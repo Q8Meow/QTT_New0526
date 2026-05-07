@@ -1,0 +1,7 @@
+{
+  "document": "docs/master_plan/QTT_MasterPlan_Current.md",
+  "traceability_status": "generated_from_full_owner_master_plan",
+  "sections_indexed": 3006,
+  "canonical_ids_indexed": 1464,
+  "first_pr_scope": "schema_only_scaffold_no_runtime"
+}
