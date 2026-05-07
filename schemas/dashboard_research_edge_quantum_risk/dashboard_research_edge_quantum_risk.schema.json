@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schema-only Source-Required Disabled Surface",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    }
+  },
+  "required": [
+    "mode",
+    "execution"
+  ],
+  "additionalProperties": true
+}

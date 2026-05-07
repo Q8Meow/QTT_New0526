@@ -1,0 +1,26 @@
+{
+  "first_pr_scope": "schema_only_scaffold",
+  "allowed_surface": [
+    "schemas",
+    "validators",
+    "manifests",
+    "scaffolds",
+    "fail_closed_tests"
+  ],
+  "blocks": [
+    "runtime",
+    "live",
+    "sha",
+    "companion_package",
+    "profit_claims",
+    "source_retrieval",
+    "source_acceptance",
+    "connector_binding",
+    "private_state_fetch",
+    "order_execution",
+    "neural_training",
+    "neural_inference",
+    "external_repo_clone",
+    "package_install_scripts"
+  ]
+}
