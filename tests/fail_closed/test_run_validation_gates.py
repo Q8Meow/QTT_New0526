@@ -112,6 +112,23 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_order_intent_execution_router_static.py"),
+            "--schema",
+            str(
+                Path("schemas")
+                / "connectors"
+                / "order_intent_execution_router_scaffolding.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "connectors"
+                / "synthetic_order_intent_execution_router_scaffolding.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
