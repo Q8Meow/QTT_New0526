@@ -6,6 +6,7 @@ import pytest
 
 from tools.validate_order_intent_execution_router_static import (
     FORBIDDEN_ACTION_FLAGS,
+    NO_CLAIM_FLAGS,
     validate_order_intent_execution_router_fixture,
     validate_static_surface,
 )
@@ -19,6 +20,15 @@ FIXTURE_PATH = Path(
 
 def _fixture() -> dict:
     return json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+
+
+def _schema() -> dict:
+    return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+
+def _write_json(path: Path, value: dict) -> Path:
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+    return path
 
 
 def _intent(fixture: dict) -> dict:
@@ -35,6 +45,75 @@ def _assert_failure_contains(failures: list[str], fragment: str) -> None:
 
 def test_order_intent_execution_router_static_validator_accepts_schema_and_fixture():
     assert validate_static_surface(schema_path=SCHEMA_PATH, fixture_path=FIXTURE_PATH) == []
+
+
+def test_schema_uses_explicit_false_flag_defs_not_generic_false_map():
+    schema = _schema()
+
+    assert "false_flag_map" not in schema["$defs"]
+    assert schema["properties"]["forbidden_action_flags"]["$ref"] == (
+        "#/$defs/forbidden_action_flags"
+    )
+    assert schema["properties"]["fixture_no_claim_flags"]["$ref"] == (
+        "#/$defs/fixture_no_claim_flags"
+    )
+    for def_name, expected_fields in {
+        "forbidden_action_flags": FORBIDDEN_ACTION_FLAGS,
+        "fixture_no_claim_flags": NO_CLAIM_FLAGS,
+    }.items():
+        definition = schema["$defs"][def_name]
+        assert definition["additionalProperties"] is False
+        assert set(definition["properties"]) == expected_fields
+        assert set(definition["required"]) == expected_fields
+        assert all(
+            definition["properties"][field]["const"] is False
+            for field in expected_fields
+        )
+
+
+@pytest.mark.parametrize(
+    "mutate, expected_fragment",
+    [
+        (
+            lambda schema: schema["$defs"]["forbidden_action_flags"].update(
+                {"additionalProperties": {"const": False}}
+            ),
+            "forbidden_action_flags.additionalProperties",
+        ),
+        (
+            lambda schema: schema["$defs"]["fixture_no_claim_flags"]["required"].remove(
+                "creates_profit_evidence"
+            ),
+            "creates_profit_evidence",
+        ),
+        (
+            lambda schema: schema["$defs"]["scope_flags"]["properties"][
+                "runtime_use_allowed"
+            ].update({"const": True}),
+            "runtime_use_allowed",
+        ),
+        (
+            lambda schema: schema["properties"]["mode"].update({"const": "OPTIONAL"}),
+            "schema.properties.mode",
+        ),
+        (
+            lambda schema: schema["$defs"]["source_required_order_semantics"][
+                "properties"
+            ]["order_type_semantics"].clear(),
+            "order_type_semantics",
+        ),
+    ],
+)
+def test_schema_mutation_relaxations_fail_static_validation(
+    tmp_path, mutate, expected_fragment
+):
+    schema = _schema()
+    mutate(schema)
+    schema_path = _write_json(tmp_path / "schema.json", schema)
+
+    failures = validate_static_surface(schema_path=schema_path, fixture_path=FIXTURE_PATH)
+
+    _assert_failure_contains(failures, expected_fragment)
 
 
 def test_valid_synthetic_fixture_is_static_disabled_and_unbound():
@@ -89,6 +168,16 @@ def test_every_forbidden_action_flag_fails_when_true():
     for flag in sorted(FORBIDDEN_ACTION_FLAGS):
         fixture = _fixture()
         fixture["forbidden_action_flags"][flag] = True
+
+        failures = validate_order_intent_execution_router_fixture(fixture)
+
+        _assert_failure_contains(failures, flag)
+
+
+def test_every_no_claim_flag_fails_when_true():
+    for flag in sorted(NO_CLAIM_FLAGS):
+        fixture = _fixture()
+        fixture["fixture_no_claim_flags"][flag] = True
 
         failures = validate_order_intent_execution_router_fixture(fixture)
 
@@ -164,6 +253,39 @@ def test_venue_specific_order_semantic_values_fail_unless_source_required_or_unb
     _assert_failure_contains(failures, "order_side_semantics")
     _assert_failure_contains(failures, "venue_reference")
     _assert_failure_contains(failures, "semantic_binding_state must be UNBOUND")
+
+
+@pytest.mark.parametrize(
+    "fragment",
+    [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTX",
+        "FORECASTEX",
+        "IBKR",
+        "HTTP",
+        "HTTPS",
+        "API",
+        "ENDPOINT",
+    ],
+)
+def test_real_venue_or_api_fragments_in_order_intent_ids_fail(fragment):
+    fixture = _fixture()
+    _intent(fixture)["intent_contract_id"] = f"SYNTHETIC_{fragment}_ORDER_INTENT"
+
+    failures = validate_order_intent_execution_router_fixture(fixture)
+
+    _assert_failure_contains(failures, "forbidden live/source/private fragment")
+
+
+def test_real_venue_or_api_fragments_in_non_reference_strings_fail():
+    fixture = _fixture()
+    fixture["validation_hook_ids"] = ["SYNTHETIC_API_ENDPOINT_HOOK"]
+
+    failures = validate_order_intent_execution_router_fixture(fixture)
+
+    _assert_failure_contains(failures, "validation_hook_ids")
+    _assert_failure_contains(failures, "endpoint")
 
 
 def test_runtime_resolver_snapshot_claims_fail():

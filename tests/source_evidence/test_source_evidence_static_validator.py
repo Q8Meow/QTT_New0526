@@ -16,6 +16,9 @@ SCHEMA_PATH = Path("schemas/source_evidence/source_evidence.schema.json")
 OWNER_PACKET_PATH = Path(
     "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md"
 )
+REGISTRY_FIXTURE_PATH = Path(
+    "tests/fixtures/source_evidence/synthetic_acceptance_registry.v1.fixture.json"
+)
 
 
 def _schema() -> dict:
@@ -49,6 +52,32 @@ def test_static_validator_accepts_current_schema_and_owner_packet():
     )
 
     assert failures == []
+
+
+def test_static_validator_accepts_registry_fixture_through_cli_path():
+    failures = validate_static_surface(
+        schema_path=SCHEMA_PATH,
+        owner_packet_path=OWNER_PACKET_PATH,
+        registry_fixture_path=REGISTRY_FIXTURE_PATH,
+    )
+
+    assert failures == []
+
+
+def test_static_validator_rejects_bad_registry_fixture_through_cli_path(tmp_path):
+    registry_fixture = json.loads(REGISTRY_FIXTURE_PATH.read_text(encoding="utf-8"))
+    registry_fixture["source_evidence_acceptance_registry"][
+        "registry_forbidden_action_flags"
+    ]["order_execution_enabled"] = True
+    registry_fixture_path = _write_json(tmp_path / "registry_fixture.json", registry_fixture)
+
+    failures = validate_static_surface(
+        schema_path=SCHEMA_PATH,
+        owner_packet_path=OWNER_PACKET_PATH,
+        registry_fixture_path=registry_fixture_path,
+    )
+
+    assert any("order_execution_enabled" in failure for failure in failures)
 
 
 def test_static_validator_rejects_missing_schema(tmp_path):

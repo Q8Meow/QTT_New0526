@@ -793,13 +793,20 @@ def validate_acceptance_registry_fixture(fixture: dict[str, Any]) -> list[str]:
 
 
 def validate_static_surface(
-    *, schema_path: pathlib.Path, owner_packet_path: pathlib.Path
+    *,
+    schema_path: pathlib.Path,
+    owner_packet_path: pathlib.Path,
+    registry_fixture_path: pathlib.Path | None = None,
 ) -> list[str]:
     failures: list[str] = []
     schema, schema_failures = _load_schema(schema_path)
     failures.extend(schema_failures)
     packet_text, packet_failures = _read_owner_packet(owner_packet_path)
     failures.extend(packet_failures)
+    registry_fixture: dict[str, Any] | None = None
+    if registry_fixture_path is not None:
+        registry_fixture, registry_fixture_failures = _load_schema(registry_fixture_path)
+        failures.extend(registry_fixture_failures)
 
     if packet_text is not None:
         failures.extend(_validate_owner_packet(packet_text))
@@ -807,6 +814,8 @@ def validate_static_surface(
         failures.extend(_validate_schema_surfaces(schema))
         failures.extend(_validate_no_authority(schema))
         failures.extend(_validate_examples(schema))
+    if registry_fixture is not None:
+        failures.extend(validate_acceptance_registry_fixture(registry_fixture))
 
     return failures
 
@@ -815,11 +824,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--schema", required=True)
     parser.add_argument("--owner-packet", required=True)
+    parser.add_argument("--registry-fixture")
     args = parser.parse_args()
 
     failures = validate_static_surface(
         schema_path=pathlib.Path(args.schema),
         owner_packet_path=pathlib.Path(args.owner_packet),
+        registry_fixture_path=(
+            pathlib.Path(args.registry_fixture) if args.registry_fixture else None
+        ),
     )
     if failures:
         raise SystemExit(
