@@ -32,6 +32,9 @@
     "target_field_ledger_record": {
       "$ref": "#/$defs/target_field_ledger_record"
     },
+    "source_evidence_acceptance_registry": {
+      "$ref": "#/$defs/source_evidence_acceptance_registry"
+    },
     "conflict_metadata": {
       "$ref": "#/$defs/conflict_metadata"
     },
@@ -790,6 +793,320 @@
       ],
       "additionalProperties": false
     },
+    "registry_forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "external_fact_acceptance_enabled": {
+          "const": false
+        },
+        "connector_binding_enabled": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "live_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "sha_freeze_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "connector_binding_enabled",
+        "runtime_enabled",
+        "live_enabled",
+        "private_state_fetch_enabled",
+        "balance_fetch_enabled",
+        "order_execution_enabled",
+        "profit_claim_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "registry_authority_scope_flags": {
+      "type": "object",
+      "properties": {
+        "source_required": {
+          "const": true
+        },
+        "execution_disabled": {
+          "const": true
+        },
+        "candidate_records_are_not_accepted_source_evidence": {
+          "const": true
+        },
+        "accepted_records_are_schema_only_without_external_fact_authority_flag": {
+          "const": true
+        },
+        "accepted_fact_claims_require_accepted_source_packet_authority_flag": {
+          "const": true
+        },
+        "accepted_source_packet_authority_required_before_ledger_current": {
+          "const": true
+        },
+        "target_field_scope_required": {
+          "const": true
+        },
+        "wildcard_scope_allowed": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_use_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_required",
+        "execution_disabled",
+        "candidate_records_are_not_accepted_source_evidence",
+        "accepted_records_are_schema_only_without_external_fact_authority_flag",
+        "accepted_fact_claims_require_accepted_source_packet_authority_flag",
+        "accepted_source_packet_authority_required_before_ledger_current",
+        "target_field_scope_required",
+        "wildcard_scope_allowed",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "registry_candidate_source_evidence_record": {
+      "type": "object",
+      "description": "Static registry candidate record. It records target-field candidate packet identity only and is not accepted evidence.",
+      "properties": {
+        "record_type": {
+          "const": "SOURCE_EVIDENCE_REGISTRY_CANDIDATE_RECORD"
+        },
+        "record_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "candidate_source_packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "source_target_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_semantic_family": {
+          "$ref": "#/$defs/target_semantic_family"
+        },
+        "target_field_paths": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "candidate_state": {
+          "const": "CANDIDATE_ONLY_NOT_ACCEPTED"
+        },
+        "source_locator_status": {
+          "$ref": "#/$defs/source_locator_status"
+        },
+        "accepted_fact_claim_present": {
+          "const": false
+        },
+        "accepted_source_packet_authority_present": {
+          "const": false
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        },
+        "registry_forbidden_action_flags": {
+          "$ref": "#/$defs/registry_forbidden_action_flags"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "candidate_source_packet_id",
+        "source_target_id",
+        "venue_id",
+        "target_semantic_family",
+        "target_field_paths",
+        "candidate_state",
+        "source_locator_status",
+        "accepted_fact_claim_present",
+        "accepted_source_packet_authority_present",
+        "no_claim_flags",
+        "registry_forbidden_action_flags"
+      ],
+      "additionalProperties": false
+    },
+    "registry_accepted_source_evidence_record": {
+      "type": "object",
+      "description": "Static registry accepted-record slot. It cannot become current authority until a real accepted source packet exists outside this scaffold.",
+      "properties": {
+        "record_type": {
+          "const": "SOURCE_EVIDENCE_REGISTRY_ACCEPTED_RECORD_STATIC_SCAFFOLD"
+        },
+        "record_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "accepted_source_packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "accepted_source_packet_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "source_target_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "target_semantic_family": {
+          "$ref": "#/$defs/target_semantic_family"
+        },
+        "accepted_record_state": {
+          "enum": [
+            "SOURCE_REQUIRED_BLOCKED_NO_ACCEPTED_PACKET_AUTHORITY",
+            "STATIC_SCHEMA_ONLY_NOT_CURRENT_LEDGER_AUTHORITY"
+          ]
+        },
+        "accepted_source_packet_authority_present": {
+          "const": false
+        },
+        "accepted_fact_claim_present": {
+          "const": false
+        },
+        "target_field_ledger_record_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "target_field_ledger_record_state": {
+          "enum": [
+            "SOURCE_REQUIRED_BLOCKED_NO_ACCEPTED_PACKET_AUTHORITY",
+            "STATIC_SCHEMA_ONLY_NOT_CURRENT_LEDGER_AUTHORITY"
+          ]
+        },
+        "connector_semantic_binding_allowed_flag": {
+          "const": false
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        },
+        "registry_forbidden_action_flags": {
+          "$ref": "#/$defs/registry_forbidden_action_flags"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "accepted_source_packet_id",
+        "accepted_source_packet_digest_sha256",
+        "source_target_id",
+        "venue_id",
+        "target_field_path",
+        "target_semantic_family",
+        "accepted_record_state",
+        "accepted_source_packet_authority_present",
+        "accepted_fact_claim_present",
+        "target_field_ledger_record_id",
+        "target_field_ledger_record_state",
+        "connector_semantic_binding_allowed_flag",
+        "no_claim_flags",
+        "registry_forbidden_action_flags"
+      ],
+      "additionalProperties": false
+    },
+    "source_evidence_acceptance_registry": {
+      "type": "object",
+      "description": "Non-runtime static source-evidence registry scaffold for candidate and accepted-record bookkeeping. It does not retrieve sources, accept facts, bind connectors, create runtime snapshots, execute orders, compute freeze authority, or claim profit.",
+      "properties": {
+        "registry_type": {
+          "const": "SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_STATIC_SCAFFOLD"
+        },
+        "registry_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "registry_authority_class": {
+          "const": "STATIC_SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "registry_authority_scope_flags": {
+          "$ref": "#/$defs/registry_authority_scope_flags"
+        },
+        "registry_forbidden_action_flags": {
+          "$ref": "#/$defs/registry_forbidden_action_flags"
+        },
+        "candidate_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/registry_candidate_source_evidence_record"
+          }
+        },
+        "accepted_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/registry_accepted_source_evidence_record"
+          }
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "registry_type",
+        "registry_id",
+        "registry_authority_class",
+        "mode",
+        "execution",
+        "deterministic_output",
+        "registry_authority_scope_flags",
+        "registry_forbidden_action_flags",
+        "candidate_records",
+        "accepted_records",
+        "validation_hook_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
     "source_packet_marker_checks": {
       "type": "object",
       "properties": {
@@ -838,13 +1155,18 @@
         },
         "checked_surfaces": {
           "type": "array",
-          "minItems": 6,
+          "minItems": 11,
           "uniqueItems": true,
           "items": {
             "enum": [
               "candidate_source_packet",
               "accepted_source_packet",
               "target_field_ledger_record",
+              "source_evidence_acceptance_registry",
+              "registry_candidate_source_evidence_record",
+              "registry_accepted_source_evidence_record",
+              "registry_authority_scope_flags",
+              "registry_forbidden_action_flags",
               "conflict_metadata",
               "materiality_metadata",
               "revalidation_metadata",

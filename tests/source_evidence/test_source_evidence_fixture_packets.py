@@ -31,12 +31,16 @@ SCHEMA_NO_CLAIM_FLAGS = {
     "profit_claim_authority",
 }
 EXPECTED_FIXTURE_NAMES = {
+    "synthetic_acceptance_registry.v1.fixture.json",
     "synthetic_candidate_source_packet.v1.fixture.json",
     "synthetic_accepted_source_packet.v1.fixture.json",
     "synthetic_target_field_ledger.v1.fixture.json",
     "synthetic_conflict_materiality_revalidation.v1.fixture.json",
 }
 SURFACE_FIXTURE_MAP = {
+    "synthetic_acceptance_registry.v1.fixture.json": (
+        "source_evidence_acceptance_registry",
+    ),
     "synthetic_candidate_source_packet.v1.fixture.json": ("candidate_source_packet",),
     "synthetic_accepted_source_packet.v1.fixture.json": ("accepted_source_packet",),
     "synthetic_target_field_ledger.v1.fixture.json": ("target_field_ledger_record",),
