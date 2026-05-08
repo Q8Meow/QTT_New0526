@@ -1,0 +1,995 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/replay_paper_review/replay_paper_execution_graph.schema.json",
+  "title": "Static Replay/Paper Execution Graph Schema",
+  "description": "Static/offline replay/paper execution graph scaffold. This schema creates no runtime execution, live path, source retrieval, accepted external fact, connector semantic binding, private-state fetch, runtime resolver snapshot, replay execution, paper execution, replay result packet, paper result packet, dual-result review, live eligibility, runtime cash receipt, order execution, AtomicRows bundle/hash, SHA/freeze authority, or profit claim.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "REPLAY_PAPER_EXECUTION_GRAPH_STATIC_SCAFFOLD"
+    },
+    "surface_version": {
+      "const": "PR23_REPLAY_PAPER_EXECUTION_GRAPH_SCHEMA_V1"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "replay_paper_execution_graph": {
+      "$ref": "#/$defs/replay_paper_execution_graph"
+    }
+  },
+  "required": [
+    "mode",
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "deterministic_output",
+    "no_claim_flags",
+    "replay_paper_execution_graph"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Z0-9_:-]+$"
+    },
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "synthetic_reference": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^SYNTHETIC_"
+    },
+    "source_required_reference": {
+      "const": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE"
+    },
+    "execution_graph_authority_scope_flags": {
+      "type": "object",
+      "properties": {
+        "source_required": {
+          "const": true
+        },
+        "execution_disabled": {
+          "const": true
+        },
+        "scaffold_only": {
+          "const": true
+        },
+        "deterministic_static_fixture_only": {
+          "const": true
+        },
+        "synthetic_records_only": {
+          "const": true
+        },
+        "accepted_source_evidence_required_before_runtime_use": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_required_before_graph_use": {
+          "const": true
+        },
+        "runtime_resolver_snapshot_present": {
+          "const": false
+        },
+        "shared_input_identity_required_before_lanes": {
+          "const": true
+        },
+        "immutable_input_lock_required_before_lanes": {
+          "const": true
+        },
+        "lane_separation_required": {
+          "const": true
+        },
+        "result_packet_boundaries_placeholder_only": {
+          "const": true
+        },
+        "external_fact_acceptance_allowed": {
+          "const": false
+        },
+        "source_retrieval_allowed": {
+          "const": false
+        },
+        "source_acceptance_allowed": {
+          "const": false
+        },
+        "connector_binding_allowed": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_use_allowed": {
+          "const": false
+        },
+        "runtime_execution_allowed": {
+          "const": false
+        },
+        "runtime_trading_allowed": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_allowed": {
+          "const": false
+        },
+        "replay_execution_allowed": {
+          "const": false
+        },
+        "paper_execution_allowed": {
+          "const": false
+        },
+        "replay_result_packet_creation_allowed": {
+          "const": false
+        },
+        "paper_result_packet_creation_allowed": {
+          "const": false
+        },
+        "dual_result_review_allowed": {
+          "const": false
+        },
+        "live_use_allowed": {
+          "const": false
+        },
+        "live_eligibility_creation_allowed": {
+          "const": false
+        },
+        "live_reachability_allowed": {
+          "const": false
+        },
+        "private_state_fetch_allowed": {
+          "const": false
+        },
+        "runtime_cash_fetch_allowed": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_allowed": {
+          "const": false
+        },
+        "order_execution_allowed": {
+          "const": false
+        },
+        "network_io_allowed": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_allowed": {
+          "const": false
+        },
+        "sha_freeze_authority_allowed": {
+          "const": false
+        },
+        "blocker_reduction_allowed": {
+          "const": false
+        },
+        "profit_claim_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_required",
+        "execution_disabled",
+        "scaffold_only",
+        "deterministic_static_fixture_only",
+        "synthetic_records_only",
+        "accepted_source_evidence_required_before_runtime_use",
+        "accepted_source_evidence_present",
+        "runtime_resolver_snapshot_required_before_graph_use",
+        "runtime_resolver_snapshot_present",
+        "shared_input_identity_required_before_lanes",
+        "immutable_input_lock_required_before_lanes",
+        "lane_separation_required",
+        "result_packet_boundaries_placeholder_only",
+        "external_fact_acceptance_allowed",
+        "source_retrieval_allowed",
+        "source_acceptance_allowed",
+        "connector_binding_allowed",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed",
+        "runtime_execution_allowed",
+        "runtime_trading_allowed",
+        "runtime_resolver_snapshot_creation_allowed",
+        "replay_execution_allowed",
+        "paper_execution_allowed",
+        "replay_result_packet_creation_allowed",
+        "paper_result_packet_creation_allowed",
+        "dual_result_review_allowed",
+        "live_use_allowed",
+        "live_eligibility_creation_allowed",
+        "live_reachability_allowed",
+        "private_state_fetch_allowed",
+        "runtime_cash_fetch_allowed",
+        "runtime_cash_receipt_creation_allowed",
+        "order_execution_allowed",
+        "network_io_allowed",
+        "atomicrows_bundle_creation_allowed",
+        "sha_freeze_authority_allowed",
+        "blocker_reduction_allowed",
+        "profit_claim_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "execution_graph_forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "external_fact_acceptance_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_creation_enabled": {
+          "const": false
+        },
+        "connector_binding_enabled": {
+          "const": false
+        },
+        "semantic_value_population_enabled": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "runtime_execution_enabled": {
+          "const": false
+        },
+        "runtime_trading_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_materialization_enabled": {
+          "const": false
+        },
+        "shared_input_identity_digest_computation_enabled": {
+          "const": false
+        },
+        "immutable_input_lock_materialization_enabled": {
+          "const": false
+        },
+        "replay_execution_enabled": {
+          "const": false
+        },
+        "paper_execution_enabled": {
+          "const": false
+        },
+        "replay_paper_execution_enabled": {
+          "const": false
+        },
+        "replay_result_packet_creation_enabled": {
+          "const": false
+        },
+        "paper_result_packet_creation_enabled": {
+          "const": false
+        },
+        "real_replay_result_packet_claimed": {
+          "const": false
+        },
+        "real_paper_result_packet_claimed": {
+          "const": false
+        },
+        "dual_result_review_enabled": {
+          "const": false
+        },
+        "live_eligibility_creation_enabled": {
+          "const": false
+        },
+        "live_reachability_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "position_fetch_enabled": {
+          "const": false
+        },
+        "open_orders_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "order_submit_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_reduce_close_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "sha_freeze_enabled": {
+          "const": false
+        },
+        "blocker_reduction_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "accepted_source_packet_creation_enabled",
+        "connector_binding_enabled",
+        "semantic_value_population_enabled",
+        "runtime_enabled",
+        "runtime_execution_enabled",
+        "runtime_trading_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "runtime_resolver_snapshot_materialization_enabled",
+        "shared_input_identity_digest_computation_enabled",
+        "immutable_input_lock_materialization_enabled",
+        "replay_execution_enabled",
+        "paper_execution_enabled",
+        "replay_paper_execution_enabled",
+        "replay_result_packet_creation_enabled",
+        "paper_result_packet_creation_enabled",
+        "real_replay_result_packet_claimed",
+        "real_paper_result_packet_claimed",
+        "dual_result_review_enabled",
+        "live_eligibility_creation_enabled",
+        "live_reachability_enabled",
+        "private_state_fetch_enabled",
+        "balance_fetch_enabled",
+        "position_fetch_enabled",
+        "open_orders_fetch_enabled",
+        "runtime_cash_fetch_enabled",
+        "runtime_cash_receipt_creation_enabled",
+        "order_execution_enabled",
+        "order_submit_enabled",
+        "order_cancel_enabled",
+        "order_reduce_close_enabled",
+        "network_io_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled",
+        "blocker_reduction_enabled",
+        "profit_claim_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "connector_semantic_value_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "runtime_execution_authority": {
+          "const": false
+        },
+        "runtime_trading_authority": {
+          "const": false
+        },
+        "replay_paper_execution_graph_authority": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_authority": {
+          "const": false
+        },
+        "shared_input_identity_runtime_authority": {
+          "const": false
+        },
+        "immutable_input_lock_runtime_authority": {
+          "const": false
+        },
+        "replay_execution_authority": {
+          "const": false
+        },
+        "paper_execution_authority": {
+          "const": false
+        },
+        "replay_result_packet_authority": {
+          "const": false
+        },
+        "paper_result_packet_authority": {
+          "const": false
+        },
+        "dual_result_review_authority": {
+          "const": false
+        },
+        "live_eligibility_authority": {
+          "const": false
+        },
+        "live_reachability_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "runtime_cash_receipt_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "balance_fetch_authority": {
+          "const": false
+        },
+        "position_fetch_authority": {
+          "const": false
+        },
+        "open_orders_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "order_cancel_authority": {
+          "const": false
+        },
+        "order_reduce_close_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "atomicrows_bundle_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "blocker_reduction_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "connector_semantic_value_authority",
+        "runtime_authority",
+        "runtime_execution_authority",
+        "runtime_trading_authority",
+        "replay_paper_execution_graph_authority",
+        "runtime_resolver_snapshot_authority",
+        "shared_input_identity_runtime_authority",
+        "immutable_input_lock_runtime_authority",
+        "replay_execution_authority",
+        "paper_execution_authority",
+        "replay_result_packet_authority",
+        "paper_result_packet_authority",
+        "dual_result_review_authority",
+        "live_eligibility_authority",
+        "live_reachability_authority",
+        "runtime_cash_fetch_authority",
+        "runtime_cash_receipt_authority",
+        "private_state_fetch_authority",
+        "balance_fetch_authority",
+        "position_fetch_authority",
+        "open_orders_fetch_authority",
+        "order_execution_authority",
+        "order_cancel_authority",
+        "order_reduce_close_authority",
+        "network_io_authority",
+        "atomicrows_bundle_authority",
+        "sha_freeze_authority",
+        "blocker_reduction_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "shared_input_identity_placeholder": {
+      "type": "object",
+      "description": "Synthetic shared input identity placeholder only. It is not a runtime resolver snapshot, not a computed digest, and not accepted runtime input.",
+      "properties": {
+        "input_identity_type": {
+          "const": "REPLAY_PAPER_SHARED_INPUT_IDENTITY_PLACEHOLDER"
+        },
+        "input_identity_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "identity_state": {
+          "const": "SCAFFOLD_ONLY_NOT_RUNTIME_IDENTITY"
+        },
+        "identity_material_state": {
+          "const": "NO_RUNTIME_RESOLVER_SNAPSHOT_NO_CONTRACT_EVENT_VENUE_MARKET_SELECTION"
+        },
+        "replay_paper_input_identity_digest_state": {
+          "const": "PLACEHOLDER_ONLY_NOT_COMPUTED"
+        },
+        "replay_paper_input_identity_digest_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "runtime_resolver_snapshot_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "source_reference": {
+          "$ref": "#/$defs/source_required_reference"
+        },
+        "digest_computation_allowed": {
+          "const": false
+        },
+        "contains_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "contains_real_runtime_input": {
+          "const": false
+        },
+        "contains_computed_identity_digest": {
+          "const": false
+        },
+        "accepts_external_fact": {
+          "const": false
+        },
+        "binds_connector_semantics": {
+          "const": false
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "input_identity_type",
+        "input_identity_id",
+        "identity_state",
+        "identity_material_state",
+        "replay_paper_input_identity_digest_state",
+        "replay_paper_input_identity_digest_reference",
+        "runtime_resolver_snapshot_reference",
+        "source_reference",
+        "digest_computation_allowed",
+        "contains_runtime_resolver_snapshot",
+        "contains_real_runtime_input",
+        "contains_computed_identity_digest",
+        "accepts_external_fact",
+        "binds_connector_semantics",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "immutable_input_lock_contract_placeholder": {
+      "type": "object",
+      "description": "Synthetic immutable input-lock contract placeholder only. It defines the future immutability boundary without materializing a runtime lock.",
+      "properties": {
+        "input_lock_type": {
+          "const": "REPLAY_PAPER_IMMUTABLE_INPUT_LOCK_CONTRACT_PLACEHOLDER"
+        },
+        "input_lock_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "input_lock_state": {
+          "const": "SCAFFOLD_ONLY_NOT_LOCKED"
+        },
+        "input_lock_digest_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "lock_required_before_lane_execution": {
+          "const": true
+        },
+        "shared_input_identity_required": {
+          "const": true
+        },
+        "runtime_resolver_snapshot_required": {
+          "const": true
+        },
+        "input_lock_materialization_allowed": {
+          "const": false
+        },
+        "input_lock_mutation_allowed": {
+          "const": false
+        },
+        "replay_lane_may_modify_shared_inputs": {
+          "const": false
+        },
+        "paper_lane_may_modify_shared_inputs": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_allowed": {
+          "const": false
+        },
+        "contains_materialized_input_lock": {
+          "const": false
+        },
+        "contains_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "input_lock_type",
+        "input_lock_id",
+        "input_lock_state",
+        "input_lock_digest_reference",
+        "lock_required_before_lane_execution",
+        "shared_input_identity_required",
+        "runtime_resolver_snapshot_required",
+        "input_lock_materialization_allowed",
+        "input_lock_mutation_allowed",
+        "replay_lane_may_modify_shared_inputs",
+        "paper_lane_may_modify_shared_inputs",
+        "runtime_resolver_snapshot_creation_allowed",
+        "contains_materialized_input_lock",
+        "contains_runtime_resolver_snapshot",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "lane_placeholder": {
+      "type": "object",
+      "description": "Synthetic replay/paper lane placeholder only. The lane cannot execute and cannot create a result packet.",
+      "properties": {
+        "lane_id": {
+          "enum": [
+            "REPLAY_LANE",
+            "PAPER_LANE"
+          ]
+        },
+        "lane_kind": {
+          "enum": [
+            "REPLAY",
+            "PAPER"
+          ]
+        },
+        "lane_state": {
+          "const": "SCAFFOLD_ONLY_NOT_EXECUTED"
+        },
+        "lane_execution_allowed": {
+          "const": false
+        },
+        "result_packet_creation_allowed": {
+          "const": false
+        },
+        "reads_shared_input_identity_required": {
+          "const": true
+        },
+        "reads_immutable_input_lock_required": {
+          "const": true
+        },
+        "writes_shared_input_identity_allowed": {
+          "const": false
+        },
+        "writes_other_lane_output_allowed": {
+          "const": false
+        },
+        "lane_output_state": {
+          "enum": [
+            "NO_REPLAY_RESULT_PACKET",
+            "NO_PAPER_RESULT_PACKET"
+          ]
+        },
+        "result_packet_boundary_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "lane_id",
+        "lane_kind",
+        "lane_state",
+        "lane_execution_allowed",
+        "result_packet_creation_allowed",
+        "reads_shared_input_identity_required",
+        "reads_immutable_input_lock_required",
+        "writes_shared_input_identity_allowed",
+        "writes_other_lane_output_allowed",
+        "lane_output_state",
+        "result_packet_boundary_reference",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "lane_separation_placeholder": {
+      "type": "object",
+      "description": "Synthetic lane-separation placeholder only. It records separated replay and paper lanes without executing either lane.",
+      "properties": {
+        "lane_separation_type": {
+          "const": "REPLAY_PAPER_LANE_SEPARATION_PLACEHOLDER"
+        },
+        "lane_separation_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "lane_separation_state": {
+          "const": "SCAFFOLD_ONLY_SEPARATED_NON_EXECUTING"
+        },
+        "shared_input_identity_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "immutable_input_lock_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "lane_count_contract": {
+          "const": "REPLAY_AND_PAPER_PLACEHOLDERS_ONLY"
+        },
+        "cross_lane_write_allowed": {
+          "const": false
+        },
+        "result_merge_allowed": {
+          "const": false
+        },
+        "dual_result_review_allowed": {
+          "const": false
+        },
+        "live_eligibility_creation_allowed": {
+          "const": false
+        },
+        "lane_placeholders": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/lane_placeholder"
+          }
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "lane_separation_type",
+        "lane_separation_id",
+        "lane_separation_state",
+        "shared_input_identity_reference",
+        "immutable_input_lock_reference",
+        "lane_count_contract",
+        "cross_lane_write_allowed",
+        "result_merge_allowed",
+        "dual_result_review_allowed",
+        "live_eligibility_creation_allowed",
+        "lane_placeholders",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "result_packet_boundary_placeholder": {
+      "type": "object",
+      "description": "Synthetic future result-packet boundary placeholder only. It is not a replay result packet, paper result packet, review input, or live-eligibility input.",
+      "properties": {
+        "boundary_type": {
+          "enum": [
+            "REPLAY_RESULT_PACKET_BOUNDARY_PLACEHOLDER",
+            "PAPER_RESULT_PACKET_BOUNDARY_PLACEHOLDER"
+          ]
+        },
+        "boundary_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "boundary_state": {
+          "const": "FUTURE_BOUNDARY_ONLY_NO_RESULT_PACKET"
+        },
+        "source_reference": {
+          "$ref": "#/$defs/source_required_reference"
+        },
+        "result_packet_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "result_packet_creation_allowed": {
+          "const": false
+        },
+        "result_materialization_allowed": {
+          "const": false
+        },
+        "contains_result_packet": {
+          "const": false
+        },
+        "contains_replay_output": {
+          "const": false
+        },
+        "contains_paper_output": {
+          "const": false
+        },
+        "contains_runtime_cash_receipt": {
+          "const": false
+        },
+        "contains_order_receipt": {
+          "const": false
+        },
+        "dual_result_review_input_allowed": {
+          "const": false
+        },
+        "live_eligibility_input_allowed": {
+          "const": false
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "boundary_type",
+        "boundary_id",
+        "boundary_state",
+        "source_reference",
+        "result_packet_reference",
+        "result_packet_creation_allowed",
+        "result_materialization_allowed",
+        "contains_result_packet",
+        "contains_replay_output",
+        "contains_paper_output",
+        "contains_runtime_cash_receipt",
+        "contains_order_receipt",
+        "dual_result_review_input_allowed",
+        "live_eligibility_input_allowed",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "replay_paper_execution_graph": {
+      "type": "object",
+      "description": "Non-live replay/paper execution graph scaffold. It defines shared input identity, immutable input-lock, lane-separation, and future result-packet boundary placeholders only.",
+      "properties": {
+        "graph_type": {
+          "const": "REPLAY_PAPER_EXECUTION_GRAPH_STATIC_SCAFFOLD"
+        },
+        "graph_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "graph_authority_class": {
+          "const": "STATIC_REPLAY_PAPER_EXECUTION_GRAPH_NOT_RUNTIME_AUTHORITY"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "scaffold_state": {
+          "const": "SCAFFOLD_ONLY"
+        },
+        "graph_state": {
+          "const": "SCAFFOLD_ONLY_NOT_EXECUTABLE"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "execution_graph_authority_scope_flags": {
+          "$ref": "#/$defs/execution_graph_authority_scope_flags"
+        },
+        "execution_graph_forbidden_action_flags": {
+          "$ref": "#/$defs/execution_graph_forbidden_action_flags"
+        },
+        "shared_input_identity": {
+          "$ref": "#/$defs/shared_input_identity_placeholder"
+        },
+        "immutable_input_lock_contract": {
+          "$ref": "#/$defs/immutable_input_lock_contract_placeholder"
+        },
+        "lane_separation": {
+          "$ref": "#/$defs/lane_separation_placeholder"
+        },
+        "result_packet_boundaries": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/result_packet_boundary_placeholder"
+          }
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "graph_type",
+        "graph_id",
+        "graph_authority_class",
+        "mode",
+        "execution",
+        "scaffold_state",
+        "graph_state",
+        "deterministic_output",
+        "execution_graph_authority_scope_flags",
+        "execution_graph_forbidden_action_flags",
+        "shared_input_identity",
+        "immutable_input_lock_contract",
+        "lane_separation",
+        "result_packet_boundaries",
+        "validation_hook_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

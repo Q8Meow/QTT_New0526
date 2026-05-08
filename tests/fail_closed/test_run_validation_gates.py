@@ -82,6 +82,23 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_replay_paper_execution_graph_static.py"),
+            "--schema",
+            str(
+                Path("schemas")
+                / "replay_paper_review"
+                / "replay_paper_execution_graph.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "replay_paper_review"
+                / "synthetic_replay_paper_execution_graph.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",

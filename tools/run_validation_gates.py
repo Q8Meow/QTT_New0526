@@ -88,6 +88,23 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_replay_paper_execution_graph_static.py"),
+            "--schema",
+            _path(
+                "schemas",
+                "replay_paper_review",
+                "replay_paper_execution_graph.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "replay_paper_review",
+                "synthetic_replay_paper_execution_graph.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
