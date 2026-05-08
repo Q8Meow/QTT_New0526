@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Schema-only Source-Required Disabled Surface",
+  "description": "Static connector placeholder contract only. This schema creates no source retrieval, source acceptance execution, connector binding, private-state fetch, runtime cash fetch, order execution, live connector access, or profit authority.",
   "type": "object",
   "properties": {
     "mode": {
@@ -8,11 +9,51 @@
     },
     "execution": {
       "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_CONNECTOR_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "CONNECTOR_SOURCE_REQUIRED_PLACEHOLDER"
+    },
+    "connector_semantic_binding_allowed": {
+      "const": false
+    },
+    "live_connector_allowed": {
+      "const": false
+    },
+    "api_key_required_or_allowed": {
+      "const": false
+    },
+    "source_acceptance_execution_allowed": {
+      "const": false
+    },
+    "private_state_fetch_allowed": {
+      "const": false
+    },
+    "order_execution_allowed": {
+      "const": false
+    },
+    "runtime_cash_fetch_allowed": {
+      "const": false
+    },
+    "profit_claim_allowed": {
+      "const": false
     }
   },
   "required": [
     "mode",
-    "execution"
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "connector_semantic_binding_allowed",
+    "live_connector_allowed",
+    "api_key_required_or_allowed",
+    "source_acceptance_execution_allowed",
+    "private_state_fetch_allowed",
+    "order_execution_allowed",
+    "runtime_cash_fetch_allowed",
+    "profit_claim_allowed"
   ],
   "additionalProperties": true
 }
