@@ -44,4 +44,4 @@ jobs:
         run: python tools/validate_no_runtime_artifacts.py --repo-root . --forbid-source-retrieval --forbid-source-acceptance --forbid-connector-binding --forbid-private-state-fetch --forbid-order-execution --forbid-neural-training --forbid-neural-inference --forbid-external-repo-clone --forbid-package-install-scripts
 
       - name: Run tests
-        run: python -m pytest -q
+        run: python tools/run_pytest_fresh_basetemp.py -q
