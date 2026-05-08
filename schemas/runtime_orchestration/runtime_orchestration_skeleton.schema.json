@@ -1,0 +1,819 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/runtime_orchestration/runtime_orchestration_skeleton.schema.json",
+  "title": "Static Runtime Orchestration Skeleton Schema",
+  "description": "Static/offline runtime orchestration skeleton scaffold. This schema creates no runtime execution, live path, source retrieval, accepted external fact, connector semantic binding, private-state fetch, runtime resolver snapshot, replay execution, paper execution, runtime cash receipt, order execution, AtomicRows bundle/hash, SHA/freeze authority, or profit claim.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_RUNTIME_ORCHESTRATION_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "RUNTIME_ORCHESTRATION_SKELETON_STATIC_SCAFFOLD"
+    },
+    "surface_version": {
+      "const": "PR22_RUNTIME_ORCHESTRATION_SKELETON_SCHEMA_V1"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "runtime_orchestration_skeleton": {
+      "$ref": "#/$defs/runtime_orchestration_skeleton"
+    }
+  },
+  "required": [
+    "mode",
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "deterministic_output",
+    "no_claim_flags",
+    "runtime_orchestration_skeleton"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Z0-9_:-]+$"
+    },
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "synthetic_reference": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^SYNTHETIC_"
+    },
+    "source_required_reference": {
+      "const": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE"
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "connector_semantic_value_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "runtime_execution_authority": {
+          "const": false
+        },
+        "runtime_trading_authority": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_authority": {
+          "const": false
+        },
+        "replay_execution_authority": {
+          "const": false
+        },
+        "paper_execution_authority": {
+          "const": false
+        },
+        "replay_result_packet_authority": {
+          "const": false
+        },
+        "paper_result_packet_authority": {
+          "const": false
+        },
+        "live_reachability_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "runtime_cash_receipt_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "balance_fetch_authority": {
+          "const": false
+        },
+        "position_fetch_authority": {
+          "const": false
+        },
+        "open_orders_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "order_cancel_authority": {
+          "const": false
+        },
+        "order_reduce_close_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "atomicrows_bundle_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "blocker_reduction_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "connector_semantic_value_authority",
+        "runtime_authority",
+        "runtime_execution_authority",
+        "runtime_trading_authority",
+        "runtime_resolver_snapshot_authority",
+        "replay_execution_authority",
+        "paper_execution_authority",
+        "replay_result_packet_authority",
+        "paper_result_packet_authority",
+        "live_reachability_authority",
+        "runtime_cash_fetch_authority",
+        "runtime_cash_receipt_authority",
+        "private_state_fetch_authority",
+        "balance_fetch_authority",
+        "position_fetch_authority",
+        "open_orders_fetch_authority",
+        "order_execution_authority",
+        "order_cancel_authority",
+        "order_reduce_close_authority",
+        "network_io_authority",
+        "atomicrows_bundle_authority",
+        "sha_freeze_authority",
+        "blocker_reduction_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_authority_scope_flags": {
+      "type": "object",
+      "properties": {
+        "source_required": {
+          "const": true
+        },
+        "execution_disabled": {
+          "const": true
+        },
+        "scaffold_only": {
+          "const": true
+        },
+        "deterministic_static_fixture_only": {
+          "const": true
+        },
+        "synthetic_records_only": {
+          "const": true
+        },
+        "accepted_source_evidence_required_before_runtime_use": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "external_fact_acceptance_allowed": {
+          "const": false
+        },
+        "source_retrieval_allowed": {
+          "const": false
+        },
+        "source_acceptance_allowed": {
+          "const": false
+        },
+        "connector_binding_allowed": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_use_allowed": {
+          "const": false
+        },
+        "runtime_execution_allowed": {
+          "const": false
+        },
+        "runtime_trading_allowed": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_allowed": {
+          "const": false
+        },
+        "replay_execution_allowed": {
+          "const": false
+        },
+        "paper_execution_allowed": {
+          "const": false
+        },
+        "replay_result_packet_creation_allowed": {
+          "const": false
+        },
+        "paper_result_packet_creation_allowed": {
+          "const": false
+        },
+        "live_use_allowed": {
+          "const": false
+        },
+        "live_reachability_allowed": {
+          "const": false
+        },
+        "private_state_fetch_allowed": {
+          "const": false
+        },
+        "runtime_cash_fetch_allowed": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_allowed": {
+          "const": false
+        },
+        "order_execution_allowed": {
+          "const": false
+        },
+        "profit_claim_allowed": {
+          "const": false
+        },
+        "network_io_allowed": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_allowed": {
+          "const": false
+        },
+        "sha_freeze_authority_allowed": {
+          "const": false
+        },
+        "blocker_reduction_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_required",
+        "execution_disabled",
+        "scaffold_only",
+        "deterministic_static_fixture_only",
+        "synthetic_records_only",
+        "accepted_source_evidence_required_before_runtime_use",
+        "accepted_source_evidence_present",
+        "external_fact_acceptance_allowed",
+        "source_retrieval_allowed",
+        "source_acceptance_allowed",
+        "connector_binding_allowed",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed",
+        "runtime_execution_allowed",
+        "runtime_trading_allowed",
+        "runtime_resolver_snapshot_creation_allowed",
+        "replay_execution_allowed",
+        "paper_execution_allowed",
+        "replay_result_packet_creation_allowed",
+        "paper_result_packet_creation_allowed",
+        "live_use_allowed",
+        "live_reachability_allowed",
+        "private_state_fetch_allowed",
+        "runtime_cash_fetch_allowed",
+        "runtime_cash_receipt_creation_allowed",
+        "order_execution_allowed",
+        "profit_claim_allowed",
+        "network_io_allowed",
+        "atomicrows_bundle_creation_allowed",
+        "sha_freeze_authority_allowed",
+        "blocker_reduction_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "external_fact_acceptance_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_creation_enabled": {
+          "const": false
+        },
+        "connector_binding_enabled": {
+          "const": false
+        },
+        "semantic_value_population_enabled": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "runtime_execution_enabled": {
+          "const": false
+        },
+        "runtime_trading_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_enabled": {
+          "const": false
+        },
+        "replay_execution_enabled": {
+          "const": false
+        },
+        "paper_execution_enabled": {
+          "const": false
+        },
+        "replay_paper_execution_enabled": {
+          "const": false
+        },
+        "replay_result_packet_creation_enabled": {
+          "const": false
+        },
+        "paper_result_packet_creation_enabled": {
+          "const": false
+        },
+        "live_enabled": {
+          "const": false
+        },
+        "live_reachability_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "position_fetch_enabled": {
+          "const": false
+        },
+        "open_orders_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "order_submit_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_reduce_close_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "sha_freeze_enabled": {
+          "const": false
+        },
+        "blocker_reduction_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "accepted_source_packet_creation_enabled",
+        "connector_binding_enabled",
+        "semantic_value_population_enabled",
+        "runtime_enabled",
+        "runtime_execution_enabled",
+        "runtime_trading_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "replay_execution_enabled",
+        "paper_execution_enabled",
+        "replay_paper_execution_enabled",
+        "replay_result_packet_creation_enabled",
+        "paper_result_packet_creation_enabled",
+        "live_enabled",
+        "live_reachability_enabled",
+        "private_state_fetch_enabled",
+        "balance_fetch_enabled",
+        "position_fetch_enabled",
+        "open_orders_fetch_enabled",
+        "runtime_cash_fetch_enabled",
+        "runtime_cash_receipt_creation_enabled",
+        "order_execution_enabled",
+        "order_submit_enabled",
+        "order_cancel_enabled",
+        "order_reduce_close_enabled",
+        "network_io_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled",
+        "blocker_reduction_enabled",
+        "profit_claim_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "receipt_envelope_placeholder": {
+      "type": "object",
+      "description": "Synthetic receipt-envelope placeholder only. It is not a runtime result, runtime resolver snapshot, replay result, paper result, cash receipt, or order receipt.",
+      "properties": {
+        "receipt_envelope_type": {
+          "const": "RUNTIME_ORCHESTRATION_RECEIPT_ENVELOPE_PLACEHOLDER"
+        },
+        "receipt_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "receipt_state": {
+          "const": "PLACEHOLDER_ONLY_NOT_CREATED"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "scaffold_state": {
+          "const": "SCAFFOLD_ONLY"
+        },
+        "contains_runtime_result": {
+          "const": false
+        },
+        "contains_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "contains_replay_result_packet": {
+          "const": false
+        },
+        "contains_paper_result_packet": {
+          "const": false
+        },
+        "contains_runtime_cash_receipt": {
+          "const": false
+        },
+        "contains_order_receipt": {
+          "const": false
+        },
+        "contains_accepted_source_fact": {
+          "const": false
+        },
+        "source_reference": {
+          "$ref": "#/$defs/source_required_reference"
+        },
+        "runtime_resolver_snapshot_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "replay_result_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "paper_result_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "runtime_cash_receipt_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "order_receipt_reference": {
+          "$ref": "#/$defs/synthetic_reference"
+        },
+        "runtime_authority_scope_flags": {
+          "$ref": "#/$defs/runtime_authority_scope_flags"
+        },
+        "runtime_forbidden_action_flags": {
+          "$ref": "#/$defs/runtime_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "receipt_envelope_type",
+        "receipt_id",
+        "receipt_state",
+        "mode",
+        "execution",
+        "scaffold_state",
+        "contains_runtime_result",
+        "contains_runtime_resolver_snapshot",
+        "contains_replay_result_packet",
+        "contains_paper_result_packet",
+        "contains_runtime_cash_receipt",
+        "contains_order_receipt",
+        "contains_accepted_source_fact",
+        "source_reference",
+        "runtime_resolver_snapshot_reference",
+        "replay_result_reference",
+        "paper_result_reference",
+        "runtime_cash_receipt_reference",
+        "order_receipt_reference",
+        "runtime_authority_scope_flags",
+        "runtime_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "state_placeholder": {
+      "type": "object",
+      "properties": {
+        "state_id": {
+          "enum": [
+            "RUNTIME_ORCHESTRATION_DISABLED",
+            "SOURCE_REQUIRED_BLOCKED",
+            "OWNER_APPROVAL_BLOCKED"
+          ]
+        },
+        "state_status": {
+          "const": "SCAFFOLD_ONLY_NOT_EXECUTABLE"
+        },
+        "state_execution_allowed": {
+          "const": false
+        },
+        "entry_action_allowed": {
+          "const": false
+        },
+        "exit_action_allowed": {
+          "const": false
+        },
+        "opens_runtime_path": {
+          "const": false
+        },
+        "opens_live_path": {
+          "const": false
+        },
+        "opens_order_path": {
+          "const": false
+        },
+        "source_required": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        }
+      },
+      "required": [
+        "state_id",
+        "state_status",
+        "state_execution_allowed",
+        "entry_action_allowed",
+        "exit_action_allowed",
+        "opens_runtime_path",
+        "opens_live_path",
+        "opens_order_path",
+        "source_required",
+        "accepted_source_evidence_present"
+      ],
+      "additionalProperties": false
+    },
+    "state_machine_placeholder": {
+      "type": "object",
+      "description": "Synthetic state-machine placeholder only. It defines disabled states and no executable transitions.",
+      "properties": {
+        "state_machine_type": {
+          "const": "RUNTIME_ORCHESTRATION_STATE_MACHINE_PLACEHOLDER"
+        },
+        "state_machine_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "state_machine_state": {
+          "const": "SCAFFOLD_ONLY_NOT_EXECUTABLE"
+        },
+        "initial_state": {
+          "const": "RUNTIME_ORCHESTRATION_DISABLED"
+        },
+        "terminal_state": {
+          "const": "RUNTIME_ORCHESTRATION_DISABLED"
+        },
+        "transition_execution_allowed": {
+          "const": false
+        },
+        "runtime_execution_allowed": {
+          "const": false
+        },
+        "live_transition_allowed": {
+          "const": false
+        },
+        "order_transition_allowed": {
+          "const": false
+        },
+        "state_placeholders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/state_placeholder"
+          }
+        },
+        "runtime_authority_scope_flags": {
+          "$ref": "#/$defs/runtime_authority_scope_flags"
+        },
+        "runtime_forbidden_action_flags": {
+          "$ref": "#/$defs/runtime_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "state_machine_type",
+        "state_machine_id",
+        "state_machine_state",
+        "initial_state",
+        "terminal_state",
+        "transition_execution_allowed",
+        "runtime_execution_allowed",
+        "live_transition_allowed",
+        "order_transition_allowed",
+        "state_placeholders",
+        "runtime_authority_scope_flags",
+        "runtime_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "gate_placeholder": {
+      "type": "object",
+      "description": "Synthetic gate placeholder only. It cannot evaluate, open runtime, open live use, or open order authority.",
+      "properties": {
+        "gate_type": {
+          "const": "RUNTIME_ORCHESTRATION_GATE_PLACEHOLDER"
+        },
+        "gate_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "gate_state": {
+          "const": "SOURCE_REQUIRED_DISABLED"
+        },
+        "gate_result_state": {
+          "const": "NOT_EVALUATED_NO_RUNTIME_AUTHORITY"
+        },
+        "gate_evaluation_allowed": {
+          "const": false
+        },
+        "opens_runtime_path": {
+          "const": false
+        },
+        "opens_live_path": {
+          "const": false
+        },
+        "opens_order_path": {
+          "const": false
+        },
+        "required_before_runtime": {
+          "const": true
+        },
+        "source_required": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "runtime_authority_scope_flags": {
+          "$ref": "#/$defs/runtime_authority_scope_flags"
+        },
+        "runtime_forbidden_action_flags": {
+          "$ref": "#/$defs/runtime_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "gate_type",
+        "gate_id",
+        "gate_state",
+        "gate_result_state",
+        "gate_evaluation_allowed",
+        "opens_runtime_path",
+        "opens_live_path",
+        "opens_order_path",
+        "required_before_runtime",
+        "source_required",
+        "accepted_source_evidence_present",
+        "runtime_authority_scope_flags",
+        "runtime_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_orchestration_skeleton": {
+      "type": "object",
+      "description": "Non-live runtime orchestration scaffold. It records only synthetic receipt-envelope, state-machine, and gate placeholders.",
+      "properties": {
+        "skeleton_type": {
+          "const": "RUNTIME_ORCHESTRATION_SKELETON_STATIC_SCAFFOLD"
+        },
+        "skeleton_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "skeleton_authority_class": {
+          "const": "STATIC_RUNTIME_ORCHESTRATION_SKELETON_NOT_RUNTIME_AUTHORITY"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "scaffold_state": {
+          "const": "SCAFFOLD_ONLY"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "runtime_authority_scope_flags": {
+          "$ref": "#/$defs/runtime_authority_scope_flags"
+        },
+        "runtime_forbidden_action_flags": {
+          "$ref": "#/$defs/runtime_forbidden_action_flags"
+        },
+        "receipt_envelopes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/receipt_envelope_placeholder"
+          }
+        },
+        "state_machine_placeholders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/state_machine_placeholder"
+          }
+        },
+        "gate_placeholders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/gate_placeholder"
+          }
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "skeleton_type",
+        "skeleton_id",
+        "skeleton_authority_class",
+        "mode",
+        "execution",
+        "scaffold_state",
+        "deterministic_output",
+        "runtime_authority_scope_flags",
+        "runtime_forbidden_action_flags",
+        "receipt_envelopes",
+        "state_machine_placeholders",
+        "gate_placeholders",
+        "validation_hook_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -71,6 +71,23 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_runtime_orchestration_static.py"),
+            "--schema",
+            _path(
+                "schemas",
+                "runtime_orchestration",
+                "runtime_orchestration_skeleton.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "runtime_orchestration",
+                "synthetic_runtime_orchestration_skeleton.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",

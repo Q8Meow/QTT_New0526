@@ -65,6 +65,23 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_runtime_orchestration_static.py"),
+            "--schema",
+            str(
+                Path("schemas")
+                / "runtime_orchestration"
+                / "runtime_orchestration_skeleton.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "runtime_orchestration"
+                / "synthetic_runtime_orchestration_skeleton.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
