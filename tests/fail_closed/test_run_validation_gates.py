@@ -99,6 +99,19 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_venue_abstraction_layer_static.py"),
+            "--schema",
+            str(Path("schemas") / "connectors" / "venue_abstraction_layer.schema.json"),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "connectors"
+                / "synthetic_venue_abstraction_layer.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",

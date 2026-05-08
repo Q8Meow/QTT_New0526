@@ -105,6 +105,19 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_venue_abstraction_layer_static.py"),
+            "--schema",
+            _path("schemas", "connectors", "venue_abstraction_layer.schema.json"),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "connectors",
+                "synthetic_venue_abstraction_layer.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
