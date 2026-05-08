@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Schema-only Source-Required Disabled Surface",
+  "description": "Static replay/paper/review contract only. This schema creates no replay execution, paper execution, result packet, dual-result review, owner approval, live reachability, source retrieval, source acceptance execution, connector binding, private-state fetch, runtime cash fetch, order execution, neural execution, AtomicRows bundle, SHA/freeze authority, or profit authority.",
   "type": "object",
   "properties": {
     "mode": {
@@ -8,11 +9,139 @@
     },
     "execution": {
       "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_REPLAY_PAPER_REVIEW_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "REPLAY_PAPER_REVIEW_SOURCE_REQUIRED"
+    },
+    "replay_lane_execution_allowed": {
+      "const": false
+    },
+    "paper_lane_execution_allowed": {
+      "const": false
+    },
+    "replay_result_creation_allowed": {
+      "const": false
+    },
+    "paper_result_creation_allowed": {
+      "const": false
+    },
+    "dual_result_review_creation_allowed": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_creation_allowed": {
+      "const": false
+    },
+    "shared_input_identity_creation_allowed": {
+      "const": false
+    },
+    "result_packet_merge_allowed": {
+      "const": false
+    },
+    "owner_live_promotion_review_creation_allowed": {
+      "const": false
+    },
+    "limited_live_canary_eligibility_allowed": {
+      "const": false
+    },
+    "live_reachability_allowed": {
+      "const": false
+    },
+    "connector_binding_allowed": {
+      "const": false
+    },
+    "source_retrieval_allowed": {
+      "const": false
+    },
+    "source_acceptance_execution_allowed": {
+      "const": false
+    },
+    "private_state_fetch_allowed": {
+      "const": false
+    },
+    "runtime_cash_fetch_allowed": {
+      "const": false
+    },
+    "runtime_cash_receipt_creation_allowed": {
+      "const": false
+    },
+    "api_key_use_allowed": {
+      "const": false
+    },
+    "order_execution_allowed": {
+      "const": false
+    },
+    "neural_training_allowed": {
+      "const": false
+    },
+    "neural_inference_allowed": {
+      "const": false
+    },
+    "external_repo_clone_allowed": {
+      "const": false
+    },
+    "atomicrows_bundle_creation_allowed": {
+      "const": false
+    },
+    "sha_freeze_authority_allowed": {
+      "const": false
+    },
+    "blocker_reduction_allowed": {
+      "const": false
+    },
+    "profit_claim_allowed": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_required_before_replay_paper": {
+      "const": true
+    },
+    "shared_input_identity_required_before_lanes": {
+      "const": true
+    },
+    "separate_replay_and_paper_results_required_before_review": {
+      "const": true
+    },
+    "owner_approval_required_before_live_use": {
+      "const": true
     }
   },
   "required": [
     "mode",
-    "execution"
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "replay_lane_execution_allowed",
+    "paper_lane_execution_allowed",
+    "replay_result_creation_allowed",
+    "paper_result_creation_allowed",
+    "dual_result_review_creation_allowed",
+    "runtime_resolver_snapshot_creation_allowed",
+    "shared_input_identity_creation_allowed",
+    "result_packet_merge_allowed",
+    "owner_live_promotion_review_creation_allowed",
+    "limited_live_canary_eligibility_allowed",
+    "live_reachability_allowed",
+    "connector_binding_allowed",
+    "source_retrieval_allowed",
+    "source_acceptance_execution_allowed",
+    "private_state_fetch_allowed",
+    "runtime_cash_fetch_allowed",
+    "runtime_cash_receipt_creation_allowed",
+    "api_key_use_allowed",
+    "order_execution_allowed",
+    "neural_training_allowed",
+    "neural_inference_allowed",
+    "external_repo_clone_allowed",
+    "atomicrows_bundle_creation_allowed",
+    "sha_freeze_authority_allowed",
+    "blocker_reduction_allowed",
+    "profit_claim_allowed",
+    "runtime_resolver_snapshot_required_before_replay_paper",
+    "shared_input_identity_required_before_lanes",
+    "separate_replay_and_paper_results_required_before_review",
+    "owner_approval_required_before_live_use"
   ],
   "additionalProperties": true
 }
