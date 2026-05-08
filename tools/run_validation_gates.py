@@ -58,6 +58,19 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_connector_capability_static.py"),
+            "--schema",
+            _path("schemas", "connectors", "connector_capability_registry.schema.json"),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "connectors",
+                "synthetic_connector_capability_registry.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
