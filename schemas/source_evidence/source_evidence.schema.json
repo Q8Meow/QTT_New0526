@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Schema-only Source-Required Disabled Surface",
+  "$id": "https://qtt.local/schemas/source_evidence/source_evidence.schema.json",
+  "title": "Static Source-Evidence Packet Surface Schema",
+  "description": "Static/offline schema contract for source-evidence packet surfaces. This schema creates no retrieval, source acceptance execution, connector binding, runtime, order, SHA/freeze, or profit authority.",
   "type": "object",
   "properties": {
     "mode": {
@@ -8,11 +10,885 @@
     },
     "execution": {
       "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_EXTERNAL_FACT_AUTHORITY"
+    },
+    "surface_version": {
+      "const": "PR4_STATIC_SOURCE_EVIDENCE_SCHEMA_V1"
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "candidate_source_packet": {
+      "$ref": "#/$defs/candidate_source_packet"
+    },
+    "accepted_source_packet": {
+      "$ref": "#/$defs/accepted_source_packet"
+    },
+    "target_field_ledger_record": {
+      "$ref": "#/$defs/target_field_ledger_record"
+    },
+    "conflict_metadata": {
+      "$ref": "#/$defs/conflict_metadata"
+    },
+    "materiality_metadata": {
+      "$ref": "#/$defs/materiality_metadata"
+    },
+    "revalidation_metadata": {
+      "$ref": "#/$defs/revalidation_metadata"
+    },
+    "source_packet_marker_checks": {
+      "$ref": "#/$defs/source_packet_marker_checks"
+    },
+    "static_validation_report": {
+      "$ref": "#/$defs/static_validation_report"
     }
   },
   "required": [
     "mode",
-    "execution"
+    "execution",
+    "schema_authority_class",
+    "surface_version",
+    "no_claim_flags"
   ],
-  "additionalProperties": true
+  "additionalProperties": false,
+  "$defs": {
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Z0-9_:-]+$"
+    },
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+      "not": {
+        "pattern": "\\*"
+      }
+    },
+    "target_field_paths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/target_field_path"
+      }
+    },
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "VENUE_NEUTRAL_STAGE1",
+        "NOT_VENUE_SPECIFIC"
+      ]
+    },
+    "target_semantic_family": {
+      "enum": [
+        "VENUE_API_SEMANTICS",
+        "ORDER_ENTRY_FIELDS",
+        "ORDER_STATUS_FIELDS",
+        "ORDERBOOK_SCHEMA",
+        "WEBSOCKET_SCHEMA",
+        "FEE_RULES",
+        "TICK_RULES",
+        "PAYOUT_RULES",
+        "SETTLEMENT_RULES",
+        "RATE_LIMITS",
+        "ERROR_REJECT_THROTTLE_SEMANTICS",
+        "SDK_BEHAVIOR",
+        "ACCOUNT_BALANCE_SEMANTICS",
+        "PRIVATE_STATE_CASH_SEMANTICS",
+        "MARGIN_RESERVE_LOCK_SEMANTICS",
+        "EXECUTION_LIFECYCLE_SEMANTICS",
+        "FILL_INTEGRITY_SEMANTICS",
+        "CASHFLOW_PNL_SEMANTICS",
+        "LATENCY_COMPONENT_SEMANTICS",
+        "SETTLEMENT_FINALITY_SEMANTICS",
+        "RECONCILIATION_SEMANTICS",
+        "CROSS_VENUE_EXECUTION_NORMALIZATION_SEMANTICS"
+      ]
+    },
+    "official_source_class": {
+      "enum": [
+        "OFFICIAL_VENUE_DOCS",
+        "OFFICIAL_API_DOCS",
+        "OFFICIAL_SDK_DOCS",
+        "OFFICIAL_RULEBOOKS",
+        "OFFICIAL_FEE_TICK_SETTLEMENT_DOCS",
+        "OFFICIAL_PROVIDER_DOCS"
+      ]
+    },
+    "source_locator_type": {
+      "enum": [
+        "OWNER_UNSET_PENDING_OFFICIAL_SOURCE_DISCOVERY",
+        "OFFICIAL_URL",
+        "OFFICIAL_DOCUMENT_PATH",
+        "OFFICIAL_API_SCHEMA_PATH",
+        "OFFICIAL_SDK_REFERENCE",
+        "OWNER_UPLOADED_PRIVATE_DOC_LOCATOR"
+      ]
+    },
+    "source_locator_status": {
+      "enum": [
+        "OWNER_UNSET_PENDING_OFFICIAL_SOURCE_DISCOVERY",
+        "OFFICIAL_LOCATOR_DECLARED",
+        "PRIVATE_DOC_QUARANTINED_PENDING_ACCESS_ATTESTATION"
+      ]
+    },
+    "expected_capture_type": {
+      "enum": [
+        "EXACT_QUOTE_SPAN",
+        "MACHINE_FIELD_LOCATOR",
+        "BOTH"
+      ]
+    },
+    "extracted_fact_type": {
+      "enum": [
+        "STRING",
+        "NUMBER",
+        "BOOLEAN",
+        "OBJECT",
+        "ARRAY",
+        "ENUM",
+        "NO_VALUE_REASON"
+      ]
+    },
+    "applicability_scope": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_field_paths": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "non_applicability_scope_when_known": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          },
+          "default": []
+        },
+        "wildcard_scope_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "scope_id",
+        "venue_id",
+        "target_field_paths",
+        "wildcard_scope_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "replay_paper_live_execution_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "runtime_authority",
+        "runtime_cash_fetch_authority",
+        "private_state_fetch_authority",
+        "order_execution_authority",
+        "replay_paper_live_execution_authority",
+        "network_io_authority",
+        "sha_freeze_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "conflict_metadata": {
+      "type": "object",
+      "properties": {
+        "conflict_check_state": {
+          "enum": [
+            "NOT_RUN_STATIC_PLACEHOLDER",
+            "NO_PRIOR_PACKET_FOR_TARGET_FIELD",
+            "ACCEPTABLE_DUPLICATE",
+            "OWNER_REVIEWED_EXACT_EVIDENCE",
+            "UNRESOLVED_CONFLICT",
+            "STALE_DIGEST_REVALIDATION_REQUIRED"
+          ]
+        },
+        "conflict_resolution_state": {
+          "enum": [
+            "NO_PRIOR_PACKET_FOR_TARGET_FIELD",
+            "ACCEPTABLE_DUPLICATE",
+            "OWNER_REVIEWED_EXACT_EVIDENCE",
+            "UNRESOLVED_CONFLICT",
+            "REVALIDATION_REQUIRED_BEFORE_ACTIVE_CURRENT"
+          ]
+        },
+        "conflicting_packet_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/packet_id"
+          },
+          "default": []
+        },
+        "owner_or_risk_review_required": {
+          "type": "boolean"
+        },
+        "exact_locator_quote_digest_fact_scope_target_and_revalidation_required": {
+          "const": true
+        },
+        "block_code_when_unresolved": {
+          "enum": [
+            "BLOCKED_ACCEPTED_PACKET_UNRESOLVED_CONFLICT",
+            "BLOCKED_ACCEPTED_PACKET_DIGEST_MISMATCH",
+            "BLOCKED_ACCEPTED_PACKET_SCOPE_OVERREACH",
+            "BLOCKED_ACCEPTED_PACKET_REVALIDATION_MISSING",
+            "NONE"
+          ]
+        }
+      },
+      "required": [
+        "conflict_check_state",
+        "conflict_resolution_state",
+        "conflicting_packet_ids",
+        "owner_or_risk_review_required",
+        "exact_locator_quote_digest_fact_scope_target_and_revalidation_required",
+        "block_code_when_unresolved"
+      ],
+      "additionalProperties": false
+    },
+    "materiality_metadata": {
+      "type": "object",
+      "properties": {
+        "source_change_materiality_class": {
+          "enum": [
+            "INFO_ONLY",
+            "LOW_RISK",
+            "MEDIUM_RISK",
+            "HIGH_RISK",
+            "CONNECTOR_BLOCKING",
+            "LIVE_TRADING_BLOCKING",
+            "UNKNOWN_DEFAULTS_CONNECTOR_BLOCKING"
+          ]
+        },
+        "affected_target_field_paths": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "materiality_unknown_defaults_to_connector_blocking_flag": {
+          "const": true
+        },
+        "owner_or_risk_review_required": {
+          "type": "boolean"
+        },
+        "new_binding_blocked_when_material": {
+          "const": true
+        },
+        "live_exposure_increase_blocked_when_live_trading_blocking": {
+          "const": true
+        }
+      },
+      "required": [
+        "source_change_materiality_class",
+        "affected_target_field_paths",
+        "materiality_unknown_defaults_to_connector_blocking_flag",
+        "owner_or_risk_review_required",
+        "new_binding_blocked_when_material",
+        "live_exposure_increase_blocked_when_live_trading_blocking"
+      ],
+      "additionalProperties": false
+    },
+    "revalidation_metadata": {
+      "type": "object",
+      "properties": {
+        "revalidation_class": {
+          "enum": [
+            "LIVE_CRITICAL",
+            "LOW_RISK",
+            "EVENT_TRIGGERED"
+          ]
+        },
+        "revalidation_trigger": {
+          "enum": [
+            "TIME_BASED",
+            "EVENT_BASED",
+            "TIME_OR_EVENT_BASED"
+          ]
+        },
+        "revalidation_interval": {
+          "enum": [
+            "P1D",
+            "P7D",
+            "EVENT_TRIGGERED_IMMEDIATE"
+          ]
+        },
+        "revalidation_due_at_or_event": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "source_change_event_trigger_required": {
+          "const": true
+        },
+        "stale_or_superseded_packet_blocks_new_connector_binding": {
+          "const": true
+        },
+        "fresh_revalidation_state_required_before_new_connector_binding": {
+          "const": true
+        }
+      },
+      "required": [
+        "revalidation_class",
+        "revalidation_trigger",
+        "revalidation_interval",
+        "revalidation_due_at_or_event",
+        "source_change_event_trigger_required",
+        "stale_or_superseded_packet_blocks_new_connector_binding",
+        "fresh_revalidation_state_required_before_new_connector_binding"
+      ],
+      "additionalProperties": false
+    },
+    "candidate_source_packet": {
+      "type": "object",
+      "description": "Candidate source packet surface only. A candidate packet is not accepted evidence and unlocks no connector semantics.",
+      "properties": {
+        "packet_type": {
+          "const": "CANDIDATE_SOURCE_PACKET_NOT_ACCEPTED"
+        },
+        "packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "schema_authority_class": {
+          "const": "CANDIDATE_PACKET_SCHEMA_ONLY_NOT_EXTERNAL_FACT_AUTHORITY"
+        },
+        "candidate_state": {
+          "const": "CANDIDATE_NOT_ACCEPTED"
+        },
+        "retrieval_manifest_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "source_target_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_semantic_family": {
+          "$ref": "#/$defs/target_semantic_family"
+        },
+        "target_field_paths": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "source_locator_status": {
+          "$ref": "#/$defs/source_locator_status"
+        },
+        "source_locator": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "source_locator_type": {
+          "$ref": "#/$defs/source_locator_type"
+        },
+        "authority_class_required": {
+          "$ref": "#/$defs/official_source_class"
+        },
+        "expected_capture_type": {
+          "$ref": "#/$defs/expected_capture_type"
+        },
+        "raw_capture_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "canonical_text_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "quote_span_or_machine_field_locator": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "extracted_fact_candidate_value": {
+          "description": "Candidate value field only. This schema does not make the value true.",
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "extracted_fact_type": {
+          "$ref": "#/$defs/extracted_fact_type"
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/applicability_scope"
+        },
+        "conflict_metadata": {
+          "$ref": "#/$defs/conflict_metadata"
+        },
+        "materiality_metadata": {
+          "$ref": "#/$defs/materiality_metadata"
+        },
+        "revalidation_metadata": {
+          "$ref": "#/$defs/revalidation_metadata"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        },
+        "candidate_packet_may_unlock_connector_semantics": {
+          "const": false
+        }
+      },
+      "required": [
+        "packet_type",
+        "packet_id",
+        "schema_authority_class",
+        "candidate_state",
+        "source_target_id",
+        "venue_id",
+        "target_semantic_family",
+        "target_field_paths",
+        "source_locator_status",
+        "authority_class_required",
+        "expected_capture_type",
+        "applicability_scope",
+        "conflict_metadata",
+        "materiality_metadata",
+        "revalidation_metadata",
+        "no_claim_flags",
+        "candidate_packet_may_unlock_connector_semantics"
+      ],
+      "additionalProperties": false
+    },
+    "accepted_source_packet": {
+      "type": "object",
+      "description": "Accepted source packet shape for future accepted ledgers. This schema is not an acceptance executor and creates no accepted source packet instance.",
+      "properties": {
+        "packet_type": {
+          "const": "ACCEPTED_SOURCE_PACKET_SCHEMA_ONLY"
+        },
+        "packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "schema_authority_class": {
+          "const": "ACCEPTED_PACKET_SCHEMA_ONLY_NOT_RUNTIME_NOT_CONNECTOR_BINDING"
+        },
+        "candidate_packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "acceptance_decision_packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "retrieval_manifest_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "source_target_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "source_locator": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "source_locator_type": {
+          "$ref": "#/$defs/source_locator_type"
+        },
+        "raw_capture_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "canonical_text_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "quote_span_or_machine_field_locator": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "extracted_fact_payload": {
+          "description": "Future accepted packet payload field. This schema file alone does not populate or accept the payload.",
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "extracted_fact_type": {
+          "$ref": "#/$defs/extracted_fact_type"
+        },
+        "target_field_paths_authorized": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/applicability_scope"
+        },
+        "acceptance_state": {
+          "enum": [
+            "ACCEPTED_TARGET_FIELD_SPECIFIC_CURRENT",
+            "ACCEPTED_TARGET_FIELD_SPECIFIC_OWNER_REVIEWED"
+          ]
+        },
+        "conflict_metadata": {
+          "$ref": "#/$defs/conflict_metadata"
+        },
+        "materiality_metadata": {
+          "$ref": "#/$defs/materiality_metadata"
+        },
+        "revalidation_metadata": {
+          "$ref": "#/$defs/revalidation_metadata"
+        },
+        "supersedes_packet_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/packet_id"
+          },
+          "default": []
+        },
+        "receipt_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/packet_id"
+          }
+        },
+        "no_connector_semantic_population_flag": {
+          "const": true
+        },
+        "no_live_reachability_flag": {
+          "const": true
+        },
+        "no_order_execution_flag": {
+          "const": true
+        },
+        "no_runtime_cash_claim_flag": {
+          "const": true
+        },
+        "no_blocker_reduction_or_profit_claim_flag": {
+          "const": true
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "packet_type",
+        "packet_id",
+        "schema_authority_class",
+        "candidate_packet_id",
+        "acceptance_decision_packet_id",
+        "retrieval_manifest_id",
+        "source_target_id",
+        "venue_id",
+        "source_locator",
+        "source_locator_type",
+        "raw_capture_digest_sha256",
+        "canonical_text_digest_sha256",
+        "quote_span_or_machine_field_locator",
+        "extracted_fact_payload",
+        "extracted_fact_type",
+        "target_field_paths_authorized",
+        "applicability_scope",
+        "acceptance_state",
+        "conflict_metadata",
+        "materiality_metadata",
+        "revalidation_metadata",
+        "receipt_ids",
+        "no_connector_semantic_population_flag",
+        "no_live_reachability_flag",
+        "no_order_execution_flag",
+        "no_runtime_cash_claim_flag",
+        "no_blocker_reduction_or_profit_claim_flag",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "target_field_ledger_record": {
+      "type": "object",
+      "description": "Target-field ledger record surface only. This record schema does not perform connector binding.",
+      "properties": {
+        "record_type": {
+          "const": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD"
+        },
+        "ledger_record_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "master_plan_edition": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "master_plan_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "accepted_source_packet_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "accepted_source_packet_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "source_target_id": {
+          "$ref": "#/$defs/packet_id"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "target_semantic_family": {
+          "$ref": "#/$defs/target_semantic_family"
+        },
+        "applicability_scope_digest": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "accepted_fact_payload_digest_sha256": {
+          "$ref": "#/$defs/sha256_digest"
+        },
+        "acceptance_state": {
+          "enum": [
+            "ACCEPTED_TARGET_FIELD_SPECIFIC_CURRENT",
+            "ACCEPTED_TARGET_FIELD_SPECIFIC_OWNER_REVIEWED"
+          ]
+        },
+        "conflict_resolution_state": {
+          "enum": [
+            "NO_PRIOR_PACKET_FOR_TARGET_FIELD",
+            "ACCEPTABLE_DUPLICATE",
+            "OWNER_REVIEWED_EXACT_EVIDENCE"
+          ]
+        },
+        "revalidation_trigger": {
+          "enum": [
+            "TIME_BASED",
+            "EVENT_BASED",
+            "TIME_OR_EVENT_BASED"
+          ]
+        },
+        "revalidation_due_at_or_event": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "supersedes_packet_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/packet_id"
+          },
+          "default": []
+        },
+        "ledger_record_state": {
+          "enum": [
+            "ACTIVE_CURRENT",
+            "ACTIVE_OWNER_REVIEWED",
+            "SUPERSEDED",
+            "EXPIRED_REVALIDATION_REQUIRED",
+            "REJECTED_WITH_RECEIPT"
+          ]
+        },
+        "connector_semantic_binding_allowed_flag": {
+          "const": false
+        },
+        "blocked_reason_when_not_bindable": {
+          "enum": [
+            "STATIC_PR4_SCHEMA_ONLY_NOT_BINDABLE",
+            "BLOCKED_ACCEPTED_PACKET_REVALIDATION_EXPIRED",
+            "BLOCKED_ACCEPTED_PACKET_UNRESOLVED_CONFLICT",
+            "BLOCKED_ACCEPTED_PACKET_FORBIDDEN_AUTHORITY_CLAIM"
+          ]
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "receipt_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/packet_id"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "record_type",
+        "ledger_record_id",
+        "accepted_source_packet_id",
+        "accepted_source_packet_digest_sha256",
+        "source_target_id",
+        "venue_id",
+        "target_field_path",
+        "target_semantic_family",
+        "applicability_scope_digest",
+        "accepted_fact_payload_digest_sha256",
+        "acceptance_state",
+        "conflict_resolution_state",
+        "revalidation_trigger",
+        "revalidation_due_at_or_event",
+        "ledger_record_state",
+        "connector_semantic_binding_allowed_flag",
+        "blocked_reason_when_not_bindable",
+        "validation_hook_ids",
+        "receipt_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "source_packet_marker_checks": {
+      "type": "object",
+      "properties": {
+        "packet_version_marker": {
+          "const": "packet_version = v1.3A_OWNER_APPROVED_EXECUTION_MECHANICS_ABSTRACTION_AND_RETRIEVAL_READINESS_CURRENTIZATION_NOT_EXTERNAL_FACT_AUTHORITY"
+        },
+        "external_fact_authority_blocked_marker": {
+          "const": "owner_source_evidence_definitions_packet_can_authorize_external_fact_value = false"
+        },
+        "connector_semantic_population_blocked_marker": {
+          "const": "owner_source_evidence_definitions_packet_can_populate_connector_semantic_value = false"
+        },
+        "this_packet_retrieves_no_source_facts_marker": {
+          "const": "this_packet_retrieves_source_facts = false"
+        },
+        "this_packet_accepts_no_source_facts_marker": {
+          "const": "this_packet_accepts_source_facts = false"
+        }
+      },
+      "required": [
+        "packet_version_marker",
+        "external_fact_authority_blocked_marker",
+        "connector_semantic_population_blocked_marker",
+        "this_packet_retrieves_no_source_facts_marker",
+        "this_packet_accepts_no_source_facts_marker"
+      ],
+      "additionalProperties": false
+    },
+    "static_validation_report": {
+      "type": "object",
+      "properties": {
+        "validator_id": {
+          "const": "validate_source_evidence_static"
+        },
+        "status": {
+          "enum": [
+            "SOURCE_EVIDENCE_STATIC_VALIDATION_OK",
+            "SOURCE_EVIDENCE_STATIC_VALIDATION_FAILED"
+          ]
+        },
+        "checked_schema_path": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "checked_owner_packet_path": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "checked_surfaces": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "candidate_source_packet",
+              "accepted_source_packet",
+              "target_field_ledger_record",
+              "conflict_metadata",
+              "materiality_metadata",
+              "revalidation_metadata",
+              "no_claim_flags"
+            ]
+          }
+        },
+        "blocked_authority_checks": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "validator_id",
+        "status",
+        "checked_schema_path",
+        "checked_owner_packet_path",
+        "checked_surfaces",
+        "blocked_authority_checks"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "mode": "SOURCE_REQUIRED",
+      "execution": "DISABLED",
+      "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+      "surface_version": "PR4_STATIC_SOURCE_EVIDENCE_SCHEMA_V1",
+      "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT",
+      "no_claim_flags": {
+        "external_fact_authority": false,
+        "source_retrieval_authority": false,
+        "source_acceptance_execution_authority": false,
+        "accepted_packet_creation_authority": false,
+        "connector_binding_authority": false,
+        "runtime_authority": false,
+        "runtime_cash_fetch_authority": false,
+        "private_state_fetch_authority": false,
+        "order_execution_authority": false,
+        "replay_paper_live_execution_authority": false,
+        "network_io_authority": false,
+        "sha_freeze_authority": false,
+        "profit_claim_authority": false
+      }
+    }
+  ]
 }
