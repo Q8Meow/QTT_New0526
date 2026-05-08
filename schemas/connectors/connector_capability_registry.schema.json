@@ -1,0 +1,864 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/connectors/connector_capability_registry.schema.json",
+  "title": "Static Connector Capability Registry Schema",
+  "description": "Static/offline connector capability registry scaffold. This schema creates no source retrieval, source acceptance execution, connector semantic binding, runtime connector, live reachability, private-state fetch, order execution, AtomicRows bundle/hash, freeze authority, or profit claim.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_CONNECTOR_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "CONNECTOR_CAPABILITY_REGISTRY_STATIC_SCAFFOLD"
+    },
+    "surface_version": {
+      "const": "PR21_CONNECTOR_CAPABILITY_REGISTRY_SCHEMA_V1"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "connector_capability_registry": {
+      "$ref": "#/$defs/connector_capability_registry"
+    }
+  },
+  "required": [
+    "mode",
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "deterministic_output",
+    "no_claim_flags",
+    "connector_capability_registry"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Z0-9_:-]+$"
+    },
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+      "not": {
+        "pattern": "\\*"
+      }
+    },
+    "source_required_value": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "connector_capability_family": {
+      "enum": [
+        "CONNECTOR_IDENTITY",
+        "CONNECTOR_API_SURFACE",
+        "MARKET_DATA_READINESS",
+        "LIVE_REACHABILITY",
+        "PRIVATE_STATE",
+        "ORDER_AUTHORITY"
+      ]
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "connector_semantic_value_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "live_reachability_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "balance_fetch_authority": {
+          "const": false
+        },
+        "position_fetch_authority": {
+          "const": false
+        },
+        "open_orders_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "replay_paper_live_execution_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "atomicrows_bundle_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "connector_semantic_value_authority",
+        "runtime_authority",
+        "live_reachability_authority",
+        "runtime_cash_fetch_authority",
+        "private_state_fetch_authority",
+        "balance_fetch_authority",
+        "position_fetch_authority",
+        "open_orders_fetch_authority",
+        "order_execution_authority",
+        "replay_paper_live_execution_authority",
+        "network_io_authority",
+        "atomicrows_bundle_authority",
+        "sha_freeze_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "connector_authority_scope_flags": {
+      "type": "object",
+      "properties": {
+        "source_required": {
+          "const": true
+        },
+        "execution_disabled": {
+          "const": true
+        },
+        "deterministic_static_fixture_only": {
+          "const": true
+        },
+        "synthetic_records_only": {
+          "const": true
+        },
+        "accepted_source_evidence_required_before_semantic_binding": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "connector_semantics_unbound": {
+          "const": true
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_use_allowed": {
+          "const": false
+        },
+        "live_use_allowed": {
+          "const": false
+        },
+        "private_state_fetch_allowed": {
+          "const": false
+        },
+        "order_execution_allowed": {
+          "const": false
+        },
+        "profit_claim_allowed": {
+          "const": false
+        },
+        "source_retrieval_allowed": {
+          "const": false
+        },
+        "source_acceptance_allowed": {
+          "const": false
+        },
+        "external_fact_acceptance_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_required",
+        "execution_disabled",
+        "deterministic_static_fixture_only",
+        "synthetic_records_only",
+        "accepted_source_evidence_required_before_semantic_binding",
+        "accepted_source_evidence_present",
+        "connector_semantics_unbound",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed",
+        "live_use_allowed",
+        "private_state_fetch_allowed",
+        "order_execution_allowed",
+        "profit_claim_allowed",
+        "source_retrieval_allowed",
+        "source_acceptance_allowed",
+        "external_fact_acceptance_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "connector_forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "external_fact_acceptance_enabled": {
+          "const": false
+        },
+        "connector_binding_enabled": {
+          "const": false
+        },
+        "semantic_value_population_enabled": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "live_enabled": {
+          "const": false
+        },
+        "live_reachability_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "position_fetch_enabled": {
+          "const": false
+        },
+        "open_orders_fetch_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_reduce_close_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "sha_freeze_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "connector_binding_enabled",
+        "semantic_value_population_enabled",
+        "runtime_enabled",
+        "live_enabled",
+        "live_reachability_enabled",
+        "private_state_fetch_enabled",
+        "balance_fetch_enabled",
+        "position_fetch_enabled",
+        "open_orders_fetch_enabled",
+        "order_execution_enabled",
+        "order_cancel_enabled",
+        "order_reduce_close_enabled",
+        "profit_claim_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "connector_source_required_field_placeholders": {
+      "type": "object",
+      "properties": {
+        "connector_semantic_values": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "connector_api_surface_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "credential_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "live_endpoint": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "private_state_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "balance_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "position_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "open_order_fields": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_authority_fields": {
+          "$ref": "#/$defs/source_required_value"
+        }
+      },
+      "required": [
+        "connector_semantic_values",
+        "connector_api_surface_fields",
+        "credential_fields",
+        "live_endpoint",
+        "private_state_fields",
+        "balance_fields",
+        "position_fields",
+        "open_order_fields",
+        "order_authority_fields"
+      ],
+      "additionalProperties": false
+    },
+    "connector_capability_card": {
+      "type": "object",
+      "description": "Synthetic source-required capability card. It is not a connector, does not bind semantics, and cannot be used at runtime.",
+      "properties": {
+        "card_type": {
+          "const": "CONNECTOR_CAPABILITY_CARD_STATIC_SOURCE_REQUIRED"
+        },
+        "card_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "connector_id": {
+          "const": "SYNTHETIC_CONNECTOR_SOURCE_REQUIRED_PLACEHOLDER"
+        },
+        "connector_display_name": {
+          "const": "SYNTHETIC_CONNECTOR_PLACEHOLDER_NOT_REAL"
+        },
+        "capability_state": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "source_evidence_state": {
+          "const": "NO_ACCEPTED_SOURCE_EVIDENCE_PRESENT"
+        },
+        "semantic_binding_state": {
+          "const": "UNBOUND"
+        },
+        "runtime_state": {
+          "const": "DISABLED"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "connector_runtime_enabled": {
+          "const": false
+        },
+        "connector_live_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_reference": {
+          "const": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "source_required_fields": {
+          "$ref": "#/$defs/connector_source_required_field_placeholders"
+        },
+        "connector_authority_scope_flags": {
+          "$ref": "#/$defs/connector_authority_scope_flags"
+        },
+        "connector_forbidden_action_flags": {
+          "$ref": "#/$defs/connector_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "card_type",
+        "card_id",
+        "connector_id",
+        "connector_display_name",
+        "capability_state",
+        "source_evidence_state",
+        "semantic_binding_state",
+        "runtime_state",
+        "accepted_source_evidence_present",
+        "connector_semantic_binding_allowed",
+        "connector_runtime_enabled",
+        "connector_live_enabled",
+        "accepted_source_packet_reference",
+        "source_required_fields",
+        "connector_authority_scope_flags",
+        "connector_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "connector_readiness_record": {
+      "type": "object",
+      "description": "Synthetic connector readiness record. All semantic values remain SOURCE_REQUIRED and UNBOUND until accepted source evidence exists.",
+      "properties": {
+        "record_type": {
+          "const": "CONNECTOR_READINESS_RECORD_STATIC_SOURCE_REQUIRED"
+        },
+        "record_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "card_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "capability_family": {
+          "$ref": "#/$defs/connector_capability_family"
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "capability_state": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "semantic_value": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "semantic_value_state": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "semantic_binding_state": {
+          "const": "UNBOUND"
+        },
+        "execution_state": {
+          "const": "DISABLED"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "accepted_source_packet_authority_present": {
+          "const": false
+        },
+        "connector_semantic_binding_claim_present": {
+          "const": false
+        },
+        "accepted_source_packet_reference": {
+          "const": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "source_required_fields": {
+          "$ref": "#/$defs/connector_source_required_field_placeholders"
+        },
+        "connector_authority_scope_flags": {
+          "$ref": "#/$defs/connector_authority_scope_flags"
+        },
+        "connector_forbidden_action_flags": {
+          "$ref": "#/$defs/connector_forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "card_id",
+        "capability_family",
+        "target_field_path",
+        "capability_state",
+        "semantic_value",
+        "semantic_value_state",
+        "semantic_binding_state",
+        "execution_state",
+        "accepted_source_evidence_present",
+        "accepted_source_packet_authority_present",
+        "connector_semantic_binding_claim_present",
+        "accepted_source_packet_reference",
+        "source_required_fields",
+        "connector_authority_scope_flags",
+        "connector_forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "connector_capability_registry": {
+      "type": "object",
+      "description": "Non-runtime connector capability registry scaffold. It records only synthetic source-required capability cards and readiness records.",
+      "properties": {
+        "registry_type": {
+          "const": "CONNECTOR_CAPABILITY_REGISTRY_STATIC_SCAFFOLD"
+        },
+        "registry_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "registry_authority_class": {
+          "const": "STATIC_CONNECTOR_CAPABILITY_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "connector_authority_scope_flags": {
+          "$ref": "#/$defs/connector_authority_scope_flags"
+        },
+        "connector_forbidden_action_flags": {
+          "$ref": "#/$defs/connector_forbidden_action_flags"
+        },
+        "capability_cards": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/connector_capability_card"
+          }
+        },
+        "readiness_records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/connector_readiness_record"
+          }
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "registry_type",
+        "registry_id",
+        "registry_authority_class",
+        "mode",
+        "execution",
+        "deterministic_output",
+        "connector_authority_scope_flags",
+        "connector_forbidden_action_flags",
+        "capability_cards",
+        "readiness_records",
+        "validation_hook_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "mode": "SOURCE_REQUIRED",
+      "execution": "DISABLED",
+      "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_CONNECTOR_AUTHORITY",
+      "surface_kind": "CONNECTOR_CAPABILITY_REGISTRY_STATIC_SCAFFOLD",
+      "surface_version": "PR21_CONNECTOR_CAPABILITY_REGISTRY_SCHEMA_V1",
+      "deterministic_output": true,
+      "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT",
+      "no_claim_flags": {
+        "external_fact_authority": false,
+        "source_retrieval_authority": false,
+        "source_acceptance_execution_authority": false,
+        "accepted_packet_creation_authority": false,
+        "connector_binding_authority": false,
+        "connector_semantic_value_authority": false,
+        "runtime_authority": false,
+        "live_reachability_authority": false,
+        "runtime_cash_fetch_authority": false,
+        "private_state_fetch_authority": false,
+        "balance_fetch_authority": false,
+        "position_fetch_authority": false,
+        "open_orders_fetch_authority": false,
+        "order_execution_authority": false,
+        "replay_paper_live_execution_authority": false,
+        "network_io_authority": false,
+        "atomicrows_bundle_authority": false,
+        "sha_freeze_authority": false,
+        "profit_claim_authority": false
+      },
+      "connector_capability_registry": {
+        "registry_type": "CONNECTOR_CAPABILITY_REGISTRY_STATIC_SCAFFOLD",
+        "registry_id": "SYNTHETIC_PR21_CONNECTOR_CAPABILITY_REGISTRY_NOT_REAL",
+        "registry_authority_class": "STATIC_CONNECTOR_CAPABILITY_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY",
+        "mode": "SOURCE_REQUIRED",
+        "execution": "DISABLED",
+        "deterministic_output": true,
+        "connector_authority_scope_flags": {
+          "source_required": true,
+          "execution_disabled": true,
+          "deterministic_static_fixture_only": true,
+          "synthetic_records_only": true,
+          "accepted_source_evidence_required_before_semantic_binding": true,
+          "accepted_source_evidence_present": false,
+          "connector_semantics_unbound": true,
+          "connector_semantic_binding_allowed": false,
+          "runtime_use_allowed": false,
+          "live_use_allowed": false,
+          "private_state_fetch_allowed": false,
+          "order_execution_allowed": false,
+          "profit_claim_allowed": false,
+          "source_retrieval_allowed": false,
+          "source_acceptance_allowed": false,
+          "external_fact_acceptance_allowed": false
+        },
+        "connector_forbidden_action_flags": {
+          "source_retrieval_enabled": false,
+          "source_acceptance_execution_enabled": false,
+          "external_fact_acceptance_enabled": false,
+          "connector_binding_enabled": false,
+          "semantic_value_population_enabled": false,
+          "runtime_enabled": false,
+          "live_enabled": false,
+          "live_reachability_enabled": false,
+          "private_state_fetch_enabled": false,
+          "balance_fetch_enabled": false,
+          "position_fetch_enabled": false,
+          "open_orders_fetch_enabled": false,
+          "order_execution_enabled": false,
+          "order_cancel_enabled": false,
+          "order_reduce_close_enabled": false,
+          "profit_claim_enabled": false,
+          "atomicrows_bundle_creation_enabled": false,
+          "sha_freeze_enabled": false
+        },
+        "capability_cards": [
+          {
+            "card_type": "CONNECTOR_CAPABILITY_CARD_STATIC_SOURCE_REQUIRED",
+            "card_id": "SYNTHETIC_PR21_CONNECTOR_CARD_NOT_REAL",
+            "connector_id": "SYNTHETIC_CONNECTOR_SOURCE_REQUIRED_PLACEHOLDER",
+            "connector_display_name": "SYNTHETIC_CONNECTOR_PLACEHOLDER_NOT_REAL",
+            "capability_state": "SOURCE_REQUIRED",
+            "source_evidence_state": "NO_ACCEPTED_SOURCE_EVIDENCE_PRESENT",
+            "semantic_binding_state": "UNBOUND",
+            "runtime_state": "DISABLED",
+            "accepted_source_evidence_present": false,
+            "connector_semantic_binding_allowed": false,
+            "connector_runtime_enabled": false,
+            "connector_live_enabled": false,
+            "accepted_source_packet_reference": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE",
+            "source_required_fields": {
+              "connector_semantic_values": "SOURCE_REQUIRED",
+              "connector_api_surface_fields": "SOURCE_REQUIRED",
+              "credential_fields": "SOURCE_REQUIRED",
+              "live_endpoint": "SOURCE_REQUIRED",
+              "private_state_fields": "SOURCE_REQUIRED",
+              "balance_fields": "SOURCE_REQUIRED",
+              "position_fields": "SOURCE_REQUIRED",
+              "open_order_fields": "SOURCE_REQUIRED",
+              "order_authority_fields": "SOURCE_REQUIRED"
+            },
+            "connector_authority_scope_flags": {
+              "source_required": true,
+              "execution_disabled": true,
+              "deterministic_static_fixture_only": true,
+              "synthetic_records_only": true,
+              "accepted_source_evidence_required_before_semantic_binding": true,
+              "accepted_source_evidence_present": false,
+              "connector_semantics_unbound": true,
+              "connector_semantic_binding_allowed": false,
+              "runtime_use_allowed": false,
+              "live_use_allowed": false,
+              "private_state_fetch_allowed": false,
+              "order_execution_allowed": false,
+              "profit_claim_allowed": false,
+              "source_retrieval_allowed": false,
+              "source_acceptance_allowed": false,
+              "external_fact_acceptance_allowed": false
+            },
+            "connector_forbidden_action_flags": {
+              "source_retrieval_enabled": false,
+              "source_acceptance_execution_enabled": false,
+              "external_fact_acceptance_enabled": false,
+              "connector_binding_enabled": false,
+              "semantic_value_population_enabled": false,
+              "runtime_enabled": false,
+              "live_enabled": false,
+              "live_reachability_enabled": false,
+              "private_state_fetch_enabled": false,
+              "balance_fetch_enabled": false,
+              "position_fetch_enabled": false,
+              "open_orders_fetch_enabled": false,
+              "order_execution_enabled": false,
+              "order_cancel_enabled": false,
+              "order_reduce_close_enabled": false,
+              "profit_claim_enabled": false,
+              "atomicrows_bundle_creation_enabled": false,
+              "sha_freeze_enabled": false
+            },
+            "no_claim_flags": {
+              "external_fact_authority": false,
+              "source_retrieval_authority": false,
+              "source_acceptance_execution_authority": false,
+              "accepted_packet_creation_authority": false,
+              "connector_binding_authority": false,
+              "connector_semantic_value_authority": false,
+              "runtime_authority": false,
+              "live_reachability_authority": false,
+              "runtime_cash_fetch_authority": false,
+              "private_state_fetch_authority": false,
+              "balance_fetch_authority": false,
+              "position_fetch_authority": false,
+              "open_orders_fetch_authority": false,
+              "order_execution_authority": false,
+              "replay_paper_live_execution_authority": false,
+              "network_io_authority": false,
+              "atomicrows_bundle_authority": false,
+              "sha_freeze_authority": false,
+              "profit_claim_authority": false
+            }
+          }
+        ],
+        "readiness_records": [
+          {
+            "record_type": "CONNECTOR_READINESS_RECORD_STATIC_SOURCE_REQUIRED",
+            "record_id": "SYNTHETIC_PR21_CONNECTOR_READINESS_RECORD_NOT_REAL",
+            "card_id": "SYNTHETIC_PR21_CONNECTOR_CARD_NOT_REAL",
+            "capability_family": "CONNECTOR_API_SURFACE",
+            "target_field_path": "synthetic_connector.synthetic_capability",
+            "capability_state": "SOURCE_REQUIRED",
+            "semantic_value": "SOURCE_REQUIRED",
+            "semantic_value_state": "SOURCE_REQUIRED",
+            "semantic_binding_state": "UNBOUND",
+            "execution_state": "DISABLED",
+            "accepted_source_evidence_present": false,
+            "accepted_source_packet_authority_present": false,
+            "connector_semantic_binding_claim_present": false,
+            "accepted_source_packet_reference": "SOURCE_REQUIRED_NO_ACCEPTED_SOURCE_EVIDENCE",
+            "source_required_fields": {
+              "connector_semantic_values": "SOURCE_REQUIRED",
+              "connector_api_surface_fields": "SOURCE_REQUIRED",
+              "credential_fields": "SOURCE_REQUIRED",
+              "live_endpoint": "SOURCE_REQUIRED",
+              "private_state_fields": "SOURCE_REQUIRED",
+              "balance_fields": "SOURCE_REQUIRED",
+              "position_fields": "SOURCE_REQUIRED",
+              "open_order_fields": "SOURCE_REQUIRED",
+              "order_authority_fields": "SOURCE_REQUIRED"
+            },
+            "connector_authority_scope_flags": {
+              "source_required": true,
+              "execution_disabled": true,
+              "deterministic_static_fixture_only": true,
+              "synthetic_records_only": true,
+              "accepted_source_evidence_required_before_semantic_binding": true,
+              "accepted_source_evidence_present": false,
+              "connector_semantics_unbound": true,
+              "connector_semantic_binding_allowed": false,
+              "runtime_use_allowed": false,
+              "live_use_allowed": false,
+              "private_state_fetch_allowed": false,
+              "order_execution_allowed": false,
+              "profit_claim_allowed": false,
+              "source_retrieval_allowed": false,
+              "source_acceptance_allowed": false,
+              "external_fact_acceptance_allowed": false
+            },
+            "connector_forbidden_action_flags": {
+              "source_retrieval_enabled": false,
+              "source_acceptance_execution_enabled": false,
+              "external_fact_acceptance_enabled": false,
+              "connector_binding_enabled": false,
+              "semantic_value_population_enabled": false,
+              "runtime_enabled": false,
+              "live_enabled": false,
+              "live_reachability_enabled": false,
+              "private_state_fetch_enabled": false,
+              "balance_fetch_enabled": false,
+              "position_fetch_enabled": false,
+              "open_orders_fetch_enabled": false,
+              "order_execution_enabled": false,
+              "order_cancel_enabled": false,
+              "order_reduce_close_enabled": false,
+              "profit_claim_enabled": false,
+              "atomicrows_bundle_creation_enabled": false,
+              "sha_freeze_enabled": false
+            },
+            "no_claim_flags": {
+              "external_fact_authority": false,
+              "source_retrieval_authority": false,
+              "source_acceptance_execution_authority": false,
+              "accepted_packet_creation_authority": false,
+              "connector_binding_authority": false,
+              "connector_semantic_value_authority": false,
+              "runtime_authority": false,
+              "live_reachability_authority": false,
+              "runtime_cash_fetch_authority": false,
+              "private_state_fetch_authority": false,
+              "balance_fetch_authority": false,
+              "position_fetch_authority": false,
+              "open_orders_fetch_authority": false,
+              "order_execution_authority": false,
+              "replay_paper_live_execution_authority": false,
+              "network_io_authority": false,
+              "atomicrows_bundle_authority": false,
+              "sha_freeze_authority": false,
+              "profit_claim_authority": false
+            }
+          }
+        ],
+        "validation_hook_ids": [
+          "validate_connector_capability_registry_fixture"
+        ],
+        "no_claim_flags": {
+          "external_fact_authority": false,
+          "source_retrieval_authority": false,
+          "source_acceptance_execution_authority": false,
+          "accepted_packet_creation_authority": false,
+          "connector_binding_authority": false,
+          "connector_semantic_value_authority": false,
+          "runtime_authority": false,
+          "live_reachability_authority": false,
+          "runtime_cash_fetch_authority": false,
+          "private_state_fetch_authority": false,
+          "balance_fetch_authority": false,
+          "position_fetch_authority": false,
+          "open_orders_fetch_authority": false,
+          "order_execution_authority": false,
+          "replay_paper_live_execution_authority": false,
+          "network_io_authority": false,
+          "atomicrows_bundle_authority": false,
+          "sha_freeze_authority": false,
+          "profit_claim_authority": false
+        }
+      }
+    }
+  ]
+}

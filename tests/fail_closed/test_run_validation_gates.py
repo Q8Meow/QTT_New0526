@@ -48,6 +48,23 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_connector_capability_static.py"),
+            "--schema",
+            str(
+                Path("schemas")
+                / "connectors"
+                / "connector_capability_registry.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "connectors"
+                / "synthetic_connector_capability_registry.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
