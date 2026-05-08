@@ -35,6 +35,28 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_first_pr_scope.py"),
+            "--repo-root",
+            ".",
+            "--scope-report",
+            str(first_pr_scope_report),
+            "--block-runtime",
+            "--block-live",
+            "--block-sha",
+            "--block-companion-package",
+            "--block-profit-claims",
+            "--block-source-retrieval",
+            "--block-source-acceptance",
+            "--block-connector-binding",
+            "--block-private-state-fetch",
+            "--block-order-execution",
+            "--block-neural-training",
+            "--block-neural-inference",
+            "--block-external-repo-clone",
+            "--block-package-install-scripts",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_source_evidence_static.py"),
             "--schema",
             str(Path("schemas") / "source_evidence" / "source_evidence.schema.json"),
@@ -44,6 +66,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 / "master_plan"
                 / "source_evidence"
                 / "QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md"
+            ),
+            "--registry-fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "synthetic_acceptance_registry.v1.fixture.json"
             ),
         ],
         [

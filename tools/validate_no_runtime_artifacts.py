@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from dataclasses import dataclass
 import os
 import pathlib
@@ -117,14 +118,25 @@ SKIP_DIR_PARTS = {
 SKIP_CONTENT_PATHS = {
     pathlib.PurePosixPath("tools/validate_no_runtime_artifacts.py"),
 }
-SKIP_CONTENT_TOP_LEVEL_DIRS = {"docs", "tests"}
+SKIP_CONTENT_TOP_LEVEL_DIRS = {"docs"}
 
 CONTENT_PATTERNS = {
     "forbid_source_retrieval": [
         ("HTTP retrieval client", r"\b(?:requests|httpx)\.(?:get|post|request)\s*\("),
+        (
+            "HTTP retrieval session client",
+            r"\brequests\.Session\s*\(\s*\)\s*\.\s*(?:get|post|request)\s*\(",
+        ),
         ("urllib retrieval client", r"\burllib\.request\.urlopen\s*\("),
+        ("http.client import/use", r"\bhttp\.client\b"),
+        ("socket client", r"\bsocket\.socket\s*\("),
+        ("urllib3 client", r"\burllib3\b"),
         ("aiohttp client", r"\baiohttp\.ClientSession\b"),
         ("browser retrieval automation", r"\b(?:playwright|selenium)\b"),
+        (
+            "curl command",
+            r"\bsubprocess\.(?:run|check_call|check_output)\([^)]*[\"']curl[\"']",
+        ),
     ],
     "forbid_source_acceptance": [
         (
@@ -184,7 +196,14 @@ CONTENT_PATTERNS = {
         ),
     ],
     "forbid_package_install_scripts": [
-        ("pip install command", r"\b(?:python\s+-m\s+)?pip\s+install\b"),
+        (
+            "subprocess pip install command",
+            r"\bsubprocess\.(?:run|check_call|check_output)\([^)]*[\"'](?:pip|pip3)[\"'][^)]*[\"']install[\"']",
+        ),
+        (
+            "pip install command",
+            r"\b(?:(?:python|python3|py)\s+-m\s+)?pip3?\s+install\b",
+        ),
         ("uv pip install command", r"\buv\s+pip\s+install\b"),
         ("npm install command", r"\bnpm\s+install\b"),
         ("pnpm install command", r"\bpnpm\s+install\b"),
@@ -240,7 +259,285 @@ def _should_scan_content(path: pathlib.Path, root: pathlib.Path) -> bool:
         return False
     if rel.parts and rel.parts[0] in SKIP_CONTENT_TOP_LEVEL_DIRS:
         return False
+    if rel.parts and rel.parts[0] == "tests" and path.suffix.lower() != ".py":
+        return False
     return path.is_file() and path.suffix.lower() in TEXT_SUFFIXES
+
+
+def _dotted_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        base = _dotted_name(node.value)
+        return f"{base}.{node.attr}" if base else node.attr
+    if isinstance(node, ast.Call):
+        base = _dotted_name(node.func)
+        return f"{base}()" if base else None
+    return None
+
+
+def _imported_module_names(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if isinstance(node, ast.ImportFrom) and node.module:
+        return [node.module]
+    return []
+
+
+def _literal_command_tokens(node: ast.AST) -> list[str]:
+    if isinstance(node, (ast.List, ast.Tuple)):
+        tokens: list[str] = []
+        for item in node.elts:
+            if not isinstance(item, ast.Constant) or not isinstance(item.value, str):
+                return []
+            tokens.append(item.value.lower())
+        return tokens
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value.lower().split()
+    return []
+
+
+def _tokens_are_pip_install(tokens: list[str]) -> bool:
+    if len(tokens) >= 2 and tokens[0] in {"pip", "pip3"} and tokens[1] == "install":
+        return True
+    return (
+        len(tokens) >= 4
+        and tokens[0] in {"python", "python3", "py"}
+        and tokens[1:4] == ["-m", "pip", "install"]
+    )
+
+
+def _call_labels(node: ast.Call) -> list[str]:
+    labels: list[str] = []
+    name = _dotted_name(node.func)
+    if name is None:
+        return labels
+
+    if name in {
+        "requests.get",
+        "requests.post",
+        "requests.request",
+        "httpx.get",
+        "httpx.post",
+        "httpx.request",
+    }:
+        labels.append("HTTP retrieval client")
+    if name in {
+        "requests.Session().get",
+        "requests.Session().post",
+        "requests.Session().request",
+    }:
+        labels.append("HTTP retrieval session client")
+    if name == "urllib.request.urlopen":
+        labels.append("urllib retrieval client")
+    if name == "http.client.HTTPConnection" or name == "http.client.HTTPSConnection":
+        labels.append("http.client import/use")
+    if name == "socket.socket":
+        labels.append("socket client")
+    if name == "aiohttp.ClientSession":
+        labels.append("aiohttp client")
+    if name in {"Repo.clone_from", "git.Repo.clone_from"}:
+        labels.append("GitPython clone call")
+
+    call_name = name.rsplit(".", 1)[-1]
+    if call_name in {
+        "accept_source_fact",
+        "accept_source_evidence",
+        "accept_source_packet",
+        "accepted_source_fact",
+        "accepted_source_evidence",
+        "accepted_source_packet",
+    }:
+        labels.append("source acceptance call")
+    if call_name == "create_accepted_source_evidence":
+        labels.append("accepted source evidence creation")
+    if call_name in {"bind_connector_semantic", "bind_connector_semantics"}:
+        labels.append("connector semantic binding call")
+    if call_name == "fetch_private_state":
+        labels.append("private state fetch call")
+    if call_name == "get_account_balance":
+        labels.append("account balance fetch call")
+    if call_name in {
+        "place_order",
+        "submit_order",
+        "send_order",
+        "cancel_order",
+        "reduce_order",
+        "close_order",
+    }:
+        labels.append("order execution call")
+    if call_name in {"train_model", "fit_model"}:
+        labels.append("model training call")
+    if name.endswith(".predict"):
+        labels.append("model predict call")
+    if call_name == "run_inference":
+        labels.append("inference call")
+    if name == "torch.load":
+        labels.append("torch model load")
+
+    if name in {"subprocess.run", "subprocess.check_call", "subprocess.check_output"} and node.args:
+        tokens = _literal_command_tokens(node.args[0])
+        if tokens:
+            if tokens[0] == "git" and "clone" in tokens:
+                labels.append("subprocess git clone")
+            if tokens[0] == "curl":
+                labels.append("curl command")
+            if _tokens_are_pip_install(tokens):
+                labels.append("subprocess pip install command")
+    return labels
+
+
+def _assignment_labels(node: ast.Assign | ast.AnnAssign) -> list[str]:
+    labels: list[str] = []
+    targets: list[ast.AST]
+    value: ast.AST | None
+    if isinstance(node, ast.Assign):
+        targets = list(node.targets)
+        value = node.value
+    else:
+        targets = [node.target]
+        value = node.value
+
+    target_names = {
+        name
+        for target in targets
+        if (name := _dotted_name(target)) is not None
+    }
+    if "connector_semantic_value" in target_names:
+        labels.append("connector semantic value assignment")
+    if "source_acceptance_status" in target_names and isinstance(value, ast.Constant):
+        if value.value == "ACCEPTED":
+            labels.append("accepted source status assignment")
+    if "LIVE_ORDER_EXECUTION_ENABLED" in target_names and isinstance(value, ast.Constant):
+        if value.value is True:
+            labels.append("live order execution toggle")
+    return labels
+
+
+def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
+    try:
+        tree = ast.parse(text, filename=str(path))
+    except SyntaxError:
+        return _scan_text_content(path, text, enabled_flags)
+
+    found_by_flag = {flag: set[str]() for flag in enabled_flags}
+    source_retrieval_imports = {
+        "http.client": "http.client import/use",
+        "urllib3": "urllib3 client",
+        "playwright": "browser retrieval automation",
+        "selenium": "browser retrieval automation",
+    }
+    neural_training_imports = {
+        "tensorflow": "tensorflow import/use",
+        "keras": "tensorflow import/use",
+    }
+    neural_inference_imports = {
+        "onnxruntime": "onnx runtime import/use",
+    }
+
+    for node in ast.walk(tree):
+        for module_name in _imported_module_names(node):
+            root_name = module_name.split(".", 1)[0]
+            if "forbid_source_retrieval" in found_by_flag:
+                if module_name in source_retrieval_imports:
+                    found_by_flag["forbid_source_retrieval"].add(source_retrieval_imports[module_name])
+                if root_name in source_retrieval_imports:
+                    found_by_flag["forbid_source_retrieval"].add(source_retrieval_imports[root_name])
+            if "forbid_neural_training" in found_by_flag and root_name in neural_training_imports:
+                found_by_flag["forbid_neural_training"].add(neural_training_imports[root_name])
+            if "forbid_neural_inference" in found_by_flag and root_name in neural_inference_imports:
+                found_by_flag["forbid_neural_inference"].add(neural_inference_imports[root_name])
+
+        if isinstance(node, ast.Call):
+            labels = set(_call_labels(node))
+            flag_to_labels = {
+                "forbid_source_retrieval": {
+                    "HTTP retrieval client",
+                    "HTTP retrieval session client",
+                    "urllib retrieval client",
+                    "http.client import/use",
+                    "socket client",
+                    "urllib3 client",
+                    "aiohttp client",
+                    "browser retrieval automation",
+                    "curl command",
+                },
+                "forbid_source_acceptance": {
+                    "source acceptance call",
+                    "accepted source evidence creation",
+                },
+                "forbid_connector_binding": {
+                    "connector semantic binding call",
+                },
+                "forbid_private_state_fetch": {
+                    "private state fetch call",
+                    "account balance fetch call",
+                },
+                "forbid_order_execution": {
+                    "order execution call",
+                },
+                "forbid_neural_training": {
+                    "model training call",
+                },
+                "forbid_neural_inference": {
+                    "model predict call",
+                    "inference call",
+                    "torch model load",
+                },
+                "forbid_external_repo_clone": {
+                    "GitPython clone call",
+                    "subprocess git clone",
+                },
+                "forbid_package_install_scripts": {
+                    "subprocess pip install command",
+                },
+            }
+            for flag, flag_labels in flag_to_labels.items():
+                if flag in found_by_flag:
+                    found_by_flag[flag].update(labels & flag_labels)
+
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            labels = set(_assignment_labels(node))
+            if "forbid_source_acceptance" in found_by_flag:
+                found_by_flag["forbid_source_acceptance"].update(
+                    labels & {"accepted source status assignment"}
+                )
+            if "forbid_connector_binding" in found_by_flag:
+                found_by_flag["forbid_connector_binding"].update(
+                    labels & {"connector semantic value assignment"}
+                )
+            if "forbid_order_execution" in found_by_flag:
+                found_by_flag["forbid_order_execution"].update(
+                    labels & {"live order execution toggle"}
+                )
+
+        if isinstance(node, ast.Attribute):
+            name = _dotted_name(node)
+            if "forbid_neural_training" in found_by_flag and name == "torch.optim":
+                found_by_flag["forbid_neural_training"].add("torch optimizer import/use")
+            if "forbid_neural_inference" in found_by_flag and name == "onnxruntime":
+                found_by_flag["forbid_neural_inference"].add("onnx runtime import/use")
+
+        if isinstance(node, ast.Name):
+            if "forbid_private_state_fetch" in found_by_flag and node.id == "private_state_client":
+                found_by_flag["forbid_private_state_fetch"].add("private state client")
+            if "forbid_connector_binding" in found_by_flag and node.id == "CONNECTOR_SEMANTIC_BOUND":
+                found_by_flag["forbid_connector_binding"].add("connector bound state")
+
+    return [
+        f"forbidden {label} in {path}"
+        for flag in enabled_flags
+        for label in sorted(found_by_flag.get(flag, set()))
+    ]
+
+
+def _scan_text_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
+    violations: list[str] = []
+    for flag in enabled_flags:
+        for label, pattern in CONTENT_PATTERNS.get(flag, []):
+            if re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE):
+                violations.append(f"forbidden {label} in {path}")
+    return violations
 
 
 def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
@@ -277,10 +574,10 @@ def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
             continue
 
         text = path.read_text(encoding="utf-8", errors="ignore")
-        for flag in enabled_flags:
-            for label, pattern in CONTENT_PATTERNS.get(flag, []):
-                if re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE):
-                    violations.append(f"forbidden {label} in {rel}")
+        if path.suffix.lower() == ".py":
+            violations.extend(_scan_python_content(rel, text, enabled_flags))
+        else:
+            violations.extend(_scan_text_content(rel, text, enabled_flags))
 
     return violations
 

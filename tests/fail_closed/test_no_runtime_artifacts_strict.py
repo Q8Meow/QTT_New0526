@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from tools.validate_no_runtime_artifacts import ScanOptions, scan_repository
 
 
@@ -169,3 +171,127 @@ def test_scanner_still_catches_forbidden_looking_files_outside_ignored_directori
     assert any("HTTP retrieval client" in violation for violation in violations)
     assert any("pip install command" in violation for violation in violations)
     assert any("secrets.json" in violation for violation in violations)
+
+
+def test_scanner_scans_tests_py_for_real_runtime_code(tmp_path):
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_bad_runtime_path.py").write_text(
+        "\n".join(
+            [
+                "import requests",
+                "requests.Session().get('https://example.invalid/source')",
+                "submit_order()",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("HTTP retrieval session client" in violation for violation in violations)
+    assert any("order execution call" in violation for violation in violations)
+
+
+def test_scanner_allows_synthetic_negative_test_strings_in_tests_py(tmp_path):
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_guardrail_strings.py").write_text(
+        "\n".join(
+            [
+                "def test_guardrail_examples_are_quoted():",
+                "    examples = [",
+                "        'requests.Session().get(\"https://example.invalid/source\")',",
+                "        'subprocess.run([\"pip\", \"install\", \"package\"]',",
+                "        'submit_order()',",
+                "    ]",
+                "    assert examples",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
+@pytest.mark.parametrize(
+    "code, expected_fragment",
+    [
+        (
+            "import requests\nrequests.Session().get('https://example.invalid/source')\n",
+            "HTTP retrieval session client",
+        ),
+        (
+            "import requests\nrequests.Session().post('https://example.invalid/source')\n",
+            "HTTP retrieval session client",
+        ),
+        (
+            "import http.client\nhttp.client.HTTPConnection('example.invalid')\n",
+            "http.client import/use",
+        ),
+        (
+            "import socket\nsocket.socket()\n",
+            "socket client",
+        ),
+        (
+            "import urllib3\nurllib3.PoolManager()\n",
+            "urllib3 client",
+        ),
+        (
+            "import subprocess\nsubprocess.run(['curl', 'https://example.invalid/source'])\n",
+            "curl command",
+        ),
+    ],
+)
+def test_scanner_rejects_expanded_runtime_network_variants(
+    tmp_path, code, expected_fragment
+):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "bad.py").write_text(code, encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(expected_fragment in violation for violation in violations)
+
+
+@pytest.mark.parametrize(
+    "filename, text, expected_fragment",
+    [
+        (
+            "bad.py",
+            "import subprocess\nsubprocess.run(['pip', 'install', 'package'])\n",
+            "subprocess pip install command",
+        ),
+        (
+            "bad.py",
+            "import subprocess\nsubprocess.run(['pip3', 'install', 'package'])\n",
+            "subprocess pip install command",
+        ),
+        (
+            "bad.py",
+            "import subprocess\nsubprocess.run(['python3', '-m', 'pip', 'install', 'package'])\n",
+            "subprocess pip install command",
+        ),
+        (
+            "bad.py",
+            "import subprocess\nsubprocess.run(['py', '-m', 'pip', 'install', 'package'])\n",
+            "subprocess pip install command",
+        ),
+        ("bad.sh", "pip3 install package\n", "pip install command"),
+        ("bad.sh", "python3 -m pip install package\n", "pip install command"),
+        ("bad.sh", "py -m pip install package\n", "pip install command"),
+    ],
+)
+def test_scanner_rejects_expanded_package_install_variants(
+    tmp_path, filename, text, expected_fragment
+):
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / filename).write_text(text, encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(expected_fragment in violation for violation in violations)
