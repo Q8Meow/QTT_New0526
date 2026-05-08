@@ -1,0 +1,129 @@
+{
+  "fixture_id": "SYNTHETIC_PR5_ACCEPTED_SOURCE_PACKET_FIXTURE",
+  "fixture_version": "PR5_SOURCE_EVIDENCE_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_SOURCE_FACT",
+  "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+  "surface_version": "PR4_STATIC_SOURCE_EVIDENCE_SCHEMA_V1",
+  "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_QUOTE_NO_EXTERNAL_FACT",
+  "source_locator_policy": "SYNTHETIC_PLACEHOLDER_LOCATOR_ONLY_NO_URL_NO_CONFIDENTIAL_LOCATOR",
+  "digest_policy": "DUMMY_PLACEHOLDER_DIGESTS_NOT_COMPUTED_NOT_FREEZE_MATERIAL",
+  "synthetic_acceptance_authority_flags": {
+    "real_accepted_source_authority": false,
+    "external_fact_acceptance_authority": false,
+    "connector_unlock_authority": false
+  },
+  "fixture_no_claim_flags": {
+    "retrieves_source_facts": false,
+    "accepts_source_facts": false,
+    "creates_accepted_source_evidence": false,
+    "unlocks_connector_semantics": false,
+    "creates_runtime_cash_receipts": false,
+    "creates_live_reachability": false,
+    "executes_orders": false,
+    "creates_profit_evidence": false
+  },
+  "no_claim_flags": {
+    "external_fact_authority": false,
+    "source_retrieval_authority": false,
+    "source_acceptance_execution_authority": false,
+    "accepted_packet_creation_authority": false,
+    "connector_binding_authority": false,
+    "runtime_authority": false,
+    "runtime_cash_fetch_authority": false,
+    "private_state_fetch_authority": false,
+    "order_execution_authority": false,
+    "replay_paper_live_execution_authority": false,
+    "network_io_authority": false,
+    "sha_freeze_authority": false,
+    "profit_claim_authority": false
+  },
+  "surface_kind": "accepted_source_packet",
+  "accepted_source_packet": {
+    "packet_type": "ACCEPTED_SOURCE_PACKET_SCHEMA_ONLY",
+    "packet_id": "SYNTHETIC_PR5_ACCEPTED_PACKET_NOT_REAL",
+    "schema_authority_class": "ACCEPTED_PACKET_SCHEMA_ONLY_NOT_RUNTIME_NOT_CONNECTOR_BINDING",
+    "candidate_packet_id": "SYNTHETIC_PR5_CANDIDATE_PACKET_NOT_REAL",
+    "acceptance_decision_packet_id": "SYNTHETIC_PR5_ACCEPTANCE_DECISION_NOT_REAL",
+    "retrieval_manifest_id": "SYNTHETIC_PR5_RETRIEVAL_MANIFEST_NOT_RUN",
+    "source_target_id": "SYNTHETIC_PR5_SOURCE_TARGET_NOT_REAL",
+    "venue_id": "NOT_VENUE_SPECIFIC",
+    "source_locator": "SYNTHETIC_LOCATOR_PLACEHOLDER_NOT_A_URL",
+    "source_locator_type": "OWNER_UNSET_PENDING_OFFICIAL_SOURCE_DISCOVERY",
+    "raw_capture_digest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "canonical_text_digest_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "quote_span_or_machine_field_locator": "SYNTHETIC_MACHINE_FIELD_LOCATOR_PLACEHOLDER_NOT_SOURCE_QUOTE",
+    "extracted_fact_payload": {
+      "synthetic_payload": "SYNTHETIC_PLACEHOLDER_NOT_ACCEPTED_FACT"
+    },
+    "extracted_fact_type": "OBJECT",
+    "target_field_paths_authorized": [
+      "synthetic_target.synthetic_field"
+    ],
+    "applicability_scope": {
+      "scope_id": "SYNTHETIC_PR5_SCOPE_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_paths": [
+        "synthetic_target.synthetic_field"
+      ],
+      "non_applicability_scope_when_known": [
+        "SYNTHETIC_NON_APPLICABILITY_PLACEHOLDER"
+      ],
+      "wildcard_scope_allowed": false
+    },
+    "acceptance_state": "ACCEPTED_TARGET_FIELD_SPECIFIC_OWNER_REVIEWED",
+    "conflict_metadata": {
+      "conflict_check_state": "OWNER_REVIEWED_EXACT_EVIDENCE",
+      "conflict_resolution_state": "OWNER_REVIEWED_EXACT_EVIDENCE",
+      "conflicting_packet_ids": [],
+      "owner_or_risk_review_required": true,
+      "exact_locator_quote_digest_fact_scope_target_and_revalidation_required": true,
+      "block_code_when_unresolved": "NONE"
+    },
+    "materiality_metadata": {
+      "source_change_materiality_class": "INFO_ONLY",
+      "affected_target_field_paths": [
+        "synthetic_target.synthetic_field"
+      ],
+      "materiality_unknown_defaults_to_connector_blocking_flag": true,
+      "owner_or_risk_review_required": true,
+      "new_binding_blocked_when_material": true,
+      "live_exposure_increase_blocked_when_live_trading_blocking": true
+    },
+    "revalidation_metadata": {
+      "revalidation_class": "LOW_RISK",
+      "revalidation_trigger": "TIME_OR_EVENT_BASED",
+      "revalidation_interval": "P7D",
+      "revalidation_due_at_or_event": "SYNTHETIC_REVALIDATION_PLACEHOLDER_NOT_RUNTIME_TIMER",
+      "source_change_event_trigger_required": true,
+      "stale_or_superseded_packet_blocks_new_connector_binding": true,
+      "fresh_revalidation_state_required_before_new_connector_binding": true
+    },
+    "supersedes_packet_ids": [],
+    "receipt_ids": [
+      "SYNTHETIC_PR5_RECEIPT_NOT_RUNTIME"
+    ],
+    "no_connector_semantic_population_flag": true,
+    "no_live_reachability_flag": true,
+    "no_order_execution_flag": true,
+    "no_runtime_cash_claim_flag": true,
+    "no_blocker_reduction_or_profit_claim_flag": true,
+    "no_claim_flags": {
+      "external_fact_authority": false,
+      "source_retrieval_authority": false,
+      "source_acceptance_execution_authority": false,
+      "accepted_packet_creation_authority": false,
+      "connector_binding_authority": false,
+      "runtime_authority": false,
+      "runtime_cash_fetch_authority": false,
+      "private_state_fetch_authority": false,
+      "order_execution_authority": false,
+      "replay_paper_live_execution_authority": false,
+      "network_io_authority": false,
+      "sha_freeze_authority": false,
+      "profit_claim_authority": false
+    }
+  }
+}
