@@ -91,6 +91,79 @@ REQUIRED_SURFACE_DEFS = {
         "receipt_ids",
         "no_claim_flags",
     },
+    "source_evidence_acceptance_registry": {
+        "registry_type",
+        "registry_id",
+        "registry_authority_class",
+        "mode",
+        "execution",
+        "deterministic_output",
+        "registry_authority_scope_flags",
+        "registry_forbidden_action_flags",
+        "candidate_records",
+        "accepted_records",
+        "validation_hook_ids",
+        "no_claim_flags",
+    },
+    "registry_candidate_source_evidence_record": {
+        "record_type",
+        "record_id",
+        "candidate_source_packet_id",
+        "source_target_id",
+        "venue_id",
+        "target_semantic_family",
+        "target_field_paths",
+        "candidate_state",
+        "source_locator_status",
+        "accepted_fact_claim_present",
+        "accepted_source_packet_authority_present",
+        "no_claim_flags",
+        "registry_forbidden_action_flags",
+    },
+    "registry_accepted_source_evidence_record": {
+        "record_type",
+        "record_id",
+        "accepted_source_packet_id",
+        "accepted_source_packet_digest_sha256",
+        "source_target_id",
+        "venue_id",
+        "target_field_path",
+        "target_semantic_family",
+        "accepted_record_state",
+        "accepted_source_packet_authority_present",
+        "accepted_fact_claim_present",
+        "target_field_ledger_record_id",
+        "target_field_ledger_record_state",
+        "connector_semantic_binding_allowed_flag",
+        "no_claim_flags",
+        "registry_forbidden_action_flags",
+    },
+    "registry_authority_scope_flags": {
+        "source_required",
+        "execution_disabled",
+        "candidate_records_are_not_accepted_source_evidence",
+        "accepted_records_are_schema_only_without_external_fact_authority_flag",
+        "accepted_fact_claims_require_accepted_source_packet_authority_flag",
+        "accepted_source_packet_authority_required_before_ledger_current",
+        "target_field_scope_required",
+        "wildcard_scope_allowed",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed",
+    },
+    "registry_forbidden_action_flags": {
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "connector_binding_enabled",
+        "runtime_enabled",
+        "live_enabled",
+        "private_state_fetch_enabled",
+        "balance_fetch_enabled",
+        "order_execution_enabled",
+        "profit_claim_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled",
+    },
     "conflict_metadata": {
         "conflict_check_state",
         "conflict_resolution_state",
@@ -155,6 +228,52 @@ REQUIRED_TRUE_NO_RUNTIME_FLAGS = {
     "no_order_execution_flag",
     "no_runtime_cash_claim_flag",
     "no_blocker_reduction_or_profit_claim_flag",
+}
+
+REGISTRY_FORBIDDEN_ACTION_FLAGS = {
+    "source_retrieval_enabled",
+    "source_acceptance_execution_enabled",
+    "external_fact_acceptance_enabled",
+    "connector_binding_enabled",
+    "runtime_enabled",
+    "live_enabled",
+    "private_state_fetch_enabled",
+    "balance_fetch_enabled",
+    "order_execution_enabled",
+    "profit_claim_enabled",
+    "atomicrows_bundle_creation_enabled",
+    "sha_freeze_enabled",
+}
+
+REGISTRY_AUTHORITY_SCOPE_FLAG_EXPECTATIONS = {
+    "source_required": True,
+    "execution_disabled": True,
+    "candidate_records_are_not_accepted_source_evidence": True,
+    "accepted_records_are_schema_only_without_external_fact_authority_flag": True,
+    "accepted_fact_claims_require_accepted_source_packet_authority_flag": True,
+    "accepted_source_packet_authority_required_before_ledger_current": True,
+    "target_field_scope_required": True,
+    "wildcard_scope_allowed": False,
+    "connector_semantic_binding_allowed": False,
+    "runtime_use_allowed": False,
+}
+
+REGISTRY_FIXTURE_REQUIRED_ROOT_FIELDS = {
+    "fixture_id",
+    "fixture_authority_class",
+    "example_authority_class",
+    "mode",
+    "execution",
+    "schema_authority_class",
+    "surface_version",
+    "fixture_no_claim_flags",
+    "no_claim_flags",
+    "source_evidence_acceptance_registry",
+}
+
+REGISTRY_REQUIRED_RECORD_COLLECTIONS = {
+    "candidate_records",
+    "accepted_records",
 }
 
 
@@ -285,6 +404,81 @@ def _validate_no_authority(schema: dict[str, Any]) -> list[str]:
     ):
         failures.append("target-field ledger must not allow connector binding in PR4 schema")
 
+    registry_surface = defs.get("source_evidence_acceptance_registry")
+    if isinstance(registry_surface, dict):
+        if _const_value(registry_surface, "mode") != "SOURCE_REQUIRED":
+            failures.append("source-evidence registry mode must be SOURCE_REQUIRED")
+        if _const_value(registry_surface, "execution") != "DISABLED":
+            failures.append("source-evidence registry execution must be DISABLED")
+        if _const_value(registry_surface, "deterministic_output") is not True:
+            failures.append("source-evidence registry must declare deterministic output")
+        if _const_value(registry_surface, "registry_authority_class") != (
+            "STATIC_SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY"
+        ):
+            failures.append("source-evidence registry authority class must be static-only")
+
+    candidate_registry_record = defs.get("registry_candidate_source_evidence_record")
+    if isinstance(candidate_registry_record, dict):
+        if _const_value(candidate_registry_record, "accepted_fact_claim_present") is not False:
+            failures.append("candidate registry records must not claim accepted facts")
+        if (
+            _const_value(
+                candidate_registry_record,
+                "accepted_source_packet_authority_present",
+            )
+            is not False
+        ):
+            failures.append("candidate registry records must not claim accepted-packet authority")
+
+    accepted_registry_record = defs.get("registry_accepted_source_evidence_record")
+    if isinstance(accepted_registry_record, dict):
+        if _const_value(accepted_registry_record, "accepted_fact_claim_present") is not False:
+            failures.append("accepted registry records must not claim accepted facts")
+        if (
+            _const_value(
+                accepted_registry_record,
+                "accepted_source_packet_authority_present",
+            )
+            is not False
+        ):
+            failures.append("accepted registry records must not claim accepted-packet authority")
+        if (
+            _const_value(
+                accepted_registry_record,
+                "connector_semantic_binding_allowed_flag",
+            )
+            is not False
+        ):
+            failures.append("accepted registry records must not allow connector binding")
+
+    registry_forbidden_flags = defs.get("registry_forbidden_action_flags")
+    if isinstance(registry_forbidden_flags, dict):
+        flag_properties = _properties(registry_forbidden_flags)
+        flag_required = _required(registry_forbidden_flags)
+        for field in sorted(REGISTRY_FORBIDDEN_ACTION_FLAGS):
+            if field not in flag_properties:
+                failures.append(f"registry forbidden flags missing field: {field}")
+                continue
+            if field not in flag_required:
+                failures.append(f"registry forbidden flags must require field: {field}")
+            if _const_value(registry_forbidden_flags, field) is not False:
+                failures.append(f"registry forbidden flag {field} must be const false")
+
+    registry_scope_flags = defs.get("registry_authority_scope_flags")
+    if isinstance(registry_scope_flags, dict):
+        scope_properties = _properties(registry_scope_flags)
+        scope_required = _required(registry_scope_flags)
+        for field, expected in sorted(REGISTRY_AUTHORITY_SCOPE_FLAG_EXPECTATIONS.items()):
+            if field not in scope_properties:
+                failures.append(f"registry authority/scope flags missing field: {field}")
+                continue
+            if field not in scope_required:
+                failures.append(f"registry authority/scope flags must require field: {field}")
+            if _const_value(registry_scope_flags, field) is not expected:
+                failures.append(
+                    f"registry authority/scope flag {field} must be const {expected}"
+                )
+
     return failures
 
 
@@ -300,6 +494,302 @@ def _validate_examples(schema: dict[str, Any]) -> list[str]:
         ):
             return [f"schema example {index} must be marked synthetic and non-authoritative"]
     return []
+
+
+def _mapping_at(value: dict[str, Any], field: str, label: str) -> tuple[dict[str, Any] | None, list[str]]:
+    item = value.get(field)
+    if not isinstance(item, dict):
+        return None, [f"{label}.{field} must be an object"]
+    return item, []
+
+
+def _list_at(value: dict[str, Any], field: str, label: str) -> tuple[list[Any] | None, list[str]]:
+    item = value.get(field)
+    if not isinstance(item, list) or not item:
+        return None, [f"{label}.{field} must be a non-empty list"]
+    return item, []
+
+
+def _require_mapping_fields(
+    value: dict[str, Any], required_fields: set[str], label: str
+) -> list[str]:
+    missing = sorted(required_fields - set(value))
+    if not missing:
+        return []
+    return [f"{label} missing required fields: {', '.join(missing)}"]
+
+
+def _validate_false_flag_map(
+    value: dict[str, Any], required_fields: set[str], label: str
+) -> list[str]:
+    failures = _require_mapping_fields(value, required_fields, label)
+    for field in sorted(required_fields):
+        if field in value and value[field] is not False:
+            failures.append(f"{label}.{field} must be false")
+    return failures
+
+
+def _validate_authority_scope_flag_map(value: dict[str, Any], label: str) -> list[str]:
+    failures = _require_mapping_fields(
+        value,
+        set(REGISTRY_AUTHORITY_SCOPE_FLAG_EXPECTATIONS),
+        label,
+    )
+    for field, expected in sorted(REGISTRY_AUTHORITY_SCOPE_FLAG_EXPECTATIONS.items()):
+        if field in value and value[field] is not expected:
+            failures.append(f"{label}.{field} must be {expected}")
+    return failures
+
+
+def _walk_registry_values(value: Any, path: str = "registry"):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            current = f"{path}.{key}"
+            yield current, key, item
+            yield from _walk_registry_values(item, current)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from _walk_registry_values(item, f"{path}[{index}]")
+
+
+def _validate_no_forbidden_true_values(value: dict[str, Any]) -> list[str]:
+    failures: list[str] = []
+    forbidden_false_fields = (
+        REGISTRY_FORBIDDEN_ACTION_FLAGS
+        | FORBIDDEN_AUTHORITY_FIELDS
+        | {
+            "retrieves_source_facts",
+            "accepts_source_facts",
+            "creates_accepted_source_evidence",
+            "unlocks_connector_semantics",
+            "creates_runtime_cash_receipts",
+            "creates_live_reachability",
+            "executes_orders",
+            "creates_profit_evidence",
+            "accepted_fact_claim_present",
+            "accepted_source_packet_authority_present",
+            "connector_semantic_binding_allowed_flag",
+        }
+    )
+    for path, key, item in _walk_registry_values(value):
+        if key in forbidden_false_fields and item is not False:
+            failures.append(f"{path} must be false")
+    return failures
+
+
+def _validate_records_have_target_field_scope(
+    records: list[Any], *, collection_label: str, field_name: str
+) -> list[str]:
+    failures: list[str] = []
+    for index, record in enumerate(records):
+        label = f"{collection_label}[{index}]"
+        if not isinstance(record, dict):
+            failures.append(f"{label} must be an object")
+            continue
+        if field_name == "target_field_paths":
+            paths = record.get(field_name)
+            if not isinstance(paths, list) or not paths:
+                failures.append(f"{label}.{field_name} must be a non-empty list")
+                continue
+            for item in paths:
+                if not isinstance(item, str) or "*" in item:
+                    failures.append(f"{label}.{field_name} must contain scoped field paths")
+        else:
+            path = record.get(field_name)
+            if not isinstance(path, str) or not path or "*" in path:
+                failures.append(f"{label}.{field_name} must be a scoped field path")
+    return failures
+
+
+def validate_acceptance_registry_fixture(fixture: dict[str, Any]) -> list[str]:
+    failures: list[str] = []
+    failures.extend(
+        _require_mapping_fields(
+            fixture,
+            REGISTRY_FIXTURE_REQUIRED_ROOT_FIELDS,
+            "registry fixture",
+        )
+    )
+
+    if fixture.get("fixture_authority_class") != (
+        "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_SOURCE_FACT"
+    ):
+        failures.append("registry fixture must be synthetic and non-authoritative")
+    if fixture.get("example_authority_class") != (
+        "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    ):
+        failures.append("registry fixture example authority must be synthetic")
+    if fixture.get("mode") != "SOURCE_REQUIRED":
+        failures.append("registry fixture mode must be SOURCE_REQUIRED")
+    if fixture.get("execution") != "DISABLED":
+        failures.append("registry fixture execution must be DISABLED")
+
+    fixture_no_claim_flags, flag_failures = _mapping_at(
+        fixture, "fixture_no_claim_flags", "registry fixture"
+    )
+    failures.extend(flag_failures)
+    if fixture_no_claim_flags is not None:
+        failures.extend(
+            _validate_false_flag_map(
+                fixture_no_claim_flags,
+                {
+                    "retrieves_source_facts",
+                    "accepts_source_facts",
+                    "creates_accepted_source_evidence",
+                    "unlocks_connector_semantics",
+                    "creates_runtime_cash_receipts",
+                    "creates_live_reachability",
+                    "executes_orders",
+                    "creates_profit_evidence",
+                },
+                "registry fixture.fixture_no_claim_flags",
+            )
+        )
+
+    no_claim_flags, no_claim_failures = _mapping_at(
+        fixture, "no_claim_flags", "registry fixture"
+    )
+    failures.extend(no_claim_failures)
+    if no_claim_flags is not None:
+        failures.extend(
+            _validate_false_flag_map(
+                no_claim_flags,
+                FORBIDDEN_AUTHORITY_FIELDS,
+                "registry fixture.no_claim_flags",
+            )
+        )
+
+    registry, registry_failures = _mapping_at(
+        fixture,
+        "source_evidence_acceptance_registry",
+        "registry fixture",
+    )
+    failures.extend(registry_failures)
+    if registry is None:
+        return failures
+
+    failures.extend(
+        _require_mapping_fields(
+            registry,
+            {
+                "registry_type",
+                "registry_id",
+                "registry_authority_class",
+                "mode",
+                "execution",
+                "deterministic_output",
+                "registry_authority_scope_flags",
+                "registry_forbidden_action_flags",
+                "candidate_records",
+                "accepted_records",
+                "validation_hook_ids",
+                "no_claim_flags",
+            },
+            "source_evidence_acceptance_registry",
+        )
+    )
+    if registry.get("registry_type") != (
+        "SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_STATIC_SCAFFOLD"
+    ):
+        failures.append("registry_type must be static scaffold")
+    if registry.get("registry_authority_class") != (
+        "STATIC_SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY"
+    ):
+        failures.append("registry_authority_class must be static non-runtime")
+    if registry.get("mode") != "SOURCE_REQUIRED":
+        failures.append("registry mode must be SOURCE_REQUIRED")
+    if registry.get("execution") != "DISABLED":
+        failures.append("registry execution must be DISABLED")
+    if registry.get("deterministic_output") is not True:
+        failures.append("registry deterministic_output must be true")
+
+    scope_flags, scope_failures = _mapping_at(
+        registry,
+        "registry_authority_scope_flags",
+        "source_evidence_acceptance_registry",
+    )
+    failures.extend(scope_failures)
+    if scope_flags is not None:
+        failures.extend(
+            _validate_authority_scope_flag_map(
+                scope_flags,
+                "source_evidence_acceptance_registry.registry_authority_scope_flags",
+            )
+        )
+
+    registry_forbidden_flags, registry_flag_failures = _mapping_at(
+        registry,
+        "registry_forbidden_action_flags",
+        "source_evidence_acceptance_registry",
+    )
+    failures.extend(registry_flag_failures)
+    if registry_forbidden_flags is not None:
+        failures.extend(
+            _validate_false_flag_map(
+                registry_forbidden_flags,
+                REGISTRY_FORBIDDEN_ACTION_FLAGS,
+                "source_evidence_acceptance_registry.registry_forbidden_action_flags",
+            )
+        )
+
+    registry_no_claim_flags, registry_no_claim_failures = _mapping_at(
+        registry,
+        "no_claim_flags",
+        "source_evidence_acceptance_registry",
+    )
+    failures.extend(registry_no_claim_failures)
+    if registry_no_claim_flags is not None:
+        failures.extend(
+            _validate_false_flag_map(
+                registry_no_claim_flags,
+                FORBIDDEN_AUTHORITY_FIELDS,
+                "source_evidence_acceptance_registry.no_claim_flags",
+            )
+        )
+
+    candidate_records, candidate_failures = _list_at(
+        registry,
+        "candidate_records",
+        "source_evidence_acceptance_registry",
+    )
+    failures.extend(candidate_failures)
+    if candidate_records is not None:
+        failures.extend(
+            _validate_records_have_target_field_scope(
+                candidate_records,
+                collection_label="source_evidence_acceptance_registry.candidate_records",
+                field_name="target_field_paths",
+            )
+        )
+
+    accepted_records, accepted_failures = _list_at(
+        registry,
+        "accepted_records",
+        "source_evidence_acceptance_registry",
+    )
+    failures.extend(accepted_failures)
+    if accepted_records is not None:
+        failures.extend(
+            _validate_records_have_target_field_scope(
+                accepted_records,
+                collection_label="source_evidence_acceptance_registry.accepted_records",
+                field_name="target_field_path",
+            )
+        )
+        for index, record in enumerate(accepted_records):
+            if not isinstance(record, dict):
+                continue
+            label = f"source_evidence_acceptance_registry.accepted_records[{index}]"
+            if (
+                record.get("accepted_fact_claim_present") is True
+                and record.get("accepted_source_packet_authority_present") is not True
+            ):
+                failures.append(
+                    f"{label} accepted fact claim requires accepted-source packet authority"
+                )
+
+    failures.extend(_validate_no_forbidden_true_values(fixture))
+    return failures
 
 
 def validate_static_surface(

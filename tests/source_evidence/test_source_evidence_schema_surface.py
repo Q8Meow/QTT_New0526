@@ -17,6 +17,11 @@ def test_source_evidence_schema_exposes_required_static_surfaces():
         "candidate_source_packet",
         "accepted_source_packet",
         "target_field_ledger_record",
+        "source_evidence_acceptance_registry",
+        "registry_candidate_source_evidence_record",
+        "registry_accepted_source_evidence_record",
+        "registry_authority_scope_flags",
+        "registry_forbidden_action_flags",
         "conflict_metadata",
         "materiality_metadata",
         "revalidation_metadata",
@@ -141,3 +146,40 @@ def test_target_field_paths_disallow_wildcards_and_unknown_venue_scope():
     assert defs["target_field_path"]["not"]["pattern"] == "\\*"
     assert "*" not in defs["venue_id"]["enum"]
     assert "UNKNOWN" not in defs["venue_id"]["enum"]
+
+
+def test_acceptance_registry_surface_is_non_runtime_and_fail_closed():
+    defs = _schema()["$defs"]
+    registry = defs["source_evidence_acceptance_registry"]
+    candidate_record = defs["registry_candidate_source_evidence_record"]
+    accepted_record = defs["registry_accepted_source_evidence_record"]
+    forbidden_flags = defs["registry_forbidden_action_flags"]["properties"]
+    authority_scope_flags = defs["registry_authority_scope_flags"]["properties"]
+
+    assert registry["properties"]["mode"]["const"] == "SOURCE_REQUIRED"
+    assert registry["properties"]["execution"]["const"] == "DISABLED"
+    assert registry["properties"]["deterministic_output"]["const"] is True
+    assert registry["properties"]["registry_authority_class"]["const"] == (
+        "STATIC_SOURCE_EVIDENCE_ACCEPTANCE_REGISTRY_SCAFFOLD_NOT_RUNTIME_AUTHORITY"
+    )
+    assert candidate_record["properties"]["accepted_fact_claim_present"]["const"] is False
+    assert (
+        candidate_record["properties"]["accepted_source_packet_authority_present"]["const"]
+        is False
+    )
+    assert accepted_record["properties"]["accepted_fact_claim_present"]["const"] is False
+    assert (
+        accepted_record["properties"]["accepted_source_packet_authority_present"]["const"]
+        is False
+    )
+    assert (
+        accepted_record["properties"]["connector_semantic_binding_allowed_flag"]["const"]
+        is False
+    )
+    assert all(value["const"] is False for value in forbidden_flags.values())
+    assert authority_scope_flags["source_required"]["const"] is True
+    assert authority_scope_flags["execution_disabled"]["const"] is True
+    assert authority_scope_flags["target_field_scope_required"]["const"] is True
+    assert authority_scope_flags["wildcard_scope_allowed"]["const"] is False
+    assert authority_scope_flags["connector_semantic_binding_allowed"]["const"] is False
+    assert authority_scope_flags["runtime_use_allowed"]["const"] is False
