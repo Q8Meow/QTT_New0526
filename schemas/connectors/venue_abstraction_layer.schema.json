@@ -1,0 +1,1008 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/connectors/venue_abstraction_layer.schema.json",
+  "title": "Static Venue Abstraction Layer Schema",
+  "description": "Static/offline venue-neutral abstraction scaffold. This schema creates no source retrieval, source acceptance execution, connector semantic binding, runtime connector, live reachability, private-state fetch, order execution, AtomicRows bundle/hash, freeze authority, or profit claim.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_VENUE_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "VENUE_ABSTRACTION_LAYER_STATIC_SCAFFOLD"
+    },
+    "surface_version": {
+      "const": "PR24_VENUE_ABSTRACTION_LAYER_SCHEMA_V1"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "venue_abstraction_layer": {
+      "$ref": "#/$defs/venue_abstraction_layer"
+    }
+  },
+  "required": [
+    "mode",
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "deterministic_output",
+    "no_claim_flags",
+    "venue_abstraction_layer"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Z0-9_:-]+$"
+    },
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_required_value": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "unbound_value": {
+      "const": "UNBOUND"
+    },
+    "disabled_value": {
+      "const": "DISABLED"
+    },
+    "venue_authority_scope_flags": {
+      "type": "object",
+      "properties": {
+        "source_required": {
+          "const": true
+        },
+        "execution_disabled": {
+          "const": true
+        },
+        "scaffold_only": {
+          "const": true
+        },
+        "deterministic_static_fixture_only": {
+          "const": true
+        },
+        "synthetic_records_only": {
+          "const": true
+        },
+        "venue_neutral_interfaces_only": {
+          "const": true
+        },
+        "accepted_source_evidence_required_before_semantic_binding": {
+          "const": true
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "connector_semantics_unbound": {
+          "const": true
+        },
+        "venue_semantics_source_required": {
+          "const": true
+        },
+        "venue_specific_semantic_values_allowed": {
+          "const": false
+        },
+        "external_fact_acceptance_allowed": {
+          "const": false
+        },
+        "source_retrieval_allowed": {
+          "const": false
+        },
+        "source_acceptance_allowed": {
+          "const": false
+        },
+        "connector_binding_allowed": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_use_allowed": {
+          "const": false
+        },
+        "runtime_execution_allowed": {
+          "const": false
+        },
+        "runtime_trading_allowed": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_allowed": {
+          "const": false
+        },
+        "replay_execution_allowed": {
+          "const": false
+        },
+        "paper_execution_allowed": {
+          "const": false
+        },
+        "replay_result_packet_creation_allowed": {
+          "const": false
+        },
+        "paper_result_packet_creation_allowed": {
+          "const": false
+        },
+        "live_use_allowed": {
+          "const": false
+        },
+        "live_reachability_allowed": {
+          "const": false
+        },
+        "live_endpoint_allowed": {
+          "const": false
+        },
+        "live_client_allowed": {
+          "const": false
+        },
+        "private_state_fetch_allowed": {
+          "const": false
+        },
+        "private_state_materialization_allowed": {
+          "const": false
+        },
+        "runtime_cash_fetch_allowed": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_allowed": {
+          "const": false
+        },
+        "order_execution_allowed": {
+          "const": false
+        },
+        "order_authority_allowed": {
+          "const": false
+        },
+        "network_io_allowed": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_allowed": {
+          "const": false
+        },
+        "sha_freeze_authority_allowed": {
+          "const": false
+        },
+        "blocker_reduction_allowed": {
+          "const": false
+        },
+        "profit_claim_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_required",
+        "execution_disabled",
+        "scaffold_only",
+        "deterministic_static_fixture_only",
+        "synthetic_records_only",
+        "venue_neutral_interfaces_only",
+        "accepted_source_evidence_required_before_semantic_binding",
+        "accepted_source_evidence_present",
+        "connector_semantics_unbound",
+        "venue_semantics_source_required",
+        "venue_specific_semantic_values_allowed",
+        "external_fact_acceptance_allowed",
+        "source_retrieval_allowed",
+        "source_acceptance_allowed",
+        "connector_binding_allowed",
+        "connector_semantic_binding_allowed",
+        "runtime_use_allowed",
+        "runtime_execution_allowed",
+        "runtime_trading_allowed",
+        "runtime_resolver_snapshot_creation_allowed",
+        "replay_execution_allowed",
+        "paper_execution_allowed",
+        "replay_result_packet_creation_allowed",
+        "paper_result_packet_creation_allowed",
+        "live_use_allowed",
+        "live_reachability_allowed",
+        "live_endpoint_allowed",
+        "live_client_allowed",
+        "private_state_fetch_allowed",
+        "private_state_materialization_allowed",
+        "runtime_cash_fetch_allowed",
+        "runtime_cash_receipt_creation_allowed",
+        "order_execution_allowed",
+        "order_authority_allowed",
+        "network_io_allowed",
+        "atomicrows_bundle_creation_allowed",
+        "sha_freeze_authority_allowed",
+        "blocker_reduction_allowed",
+        "profit_claim_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "venue_forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "external_fact_acceptance_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_creation_enabled": {
+          "const": false
+        },
+        "connector_binding_enabled": {
+          "const": false
+        },
+        "semantic_value_population_enabled": {
+          "const": false
+        },
+        "venue_specific_semantic_population_enabled": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "runtime_execution_enabled": {
+          "const": false
+        },
+        "runtime_trading_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_materialization_enabled": {
+          "const": false
+        },
+        "replay_execution_enabled": {
+          "const": false
+        },
+        "paper_execution_enabled": {
+          "const": false
+        },
+        "replay_paper_execution_enabled": {
+          "const": false
+        },
+        "replay_result_packet_creation_enabled": {
+          "const": false
+        },
+        "paper_result_packet_creation_enabled": {
+          "const": false
+        },
+        "live_enabled": {
+          "const": false
+        },
+        "live_reachability_enabled": {
+          "const": false
+        },
+        "live_endpoint_enabled": {
+          "const": false
+        },
+        "live_client_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "private_state_materialization_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "position_fetch_enabled": {
+          "const": false
+        },
+        "open_orders_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_fetch_enabled": {
+          "const": false
+        },
+        "runtime_cash_receipt_creation_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "order_submit_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_reduce_close_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "sha_freeze_enabled": {
+          "const": false
+        },
+        "blocker_reduction_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_execution_enabled",
+        "external_fact_acceptance_enabled",
+        "accepted_source_packet_creation_enabled",
+        "connector_binding_enabled",
+        "semantic_value_population_enabled",
+        "venue_specific_semantic_population_enabled",
+        "runtime_enabled",
+        "runtime_execution_enabled",
+        "runtime_trading_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "runtime_resolver_snapshot_materialization_enabled",
+        "replay_execution_enabled",
+        "paper_execution_enabled",
+        "replay_paper_execution_enabled",
+        "replay_result_packet_creation_enabled",
+        "paper_result_packet_creation_enabled",
+        "live_enabled",
+        "live_reachability_enabled",
+        "live_endpoint_enabled",
+        "live_client_enabled",
+        "private_state_fetch_enabled",
+        "private_state_materialization_enabled",
+        "balance_fetch_enabled",
+        "position_fetch_enabled",
+        "open_orders_fetch_enabled",
+        "runtime_cash_fetch_enabled",
+        "runtime_cash_receipt_creation_enabled",
+        "order_execution_enabled",
+        "order_submit_enabled",
+        "order_cancel_enabled",
+        "order_reduce_close_enabled",
+        "network_io_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "sha_freeze_enabled",
+        "blocker_reduction_enabled",
+        "profit_claim_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "connector_semantic_value_authority": {
+          "const": false
+        },
+        "venue_abstraction_runtime_authority": {
+          "const": false
+        },
+        "venue_semantic_value_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "runtime_execution_authority": {
+          "const": false
+        },
+        "runtime_trading_authority": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_authority": {
+          "const": false
+        },
+        "replay_execution_authority": {
+          "const": false
+        },
+        "paper_execution_authority": {
+          "const": false
+        },
+        "replay_result_packet_authority": {
+          "const": false
+        },
+        "paper_result_packet_authority": {
+          "const": false
+        },
+        "live_reachability_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "runtime_cash_receipt_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "balance_fetch_authority": {
+          "const": false
+        },
+        "position_fetch_authority": {
+          "const": false
+        },
+        "open_orders_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "order_cancel_authority": {
+          "const": false
+        },
+        "order_reduce_close_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "atomicrows_bundle_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "blocker_reduction_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "connector_semantic_value_authority",
+        "venue_abstraction_runtime_authority",
+        "venue_semantic_value_authority",
+        "runtime_authority",
+        "runtime_execution_authority",
+        "runtime_trading_authority",
+        "runtime_resolver_snapshot_authority",
+        "replay_execution_authority",
+        "paper_execution_authority",
+        "replay_result_packet_authority",
+        "paper_result_packet_authority",
+        "live_reachability_authority",
+        "runtime_cash_fetch_authority",
+        "runtime_cash_receipt_authority",
+        "private_state_fetch_authority",
+        "balance_fetch_authority",
+        "position_fetch_authority",
+        "open_orders_fetch_authority",
+        "order_execution_authority",
+        "order_cancel_authority",
+        "order_reduce_close_authority",
+        "network_io_authority",
+        "atomicrows_bundle_authority",
+        "sha_freeze_authority",
+        "blocker_reduction_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "source_required_venue_semantic_fields": {
+      "type": "object",
+      "properties": {
+        "market_data_schema": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "market_data_snapshot_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "market_data_stream_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "market_data_normalization_rules": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_intent_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_type_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_side_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_quantity_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_price_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_time_in_force_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "order_lifecycle_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "private_state_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "balance_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "position_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "open_orders_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "connector_capability_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "capability_reference_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "fee_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "tick_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "payout_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "settlement_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "rate_limit_semantics": {
+          "$ref": "#/$defs/source_required_value"
+        }
+      },
+      "required": [
+        "market_data_schema",
+        "market_data_snapshot_semantics",
+        "market_data_stream_semantics",
+        "market_data_normalization_rules",
+        "order_intent_semantics",
+        "order_type_semantics",
+        "order_side_semantics",
+        "order_quantity_semantics",
+        "order_price_semantics",
+        "order_time_in_force_semantics",
+        "order_lifecycle_semantics",
+        "private_state_semantics",
+        "balance_semantics",
+        "position_semantics",
+        "open_orders_semantics",
+        "connector_capability_semantics",
+        "capability_reference_semantics",
+        "fee_semantics",
+        "tick_semantics",
+        "payout_semantics",
+        "settlement_semantics",
+        "rate_limit_semantics"
+      ],
+      "additionalProperties": false
+    },
+    "market_data_surface_contract": {
+      "type": "object",
+      "properties": {
+        "surface_type": {
+          "const": "VENUE_NEUTRAL_MARKET_DATA_SURFACE_CONTRACT_PLACEHOLDER"
+        },
+        "surface_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "surface_state": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "semantic_binding_state": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "runtime_state": {
+          "$ref": "#/$defs/disabled_value"
+        },
+        "source_required_semantic_fields": {
+          "$ref": "#/$defs/source_required_venue_semantic_fields"
+        },
+        "venue_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "market_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "contract_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "event_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "market_data_endpoint_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "market_data_client_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "live_endpoint_present": {
+          "const": false
+        },
+        "live_client_present": {
+          "const": false
+        },
+        "market_data_runtime_allowed": {
+          "const": false
+        },
+        "contains_real_market_identifier": {
+          "const": false
+        },
+        "contains_accepted_source_fact": {
+          "const": false
+        }
+      },
+      "required": [
+        "surface_type",
+        "surface_id",
+        "surface_state",
+        "semantic_binding_state",
+        "runtime_state",
+        "source_required_semantic_fields",
+        "venue_reference",
+        "market_reference",
+        "contract_reference",
+        "event_reference",
+        "market_data_endpoint_reference",
+        "market_data_client_reference",
+        "live_endpoint_present",
+        "live_client_present",
+        "market_data_runtime_allowed",
+        "contains_real_market_identifier",
+        "contains_accepted_source_fact"
+      ],
+      "additionalProperties": false
+    },
+    "order_intent_surface_contract": {
+      "type": "object",
+      "properties": {
+        "surface_type": {
+          "const": "VENUE_NEUTRAL_ORDER_INTENT_SURFACE_CONTRACT_PLACEHOLDER"
+        },
+        "surface_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "surface_state": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "semantic_binding_state": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "runtime_state": {
+          "$ref": "#/$defs/disabled_value"
+        },
+        "source_required_semantic_fields": {
+          "$ref": "#/$defs/source_required_venue_semantic_fields"
+        },
+        "order_client_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "order_authority_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "order_execution_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "order_intent_runtime_allowed": {
+          "const": false
+        },
+        "order_execution_allowed": {
+          "const": false
+        },
+        "order_authority_present": {
+          "const": false
+        },
+        "contains_order_instruction": {
+          "const": false
+        },
+        "contains_order_receipt": {
+          "const": false
+        }
+      },
+      "required": [
+        "surface_type",
+        "surface_id",
+        "surface_state",
+        "semantic_binding_state",
+        "runtime_state",
+        "source_required_semantic_fields",
+        "order_client_reference",
+        "order_authority_reference",
+        "order_execution_reference",
+        "order_intent_runtime_allowed",
+        "order_execution_allowed",
+        "order_authority_present",
+        "contains_order_instruction",
+        "contains_order_receipt"
+      ],
+      "additionalProperties": false
+    },
+    "private_state_placeholder_contract": {
+      "type": "object",
+      "properties": {
+        "surface_type": {
+          "const": "VENUE_NEUTRAL_PRIVATE_STATE_PLACEHOLDER_CONTRACT"
+        },
+        "surface_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "surface_state": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "semantic_binding_state": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "runtime_state": {
+          "$ref": "#/$defs/disabled_value"
+        },
+        "source_required_semantic_fields": {
+          "$ref": "#/$defs/source_required_venue_semantic_fields"
+        },
+        "private_state_client_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "private_state_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "account_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "cash_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "balance_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "position_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "open_orders_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "private_state_fetch_allowed": {
+          "const": false
+        },
+        "private_state_present": {
+          "const": false
+        },
+        "contains_balance_value": {
+          "const": false
+        },
+        "contains_position_value": {
+          "const": false
+        },
+        "contains_open_orders": {
+          "const": false
+        }
+      },
+      "required": [
+        "surface_type",
+        "surface_id",
+        "surface_state",
+        "semantic_binding_state",
+        "runtime_state",
+        "source_required_semantic_fields",
+        "private_state_client_reference",
+        "private_state_reference",
+        "account_reference",
+        "cash_reference",
+        "balance_reference",
+        "position_reference",
+        "open_orders_reference",
+        "private_state_fetch_allowed",
+        "private_state_present",
+        "contains_balance_value",
+        "contains_position_value",
+        "contains_open_orders"
+      ],
+      "additionalProperties": false
+    },
+    "connector_capability_reference_contract": {
+      "type": "object",
+      "properties": {
+        "surface_type": {
+          "const": "CONNECTOR_CAPABILITY_REFERENCE_CONTRACT_PLACEHOLDER"
+        },
+        "surface_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "surface_state": {
+          "$ref": "#/$defs/source_required_value"
+        },
+        "semantic_binding_state": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "runtime_state": {
+          "$ref": "#/$defs/disabled_value"
+        },
+        "source_required_semantic_fields": {
+          "$ref": "#/$defs/source_required_venue_semantic_fields"
+        },
+        "connector_capability_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "connector_binding_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "connector_semantic_value_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "connector_binding_allowed": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "contains_connector_semantic_values": {
+          "const": false
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        }
+      },
+      "required": [
+        "surface_type",
+        "surface_id",
+        "surface_state",
+        "semantic_binding_state",
+        "runtime_state",
+        "source_required_semantic_fields",
+        "connector_capability_reference",
+        "connector_binding_reference",
+        "connector_semantic_value_reference",
+        "connector_binding_allowed",
+        "connector_semantic_binding_allowed",
+        "contains_connector_semantic_values",
+        "accepted_source_evidence_present"
+      ],
+      "additionalProperties": false
+    },
+    "venue_abstraction_layer": {
+      "type": "object",
+      "properties": {
+        "layer_type": {
+          "const": "VENUE_ABSTRACTION_LAYER_STATIC_SCAFFOLD"
+        },
+        "layer_id": {
+          "$ref": "#/$defs/record_id"
+        },
+        "layer_authority_class": {
+          "const": "STATIC_VENUE_ABSTRACTION_LAYER_NOT_RUNTIME_AUTHORITY"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "scaffold_state": {
+          "const": "SCAFFOLD_ONLY"
+        },
+        "layer_state": {
+          "const": "SCAFFOLD_ONLY_NOT_EXECUTABLE"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "runtime_resolver_snapshot_reference": {
+          "$ref": "#/$defs/unbound_value"
+        },
+        "contains_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "contains_replay_result_packet": {
+          "const": false
+        },
+        "contains_paper_result_packet": {
+          "const": false
+        },
+        "contains_runtime_cash_receipt": {
+          "const": false
+        },
+        "venue_authority_scope_flags": {
+          "$ref": "#/$defs/venue_authority_scope_flags"
+        },
+        "venue_forbidden_action_flags": {
+          "$ref": "#/$defs/venue_forbidden_action_flags"
+        },
+        "market_data_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/market_data_surface_contract"
+          }
+        },
+        "order_intent_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/order_intent_surface_contract"
+          }
+        },
+        "private_state_placeholders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/private_state_placeholder_contract"
+          }
+        },
+        "connector_capability_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/connector_capability_reference_contract"
+          }
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/non_empty_string"
+          }
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "layer_type",
+        "layer_id",
+        "layer_authority_class",
+        "mode",
+        "execution",
+        "scaffold_state",
+        "layer_state",
+        "deterministic_output",
+        "runtime_resolver_snapshot_reference",
+        "contains_runtime_resolver_snapshot",
+        "contains_replay_result_packet",
+        "contains_paper_result_packet",
+        "contains_runtime_cash_receipt",
+        "venue_authority_scope_flags",
+        "venue_forbidden_action_flags",
+        "market_data_surfaces",
+        "order_intent_surfaces",
+        "private_state_placeholders",
+        "connector_capability_references",
+        "validation_hook_ids",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
