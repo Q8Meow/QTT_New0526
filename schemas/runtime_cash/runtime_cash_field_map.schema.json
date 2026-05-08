@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Schema-only Source-Required Disabled Surface",
+  "description": "Static runtime-cash field-map contract only. This schema creates no account balance semantics, buying power semantics, runtime cash values, private-state fetch, runtime cash fetch, runtime cash receipts, connector binding, live account access, order execution, or profit authority.",
   "type": "object",
   "properties": {
     "mode": {
@@ -8,11 +9,75 @@
     },
     "execution": {
       "const": "DISABLED"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_RUNTIME_CASH_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "RUNTIME_CASH_FIELD_MAP_SOURCE_REQUIRED"
+    },
+    "runtime_cash_semantic_population_allowed": {
+      "const": false
+    },
+    "account_balance_semantics_allowed": {
+      "const": false
+    },
+    "buying_power_semantics_allowed": {
+      "const": false
+    },
+    "private_state_fetch_allowed": {
+      "const": false
+    },
+    "runtime_cash_fetch_allowed": {
+      "const": false
+    },
+    "runtime_cash_receipt_creation_allowed": {
+      "const": false
+    },
+    "connector_binding_allowed": {
+      "const": false
+    },
+    "live_account_access_allowed": {
+      "const": false
+    },
+    "api_key_use_allowed": {
+      "const": false
+    },
+    "order_execution_allowed": {
+      "const": false
+    },
+    "profit_claim_allowed": {
+      "const": false
+    },
+    "accepted_source_evidence_required_before_semantics": {
+      "const": true
+    },
+    "runtime_cash_receipt_required_before_values": {
+      "const": true
+    },
+    "owner_approval_required_before_live_use": {
+      "const": true
     }
   },
   "required": [
     "mode",
-    "execution"
+    "execution",
+    "schema_authority_class",
+    "surface_kind",
+    "runtime_cash_semantic_population_allowed",
+    "account_balance_semantics_allowed",
+    "buying_power_semantics_allowed",
+    "private_state_fetch_allowed",
+    "runtime_cash_fetch_allowed",
+    "runtime_cash_receipt_creation_allowed",
+    "connector_binding_allowed",
+    "live_account_access_allowed",
+    "api_key_use_allowed",
+    "order_execution_allowed",
+    "profit_claim_allowed",
+    "accepted_source_evidence_required_before_semantics",
+    "runtime_cash_receipt_required_before_values",
+    "owner_approval_required_before_live_use"
   ],
   "additionalProperties": true
 }
