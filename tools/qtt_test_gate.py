@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR45_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR46_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -101,6 +101,7 @@ GATE_CHECK_FIELDS = {
     "concurrent_replay_paper_contract_gate_receipt_present",
     "dual_result_review_contract_gate_receipt_present",
     "owner_live_promotion_review_contract_gate_receipt_present",
+    "three_venue_canary_eligibility_contract_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -519,6 +520,46 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
         ],
         "validation_marker": (
             "STAGE1_OWNER_LIVE_PROMOTION_REVIEW_CONTRACT_CHECK_OK"
+        ),
+    },
+    {
+        "receipt_id": "three_venue_canary_eligibility_contract_gate_receipt_present",
+        "description": (
+            "PR46 three-venue canary eligibility input contract, platform "
+            "readiness matrix, owner-review handoff gate, execution block, "
+            "and no-canary-execution boundary are confirmed by the static "
+            "validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+                "stage1_three_venue_canary_eligibility_input_contract.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+                "stage1_three_venue_platform_readiness_matrix.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+                "stage1_owner_review_to_canary_eligibility_handoff.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+                "stage1_three_venue_canary_eligibility_gate_report.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+                "stage1_limited_live_canary_execution_block.schema.json"
+            ),
+            "tools/stage1_three_venue_canary_eligibility_contract_check.py",
+            (
+                "tests/fixtures/source_evidence/three_venue_canary_eligibility/"
+                "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": (
+            "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_CHECK_OK"
         ),
     },
 ]

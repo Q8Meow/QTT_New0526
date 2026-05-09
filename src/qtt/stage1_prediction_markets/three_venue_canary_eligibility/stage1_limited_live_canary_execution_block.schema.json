@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_limited_live_canary_execution_block.schema.json",
+  "title": "Stage-1 Limited-Live Canary Execution Block Static Schema",
+  "description": "Static PR46 block proving that limited-live canary execution is not implemented. All execution, live reachability, order authority, runtime cash, profit, canary receipt, AtomicRows bundle/hash, and blocker-reduction flags remain false.",
+  "type": "object",
+  "properties": {
+    "limited_live_canary_execution_block_type": {
+      "const": "STAGE1_LIMITED_LIVE_CANARY_EXECUTION_BLOCK"
+    },
+    "limited_live_canary_execution_block_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_LIMITED_LIVE_CANARY_EXECUTION_BLOCK_ONLY_NO_EXECUTION_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "limited_live_canary_execution_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "canary_execution_receipt_created_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "limited_live_canary_execution_block_type",
+    "limited_live_canary_execution_block_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "limited_live_canary_execution_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "canary_execution_receipt_created_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocker_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "const": false
+      }
+    }
+  }
+}

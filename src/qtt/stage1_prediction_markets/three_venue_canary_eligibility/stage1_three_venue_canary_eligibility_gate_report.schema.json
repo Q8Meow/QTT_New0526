@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_canary_eligibility_gate_report.schema.json",
+  "title": "Stage-1 Three-Venue Canary Eligibility Gate Report Static Schema",
+  "description": "Static PR46 eligibility gate report schema. Reports may document only blocked static readiness and fail-closed eligibility conditions. They do not create live eligibility, canary eligibility, canary execution, live reachability, order authority, runtime cash, AtomicRows bundle/hash, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "const": "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_GATE_REPORT"
+    },
+    "report_version": {
+      "const": "PR46_STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_CHECK_REPORT_V1"
+    },
+    "master_plan_edition": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_sha256": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "created_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "input_contract_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "readiness_matrix_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "handoff_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "execution_block_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_case_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_owner_review_or_approval_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_platform_scope_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_fallback_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_execution_live_cash_profit_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_atomicrows_or_blocker_reduction_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_state": {
+      "enum": [
+        "STATIC_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_VALIDATED_NO_RUNTIME_AUTHORITY",
+        "FAIL"
+      ]
+    },
+    "validation_failure_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "owner_live_promotion_review_pass_next_allowed_consumer": {
+      "const": "THREE_VENUE_CANARY_ELIGIBILITY_GATE_ONLY"
+    },
+    "three_venue_canary_eligibility_green_next_allowed_consumer": {
+      "const": "LIMITED_LIVE_CANARY_EXECUTION_BOUNDARY_ONLY"
+    },
+    "platform_scope_type": {
+      "const": "KALSHI_POLYMARKET_FORECASTEX_IBKR"
+    },
+    "required_platform_scope_identities": {
+      "$ref": "#/$defs/canonical_platforms"
+    },
+    "canary_eligibility_gate_may_only_produce_static_blocked_readiness_reports_flag": {
+      "const": true
+    },
+    "direct_limited_live_canary_execution_allowed_flag": {
+      "const": false
+    },
+    "direct_live_order_router_allowed_flag": {
+      "const": false
+    },
+    "direct_live_arbitrage_allowed_flag": {
+      "const": false
+    },
+    "direct_full_scaled_live_allowed_flag": {
+      "const": false
+    },
+    "live_eligibility_allowed_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_allowed_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_created_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_green_flag": {
+      "const": false
+    },
+    "limited_live_canary_execution_allowed_flag": {
+      "const": false
+    },
+    "limited_live_canary_execution_created_flag": {
+      "const": false
+    },
+    "canary_execution_receipt_created_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids_emitted": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "created_at_utc",
+    "input_contract_record_count",
+    "readiness_matrix_record_count",
+    "handoff_record_count",
+    "execution_block_record_count",
+    "gate_case_record_count",
+    "blocked_owner_review_or_approval_case_count",
+    "blocked_platform_scope_case_count",
+    "blocked_fallback_case_count",
+    "blocked_execution_live_cash_profit_case_count",
+    "blocked_atomicrows_or_blocker_reduction_case_count",
+    "gate_state",
+    "validation_failure_count",
+    "owner_live_promotion_review_pass_next_allowed_consumer",
+    "three_venue_canary_eligibility_green_next_allowed_consumer",
+    "platform_scope_type",
+    "required_platform_scope_identities",
+    "canary_eligibility_gate_may_only_produce_static_blocked_readiness_reports_flag",
+    "direct_limited_live_canary_execution_allowed_flag",
+    "direct_live_order_router_allowed_flag",
+    "direct_live_arbitrage_allowed_flag",
+    "direct_full_scaled_live_allowed_flag",
+    "live_eligibility_allowed_flag",
+    "three_venue_canary_eligibility_allowed_flag",
+    "three_venue_canary_eligibility_created_flag",
+    "three_venue_canary_eligibility_green_flag",
+    "limited_live_canary_execution_allowed_flag",
+    "limited_live_canary_execution_created_flag",
+    "canary_execution_receipt_created_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "blocker_codes",
+    "receipt_ids_emitted",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonical_platforms": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "const": "KALSHI" },
+        { "const": "POLYMARKET" },
+        { "const": "FORECASTEX_IBKR" }
+      ],
+      "items": false
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "const": false
+      }
+    }
+  }
+}

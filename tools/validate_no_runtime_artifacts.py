@@ -34,6 +34,7 @@ ALWAYS_FORBIDDEN_PATH_PARTS = {
     "runtime_resolver_snapshot",
     "runtime_services",
     "telegram_runtime",
+    "three_venue_canary_eligibility",
 }
 FLAG_FORBIDDEN_PATH_PARTS = {
     "forbid_source_retrieval": {
@@ -221,11 +222,44 @@ STATIC_OWNER_LIVE_PROMOTION_REVIEW_ALLOWED_PATHS = {
         "synthetic_stage1_owner_live_promotion_review_contracts.v1.fixture.json"
     ),
 }
+STATIC_THREE_VENUE_CANARY_ELIGIBILITY_ALLOWED_PATHS = {
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_canary_eligibility_input_contract.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_platform_readiness_matrix.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_owner_review_to_canary_eligibility_handoff.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_canary_eligibility_gate_report.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_limited_live_canary_execution_block.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/three_venue_canary_eligibility"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/three_venue_canary_eligibility/"
+        "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
+    ),
+}
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "dual_result_review.packet.json",
     "dual_result_review_runtime.py",
     "live_snapshot.py",
     "live_promotion.py",
+    "live_reachability.json",
     "merged_replay_paper_result.json",
     "order_execution.py",
     "owner_approval_receipt.json",
@@ -243,10 +277,12 @@ FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "runtime_resolver_snapshot.input_lock.json",
     "runtime_resolver_snapshot.packet.json",
     "runtime_snapshot.py",
+    "runtime_cash_receipt.json",
     "runtime_resolver_to_replay_paper_runtime.py",
     "stage1runtimeresolversnapshot.input_lock.json",
     "stage1runtimeresolversnapshot.packet.json",
     "three_venue_canary_eligibility.packet.json",
+    "three_venue_canary_eligibility_runtime.py",
 }
 PACKAGE_INSTALL_SCRIPT_NAMES = {
     "bootstrap.sh",
@@ -437,6 +473,12 @@ def _is_allowed_static_owner_live_promotion_review_contract_path(
     return rel in STATIC_OWNER_LIVE_PROMOTION_REVIEW_ALLOWED_PATHS
 
 
+def _is_allowed_static_three_venue_canary_eligibility_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_THREE_VENUE_CANARY_ELIGIBILITY_ALLOWED_PATHS
+
+
 def _is_allowed_always_forbidden_path(
     rel: pathlib.PurePosixPath,
     part_keys: set[str],
@@ -450,6 +492,8 @@ def _is_allowed_always_forbidden_path(
         return _is_allowed_static_runtime_resolver_contract_path(rel)
     if forbidden_parts == {"runtime_resolver_snapshot"}:
         return _is_allowed_static_runtime_resolver_snapshot_contract_path(rel)
+    if forbidden_parts == {"three_venue_canary_eligibility"}:
+        return _is_allowed_static_three_venue_canary_eligibility_contract_path(rel)
     return False
 
 

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_platform_readiness_matrix.schema.json",
+  "title": "Stage-1 Three-Venue Platform Readiness Matrix Static Schema",
+  "description": "Static PR46 three-venue platform readiness matrix. It explicitly lists KALSHI, POLYMARKET, and FORECASTEX_IBKR as synthetic non-live placeholders and blocks silent single-venue or partial-platform fallback. It creates no connector semantics, live API reachability, balances, order placement, live market selection, runtime cash, AtomicRows bundle/hash, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "three_venue_platform_readiness_matrix_type": {
+      "const": "STAGE1_THREE_VENUE_PLATFORM_READINESS_MATRIX"
+    },
+    "three_venue_platform_readiness_matrix_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_THREE_VENUE_PLATFORM_READINESS_MATRIX_ONLY_NOT_LIVE_READINESS_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "platform_scope_type": {
+      "const": "KALSHI_POLYMARKET_FORECASTEX_IBKR"
+    },
+    "platform_scope_identities": {
+      "$ref": "#/$defs/canonical_platforms"
+    },
+    "all_three_platforms_required_flag": {
+      "const": true
+    },
+    "platform_readiness_entries": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/platform_readiness_entry"
+      }
+    },
+    "matrix_entries_non_live_flag": {
+      "const": true
+    },
+    "matrix_entries_non_execution_flag": {
+      "const": true
+    },
+    "silent_single_venue_fallback_allowed_flag": {
+      "const": false
+    },
+    "partial_platform_launch_allowed_flag": {
+      "const": false
+    },
+    "partial_platform_launch_requires_future_owner_risk_reduction_override_flag": {
+      "const": true
+    },
+    "future_owner_risk_reduction_override_present_flag": {
+      "const": false
+    },
+    "connector_semantics_created_flag": {
+      "const": false
+    },
+    "production_connector_semantic_values_populated_flag": {
+      "const": false
+    },
+    "live_api_reachability_created_flag": {
+      "const": false
+    },
+    "order_placement_authority_created_flag": {
+      "const": false
+    },
+    "live_market_selection_created_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_created_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "three_venue_platform_readiness_matrix_type",
+    "three_venue_platform_readiness_matrix_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "platform_scope_type",
+    "platform_scope_identities",
+    "all_three_platforms_required_flag",
+    "platform_readiness_entries",
+    "matrix_entries_non_live_flag",
+    "matrix_entries_non_execution_flag",
+    "silent_single_venue_fallback_allowed_flag",
+    "partial_platform_launch_allowed_flag",
+    "partial_platform_launch_requires_future_owner_risk_reduction_override_flag",
+    "future_owner_risk_reduction_override_present_flag",
+    "connector_semantics_created_flag",
+    "production_connector_semantic_values_populated_flag",
+    "live_api_reachability_created_flag",
+    "order_placement_authority_created_flag",
+    "live_market_selection_created_flag",
+    "runtime_cash_claim_created_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_platforms": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "const": "KALSHI" },
+        { "const": "POLYMARKET" },
+        { "const": "FORECASTEX_IBKR" }
+      ],
+      "items": false
+    },
+    "platform_readiness_entry": {
+      "type": "object",
+      "properties": {
+        "platform_id": {
+          "enum": [
+            "KALSHI",
+            "POLYMARKET",
+            "FORECASTEX_IBKR"
+          ]
+        },
+        "readiness_state": {
+          "enum": [
+            "BLOCKED_STATIC_CONTRACT_ONLY",
+            "SOURCE_REQUIRED",
+            "FUTURE_GATE_REQUIRED"
+          ]
+        },
+        "synthetic_placeholder_only_flag": {
+          "const": true
+        },
+        "non_live_flag": {
+          "const": true
+        },
+        "non_execution_flag": {
+          "const": true
+        },
+        "source_required_flag": {
+          "const": true
+        },
+        "future_gate_required_flag": {
+          "const": true
+        },
+        "connector_semantics_created_flag": {
+          "const": false
+        },
+        "live_api_reachability_created_flag": {
+          "const": false
+        },
+        "balance_receipt_created_flag": {
+          "const": false
+        },
+        "order_placement_authority_created_flag": {
+          "const": false
+        },
+        "live_market_selection_created_flag": {
+          "const": false
+        },
+        "runtime_cash_claim_created_flag": {
+          "const": false
+        }
+      },
+      "required": [
+        "platform_id",
+        "readiness_state",
+        "synthetic_placeholder_only_flag",
+        "non_live_flag",
+        "non_execution_flag",
+        "source_required_flag",
+        "future_gate_required_flag",
+        "connector_semantics_created_flag",
+        "live_api_reachability_created_flag",
+        "balance_receipt_created_flag",
+        "order_placement_authority_created_flag",
+        "live_market_selection_created_flag",
+        "runtime_cash_claim_created_flag"
+      ],
+      "additionalProperties": false
+    },
+    "blocker_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "const": false
+      }
+    }
+  }
+}

@@ -750,6 +750,67 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_three_venue_canary_eligibility_contract_check.py"),
+            "--repo-root",
+            ".",
+            "--input-contract-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "three_venue_canary_eligibility"
+                / "stage1_three_venue_canary_eligibility_input_contract.schema.json"
+            ),
+            "--readiness-matrix-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "three_venue_canary_eligibility"
+                / "stage1_three_venue_platform_readiness_matrix.schema.json"
+            ),
+            "--handoff-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "three_venue_canary_eligibility"
+                / "stage1_owner_review_to_canary_eligibility_handoff.schema.json"
+            ),
+            "--gate-report-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "three_venue_canary_eligibility"
+                / "stage1_three_venue_canary_eligibility_gate_report.schema.json"
+            ),
+            "--execution-block-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "three_venue_canary_eligibility"
+                / "stage1_limited_live_canary_execution_block.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "three_venue_canary_eligibility"
+                / "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
+            ),
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -1655,6 +1716,88 @@ def test_runner_includes_pr45_owner_live_promotion_review_contract_after_pr44_an
             / "master_plan"
             / "generated"
             / "Stage1OwnerLivePromotionReviewContractCheck.report.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr46_three_venue_canary_eligibility_contract_after_pr45_and_before_qtt_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr45_index = command_names.index(
+        "stage1_owner_live_promotion_review_contract_check.py"
+    )
+    pr46_index = command_names.index(
+        "stage1_three_venue_canary_eligibility_contract_check.py"
+    )
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr45_index < pr46_index < qtt_gate_index < no_runtime_index
+    assert commands[pr46_index] == [
+        python_executable,
+        str(Path("tools") / "stage1_three_venue_canary_eligibility_contract_check.py"),
+        "--repo-root",
+        ".",
+        "--input-contract-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "three_venue_canary_eligibility"
+            / "stage1_three_venue_canary_eligibility_input_contract.schema.json"
+        ),
+        "--readiness-matrix-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "three_venue_canary_eligibility"
+            / "stage1_three_venue_platform_readiness_matrix.schema.json"
+        ),
+        "--handoff-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "three_venue_canary_eligibility"
+            / "stage1_owner_review_to_canary_eligibility_handoff.schema.json"
+        ),
+        "--gate-report-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "three_venue_canary_eligibility"
+            / "stage1_three_venue_canary_eligibility_gate_report.schema.json"
+        ),
+        "--execution-block-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "three_venue_canary_eligibility"
+            / "stage1_limited_live_canary_execution_block.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "source_evidence"
+            / "three_venue_canary_eligibility"
+            / "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
+        ),
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
         ),
     ]
 
