@@ -429,6 +429,51 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_connector_semantic_binding_ledger_check.py"),
+            "--repo-root",
+            ".",
+            "--ledger-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "connector_semantic_binding"
+                / "stage1_connector_semantic_binding_ledger_record.schema.json"
+            ),
+            "--canonicalization-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "connector_semantic_binding"
+                / "stage1_connector_semantic_value_canonicalization.schema.json"
+            ),
+            "--consumer-contract-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "connector_semantic_binding"
+                / "stage1_connector_semantic_binding_consumer_contract.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "connector_semantic_binding"
+                / "synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json"
+            ),
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "Stage1ConnectorSemanticBindingLedgerCheck.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",

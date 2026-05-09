@@ -50,6 +50,20 @@ def test_qtt_cumulative_gate_requires_stage1_runtime_scaffold_receipt():
     )
 
 
+def test_qtt_cumulative_gate_requires_pr40_connector_semantic_binding_receipt():
+    report = _report()
+    receipt = next(
+        item
+        for item in report["prior_gate_receipts"]
+        if item["receipt_id"]
+        == "connector_semantic_binding_ledger_contract_gate_receipt_present"
+    )
+
+    assert receipt["satisfied"] is True
+    assert receipt["status"] == "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER"
+    assert receipt["validation_marker"] == "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_CHECK_OK"
+
+
 def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap():
     report = _report()
     statuses = {item["receipt_id"]: item["status"] for item in report["prior_gate_receipts"]}

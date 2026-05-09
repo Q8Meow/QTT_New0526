@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_value_canonicalization.schema.json",
+  "title": "Stage-1 Connector Semantic Value Canonicalization Static Schema",
+  "description": "Static, non-mutating semantic value canonicalization contract. It may convert representation but may not change meaning, may not invent values, may not zero-fill missing values, may not substitute owner policy or runtime observed values when source evidence is required, and blocks binding packet creation on failure.",
+  "type": "object",
+  "properties": {
+    "stage1_connector_semantic_value_canonicalization_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_VALUE_CANONICALIZATION"
+    },
+    "semantic_value_canonicalization_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_SYNTHETIC_VALUE_CANONICALIZATION_RECORD_ONLY_NOT_CONNECTOR_VALUE_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "accepted_source_evidence_export_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_field_acceptance_ledger_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_to_connector_field_binding_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_field_path": {
+      "$ref": "#/$defs/target_field_path"
+    },
+    "bound_value_original": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_canonical": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_type": {
+      "$ref": "#/$defs/semantic_value_type"
+    },
+    "bound_value_unit_or_scale": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_scope": {
+      "$ref": "#/$defs/value_scope"
+    },
+    "bound_value_normalization_rule_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_rounding_or_precision_rule_id_when_applicable": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "semantic_meaning_preservation_key_original": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "semantic_meaning_preservation_key_canonical": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_value_origin": {
+      "$ref": "#/$defs/source_value_origin"
+    },
+    "canonicalization_state": {
+      "$ref": "#/$defs/canonicalization_state"
+    },
+    "canonicalization_may_convert_representation_but_may_not_change_meaning": {
+      "const": true
+    },
+    "canonicalization_requires_accepted_source_evidence_export_record": {
+      "const": true
+    },
+    "canonicalization_requires_target_field_acceptance_ledger_record": {
+      "const": true
+    },
+    "canonicalization_requires_source_to_connector_field_binding_record": {
+      "const": true
+    },
+    "canonicalization_requires_explicit_value_type_unit_scale_and_scope": {
+      "const": true
+    },
+    "canonicalization_may_not_invent_fee_tick_rate_limit_settlement_payout_latency_or_order_behavior": {
+      "const": true
+    },
+    "canonicalization_may_not_zero_fill_missing_value": {
+      "const": true
+    },
+    "canonicalization_may_not_use_owner_policy_value_when_source_packet_required": {
+      "const": true
+    },
+    "canonicalization_may_not_use_runtime_observed_value_when_source_packet_required": {
+      "const": true
+    },
+    "canonicalization_failure_blocks_binding_packet_creation": {
+      "const": true
+    },
+    "canonicalization_changes_meaning_flag": {
+      "const": false
+    },
+    "semantic_value_invention_attempt_flag": {
+      "type": "boolean"
+    },
+    "zero_fill_missing_value_attempt_flag": {
+      "type": "boolean"
+    },
+    "owner_policy_substitution_attempt_flag": {
+      "type": "boolean"
+    },
+    "runtime_observed_value_substitution_attempt_flag": {
+      "type": "boolean"
+    },
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag": {
+      "const": false
+    },
+    "binding_packet_creation_allowed_flag": {
+      "type": "boolean"
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "stage1_connector_semantic_value_canonicalization_type",
+    "semantic_value_canonicalization_record_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "accepted_source_evidence_export_record_id",
+    "target_field_acceptance_ledger_record_id",
+    "source_to_connector_field_binding_record_id",
+    "target_field_path",
+    "bound_value_original",
+    "bound_value_canonical",
+    "bound_value_type",
+    "bound_value_unit_or_scale",
+    "bound_value_scope",
+    "bound_value_normalization_rule_id",
+    "bound_value_rounding_or_precision_rule_id_when_applicable",
+    "semantic_meaning_preservation_key_original",
+    "semantic_meaning_preservation_key_canonical",
+    "source_value_origin",
+    "canonicalization_state",
+    "canonicalization_may_convert_representation_but_may_not_change_meaning",
+    "canonicalization_requires_accepted_source_evidence_export_record",
+    "canonicalization_requires_target_field_acceptance_ledger_record",
+    "canonicalization_requires_source_to_connector_field_binding_record",
+    "canonicalization_requires_explicit_value_type_unit_scale_and_scope",
+    "canonicalization_may_not_invent_fee_tick_rate_limit_settlement_payout_latency_or_order_behavior",
+    "canonicalization_may_not_zero_fill_missing_value",
+    "canonicalization_may_not_use_owner_policy_value_when_source_packet_required",
+    "canonicalization_may_not_use_runtime_observed_value_when_source_packet_required",
+    "canonicalization_failure_blocks_binding_packet_creation",
+    "canonicalization_changes_meaning_flag",
+    "semantic_value_invention_attempt_flag",
+    "zero_fill_missing_value_attempt_flag",
+    "owner_policy_substitution_attempt_flag",
+    "runtime_observed_value_substitution_attempt_flag",
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag",
+    "binding_packet_creation_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+      "not": {
+        "pattern": "\\*"
+      }
+    },
+    "semantic_value_type": {
+      "enum": [
+        "SYNTHETIC_DECIMAL_RATIO",
+        "SYNTHETIC_INTEGER",
+        "SYNTHETIC_STRING",
+        "SYNTHETIC_ENUM",
+        "SYNTHETIC_BOOLEAN",
+        "SYNTHETIC_TIMESTAMP"
+      ]
+    },
+    "value_scope": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "scope_authority_class": {
+          "const": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY"
+        },
+        "venue_id": {
+          "enum": [
+            "NOT_VENUE_SPECIFIC",
+            "VENUE_NEUTRAL_STAGE1"
+          ]
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "wildcard_scope_allowed": {
+          "const": false
+        },
+        "cross_venue_scope_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "scope_id",
+        "scope_authority_class",
+        "venue_id",
+        "target_field_path",
+        "wildcard_scope_allowed",
+        "cross_venue_scope_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "source_value_origin": {
+      "enum": [
+        "ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+        "MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+        "MISSING_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+        "MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_RECORD",
+        "CANDIDATE_SOURCE_EVIDENCE_PACKET_NOT_ACCEPTED",
+        "OWNER_POLICY_SUBSTITUTION_NOT_ALLOWED",
+        "RUNTIME_OBSERVED_VALUE_SUBSTITUTION_NOT_ALLOWED",
+        "INVENTED_OR_ZERO_FILL_VALUE_NOT_ALLOWED"
+      ]
+    },
+    "canonicalization_state": {
+      "enum": [
+        "CANONICALIZATION_VALID",
+        "BLOCKED_MISSING_ACCEPTED_SOURCE_EXPORT",
+        "BLOCKED_MISSING_TARGET_FIELD_ACCEPTANCE_LEDGER",
+        "BLOCKED_MISSING_SOURCE_TO_CONNECTOR_BINDING",
+        "BLOCKED_GUESSED_OR_INVENTED_VALUE",
+        "BLOCKED_ZERO_FILL",
+        "BLOCKED_OWNER_POLICY_SUBSTITUTION",
+        "BLOCKED_RUNTIME_OBSERVED_SUBSTITUTION",
+        "BLOCKED_MEANING_CHANGE",
+        "BLOCKED_SCHEMA_ERROR"
+      ]
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_connector_semantic_binding_ledger_record.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_STATIC_AUDIT"
+      }
+    }
+  }
+}

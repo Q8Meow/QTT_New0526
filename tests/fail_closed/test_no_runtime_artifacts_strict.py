@@ -113,6 +113,41 @@ def test_scanner_rejects_static_source_acceptance_and_connector_binding(tmp_path
     assert any("model training call" in violation for violation in violations)
 
 
+def test_scanner_allows_pr40_static_connector_semantic_binding_contract_paths(tmp_path):
+    allowed_paths = [
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_binding_ledger_record.schema.json",
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_value_canonicalization.schema.json",
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_binding_consumer_contract.schema.json",
+        "tests/fixtures/source_evidence/connector_semantic_binding/"
+        "synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json",
+    ]
+    for path_text in allowed_paths:
+        path = tmp_path / path_text
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, ScanOptions(forbid_connector_binding=True))
+
+    assert violations == []
+
+    runtime_file = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "connector_semantic_binding"
+        / "runtime_binding.py"
+    )
+    runtime_file.write_text("", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, ScanOptions(forbid_connector_binding=True))
+
+    assert any("forbid-connector-binding path" in violation for violation in violations)
+
+
 def test_scanner_ignores_forbidden_looking_files_inside_venv(tmp_path):
     requests_dir = tmp_path / ".venv" / "Lib" / "site-packages" / "requests"
     requests_dir.mkdir(parents=True)

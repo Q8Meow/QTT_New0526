@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR39_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR40_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -95,6 +95,7 @@ GATE_CHECK_FIELDS = {
     "stage1_runtime_scaffold_gate_receipt_present",
     "source_fact_binding_connector_semantic_readiness_gate_receipt_present",
     "accepted_source_evidence_consumer_contract_gate_receipt_present",
+    "connector_semantic_binding_ledger_contract_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -310,6 +311,36 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
         "validation_marker": (
             "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_VALIDATION_OK"
         ),
+    },
+    {
+        "receipt_id": "connector_semantic_binding_ledger_contract_gate_receipt_present",
+        "description": (
+            "PR40 connector semantic binding implementation contract, semantic "
+            "value packet discipline, and fail-closed checks are confirmed by "
+            "the static validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+                "stage1_connector_semantic_binding_ledger_record.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+                "stage1_connector_semantic_value_canonicalization.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+                "stage1_connector_semantic_binding_consumer_contract.schema.json"
+            ),
+            "tools/stage1_connector_semantic_binding_ledger_check.py",
+            "tools/stage1_connector_semantic_value_canonicalize.py",
+            (
+                "tests/fixtures/source_evidence/connector_semantic_binding/"
+                "synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_CHECK_OK",
     },
 ]
 
