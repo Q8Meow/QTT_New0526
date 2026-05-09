@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/stage1_prediction_markets/stage1_capital_cash_component_receipt.schema.json",
+  "title": "Stage-1 Capital Cash Component Receipt Static Contract",
+  "description": "Static schema contract only. This packet family cannot create real runtime cash receipts, balances, account state, or private-state fetch authority.",
+  "type": "object",
+  "properties": {
+    "packet_family": {
+      "const": "stage1_capital_cash_component_receipt"
+    },
+    "packet_version": {
+      "const": "stage1_capital_cash_component_receipt.v1"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_STAGE1_PACKET_SCHEMA_CONTRACT_ONLY"
+    },
+    "packet_authority_class": {
+      "const": "SCHEMA_ONLY_STATIC_PACKET_NOT_RUNTIME_AUTHORITY"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "schema_only_static_audit": {
+      "const": true
+    },
+    "contracts_only": {
+      "const": true
+    },
+    "generated_derivative_gate_receipt_required": {
+      "const": true
+    },
+    "source_evidence_gate_confirmation_receipt_required": {
+      "const": true
+    },
+    "parameter_revitalization_gate_status": {
+      "enum": [
+        "REQUIRED",
+        "BLOCKED_PENDING_IMPLEMENTATION"
+      ]
+    },
+    "source_required_placeholder_policy": {
+      "const": "SOURCE_REQUIRED_PLACEHOLDER"
+    },
+    "accepted_source_packets_required_before_connector_facts": {
+      "const": true
+    },
+    "source_fact_acceptance_allowed": {
+      "const": false
+    },
+    "connector_binding_allowed": {
+      "const": false
+    },
+    "exact_market_selection_allowed": {
+      "const": false
+    },
+    "runtime_creation_allowed": {
+      "const": false
+    },
+    "live_reachability_allowed": {
+      "const": false
+    },
+    "order_authority_allowed": {
+      "const": false
+    },
+    "blocker_reduction_allowed": {
+      "const": false
+    },
+    "profit_claim_allowed": {
+      "const": false
+    },
+    "atomicrows_authority_allowed": {
+      "const": false
+    },
+    "schema_receipt_only": {
+      "const": true
+    },
+    "real_runtime_cash_receipt_created": {
+      "const": false
+    },
+    "private_state_fetch_allowed": {
+      "const": false
+    }
+  },
+  "required": [
+    "packet_family",
+    "packet_version",
+    "schema_authority_class",
+    "packet_authority_class",
+    "mode",
+    "execution",
+    "schema_only_static_audit",
+    "contracts_only",
+    "generated_derivative_gate_receipt_required",
+    "source_evidence_gate_confirmation_receipt_required",
+    "parameter_revitalization_gate_status",
+    "source_required_placeholder_policy",
+    "accepted_source_packets_required_before_connector_facts",
+    "source_fact_acceptance_allowed",
+    "connector_binding_allowed",
+    "exact_market_selection_allowed",
+    "runtime_creation_allowed",
+    "live_reachability_allowed",
+    "order_authority_allowed",
+    "blocker_reduction_allowed",
+    "profit_claim_allowed",
+    "atomicrows_authority_allowed",
+    "schema_receipt_only",
+    "real_runtime_cash_receipt_created",
+    "private_state_fetch_allowed"
+  ],
+  "additionalProperties": false
+}

@@ -272,6 +272,21 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_stage1_packet_schema_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema-dir",
+            _path("schemas", "stage1_prediction_markets"),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "stage1_prediction_markets",
+                "synthetic_stage1_packet_schema_gate_blocked.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
