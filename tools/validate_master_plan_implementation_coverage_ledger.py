@@ -50,6 +50,9 @@ EXPECTED_STRONG_PR_SECTIONS = {
     for pr_number, spec in builder.STRONG_PR_RECORDS.items()
 }
 
+EXPECTED_PR47_MARKERS = set(builder.PR47_VALIDATION_MARKERS)
+EXPECTED_PR47_VALIDATORS = set(builder.PR47_VALIDATOR_TOOLS)
+
 FORBIDDEN_TRUE_FIELDS = {
     "ledger_is_master_plan_authority",
     "ledger_is_source_fact_authority",
@@ -293,11 +296,14 @@ def _pr_record_failures(ledger: dict[str, Any]) -> list[str]:
     }
     failures: list[str] = []
 
-    expected_pr_numbers = list(range(1, 47))
+    expected_pr_numbers = list(range(builder.TRACKED_PR_MIN, builder.TRACKED_PR_MAX + 1))
     if sorted(by_pr) != expected_pr_numbers:
-        failures.append("pr_records must contain exactly PR #1 through PR #46")
+        failures.append("pr_records must contain exactly PR #1 through PR #47")
 
-    for pr_number in range(1, 38):
+    for pr_number in range(
+        builder.TRACKED_PR_MIN,
+        builder.HISTORICAL_REVIEW_REQUIRED_PR_MAX + 1,
+    ):
         record = by_pr.get(pr_number)
         if not record:
             continue
@@ -330,6 +336,33 @@ def _pr_record_failures(ledger: dict[str, Any]) -> list[str]:
             "STATIC_GATE_IMPLEMENTED",
         }:
             failures.append(f"PR #{pr_number} must be a static implemented record")
+
+    pr47 = by_pr.get(47)
+    if not isinstance(pr47, dict):
+        failures.append("PR #47 tracking record is missing")
+    else:
+        if pr47.get("implementation_status") != "TRACKING_ONLY":
+            failures.append("PR #47 must remain TRACKING_ONLY")
+        if pr47.get("review_status") != "SECTION_MAPPING_REQUIRES_OWNER_REVIEW":
+            failures.append("PR #47 must require owner section-mapping review")
+        if pr47.get("branch_name_if_known") is not None:
+            failures.append("PR #47 must not require branch-name metadata")
+        if pr47.get("local_commit_if_known") is not None:
+            failures.append("PR #47 must not require local branch-tip metadata")
+        if pr47.get("merge_commit_if_known") is not None:
+            failures.append("PR #47 must not require merge-commit metadata")
+        if pr47.get("master_plan_section_ids") != []:
+            failures.append("PR #47 must not claim a verified master-plan section mapping")
+        missing_markers = EXPECTED_PR47_MARKERS - set(pr47.get("validation_markers", []))
+        if missing_markers:
+            failures.append(
+                "PR #47 missing validation markers: " + ", ".join(sorted(missing_markers))
+            )
+        missing_validators = EXPECTED_PR47_VALIDATORS - set(pr47.get("validator_tools", []))
+        if missing_validators:
+            failures.append(
+                "PR #47 missing validator tools: " + ", ".join(sorted(missing_validators))
+            )
 
     return failures
 

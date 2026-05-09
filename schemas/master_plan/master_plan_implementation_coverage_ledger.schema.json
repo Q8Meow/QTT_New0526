@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qtt.local/schemas/master_plan/master_plan_implementation_coverage_ledger.schema.json",
   "title": "Master Plan Implementation Coverage Ledger",
-  "description": "Regenerable static coverage ledger derived from local git history and repo files only. This schema creates no source fact authority, connector semantic authority, runtime authority, order authority, AtomicRows authority, blocker reduction, live authority, or profit evidence.",
+  "description": "Regenerable static coverage ledger derived from a stable PR tracking table and repo files only. This schema creates no source fact authority, connector semantic authority, runtime authority, order authority, AtomicRows authority, blocker reduction, live authority, or profit evidence.",
   "type": "object",
   "properties": {
     "authority": {
@@ -34,8 +34,8 @@
     },
     "pr_records": {
       "type": "array",
-      "minItems": 46,
-      "maxItems": 46,
+      "minItems": 47,
+      "maxItems": 47,
       "items": {
         "$ref": "#/$defs/pr_record"
       }
@@ -83,7 +83,7 @@
           "const": "NON_AUTHORITATIVE_IMPLEMENTATION_COVERAGE_LEDGER"
         },
         "derived_from": {
-          "const": "local_git_history_and_repo_files"
+          "const": "stable_pr_tracking_table_and_repo_files"
         },
         "ledger_is_master_plan_authority": {
           "const": false
@@ -233,7 +233,7 @@
         "atomicrows_sha_present": {
           "const": false
         },
-        "deterministic_local_git_history_only": {
+        "deterministic_stable_pr_tracking_table_only": {
           "const": true
         },
         "master_plan_section_record_count": {
@@ -259,8 +259,8 @@
         },
         "total_pr_records": {
           "type": "integer",
-          "minimum": 46,
-          "maximum": 46
+          "minimum": 47,
+          "maximum": 47
         },
         "unknown_unmapped_pr_record_count": {
           "type": "integer",
@@ -274,7 +274,7 @@
       "required": [
         "atomicrows_bundle_present",
         "atomicrows_sha_present",
-        "deterministic_local_git_history_only",
+        "deterministic_stable_pr_tracking_table_only",
         "master_plan_section_record_count",
         "no_authority_claims_preserved",
         "pr_1_through_37_review_required_count",
