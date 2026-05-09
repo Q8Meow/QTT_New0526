@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR46_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR47_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -102,6 +102,7 @@ GATE_CHECK_FIELDS = {
     "dual_result_review_contract_gate_receipt_present",
     "owner_live_promotion_review_contract_gate_receipt_present",
     "three_venue_canary_eligibility_contract_gate_receipt_present",
+    "master_plan_implementation_coverage_ledger_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -561,6 +562,29 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
         "validation_marker": (
             "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_CHECK_OK"
         ),
+    },
+    {
+        "receipt_id": "master_plan_implementation_coverage_ledger_receipt_present",
+        "description": (
+            "PR47 non-authoritative master-plan implementation coverage ledger "
+            "is generated, schema-valid, deterministic, and confirmed by the "
+            "static validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "schemas/master_plan/"
+                "master_plan_implementation_coverage_ledger.schema.json"
+            ),
+            (
+                "docs/master_plan/generated/"
+                "MasterPlanImplementationCoverageLedger.json"
+            ),
+            "tools/build_master_plan_implementation_coverage_ledger.py",
+            "tools/validate_master_plan_implementation_coverage_ledger.py",
+            "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+        ],
+        "validation_marker": "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
     },
 ]
 

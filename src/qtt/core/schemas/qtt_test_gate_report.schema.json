@@ -9,7 +9,7 @@
       "const": "QTT_CUMULATIVE_TEST_GATE_REPORT"
     },
     "report_version": {
-      "const": "PR46_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+      "const": "PR47_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
     },
     "phase": {
       "const": "first-coding-runbook"
@@ -28,8 +28,8 @@
     },
     "prior_gate_receipts": {
       "type": "array",
-      "minItems": 21,
-      "maxItems": 21,
+      "minItems": 22,
+      "maxItems": 22,
       "items": {
         "$ref": "#/$defs/prior_gate_receipt"
       }
@@ -155,7 +155,8 @@
             "concurrent_replay_paper_contract_gate_receipt_present",
             "dual_result_review_contract_gate_receipt_present",
             "owner_live_promotion_review_contract_gate_receipt_present",
-            "three_venue_canary_eligibility_contract_gate_receipt_present"
+            "three_venue_canary_eligibility_contract_gate_receipt_present",
+            "master_plan_implementation_coverage_ledger_receipt_present"
           ]
         },
         "description": {
@@ -309,6 +310,9 @@
         "three_venue_canary_eligibility_contract_gate_receipt_present": {
           "type": "boolean"
         },
+        "master_plan_implementation_coverage_ledger_receipt_present": {
+          "type": "boolean"
+        },
         "no_stale_generated_derivative_completion_claim": {
           "type": "boolean"
         },
@@ -356,6 +360,7 @@
         "dual_result_review_contract_gate_receipt_present",
         "owner_live_promotion_review_contract_gate_receipt_present",
         "three_venue_canary_eligibility_contract_gate_receipt_present",
+        "master_plan_implementation_coverage_ledger_receipt_present",
         "no_stale_generated_derivative_completion_claim",
         "no_hidden_zip_authority",
         "no_source_dependent_connector_semantic_values",
