@@ -214,6 +214,23 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_atomicrows_bundle_schema_checker_static.py"),
+            "--repo-root",
+            ".",
+            "--row-schema",
+            str(Path("schemas") / "atomicrows" / "atomic_parameter_row.schema.json"),
+            "--bundle-schema",
+            str(Path("schemas") / "atomicrows" / "atomic_row_bundle.schema.json"),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "atomicrows"
+                / "synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -414,6 +431,44 @@ def test_runner_includes_non_mutating_atomicrows_canonical_row_specification_aud
     ]
     assert "AtomicRows.bundle.jsonl" not in audit_command
     assert "AtomicRows.bundle.sha256" not in audit_command
+
+
+def test_runner_includes_atomicrows_bundle_schema_checker_after_row_specification(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    row_spec_index = command_names.index(
+        "validate_atomicrows_canonical_row_specification_static.py"
+    )
+    bundle_checker_index = command_names.index(
+        "validate_atomicrows_bundle_schema_checker_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+    assert row_spec_index < bundle_checker_index < no_runtime_index
+
+    audit_command = commands[bundle_checker_index]
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_bundle_schema_checker_static.py"),
+        "--repo-root",
+        ".",
+        "--row-schema",
+        str(Path("schemas") / "atomicrows" / "atomic_parameter_row.schema.json"),
+        "--bundle-schema",
+        str(Path("schemas") / "atomicrows" / "atomic_row_bundle.schema.json"),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "atomicrows"
+            / "synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json"
+        ),
+    ]
 
 
 def test_runner_stops_on_first_failure_and_returns_failing_exit_code(monkeypatch, capsys):

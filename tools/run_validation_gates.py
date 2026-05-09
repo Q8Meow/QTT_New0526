@@ -217,6 +217,23 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_atomicrows_bundle_schema_checker_static.py"),
+            "--repo-root",
+            ".",
+            "--row-schema",
+            _path("schemas", "atomicrows", "atomic_parameter_row.schema.json"),
+            "--bundle-schema",
+            _path("schemas", "atomicrows", "atomic_row_bundle.schema.json"),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "atomicrows",
+                "synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
