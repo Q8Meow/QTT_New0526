@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR37_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR38_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -93,6 +93,7 @@ GATE_CHECK_FIELDS = {
     "venue_neutral_prediction_adapter_gate_receipt_present",
     "connector_scaffold_source_required_gate_receipt_present",
     "stage1_runtime_scaffold_gate_receipt_present",
+    "source_fact_binding_connector_semantic_readiness_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -239,6 +240,45 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
             "tests/fixtures/runtime_orchestration/synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json",
         ],
         "validation_marker": "STAGE1_RUNTIME_SCAFFOLD_GATE_STATIC_VALIDATION_OK",
+    },
+    {
+        "receipt_id": (
+            "source_fact_binding_connector_semantic_readiness_gate_receipt_present"
+        ),
+        "description": (
+            "PR38 source-fact binding and connector semantic readiness gate is "
+            "confirmed by prior validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "schemas/source_fact_binding_readiness/"
+                "stage1_source_to_connector_field_binding_matrix.schema.json"
+            ),
+            (
+                "schemas/source_fact_binding_readiness/"
+                "stage1_connector_semantic_target_field_matrix.schema.json"
+            ),
+            (
+                "schemas/source_fact_binding_readiness/"
+                "stage1_connector_semantic_readiness_gate_report.schema.json"
+            ),
+            (
+                "tests/fixtures/source_fact_binding_readiness/"
+                "synthetic_stage1_source_to_connector_field_binding_matrix.v1.fixture.json"
+            ),
+            (
+                "tests/fixtures/source_fact_binding_readiness/"
+                "synthetic_stage1_connector_semantic_target_field_matrix.v1.fixture.json"
+            ),
+            (
+                "tests/fixtures/source_fact_binding_readiness/"
+                "synthetic_stage1_connector_semantic_readiness_gate_report.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": (
+            "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_VALIDATION_OK"
+        ),
     },
 ]
 

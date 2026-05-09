@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_fact_binding_readiness/stage1_connector_semantic_target_field_matrix.schema.json",
+  "title": "Stage-1 Connector Semantic Target Field Matrix Static Schema",
+  "description": "Static pre-acceptance connector semantic target-field matrix. It preserves source-required target fields and creates no official source fact, no connector semantic value, no runtime resolver snapshot, no replay or paper result, no live reachability, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence.",
+  "type": "object",
+  "properties": {
+    "matrix_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX"
+    },
+    "matrix_version": {
+      "const": "PR38_STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX_V1"
+    },
+    "matrix_authority_class": {
+      "const": "STATIC_TARGET_FIELD_MATRIX_ONLY_NOT_CONNECTOR_SEMANTIC_VALUE_AUTHORITY"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "validation_mode": {
+      "const": "STATIC_SCHEMA_ONLY_NON_MUTATING_AUDIT"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "venue_rows": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/venue_target_field_row"
+      }
+    },
+    "no_value_population_policy": {
+      "$ref": "#/$defs/no_value_population_policy"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_AUDIT"
+      }
+    }
+  },
+  "required": [
+    "matrix_type",
+    "matrix_version",
+    "matrix_authority_class",
+    "mode",
+    "execution",
+    "validation_mode",
+    "deterministic_output",
+    "venue_rows",
+    "no_value_population_policy",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ]
+    },
+    "target_field_path": {
+      "enum": [
+        "connector.semantic.connector_semantic_values",
+        "connector.venue_api.venue_api_facts",
+        "connector.fundamentals.fundamental_facts",
+        "connector.fees.fee_semantics",
+        "connector.market.tick_semantics",
+        "connector.api.rate_limit_semantics",
+        "connector.settlement.settlement_rules",
+        "connector.order_entry.order_entry_fields",
+        "connector.order_status.status_lifecycle",
+        "connector.private_state.private_state_fields",
+        "connector.private_state.account_fields",
+        "connector.private_state.balance_fields",
+        "connector.selection.market_selection",
+        "connector.selection.contract_selection",
+        "connector.selection.event_selection",
+        "connector.selection.symbol_selection",
+        "connector.selection.live_venue_selection",
+        "connector.runtime.runtime_resolver_snapshot",
+        "connector.execution.replay_paper_execution",
+        "connector.cash.runtime_cash_value",
+        "connector.order_authority.order_authority_fields"
+      ]
+    },
+    "venue_target_field_row": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX_VENUE_ROW"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "surface_registry_record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_authority_class": {
+          "const": "READINESS_TARGET_FIELD_MATRIX_ONLY_NOT_CONNECTOR_VALUE"
+        },
+        "semantic_surface_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semantic_families": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "target_field_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/target_field_path"
+          }
+        },
+        "source_to_connector_field_binding_record_required": {
+          "const": true
+        },
+        "accepted_packet_required_flag": {
+          "const": true
+        },
+        "runtime_receipt_required_flag": {
+          "const": true
+        },
+        "owner_policy_required_flag": {
+          "const": true
+        },
+        "staleness_policy_required_flag": {
+          "const": true
+        },
+        "rollback_receipt_required_flag": {
+          "const": true
+        },
+        "no_default_value_allowed_flag": {
+          "const": true
+        },
+        "zero_fill_allowed_flag": {
+          "const": false
+        },
+        "target_field_state": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "accepted_packet_requirement_state": {
+          "const": "ACCEPTED_PACKET_REQUIRED"
+        },
+        "readiness_state": {
+          "const": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+        },
+        "connector_semantic_value_state": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "connector_semantic_value_populated": {
+          "const": false
+        },
+        "venue_api_value_populated": {
+          "const": false
+        },
+        "fee_tick_rate_limit_settlement_order_private_state_values_populated": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "replay_paper_result_packet_created": {
+          "const": false
+        },
+        "live_reachability_created": {
+          "const": false
+        },
+        "order_authority_created": {
+          "const": false
+        },
+        "blocker_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "const": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+          }
+        }
+      },
+      "required": [
+        "record_type",
+        "venue_id",
+        "surface_registry_record_id",
+        "record_authority_class",
+        "semantic_surface_id",
+        "semantic_families",
+        "target_field_paths",
+        "source_to_connector_field_binding_record_required",
+        "accepted_packet_required_flag",
+        "runtime_receipt_required_flag",
+        "owner_policy_required_flag",
+        "staleness_policy_required_flag",
+        "rollback_receipt_required_flag",
+        "no_default_value_allowed_flag",
+        "zero_fill_allowed_flag",
+        "target_field_state",
+        "accepted_packet_requirement_state",
+        "readiness_state",
+        "connector_semantic_value_state",
+        "connector_semantic_value_populated",
+        "venue_api_value_populated",
+        "fee_tick_rate_limit_settlement_order_private_state_values_populated",
+        "runtime_resolver_snapshot_created",
+        "replay_paper_result_packet_created",
+        "live_reachability_created",
+        "order_authority_created",
+        "blocker_codes"
+      ],
+      "additionalProperties": false
+    },
+    "no_value_population_policy": {
+      "type": "object",
+      "properties": {
+        "every_connector_semantic_field_unpopulated": {
+          "const": true
+        },
+        "source_required_state_required": {
+          "const": true
+        },
+        "accepted_packet_required_state_required": {
+          "const": true
+        },
+        "blocked_pending_accepted_source_packet_state_required": {
+          "const": true
+        },
+        "connector_semantic_value_population_allowed": {
+          "const": false
+        },
+        "venue_api_fee_tick_rate_limit_settlement_order_private_values_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "every_connector_semantic_field_unpopulated",
+        "source_required_state_required",
+        "accepted_packet_required_state_required",
+        "blocked_pending_accepted_source_packet_state_required",
+        "connector_semantic_value_population_allowed",
+        "venue_api_fee_tick_rate_limit_settlement_order_private_values_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "populates_connector_semantic_values": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_hash": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "accepts_source_facts",
+        "creates_accepted_source_packets",
+        "populates_connector_semantic_values",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

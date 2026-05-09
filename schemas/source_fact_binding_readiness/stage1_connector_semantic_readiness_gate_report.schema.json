@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_fact_binding_readiness/stage1_connector_semantic_readiness_gate_report.schema.json",
+  "title": "Stage-1 Connector Semantic Readiness Gate Report Static Schema",
+  "description": "Static pre-acceptance readiness gate report. It represents source-fact binding readiness receipts and connector semantic readiness receipts without accepting source facts, populating connector semantic values, creating runtime resolver snapshots, creating live reachability, creating order authority, creating AtomicRows authority, reducing blockers, or creating profit evidence.",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT"
+    },
+    "report_version": {
+      "const": "PR38_STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT_V1"
+    },
+    "task_packet_type": {
+      "const": "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_TASK_PACKET"
+    },
+    "report_authority_class": {
+      "const": "STATIC_PRE_ACCEPTANCE_READINESS_REPORT_ONLY_NOT_SOURCE_FACT_NOT_CONNECTOR_VALUE_AUTHORITY"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "status": {
+      "const": "BLOCKED"
+    },
+    "gate_state": {
+      "const": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "authority_boundary_statement": {
+      "const": "This readiness report creates no official source fact, no connector semantic value, no runtime resolver snapshot, no live reachability, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence."
+    },
+    "required_typed_artifacts_represented": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "enum": [
+          "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_TASK_PACKET",
+          "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_RECEIPT",
+          "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_BLOCK_RECEIPT",
+          "STAGE1_SOURCE_FACT_BINDING_READINESS_RECEIPT",
+          "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_RECEIPT",
+          "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX",
+          "STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX",
+          "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT",
+          "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+          "CONNECTOR_SEMANTIC_READINESS_NO_VALUE_POPULATION_RECEIPT",
+          "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+        ]
+      }
+    },
+    "artifact_refs": {
+      "$ref": "#/$defs/artifact_refs"
+    },
+    "source_fact_binding_readiness_report": {
+      "$ref": "#/$defs/source_fact_binding_readiness_report"
+    },
+    "connector_semantic_readiness_summary": {
+      "$ref": "#/$defs/connector_semantic_readiness_summary"
+    },
+    "receipt_ids_emitted": {
+      "type": "array",
+      "minItems": 7,
+      "items": {
+        "enum": [
+          "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_RECEIPT",
+          "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_BLOCK_RECEIPT",
+          "STAGE1_SOURCE_FACT_BINDING_READINESS_RECEIPT",
+          "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_RECEIPT",
+          "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+          "CONNECTOR_SEMANTIC_READINESS_NO_VALUE_POPULATION_RECEIPT",
+          "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+        ]
+      }
+    },
+    "atomicrows_authority_state": {
+      "$ref": "#/$defs/atomicrows_authority_state"
+    },
+    "forbidden_action_flags": {
+      "$ref": "#/$defs/forbidden_action_flags"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_AUDIT"
+      }
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "task_packet_type",
+    "report_authority_class",
+    "mode",
+    "execution",
+    "status",
+    "gate_state",
+    "generated_at_utc",
+    "authority_boundary_statement",
+    "required_typed_artifacts_represented",
+    "artifact_refs",
+    "source_fact_binding_readiness_report",
+    "connector_semantic_readiness_summary",
+    "receipt_ids_emitted",
+    "atomicrows_authority_state",
+    "forbidden_action_flags",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "artifact_refs": {
+      "type": "object",
+      "properties": {
+        "source_to_connector_field_binding_matrix_schema": {
+          "const": "schemas/source_fact_binding_readiness/stage1_source_to_connector_field_binding_matrix.schema.json"
+        },
+        "source_to_connector_field_binding_matrix_fixture": {
+          "const": "tests/fixtures/source_fact_binding_readiness/synthetic_stage1_source_to_connector_field_binding_matrix.v1.fixture.json"
+        },
+        "connector_semantic_target_field_matrix_schema": {
+          "const": "schemas/source_fact_binding_readiness/stage1_connector_semantic_target_field_matrix.schema.json"
+        },
+        "connector_semantic_target_field_matrix_fixture": {
+          "const": "tests/fixtures/source_fact_binding_readiness/synthetic_stage1_connector_semantic_target_field_matrix.v1.fixture.json"
+        }
+      },
+      "required": [
+        "source_to_connector_field_binding_matrix_schema",
+        "source_to_connector_field_binding_matrix_fixture",
+        "connector_semantic_target_field_matrix_schema",
+        "connector_semantic_target_field_matrix_fixture"
+      ],
+      "additionalProperties": false
+    },
+    "source_fact_binding_readiness_report": {
+      "type": "object",
+      "properties": {
+        "report_type": {
+          "const": "STAGE1_SOURCE_FACT_BINDING_READINESS_REPORT"
+        },
+        "gate_state": {
+          "const": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+        },
+        "authority_boundary_statement": {
+          "const": "This readiness report creates no official source fact, no connector semantic value, no runtime resolver snapshot, no live reachability, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence."
+        },
+        "target_field_matrix_required_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target_field_matrix_present_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target_field_matrix_missing_count": {
+          "const": 0
+        },
+        "accepted_source_fact_created_count": {
+          "const": 0
+        },
+        "connector_semantic_value_populated_count": {
+          "const": 0
+        },
+        "blocker_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "const": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+          }
+        }
+      },
+      "required": [
+        "report_type",
+        "gate_state",
+        "authority_boundary_statement",
+        "target_field_matrix_required_count",
+        "target_field_matrix_present_count",
+        "target_field_matrix_missing_count",
+        "accepted_source_fact_created_count",
+        "connector_semantic_value_populated_count",
+        "blocker_codes"
+      ],
+      "additionalProperties": false
+    },
+    "connector_semantic_readiness_summary": {
+      "type": "object",
+      "properties": {
+        "venue_ids_checked": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "enum": [
+              "KALSHI",
+              "POLYMARKET",
+              "FORECASTEX_IBKR"
+            ]
+          }
+        },
+        "semantic_surface_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "semantic_surface_ready_for_accepted_packet_count": {
+          "const": 0
+        },
+        "semantic_surface_blocked_packet_missing_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accepted_source_fact_created_count": {
+          "const": 0
+        },
+        "connector_semantic_value_populated_count": {
+          "const": 0
+        },
+        "runtime_resolver_snapshot_violation_count": {
+          "const": 0
+        },
+        "replay_paper_execution_violation_count": {
+          "const": 0
+        },
+        "live_reachability_violation_count": {
+          "const": 0
+        },
+        "atomicrows_mutation_violation_count": {
+          "const": 0
+        },
+        "blocker_reduction_or_profit_claim_violation_count": {
+          "const": 0
+        }
+      },
+      "required": [
+        "venue_ids_checked",
+        "semantic_surface_count",
+        "semantic_surface_ready_for_accepted_packet_count",
+        "semantic_surface_blocked_packet_missing_count",
+        "accepted_source_fact_created_count",
+        "connector_semantic_value_populated_count",
+        "runtime_resolver_snapshot_violation_count",
+        "replay_paper_execution_violation_count",
+        "live_reachability_violation_count",
+        "atomicrows_mutation_violation_count",
+        "blocker_reduction_or_profit_claim_violation_count"
+      ],
+      "additionalProperties": false
+    },
+    "atomicrows_authority_state": {
+      "type": "object",
+      "properties": {
+        "canonical_bundle_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "canonical_bundle_sha_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        },
+        "canonical_bundle_present": {
+          "const": false
+        },
+        "canonical_bundle_sha_present": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_claimed": {
+          "const": false
+        },
+        "atomicrows_hash_creation_claimed": {
+          "const": false
+        },
+        "atomicrows_sha_authority_claimed": {
+          "const": false
+        },
+        "atomicrows_row_creation_claimed": {
+          "const": false
+        },
+        "freeze_authority_claimed": {
+          "const": false
+        }
+      },
+      "required": [
+        "canonical_bundle_path",
+        "canonical_bundle_sha_path",
+        "canonical_bundle_present",
+        "canonical_bundle_sha_present",
+        "atomicrows_bundle_creation_claimed",
+        "atomicrows_hash_creation_claimed",
+        "atomicrows_sha_authority_claimed",
+        "atomicrows_row_creation_claimed",
+        "freeze_authority_claimed"
+      ],
+      "additionalProperties": false
+    },
+    "forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "source_acceptance_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_creation_enabled": {
+          "const": false
+        },
+        "connector_semantic_value_population_enabled": {
+          "const": false
+        },
+        "live_client_import_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_enabled": {
+          "const": false
+        },
+        "replay_paper_live_result_packet_creation_enabled": {
+          "const": false
+        },
+        "order_authority_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_or_hash_creation_enabled": {
+          "const": false
+        },
+        "blocker_reduction_enabled": {
+          "const": false
+        },
+        "profit_evidence_creation_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_enabled",
+        "source_acceptance_enabled",
+        "accepted_source_packet_creation_enabled",
+        "connector_semantic_value_population_enabled",
+        "live_client_import_enabled",
+        "network_io_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "replay_paper_live_result_packet_creation_enabled",
+        "order_authority_enabled",
+        "atomicrows_bundle_or_hash_creation_enabled",
+        "blocker_reduction_enabled",
+        "profit_evidence_creation_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "populates_connector_semantic_values": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_hash": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "accepts_source_facts",
+        "creates_accepted_source_packets",
+        "populates_connector_semantic_values",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

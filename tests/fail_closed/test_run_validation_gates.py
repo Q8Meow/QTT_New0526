@@ -343,6 +343,54 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_source_fact_binding_connector_semantic_readiness_static.py"
+            ),
+            "--repo-root",
+            ".",
+            "--source-to-connector-schema",
+            str(
+                Path("schemas")
+                / "source_fact_binding_readiness"
+                / "stage1_source_to_connector_field_binding_matrix.schema.json"
+            ),
+            "--source-to-connector-fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_fact_binding_readiness"
+                / "synthetic_stage1_source_to_connector_field_binding_matrix.v1.fixture.json"
+            ),
+            "--connector-target-schema",
+            str(
+                Path("schemas")
+                / "source_fact_binding_readiness"
+                / "stage1_connector_semantic_target_field_matrix.schema.json"
+            ),
+            "--connector-target-fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_fact_binding_readiness"
+                / "synthetic_stage1_connector_semantic_target_field_matrix.v1.fixture.json"
+            ),
+            "--gate-report-schema",
+            str(
+                Path("schemas")
+                / "source_fact_binding_readiness"
+                / "stage1_connector_semantic_readiness_gate_report.schema.json"
+            ),
+            "--gate-report-fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_fact_binding_readiness"
+                / "synthetic_stage1_connector_semantic_readiness_gate_report.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",

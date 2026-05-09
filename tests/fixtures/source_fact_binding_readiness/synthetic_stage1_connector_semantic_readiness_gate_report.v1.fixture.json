@@ -1,0 +1,110 @@
+{
+  "report_type": "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT",
+  "report_version": "PR38_STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT_V1",
+  "task_packet_type": "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_TASK_PACKET",
+  "report_authority_class": "STATIC_PRE_ACCEPTANCE_READINESS_REPORT_ONLY_NOT_SOURCE_FACT_NOT_CONNECTOR_VALUE_AUTHORITY",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "status": "BLOCKED",
+  "gate_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "authority_boundary_statement": "This readiness report creates no official source fact, no connector semantic value, no runtime resolver snapshot, no live reachability, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence.",
+  "required_typed_artifacts_represented": [
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_TASK_PACKET",
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_RECEIPT",
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_BLOCK_RECEIPT",
+    "STAGE1_SOURCE_FACT_BINDING_READINESS_RECEIPT",
+    "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_RECEIPT",
+    "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX",
+    "STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX",
+    "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_REPORT",
+    "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+    "CONNECTOR_SEMANTIC_READINESS_NO_VALUE_POPULATION_RECEIPT",
+    "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+  ],
+  "artifact_refs": {
+    "source_to_connector_field_binding_matrix_schema": "schemas/source_fact_binding_readiness/stage1_source_to_connector_field_binding_matrix.schema.json",
+    "source_to_connector_field_binding_matrix_fixture": "tests/fixtures/source_fact_binding_readiness/synthetic_stage1_source_to_connector_field_binding_matrix.v1.fixture.json",
+    "connector_semantic_target_field_matrix_schema": "schemas/source_fact_binding_readiness/stage1_connector_semantic_target_field_matrix.schema.json",
+    "connector_semantic_target_field_matrix_fixture": "tests/fixtures/source_fact_binding_readiness/synthetic_stage1_connector_semantic_target_field_matrix.v1.fixture.json"
+  },
+  "source_fact_binding_readiness_report": {
+    "report_type": "STAGE1_SOURCE_FACT_BINDING_READINESS_REPORT",
+    "gate_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+    "authority_boundary_statement": "This readiness report creates no official source fact, no connector semantic value, no runtime resolver snapshot, no live reachability, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence.",
+    "target_field_matrix_required_count": 63,
+    "target_field_matrix_present_count": 63,
+    "target_field_matrix_missing_count": 0,
+    "accepted_source_fact_created_count": 0,
+    "connector_semantic_value_populated_count": 0,
+    "blocker_codes": [
+      "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+    ]
+  },
+  "connector_semantic_readiness_summary": {
+    "venue_ids_checked": [
+      "KALSHI",
+      "POLYMARKET",
+      "FORECASTEX_IBKR"
+    ],
+    "semantic_surface_count": 63,
+    "semantic_surface_ready_for_accepted_packet_count": 0,
+    "semantic_surface_blocked_packet_missing_count": 63,
+    "accepted_source_fact_created_count": 0,
+    "connector_semantic_value_populated_count": 0,
+    "runtime_resolver_snapshot_violation_count": 0,
+    "replay_paper_execution_violation_count": 0,
+    "live_reachability_violation_count": 0,
+    "atomicrows_mutation_violation_count": 0,
+    "blocker_reduction_or_profit_claim_violation_count": 0
+  },
+  "receipt_ids_emitted": [
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_RECEIPT",
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_BLOCK_RECEIPT",
+    "STAGE1_SOURCE_FACT_BINDING_READINESS_RECEIPT",
+    "STAGE1_CONNECTOR_SEMANTIC_READINESS_GATE_RECEIPT",
+    "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+    "CONNECTOR_SEMANTIC_READINESS_NO_VALUE_POPULATION_RECEIPT",
+    "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+  ],
+  "atomicrows_authority_state": {
+    "canonical_bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    "canonical_bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+    "canonical_bundle_present": false,
+    "canonical_bundle_sha_present": false,
+    "atomicrows_bundle_creation_claimed": false,
+    "atomicrows_hash_creation_claimed": false,
+    "atomicrows_sha_authority_claimed": false,
+    "atomicrows_row_creation_claimed": false,
+    "freeze_authority_claimed": false
+  },
+  "forbidden_action_flags": {
+    "source_retrieval_enabled": false,
+    "source_acceptance_enabled": false,
+    "accepted_source_packet_creation_enabled": false,
+    "connector_semantic_value_population_enabled": false,
+    "live_client_import_enabled": false,
+    "network_io_enabled": false,
+    "runtime_resolver_snapshot_creation_enabled": false,
+    "replay_paper_live_result_packet_creation_enabled": false,
+    "order_authority_enabled": false,
+    "atomicrows_bundle_or_hash_creation_enabled": false,
+    "blocker_reduction_enabled": false,
+    "profit_evidence_creation_enabled": false
+  },
+  "no_claim_flags": {
+    "accepts_source_facts": false,
+    "creates_accepted_source_packets": false,
+    "populates_connector_semantic_values": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_AUDIT"
+  ]
+}
