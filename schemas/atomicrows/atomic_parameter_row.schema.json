@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomic_parameter_row.schema.json",
+  "title": "Atomic Parameter Row Candidate Schema",
+  "description": "Static candidate row shape for future source-backed AtomicRows records. This schema declares structure only and creates no AtomicRows bundle, hash, rows, SHA authority, blocker reduction, runtime authority, live authority, connector binding, private-state authority, order authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "atomic_parameter_row_id": {
+      "type": "string",
+      "pattern": "^atomic_parameter_row_[0-9]{4}$"
+    },
+    "schema_version": {
+      "const": "atomic_parameter_row.v1"
+    },
+    "row_authority_class": {
+      "enum": [
+        "SOURCE_BACKED_ATOMIC_PARAMETER_ROW"
+      ]
+    },
+    "parameter_key": {
+      "$ref": "#/$defs/parameter_key"
+    },
+    "parameter_value": {
+      "$ref": "#/$defs/scalar_parameter_value"
+    },
+    "source_evidence": {
+      "$ref": "#/$defs/source_evidence"
+    },
+    "canonicalization": {
+      "$ref": "#/$defs/canonicalization"
+    }
+  },
+  "required": [
+    "atomic_parameter_row_id",
+    "schema_version",
+    "row_authority_class",
+    "parameter_key",
+    "parameter_value",
+    "source_evidence",
+    "canonicalization"
+  ],
+  "$defs": {
+    "parameter_key": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "namespace",
+        "name"
+      ]
+    },
+    "scalar_parameter_value": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "source_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_evidence_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]+$"
+          }
+        },
+        "source_fact_acceptance_required_before_bundle_authority": {
+          "const": true
+        }
+      },
+      "required": [
+        "source_evidence_ids",
+        "source_fact_acceptance_required_before_bundle_authority"
+      ]
+    },
+    "canonicalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sorted_by": {
+          "const": "atomic_parameter_row_id"
+        },
+        "jsonl_one_object_per_line": {
+          "const": true
+        },
+        "utf8_encoding": {
+          "const": "UTF-8"
+        },
+        "newline_policy": {
+          "const": "LF"
+        }
+      },
+      "required": [
+        "sorted_by",
+        "jsonl_one_object_per_line",
+        "utf8_encoding",
+        "newline_policy"
+      ]
+    }
+  }
+}
