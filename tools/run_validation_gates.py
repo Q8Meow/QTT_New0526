@@ -302,6 +302,28 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_connector_scaffold_source_required_gate_static.py",
+            ),
+            "--repo-root",
+            ".",
+            "--schema",
+            _path(
+                "schemas",
+                "connectors",
+                "connector_scaffold_source_required_gate.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "connectors",
+                "synthetic_connector_scaffold_source_required_blocked.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
