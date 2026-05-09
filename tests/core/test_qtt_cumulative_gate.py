@@ -108,6 +108,19 @@ def test_qtt_cumulative_gate_requires_pr43_concurrent_replay_paper_contract_rece
     assert receipt["validation_marker"] == "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_CHECK_OK"
 
 
+def test_qtt_cumulative_gate_requires_pr44_dual_result_review_contract_receipt():
+    report = _report()
+    receipt = next(
+        item
+        for item in report["prior_gate_receipts"]
+        if item["receipt_id"] == "dual_result_review_contract_gate_receipt_present"
+    )
+
+    assert receipt["satisfied"] is True
+    assert receipt["status"] == "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER"
+    assert receipt["validation_marker"] == "STAGE1_DUAL_RESULT_REVIEW_CONTRACT_CHECK_OK"
+
+
 def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap():
     report = _report()
     statuses = {item["receipt_id"]: item["status"] for item in report["prior_gate_receipts"]}

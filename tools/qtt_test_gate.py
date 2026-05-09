@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR43_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR44_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -99,6 +99,7 @@ GATE_CHECK_FIELDS = {
     "runtime_resolver_snapshot_contract_gate_receipt_present",
     "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
     "concurrent_replay_paper_contract_gate_receipt_present",
+    "dual_result_review_contract_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -449,6 +450,39 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
             ),
         ],
         "validation_marker": "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_CHECK_OK",
+    },
+    {
+        "receipt_id": "dual_result_review_contract_gate_receipt_present",
+        "description": (
+            "PR44 dual-result review input contract, replay/paper comparison "
+            "matrix, no-merge, no-auto-promotion, and owner-review handoff "
+            "boundary are confirmed by the static validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/stage1_prediction_markets/dual_result_review/"
+                "stage1_dual_result_review_input_contract.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/dual_result_review/"
+                "stage1_replay_paper_comparison_matrix.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/dual_result_review/"
+                "stage1_dual_result_review_gate_report.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/dual_result_review/"
+                "stage1_owner_live_promotion_handoff_block.schema.json"
+            ),
+            "tools/stage1_dual_result_review_contract_check.py",
+            (
+                "tests/fixtures/source_evidence/dual_result_review/"
+                "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": "STAGE1_DUAL_RESULT_REVIEW_CONTRACT_CHECK_OK",
     },
 ]
 

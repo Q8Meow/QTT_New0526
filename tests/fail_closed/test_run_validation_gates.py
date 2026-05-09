@@ -644,6 +644,59 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_dual_result_review_contract_check.py"),
+            "--repo-root",
+            ".",
+            "--input-contract-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "dual_result_review"
+                / "stage1_dual_result_review_input_contract.schema.json"
+            ),
+            "--comparison-matrix-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "dual_result_review"
+                / "stage1_replay_paper_comparison_matrix.schema.json"
+            ),
+            "--gate-report-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "dual_result_review"
+                / "stage1_dual_result_review_gate_report.schema.json"
+            ),
+            "--owner-handoff-block-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "dual_result_review"
+                / "stage1_owner_live_promotion_handoff_block.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "dual_result_review"
+                / "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
+            ),
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "Stage1DualResultReviewContractCheck.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -1407,6 +1460,76 @@ def test_runner_includes_pr43_concurrent_replay_paper_contract_after_pr42_and_be
             / "master_plan"
             / "generated"
             / "Stage1ConcurrentReplayPaperContractCheck.report.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr44_dual_result_review_contract_after_pr43_and_before_qtt_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr43_index = command_names.index("stage1_concurrent_replay_paper_contract_check.py")
+    pr44_index = command_names.index("stage1_dual_result_review_contract_check.py")
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr43_index < pr44_index < qtt_gate_index < no_runtime_index
+    assert commands[pr44_index] == [
+        python_executable,
+        str(Path("tools") / "stage1_dual_result_review_contract_check.py"),
+        "--repo-root",
+        ".",
+        "--input-contract-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "dual_result_review"
+            / "stage1_dual_result_review_input_contract.schema.json"
+        ),
+        "--comparison-matrix-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "dual_result_review"
+            / "stage1_replay_paper_comparison_matrix.schema.json"
+        ),
+        "--gate-report-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "dual_result_review"
+            / "stage1_dual_result_review_gate_report.schema.json"
+        ),
+        "--owner-handoff-block-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "dual_result_review"
+            / "stage1_owner_live_promotion_handoff_block.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "source_evidence"
+            / "dual_result_review"
+            / "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
+        ),
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "Stage1DualResultReviewContractCheck.report.json"
         ),
     ]
 
