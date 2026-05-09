@@ -324,6 +324,25 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_stage1_runtime_scaffold_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            _path(
+                "schemas",
+                "runtime_orchestration",
+                "stage1_runtime_scaffold_gate.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "runtime_orchestration",
+                "synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
