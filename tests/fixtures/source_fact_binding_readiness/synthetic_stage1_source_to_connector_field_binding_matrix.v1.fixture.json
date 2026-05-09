@@ -1,0 +1,209 @@
+{
+  "matrix_type": "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX",
+  "matrix_version": "PR38_STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX_V1",
+  "matrix_authority_class": "STATIC_READINESS_MATRIX_ONLY_NOT_ACCEPTED_FACT_NOT_CONNECTOR_VALUE",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "validation_mode": "STATIC_SCHEMA_ONLY_NON_MUTATING_AUDIT",
+  "deterministic_output": true,
+  "target_field_binding_policy": {
+    "all_source_dependent_fields_state": "SOURCE_REQUIRED",
+    "accepted_packet_requirement_state": "ACCEPTED_PACKET_REQUIRED",
+    "future_binding_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+    "future_accepted_source_evidence_packet_required": true,
+    "target_field_specific_packet_required": true,
+    "connector_semantic_value_population_allowed": false,
+    "connector_semantic_binding_allowed": false
+  },
+  "venue_rows": [
+    {
+      "record_type": "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX_VENUE_ROW",
+      "venue_id": "KALSHI",
+      "source_to_connector_field_binding_record_id_prefix": "STAGE1_S2C__KALSHI__SOURCE_REQUIRED_TARGET_FIELD_ROUTE",
+      "record_authority_class": "READINESS_ROUTE_ONLY_NOT_ACCEPTED_FACT_NOT_CONNECTOR_VALUE",
+      "canonical_connector_namespace": "stage1_prediction_markets.source_required_connector_placeholders",
+      "connector_scaffold_path": "schemas/connectors/connector_scaffold_source_required_gate.schema.json",
+      "venue_neutral_adapter_contract_ref": "schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json",
+      "stage1_packet_schema_ref": "schemas/stage1_prediction_markets/stage1_packet_schema_gate_report.schema.json",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_FOR_IDENTIFIER_ONLY_NOT_AUTHORITY",
+      "target_field_path_hash_authority": "IDENTIFIER_ONLY_NOT_SHA_OR_FREEZE_AUTHORITY",
+      "target_field_paths": [
+        "connector.semantic.connector_semantic_values",
+        "connector.venue_api.venue_api_facts",
+        "connector.fundamentals.fundamental_facts",
+        "connector.fees.fee_semantics",
+        "connector.market.tick_semantics",
+        "connector.api.rate_limit_semantics",
+        "connector.settlement.settlement_rules",
+        "connector.order_entry.order_entry_fields",
+        "connector.order_status.status_lifecycle",
+        "connector.private_state.private_state_fields",
+        "connector.private_state.account_fields",
+        "connector.private_state.balance_fields",
+        "connector.selection.market_selection",
+        "connector.selection.contract_selection",
+        "connector.selection.event_selection",
+        "connector.selection.symbol_selection",
+        "connector.selection.live_venue_selection",
+        "connector.runtime.runtime_resolver_snapshot",
+        "connector.execution.replay_paper_execution",
+        "connector.cash.runtime_cash_value",
+        "connector.order_authority.order_authority_fields"
+      ],
+      "source_target_ids_allowed": [
+        "SOURCE_TARGET_ROUTE_REQUIRED_BEFORE_ACCEPTED_PACKET"
+      ],
+      "accepted_source_evidence_packet_id_required_flag": true,
+      "stage1_target_field_acceptance_ledger_record_required_flag": true,
+      "source_dependency_state": "SOURCE_REQUIRED",
+      "accepted_packet_requirement_state": "ACCEPTED_PACKET_REQUIRED",
+      "readiness_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+      "accepted_packet_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_binding_receipt_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_semantic_value_state": "SOURCE_REQUIRED",
+      "connector_semantic_value_populated": false,
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+      ],
+      "receipt_ids": [
+        "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+        "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+      ]
+    },
+    {
+      "record_type": "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX_VENUE_ROW",
+      "venue_id": "POLYMARKET",
+      "source_to_connector_field_binding_record_id_prefix": "STAGE1_S2C__POLYMARKET__SOURCE_REQUIRED_TARGET_FIELD_ROUTE",
+      "record_authority_class": "READINESS_ROUTE_ONLY_NOT_ACCEPTED_FACT_NOT_CONNECTOR_VALUE",
+      "canonical_connector_namespace": "stage1_prediction_markets.source_required_connector_placeholders",
+      "connector_scaffold_path": "schemas/connectors/connector_scaffold_source_required_gate.schema.json",
+      "venue_neutral_adapter_contract_ref": "schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json",
+      "stage1_packet_schema_ref": "schemas/stage1_prediction_markets/stage1_packet_schema_gate_report.schema.json",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_FOR_IDENTIFIER_ONLY_NOT_AUTHORITY",
+      "target_field_path_hash_authority": "IDENTIFIER_ONLY_NOT_SHA_OR_FREEZE_AUTHORITY",
+      "target_field_paths": [
+        "connector.semantic.connector_semantic_values",
+        "connector.venue_api.venue_api_facts",
+        "connector.fundamentals.fundamental_facts",
+        "connector.fees.fee_semantics",
+        "connector.market.tick_semantics",
+        "connector.api.rate_limit_semantics",
+        "connector.settlement.settlement_rules",
+        "connector.order_entry.order_entry_fields",
+        "connector.order_status.status_lifecycle",
+        "connector.private_state.private_state_fields",
+        "connector.private_state.account_fields",
+        "connector.private_state.balance_fields",
+        "connector.selection.market_selection",
+        "connector.selection.contract_selection",
+        "connector.selection.event_selection",
+        "connector.selection.symbol_selection",
+        "connector.selection.live_venue_selection",
+        "connector.runtime.runtime_resolver_snapshot",
+        "connector.execution.replay_paper_execution",
+        "connector.cash.runtime_cash_value",
+        "connector.order_authority.order_authority_fields"
+      ],
+      "source_target_ids_allowed": [
+        "SOURCE_TARGET_ROUTE_REQUIRED_BEFORE_ACCEPTED_PACKET"
+      ],
+      "accepted_source_evidence_packet_id_required_flag": true,
+      "stage1_target_field_acceptance_ledger_record_required_flag": true,
+      "source_dependency_state": "SOURCE_REQUIRED",
+      "accepted_packet_requirement_state": "ACCEPTED_PACKET_REQUIRED",
+      "readiness_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+      "accepted_packet_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_binding_receipt_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_semantic_value_state": "SOURCE_REQUIRED",
+      "connector_semantic_value_populated": false,
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+      ],
+      "receipt_ids": [
+        "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+        "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+      ]
+    },
+    {
+      "record_type": "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MATRIX_VENUE_ROW",
+      "venue_id": "FORECASTEX_IBKR",
+      "source_to_connector_field_binding_record_id_prefix": "STAGE1_S2C__FORECASTEX_IBKR__SOURCE_REQUIRED_TARGET_FIELD_ROUTE",
+      "record_authority_class": "READINESS_ROUTE_ONLY_NOT_ACCEPTED_FACT_NOT_CONNECTOR_VALUE",
+      "canonical_connector_namespace": "stage1_prediction_markets.source_required_connector_placeholders",
+      "connector_scaffold_path": "schemas/connectors/connector_scaffold_source_required_gate.schema.json",
+      "venue_neutral_adapter_contract_ref": "schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json",
+      "stage1_packet_schema_ref": "schemas/stage1_prediction_markets/stage1_packet_schema_gate_report.schema.json",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_FOR_IDENTIFIER_ONLY_NOT_AUTHORITY",
+      "target_field_path_hash_authority": "IDENTIFIER_ONLY_NOT_SHA_OR_FREEZE_AUTHORITY",
+      "target_field_paths": [
+        "connector.semantic.connector_semantic_values",
+        "connector.venue_api.venue_api_facts",
+        "connector.fundamentals.fundamental_facts",
+        "connector.fees.fee_semantics",
+        "connector.market.tick_semantics",
+        "connector.api.rate_limit_semantics",
+        "connector.settlement.settlement_rules",
+        "connector.order_entry.order_entry_fields",
+        "connector.order_status.status_lifecycle",
+        "connector.private_state.private_state_fields",
+        "connector.private_state.account_fields",
+        "connector.private_state.balance_fields",
+        "connector.selection.market_selection",
+        "connector.selection.contract_selection",
+        "connector.selection.event_selection",
+        "connector.selection.symbol_selection",
+        "connector.selection.live_venue_selection",
+        "connector.runtime.runtime_resolver_snapshot",
+        "connector.execution.replay_paper_execution",
+        "connector.cash.runtime_cash_value",
+        "connector.order_authority.order_authority_fields"
+      ],
+      "source_target_ids_allowed": [
+        "SOURCE_TARGET_ROUTE_REQUIRED_BEFORE_ACCEPTED_PACKET"
+      ],
+      "accepted_source_evidence_packet_id_required_flag": true,
+      "stage1_target_field_acceptance_ledger_record_required_flag": true,
+      "source_dependency_state": "SOURCE_REQUIRED",
+      "accepted_packet_requirement_state": "ACCEPTED_PACKET_REQUIRED",
+      "readiness_state": "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+      "accepted_packet_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_binding_receipt_id": "ACCEPTED_PACKET_REQUIRED",
+      "connector_semantic_value_state": "SOURCE_REQUIRED",
+      "connector_semantic_value_populated": false,
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET"
+      ],
+      "receipt_ids": [
+        "SOURCE_FACT_BINDING_NO_FACT_ACCEPTANCE_RECEIPT",
+        "CONNECTOR_SEMANTIC_ACCEPTED_PACKET_REQUIRED_RECEIPT"
+      ]
+    }
+  ],
+  "no_claim_flags": {
+    "accepts_source_facts": false,
+    "creates_accepted_source_packets": false,
+    "populates_connector_semantic_values": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_AUDIT"
+  ]
+}
