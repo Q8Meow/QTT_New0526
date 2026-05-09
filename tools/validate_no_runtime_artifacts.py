@@ -76,6 +76,28 @@ FLAG_FORBIDDEN_PATH_PARTS = {
         "vendor_external_repo",
     },
 }
+STATIC_CONNECTOR_BINDING_ALLOWED_PATHS = {
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_binding_ledger_record.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_value_canonicalization.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/"
+        "stage1_connector_semantic_binding_consumer_contract.schema.json"
+    ),
+    pathlib.PurePosixPath("tests/fixtures/source_evidence/connector_semantic_binding"),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/connector_semantic_binding/"
+        "synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json"
+    ),
+}
 PACKAGE_INSTALL_SCRIPT_NAMES = {
     "bootstrap.sh",
     "install.bat",
@@ -233,6 +255,12 @@ def _part_key(part: str) -> str:
 
 def _rel_path(path: pathlib.Path, root: pathlib.Path) -> pathlib.PurePosixPath:
     return pathlib.PurePosixPath(path.relative_to(root).as_posix())
+
+
+def _is_allowed_static_connector_binding_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_CONNECTOR_BINDING_ALLOWED_PATHS
 
 
 def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
@@ -560,7 +588,13 @@ def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
 
         for flag in enabled_flags:
             forbidden_parts = FLAG_FORBIDDEN_PATH_PARTS.get(flag, set())
-            if forbidden_parts.intersection(part_keys):
+            if (
+                forbidden_parts.intersection(part_keys)
+                and not (
+                    flag == "forbid_connector_binding"
+                    and _is_allowed_static_connector_binding_contract_path(rel)
+                )
+            ):
                 violations.append(f"forbidden {flag.replace('_', '-')} path present: {rel}")
 
         if (

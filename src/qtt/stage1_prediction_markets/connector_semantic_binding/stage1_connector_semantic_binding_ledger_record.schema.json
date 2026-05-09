@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_ledger_record.schema.json",
+  "title": "Stage-1 Connector Semantic Binding Ledger Record Static Schema",
+  "description": "Static connector semantic binding ledger record contract for synthetic non-live tests only. It requires accepted source-evidence export linkage, target-field acceptance ledger linkage, source-to-connector field binding linkage, explicit semantic value discipline, and fail-closed runtime flags. It creates no source fact acceptance, no production connector semantic population, no live client, no network IO, no runtime resolver snapshot, no replay or paper execution, no order authority, no AtomicRows authority, no blocker reduction, and no profit evidence.",
+  "type": "object",
+  "properties": {
+    "connector_semantic_binding_ledger_record_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_RECORD"
+    },
+    "connector_semantic_binding_ledger_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_SYNTHETIC_CONNECTOR_SEMANTIC_BINDING_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "binding_packet_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "binding_manifest_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "accepted_source_evidence_export_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "accepted_source_evidence_packet_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "accepted_source_evidence_packet_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "accepted_source_evidence_packet_version": {
+      "const": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT"
+    },
+    "accepted_source_evidence_packet_authority_class": {
+      "const": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY"
+    },
+    "target_field_acceptance_ledger_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_field_acceptance_ledger_record_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "source_to_connector_field_binding_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "semantic_value_canonicalization_record_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "venue_id": {
+      "$ref": "#/$defs/venue_id"
+    },
+    "canonical_connector_namespace": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "semantic_surface_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_field_path": {
+      "$ref": "#/$defs/target_field_path"
+    },
+    "bound_value_original": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_canonical": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_type": {
+      "$ref": "#/$defs/semantic_value_type"
+    },
+    "bound_value_unit_or_scale": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_normalization_rule_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_rounding_or_precision_rule_id_when_applicable": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "bound_value_scope": {
+      "$ref": "#/$defs/value_scope"
+    },
+    "source_value_origin": {
+      "$ref": "#/$defs/source_value_origin"
+    },
+    "source_value_required_flag": {
+      "const": true
+    },
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag": {
+      "const": false
+    },
+    "revalidation_due_condition": {
+      "$ref": "#/$defs/revalidation_due_condition"
+    },
+    "stale_binding_invalidates_downstream_snapshot_flag": {
+      "const": true
+    },
+    "rollback_receipt_required_flag": {
+      "const": true
+    },
+    "consumer_contract_state": {
+      "$ref": "#/$defs/consumer_contract_state"
+    },
+    "binding_packet_creation_allowed_flag": {
+      "type": "boolean"
+    },
+    "production_connector_semantic_value_population_allowed_flag": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_creation_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_consumption_allowed_without_runtime_resolver_snapshot_input_lock_flag": {
+      "const": false
+    },
+    "live_client_import_allowed_flag": {
+      "const": false
+    },
+    "network_io_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "connector_semantic_binding_ledger_record_type",
+    "connector_semantic_binding_ledger_record_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "binding_packet_id",
+    "binding_manifest_id",
+    "accepted_source_evidence_export_record_id",
+    "accepted_source_evidence_packet_id",
+    "accepted_source_evidence_packet_digest",
+    "accepted_source_evidence_packet_version",
+    "accepted_source_evidence_packet_authority_class",
+    "target_field_acceptance_ledger_record_id",
+    "target_field_acceptance_ledger_record_digest",
+    "source_to_connector_field_binding_record_id",
+    "semantic_value_canonicalization_record_id",
+    "venue_id",
+    "canonical_connector_namespace",
+    "semantic_surface_id",
+    "target_field_path",
+    "bound_value_original",
+    "bound_value_canonical",
+    "bound_value_type",
+    "bound_value_unit_or_scale",
+    "bound_value_normalization_rule_id",
+    "bound_value_rounding_or_precision_rule_id_when_applicable",
+    "bound_value_scope",
+    "source_value_origin",
+    "source_value_required_flag",
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag",
+    "revalidation_due_condition",
+    "stale_binding_invalidates_downstream_snapshot_flag",
+    "rollback_receipt_required_flag",
+    "consumer_contract_state",
+    "binding_packet_creation_allowed_flag",
+    "production_connector_semantic_value_population_allowed_flag",
+    "runtime_resolver_snapshot_creation_allowed_flag",
+    "replay_paper_consumption_allowed_without_runtime_resolver_snapshot_input_lock_flag",
+    "live_client_import_allowed_flag",
+    "network_io_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag",
+    "receipt_ids",
+    "blocker_codes",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "venue_id": {
+      "enum": [
+        "NOT_VENUE_SPECIFIC",
+        "VENUE_NEUTRAL_STAGE1"
+      ]
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+      "not": {
+        "pattern": "\\*"
+      }
+    },
+    "semantic_value_type": {
+      "enum": [
+        "SYNTHETIC_DECIMAL_RATIO",
+        "SYNTHETIC_INTEGER",
+        "SYNTHETIC_STRING",
+        "SYNTHETIC_ENUM",
+        "SYNTHETIC_BOOLEAN",
+        "SYNTHETIC_TIMESTAMP"
+      ]
+    },
+    "value_scope": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "scope_authority_class": {
+          "const": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/venue_id"
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "wildcard_scope_allowed": {
+          "const": false
+        },
+        "cross_venue_scope_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "scope_id",
+        "scope_authority_class",
+        "venue_id",
+        "target_field_path",
+        "wildcard_scope_allowed",
+        "cross_venue_scope_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "source_value_origin": {
+      "enum": [
+        "ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+        "MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+        "MISSING_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+        "MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_RECORD",
+        "CANDIDATE_SOURCE_EVIDENCE_PACKET_NOT_ACCEPTED",
+        "OWNER_POLICY_SUBSTITUTION_NOT_ALLOWED",
+        "RUNTIME_OBSERVED_VALUE_SUBSTITUTION_NOT_ALLOWED",
+        "INVENTED_OR_ZERO_FILL_VALUE_NOT_ALLOWED"
+      ]
+    },
+    "revalidation_due_condition": {
+      "enum": [
+        "NOT_DUE_SYNTHETIC_CURRENT",
+        "REVALIDATION_DUE",
+        "CONFLICT_REVALIDATION_REQUIRED",
+        "TARGET_MISMATCH_REVIEW_REQUIRED",
+        "SCHEMA_ERROR_REQUIRES_REVIEW"
+      ]
+    },
+    "consumer_contract_state": {
+      "enum": [
+        "CONSUMABLE_BY_RUNTIME_RESOLVER_GATE_ONLY",
+        "BLOCKED_STALE",
+        "BLOCKED_CONFLICT",
+        "BLOCKED_TARGET_MISMATCH",
+        "BLOCKED_SCHEMA_ERROR"
+      ]
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_real_accepted_source_evidence": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "populates_connector_semantic_values": {
+          "const": false
+        },
+        "imports_live_clients": {
+          "const": false
+        },
+        "creates_network_io": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_replay_paper_result_packets": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_runtime_cash_claim": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_hash": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "accepts_source_facts",
+        "creates_real_accepted_source_evidence",
+        "creates_accepted_source_packets",
+        "populates_connector_semantic_values",
+        "imports_live_clients",
+        "creates_network_io",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_replay_paper_result_packets",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_claim",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_STATIC_AUDIT"
+      }
+    }
+  }
+}

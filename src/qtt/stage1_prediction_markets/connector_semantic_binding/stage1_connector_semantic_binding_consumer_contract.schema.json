@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_consumer_contract.schema.json",
+  "title": "Stage-1 Connector Semantic Binding Consumer Boundary Static Schema",
+  "description": "Static consumer boundary for connector semantic binding ledgers. Runtime resolver gates may consume the ledger only as gate input, runtime resolver snapshot creation remains blocked until a later snapshot gate is green, live venue clients cannot consume bindings, replay and paper cannot consume without a later snapshot input lock, and the ledger is never live order authority.",
+  "type": "object",
+  "properties": {
+    "stage1_connector_semantic_binding_consumer_contract_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_BINDING_CONSUMER_CONTRACT"
+    },
+    "stage1_connector_semantic_binding_consumer_contract_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "contract_authority_class": {
+      "const": "STATIC_CONNECTOR_SEMANTIC_BINDING_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "consumer_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "consumer_class": {
+      "$ref": "#/$defs/consumer_class"
+    },
+    "ledger_consumption_authorization_state": {
+      "$ref": "#/$defs/ledger_consumption_authorization_state"
+    },
+    "runtime_resolver_gate_may_consume_connector_semantic_binding_ledger_as_gate_input_only_flag": {
+      "const": true
+    },
+    "runtime_resolver_snapshot_create_may_consume_only_after_runtime_resolver_snapshot_gate_green_flag": {
+      "const": true
+    },
+    "venue_connector_scaffold_static_non_live_configuration_tests_only_flag": {
+      "const": true
+    },
+    "venue_connector_live_client_may_consume_binding_flag": {
+      "const": false
+    },
+    "replay_paper_may_consume_without_runtime_resolver_snapshot_input_lock_flag": {
+      "const": false
+    },
+    "connector_semantic_binding_ledger_is_live_order_authority_flag": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_creation_allowed_flag": {
+      "const": false
+    },
+    "direct_runtime_use_allowed_flag": {
+      "const": false
+    },
+    "live_client_import_allowed_flag": {
+      "const": false
+    },
+    "network_io_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_live_order_profit_claim_allowed_flag": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_input_lock_required_before_replay_paper_flag": {
+      "const": true
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_connector_semantic_binding_ledger_record.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "stage1_connector_semantic_binding_consumer_contract_type",
+    "stage1_connector_semantic_binding_consumer_contract_id",
+    "fixture_case",
+    "contract_authority_class",
+    "synthetic_data_notice",
+    "consumer_id",
+    "consumer_class",
+    "ledger_consumption_authorization_state",
+    "runtime_resolver_gate_may_consume_connector_semantic_binding_ledger_as_gate_input_only_flag",
+    "runtime_resolver_snapshot_create_may_consume_only_after_runtime_resolver_snapshot_gate_green_flag",
+    "venue_connector_scaffold_static_non_live_configuration_tests_only_flag",
+    "venue_connector_live_client_may_consume_binding_flag",
+    "replay_paper_may_consume_without_runtime_resolver_snapshot_input_lock_flag",
+    "connector_semantic_binding_ledger_is_live_order_authority_flag",
+    "runtime_resolver_snapshot_creation_allowed_flag",
+    "direct_runtime_use_allowed_flag",
+    "live_client_import_allowed_flag",
+    "network_io_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag",
+    "replay_paper_live_order_profit_claim_allowed_flag",
+    "runtime_resolver_snapshot_input_lock_required_before_replay_paper_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer_class": {
+      "enum": [
+        "RUNTIME_RESOLVER_GATE_ONLY",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATE_DIRECT",
+        "VENUE_CONNECTOR_SCAFFOLD_STATIC_TEST_ONLY",
+        "VENUE_CONNECTOR_LIVE_CLIENT",
+        "REPLAY_PAPER_WITHOUT_RUNTIME_RESOLVER_INPUT_LOCK",
+        "LIVE_ORDER_AUTHORITY_ATTEMPT"
+      ]
+    },
+    "ledger_consumption_authorization_state": {
+      "enum": [
+        "AUTHORIZED_GATE_INPUT_ONLY",
+        "BLOCKED_DIRECT_RUNTIME_USE",
+        "BLOCKED_LIVE_CLIENT",
+        "BLOCKED_REPLAY_PAPER_WITHOUT_INPUT_LOCK",
+        "BLOCKED_LIVE_ORDER_AUTHORITY"
+      ]
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "STAGE1_CONNECTOR_SEMANTIC_BINDING_LEDGER_STATIC_AUDIT"
+      }
+    }
+  }
+}
