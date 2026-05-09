@@ -234,6 +234,25 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            _path(
+                "schemas",
+                "master_plan",
+                "generated_derivative_bootstrap_gate.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "master_plan",
+                "synthetic_generated_derivative_bootstrap_gate.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
