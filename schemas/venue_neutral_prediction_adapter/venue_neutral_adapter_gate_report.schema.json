@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json",
+  "title": "VenueNeutralAdapterGateReport",
+  "type": "object",
+  "properties": {
+    "surface_name": {
+      "const": "VenueNeutralAdapterGateReport"
+    },
+    "surface_version": {
+      "const": "PR34_VENUE_NEUTRAL_PREDICTION_ADAPTER_SCHEMA_V1"
+    },
+    "schema_authority_class": {
+      "const": "VENUE_NEUTRAL_PREDICTION_ADAPTER_SCHEMA_ONLY_STATIC_AUDIT"
+    },
+    "record_authority_class": {
+      "const": "VENUE_NEUTRAL_ABSTRACT_RECORD_NOT_RUNTIME_AUTHORITY"
+    },
+    "adapter_gate_authority_class": {
+      "const": "SCHEMA_ONLY_STATIC_AUDIT_NOT_RUNTIME_AUTHORITY"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "static_audit_only": {
+      "const": true
+    },
+    "schema_only": {
+      "const": true
+    },
+    "abstract_internal_fields_only": {
+      "const": true
+    },
+    "runtime_authority_allowed": {
+      "const": false
+    },
+    "connector_scaffold_allowed": {
+      "const": false
+    },
+    "connector_semantic_value_population_allowed": {
+      "const": false
+    },
+    "venue_specific_semantic_values_allowed": {
+      "const": false
+    },
+    "exact_selection_allowed": {
+      "const": false
+    },
+    "source_dependency_state": {
+      "$ref": "#/$defs/source_dependency_state"
+    },
+    "internal_reference": {
+      "$ref": "#/$defs/internal_reference"
+    },
+    "abstract_payload_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/target_field_path"
+      }
+    },
+    "source_required_placeholders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source_required_placeholder"
+      }
+    }
+  },
+  "required": [
+    "surface_name",
+    "surface_version",
+    "schema_authority_class",
+    "record_authority_class",
+    "adapter_gate_authority_class",
+    "mode",
+    "execution",
+    "static_audit_only",
+    "schema_only",
+    "abstract_internal_fields_only",
+    "runtime_authority_allowed",
+    "connector_scaffold_allowed",
+    "connector_semantic_value_population_allowed",
+    "venue_specific_semantic_values_allowed",
+    "exact_selection_allowed",
+    "source_dependency_state",
+    "internal_reference",
+    "abstract_payload_fields",
+    "source_required_placeholders"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "internal_reference": {
+      "type": "string",
+      "pattern": "^INTERNAL_[A-Z0-9_:-]+$"
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"
+    },
+    "source_dependency_state": {
+      "enum": [
+        "SOURCE_REQUIRED_PLACEHOLDER",
+        "OWNER_POLICY_REQUIRED",
+        "RUNTIME_OBSERVATION_REQUIRED",
+        "ACCEPTED_SOURCE_PACKET_BOUND",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "source_required_placeholder": {
+      "type": "object",
+      "properties": {
+        "placeholder_type": {
+          "const": "SOURCE_REQUIRED_PLACEHOLDER"
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "dependency_class": {
+          "enum": [
+            "SOURCE_EVIDENCE_REQUIRED",
+            "OWNER_POLICY_REQUIRED",
+            "RUNTIME_OBSERVATION_REQUIRED",
+            "ACCEPTED_SOURCE_PACKET_REQUIRED"
+          ]
+        },
+        "blocker_code": {
+          "type": "string",
+          "pattern": "^BLOCKER_[A-Z0-9_]+$"
+        },
+        "acceptance_route": {
+          "enum": [
+            "OWNER_ACCEPTED_SOURCE_PACKET_REQUIRED",
+            "OWNER_POLICY_DECISION_REQUIRED",
+            "RUNTIME_OBSERVATION_GATE_REQUIRED",
+            "ACCEPTED_SOURCE_PACKET_BINDING_REQUIRED"
+          ]
+        },
+        "source_dependency_state": {
+          "$ref": "#/$defs/source_dependency_state"
+        }
+      },
+      "required": [
+        "placeholder_type",
+        "target_field_path",
+        "dependency_class",
+        "blocker_code",
+        "acceptance_route",
+        "source_dependency_state"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

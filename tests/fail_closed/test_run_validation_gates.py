@@ -284,6 +284,24 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_venue_neutral_prediction_adapter_gate_static.py"
+            ),
+            "--repo-root",
+            ".",
+            "--schema-dir",
+            str(Path("schemas") / "venue_neutral_prediction_adapter"),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "venue_neutral_prediction_adapter"
+                / "synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -612,6 +630,42 @@ def test_runner_includes_stage1_packet_schema_gate_after_generated_derivative_ga
             / "fixtures"
             / "stage1_prediction_markets"
             / "synthetic_stage1_packet_schema_gate_blocked.v1.fixture.json"
+        ),
+    ]
+
+
+def test_runner_includes_venue_neutral_adapter_gate_after_stage1_and_before_no_runtime(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    stage1_gate_index = command_names.index(
+        "validate_stage1_packet_schema_gate_static.py"
+    )
+    adapter_gate_index = command_names.index(
+        "validate_venue_neutral_prediction_adapter_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+    assert stage1_gate_index < adapter_gate_index < no_runtime_index
+
+    audit_command = commands[adapter_gate_index]
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_venue_neutral_prediction_adapter_gate_static.py"),
+        "--repo-root",
+        ".",
+        "--schema-dir",
+        str(Path("schemas") / "venue_neutral_prediction_adapter"),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "venue_neutral_prediction_adapter"
+            / "synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json"
         ),
     ]
 

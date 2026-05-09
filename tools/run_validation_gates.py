@@ -287,6 +287,21 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_venue_neutral_prediction_adapter_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema-dir",
+            _path("schemas", "venue_neutral_prediction_adapter"),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "venue_neutral_prediction_adapter",
+                "synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
