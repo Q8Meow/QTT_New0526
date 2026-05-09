@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/core/schemas/pr_handoff_packet.schema.json",
+  "title": "First Coding PR Handoff Static Packet Schema",
+  "description": "Static first-coding PR handoff packet. This schema creates no source fact acceptance, connector semantics, runtime resolver snapshot, replay or paper execution, live reachability, runtime cash, AtomicRows bundle, blocker reduction, trading authority, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "packet_type": {
+      "const": "FIRST_CODING_PR_HANDOFF_PACKET"
+    },
+    "packet_version": {
+      "const": "PR37_FIRST_CODING_PR_HANDOFF_PACKET_V1"
+    },
+    "status": {
+      "const": "PASS"
+    },
+    "metadata": {
+      "$ref": "#/$defs/static_metadata"
+    },
+    "handoff_scope": {
+      "$ref": "#/$defs/handoff_scope"
+    },
+    "not_created_claims": {
+      "$ref": "#/$defs/not_created_claims"
+    },
+    "remaining_blockers": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "$ref": "#/$defs/remaining_blocker"
+      }
+    },
+    "generated_derivative_and_atomicrows_status": {
+      "$ref": "#/$defs/generated_derivative_and_atomicrows_status"
+    },
+    "forbidden_authority_claims": {
+      "$ref": "#/$defs/forbidden_authority_claims"
+    },
+    "summary_no_authority": {
+      "$ref": "#/$defs/summary_no_authority"
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "PR_HANDOFF_CHECK_STATIC_AUDIT"
+      }
+    }
+  },
+  "required": [
+    "packet_type",
+    "packet_version",
+    "status",
+    "metadata",
+    "handoff_scope",
+    "not_created_claims",
+    "remaining_blockers",
+    "generated_derivative_and_atomicrows_status",
+    "forbidden_authority_claims",
+    "summary_no_authority",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "static_metadata": {
+      "type": "object",
+      "properties": {
+        "generated_by": {
+          "type": "string"
+        },
+        "generated_at_utc": {
+          "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+        },
+        "authority_class": {
+          "const": "STATIC_REPORT_ONLY_NOT_TRADING_AUTHORITY"
+        },
+        "creates_source_fact_acceptance": {
+          "const": false
+        },
+        "creates_connector_semantics": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_runtime_cash_or_usable_cash": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_4183_rows": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "generated_by",
+        "generated_at_utc",
+        "authority_class",
+        "creates_source_fact_acceptance",
+        "creates_connector_semantics",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_live_reachability",
+        "creates_runtime_cash_or_usable_cash",
+        "creates_atomicrows_bundle_or_4183_rows",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "handoff_scope": {
+      "type": "object",
+      "properties": {
+        "phase": {
+          "const": "first-coding-runbook"
+        },
+        "pr_title": {
+          "const": "Add QTT cumulative test gate and PR handoff checker"
+        },
+        "master_plan_mapping": {
+          "const": "0X.4O QTT cumulative test gate, local gate command matrix, and first-coding PR handoff Codex task packet"
+        },
+        "authority_class": {
+          "const": "STATIC_REPORT_ONLY_NOT_TRADING_AUTHORITY"
+        },
+        "pr_handoff_creates_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "phase",
+        "pr_title",
+        "master_plan_mapping",
+        "authority_class",
+        "pr_handoff_creates_authority"
+      ],
+      "additionalProperties": false
+    },
+    "not_created_claims": {
+      "type": "object",
+      "properties": {
+        "source_fact_acceptance": {
+          "const": "NOT_CREATED"
+        },
+        "connector_semantics": {
+          "const": "NOT_CREATED"
+        },
+        "runtime_resolver_snapshots": {
+          "const": "NOT_CREATED"
+        },
+        "replay_paper_results": {
+          "const": "NOT_CREATED"
+        },
+        "live_reachability": {
+          "const": "NOT_CREATED"
+        },
+        "runtime_cash_or_usable_cash_receipts": {
+          "const": "NOT_CREATED"
+        },
+        "atomicrows_bundle_hash_or_4183_rows": {
+          "const": "NOT_CREATED"
+        },
+        "blocker_reduction": {
+          "const": "NOT_CREATED"
+        },
+        "profit_evidence": {
+          "const": "NOT_CREATED"
+        }
+      },
+      "required": [
+        "source_fact_acceptance",
+        "connector_semantics",
+        "runtime_resolver_snapshots",
+        "replay_paper_results",
+        "live_reachability",
+        "runtime_cash_or_usable_cash_receipts",
+        "atomicrows_bundle_hash_or_4183_rows",
+        "blocker_reduction",
+        "profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "remaining_blocker": {
+      "type": "object",
+      "properties": {
+        "blocker_id": {
+          "enum": [
+            "source_fact_acceptance",
+            "connector_semantics",
+            "runtime_resolver_snapshots",
+            "replay_paper_results",
+            "live_reachability",
+            "runtime_cash_or_usable_cash_receipts",
+            "atomicrows_bundle_hash_or_4183_rows",
+            "blocker_reduction",
+            "profit_evidence"
+          ]
+        },
+        "status": {
+          "const": "REMAINING_BLOCKER"
+        },
+        "reduced_by_this_packet": {
+          "const": false
+        },
+        "authority_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "blocker_id",
+        "status",
+        "reduced_by_this_packet",
+        "authority_created"
+      ],
+      "additionalProperties": false
+    },
+    "generated_derivative_and_atomicrows_status": {
+      "type": "object",
+      "properties": {
+        "generated_derivative_status": {
+          "const": "STATIC_BOOTSTRAP_ABSENT_NO_COMPLETION_AUTHORITY"
+        },
+        "atomicrows_bundle_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "atomicrows_bundle_present": {
+          "type": "boolean"
+        },
+        "atomicrows_bundle_sha_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        },
+        "atomicrows_bundle_sha_present": {
+          "type": "boolean"
+        },
+        "atomicrows_row_count_status": {
+          "const": "NOT_CREATED_UNBOUND"
+        },
+        "bootstrap_status_explicit": {
+          "const": true
+        },
+        "creates_completion_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "generated_derivative_status",
+        "atomicrows_bundle_path",
+        "atomicrows_bundle_present",
+        "atomicrows_bundle_sha_path",
+        "atomicrows_bundle_sha_present",
+        "atomicrows_row_count_status",
+        "bootstrap_status_explicit",
+        "creates_completion_authority"
+      ],
+      "additionalProperties": false
+    },
+    "forbidden_authority_claims": {
+      "type": "object",
+      "properties": {
+        "freeze_or_sha_authority": {
+          "const": false
+        },
+        "source_fact_acceptance": {
+          "const": false
+        },
+        "connector_semantics": {
+          "const": false
+        },
+        "exact_contract_event_market_selection": {
+          "const": false
+        },
+        "runtime_resolver_snapshot": {
+          "const": false
+        },
+        "replay_paper_execution_or_result_packets": {
+          "const": false
+        },
+        "dual_result_review_decision": {
+          "const": false
+        },
+        "limited_live_canary_or_live_arbitrage": {
+          "const": false
+        },
+        "live_reachability": {
+          "const": false
+        },
+        "runtime_cash_or_usable_cash_receipt": {
+          "const": false
+        },
+        "dashboard_live_mutation": {
+          "const": false
+        },
+        "atomicrows_bundle_hash_or_4183_rows": {
+          "const": false
+        },
+        "blocker_reduction": {
+          "const": false
+        },
+        "profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "freeze_or_sha_authority",
+        "source_fact_acceptance",
+        "connector_semantics",
+        "exact_contract_event_market_selection",
+        "runtime_resolver_snapshot",
+        "replay_paper_execution_or_result_packets",
+        "dual_result_review_decision",
+        "limited_live_canary_or_live_arbitrage",
+        "live_reachability",
+        "runtime_cash_or_usable_cash_receipt",
+        "dashboard_live_mutation",
+        "atomicrows_bundle_hash_or_4183_rows",
+        "blocker_reduction",
+        "profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "summary_no_authority": {
+      "type": "object",
+      "properties": {
+        "pr_handoff_creates_authority": {
+          "const": false
+        },
+        "creates_source_fact_acceptance": {
+          "const": false
+        },
+        "creates_connector_semantics": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_runtime_cash_or_usable_cash": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_4183_rows": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "pr_handoff_creates_authority",
+        "creates_source_fact_acceptance",
+        "creates_connector_semantics",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_live_reachability",
+        "creates_runtime_cash_or_usable_cash",
+        "creates_atomicrows_bundle_or_4183_rows",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
