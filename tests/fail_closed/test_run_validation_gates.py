@@ -343,6 +343,38 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "qtt_test_gate.py"),
+            "--phase",
+            "first-coding-runbook",
+            "--repo-root",
+            ".",
+            "--strict-no-claim",
+            "--out",
+            str(Path("docs") / "master_plan" / "generated" / "QTTTestGate.report.json"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "local_gate_command_matrix.py"),
+            "--repo-root",
+            ".",
+            "--out",
+            str(Path("docs") / "master_plan" / "generated" / "LocalGateCommandMatrix.json"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "pr_handoff_check.py"),
+            "--repo-root",
+            ".",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "FirstCodingPRHandoff.packet.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -791,6 +823,64 @@ def test_runner_includes_stage1_runtime_scaffold_gate_after_connector_and_before
             / "fixtures"
             / "runtime_orchestration"
             / "synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr37_static_gates_after_stage1_runtime_and_before_no_runtime(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    stage1_runtime_index = command_names.index(
+        "validate_stage1_runtime_scaffold_gate_static.py"
+    )
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    matrix_index = command_names.index("local_gate_command_matrix.py")
+    handoff_index = command_names.index("pr_handoff_check.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert (
+        stage1_runtime_index
+        < qtt_gate_index
+        < matrix_index
+        < handoff_index
+        < no_runtime_index
+    )
+    assert commands[qtt_gate_index] == [
+        python_executable,
+        str(Path("tools") / "qtt_test_gate.py"),
+        "--phase",
+        "first-coding-runbook",
+        "--repo-root",
+        ".",
+        "--strict-no-claim",
+        "--out",
+        str(Path("docs") / "master_plan" / "generated" / "QTTTestGate.report.json"),
+    ]
+    assert commands[matrix_index] == [
+        python_executable,
+        str(Path("tools") / "local_gate_command_matrix.py"),
+        "--repo-root",
+        ".",
+        "--out",
+        str(Path("docs") / "master_plan" / "generated" / "LocalGateCommandMatrix.json"),
+    ]
+    assert commands[handoff_index] == [
+        python_executable,
+        str(Path("tools") / "pr_handoff_check.py"),
+        "--repo-root",
+        ".",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "FirstCodingPRHandoff.packet.json"
         ),
     ]
 

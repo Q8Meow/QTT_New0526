@@ -1,0 +1,2 @@
+"""QTT static package namespace."""
+
