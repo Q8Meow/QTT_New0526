@@ -21,7 +21,7 @@
     "pr_1_through_37_review_required_count": 37,
     "review_required_record_count": 38,
     "strong_pr_38_through_46_record_count": 9,
-    "total_pr_records": 47,
+    "total_pr_records": 49,
     "unknown_unmapped_pr_record_count": 0,
     "validation_marker_record_count": 11
   },
@@ -3721,6 +3721,158 @@
         "tools/build_master_plan_implementation_coverage_ledger.py",
         "tools/validate_master_plan_implementation_coverage_ledger.py"
       ]
+    },
+    {
+      "atomicrows_bundle_created_flag": false,
+      "atomicrows_sha_created_flag": false,
+      "authority_boundary": {
+        "boundary_class": "STATIC_LEDGER_RECORD_ONLY_NO_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_hash": false,
+        "creates_canary_eligibility": false,
+        "creates_dual_result_review_decision": false,
+        "creates_live_eligibility": false,
+        "creates_live_reachability": false,
+        "creates_network_io": false,
+        "creates_order_authority": false,
+        "creates_owner_live_promotion_approval": false,
+        "creates_profit_evidence": false,
+        "creates_real_accepted_source_evidence_packets": false,
+        "creates_replay_or_paper_result_packets": false,
+        "creates_runtime_cash_receipt": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_source_fact_acceptance": false,
+        "executes_canary": false,
+        "executes_replay_or_paper": false,
+        "merges_replay_paper_results": false,
+        "populates_production_connector_semantics": false,
+        "reduces_blockers": false,
+        "retrieves_source_evidence": false
+      },
+      "blocker_reduction_created_flag": false,
+      "branch_name_if_known": null,
+      "canary_eligibility_created_flag": false,
+      "canary_execution_created_flag": false,
+      "connector_semantics_populated_flag": false,
+      "created_or_changed_paths": [
+        "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
+        "schemas/master_plan/master_plan_implementation_coverage_ledger.schema.json",
+        "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+        "tools/build_master_plan_implementation_coverage_ledger.py",
+        "tools/validate_master_plan_implementation_coverage_ledger.py"
+      ],
+      "dual_result_review_decision_created_flag": false,
+      "generated_report_paths": [
+        "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json"
+      ],
+      "implementation_status": "TRACKING_ONLY",
+      "implemented_subject": "coverage ledger determinism hotfix",
+      "live_eligibility_created_flag": false,
+      "live_reachability_created_flag": false,
+      "local_commit_if_known": null,
+      "master_plan_anchor_terms": [
+        "PR48",
+        "Fix coverage ledger determinism",
+        "non-authoritative implementation coverage tracking only",
+        "no runtime/source/live/order/profit authority"
+      ],
+      "master_plan_section_ids": [],
+      "merge_commit_if_known": null,
+      "network_io_created_flag": false,
+      "order_authority_created_flag": false,
+      "owner_live_promotion_approval_created_flag": false,
+      "pr_number": 48,
+      "pr_title_or_subject": "Fix coverage ledger determinism",
+      "profit_claim_created_flag": false,
+      "replay_or_paper_execution_created_flag": false,
+      "replay_paper_result_packets_created_flag": false,
+      "result_merge_created_flag": false,
+      "review_status": "VERIFIED",
+      "runtime_authority_created_flag": false,
+      "runtime_cash_receipt_created_flag": false,
+      "runtime_resolver_snapshot_created_flag": false,
+      "source_fact_acceptance_created_flag": false,
+      "source_retrieval_created_flag": false,
+      "test_paths": [
+        "tests/master_plan/test_master_plan_implementation_coverage_ledger.py"
+      ],
+      "validation_markers": [
+        "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
+        "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK"
+      ],
+      "validator_tools": [
+        "tools/build_master_plan_implementation_coverage_ledger.py",
+        "tools/validate_master_plan_implementation_coverage_ledger.py"
+      ]
+    },
+    {
+      "atomicrows_bundle_created_flag": false,
+      "atomicrows_sha_created_flag": false,
+      "authority_boundary": {
+        "boundary_class": "STATIC_LEDGER_RECORD_ONLY_NO_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_hash": false,
+        "creates_canary_eligibility": false,
+        "creates_dual_result_review_decision": false,
+        "creates_live_eligibility": false,
+        "creates_live_reachability": false,
+        "creates_network_io": false,
+        "creates_order_authority": false,
+        "creates_owner_live_promotion_approval": false,
+        "creates_profit_evidence": false,
+        "creates_real_accepted_source_evidence_packets": false,
+        "creates_replay_or_paper_result_packets": false,
+        "creates_runtime_cash_receipt": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_source_fact_acceptance": false,
+        "executes_canary": false,
+        "executes_replay_or_paper": false,
+        "merges_replay_paper_results": false,
+        "populates_production_connector_semantics": false,
+        "reduces_blockers": false,
+        "retrieves_source_evidence": false
+      },
+      "blocker_reduction_created_flag": false,
+      "branch_name_if_known": null,
+      "canary_eligibility_created_flag": false,
+      "canary_execution_created_flag": false,
+      "connector_semantics_populated_flag": false,
+      "created_or_changed_paths": [
+        ".gitignore"
+      ],
+      "dual_result_review_decision_created_flag": false,
+      "generated_report_paths": [],
+      "implementation_status": "TRACKING_ONLY",
+      "implemented_subject": ".tmp/ gitignore hygiene for validation temp artifacts",
+      "live_eligibility_created_flag": false,
+      "live_reachability_created_flag": false,
+      "local_commit_if_known": null,
+      "master_plan_anchor_terms": [
+        "PR49",
+        "Ignore validation temp artifacts",
+        ".tmp/ gitignore hygiene for validation temp artifacts",
+        "no runtime/source/live/order/profit authority"
+      ],
+      "master_plan_section_ids": [],
+      "merge_commit_if_known": null,
+      "network_io_created_flag": false,
+      "order_authority_created_flag": false,
+      "owner_live_promotion_approval_created_flag": false,
+      "pr_number": 49,
+      "pr_title_or_subject": "Ignore validation temp artifacts",
+      "profit_claim_created_flag": false,
+      "replay_or_paper_execution_created_flag": false,
+      "replay_paper_result_packets_created_flag": false,
+      "result_merge_created_flag": false,
+      "review_status": "VERIFIED",
+      "runtime_authority_created_flag": false,
+      "runtime_cash_receipt_created_flag": false,
+      "runtime_resolver_snapshot_created_flag": false,
+      "source_fact_acceptance_created_flag": false,
+      "source_retrieval_created_flag": false,
+      "test_paths": [],
+      "validation_markers": [],
+      "validator_tools": []
     }
   ],
   "review_required_records": [
@@ -4052,7 +4204,8 @@
         "docs/master_plan/generated/QTTTestGate.report.json"
       ],
       "producing_pr_numbers": [
-        47
+        47,
+        48
       ],
       "review_required_flag": true,
       "validation_marker": "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
@@ -4069,7 +4222,8 @@
         "docs/master_plan/generated/QTTTestGate.report.json"
       ],
       "producing_pr_numbers": [
-        47
+        47,
+        48
       ],
       "review_required_flag": true,
       "validation_marker": "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",

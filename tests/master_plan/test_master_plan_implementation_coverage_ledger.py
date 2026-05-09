@@ -33,6 +33,11 @@ EXPECTED_PR47_MARKERS = {
     "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
 }
 
+EXPECTED_PR48_MARKERS = {
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
+}
+
 AUTHORITY_FIELDS = [
     "ledger_is_master_plan_authority",
     "ledger_is_source_fact_authority",
@@ -138,6 +143,59 @@ def test_pr47_tracking_record_is_review_required_without_checkout_specific_metad
     assert "tools/validate_master_plan_implementation_coverage_ledger.py" in record[
         "validator_tools"
     ]
+
+
+def test_pr48_and_pr49_tracking_records_exist_without_checkout_specific_metadata():
+    ledger = _load_generated_ledger()
+    records = {record["pr_number"]: record for record in ledger["pr_records"]}
+
+    assert ledger["coverage_summary"]["total_pr_records"] == 49
+
+    pr48 = records[48]
+    assert pr48["pr_title_or_subject"] == "Fix coverage ledger determinism"
+    assert pr48["implementation_status"] == "TRACKING_ONLY"
+    assert pr48["review_status"] == "VERIFIED"
+    assert pr48["master_plan_section_ids"] == []
+    assert pr48["branch_name_if_known"] is None
+    assert pr48["local_commit_if_known"] is None
+    assert pr48["merge_commit_if_known"] is None
+    assert EXPECTED_PR48_MARKERS.issubset(set(pr48["validation_markers"]))
+    assert "non-authoritative implementation coverage tracking only" in pr48[
+        "master_plan_anchor_terms"
+    ]
+
+    pr49 = records[49]
+    assert pr49["pr_title_or_subject"] == "Ignore validation temp artifacts"
+    assert (
+        pr49["implemented_subject"]
+        == ".tmp/ gitignore hygiene for validation temp artifacts"
+    )
+    assert pr49["implementation_status"] == "TRACKING_ONLY"
+    assert pr49["review_status"] == "VERIFIED"
+    assert pr49["master_plan_section_ids"] == []
+    assert pr49["branch_name_if_known"] is None
+    assert pr49["local_commit_if_known"] is None
+    assert pr49["merge_commit_if_known"] is None
+    assert ".gitignore" in pr49["created_or_changed_paths"]
+
+
+def test_validator_fails_closed_when_pr48_or_pr49_tracking_record_is_missing(tmp_path):
+    ledger = builder.build_ledger(REPO_ROOT)
+    ledger["pr_records"] = [
+        record
+        for record in ledger["pr_records"]
+        if record["pr_number"] not in {48, 49}
+    ]
+    schema = _load_schema()
+
+    failures = validator.validate_ledger(
+        ledger,
+        schema,
+        repo_root=REPO_ROOT,
+        ledger_path=tmp_path / "missing_tracking_records.json",
+    )
+
+    assert any("PR #1 through PR #49" in failure for failure in failures)
 
 
 def test_ledger_authority_flags_remain_false_for_forbidden_authorities():
