@@ -29,6 +29,7 @@ ALWAYS_FORBIDDEN_PATH_PARTS = {
     "dashboard_runtime",
     "dual_result_review",
     "live_connectors",
+    "owner_live_promotion_review",
     "runtime_resolver",
     "runtime_resolver_snapshot",
     "runtime_services",
@@ -192,6 +193,34 @@ STATIC_DUAL_RESULT_REVIEW_ALLOWED_PATHS = {
         "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
     ),
 }
+STATIC_OWNER_LIVE_PROMOTION_REVIEW_ALLOWED_PATHS = {
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/owner_live_promotion_review"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/owner_live_promotion_review/"
+        "stage1_owner_live_promotion_review_input_contract.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/owner_live_promotion_review/"
+        "stage1_owner_approval_receipt_boundary.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/owner_live_promotion_review/"
+        "stage1_owner_live_promotion_review_gate_report.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/owner_live_promotion_review/"
+        "stage1_three_venue_canary_eligibility_handoff_block.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/owner_live_promotion_review"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/owner_live_promotion_review/"
+        "synthetic_stage1_owner_live_promotion_review_contracts.v1.fixture.json"
+    ),
+}
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "dual_result_review.packet.json",
     "dual_result_review_runtime.py",
@@ -199,9 +228,12 @@ FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "live_promotion.py",
     "merged_replay_paper_result.json",
     "order_execution.py",
+    "owner_approval_receipt.json",
     "owner_live_promotion_review.packet.json",
+    "owner_live_promotion_review_runtime.py",
     "profit_claim.json",
     "live_handoff.py",
+    "limited_live_canary_execution.py",
     "paper_execution.py",
     "paper_result_packet.json",
     "replay_input_snapshot.json",
@@ -214,6 +246,7 @@ FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "runtime_resolver_to_replay_paper_runtime.py",
     "stage1runtimeresolversnapshot.input_lock.json",
     "stage1runtimeresolversnapshot.packet.json",
+    "three_venue_canary_eligibility.packet.json",
 }
 PACKAGE_INSTALL_SCRIPT_NAMES = {
     "bootstrap.sh",
@@ -398,6 +431,12 @@ def _is_allowed_static_dual_result_review_contract_path(
     return rel in STATIC_DUAL_RESULT_REVIEW_ALLOWED_PATHS
 
 
+def _is_allowed_static_owner_live_promotion_review_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_OWNER_LIVE_PROMOTION_REVIEW_ALLOWED_PATHS
+
+
 def _is_allowed_always_forbidden_path(
     rel: pathlib.PurePosixPath,
     part_keys: set[str],
@@ -405,6 +444,8 @@ def _is_allowed_always_forbidden_path(
     forbidden_parts = ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys)
     if forbidden_parts == {"dual_result_review"}:
         return _is_allowed_static_dual_result_review_contract_path(rel)
+    if forbidden_parts == {"owner_live_promotion_review"}:
+        return _is_allowed_static_owner_live_promotion_review_contract_path(rel)
     if forbidden_parts == {"runtime_resolver"}:
         return _is_allowed_static_runtime_resolver_contract_path(rel)
     if forbidden_parts == {"runtime_resolver_snapshot"}:
