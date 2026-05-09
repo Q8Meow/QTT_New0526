@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_owner_review_to_canary_eligibility_handoff.schema.json",
+  "title": "Stage-1 Owner Review To Canary Eligibility Handoff Static Schema",
+  "description": "Static PR46 handoff boundary. Owner live-promotion review may only hand off to the three-venue canary eligibility gate. A green eligibility gate may only hand off to the later limited-live canary execution boundary, and PR46 may only produce static blocked readiness reports.",
+  "type": "object",
+  "properties": {
+    "owner_review_to_canary_eligibility_handoff_type": {
+      "const": "STAGE1_OWNER_REVIEW_TO_CANARY_ELIGIBILITY_HANDOFF"
+    },
+    "owner_review_to_canary_eligibility_handoff_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_OWNER_REVIEW_TO_CANARY_ELIGIBILITY_HANDOFF_ONLY_NOT_EXECUTION_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "owner_live_promotion_review_pass_next_allowed_consumer": {
+      "const": "THREE_VENUE_CANARY_ELIGIBILITY_GATE_ONLY"
+    },
+    "three_venue_canary_eligibility_green_next_allowed_consumer": {
+      "const": "LIMITED_LIVE_CANARY_EXECUTION_BOUNDARY_ONLY"
+    },
+    "canary_eligibility_gate_output_scope": {
+      "const": "STATIC_BLOCKED_READINESS_REPORTS_ONLY"
+    },
+    "canary_eligibility_gate_may_only_produce_static_blocked_readiness_reports_flag": {
+      "const": true
+    },
+    "direct_limited_live_canary_execution_allowed_flag": {
+      "const": false
+    },
+    "direct_live_order_router_allowed_flag": {
+      "const": false
+    },
+    "direct_live_arbitrage_allowed_flag": {
+      "const": false
+    },
+    "direct_full_scaled_live_allowed_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_created_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_green_flag": {
+      "const": false
+    },
+    "limited_live_canary_execution_created_flag": {
+      "const": false
+    },
+    "canary_execution_receipt_created_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "owner_review_to_canary_eligibility_handoff_type",
+    "owner_review_to_canary_eligibility_handoff_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "owner_live_promotion_review_pass_next_allowed_consumer",
+    "three_venue_canary_eligibility_green_next_allowed_consumer",
+    "canary_eligibility_gate_output_scope",
+    "canary_eligibility_gate_may_only_produce_static_blocked_readiness_reports_flag",
+    "direct_limited_live_canary_execution_allowed_flag",
+    "direct_live_order_router_allowed_flag",
+    "direct_live_arbitrage_allowed_flag",
+    "direct_full_scaled_live_allowed_flag",
+    "three_venue_canary_eligibility_created_flag",
+    "three_venue_canary_eligibility_green_flag",
+    "limited_live_canary_execution_created_flag",
+    "canary_execution_receipt_created_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocker_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "const": false
+      }
+    }
+  }
+}

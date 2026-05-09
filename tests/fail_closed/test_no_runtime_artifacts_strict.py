@@ -448,6 +448,80 @@ def test_scanner_rejects_arbitrary_files_under_owner_live_promotion_review_direc
     assert any("runtime path" in violation for violation in violations)
 
 
+def test_scanner_allows_pr46_static_three_venue_canary_eligibility_contract_paths_exactly(tmp_path):
+    allowed_paths = [
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_canary_eligibility_input_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_platform_readiness_matrix.schema.json",
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_owner_review_to_canary_eligibility_handoff.schema.json",
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_three_venue_canary_eligibility_gate_report.schema.json",
+        "src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/"
+        "stage1_limited_live_canary_execution_block.schema.json",
+        "tests/fixtures/source_evidence/three_venue_canary_eligibility/"
+        "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json",
+    ]
+    for path_text in allowed_paths:
+        path = tmp_path / path_text
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "three_venue_canary_eligibility_runtime.py",
+        "three_venue_canary_eligibility.packet.json",
+        "limited_live_canary_execution.py",
+        "live_reachability.json",
+        "order_execution.py",
+        "runtime_cash_receipt.json",
+        "profit_claim.json",
+    ],
+)
+def test_scanner_rejects_pr46_three_venue_canary_runtime_live_order_cash_and_profit_artifacts(
+    tmp_path, filename
+):
+    canary_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "three_venue_canary_eligibility"
+    )
+    canary_dir.mkdir(parents=True)
+    (canary_dir / filename).write_text("", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(
+        "runtime resolver artifact" in violation or "runtime path" in violation
+        for violation in violations
+    )
+
+
+def test_scanner_rejects_arbitrary_files_under_three_venue_canary_eligibility_directory(tmp_path):
+    canary_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "three_venue_canary_eligibility"
+    )
+    canary_dir.mkdir(parents=True)
+    (canary_dir / "extra_static_contract.json").write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("runtime path" in violation for violation in violations)
+
+
 def test_scanner_ignores_forbidden_looking_files_inside_venv(tmp_path):
     requests_dir = tmp_path / ".venv" / "Lib" / "site-packages" / "requests"
     requests_dir.mkdir(parents=True)

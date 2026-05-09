@@ -138,6 +138,23 @@ def test_qtt_cumulative_gate_requires_pr45_owner_live_promotion_review_contract_
     )
 
 
+def test_qtt_cumulative_gate_requires_pr46_three_venue_canary_eligibility_contract_receipt():
+    report = _report()
+    receipt = next(
+        item
+        for item in report["prior_gate_receipts"]
+        if item["receipt_id"]
+        == "three_venue_canary_eligibility_contract_gate_receipt_present"
+    )
+
+    assert receipt["satisfied"] is True
+    assert receipt["status"] == "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER"
+    assert (
+        receipt["validation_marker"]
+        == "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_CHECK_OK"
+    )
+
+
 def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap():
     report = _report()
     statuses = {item["receipt_id"]: item["status"] for item in report["prior_gate_receipts"]}
