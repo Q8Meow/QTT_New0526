@@ -1,0 +1,998 @@
+{
+  "fixture_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_CONTRACTS_FIXTURE",
+  "fixture_version": "PR43_CONCURRENT_REPLAY_PAPER_CONTRACTS_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_REPLAY_PAPER_EXECUTION_NOT_SOURCE_FACT",
+  "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_RUNTIME_RESOLVER_SNAPSHOT_NOT_REPLAY_PAPER_RESULT_AUTHORITY",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+  "fixture_no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "creates_replay_paper_input_lock": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_result_packets": false,
+    "creates_paper_result_packets": false,
+    "creates_dual_result_review": false,
+    "creates_owner_live_promotion_review": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "creates_replay_paper_input_lock": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_result_packets": false,
+    "creates_paper_result_packets": false,
+    "creates_dual_result_review": false,
+    "creates_owner_live_promotion_review": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+  ],
+  "input_identity_records": [
+    {
+      "input_identity_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY",
+      "input_identity_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_VALID",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY",
+      "record_authority_class": "STATIC_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "master_plan_edition": "v9.9.750",
+      "master_plan_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+      "runtime_resolver_snapshot_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+      "runtime_resolver_input_lock_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "runtime_resolver_to_replay_paper_handoff_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_REFERENCE",
+      "runtime_resolver_to_replay_paper_handoff_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "runtime_resolver_handoff_gate_report_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_HANDOFF_GATE_REPORT_REFERENCE",
+      "runtime_resolver_handoff_gate_report_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "candidate_contract_identity_set": [
+        "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_A",
+        "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_B"
+      ],
+      "candidate_contract_identity_set_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "venue_normalization_identity_set": [
+        "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_A",
+        "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_B"
+      ],
+      "venue_normalization_identity_set_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "source_connector_semantic_gate_receipt_refs": {
+        "source_evidence_gate_receipt_ids": [
+          "SYNTHETIC_PR39_ACCEPTED_SOURCE_EVIDENCE_EXPORT_GATE_RECEIPT"
+        ],
+        "connector_semantic_gate_receipt_ids": [
+          "SYNTHETIC_PR40_CONNECTOR_SEMANTIC_BINDING_GATE_RECEIPT"
+        ]
+      },
+      "replay_lane_input_identity_ref": {
+        "lane_type": "REPLAY",
+        "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+        "runtime_resolver_snapshot_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+        "runtime_resolver_input_lock_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "runtime_resolver_to_replay_paper_handoff_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_REFERENCE",
+        "runtime_resolver_handoff_gate_report_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_HANDOFF_GATE_REPORT_REFERENCE",
+        "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "candidate_contract_identity_set": [
+          "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_A",
+          "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_B"
+        ],
+        "candidate_contract_identity_set_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "venue_normalization_identity_set": [
+          "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_A",
+          "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_B"
+        ],
+        "venue_normalization_identity_set_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+        "source_evidence_gate_receipt_ids": [
+          "SYNTHETIC_PR39_ACCEPTED_SOURCE_EVIDENCE_EXPORT_GATE_RECEIPT"
+        ],
+        "connector_semantic_gate_receipt_ids": [
+          "SYNTHETIC_PR40_CONNECTOR_SEMANTIC_BINDING_GATE_RECEIPT"
+        ]
+      },
+      "paper_lane_input_identity_ref": {
+        "lane_type": "PAPER",
+        "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+        "runtime_resolver_snapshot_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+        "runtime_resolver_input_lock_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "runtime_resolver_to_replay_paper_handoff_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_REFERENCE",
+        "runtime_resolver_handoff_gate_report_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_HANDOFF_GATE_REPORT_REFERENCE",
+        "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "candidate_contract_identity_set": [
+          "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_A",
+          "SYNTHETIC_CANDIDATE_CONTRACT_IDENTITY_B"
+        ],
+        "candidate_contract_identity_set_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "venue_normalization_identity_set": [
+          "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_A",
+          "SYNTHETIC_VENUE_NORMALIZATION_IDENTITY_B"
+        ],
+        "venue_normalization_identity_set_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+        "source_evidence_gate_receipt_ids": [
+          "SYNTHETIC_PR39_ACCEPTED_SOURCE_EVIDENCE_EXPORT_GATE_RECEIPT"
+        ],
+        "connector_semantic_gate_receipt_ids": [
+          "SYNTHETIC_PR40_CONNECTOR_SEMANTIC_BINDING_GATE_RECEIPT"
+        ]
+      },
+      "input_identity_state": "STATIC_INPUT_IDENTITY_VALID_FOR_GATE_ONLY",
+      "replay_lane_and_paper_lane_must_share_input_identity_flag": true,
+      "replay_lane_and_paper_lane_must_remain_separate_flag": true,
+      "replay_result_packet_may_not_overwrite_paper_result_packet_flag": true,
+      "paper_result_packet_may_not_overwrite_replay_result_packet_flag": true,
+      "combined_result_packet_allowed_flag": false,
+      "lane_result_merge_allowed_flag": false,
+      "mutation_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_result_packets": false,
+        "creates_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_owner_live_promotion_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "replay_lane_contract_records": [
+    {
+      "replay_lane_contract_type": "STAGE1_CONCURRENT_REPLAY_LANE_CONTRACT",
+      "replay_lane_contract_id": "SYNTHETIC_PR43_REPLAY_LANE_CONTRACT_BLOCKED",
+      "fixture_case": "VALID_SYNTHETIC_BLOCKED_REPLAY_LANE_BOUNDARY",
+      "record_authority_class": "STATIC_REPLAY_LANE_CONTRACT_ONLY_NOT_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "shared_input_identity_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_VALID",
+      "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+      "runtime_resolver_snapshot_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+      "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "lane_type": "REPLAY",
+      "lane_contract_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "lane_start_policy": "SEPARATE_NON_SEQUENTIAL_LANE_AFTER_SHARED_INPUT_LOCK_ONLY",
+      "replay_pass_starts_paper_flag": false,
+      "paper_pass_implies_live_eligibility_flag": false,
+      "lane_execution_allowed_flag": false,
+      "result_packet_creation_allowed_flag": false,
+      "result_packet_merge_allowed_flag": false,
+      "dual_result_review_allowed_flag": false,
+      "owner_live_promotion_review_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_REPLAY_LANE_EXECUTION_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_REPLAY_LANE_BOUNDARY_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_result_packets": false,
+        "creates_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_owner_live_promotion_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "paper_lane_contract_records": [
+    {
+      "paper_lane_contract_type": "STAGE1_CONCURRENT_PAPER_LANE_CONTRACT",
+      "paper_lane_contract_id": "SYNTHETIC_PR43_PAPER_LANE_CONTRACT_BLOCKED",
+      "fixture_case": "VALID_SYNTHETIC_BLOCKED_PAPER_LANE_BOUNDARY",
+      "record_authority_class": "STATIC_PAPER_LANE_CONTRACT_ONLY_NOT_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "shared_input_identity_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_VALID",
+      "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+      "runtime_resolver_snapshot_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+      "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "lane_type": "PAPER",
+      "lane_contract_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "lane_start_policy": "SEPARATE_NON_SEQUENTIAL_LANE_AFTER_SHARED_INPUT_LOCK_ONLY",
+      "replay_pass_required_before_paper_flag": false,
+      "paper_pass_implies_live_eligibility_flag": false,
+      "lane_execution_allowed_flag": false,
+      "result_packet_creation_allowed_flag": false,
+      "result_packet_merge_allowed_flag": false,
+      "dual_result_review_allowed_flag": false,
+      "owner_live_promotion_review_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_PAPER_LANE_EXECUTION_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_PAPER_LANE_BOUNDARY_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_result_packets": false,
+        "creates_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_owner_live_promotion_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "replay_result_packet_boundary_records": [
+    {
+      "replay_result_packet_boundary_type": "STAGE1_REPLAY_RESULT_PACKET_BOUNDARY",
+      "replay_result_packet_boundary_id": "SYNTHETIC_PR43_REPLAY_RESULT_PACKET_BOUNDARY_BLOCKED",
+      "fixture_case": "VALID_SYNTHETIC_BLOCKED_REPLAY_RESULT_PACKET_BOUNDARY",
+      "record_authority_class": "STATIC_REPLAY_RESULT_PACKET_BOUNDARY_ONLY_NOT_RESULT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "shared_input_identity_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_VALID",
+      "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+      "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+      "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "lane_type": "REPLAY",
+      "replay_result_packet_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "immutable_after_creation_required_flag": true,
+      "replay_lane_execution_allowed_flag": false,
+      "replay_result_packet_creation_allowed_flag": false,
+      "replay_result_packet_created_flag": false,
+      "result_merge_allowed_flag": false,
+      "dual_result_review_allowed_flag": false,
+      "owner_live_promotion_review_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_REPLAY_RESULT_PACKET_CREATION_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_REPLAY_RESULT_PACKET_BOUNDARY_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_result_packets": false,
+        "creates_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_owner_live_promotion_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "paper_result_packet_boundary_records": [
+    {
+      "paper_result_packet_boundary_type": "STAGE1_PAPER_RESULT_PACKET_BOUNDARY",
+      "paper_result_packet_boundary_id": "SYNTHETIC_PR43_PAPER_RESULT_PACKET_BOUNDARY_BLOCKED",
+      "fixture_case": "VALID_SYNTHETIC_BLOCKED_PAPER_RESULT_PACKET_BOUNDARY",
+      "record_authority_class": "STATIC_PAPER_RESULT_PACKET_BOUNDARY_ONLY_NOT_RESULT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "shared_input_identity_id": "SYNTHETIC_PR43_CONCURRENT_REPLAY_PAPER_INPUT_IDENTITY_VALID",
+      "runtime_resolver_snapshot_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+      "runtime_resolver_input_lock_id": "SYNTHETIC_PR43_RUNTIME_RESOLVER_INPUT_LOCK_REFERENCE",
+      "replay_paper_input_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "lane_type": "PAPER",
+      "paper_result_packet_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "immutable_after_creation_required_flag": true,
+      "paper_lane_execution_allowed_flag": false,
+      "paper_result_packet_creation_allowed_flag": false,
+      "paper_result_packet_created_flag": false,
+      "result_merge_allowed_flag": false,
+      "dual_result_review_allowed_flag": false,
+      "owner_live_promotion_review_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_PAPER_RESULT_PACKET_CREATION_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_PAPER_RESULT_PACKET_BOUNDARY_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_result_packets": false,
+        "creates_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_owner_live_promotion_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "execution_gate_case_records": [
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_ID",
+      "fixture_case": "BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_ID",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "MISSING_ID",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MISSING",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ID_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ID_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_ID_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_DIGEST",
+      "fixture_case": "BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_DIGEST",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "MISSING_DIGEST",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MISSING",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIGEST_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIGEST_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_SNAPSHOT_DIGEST_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_INPUT_LOCK",
+      "fixture_case": "BLOCKED_MISSING_RUNTIME_RESOLVER_INPUT_LOCK",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "MISSING",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_RUNTIME_RESOLVER_INPUT_LOCK_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_INPUT_LOCK_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_RUNTIME_RESOLVER_INPUT_LOCK_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISMATCHED_REPLAY_PAPER_INPUT_IDENTITY_DIGEST",
+      "fixture_case": "BLOCKED_MISMATCHED_REPLAY_PAPER_INPUT_IDENTITY_DIGEST",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MISMATCH",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_REPLAY_PAPER_INPUT_IDENTITY_DIGEST_MISMATCH",
+      "blocker_codes": [
+        "BLOCKED_REPLAY_PAPER_INPUT_IDENTITY_DIGEST_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISMATCHED_REPLAY_PAPER_INPUT_IDENTITY_DIGEST_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISMATCHED_SNAPSHOT_ID_BETWEEN_REPLAY_AND_PAPER",
+      "fixture_case": "BLOCKED_MISMATCHED_SNAPSHOT_ID_BETWEEN_REPLAY_AND_PAPER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MISMATCH",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_REPLAY_PAPER_RUNTIME_RESOLVER_SNAPSHOT_ID_MISMATCH",
+      "blocker_codes": [
+        "BLOCKED_REPLAY_PAPER_RUNTIME_RESOLVER_SNAPSHOT_ID_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISMATCHED_SNAPSHOT_ID_BETWEEN_REPLAY_AND_PAPER_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_HANDOFF_GATE_REPORT",
+      "fixture_case": "BLOCKED_MISSING_HANDOFF_GATE_REPORT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "MISSING",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_REPORT_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_REPORT_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_HANDOFF_GATE_REPORT_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_STALE_RUNTIME_RESOLVER_SNAPSHOT",
+      "fixture_case": "BLOCKED_STALE_RUNTIME_RESOLVER_SNAPSHOT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "STALE",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_STALE_RUNTIME_RESOLVER_SNAPSHOT",
+      "blocker_codes": [
+        "BLOCKED_STALE_RUNTIME_RESOLVER_SNAPSHOT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_STALE_RUNTIME_RESOLVER_SNAPSHOT_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_SUPERSEDED_RUNTIME_RESOLVER_SNAPSHOT",
+      "fixture_case": "BLOCKED_SUPERSEDED_RUNTIME_RESOLVER_SNAPSHOT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "SUPERSEDED",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_SUPERSEDED_RUNTIME_RESOLVER_SNAPSHOT",
+      "blocker_codes": [
+        "BLOCKED_SUPERSEDED_RUNTIME_RESOLVER_SNAPSHOT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_SUPERSEDED_RUNTIME_RESOLVER_SNAPSHOT_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_CONFLICT_RUNTIME_RESOLVER_SNAPSHOT",
+      "fixture_case": "BLOCKED_CONFLICT_RUNTIME_RESOLVER_SNAPSHOT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "CONFLICT_PRESENT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_CONFLICT_RUNTIME_RESOLVER_SNAPSHOT",
+      "blocker_codes": [
+        "BLOCKED_CONFLICT_RUNTIME_RESOLVER_SNAPSHOT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_CONFLICT_RUNTIME_RESOLVER_SNAPSHOT_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_SCHEMA_ERROR",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_ERROR",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_SCHEMA_ERROR",
+      "blocker_codes": [
+        "BLOCKED_SCHEMA_ERROR"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_SCHEMA_ERROR_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_TARGET_MISMATCH",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MISMATCH",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_TARGET_MISMATCH",
+      "blocker_codes": [
+        "BLOCKED_TARGET_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_TARGET_MISMATCH_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_SOURCE_CONNECTOR_SEMANTIC_RECEIPTS",
+      "fixture_case": "BLOCKED_MISSING_SOURCE_CONNECTOR_SEMANTIC_RECEIPTS",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "MISSING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "NONE",
+      "expected_gate_state": "BLOCKED_SOURCE_CONNECTOR_SEMANTIC_GATE_RECEIPTS_MISSING",
+      "blocker_codes": [
+        "BLOCKED_SOURCE_CONNECTOR_SEMANTIC_GATE_RECEIPTS_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_MISSING_SOURCE_CONNECTOR_SEMANTIC_RECEIPTS_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_EXECUTION_CLAIM",
+      "fixture_case": "BLOCKED_REPLAY_EXECUTION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "REPLAY_EXECUTION_AUTHORITY",
+      "expected_gate_state": "BLOCKED_REPLAY_EXECUTION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_REPLAY_EXECUTION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_EXECUTION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_PAPER_EXECUTION_CLAIM",
+      "fixture_case": "BLOCKED_PAPER_EXECUTION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "PAPER_EXECUTION_AUTHORITY",
+      "expected_gate_state": "BLOCKED_PAPER_EXECUTION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_PAPER_EXECUTION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_PAPER_EXECUTION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_RESULT_PACKET_CREATION_CLAIM",
+      "fixture_case": "BLOCKED_REPLAY_RESULT_PACKET_CREATION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "REPLAY_RESULT_PACKET_CREATION",
+      "expected_gate_state": "BLOCKED_REPLAY_RESULT_PACKET_CREATION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_REPLAY_RESULT_PACKET_CREATION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_RESULT_PACKET_CREATION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_PAPER_RESULT_PACKET_CREATION_CLAIM",
+      "fixture_case": "BLOCKED_PAPER_RESULT_PACKET_CREATION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "PAPER_RESULT_PACKET_CREATION",
+      "expected_gate_state": "BLOCKED_PAPER_RESULT_PACKET_CREATION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_PAPER_RESULT_PACKET_CREATION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_PAPER_RESULT_PACKET_CREATION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_PAPER_RESULT_MERGE_CLAIM",
+      "fixture_case": "BLOCKED_REPLAY_PAPER_RESULT_MERGE_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "REPLAY_PAPER_RESULT_MERGE",
+      "expected_gate_state": "BLOCKED_REPLAY_PAPER_RESULT_MERGE_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_REPLAY_PAPER_RESULT_MERGE_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_REPLAY_PAPER_RESULT_MERGE_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_DUAL_RESULT_REVIEW_CLAIM",
+      "fixture_case": "BLOCKED_DUAL_RESULT_REVIEW_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "DUAL_RESULT_REVIEW",
+      "expected_gate_state": "BLOCKED_DUAL_RESULT_REVIEW_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_DUAL_RESULT_REVIEW_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_DUAL_RESULT_REVIEW_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "fixture_case": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "LIVE_ORDER_RUNTIME_CASH_PROFIT",
+      "expected_gate_state": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "fixture_case": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "ATOMICROWS_BUNDLE_HASH_MUTATION",
+      "expected_gate_state": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "case_record_type": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_CASE",
+      "case_id": "SYNTHETIC_PR43_CASE_BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "fixture_case": "BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_reference_state": "PRESENT_CURRENT",
+      "runtime_resolver_input_lock_reference_state": "PRESENT_CURRENT",
+      "handoff_gate_report_reference_state": "PRESENT_GREEN",
+      "snapshot_id_match_state": "MATCHED",
+      "snapshot_digest_match_state": "MATCHED",
+      "input_identity_digest_match_state": "MATCHED",
+      "candidate_contract_identity_set_match_state": "MATCHED",
+      "venue_normalization_identity_set_match_state": "MATCHED",
+      "source_connector_semantic_gate_receipt_state": "PRESENT_MATCHING",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "target_match_state": "MATCHED",
+      "claim_attempt_type": "BLOCKER_REDUCTION",
+      "expected_gate_state": "BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_BLOCKER_REDUCTION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR43_CASE_BLOCKED_BLOCKER_REDUCTION_CLAIM_RECEIPT"
+      ]
+    }
+  ]
+}

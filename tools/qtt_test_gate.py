@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR42_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR43_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -98,6 +98,7 @@ GATE_CHECK_FIELDS = {
     "connector_semantic_binding_ledger_contract_gate_receipt_present",
     "runtime_resolver_snapshot_contract_gate_receipt_present",
     "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
+    "concurrent_replay_paper_contract_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -407,6 +408,47 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
         "validation_marker": (
             "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CHECK_OK"
         ),
+    },
+    {
+        "receipt_id": "concurrent_replay_paper_contract_gate_receipt_present",
+        "description": (
+            "PR43 concurrent replay/paper input identity, lane separation, "
+            "result packet boundary, and no-live static contract is confirmed "
+            "by the static validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "concurrent_replay_paper_input_identity.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "concurrent_replay_lane_contract.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "concurrent_paper_lane_contract.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "replay_result_packet_boundary.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "paper_result_packet_boundary.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/replay_paper/"
+                "concurrent_replay_paper_execution_gate_report.schema.json"
+            ),
+            "tools/stage1_concurrent_replay_paper_contract_check.py",
+            (
+                "tests/fixtures/source_evidence/replay_paper/"
+                "synthetic_concurrent_replay_paper_contracts.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": "STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_CHECK_OK",
     },
 ]
 

@@ -272,6 +272,37 @@ def test_scanner_rejects_arbitrary_files_under_runtime_resolver_snapshot_directo
     assert any("runtime path" in violation for violation in violations)
 
 
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "replay_execution.py",
+        "paper_execution.py",
+        "replay_result_packet.json",
+        "paper_result_packet.json",
+        "merged_replay_paper_result.json",
+        "dual_result_review.packet.json",
+        "live_promotion.py",
+        "order_execution.py",
+    ],
+)
+def test_scanner_rejects_pr43_replay_paper_runtime_execution_result_and_live_artifacts(
+    tmp_path, filename
+):
+    replay_paper_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "replay_paper"
+    )
+    replay_paper_dir.mkdir(parents=True)
+    (replay_paper_dir / filename).write_text("", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("runtime resolver artifact" in violation for violation in violations)
+
+
 def test_scanner_ignores_forbidden_looking_files_inside_venv(tmp_path):
     requests_dir = tmp_path / ".venv" / "Lib" / "site-packages" / "requests"
     requests_dir.mkdir(parents=True)
