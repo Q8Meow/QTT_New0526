@@ -303,6 +303,78 @@ def test_scanner_rejects_pr43_replay_paper_runtime_execution_result_and_live_art
     assert any("runtime resolver artifact" in violation for violation in violations)
 
 
+def test_scanner_allows_pr44_static_dual_result_review_contract_paths_exactly(tmp_path):
+    allowed_paths = [
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_dual_result_review_input_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_replay_paper_comparison_matrix.schema.json",
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_dual_result_review_gate_report.schema.json",
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_owner_live_promotion_handoff_block.schema.json",
+        "tests/fixtures/source_evidence/dual_result_review/"
+        "synthetic_stage1_dual_result_review_contracts.v1.fixture.json",
+    ]
+    for path_text in allowed_paths:
+        path = tmp_path / path_text
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "dual_result_review_runtime.py",
+        "dual_result_review.packet.json",
+        "merged_replay_paper_result.json",
+        "owner_live_promotion_review.packet.json",
+        "live_promotion.py",
+        "order_execution.py",
+        "profit_claim.json",
+    ],
+)
+def test_scanner_rejects_pr44_dual_result_review_runtime_packet_live_order_and_profit_artifacts(
+    tmp_path, filename
+):
+    review_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "dual_result_review"
+    )
+    review_dir.mkdir(parents=True)
+    (review_dir / filename).write_text("", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(
+        "runtime resolver artifact" in violation or "runtime path" in violation
+        for violation in violations
+    )
+
+
+def test_scanner_rejects_arbitrary_files_under_dual_result_review_directory(tmp_path):
+    review_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "dual_result_review"
+    )
+    review_dir.mkdir(parents=True)
+    (review_dir / "extra_static_contract.json").write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("runtime path" in violation for violation in violations)
+
+
 def test_scanner_ignores_forbidden_looking_files_inside_venv(tmp_path):
     requests_dir = tmp_path / ".venv" / "Lib" / "site-packages" / "requests"
     requests_dir.mkdir(parents=True)

@@ -27,6 +27,7 @@ FORBIDDEN_SUFFIXES = {
 }
 ALWAYS_FORBIDDEN_PATH_PARTS = {
     "dashboard_runtime",
+    "dual_result_review",
     "live_connectors",
     "runtime_resolver",
     "runtime_resolver_snapshot",
@@ -165,12 +166,41 @@ STATIC_RUNTIME_RESOLVER_SNAPSHOT_ALLOWED_PATHS = {
         "synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json"
     ),
 }
+STATIC_DUAL_RESULT_REVIEW_ALLOWED_PATHS = {
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/dual_result_review"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_dual_result_review_input_contract.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_replay_paper_comparison_matrix.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_dual_result_review_gate_report.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/dual_result_review/"
+        "stage1_owner_live_promotion_handoff_block.schema.json"
+    ),
+    pathlib.PurePosixPath("tests/fixtures/source_evidence/dual_result_review"),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/dual_result_review/"
+        "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
+    ),
+}
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "dual_result_review.packet.json",
+    "dual_result_review_runtime.py",
     "live_snapshot.py",
     "live_promotion.py",
     "merged_replay_paper_result.json",
     "order_execution.py",
+    "owner_live_promotion_review.packet.json",
+    "profit_claim.json",
     "live_handoff.py",
     "paper_execution.py",
     "paper_result_packet.json",
@@ -362,11 +392,19 @@ def _is_allowed_static_runtime_resolver_snapshot_contract_path(
     return rel in STATIC_RUNTIME_RESOLVER_SNAPSHOT_ALLOWED_PATHS
 
 
+def _is_allowed_static_dual_result_review_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_DUAL_RESULT_REVIEW_ALLOWED_PATHS
+
+
 def _is_allowed_always_forbidden_path(
     rel: pathlib.PurePosixPath,
     part_keys: set[str],
 ) -> bool:
     forbidden_parts = ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys)
+    if forbidden_parts == {"dual_result_review"}:
+        return _is_allowed_static_dual_result_review_contract_path(rel)
     if forbidden_parts == {"runtime_resolver"}:
         return _is_allowed_static_runtime_resolver_contract_path(rel)
     if forbidden_parts == {"runtime_resolver_snapshot"}:

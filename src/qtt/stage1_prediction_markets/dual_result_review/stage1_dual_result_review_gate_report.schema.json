@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_gate_report.schema.json",
+  "title": "Stage-1 Dual Result Review Gate Report Static Schema",
+  "description": "Static PR44 fail-closed report schema for dual-result review contract validation. It creates no source fact acceptance, replay or paper result packet, result merge, review decision, owner approval, owner live-promotion review, live eligibility, live reachability, order authority, runtime cash claim, AtomicRows bundle/hash, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "const": "STAGE1_DUAL_RESULT_REVIEW_GATE_REPORT"
+    },
+    "report_version": {
+      "const": "PR44_STAGE1_DUAL_RESULT_REVIEW_CONTRACT_CHECK_REPORT_V1"
+    },
+    "master_plan_edition": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_sha256": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "created_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "input_contract_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "comparison_matrix_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "handoff_block_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_case_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_missing_result_boundary_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_identity_or_snapshot_mismatch_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_stale_conflict_schema_target_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_merge_or_decision_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_auto_promotion_or_owner_review_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_live_cash_profit_atomicrows_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_state": {
+      "enum": [
+        "STATIC_DUAL_RESULT_REVIEW_CONTRACT_VALIDATED_NO_RUNTIME_AUTHORITY",
+        "FAIL"
+      ]
+    },
+    "validation_failure_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "dual_result_review_pass_next_allowed_consumer": {
+      "const": "OWNER_LIVE_PROMOTION_REVIEW_ONLY"
+    },
+    "dual_result_review_direct_live_consumer_allowed": {
+      "const": false
+    },
+    "dual_result_review_direct_order_router_allowed": {
+      "const": false
+    },
+    "dual_result_review_direct_canary_allowed": {
+      "const": false
+    },
+    "dual_result_review_auto_promotion_allowed": {
+      "const": false
+    },
+    "owner_review_required_before_live_eligibility": {
+      "const": true
+    },
+    "replay_result_packet_created_flag": {
+      "const": false
+    },
+    "paper_result_packet_created_flag": {
+      "const": false
+    },
+    "replay_paper_results_merged_flag": {
+      "const": false
+    },
+    "dual_result_review_decision_created_flag": {
+      "const": false
+    },
+    "owner_live_promotion_review_created_flag": {
+      "const": false
+    },
+    "owner_approval_receipt_created_flag": {
+      "const": false
+    },
+    "live_eligibility_created_flag": {
+      "const": false
+    },
+    "live_reachability_created_flag": {
+      "const": false
+    },
+    "order_authority_created_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_created_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "profit_evidence_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids_emitted": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "created_at_utc",
+    "input_contract_record_count",
+    "comparison_matrix_record_count",
+    "handoff_block_record_count",
+    "gate_case_record_count",
+    "blocked_missing_result_boundary_case_count",
+    "blocked_identity_or_snapshot_mismatch_case_count",
+    "blocked_stale_conflict_schema_target_case_count",
+    "blocked_merge_or_decision_case_count",
+    "blocked_auto_promotion_or_owner_review_case_count",
+    "blocked_live_cash_profit_atomicrows_case_count",
+    "gate_state",
+    "validation_failure_count",
+    "dual_result_review_pass_next_allowed_consumer",
+    "dual_result_review_direct_live_consumer_allowed",
+    "dual_result_review_direct_order_router_allowed",
+    "dual_result_review_direct_canary_allowed",
+    "dual_result_review_auto_promotion_allowed",
+    "owner_review_required_before_live_eligibility",
+    "replay_result_packet_created_flag",
+    "paper_result_packet_created_flag",
+    "replay_paper_results_merged_flag",
+    "dual_result_review_decision_created_flag",
+    "owner_live_promotion_review_created_flag",
+    "owner_approval_receipt_created_flag",
+    "live_eligibility_created_flag",
+    "live_reachability_created_flag",
+    "order_authority_created_flag",
+    "runtime_cash_claim_created_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "profit_evidence_created_flag",
+    "blocker_codes",
+    "receipt_ids_emitted",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_DUAL_RESULT_REVIEW_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "const": false
+      }
+    }
+  }
+}
