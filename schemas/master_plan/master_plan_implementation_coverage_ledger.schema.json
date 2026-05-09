@@ -34,8 +34,8 @@
     },
     "pr_records": {
       "type": "array",
-      "minItems": 47,
-      "maxItems": 47,
+      "minItems": 49,
+      "maxItems": 49,
       "items": {
         "$ref": "#/$defs/pr_record"
       }
@@ -259,8 +259,8 @@
         },
         "total_pr_records": {
           "type": "integer",
-          "minimum": 47,
-          "maximum": 47
+          "minimum": 49,
+          "maximum": 49
         },
         "unknown_unmapped_pr_record_count": {
           "type": "integer",

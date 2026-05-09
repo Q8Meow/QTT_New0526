@@ -301,7 +301,7 @@ STRONG_PR_RECORDS: dict[int, dict[str, Any]] = {
 }
 
 TRACKED_PR_MIN = 1
-TRACKED_PR_MAX = 47
+TRACKED_PR_MAX = 49
 HISTORICAL_REVIEW_REQUIRED_PR_MAX = 37
 STRONG_PR_MIN = 38
 STRONG_PR_MAX = 46
@@ -337,6 +337,36 @@ PR47_TEST_PATHS = [
 PR47_VALIDATION_MARKERS = [
     "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
     "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
+]
+
+PR48_CHANGED_PATHS = [
+    "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
+    "schemas/master_plan/master_plan_implementation_coverage_ledger.schema.json",
+    "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+    "tools/build_master_plan_implementation_coverage_ledger.py",
+    "tools/validate_master_plan_implementation_coverage_ledger.py",
+]
+
+PR48_GENERATED_REPORT_PATHS = [
+    "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
+]
+
+PR48_VALIDATOR_TOOLS = [
+    "tools/build_master_plan_implementation_coverage_ledger.py",
+    "tools/validate_master_plan_implementation_coverage_ledger.py",
+]
+
+PR48_TEST_PATHS = [
+    "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+]
+
+PR48_VALIDATION_MARKERS = [
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
+]
+
+PR49_CHANGED_PATHS = [
+    ".gitignore",
 ]
 
 
@@ -441,6 +471,48 @@ def _pr47_tracking_record() -> dict[str, Any]:
     return record
 
 
+def _pr48_tracking_record() -> dict[str, Any]:
+    record = _base_pr_record(
+        pr_number=48,
+        pr_title_or_subject="Fix coverage ledger determinism",
+        implementation_status="TRACKING_ONLY",
+        review_status="VERIFIED",
+    )
+    record["implemented_subject"] = "coverage ledger determinism hotfix"
+    record["master_plan_anchor_terms"] = [
+        "PR48",
+        "Fix coverage ledger determinism",
+        "non-authoritative implementation coverage tracking only",
+        "no runtime/source/live/order/profit authority",
+    ]
+    record["created_or_changed_paths"] = sorted(PR48_CHANGED_PATHS)
+    record["generated_report_paths"] = sorted(PR48_GENERATED_REPORT_PATHS)
+    record["validator_tools"] = sorted(PR48_VALIDATOR_TOOLS)
+    record["test_paths"] = sorted(PR48_TEST_PATHS)
+    record["validation_markers"] = sorted(PR48_VALIDATION_MARKERS)
+    return record
+
+
+def _pr49_tracking_record() -> dict[str, Any]:
+    record = _base_pr_record(
+        pr_number=49,
+        pr_title_or_subject="Ignore validation temp artifacts",
+        implementation_status="TRACKING_ONLY",
+        review_status="VERIFIED",
+    )
+    record["implemented_subject"] = (
+        ".tmp/ gitignore hygiene for validation temp artifacts"
+    )
+    record["master_plan_anchor_terms"] = [
+        "PR49",
+        "Ignore validation temp artifacts",
+        ".tmp/ gitignore hygiene for validation temp artifacts",
+        "no runtime/source/live/order/profit authority",
+    ]
+    record["created_or_changed_paths"] = sorted(PR49_CHANGED_PATHS)
+    return record
+
+
 def _pr_records() -> list[dict[str, Any]]:
     records = [
         _review_required_historical_pr_record(pr_number)
@@ -451,6 +523,8 @@ def _pr_records() -> list[dict[str, Any]]:
         for pr_number in range(STRONG_PR_MIN, STRONG_PR_MAX + 1)
     )
     records.append(_pr47_tracking_record())
+    records.append(_pr48_tracking_record())
+    records.append(_pr49_tracking_record())
     return records
 
 

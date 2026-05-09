@@ -52,6 +52,10 @@ EXPECTED_STRONG_PR_SECTIONS = {
 
 EXPECTED_PR47_MARKERS = set(builder.PR47_VALIDATION_MARKERS)
 EXPECTED_PR47_VALIDATORS = set(builder.PR47_VALIDATOR_TOOLS)
+EXPECTED_PR48_MARKERS = set(builder.PR48_VALIDATION_MARKERS)
+EXPECTED_PR48_VALIDATORS = set(builder.PR48_VALIDATOR_TOOLS)
+EXPECTED_PR48_PATHS = set(builder.PR48_CHANGED_PATHS)
+EXPECTED_PR49_PATHS = set(builder.PR49_CHANGED_PATHS)
 
 FORBIDDEN_TRUE_FIELDS = {
     "ledger_is_master_plan_authority",
@@ -298,7 +302,9 @@ def _pr_record_failures(ledger: dict[str, Any]) -> list[str]:
 
     expected_pr_numbers = list(range(builder.TRACKED_PR_MIN, builder.TRACKED_PR_MAX + 1))
     if sorted(by_pr) != expected_pr_numbers:
-        failures.append("pr_records must contain exactly PR #1 through PR #47")
+        failures.append(
+            f"pr_records must contain exactly PR #1 through PR #{builder.TRACKED_PR_MAX}"
+        )
 
     for pr_number in range(
         builder.TRACKED_PR_MIN,
@@ -362,6 +368,70 @@ def _pr_record_failures(ledger: dict[str, Any]) -> list[str]:
         if missing_validators:
             failures.append(
                 "PR #47 missing validator tools: " + ", ".join(sorted(missing_validators))
+            )
+
+    pr48 = by_pr.get(48)
+    if not isinstance(pr48, dict):
+        failures.append("PR #48 tracking record is missing")
+    else:
+        if pr48.get("implementation_status") != "TRACKING_ONLY":
+            failures.append("PR #48 must remain TRACKING_ONLY")
+        if pr48.get("review_status") != "VERIFIED":
+            failures.append("PR #48 tracking hotfix record must be VERIFIED")
+        if pr48.get("pr_title_or_subject") != "Fix coverage ledger determinism":
+            failures.append("PR #48 title must remain Fix coverage ledger determinism")
+        if pr48.get("branch_name_if_known") is not None:
+            failures.append("PR #48 must not require branch-name metadata")
+        if pr48.get("local_commit_if_known") is not None:
+            failures.append("PR #48 must not require local branch-tip metadata")
+        if pr48.get("merge_commit_if_known") is not None:
+            failures.append("PR #48 must not require merge-commit metadata")
+        if pr48.get("master_plan_section_ids") != []:
+            failures.append("PR #48 must not claim a verified master-plan section mapping")
+        missing_markers = EXPECTED_PR48_MARKERS - set(pr48.get("validation_markers", []))
+        if missing_markers:
+            failures.append(
+                "PR #48 missing validation markers: " + ", ".join(sorted(missing_markers))
+            )
+        missing_validators = EXPECTED_PR48_VALIDATORS - set(
+            pr48.get("validator_tools", [])
+        )
+        if missing_validators:
+            failures.append(
+                "PR #48 missing validator tools: " + ", ".join(sorted(missing_validators))
+            )
+        missing_paths = EXPECTED_PR48_PATHS - set(pr48.get("created_or_changed_paths", []))
+        if missing_paths:
+            failures.append(
+                "PR #48 missing stable changed paths: " + ", ".join(sorted(missing_paths))
+            )
+
+    pr49 = by_pr.get(49)
+    if not isinstance(pr49, dict):
+        failures.append("PR #49 tracking record is missing")
+    else:
+        if pr49.get("implementation_status") != "TRACKING_ONLY":
+            failures.append("PR #49 must remain TRACKING_ONLY")
+        if pr49.get("review_status") != "VERIFIED":
+            failures.append("PR #49 hygiene tracking record must be VERIFIED")
+        if pr49.get("pr_title_or_subject") != "Ignore validation temp artifacts":
+            failures.append("PR #49 title must remain Ignore validation temp artifacts")
+        if pr49.get("implemented_subject") != (
+            ".tmp/ gitignore hygiene for validation temp artifacts"
+        ):
+            failures.append("PR #49 subject must remain .tmp/ gitignore hygiene")
+        if pr49.get("branch_name_if_known") is not None:
+            failures.append("PR #49 must not require branch-name metadata")
+        if pr49.get("local_commit_if_known") is not None:
+            failures.append("PR #49 must not require local branch-tip metadata")
+        if pr49.get("merge_commit_if_known") is not None:
+            failures.append("PR #49 must not require merge-commit metadata")
+        if pr49.get("master_plan_section_ids") != []:
+            failures.append("PR #49 must not claim a verified master-plan section mapping")
+        missing_paths = EXPECTED_PR49_PATHS - set(pr49.get("created_or_changed_paths", []))
+        if missing_paths:
+            failures.append(
+                "PR #49 missing stable changed paths: " + ", ".join(sorted(missing_paths))
             )
 
     return failures
