@@ -9,7 +9,7 @@
       "const": "QTT_CUMULATIVE_TEST_GATE_REPORT"
     },
     "report_version": {
-      "const": "PR44_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+      "const": "PR45_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
     },
     "phase": {
       "const": "first-coding-runbook"
@@ -28,8 +28,8 @@
     },
     "prior_gate_receipts": {
       "type": "array",
-      "minItems": 18,
-      "maxItems": 18,
+      "minItems": 20,
+      "maxItems": 20,
       "items": {
         "$ref": "#/$defs/prior_gate_receipt"
       }
@@ -153,7 +153,8 @@
             "runtime_resolver_snapshot_contract_gate_receipt_present",
             "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
             "concurrent_replay_paper_contract_gate_receipt_present",
-            "dual_result_review_contract_gate_receipt_present"
+            "dual_result_review_contract_gate_receipt_present",
+            "owner_live_promotion_review_contract_gate_receipt_present"
           ]
         },
         "description": {
@@ -301,6 +302,9 @@
         "dual_result_review_contract_gate_receipt_present": {
           "type": "boolean"
         },
+        "owner_live_promotion_review_contract_gate_receipt_present": {
+          "type": "boolean"
+        },
         "no_stale_generated_derivative_completion_claim": {
           "type": "boolean"
         },
@@ -346,6 +350,7 @@
         "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
         "concurrent_replay_paper_contract_gate_receipt_present",
         "dual_result_review_contract_gate_receipt_present",
+        "owner_live_promotion_review_contract_gate_receipt_present",
         "no_stale_generated_derivative_completion_claim",
         "no_hidden_zip_authority",
         "no_source_dependent_connector_semantic_values",

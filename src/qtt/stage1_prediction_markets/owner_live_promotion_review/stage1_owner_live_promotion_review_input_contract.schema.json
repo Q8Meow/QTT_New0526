@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_live_promotion_review_input_contract.schema.json",
+  "title": "Stage-1 Owner Live-Promotion Review Input Contract Static Schema",
+  "description": "Static PR45 owner live-promotion review input contract. It consumes only a synthetic PR44 dual-result review gate report reference plus separate replay and paper result boundary references. It creates no owner approval decision, owner approval receipt, live eligibility, canary eligibility, canary execution, live reachability, order authority, runtime cash claim, AtomicRows bundle/hash, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "owner_live_promotion_review_input_contract_type": {
+      "const": "STAGE1_OWNER_LIVE_PROMOTION_REVIEW_INPUT_CONTRACT"
+    },
+    "owner_live_promotion_review_input_contract_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_OWNER_LIVE_PROMOTION_REVIEW_INPUT_CONTRACT_ONLY_NOT_OWNER_APPROVAL_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "master_plan_edition": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_sha256": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "dual_result_review_gate_report_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "dual_result_review_gate_report_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "dual_result_review_gate_report_state": {
+      "enum": [
+        "PRESENT_IMMUTABLE_PASS_OWNER_REVIEW_REQUIRED",
+        "MISSING",
+        "STALE",
+        "SUPERSEDED",
+        "CONFLICT",
+        "SCHEMA_ERROR",
+        "TARGET_MISMATCH"
+      ]
+    },
+    "dual_result_review_state": {
+      "enum": [
+        "PASS_OWNER_REVIEW_REQUIRED",
+        "MISSING",
+        "STALE",
+        "SUPERSEDED",
+        "CONFLICT",
+        "SCHEMA_ERROR",
+        "TARGET_MISMATCH",
+        "INVALID"
+      ]
+    },
+    "dual_result_review_input_identity_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "replay_result_packet_boundary_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "paper_result_packet_boundary_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "replay_result_packet_boundary_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "paper_result_packet_boundary_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "replay_paper_result_boundaries_separate_flag": {
+      "const": true
+    },
+    "runtime_resolver_snapshot_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "dual_result_runtime_resolver_snapshot_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "replay_runtime_resolver_snapshot_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "paper_runtime_resolver_snapshot_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "runtime_resolver_snapshot_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "dual_result_runtime_resolver_snapshot_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "replay_runtime_resolver_snapshot_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "paper_runtime_resolver_snapshot_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "runtime_resolver_snapshot_identity_unchanged_flag": {
+      "const": true
+    },
+    "upstream_report_references_immutable_flag": {
+      "const": true
+    },
+    "upstream_receipt_references_immutable_flag": {
+      "const": true
+    },
+    "input_identity_digest_state": {
+      "enum": [
+        "PRESENT",
+        "MISSING"
+      ]
+    },
+    "conflict_state": {
+      "enum": [
+        "NO_CONFLICT",
+        "CONFLICT_PRESENT"
+      ]
+    },
+    "schema_state": {
+      "enum": [
+        "SCHEMA_VALID",
+        "SCHEMA_ERROR"
+      ]
+    },
+    "lane_match_state": {
+      "enum": [
+        "MATCH",
+        "MISMATCH"
+      ]
+    },
+    "target_match_state": {
+      "enum": [
+        "MATCH",
+        "MISMATCH"
+      ]
+    },
+    "dual_result_review_pass_next_allowed_consumer": {
+      "const": "OWNER_LIVE_PROMOTION_REVIEW_ONLY"
+    },
+    "owner_live_promotion_review_pass_next_allowed_consumer": {
+      "const": "THREE_VENUE_CANARY_ELIGIBILITY_GATE_ONLY"
+    },
+    "owner_review_required_after_dual_result_review_flag": {
+      "const": true
+    },
+    "live_eligibility_requires_later_three_venue_canary_eligibility_gate": {
+      "const": true
+    },
+    "result_merge_claimed_flag": {
+      "const": false
+    },
+    "dual_result_review_decision_created_flag": {
+      "const": false
+    },
+    "owner_live_promotion_review_decision_created_flag": {
+      "const": false
+    },
+    "owner_approval_receipt_created_flag": {
+      "const": false
+    },
+    "owner_approval_receipt_creation_claimed_flag": {
+      "const": false
+    },
+    "owner_live_promotion_review_direct_live_consumer_allowed": {
+      "const": false
+    },
+    "owner_live_promotion_review_direct_order_router_allowed": {
+      "const": false
+    },
+    "owner_live_promotion_review_direct_canary_execution_allowed": {
+      "const": false
+    },
+    "owner_live_promotion_review_auto_approval_allowed": {
+      "const": false
+    },
+    "owner_live_promotion_review_auto_promotion_allowed": {
+      "const": false
+    },
+    "auto_live_promotion_claimed_flag": {
+      "const": false
+    },
+    "direct_canary_eligibility_claimed_flag": {
+      "const": false
+    },
+    "direct_canary_execution_claimed_flag": {
+      "const": false
+    },
+    "live_eligibility_allowed_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_allowed_flag": {
+      "const": false
+    },
+    "three_venue_canary_eligibility_created_flag": {
+      "const": false
+    },
+    "limited_live_canary_execution_created_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "owner_live_promotion_review_input_contract_type",
+    "owner_live_promotion_review_input_contract_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "dual_result_review_gate_report_ref",
+    "dual_result_review_gate_report_digest",
+    "dual_result_review_gate_report_state",
+    "dual_result_review_state",
+    "dual_result_review_input_identity_digest",
+    "replay_result_packet_boundary_ref",
+    "paper_result_packet_boundary_ref",
+    "replay_result_packet_boundary_digest",
+    "paper_result_packet_boundary_digest",
+    "replay_paper_result_boundaries_separate_flag",
+    "runtime_resolver_snapshot_id",
+    "dual_result_runtime_resolver_snapshot_id",
+    "replay_runtime_resolver_snapshot_id",
+    "paper_runtime_resolver_snapshot_id",
+    "runtime_resolver_snapshot_digest",
+    "dual_result_runtime_resolver_snapshot_digest",
+    "replay_runtime_resolver_snapshot_digest",
+    "paper_runtime_resolver_snapshot_digest",
+    "runtime_resolver_snapshot_identity_unchanged_flag",
+    "upstream_report_references_immutable_flag",
+    "upstream_receipt_references_immutable_flag",
+    "input_identity_digest_state",
+    "conflict_state",
+    "schema_state",
+    "lane_match_state",
+    "target_match_state",
+    "dual_result_review_pass_next_allowed_consumer",
+    "owner_live_promotion_review_pass_next_allowed_consumer",
+    "owner_review_required_after_dual_result_review_flag",
+    "live_eligibility_requires_later_three_venue_canary_eligibility_gate",
+    "result_merge_claimed_flag",
+    "dual_result_review_decision_created_flag",
+    "owner_live_promotion_review_decision_created_flag",
+    "owner_approval_receipt_created_flag",
+    "owner_approval_receipt_creation_claimed_flag",
+    "owner_live_promotion_review_direct_live_consumer_allowed",
+    "owner_live_promotion_review_direct_order_router_allowed",
+    "owner_live_promotion_review_direct_canary_execution_allowed",
+    "owner_live_promotion_review_auto_approval_allowed",
+    "owner_live_promotion_review_auto_promotion_allowed",
+    "auto_live_promotion_claimed_flag",
+    "direct_canary_eligibility_claimed_flag",
+    "direct_canary_execution_claimed_flag",
+    "live_eligibility_allowed_flag",
+    "three_venue_canary_eligibility_allowed_flag",
+    "three_venue_canary_eligibility_created_flag",
+    "limited_live_canary_execution_created_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "profit_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "STAGE1_OWNER_LIVE_PROMOTION_REVIEW_CONTRACT_STATIC_AUDIT"
+        }
+      ],
+      "items": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "retrieves_source_evidence": { "const": false },
+        "accepts_source_facts": { "const": false },
+        "creates_real_accepted_source_evidence": { "const": false },
+        "creates_accepted_source_packets": { "const": false },
+        "populates_production_connector_semantic_values": { "const": false },
+        "imports_live_clients": { "const": false },
+        "creates_network_io": { "const": false },
+        "creates_runtime_resolver_snapshot": { "const": false },
+        "executes_replay_or_paper": { "const": false },
+        "creates_replay_result_packets": { "const": false },
+        "creates_paper_result_packets": { "const": false },
+        "merges_replay_paper_results": { "const": false },
+        "creates_dual_result_review_decision": { "const": false },
+        "creates_owner_live_promotion_review": { "const": false },
+        "creates_owner_approval_receipt": { "const": false },
+        "creates_live_eligibility": { "const": false },
+        "creates_three_venue_canary_eligibility": { "const": false },
+        "creates_limited_live_canary_execution": { "const": false },
+        "creates_live_reachability": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_claim": { "const": false },
+        "creates_atomicrows_bundle_or_hash": { "const": false },
+        "reduces_blockers": { "const": false },
+        "creates_profit_evidence": { "const": false }
+      },
+      "required": [
+        "retrieves_source_evidence",
+        "accepts_source_facts",
+        "creates_real_accepted_source_evidence",
+        "creates_accepted_source_packets",
+        "populates_production_connector_semantic_values",
+        "imports_live_clients",
+        "creates_network_io",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_replay_result_packets",
+        "creates_paper_result_packets",
+        "merges_replay_paper_results",
+        "creates_dual_result_review_decision",
+        "creates_owner_live_promotion_review",
+        "creates_owner_approval_receipt",
+        "creates_live_eligibility",
+        "creates_three_venue_canary_eligibility",
+        "creates_limited_live_canary_execution",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_claim",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
