@@ -811,6 +811,38 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "build_master_plan_implementation_coverage_ledger.py"),
+            "--repo-root",
+            ".",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "MasterPlanImplementationCoverageLedger.json",
+            ),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_master_plan_implementation_coverage_ledger.py"),
+            "--repo-root",
+            ".",
+            "--ledger",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "MasterPlanImplementationCoverageLedger.json",
+            ),
+            "--schema",
+            _path(
+                "schemas",
+                "master_plan",
+                "master_plan_implementation_coverage_ledger.schema.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",

@@ -811,6 +811,38 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "build_master_plan_implementation_coverage_ledger.py"),
+            "--repo-root",
+            ".",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "MasterPlanImplementationCoverageLedger.json"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_master_plan_implementation_coverage_ledger.py"),
+            "--repo-root",
+            ".",
+            "--ledger",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "MasterPlanImplementationCoverageLedger.json"
+            ),
+            "--schema",
+            str(
+                Path("schemas")
+                / "master_plan"
+                / "master_plan_implementation_coverage_ledger.schema.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -1798,6 +1830,62 @@ def test_runner_includes_pr46_three_venue_canary_eligibility_contract_after_pr45
             / "master_plan"
             / "generated"
             / "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr47_implementation_coverage_ledger_after_pr46_and_before_qtt_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr46_index = command_names.index(
+        "stage1_three_venue_canary_eligibility_contract_check.py"
+    )
+    builder_index = command_names.index(
+        "build_master_plan_implementation_coverage_ledger.py"
+    )
+    validator_index = command_names.index(
+        "validate_master_plan_implementation_coverage_ledger.py"
+    )
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr46_index < builder_index < validator_index < qtt_gate_index < no_runtime_index
+    assert commands[builder_index] == [
+        python_executable,
+        str(Path("tools") / "build_master_plan_implementation_coverage_ledger.py"),
+        "--repo-root",
+        ".",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "MasterPlanImplementationCoverageLedger.json"
+        ),
+    ]
+    assert commands[validator_index] == [
+        python_executable,
+        str(Path("tools") / "validate_master_plan_implementation_coverage_ledger.py"),
+        "--repo-root",
+        ".",
+        "--ledger",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "MasterPlanImplementationCoverageLedger.json"
+        ),
+        "--schema",
+        str(
+            Path("schemas")
+            / "master_plan"
+            / "master_plan_implementation_coverage_ledger.schema.json"
         ),
     ]
 
