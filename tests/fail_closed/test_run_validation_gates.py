@@ -324,6 +324,25 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_stage1_runtime_scaffold_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            str(
+                Path("schemas")
+                / "runtime_orchestration"
+                / "stage1_runtime_scaffold_gate.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "runtime_orchestration"
+                / "synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -728,6 +747,50 @@ def test_runner_includes_connector_scaffold_gate_after_adapter_and_before_no_run
             / "fixtures"
             / "connectors"
             / "synthetic_connector_scaffold_source_required_blocked.v1.fixture.json"
+        ),
+    ]
+
+
+def test_runner_includes_stage1_runtime_scaffold_gate_after_connector_and_before_no_runtime(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    connector_scaffold_gate_index = command_names.index(
+        "validate_connector_scaffold_source_required_gate_static.py"
+    )
+    stage1_runtime_scaffold_gate_index = command_names.index(
+        "validate_stage1_runtime_scaffold_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+    assert (
+        connector_scaffold_gate_index
+        < stage1_runtime_scaffold_gate_index
+        < no_runtime_index
+    )
+
+    audit_command = commands[stage1_runtime_scaffold_gate_index]
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_stage1_runtime_scaffold_gate_static.py"),
+        "--repo-root",
+        ".",
+        "--schema",
+        str(
+            Path("schemas")
+            / "runtime_orchestration"
+            / "stage1_runtime_scaffold_gate.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "runtime_orchestration"
+            / "synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json"
         ),
     ]
 
