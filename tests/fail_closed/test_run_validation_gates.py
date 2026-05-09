@@ -391,6 +391,44 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "source_evidence_acceptance_consumer_contract_check.py"),
+            "--repo-root",
+            ".",
+            "--consumer-contract-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "source_evidence"
+                / "acceptance"
+                / "accepted_source_evidence_consumer_contract.schema.json"
+            ),
+            "--target-field-ledger-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "source_evidence"
+                / "acceptance"
+                / "stage1_target_field_acceptance_ledger_record.schema.json"
+            ),
+            "--export-record-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "source_evidence"
+                / "acceptance"
+                / "stage1_accepted_source_evidence_export_record.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "acceptance_consumer_contract"
+                / "synthetic_accepted_source_evidence_consumer_contract_records.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",

@@ -1,6 +1,6 @@
 {
   "report_type": "QTT_CUMULATIVE_TEST_GATE_REPORT",
-  "report_version": "PR38_QTT_CUMULATIVE_TEST_GATE_REPORT_V1",
+  "report_version": "PR39_QTT_CUMULATIVE_TEST_GATE_REPORT_V1",
   "phase": "first-coding-runbook",
   "status": "PASS",
   "strict_no_claim": true,
@@ -300,6 +300,31 @@
       "creates_atomicrows_bundle_or_4183_rows": false,
       "reduces_blockers": false,
       "creates_profit_evidence": false
+    },
+    {
+      "receipt_id": "accepted_source_evidence_consumer_contract_gate_receipt_present",
+      "description": "PR39 accepted source-evidence export ledger and consumer authorization contract is confirmed by prior validation marker.",
+      "required": true,
+      "satisfied": true,
+      "status": "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER",
+      "receipt_source": "STATIC_VALIDATION_MARKER",
+      "paths": [
+        "src/qtt/source_evidence/acceptance/accepted_source_evidence_consumer_contract.schema.json",
+        "src/qtt/source_evidence/acceptance/stage1_target_field_acceptance_ledger_record.schema.json",
+        "src/qtt/source_evidence/acceptance/stage1_accepted_source_evidence_export_record.schema.json",
+        "tools/source_evidence_acceptance_consumer_contract_check.py",
+        "tests/fixtures/source_evidence/acceptance_consumer_contract/synthetic_accepted_source_evidence_consumer_contract_records.v1.fixture.json"
+      ],
+      "validation_marker": "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_VALIDATION_OK",
+      "creates_source_fact_acceptance": false,
+      "creates_connector_semantics": false,
+      "creates_runtime_resolver_snapshot": false,
+      "executes_replay_or_paper": false,
+      "creates_live_reachability": false,
+      "creates_runtime_cash_or_usable_cash": false,
+      "creates_atomicrows_bundle_or_4183_rows": false,
+      "reduces_blockers": false,
+      "creates_profit_evidence": false
     }
   ],
   "gate_checks": {
@@ -316,6 +341,7 @@
     "connector_scaffold_source_required_gate_receipt_present": true,
     "stage1_runtime_scaffold_gate_receipt_present": true,
     "source_fact_binding_connector_semantic_readiness_gate_receipt_present": true,
+    "accepted_source_evidence_consumer_contract_gate_receipt_present": true,
     "no_stale_generated_derivative_completion_claim": true,
     "no_hidden_zip_authority": true,
     "no_source_dependent_connector_semantic_values": true,

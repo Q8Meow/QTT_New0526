@@ -9,7 +9,7 @@
       "const": "QTT_CUMULATIVE_TEST_GATE_REPORT"
     },
     "report_version": {
-      "const": "PR38_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+      "const": "PR39_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
     },
     "phase": {
       "const": "first-coding-runbook"
@@ -28,8 +28,8 @@
     },
     "prior_gate_receipts": {
       "type": "array",
-      "minItems": 13,
-      "maxItems": 13,
+      "minItems": 14,
+      "maxItems": 14,
       "items": {
         "$ref": "#/$defs/prior_gate_receipt"
       }
@@ -147,7 +147,8 @@
             "venue_neutral_prediction_adapter_gate_receipt_present",
             "connector_scaffold_source_required_gate_receipt_present",
             "stage1_runtime_scaffold_gate_receipt_present",
-            "source_fact_binding_connector_semantic_readiness_gate_receipt_present"
+            "source_fact_binding_connector_semantic_readiness_gate_receipt_present",
+            "accepted_source_evidence_consumer_contract_gate_receipt_present"
           ]
         },
         "description": {
@@ -277,6 +278,9 @@
         "source_fact_binding_connector_semantic_readiness_gate_receipt_present": {
           "type": "boolean"
         },
+        "accepted_source_evidence_consumer_contract_gate_receipt_present": {
+          "type": "boolean"
+        },
         "no_stale_generated_derivative_completion_claim": {
           "type": "boolean"
         },
@@ -316,6 +320,7 @@
         "connector_scaffold_source_required_gate_receipt_present",
         "stage1_runtime_scaffold_gate_receipt_present",
         "source_fact_binding_connector_semantic_readiness_gate_receipt_present",
+        "accepted_source_evidence_consumer_contract_gate_receipt_present",
         "no_stale_generated_derivative_completion_claim",
         "no_hidden_zip_authority",
         "no_source_dependent_connector_semantic_values",
