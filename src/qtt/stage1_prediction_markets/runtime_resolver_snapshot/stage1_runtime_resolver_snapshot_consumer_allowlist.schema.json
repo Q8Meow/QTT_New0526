@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json",
+  "title": "Stage-1 Runtime Resolver Snapshot Consumer Allowlist Static Schema",
+  "description": "Static fail-closed consumer allowlist for a future green runtime resolver snapshot. The only immediate allowed consumer is the concurrent replay/paper input-lock gate. This schema creates no runtime execution authority, no replay or paper execution, no result packet, no dual-result review, no live reachability, no order authority, no runtime cash claim, no AtomicRows mutation, no blocker reduction, and no profit evidence.",
+  "type": "object",
+  "properties": {
+    "consumer_allowlist_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST"
+    },
+    "consumer_allowlist_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "consumer_allowlist_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "allowlist_authority_class": {
+      "const": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "runtime_resolver_snapshot_green_next_allowed_consumer": {
+      "const": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY"
+    },
+    "allowed_immediate_consumer_count": {
+      "const": 1
+    },
+    "allowed_immediate_consumers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "const": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY"
+      }
+    },
+    "blocked_immediate_consumers": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/blocked_consumer_rule"
+      }
+    },
+    "concurrent_replay_paper_input_lock_gate_consumer_allowed_flag": {
+      "const": true
+    },
+    "direct_live_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_dual_result_review_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_owner_review_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_canary_eligibility_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_live_gate_day1_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_dashboard_mutation_consumer_allowed_flag": {
+      "const": false
+    },
+    "direct_order_router_consumer_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_profit_consumer_allowed_flag": {
+      "const": false
+    },
+    "undeclared_consumer_allowed_flag": {
+      "const": false
+    },
+    "runtime_execution_authority_created_flag": {
+      "const": false
+    },
+    "replay_paper_execution_authority_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_result_packet_creation_allowed_flag": {
+      "const": false
+    },
+    "dual_result_review_creation_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_mutation_allowed_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "consumer_allowlist_type",
+    "consumer_allowlist_id",
+    "consumer_allowlist_digest",
+    "fixture_case",
+    "allowlist_authority_class",
+    "synthetic_data_notice",
+    "runtime_resolver_snapshot_green_next_allowed_consumer",
+    "allowed_immediate_consumer_count",
+    "allowed_immediate_consumers",
+    "blocked_immediate_consumers",
+    "concurrent_replay_paper_input_lock_gate_consumer_allowed_flag",
+    "direct_live_consumer_allowed_flag",
+    "direct_dual_result_review_consumer_allowed_flag",
+    "direct_owner_review_consumer_allowed_flag",
+    "direct_canary_eligibility_consumer_allowed_flag",
+    "direct_live_gate_day1_consumer_allowed_flag",
+    "direct_dashboard_mutation_consumer_allowed_flag",
+    "direct_order_router_consumer_allowed_flag",
+    "runtime_cash_profit_consumer_allowed_flag",
+    "undeclared_consumer_allowed_flag",
+    "runtime_execution_authority_created_flag",
+    "replay_paper_execution_authority_allowed_flag",
+    "replay_paper_result_packet_creation_allowed_flag",
+    "dual_result_review_creation_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_mutation_allowed_flag",
+    "blocker_reduction_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocked_consumer_rule": {
+      "type": "object",
+      "properties": {
+        "consumer_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "consumer_class": {
+          "enum": [
+            "DIRECT_LIVE_CONSUMER",
+            "DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+            "DIRECT_OWNER_REVIEW_CONSUMER",
+            "DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+            "DIRECT_LIVE_GATE_DAY1_CONSUMER",
+            "DIRECT_DASHBOARD_MUTATION_CONSUMER",
+            "DIRECT_ORDER_ROUTER_CONSUMER",
+            "RUNTIME_CASH_PROFIT_CONSUMER",
+            "UNDECLARED_CONSUMER"
+          ]
+        },
+        "consumer_allowed_flag": {
+          "const": false
+        },
+        "authorization_state": {
+          "const": "BLOCKED_FORBIDDEN_CONSUMER"
+        },
+        "blocker_code": {
+          "$ref": "#/$defs/non_empty_string"
+        }
+      },
+      "required": [
+        "consumer_id",
+        "consumer_class",
+        "consumer_allowed_flag",
+        "authorization_state",
+        "blocker_code"
+      ],
+      "additionalProperties": false
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "retrieves_source_evidence": {
+          "const": false
+        },
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_real_accepted_source_evidence": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "populates_production_connector_semantic_values": {
+          "const": false
+        },
+        "imports_live_clients": {
+          "const": false
+        },
+        "creates_network_io": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "creates_replay_paper_input_lock": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_replay_paper_result_packets": {
+          "const": false
+        },
+        "creates_dual_result_review": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_runtime_cash_claim": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_hash": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "retrieves_source_evidence",
+        "accepts_source_facts",
+        "creates_real_accepted_source_evidence",
+        "creates_accepted_source_packets",
+        "populates_production_connector_semantic_values",
+        "imports_live_clients",
+        "creates_network_io",
+        "creates_runtime_resolver_snapshot",
+        "creates_replay_paper_input_lock",
+        "executes_replay_or_paper",
+        "creates_replay_paper_result_packets",
+        "creates_dual_result_review",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_claim",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_STATIC_AUDIT"
+      }
+    }
+  }
+}
