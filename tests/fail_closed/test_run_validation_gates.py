@@ -158,6 +158,21 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_atomicrows_readiness_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            str(Path("schemas") / "atomicrows" / "atomicrows_readiness_audit.schema.json"),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "atomicrows"
+                / "synthetic_atomicrows_readiness_blocked.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -251,6 +266,36 @@ def test_runner_includes_no_runtime_artifact_flags(monkeypatch):
     assert "--forbid-neural-inference" in no_runtime_command
     assert "--forbid-external-repo-clone" in no_runtime_command
     assert "--forbid-package-install-scripts" in no_runtime_command
+
+
+def test_runner_includes_non_mutating_atomicrows_readiness_audit(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    audit_command = next(
+        command
+        for command in commands
+        if command[1] == str(Path("tools") / "validate_atomicrows_readiness_static.py")
+    )
+
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_readiness_static.py"),
+        "--repo-root",
+        ".",
+        "--schema",
+        str(Path("schemas") / "atomicrows" / "atomicrows_readiness_audit.schema.json"),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "atomicrows"
+            / "synthetic_atomicrows_readiness_blocked.v1.fixture.json"
+        ),
+    ]
+    assert "AtomicRows.bundle.jsonl" not in audit_command
+    assert "AtomicRows.bundle.sha256" not in audit_command
 
 
 def test_runner_stops_on_first_failure_and_returns_failing_exit_code(monkeypatch, capsys):
