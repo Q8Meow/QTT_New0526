@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_gate_report.schema.json",
+  "title": "Stage-1 Runtime Resolver Snapshot Gate Report Static Schema",
+  "description": "Static fail-closed gate report schema for PR41 runtime resolver snapshot contracts. The report can only describe blocked synthetic fixture validation and cannot create a runtime resolver snapshot, replay/paper input, live reachability, order authority, runtime cash, AtomicRows authority, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "runtime_resolver_snapshot_gate_report_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT"
+    },
+    "runtime_resolver_snapshot_gate_report_id": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "report_authority_class": {
+      "const": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "snapshot_manifest_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "input_lock_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "consumer_contract_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stale_binding_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "conflict_binding_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_mismatch_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missing_accepted_source_evidence_export_linkage_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missing_connector_semantic_binding_linkage_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missing_source_to_connector_field_binding_linkage_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missing_digest_or_hash_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cross_venue_target_field_misuse_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "snapshot_creation_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_paper_consumption_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "live_order_runtime_cash_profit_claim_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "atomicrows_mutation_claim_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocker_reduction_claim_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_state": {
+      "enum": [
+        "BLOCKED_STATIC_CONTRACT_ONLY",
+        "FAIL"
+      ]
+    },
+    "snapshot_creation_authority_state": {
+      "const": "BLOCKED_STATIC_CONTRACT_ONLY"
+    },
+    "runtime_resolver_snapshot_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_input_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/blocker_codes"
+    },
+    "receipt_ids_emitted": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "runtime_resolver_snapshot_gate_report_type",
+    "runtime_resolver_snapshot_gate_report_id",
+    "fixture_case",
+    "report_authority_class",
+    "synthetic_data_notice",
+    "snapshot_manifest_count",
+    "input_lock_count",
+    "consumer_contract_count",
+    "stale_binding_count",
+    "conflict_binding_count",
+    "target_mismatch_count",
+    "missing_accepted_source_evidence_export_linkage_count",
+    "missing_connector_semantic_binding_linkage_count",
+    "missing_source_to_connector_field_binding_linkage_count",
+    "missing_digest_or_hash_count",
+    "cross_venue_target_field_misuse_count",
+    "snapshot_creation_attempt_count",
+    "replay_paper_consumption_attempt_count",
+    "live_order_runtime_cash_profit_claim_attempt_count",
+    "atomicrows_mutation_claim_count",
+    "blocker_reduction_claim_count",
+    "gate_state",
+    "snapshot_creation_authority_state",
+    "runtime_resolver_snapshot_allowed_flag",
+    "replay_paper_input_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids_emitted",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,428 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_input_lock.schema.json",
+  "title": "Stage-1 Runtime Resolver Snapshot Input-Lock Static Schema",
+  "description": "Static input-lock contract for future runtime resolver snapshot gates. It may reference only already-approved static upstream record identifiers and digests, blocks stale/conflict/schema-error/target-mismatch/undeclared/missing-digest/cross-venue misuse states, and creates no runtime resolver snapshot, replay or paper input, live reachability, order authority, runtime cash claim, AtomicRows authority, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "runtime_resolver_snapshot_input_lock_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK"
+    },
+    "input_lock_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "input_lock_record_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "snapshot_creation_authority_state": {
+      "$ref": "#/$defs/snapshot_creation_authority_state"
+    },
+    "input_lock_validation_state": {
+      "$ref": "#/$defs/input_lock_validation_state"
+    },
+    "accepted_source_evidence_export_record_ids": {
+      "$ref": "#/$defs/id_list"
+    },
+    "accepted_source_evidence_export_record_digests": {
+      "$ref": "#/$defs/digest_list"
+    },
+    "connector_semantic_binding_ledger_record_ids": {
+      "$ref": "#/$defs/id_list"
+    },
+    "connector_semantic_binding_ledger_record_digests": {
+      "$ref": "#/$defs/digest_list"
+    },
+    "source_to_connector_field_binding_record_ids": {
+      "$ref": "#/$defs/id_list"
+    },
+    "source_to_connector_field_binding_record_digests": {
+      "$ref": "#/$defs/digest_list"
+    },
+    "canonical_contract_venue_identity_normalization_record_ids": {
+      "$ref": "#/$defs/id_list"
+    },
+    "canonical_contract_venue_identity_normalization_record_digests": {
+      "$ref": "#/$defs/digest_list"
+    },
+    "target_field_paths": {
+      "$ref": "#/$defs/target_field_paths"
+    },
+    "target_field_path_hashes": {
+      "$ref": "#/$defs/digest_list"
+    },
+    "venue_ids": {
+      "$ref": "#/$defs/venue_ids"
+    },
+    "applicability_scope": {
+      "$ref": "#/$defs/applicability_scope"
+    },
+    "freshness_state": {
+      "$ref": "#/$defs/freshness_state"
+    },
+    "revalidation_state": {
+      "$ref": "#/$defs/revalidation_state"
+    },
+    "conflict_state": {
+      "$ref": "#/$defs/conflict_state"
+    },
+    "contract_normalization_state": {
+      "$ref": "#/$defs/contract_normalization_state"
+    },
+    "consumer_authorization_state": {
+      "$ref": "#/$defs/consumer_authorization_state"
+    },
+    "upstream_record_state": {
+      "$ref": "#/$defs/upstream_record_state"
+    },
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_input_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_mutation_allowed_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "runtime_resolver_snapshot_input_lock_type",
+    "input_lock_id",
+    "input_lock_record_digest",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "snapshot_creation_authority_state",
+    "input_lock_validation_state",
+    "accepted_source_evidence_export_record_ids",
+    "accepted_source_evidence_export_record_digests",
+    "connector_semantic_binding_ledger_record_ids",
+    "connector_semantic_binding_ledger_record_digests",
+    "source_to_connector_field_binding_record_ids",
+    "source_to_connector_field_binding_record_digests",
+    "canonical_contract_venue_identity_normalization_record_ids",
+    "canonical_contract_venue_identity_normalization_record_digests",
+    "target_field_paths",
+    "target_field_path_hashes",
+    "venue_ids",
+    "applicability_scope",
+    "freshness_state",
+    "revalidation_state",
+    "conflict_state",
+    "contract_normalization_state",
+    "consumer_authorization_state",
+    "upstream_record_state",
+    "candidate_source_evidence_packet_is_accepted_source_evidence_flag",
+    "runtime_resolver_snapshot_allowed_flag",
+    "replay_paper_input_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_mutation_allowed_flag",
+    "blocker_reduction_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "id_list": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "digest_list": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/sha256_digest"
+      }
+    },
+    "venue_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "KALSHI",
+          "POLYMARKET",
+          "FORECASTEX_IBKR",
+          "VENUE_NEUTRAL_STAGE1"
+        ]
+      }
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+      "not": {
+        "pattern": "\\*"
+      }
+    },
+    "target_field_paths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/target_field_path"
+      }
+    },
+    "applicability_scope": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "scope_authority_class": {
+          "const": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY"
+        },
+        "venue_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "requested_venue_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "target_field_paths": {
+          "$ref": "#/$defs/target_field_paths"
+        },
+        "wildcard_scope_allowed": {
+          "const": false
+        },
+        "cross_venue_scope_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "scope_id",
+        "scope_authority_class",
+        "venue_id",
+        "requested_venue_id",
+        "target_field_paths",
+        "wildcard_scope_allowed",
+        "cross_venue_scope_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "snapshot_creation_authority_state": {
+      "enum": [
+        "BLOCKED_STATIC_CONTRACT_ONLY",
+        "ELIGIBLE_FOR_FUTURE_SNAPSHOT_GATE_ONLY"
+      ]
+    },
+    "input_lock_validation_state": {
+      "enum": [
+        "STATIC_INPUT_LOCK_VALID_FOR_GATE_ONLY",
+        "BLOCKED_STALE_UPSTREAM_BINDING",
+        "BLOCKED_CONFLICT_UPSTREAM_BINDING",
+        "BLOCKED_TARGET_MISMATCH",
+        "BLOCKED_MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_LINKAGE",
+        "BLOCKED_MISSING_CONNECTOR_SEMANTIC_BINDING_LINKAGE",
+        "BLOCKED_MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_LINKAGE",
+        "BLOCKED_MISSING_DIGEST_OR_HASH",
+        "BLOCKED_CROSS_VENUE_TARGET_FIELD_MISUSE",
+        "BLOCKED_SUPERSEDED_UPSTREAM_RECORD",
+        "BLOCKED_SCHEMA_ERROR",
+        "BLOCKED_UNDECLARED_CONSUMER"
+      ]
+    },
+    "freshness_state": {
+      "enum": [
+        "CURRENT_SYNTHETIC_STATIC",
+        "STALE_REVALIDATION_REQUIRED",
+        "SUPERSEDED",
+        "SCHEMA_ERROR"
+      ]
+    },
+    "revalidation_state": {
+      "enum": [
+        "CURRENT",
+        "REVALIDATION_REQUIRED",
+        "SUPERSEDED",
+        "SCHEMA_ERROR"
+      ]
+    },
+    "conflict_state": {
+      "enum": [
+        "NO_CONFLICT",
+        "CONFLICT_PRESENT",
+        "SCHEMA_ERROR"
+      ]
+    },
+    "contract_normalization_state": {
+      "enum": [
+        "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+        "CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_STATIC_REFERENCE_ONLY",
+        "BLOCKED_TARGET_MISMATCH",
+        "BLOCKED_CROSS_VENUE_MISUSE",
+        "BLOCKED_SCHEMA_ERROR"
+      ]
+    },
+    "consumer_authorization_state": {
+      "enum": [
+        "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+        "BLOCKED_UNDECLARED_CONSUMER",
+        "BLOCKED_DIRECT_RUNTIME_USE"
+      ]
+    },
+    "upstream_record_state": {
+      "enum": [
+        "APPROVED_STATIC_RECORDS_REFERENCED_ONLY",
+        "STALE",
+        "SUPERSEDED",
+        "CONFLICT",
+        "TARGET_MISMATCH",
+        "SCHEMA_ERROR",
+        "MISSING_LINKAGE",
+        "MISSING_DIGEST",
+        "CROSS_VENUE_MISUSE"
+      ]
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "retrieves_source_evidence": {
+          "const": false
+        },
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_real_accepted_source_evidence": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "populates_production_connector_semantic_values": {
+          "const": false
+        },
+        "imports_live_clients": {
+          "const": false
+        },
+        "creates_network_io": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "executes_replay_or_paper": {
+          "const": false
+        },
+        "creates_replay_paper_result_packets": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_runtime_cash_claim": {
+          "const": false
+        },
+        "creates_atomicrows_bundle_or_hash": {
+          "const": false
+        },
+        "reduces_blockers": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "retrieves_source_evidence",
+        "accepts_source_facts",
+        "creates_real_accepted_source_evidence",
+        "creates_accepted_source_packets",
+        "populates_production_connector_semantic_values",
+        "imports_live_clients",
+        "creates_network_io",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay_or_paper",
+        "creates_replay_paper_result_packets",
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_claim",
+        "creates_atomicrows_bundle_or_hash",
+        "reduces_blockers",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      }
+    }
+  }
+}

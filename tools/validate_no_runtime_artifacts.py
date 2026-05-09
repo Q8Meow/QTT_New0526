@@ -28,6 +28,7 @@ FORBIDDEN_SUFFIXES = {
 ALWAYS_FORBIDDEN_PATH_PARTS = {
     "dashboard_runtime",
     "live_connectors",
+    "runtime_resolver",
     "runtime_services",
     "telegram_runtime",
 }
@@ -97,6 +98,57 @@ STATIC_CONNECTOR_BINDING_ALLOWED_PATHS = {
         "tests/fixtures/source_evidence/connector_semantic_binding/"
         "synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json"
     ),
+}
+STATIC_RUNTIME_RESOLVER_ALLOWED_PATHS = {
+    pathlib.PurePosixPath("schemas/runtime_resolver"),
+    pathlib.PurePosixPath("schemas/runtime_resolver/runtime_resolver.schema.json"),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver/"
+        "stage1_runtime_resolver_snapshot_input_lock.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver/"
+        "stage1_runtime_resolver_snapshot_manifest.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver/"
+        "stage1_runtime_resolver_consumer_contract.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver/"
+        "stage1_runtime_resolver_snapshot_gate_report.schema.json"
+    ),
+    pathlib.PurePosixPath("tests/fixtures/runtime_resolver"),
+    pathlib.PurePosixPath(
+        "tests/fixtures/runtime_resolver/"
+        "synthetic_runtime_resolver_source_required_disabled.v1.fixture.json"
+    ),
+    pathlib.PurePosixPath("tests/fixtures/source_evidence/runtime_resolver"),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/runtime_resolver/"
+        "synthetic_stage1_runtime_resolver_snapshot_contracts.v1.fixture.json"
+    ),
+    pathlib.PurePosixPath("tests/runtime_resolver"),
+    pathlib.PurePosixPath("tests/runtime_resolver/__init__.py"),
+    pathlib.PurePosixPath(
+        "tests/runtime_resolver/test_runtime_resolver_schema_surface.py"
+    ),
+    pathlib.PurePosixPath(
+        "tests/runtime_resolver/test_runtime_resolver_source_required_fixture.py"
+    ),
+}
+FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
+    "live_snapshot.py",
+    "replay_input_snapshot.json",
+    "resolver_runtime.py",
+    "runtime_resolver_snapshot.input_lock.json",
+    "runtime_resolver_snapshot.packet.json",
+    "runtime_snapshot.py",
+    "stage1runtimeresolversnapshot.input_lock.json",
+    "stage1runtimeresolversnapshot.packet.json",
 }
 PACKAGE_INSTALL_SCRIPT_NAMES = {
     "bootstrap.sh",
@@ -261,6 +313,23 @@ def _is_allowed_static_connector_binding_contract_path(
     rel: pathlib.PurePosixPath,
 ) -> bool:
     return rel in STATIC_CONNECTOR_BINDING_ALLOWED_PATHS
+
+
+def _is_allowed_static_runtime_resolver_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_RUNTIME_RESOLVER_ALLOWED_PATHS
+
+
+def _is_allowed_always_forbidden_path(
+    rel: pathlib.PurePosixPath,
+    part_keys: set[str],
+) -> bool:
+    forbidden_parts = ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys)
+    return (
+        forbidden_parts == {"runtime_resolver"}
+        and _is_allowed_static_runtime_resolver_contract_path(rel)
+    )
 
 
 def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
@@ -581,9 +650,13 @@ def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
 
         if name in FORBIDDEN_NAMES or lower_name in {item.lower() for item in FORBIDDEN_NAMES}:
             violations.append(f"forbidden runtime/secret artifact present: {rel}")
+        if lower_name in FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES:
+            violations.append(f"forbidden runtime resolver artifact present: {rel}")
         if path.is_file() and path.suffix.lower() in FORBIDDEN_SUFFIXES:
             violations.append(f"forbidden secret-like file present: {rel}")
-        if ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys):
+        if ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys) and not (
+            _is_allowed_always_forbidden_path(rel, part_keys)
+        ):
             violations.append(f"forbidden runtime path present: {rel}")
 
         for flag in enabled_flags:
