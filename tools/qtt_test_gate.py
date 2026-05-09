@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR38_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR39_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -94,6 +94,7 @@ GATE_CHECK_FIELDS = {
     "connector_scaffold_source_required_gate_receipt_present",
     "stage1_runtime_scaffold_gate_receipt_present",
     "source_fact_binding_connector_semantic_readiness_gate_receipt_present",
+    "accepted_source_evidence_consumer_contract_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -278,6 +279,36 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
         ],
         "validation_marker": (
             "SOURCE_FACT_BINDING_CONNECTOR_SEMANTIC_READINESS_STATIC_VALIDATION_OK"
+        ),
+    },
+    {
+        "receipt_id": "accepted_source_evidence_consumer_contract_gate_receipt_present",
+        "description": (
+            "PR39 accepted source-evidence export ledger and consumer "
+            "authorization contract is confirmed by prior validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/source_evidence/acceptance/"
+                "accepted_source_evidence_consumer_contract.schema.json"
+            ),
+            (
+                "src/qtt/source_evidence/acceptance/"
+                "stage1_target_field_acceptance_ledger_record.schema.json"
+            ),
+            (
+                "src/qtt/source_evidence/acceptance/"
+                "stage1_accepted_source_evidence_export_record.schema.json"
+            ),
+            "tools/source_evidence_acceptance_consumer_contract_check.py",
+            (
+                "tests/fixtures/source_evidence/acceptance_consumer_contract/"
+                "synthetic_accepted_source_evidence_consumer_contract_records.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": (
+            "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_VALIDATION_OK"
         ),
     },
 ]

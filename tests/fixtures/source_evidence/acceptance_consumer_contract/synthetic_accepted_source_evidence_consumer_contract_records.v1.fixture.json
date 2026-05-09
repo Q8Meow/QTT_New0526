@@ -1,0 +1,1474 @@
+{
+  "fixture_id": "SYNTHETIC_PR39_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT_FIXTURE",
+  "fixture_version": "PR39_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_SOURCE_FACT",
+  "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+  "fixture_no_claim_flags": {
+    "retrieves_source_facts": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_connector_semantic_values": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "no_claim_flags": {
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_connector_semantic_values": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+  ],
+  "target_field_acceptance_ledger_records": [
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_CURRENT_AUTHORIZED_NONLIVE",
+      "target_field_acceptance_ledger_record_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "fixture_case": "CURRENT_AUTHORIZED_NONLIVE",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_CURRENT",
+      "accepted_source_evidence_packet_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_CURRENT_AUTHORIZED_NONLIVE",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_CURRENT_AUTHORIZED_NONLIVE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_STALE",
+      "target_field_acceptance_ledger_record_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "fixture_case": "BLOCKED_STALE",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_STALE",
+      "accepted_source_evidence_packet_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_STALE",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "REVALIDATION_DUE",
+      "accepted_packet_current_state": "STALE_REVALIDATION_REQUIRED",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_STALE_REVALIDATION_REQUIRED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_STALE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_CONFLICT",
+      "target_field_acceptance_ledger_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+      "fixture_case": "BLOCKED_CONFLICT",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_CONFLICT",
+      "accepted_source_evidence_packet_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_CONFLICT",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "UNRESOLVED_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "BLOCKED_CONFLICT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_CONFLICT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_CONFLICT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_TARGET_MISMATCH",
+      "target_field_acceptance_ledger_record_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_TARGET_MISMATCH",
+      "accepted_source_evidence_packet_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_TARGET_MISMATCH",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_TARGET_FIELD_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_TARGET_MISMATCH_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_UNDECLARED_CONSUMER",
+      "target_field_acceptance_ledger_record_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "fixture_case": "BLOCKED_UNDECLARED_CONSUMER",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_UNDECLARED_CONSUMER",
+      "accepted_source_evidence_packet_digest": "5555555555555555555555555555555555555555555555555555555555555555",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_UNDECLARED_CONSUMER",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_CONSUMER_NOT_DECLARED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_UNDECLARED_CONSUMER_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SUPERSEDED",
+      "target_field_acceptance_ledger_record_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "fixture_case": "BLOCKED_SUPERSEDED",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_SUPERSEDED",
+      "accepted_source_evidence_packet_digest": "6666666666666666666666666666666666666666666666666666666666666666",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_SUPERSEDED",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "SUPERSEDED_BY_NEWER_PACKET",
+      "accepted_packet_current_state": "SUPERSEDED",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_SUPERSEDED_ACCEPTED_PACKET"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_SUPERSEDED_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SCHEMA_ERROR",
+      "target_field_acceptance_ledger_record_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_SCHEMA_ERROR",
+      "accepted_source_evidence_packet_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_SCHEMA_ERROR",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "SCHEMA_ERROR_BLOCKED",
+      "accepted_packet_revalidation_due_condition": "SCHEMA_ERROR_REQUIRES_REVIEW",
+      "accepted_packet_current_state": "BLOCKED_SCHEMA_ERROR",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_SCHEMA_ERROR"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_SCHEMA_ERROR_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "target_field_acceptance_ledger_record_type": "STAGE1_TARGET_FIELD_ACCEPTANCE_LEDGER_RECORD",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "target_field_acceptance_ledger_record_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "fixture_case": "BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "record_authority_class": "STATIC_SYNTHETIC_TARGET_FIELD_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_RUNTIME_ATTEMPT",
+      "accepted_source_evidence_packet_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "consumer_contract_required_flag": true,
+      "connector_semantic_binding_allowed_directly_from_ledger_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ATTEMPT",
+        "BLOCKED_LIVE_REACHABILITY_ATTEMPT",
+        "BLOCKED_ORDER_EXECUTION_ATTEMPT",
+        "BLOCKED_RUNTIME_CASH_OR_PROFIT_CLAIM_ATTEMPT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_LEDGER_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "accepted_source_evidence_export_records": [
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE",
+      "fixture_case": "CURRENT_AUTHORIZED_NONLIVE",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_CURRENT",
+      "accepted_source_evidence_packet_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_CURRENT_AUTHORIZED_NONLIVE",
+      "target_field_acceptance_ledger_record_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_CURRENT_AUTHORIZED_NONLIVE",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "AUTHORIZED_FOR_CONNECTOR_SEMANTIC_BINDING_NONLIVE_ONLY",
+      "connector_semantic_binding_allowed_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_STALE",
+      "fixture_case": "BLOCKED_STALE",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_STALE",
+      "accepted_source_evidence_packet_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_STALE",
+      "target_field_acceptance_ledger_record_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_STALE",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "REVALIDATION_DUE",
+      "accepted_packet_current_state": "STALE_REVALIDATION_REQUIRED",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_STALE",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_STALE_REVALIDATION_REQUIRED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_STALE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_CONFLICT",
+      "fixture_case": "BLOCKED_CONFLICT",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_CONFLICT",
+      "accepted_source_evidence_packet_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_CONFLICT",
+      "target_field_acceptance_ledger_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_CONFLICT",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "UNRESOLVED_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "BLOCKED_CONFLICT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_CONFLICT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_CONFLICT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_TARGET_MISMATCH",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_TARGET_MISMATCH",
+      "accepted_source_evidence_packet_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_TARGET_MISMATCH",
+      "target_field_acceptance_ledger_record_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_TARGET_MISMATCH",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.other_field",
+      "consumer_authorization_state": "BLOCKED_TARGET_MISMATCH",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_TARGET_FIELD_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_TARGET_MISMATCH_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_UNDECLARED_CONSUMER",
+      "fixture_case": "BLOCKED_UNDECLARED_CONSUMER",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_UNDECLARED_CONSUMER",
+      "accepted_source_evidence_packet_digest": "5555555555555555555555555555555555555555555555555555555555555555",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_UNDECLARED_CONSUMER",
+      "target_field_acceptance_ledger_record_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_UNDECLARED_CONSUMER",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "UNDECLARED_STAGE1_RUNTIME_RESOLVER_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_CONSUMER_NOT_DECLARED",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_CONSUMER_NOT_DECLARED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_UNDECLARED_CONSUMER_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_SUPERSEDED",
+      "fixture_case": "BLOCKED_SUPERSEDED",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_SUPERSEDED",
+      "accepted_source_evidence_packet_digest": "6666666666666666666666666666666666666666666666666666666666666666",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SUPERSEDED",
+      "target_field_acceptance_ledger_record_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_SUPERSEDED",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "SUPERSEDED_BY_NEWER_PACKET",
+      "accepted_packet_current_state": "SUPERSEDED",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_STALE",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_SUPERSEDED_ACCEPTED_PACKET"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_SUPERSEDED_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_SCHEMA_ERROR",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_SCHEMA_ERROR",
+      "accepted_source_evidence_packet_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SCHEMA_ERROR",
+      "target_field_acceptance_ledger_record_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_SCHEMA_ERROR",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "SCHEMA_ERROR_BLOCKED",
+      "accepted_packet_revalidation_due_condition": "SCHEMA_ERROR_REQUIRES_REVIEW",
+      "accepted_packet_current_state": "BLOCKED_SCHEMA_ERROR",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_SCHEMA_ERROR"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_SCHEMA_ERROR_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_export_record_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "fixture_case": "BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "record_authority_class": "STATIC_SYNTHETIC_EXPORT_LEDGER_RECORD_ONLY_NOT_SOURCE_FACT_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_packet_id": "SYNTHETIC_PR39_ACCEPTED_PACKET_REFERENCE_NOT_REAL_RUNTIME_ATTEMPT",
+      "accepted_source_evidence_packet_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "accepted_source_evidence_packet_version": "SYNTHETIC_ACCEPTED_PACKET_REFERENCE_V1_NOT_REAL_SOURCE_FACT",
+      "accepted_source_evidence_packet_authority_class": "SYNTHETIC_ACCEPTED_SOURCE_EVIDENCE_PACKET_REFERENCE_ONLY_NOT_REAL_FACT_AUTHORITY",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "target_field_path_hash": "40444fdff136c92cb9dbd9457998c2cd262644a548209db46b677b52a943d08c",
+      "target_field_path_hash_algorithm": "SHA256_OVER_UTF8_TARGET_FIELD_PATH_IDENTIFIER_ONLY_NOT_FREEZE_AUTHORITY",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "target_field_acceptance_ledger_record_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "accepted_packet_applicability_scope": {
+        "scope_id": "SYNTHETIC_PR39_SCOPE_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "NOT_VENUE_SPECIFIC",
+        "target_field_paths": [
+          "synthetic.connector.semantic_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_packet_conflict_state": "NO_CONFLICT",
+      "accepted_packet_revalidation_due_condition": "NOT_DUE_SYNTHETIC_CURRENT",
+      "accepted_packet_current_state": "CURRENT",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ATTEMPT",
+        "BLOCKED_LIVE_REACHABILITY_ATTEMPT",
+        "BLOCKED_ORDER_EXECUTION_ATTEMPT",
+        "BLOCKED_RUNTIME_CASH_OR_PROFIT_CLAIM_ATTEMPT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "consumer_contract_records": [
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_CURRENT_AUTHORIZED_NONLIVE",
+      "fixture_case": "CURRENT_AUTHORIZED_NONLIVE",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_CURRENT_AUTHORIZED_NONLIVE",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "CURRENT",
+      "consumer_authorization_state": "AUTHORIZED_FOR_CONNECTOR_SEMANTIC_BINDING_NONLIVE_ONLY",
+      "connector_semantic_binding_allowed_flag": true,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_CURRENT_AUTHORIZED_NONLIVE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_STALE",
+      "fixture_case": "BLOCKED_STALE",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_STALE",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_STALE",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "STALE_REVALIDATION_REQUIRED",
+      "consumer_authorization_state": "BLOCKED_STALE",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_STALE_REVALIDATION_REQUIRED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_STALE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_CONFLICT",
+      "fixture_case": "BLOCKED_CONFLICT",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_CONFLICT",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_CONFLICT",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "BLOCKED_CONFLICT",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_CONFLICT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_CONFLICT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_TARGET_MISMATCH",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_TARGET_MISMATCH",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_TARGET_MISMATCH",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.other_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "CURRENT",
+      "consumer_authorization_state": "BLOCKED_TARGET_MISMATCH",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_TARGET_FIELD_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_TARGET_MISMATCH_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_UNDECLARED_CONSUMER",
+      "fixture_case": "BLOCKED_UNDECLARED_CONSUMER",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_UNDECLARED_CONSUMER",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_UNDECLARED_CONSUMER",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "UNDECLARED_STAGE1_RUNTIME_RESOLVER_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "CURRENT",
+      "consumer_authorization_state": "BLOCKED_CONSUMER_NOT_DECLARED",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_CONSUMER_NOT_DECLARED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_UNDECLARED_CONSUMER_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_SUPERSEDED",
+      "fixture_case": "BLOCKED_SUPERSEDED",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_SUPERSEDED",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SUPERSEDED",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "SUPERSEDED",
+      "consumer_authorization_state": "BLOCKED_STALE",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_SUPERSEDED_ACCEPTED_PACKET"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_SUPERSEDED_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_SCHEMA_ERROR",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_SCHEMA_ERROR",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_SCHEMA_ERROR",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "BLOCKED_SCHEMA_ERROR",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_ACCEPTED_PACKET_SCHEMA_ERROR"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_SCHEMA_ERROR_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "accepted_source_evidence_consumer_contract_type": "STAGE1_ACCEPTED_SOURCE_EVIDENCE_CONSUMER_CONTRACT",
+      "accepted_source_evidence_consumer_contract_id": "SYNTHETIC_PR39_CONTRACT_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "fixture_case": "BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "contract_authority_class": "STATIC_CONSUMER_AUTHORIZATION_CONTRACT_ONLY_NOT_FACT_ACCEPTANCE",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "accepted_source_evidence_export_record_id": "SYNTHETIC_PR39_EXPORT_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "target_field_acceptance_ledger_record_id": "SYNTHETIC_PR39_TF_LEDGER_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT",
+      "source_target_id": "SYNTHETIC_PR39_SOURCE_TARGET_NOT_REAL",
+      "venue_id": "NOT_VENUE_SPECIFIC",
+      "target_field_path": "synthetic.connector.semantic_field",
+      "requested_target_field_path": "synthetic.connector.semantic_field",
+      "requested_consumer_task_id": "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK",
+      "authorized_consumer_task_ids": [
+        "STAGE1_CONNECTOR_SEMANTIC_BINDING_NONLIVE_SCHEMA_TASK"
+      ],
+      "candidate_evidence_packet_is_accepted_source_evidence_flag": false,
+      "accepted_packet_current_state": "CURRENT",
+      "consumer_authorization_state": "BLOCKED_CONFLICT",
+      "connector_semantic_binding_allowed_flag": false,
+      "nonlive_schema_level_downstream_work_only_flag": true,
+      "connector_semantic_value_population_allowed_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ATTEMPT",
+        "BLOCKED_LIVE_REACHABILITY_ATTEMPT",
+        "BLOCKED_ORDER_EXECUTION_ATTEMPT",
+        "BLOCKED_RUNTIME_CASH_OR_PROFIT_CLAIM_ATTEMPT"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR39_CONTRACT_BLOCKED_FORBIDDEN_RUNTIME_ATTEMPT_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_connector_semantic_values": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ]
+}
