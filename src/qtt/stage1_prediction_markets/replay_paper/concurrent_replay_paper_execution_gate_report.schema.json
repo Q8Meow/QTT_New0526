@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_execution_gate_report.schema.json",
+  "title": "Stage-1 Concurrent Replay/Paper Execution Gate Report Static Schema",
+  "description": "Static fail-closed report for PR43 concurrent replay/paper input identity, lane separation, result boundary, and no-live contract validation. It creates no runtime resolver snapshot, replay or paper execution, result packet, dual-result review, live reachability, order authority, runtime cash claim, AtomicRows bundle/hash, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "const": "STAGE1_CONCURRENT_REPLAY_PAPER_EXECUTION_GATE_REPORT"
+    },
+    "report_version": {
+      "const": "PR43_STAGE1_CONCURRENT_REPLAY_PAPER_CONTRACT_CHECK_REPORT_V1"
+    },
+    "master_plan_edition": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_sha256": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "created_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "input_identity_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_lane_contract_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "paper_lane_contract_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_result_boundary_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "paper_result_boundary_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_case_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_input_identity_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_reference_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_execution_claim_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_result_boundary_claim_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_merge_or_review_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_live_cash_profit_atomicrows_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_state": {
+      "enum": [
+        "STATIC_CONCURRENT_REPLAY_PAPER_CONTRACT_VALIDATED_NO_RUNTIME_AUTHORITY",
+        "FAIL"
+      ]
+    },
+    "validation_failure_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_lane_execution_allowed_flag": {
+      "const": false
+    },
+    "paper_lane_execution_allowed_flag": {
+      "const": false
+    },
+    "replay_result_packet_created_flag": {
+      "const": false
+    },
+    "paper_result_packet_created_flag": {
+      "const": false
+    },
+    "result_merge_created_flag": {
+      "const": false
+    },
+    "dual_result_review_created_flag": {
+      "const": false
+    },
+    "owner_live_promotion_review_created_flag": {
+      "const": false
+    },
+    "live_reachability_created_flag": {
+      "const": false
+    },
+    "order_authority_created_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_created_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "profit_evidence_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids_emitted": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "concurrent_replay_paper_input_identity.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "concurrent_replay_paper_input_identity.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "created_at_utc",
+    "input_identity_record_count",
+    "replay_lane_contract_count",
+    "paper_lane_contract_count",
+    "replay_result_boundary_count",
+    "paper_result_boundary_count",
+    "gate_case_record_count",
+    "blocked_input_identity_case_count",
+    "blocked_reference_case_count",
+    "blocked_execution_claim_case_count",
+    "blocked_result_boundary_claim_case_count",
+    "blocked_merge_or_review_case_count",
+    "blocked_live_cash_profit_atomicrows_case_count",
+    "gate_state",
+    "validation_failure_count",
+    "replay_lane_execution_allowed_flag",
+    "paper_lane_execution_allowed_flag",
+    "replay_result_packet_created_flag",
+    "paper_result_packet_created_flag",
+    "result_merge_created_flag",
+    "dual_result_review_created_flag",
+    "owner_live_promotion_review_created_flag",
+    "live_reachability_created_flag",
+    "order_authority_created_flag",
+    "runtime_cash_claim_created_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "profit_evidence_created_flag",
+    "blocker_codes",
+    "receipt_ids_emitted",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    }
+  }
+}

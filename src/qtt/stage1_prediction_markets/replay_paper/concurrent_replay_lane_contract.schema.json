@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_lane_contract.schema.json",
+  "title": "Stage-1 Concurrent Replay Lane Static Contract Schema",
+  "description": "Static blocked replay lane boundary. It defines lane separation and non-live constraints only; it does not execute replay or create replay results.",
+  "type": "object",
+  "properties": {
+    "replay_lane_contract_type": {
+      "const": "STAGE1_CONCURRENT_REPLAY_LANE_CONTRACT"
+    },
+    "replay_lane_contract_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_REPLAY_LANE_CONTRACT_ONLY_NOT_EXECUTION_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "shared_input_identity_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "runtime_resolver_snapshot_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "runtime_resolver_snapshot_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "runtime_resolver_input_lock_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "replay_paper_input_identity_digest": {
+      "$ref": "#/$defs/sha256_digest"
+    },
+    "lane_type": {
+      "const": "REPLAY"
+    },
+    "lane_contract_state": {
+      "const": "BLOCKED_STATIC_CONTRACT_ONLY"
+    },
+    "lane_start_policy": {
+      "const": "SEPARATE_NON_SEQUENTIAL_LANE_AFTER_SHARED_INPUT_LOCK_ONLY"
+    },
+    "replay_pass_starts_paper_flag": {
+      "const": false
+    },
+    "paper_pass_implies_live_eligibility_flag": {
+      "const": false
+    },
+    "lane_execution_allowed_flag": {
+      "const": false
+    },
+    "result_packet_creation_allowed_flag": {
+      "const": false
+    },
+    "result_packet_merge_allowed_flag": {
+      "const": false
+    },
+    "dual_result_review_allowed_flag": {
+      "const": false
+    },
+    "owner_live_promotion_review_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_mutation_allowed_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "concurrent_replay_paper_input_identity.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "concurrent_replay_paper_input_identity.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "replay_lane_contract_type",
+    "replay_lane_contract_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "shared_input_identity_id",
+    "runtime_resolver_snapshot_id",
+    "runtime_resolver_snapshot_digest",
+    "runtime_resolver_input_lock_id",
+    "replay_paper_input_identity_digest",
+    "lane_type",
+    "lane_contract_state",
+    "lane_start_policy",
+    "replay_pass_starts_paper_flag",
+    "paper_pass_implies_live_eligibility_flag",
+    "lane_execution_allowed_flag",
+    "result_packet_creation_allowed_flag",
+    "result_packet_merge_allowed_flag",
+    "dual_result_review_allowed_flag",
+    "owner_live_promotion_review_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "atomicrows_bundle_mutation_allowed_flag",
+    "blocker_reduction_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocker_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    }
+  }
+}

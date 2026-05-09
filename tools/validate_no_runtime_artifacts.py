@@ -168,6 +168,9 @@ STATIC_RUNTIME_RESOLVER_SNAPSHOT_ALLOWED_PATHS = {
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
     "dual_result_review.packet.json",
     "live_snapshot.py",
+    "live_promotion.py",
+    "merged_replay_paper_result.json",
+    "order_execution.py",
     "live_handoff.py",
     "paper_execution.py",
     "paper_result_packet.json",

@@ -575,6 +575,75 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_concurrent_replay_paper_contract_check.py"),
+            "--repo-root",
+            ".",
+            "--input-identity-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "concurrent_replay_paper_input_identity.schema.json"
+            ),
+            "--replay-lane-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "concurrent_replay_lane_contract.schema.json"
+            ),
+            "--paper-lane-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "concurrent_paper_lane_contract.schema.json"
+            ),
+            "--replay-result-boundary-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "replay_result_packet_boundary.schema.json"
+            ),
+            "--paper-result-boundary-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "paper_result_packet_boundary.schema.json"
+            ),
+            "--gate-report-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "replay_paper"
+                / "concurrent_replay_paper_execution_gate_report.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "replay_paper"
+                / "synthetic_concurrent_replay_paper_contracts.v1.fixture.json"
+            ),
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "Stage1ConcurrentReplayPaperContractCheck.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -1250,6 +1319,94 @@ def test_runner_includes_pr42_runtime_resolver_to_replay_paper_handoff_after_pr4
             / "master_plan"
             / "generated"
             / "Stage1RuntimeResolverToReplayPaperHandoff.report.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr43_concurrent_replay_paper_contract_after_pr42_and_before_qtt_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr42_index = command_names.index(
+        "stage1_runtime_resolver_to_replay_paper_handoff_check.py"
+    )
+    pr43_index = command_names.index("stage1_concurrent_replay_paper_contract_check.py")
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr42_index < pr43_index < qtt_gate_index < no_runtime_index
+    assert commands[pr43_index] == [
+        python_executable,
+        str(Path("tools") / "stage1_concurrent_replay_paper_contract_check.py"),
+        "--repo-root",
+        ".",
+        "--input-identity-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "concurrent_replay_paper_input_identity.schema.json"
+        ),
+        "--replay-lane-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "concurrent_replay_lane_contract.schema.json"
+        ),
+        "--paper-lane-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "concurrent_paper_lane_contract.schema.json"
+        ),
+        "--replay-result-boundary-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "replay_result_packet_boundary.schema.json"
+        ),
+        "--paper-result-boundary-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "paper_result_packet_boundary.schema.json"
+        ),
+        "--gate-report-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "replay_paper"
+            / "concurrent_replay_paper_execution_gate_report.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "source_evidence"
+            / "replay_paper"
+            / "synthetic_concurrent_replay_paper_contracts.v1.fixture.json"
+        ),
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "Stage1ConcurrentReplayPaperContractCheck.report.json"
         ),
     ]
 
