@@ -269,6 +269,21 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_stage1_packet_schema_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema-dir",
+            str(Path("schemas") / "stage1_prediction_markets"),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "stage1_prediction_markets"
+                / "synthetic_stage1_packet_schema_gate_blocked.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -561,6 +576,42 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             / "fixtures"
             / "master_plan"
             / "synthetic_generated_derivative_bootstrap_gate.v1.fixture.json"
+        ),
+    ]
+
+
+def test_runner_includes_stage1_packet_schema_gate_after_generated_derivative_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+    stage1_gate_index = command_names.index(
+        "validate_stage1_packet_schema_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+    assert generated_gate_index < stage1_gate_index < no_runtime_index
+
+    audit_command = commands[stage1_gate_index]
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_stage1_packet_schema_gate_static.py"),
+        "--repo-root",
+        ".",
+        "--schema-dir",
+        str(Path("schemas") / "stage1_prediction_markets"),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "stage1_prediction_markets"
+            / "synthetic_stage1_packet_schema_gate_blocked.v1.fixture.json"
         ),
     ]
 
