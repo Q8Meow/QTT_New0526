@@ -474,6 +474,59 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_runtime_resolver_snapshot_contract_check.py"),
+            "--repo-root",
+            ".",
+            "--input-lock-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "runtime_resolver"
+                / "stage1_runtime_resolver_snapshot_input_lock.schema.json"
+            ),
+            "--manifest-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "runtime_resolver"
+                / "stage1_runtime_resolver_snapshot_manifest.schema.json"
+            ),
+            "--consumer-contract-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "runtime_resolver"
+                / "stage1_runtime_resolver_consumer_contract.schema.json"
+            ),
+            "--gate-report-schema",
+            str(
+                Path("src")
+                / "qtt"
+                / "stage1_prediction_markets"
+                / "runtime_resolver"
+                / "stage1_runtime_resolver_snapshot_gate_report.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "runtime_resolver"
+                / "synthetic_stage1_runtime_resolver_snapshot_contracts.v1.fixture.json"
+            ),
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "Stage1RuntimeResolverSnapshotContractCheck.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -1012,6 +1065,76 @@ def test_runner_includes_pr37_static_gates_after_stage1_runtime_and_before_no_ru
             / "master_plan"
             / "generated"
             / "FirstCodingPRHandoff.packet.json"
+        ),
+    ]
+
+
+def test_runner_includes_pr41_runtime_resolver_contract_gate_after_pr40_and_before_qtt_gate(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr40_index = command_names.index("stage1_connector_semantic_binding_ledger_check.py")
+    pr41_index = command_names.index("stage1_runtime_resolver_snapshot_contract_check.py")
+    qtt_gate_index = command_names.index("qtt_test_gate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr40_index < pr41_index < qtt_gate_index < no_runtime_index
+    assert commands[pr41_index] == [
+        python_executable,
+        str(Path("tools") / "stage1_runtime_resolver_snapshot_contract_check.py"),
+        "--repo-root",
+        ".",
+        "--input-lock-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "runtime_resolver"
+            / "stage1_runtime_resolver_snapshot_input_lock.schema.json"
+        ),
+        "--manifest-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "runtime_resolver"
+            / "stage1_runtime_resolver_snapshot_manifest.schema.json"
+        ),
+        "--consumer-contract-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "runtime_resolver"
+            / "stage1_runtime_resolver_consumer_contract.schema.json"
+        ),
+        "--gate-report-schema",
+        str(
+            Path("src")
+            / "qtt"
+            / "stage1_prediction_markets"
+            / "runtime_resolver"
+            / "stage1_runtime_resolver_snapshot_gate_report.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "source_evidence"
+            / "runtime_resolver"
+            / "synthetic_stage1_runtime_resolver_snapshot_contracts.v1.fixture.json"
+        ),
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "Stage1RuntimeResolverSnapshotContractCheck.report.json"
         ),
     ]
 

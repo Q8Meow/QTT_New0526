@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_manifest.schema.json",
+  "title": "Stage-1 Runtime Resolver Snapshot Manifest Static Schema",
+  "description": "Static manifest contract for the runtime resolver snapshot gate. PR41 manifests remain blocked/static only and cannot authorize runtime resolver snapshot creation, replay/paper input, live reachability, order execution, runtime cash, AtomicRows mutation, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "runtime_resolver_snapshot_manifest_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST"
+    },
+    "runtime_resolver_snapshot_manifest_id": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "record_authority_class": {
+      "const": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "snapshot_creation_authority_state": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/snapshot_creation_authority_state"
+    },
+    "input_lock_id": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "input_lock_digest": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/sha256_digest"
+    },
+    "connector_semantic_binding_ledger_record_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/id_list"
+    },
+    "connector_semantic_binding_ledger_record_digests": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/digest_list"
+    },
+    "accepted_source_evidence_export_record_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/id_list"
+    },
+    "accepted_source_evidence_export_record_digests": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/digest_list"
+    },
+    "source_to_connector_field_binding_record_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/id_list"
+    },
+    "venue_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/venue_ids"
+    },
+    "target_field_paths": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/target_field_paths"
+    },
+    "target_field_path_hashes": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/digest_list"
+    },
+    "applicability_scope": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/applicability_scope"
+    },
+    "revalidation_state": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/revalidation_state"
+    },
+    "conflict_state": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/conflict_state"
+    },
+    "contract_normalization_state": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/contract_normalization_state"
+    },
+    "consumer_authorization_state": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/consumer_authorization_state"
+    },
+    "runtime_resolver_snapshot_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_input_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "runtime_resolver_snapshot_manifest_type",
+    "runtime_resolver_snapshot_manifest_id",
+    "fixture_case",
+    "record_authority_class",
+    "synthetic_data_notice",
+    "snapshot_creation_authority_state",
+    "input_lock_id",
+    "input_lock_digest",
+    "connector_semantic_binding_ledger_record_ids",
+    "connector_semantic_binding_ledger_record_digests",
+    "accepted_source_evidence_export_record_ids",
+    "accepted_source_evidence_export_record_digests",
+    "source_to_connector_field_binding_record_ids",
+    "venue_ids",
+    "target_field_paths",
+    "target_field_path_hashes",
+    "applicability_scope",
+    "revalidation_state",
+    "conflict_state",
+    "contract_normalization_state",
+    "consumer_authorization_state",
+    "runtime_resolver_snapshot_allowed_flag",
+    "replay_paper_input_allowed_flag",
+    "live_reachability_allowed_flag",
+    "order_execution_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false
+}

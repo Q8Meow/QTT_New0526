@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_consumer_contract.schema.json",
+  "title": "Stage-1 Runtime Resolver Consumer Authorization Static Schema",
+  "description": "Static consumer boundary for PR41 runtime resolver snapshot contracts. The schema gate may validate synthetic fixtures only; snapshot creation, replay/paper use, live/canary/arbitrage use, order routing, live readiness display, runtime cash, AtomicRows mutation, blocker reduction, and profit claims are blocked.",
+  "type": "object",
+  "properties": {
+    "runtime_resolver_consumer_contract_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT"
+    },
+    "runtime_resolver_consumer_contract_id": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "fixture_case": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "contract_authority_class": {
+      "const": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY"
+    },
+    "synthetic_data_notice": {
+      "const": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT"
+    },
+    "consumer_id": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/non_empty_string"
+    },
+    "consumer_class": {
+      "$ref": "#/$defs/consumer_class"
+    },
+    "consumer_authorization_state": {
+      "$ref": "#/$defs/consumer_authorization_state"
+    },
+    "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": {
+      "const": true
+    },
+    "runtime_resolver_snapshot_creation_allowed_flag": {
+      "const": false
+    },
+    "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": {
+      "const": false
+    },
+    "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": {
+      "const": false
+    },
+    "order_router_may_consume_runtime_resolver_data_from_pr41_flag": {
+      "const": false
+    },
+    "dashboard_may_display_blocked_static_gate_reports_only_flag": {
+      "const": true
+    },
+    "dashboard_live_readiness_claim_allowed_flag": {
+      "const": false
+    },
+    "direct_runtime_use_allowed_flag": {
+      "const": false
+    },
+    "live_client_import_allowed_flag": {
+      "const": false
+    },
+    "network_io_allowed_flag": {
+      "const": false
+    },
+    "order_execution_allowed_flag": {
+      "const": false
+    },
+    "live_reachability_allowed_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_allowed_flag": {
+      "const": false
+    },
+    "profit_claim_allowed_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/blocker_codes"
+    },
+    "receipt_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/receipt_ids"
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_input_lock.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "runtime_resolver_consumer_contract_type",
+    "runtime_resolver_consumer_contract_id",
+    "fixture_case",
+    "contract_authority_class",
+    "synthetic_data_notice",
+    "consumer_id",
+    "consumer_class",
+    "consumer_authorization_state",
+    "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag",
+    "runtime_resolver_snapshot_creation_allowed_flag",
+    "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag",
+    "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag",
+    "order_router_may_consume_runtime_resolver_data_from_pr41_flag",
+    "dashboard_may_display_blocked_static_gate_reports_only_flag",
+    "dashboard_live_readiness_claim_allowed_flag",
+    "direct_runtime_use_allowed_flag",
+    "live_client_import_allowed_flag",
+    "network_io_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag",
+    "runtime_cash_claim_allowed_flag",
+    "profit_claim_allowed_flag",
+    "blocker_codes",
+    "receipt_ids",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "consumer_class": {
+      "enum": [
+        "STATIC_SCHEMA_GATE_SYNTHETIC_FIXTURE_VALIDATION_ONLY",
+        "DASHBOARD_BLOCKED_STATIC_GATE_REPORT_DISPLAY_ONLY",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT",
+        "REPLAY_PAPER_DIRECT_CONSUMER_ATTEMPT",
+        "LIVE_CANARY_LIVE_ARBITRAGE_CONSUMER_ATTEMPT",
+        "ORDER_ROUTER_CONSUMER_ATTEMPT",
+        "RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+        "ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM_ATTEMPT"
+      ]
+    },
+    "consumer_authorization_state": {
+      "enum": [
+        "AUTHORIZED_SYNTHETIC_STATIC_VALIDATION_ONLY",
+        "AUTHORIZED_BLOCKED_STATIC_REPORT_DISPLAY_ONLY",
+        "BLOCKED_STATIC_CONTRACT_ONLY",
+        "BLOCKED_REPLAY_PAPER_DIRECT_CONSUMPTION",
+        "BLOCKED_LIVE_CONSUMPTION",
+        "BLOCKED_ORDER_AUTHORITY",
+        "BLOCKED_RUNTIME_CASH_OR_PROFIT_CLAIM",
+        "BLOCKED_ATOMICROWS_MUTATION"
+      ]
+    }
+  }
+}

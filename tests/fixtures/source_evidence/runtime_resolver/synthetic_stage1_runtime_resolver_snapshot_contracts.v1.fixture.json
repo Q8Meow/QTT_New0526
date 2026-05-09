@@ -1,0 +1,1837 @@
+{
+  "fixture_id": "SYNTHETIC_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACTS_V1",
+  "fixture_version": "v1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_SOURCE_FACT",
+  "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_RUNTIME_RESOLVER_AUTHORITY",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+  "fixture_no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_paper_result_packets": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_paper_result_packets": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+  ],
+  "input_lock_records": [
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_VALID_STATIC_ONLY",
+      "input_lock_record_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_INPUT_LOCK",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "STATIC_INPUT_LOCK_VALID_FOR_GATE_ONLY",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "APPROVED_STATIC_RECORDS_REFERENCED_ONLY",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_BLOCKED_PR41_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "CODEX_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_STALE",
+      "input_lock_record_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "fixture_case": "BLOCKED_STALE_UPSTREAM_BINDING",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_STALE_UPSTREAM_BINDING",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_STALE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_BLOCKED_STALE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "STALE_REVALIDATION_REQUIRED",
+      "revalidation_state": "REVALIDATION_REQUIRED",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "STALE",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_STALE_BINDING_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_STALE_BINDING_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_CONFLICT",
+      "input_lock_record_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "fixture_case": "BLOCKED_CONFLICT_UPSTREAM_BINDING",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_CONFLICT_UPSTREAM_BINDING",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_CONFLICT"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_BLOCKED_CONFLICT"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "CONFLICT_PRESENT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "CONFLICT",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CONFLICT_BINDING_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CONFLICT_BINDING_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_TARGET_MISMATCH",
+      "input_lock_record_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_TARGET_MISMATCH",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_TARGET_MISMATCH"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_BLOCKED_TARGET_MISMATCH"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.event_selection"
+      ],
+      "target_field_path_hashes": [
+        "7d811a7e72fae84c03ba4339e140ab207e7d83220f2cc5b0d1247f69447aa565"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "BLOCKED_TARGET_MISMATCH",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "TARGET_MISMATCH",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_TARGET_MISMATCH_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_TARGET_MISMATCH_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_MISSING_ACCEPTED_EXPORT",
+      "input_lock_record_digest": "5555555555555555555555555555555555555555555555555555555555555555",
+      "fixture_case": "BLOCKED_MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_LINKAGE",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_LINKAGE",
+      "accepted_source_evidence_export_record_ids": [
+        "MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_RECORD"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "MISSING_LINKAGE",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_ACCEPTED_EXPORT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_ACCEPTED_EXPORT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_MISSING_CONNECTOR_BINDING",
+      "input_lock_record_digest": "6666666666666666666666666666666666666666666666666666666666666666",
+      "fixture_case": "BLOCKED_MISSING_CONNECTOR_SEMANTIC_BINDING_LINKAGE",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_MISSING_CONNECTOR_SEMANTIC_BINDING_LINKAGE",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "MISSING_CONNECTOR_SEMANTIC_BINDING_LEDGER_RECORD"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "MISSING_LINKAGE",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_CONNECTOR_SEMANTIC_BINDING_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_CONNECTOR_SEMANTIC_BINDING_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_MISSING_SOURCE_TO_CONNECTOR",
+      "input_lock_record_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "fixture_case": "BLOCKED_MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_LINKAGE",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_LINKAGE",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "MISSING_SOURCE_TO_CONNECTOR_FIELD_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "MISSING_LINKAGE",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_SOURCE_TO_CONNECTOR_BINDING_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_SOURCE_TO_CONNECTOR_BINDING_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_MISSING_DIGEST",
+      "input_lock_record_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "fixture_case": "BLOCKED_MISSING_DIGEST_OR_HASH",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_MISSING_DIGEST_OR_HASH",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "MISSING_ACCEPTED_SOURCE_EVIDENCE_EXPORT_DIGEST"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "MISSING_TARGET_FIELD_PATH_HASH"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "MISSING_DIGEST",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_DIGEST_OR_HASH_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_MISSING_DIGEST_OR_HASH_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_CROSS_VENUE",
+      "input_lock_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+      "fixture_case": "BLOCKED_CROSS_VENUE_TARGET_FIELD_MISUSE",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_CROSS_VENUE_TARGET_FIELD_MISUSE",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "POLYMARKET",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "BLOCKED_CROSS_VENUE_MISUSE",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "CROSS_VENUE_MISUSE",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CROSS_VENUE_TARGET_FIELD_MISUSE_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CROSS_VENUE_TARGET_FIELD_MISUSE_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_SUPERSEDED",
+      "input_lock_record_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "fixture_case": "BLOCKED_SUPERSEDED_UPSTREAM_RECORD",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_SUPERSEDED_UPSTREAM_RECORD",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_SUPERSEDED"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "SUPERSEDED",
+      "revalidation_state": "SUPERSEDED",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "SUPERSEDED",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_SUPERSEDED_RECORD_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_SUPERSEDED_RECORD_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_SCHEMA_ERROR",
+      "input_lock_record_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_SCHEMA_ERROR",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_BLOCKED_SCHEMA_ERROR"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_BLOCKED_SCHEMA_ERROR"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "SCHEMA_ERROR",
+      "revalidation_state": "SCHEMA_ERROR",
+      "conflict_state": "SCHEMA_ERROR",
+      "contract_normalization_state": "BLOCKED_SCHEMA_ERROR",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "upstream_record_state": "SCHEMA_ERROR",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_SCHEMA_ERROR_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_SCHEMA_ERROR_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_input_lock_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_BLOCKED_UNDECLARED_CONSUMER",
+      "input_lock_record_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "fixture_case": "BLOCKED_UNDECLARED_CONSUMER",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_INPUT_LOCK_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_validation_state": "BLOCKED_UNDECLARED_CONSUMER",
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "source_to_connector_field_binding_record_digests": [
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      "canonical_contract_venue_identity_normalization_record_ids": [
+        "SYNTHETIC_CANONICAL_CONTRACT_VENUE_IDENTITY_NORMALIZATION_RECORD"
+      ],
+      "canonical_contract_venue_identity_normalization_record_digests": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "freshness_state": "CURRENT_SYNTHETIC_STATIC",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "BLOCKED_UNDECLARED_CONSUMER",
+      "upstream_record_state": "APPROVED_STATIC_RECORDS_REFERENCED_ONLY",
+      "candidate_source_evidence_packet_is_accepted_source_evidence_flag": false,
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_UNDECLARED_CONSUMER_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_UNDECLARED_CONSUMER_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "snapshot_manifest_records": [
+    {
+      "runtime_resolver_snapshot_manifest_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST",
+      "runtime_resolver_snapshot_manifest_id": "SYNTHETIC_PR41_MANIFEST_BLOCKED_STATIC_ONLY",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_INPUT_LOCK",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_VALID_STATIC_ONLY",
+      "input_lock_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_BLOCKED_PR41_STATIC_CONTRACT_ONLY"
+      ],
+      "receipt_ids": [
+        "CODEX_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_GATE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_snapshot_manifest_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST",
+      "runtime_resolver_snapshot_manifest_id": "SYNTHETIC_PR41_MANIFEST_BLOCKED_SNAPSHOT_CREATION_ATTEMPT",
+      "fixture_case": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT",
+      "record_authority_class": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_MANIFEST_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "input_lock_id": "SYNTHETIC_PR41_INPUT_LOCK_VALID_STATIC_ONLY",
+      "input_lock_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "connector_semantic_binding_ledger_record_ids": [
+        "SYNTHETIC_PR40_BINDING_LEDGER_VALID_NONLIVE"
+      ],
+      "connector_semantic_binding_ledger_record_digests": [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "accepted_source_evidence_export_record_ids": [
+        "SYNTHETIC_PR39_EXPORT_CURRENT_AUTHORIZED_NONLIVE"
+      ],
+      "accepted_source_evidence_export_record_digests": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "source_to_connector_field_binding_record_ids": [
+        "SYNTHETIC_PR38_SOURCE_TO_CONNECTOR_BINDING_RECORD"
+      ],
+      "venue_ids": [
+        "KALSHI"
+      ],
+      "target_field_paths": [
+        "connector.selection.contract_selection"
+      ],
+      "target_field_path_hashes": [
+        "0b00ba99ab5c322fdd8c518b3514927899c98837c35ea4b0d97abe959e017839"
+      ],
+      "applicability_scope": {
+        "scope_id": "SYNTHETIC_SCOPE_KALSHI_CONTRACT_SELECTION",
+        "scope_authority_class": "SYNTHETIC_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+        "venue_id": "KALSHI",
+        "requested_venue_id": "KALSHI",
+        "target_field_paths": [
+          "connector.selection.contract_selection"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "contract_normalization_state": "VENUE_LOCAL_NORMALIZATION_STATIC_REFERENCE_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_STATIC_GATE_INPUT_ONLY",
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "consumer_contract_records": [
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_STATIC_SCHEMA_GATE",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_INPUT_LOCK",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "STATIC_SCHEMA_GATE_SYNTHETIC_FIXTURE_VALIDATION_ONLY",
+      "consumer_class": "STATIC_SCHEMA_GATE_SYNTHETIC_FIXTURE_VALIDATION_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_SYNTHETIC_STATIC_VALIDATION_ONLY",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "CODEX_RUNTIME_RESOLVER_SNAPSHOT_AFTER_CONNECTOR_SEMANTIC_BINDING_TASK_PACKET_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_DASHBOARD_STATIC_REPORT_ONLY",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_INPUT_LOCK",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "DASHBOARD_BLOCKED_STATIC_GATE_REPORT_DISPLAY_ONLY",
+      "consumer_class": "DASHBOARD_BLOCKED_STATIC_GATE_REPORT_DISPLAY_ONLY",
+      "consumer_authorization_state": "AUTHORIZED_BLOCKED_STATIC_REPORT_DISPLAY_ONLY",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "CODEX_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_GATE_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_SNAPSHOT_CREATION_ATTEMPT",
+      "fixture_case": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT",
+      "consumer_class": "RUNTIME_RESOLVER_SNAPSHOT_CREATION_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_PRE_BINDING_GATE_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_PRE_BINDING_GATE_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_REPLAY_PAPER_ATTEMPT",
+      "fixture_case": "BLOCKED_REPLAY_PAPER_CONSUMPTION_ATTEMPT",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "REPLAY_PAPER_DIRECT_CONSUMER_ATTEMPT",
+      "consumer_class": "REPLAY_PAPER_DIRECT_CONSUMER_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_REPLAY_PAPER_DIRECT_CONSUMPTION",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_REPLAY_PAPER_EXECUTION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_REPLAY_PAPER_EXECUTION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_LIVE_ATTEMPT",
+      "fixture_case": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "LIVE_CANARY_LIVE_ARBITRAGE_CONSUMER_ATTEMPT",
+      "consumer_class": "LIVE_CANARY_LIVE_ARBITRAGE_CONSUMER_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_LIVE_CONSUMPTION",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_LIVE_EXECUTION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_LIVE_EXECUTION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_ORDER_ATTEMPT",
+      "fixture_case": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "ORDER_ROUTER_CONSUMER_ATTEMPT",
+      "consumer_class": "ORDER_ROUTER_CONSUMER_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_ORDER_AUTHORITY",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_ORDER_AUTHORITY_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_ORDER_AUTHORITY_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_RUNTIME_CASH_PROFIT_ATTEMPT",
+      "fixture_case": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+      "consumer_class": "RUNTIME_CASH_PROFIT_CLAIM_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_RUNTIME_CASH_OR_PROFIT_CLAIM",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_PROFIT_CLAIM_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_PROFIT_CLAIM_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    },
+    {
+      "runtime_resolver_consumer_contract_type": "STAGE1_RUNTIME_RESOLVER_CONSUMER_CONTRACT",
+      "runtime_resolver_consumer_contract_id": "SYNTHETIC_PR41_CONSUMER_ATOMICROWS_MUTATION_ATTEMPT",
+      "fixture_case": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "contract_authority_class": "STATIC_RUNTIME_RESOLVER_CONSUMER_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "consumer_id": "ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM_ATTEMPT",
+      "consumer_class": "ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM_ATTEMPT",
+      "consumer_authorization_state": "BLOCKED_ATOMICROWS_MUTATION",
+      "runtime_resolver_schema_gate_may_validate_synthetic_fixture_records_only_flag": true,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "live_canary_live_arbitrage_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "order_router_may_consume_runtime_resolver_data_from_pr41_flag": false,
+      "dashboard_may_display_blocked_static_gate_reports_only_flag": true,
+      "dashboard_live_readiness_claim_allowed_flag": false,
+      "direct_runtime_use_allowed_flag": false,
+      "live_client_import_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_ATOMICROWS_MUTATION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "receipt_ids": [
+        "RUNTIME_RESOLVER_SNAPSHOT_ATOMICROWS_MUTATION_ATTEMPT_BLOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "snapshot_gate_report_records": [
+    {
+      "runtime_resolver_snapshot_gate_report_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT",
+      "runtime_resolver_snapshot_gate_report_id": "SYNTHETIC_PR41_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_INPUT_LOCK",
+      "report_authority_class": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "snapshot_manifest_count": 2,
+      "input_lock_count": 12,
+      "consumer_contract_count": 8,
+      "stale_binding_count": 1,
+      "conflict_binding_count": 1,
+      "target_mismatch_count": 1,
+      "missing_accepted_source_evidence_export_linkage_count": 1,
+      "missing_connector_semantic_binding_linkage_count": 1,
+      "missing_source_to_connector_field_binding_linkage_count": 1,
+      "missing_digest_or_hash_count": 1,
+      "cross_venue_target_field_misuse_count": 1,
+      "snapshot_creation_attempt_count": 1,
+      "replay_paper_consumption_attempt_count": 1,
+      "live_order_runtime_cash_profit_claim_attempt_count": 3,
+      "atomicrows_mutation_claim_count": 1,
+      "blocker_reduction_claim_count": 0,
+      "gate_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "snapshot_creation_authority_state": "BLOCKED_STATIC_CONTRACT_ONLY",
+      "runtime_resolver_snapshot_allowed_flag": false,
+      "replay_paper_input_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "blocker_codes": [
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATION_BLOCKED_PR41_STATIC_CONTRACT_ONLY",
+        "RUNTIME_RESOLVER_SNAPSHOT_STALE_BINDING_BLOCK_RECEIPT",
+        "RUNTIME_RESOLVER_SNAPSHOT_REPLAY_PAPER_EXECUTION_ATTEMPT_BLOCK_RECEIPT",
+        "RUNTIME_RESOLVER_SNAPSHOT_LIVE_EXECUTION_ATTEMPT_BLOCK_RECEIPT",
+        "RUNTIME_RESOLVER_SNAPSHOT_PROFIT_CLAIM_BLOCK_RECEIPT"
+      ],
+      "receipt_ids_emitted": [
+        "CODEX_RUNTIME_RESOLVER_SNAPSHOT_AFTER_CONNECTOR_SEMANTIC_BINDING_TASK_PACKET_RECEIPT",
+        "CODEX_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_GATE_RECEIPT",
+        "CODEX_STAGE1_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_STATIC_AUDIT"
+      ]
+    }
+  ]
+}
