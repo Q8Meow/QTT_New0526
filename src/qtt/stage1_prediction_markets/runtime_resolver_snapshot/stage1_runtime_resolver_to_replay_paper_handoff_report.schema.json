@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/stage1_runtime_resolver_to_replay_paper_handoff_report.schema.json",
+  "title": "Stage-1 Runtime Resolver To Replay/Paper Handoff Check Report Static Schema",
+  "description": "Static fail-closed report for runtime resolver snapshot to replay/paper handoff contract validation. The report records only synthetic schema and fixture validation and creates no runtime resolver snapshot, no replay/paper input lock, no replay or paper execution, no result packet, no dual-result review, no live reachability, no order authority, no runtime cash claim, no AtomicRows bundle/hash, no blocker reduction, and no profit evidence.",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "const": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CHECK_REPORT"
+    },
+    "report_version": {
+      "const": "PR42_STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CHECK_REPORT_V1"
+    },
+    "master_plan_edition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "master_plan_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "created_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "consumer_allowlist_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "handoff_case_record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "allowed_immediate_consumer_count": {
+      "const": 1
+    },
+    "blocked_consumer_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_reference_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocked_claim_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_state": {
+      "enum": [
+        "STATIC_HANDOFF_CONTRACT_VALIDATED_NO_RUNTIME_AUTHORITY",
+        "FAIL"
+      ]
+    },
+    "validation_failure_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "runtime_execution_authority_created_flag": {
+      "const": false
+    },
+    "replay_paper_execution_created_flag": {
+      "const": false
+    },
+    "replay_paper_result_packet_created_flag": {
+      "const": false
+    },
+    "dual_result_review_created_flag": {
+      "const": false
+    },
+    "live_reachability_created_flag": {
+      "const": false
+    },
+    "order_authority_created_flag": {
+      "const": false
+    },
+    "runtime_cash_claim_created_flag": {
+      "const": false
+    },
+    "atomicrows_bundle_hash_created_or_mutated_flag": {
+      "const": false
+    },
+    "blocker_reduction_claim_created_flag": {
+      "const": false
+    },
+    "profit_evidence_created_flag": {
+      "const": false
+    },
+    "blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "receipt_ids_emitted": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "no_claim_flags": {
+      "$ref": "stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "$ref": "stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json#/$defs/validation_hook_ids"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "created_at_utc",
+    "consumer_allowlist_record_count",
+    "handoff_case_record_count",
+    "allowed_immediate_consumer_count",
+    "blocked_consumer_case_count",
+    "blocked_reference_case_count",
+    "blocked_claim_case_count",
+    "gate_state",
+    "validation_failure_count",
+    "runtime_execution_authority_created_flag",
+    "replay_paper_execution_created_flag",
+    "replay_paper_result_packet_created_flag",
+    "dual_result_review_created_flag",
+    "live_reachability_created_flag",
+    "order_authority_created_flag",
+    "runtime_cash_claim_created_flag",
+    "atomicrows_bundle_hash_created_or_mutated_flag",
+    "blocker_reduction_claim_created_flag",
+    "profit_evidence_created_flag",
+    "blocker_codes",
+    "receipt_ids_emitted",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false
+}

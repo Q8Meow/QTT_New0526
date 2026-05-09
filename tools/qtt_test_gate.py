@@ -28,7 +28,7 @@ SUCCESS_MARKER = "QTT_CUMULATIVE_TEST_GATE_OK"
 FAILURE_MARKER = "QTT_CUMULATIVE_TEST_GATE_FAILED"
 
 REPORT_TYPE = "QTT_CUMULATIVE_TEST_GATE_REPORT"
-REPORT_VERSION = "PR41_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
+REPORT_VERSION = "PR42_QTT_CUMULATIVE_TEST_GATE_REPORT_V1"
 PHASE = "first-coding-runbook"
 VALIDATION_HOOK = "QTT_CUMULATIVE_TEST_GATE_STATIC_AUDIT"
 
@@ -97,6 +97,7 @@ GATE_CHECK_FIELDS = {
     "accepted_source_evidence_consumer_contract_gate_receipt_present",
     "connector_semantic_binding_ledger_contract_gate_receipt_present",
     "runtime_resolver_snapshot_contract_gate_receipt_present",
+    "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
     "no_stale_generated_derivative_completion_claim",
     "no_hidden_zip_authority",
     "no_source_dependent_connector_semantic_values",
@@ -375,6 +376,37 @@ REQUIRED_RECEIPTS: list[dict[str, Any]] = [
             ),
         ],
         "validation_marker": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_CHECK_OK",
+    },
+    {
+        "receipt_id": "runtime_resolver_to_replay_paper_handoff_gate_receipt_present",
+        "description": (
+            "PR42 runtime resolver snapshot consumer allowlist and replay/paper "
+            "input-lock handoff static contract is confirmed by the static "
+            "validation marker."
+        ),
+        "receipt_source": "STATIC_VALIDATION_MARKER",
+        "paths": [
+            (
+                "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+                "stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+                "stage1_runtime_resolver_to_replay_paper_handoff_contract.schema.json"
+            ),
+            (
+                "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+                "stage1_runtime_resolver_to_replay_paper_handoff_report.schema.json"
+            ),
+            "tools/stage1_runtime_resolver_to_replay_paper_handoff_check.py",
+            (
+                "tests/fixtures/source_evidence/runtime_resolver_snapshot/"
+                "synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json"
+            ),
+        ],
+        "validation_marker": (
+            "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CHECK_OK"
+        ),
     },
 ]
 

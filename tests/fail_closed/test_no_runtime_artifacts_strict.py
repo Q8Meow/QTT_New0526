@@ -171,6 +171,27 @@ def test_scanner_allows_pr41_static_runtime_resolver_contract_paths_exactly(tmp_
     assert violations == []
 
 
+def test_scanner_allows_pr42_static_runtime_resolver_snapshot_handoff_paths_exactly(tmp_path):
+    allowed_paths = [
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json",
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_to_replay_paper_handoff_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_to_replay_paper_handoff_report.schema.json",
+        "tests/fixtures/source_evidence/runtime_resolver_snapshot/"
+        "synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json",
+    ]
+    for path_text in allowed_paths:
+        path = tmp_path / path_text
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
 @pytest.mark.parametrize(
     "filename",
     [
@@ -194,6 +215,55 @@ def test_scanner_rejects_runtime_resolver_executable_or_snapshot_artifacts(tmp_p
 
 def test_scanner_rejects_arbitrary_files_under_runtime_resolver_directory(tmp_path):
     runtime_dir = tmp_path / "src" / "qtt" / "stage1_prediction_markets" / "runtime_resolver"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "extra_static_contract.json").write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("runtime path" in violation for violation in violations)
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "runtime_resolver_to_replay_paper_runtime.py",
+        "replay_execution.py",
+        "paper_execution.py",
+        "replay_result_packet.json",
+        "paper_result_packet.json",
+        "dual_result_review.packet.json",
+        "live_handoff.py",
+    ],
+)
+def test_scanner_rejects_pr42_runtime_replay_paper_and_live_handoff_artifacts(
+    tmp_path, filename
+):
+    runtime_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "runtime_resolver_snapshot"
+    )
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / filename).write_text("", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(
+        "runtime resolver artifact" in violation or "runtime path" in violation
+        for violation in violations
+    )
+
+
+def test_scanner_rejects_arbitrary_files_under_runtime_resolver_snapshot_directory(tmp_path):
+    runtime_dir = (
+        tmp_path
+        / "src"
+        / "qtt"
+        / "stage1_prediction_markets"
+        / "runtime_resolver_snapshot"
+    )
     runtime_dir.mkdir(parents=True)
     (runtime_dir / "extra_static_contract.json").write_text("{}", encoding="utf-8")
 

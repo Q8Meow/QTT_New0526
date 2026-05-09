@@ -29,6 +29,7 @@ ALWAYS_FORBIDDEN_PATH_PARTS = {
     "dashboard_runtime",
     "live_connectors",
     "runtime_resolver",
+    "runtime_resolver_snapshot",
     "runtime_services",
     "telegram_runtime",
 }
@@ -140,13 +141,44 @@ STATIC_RUNTIME_RESOLVER_ALLOWED_PATHS = {
         "tests/runtime_resolver/test_runtime_resolver_source_required_fixture.py"
     ),
 }
+STATIC_RUNTIME_RESOLVER_SNAPSHOT_ALLOWED_PATHS = {
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_to_replay_paper_handoff_contract.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/"
+        "stage1_runtime_resolver_to_replay_paper_handoff_report.schema.json"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/runtime_resolver_snapshot"
+    ),
+    pathlib.PurePosixPath(
+        "tests/fixtures/source_evidence/runtime_resolver_snapshot/"
+        "synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json"
+    ),
+}
 FORBIDDEN_RUNTIME_RESOLVER_ARTIFACT_NAMES = {
+    "dual_result_review.packet.json",
     "live_snapshot.py",
+    "live_handoff.py",
+    "paper_execution.py",
+    "paper_result_packet.json",
     "replay_input_snapshot.json",
+    "replay_execution.py",
+    "replay_result_packet.json",
     "resolver_runtime.py",
     "runtime_resolver_snapshot.input_lock.json",
     "runtime_resolver_snapshot.packet.json",
     "runtime_snapshot.py",
+    "runtime_resolver_to_replay_paper_runtime.py",
     "stage1runtimeresolversnapshot.input_lock.json",
     "stage1runtimeresolversnapshot.packet.json",
 }
@@ -321,15 +353,22 @@ def _is_allowed_static_runtime_resolver_contract_path(
     return rel in STATIC_RUNTIME_RESOLVER_ALLOWED_PATHS
 
 
+def _is_allowed_static_runtime_resolver_snapshot_contract_path(
+    rel: pathlib.PurePosixPath,
+) -> bool:
+    return rel in STATIC_RUNTIME_RESOLVER_SNAPSHOT_ALLOWED_PATHS
+
+
 def _is_allowed_always_forbidden_path(
     rel: pathlib.PurePosixPath,
     part_keys: set[str],
 ) -> bool:
     forbidden_parts = ALWAYS_FORBIDDEN_PATH_PARTS.intersection(part_keys)
-    return (
-        forbidden_parts == {"runtime_resolver"}
-        and _is_allowed_static_runtime_resolver_contract_path(rel)
-    )
+    if forbidden_parts == {"runtime_resolver"}:
+        return _is_allowed_static_runtime_resolver_contract_path(rel)
+    if forbidden_parts == {"runtime_resolver_snapshot"}:
+        return _is_allowed_static_runtime_resolver_snapshot_contract_path(rel)
+    return False
 
 
 def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:

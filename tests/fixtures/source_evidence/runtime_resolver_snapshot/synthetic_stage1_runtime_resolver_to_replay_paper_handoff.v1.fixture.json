@@ -1,0 +1,1002 @@
+{
+  "fixture_id": "SYNTHETIC_PR42_STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_FIXTURE",
+  "fixture_version": "PR42_STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_HANDOFF_NOT_SOURCE_FACT",
+  "example_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_RUNTIME_RESOLVER_SNAPSHOT_NOT_REPLAY_PAPER_AUTHORITY",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+  "fixture_no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "creates_replay_paper_input_lock": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_paper_result_packets": false,
+    "creates_dual_result_review": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "no_claim_flags": {
+    "retrieves_source_evidence": false,
+    "accepts_source_facts": false,
+    "creates_real_accepted_source_evidence": false,
+    "creates_accepted_source_packets": false,
+    "populates_production_connector_semantic_values": false,
+    "imports_live_clients": false,
+    "creates_network_io": false,
+    "creates_runtime_resolver_snapshot": false,
+    "creates_replay_paper_input_lock": false,
+    "executes_replay_or_paper": false,
+    "creates_replay_paper_result_packets": false,
+    "creates_dual_result_review": false,
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_claim": false,
+    "creates_atomicrows_bundle_or_hash": false,
+    "reduces_blockers": false,
+    "creates_profit_evidence": false
+  },
+  "validation_hook_ids": [
+    "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_STATIC_AUDIT"
+  ],
+  "consumer_allowlist_records": [
+    {
+      "consumer_allowlist_type": "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST",
+      "consumer_allowlist_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST",
+      "consumer_allowlist_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "fixture_case": "VALID_CONSUMER_ALLOWLIST_ONLY_CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE",
+      "allowlist_authority_class": "STATIC_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "runtime_resolver_snapshot_green_next_allowed_consumer": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "allowed_immediate_consumer_count": 1,
+      "allowed_immediate_consumers": [
+        "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY"
+      ],
+      "blocked_immediate_consumers": [
+        {
+          "consumer_id": "DIRECT_LIVE_CONSUMER",
+          "consumer_class": "DIRECT_LIVE_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_LIVE_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+          "consumer_class": "DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_DUAL_RESULT_REVIEW_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_OWNER_REVIEW_CONSUMER",
+          "consumer_class": "DIRECT_OWNER_REVIEW_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_OWNER_REVIEW_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+          "consumer_class": "DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_CANARY_ELIGIBILITY_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_LIVE_GATE_DAY1_CONSUMER",
+          "consumer_class": "DIRECT_LIVE_GATE_DAY1_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_LIVE_GATE_DAY1_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_DASHBOARD_MUTATION_CONSUMER",
+          "consumer_class": "DIRECT_DASHBOARD_MUTATION_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_DASHBOARD_MUTATION_CONSUMER"
+        },
+        {
+          "consumer_id": "DIRECT_ORDER_ROUTER_CONSUMER",
+          "consumer_class": "DIRECT_ORDER_ROUTER_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_ORDER_ROUTER_CONSUMER"
+        },
+        {
+          "consumer_id": "RUNTIME_CASH_PROFIT_CONSUMER",
+          "consumer_class": "RUNTIME_CASH_PROFIT_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_RUNTIME_CASH_PROFIT_CONSUMER"
+        },
+        {
+          "consumer_id": "UNDECLARED_CONSUMER",
+          "consumer_class": "UNDECLARED_CONSUMER",
+          "consumer_allowed_flag": false,
+          "authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+          "blocker_code": "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_UNDECLARED_CONSUMER"
+        }
+      ],
+      "concurrent_replay_paper_input_lock_gate_consumer_allowed_flag": true,
+      "direct_live_consumer_allowed_flag": false,
+      "direct_dual_result_review_consumer_allowed_flag": false,
+      "direct_owner_review_consumer_allowed_flag": false,
+      "direct_canary_eligibility_consumer_allowed_flag": false,
+      "direct_live_gate_day1_consumer_allowed_flag": false,
+      "direct_dashboard_mutation_consumer_allowed_flag": false,
+      "direct_order_router_consumer_allowed_flag": false,
+      "runtime_cash_profit_consumer_allowed_flag": false,
+      "undeclared_consumer_allowed_flag": false,
+      "runtime_execution_authority_created_flag": false,
+      "replay_paper_execution_authority_allowed_flag": false,
+      "replay_paper_result_packet_creation_allowed_flag": false,
+      "dual_result_review_creation_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CONSUMER_ALLOWLIST_RECEIPT"
+      ],
+      "no_claim_flags": {
+        "retrieves_source_evidence": false,
+        "accepts_source_facts": false,
+        "creates_real_accepted_source_evidence": false,
+        "creates_accepted_source_packets": false,
+        "populates_production_connector_semantic_values": false,
+        "imports_live_clients": false,
+        "creates_network_io": false,
+        "creates_runtime_resolver_snapshot": false,
+        "creates_replay_paper_input_lock": false,
+        "executes_replay_or_paper": false,
+        "creates_replay_paper_result_packets": false,
+        "creates_dual_result_review": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_runtime_cash_claim": false,
+        "creates_atomicrows_bundle_or_hash": false,
+        "reduces_blockers": false,
+        "creates_profit_evidence": false
+      },
+      "validation_hook_ids": [
+        "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_STATIC_AUDIT"
+      ]
+    }
+  ],
+  "valid_handoff_record": {
+    "handoff_record_type": "STAGE1_RUNTIME_RESOLVER_TO_CONCURRENT_REPLAY_PAPER_HANDOFF",
+    "handoff_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_VALID",
+    "fixture_case": "VALID_SYNTHETIC_STATIC_HANDOFF",
+    "record_authority_class": "STATIC_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CONTRACT_ONLY_NOT_RUNTIME_AUTHORITY",
+    "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+    "master_plan_edition": "v9.9.750",
+    "master_plan_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+    "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+    "allowed_next_consumer_task_packet_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+    "allowed_next_consumer_section_id": "0X.4T_INPUT_LOCK_GATE_ONLY",
+    "handoff_state": "READY_FOR_CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+    "handoff_authorization_state": "AUTHORIZED_FOR_CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+    "runtime_resolver_snapshot_packet_reference": {
+      "snapshot_packet_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_PACKET_REFERENCE",
+      "snapshot_packet_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "freshness_state": "CURRENT",
+      "revalidation_state": "CURRENT",
+      "conflict_state": "NO_CONFLICT",
+      "target_match_state": "MATCHED",
+      "schema_state": "SCHEMA_VALID"
+    },
+    "runtime_resolver_snapshot_input_lock_reference": {
+      "input_lock_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK_REFERENCE",
+      "input_lock_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "snapshot_packet_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_PACKET_REFERENCE",
+      "snapshot_packet_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "freshness_state": "CURRENT",
+      "revalidation_state": "CURRENT",
+      "schema_state": "SCHEMA_VALID"
+    },
+    "runtime_resolver_snapshot_gate_report_reference": {
+      "snapshot_gate_report_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT_REFERENCE",
+      "snapshot_gate_report_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "snapshot_packet_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_PACKET_REFERENCE",
+      "snapshot_packet_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gate_state": "GREEN"
+    },
+    "runtime_resolver_snapshot_consumer_allowlist_reference": {
+      "consumer_allowlist_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST",
+      "consumer_allowlist_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "snapshot_packet_id": "SYNTHETIC_PR42_RUNTIME_RESOLVER_SNAPSHOT_PACKET_REFERENCE",
+      "snapshot_packet_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "allowlist_state": "ALLOWLISTED"
+    },
+    "upstream_digest_contract": {
+      "runtime_resolver_snapshot_input_lock_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "connector_semantic_binding_ledger_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "accepted_source_evidence_ledger_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "target_field_acceptance_ledger_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "runtime_resolver_input_identity_gate_digest": "5555555555555555555555555555555555555555555555555555555555555555",
+      "contract_normalization_gate_digest_when_applicable": "6666666666666666666666666666666666666666666666666666666666666666",
+      "candidate_scope_digest": "7777777777777777777777777777777777777777777777777777777777777777",
+      "venue_scope_digest": "8888888888888888888888888888888888888888888888888888888888888888",
+      "strategy_scope_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+      "owner_policy_snapshot_digest": "1212121212121212121212121212121212121212121212121212121212121212",
+      "staleness_policy_digest": "1313131313131313131313131313131313131313131313131313131313131313",
+      "liquidity_scope_digest": "1414141414141414141414141414141414141414141414141414141414141414",
+      "comparability_scope_digest": "1515151515151515151515151515151515151515151515151515151515151515",
+      "replay_paper_input_identity_digest": "1616161616161616161616161616161616161616161616161616161616161616"
+    },
+    "matching_identity_contract": {
+      "handoff_identity_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "handoff_identity_digest_from_snapshot_packet": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "handoff_identity_digest_from_input_lock": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "handoff_identity_digest_from_gate_report": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "handoff_identity_digest_from_consumer_allowlist": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "handoff_boundary_flags": {
+      "handoff_preserves_replay_paper_as_downstream_non_live_input_lock_gate_only_flag": true,
+      "no_replay_or_paper_execution_created_flag": true,
+      "no_replay_or_paper_result_created_flag": true,
+      "no_dual_result_review_created_flag": true,
+      "no_live_reachability_created_flag": true,
+      "no_order_execution_created_flag": true,
+      "no_runtime_cash_receipt_created_flag": true,
+      "runtime_resolver_snapshot_mutation_allowed_flag": false,
+      "new_contract_event_market_selection_allowed_flag": false,
+      "replay_paper_execution_authority_allowed_flag": false,
+      "replay_paper_result_packet_creation_allowed_flag": false,
+      "dual_result_review_creation_allowed_flag": false,
+      "live_reachability_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "runtime_cash_claim_allowed_flag": false,
+      "profit_claim_allowed_flag": false,
+      "atomicrows_bundle_mutation_allowed_flag": false,
+      "blocker_reduction_claim_allowed_flag": false,
+      "source_fact_acceptance_allowed_flag": false,
+      "connector_semantic_population_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "live_client_import_allowed_flag": false
+    },
+    "blocker_codes": [],
+    "receipt_ids": [
+      "SYNTHETIC_PR42_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_VALID_RECEIPT"
+    ],
+    "no_claim_flags": {
+      "retrieves_source_evidence": false,
+      "accepts_source_facts": false,
+      "creates_real_accepted_source_evidence": false,
+      "creates_accepted_source_packets": false,
+      "populates_production_connector_semantic_values": false,
+      "imports_live_clients": false,
+      "creates_network_io": false,
+      "creates_runtime_resolver_snapshot": false,
+      "creates_replay_paper_input_lock": false,
+      "executes_replay_or_paper": false,
+      "creates_replay_paper_result_packets": false,
+      "creates_dual_result_review": false,
+      "creates_live_reachability": false,
+      "creates_order_authority": false,
+      "creates_runtime_cash_claim": false,
+      "creates_atomicrows_bundle_or_hash": false,
+      "reduces_blockers": false,
+      "creates_profit_evidence": false
+    },
+    "validation_hook_ids": [
+      "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_STATIC_AUDIT"
+    ]
+  },
+  "handoff_case_records": [
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_VALID_HANDOFF",
+      "fixture_case": "VALID_SYNTHETIC_STATIC_HANDOFF",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "READY_FOR_CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "expected_authorization_state": "AUTHORIZED_FOR_CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "blocker_codes": [],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_VALID_HANDOFF_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_LIVE",
+      "fixture_case": "BLOCKED_DIRECT_LIVE_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_LIVE_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_LIVE_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_LIVE_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_LIVE_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_DUAL_REVIEW",
+      "fixture_case": "BLOCKED_DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_DUAL_RESULT_REVIEW_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_DUAL_RESULT_REVIEW_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_DUAL_REVIEW_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_OWNER_REVIEW",
+      "fixture_case": "BLOCKED_DIRECT_OWNER_REVIEW_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_OWNER_REVIEW_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_OWNER_REVIEW_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_OWNER_REVIEW_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_OWNER_REVIEW_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_CANARY",
+      "fixture_case": "BLOCKED_DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_CANARY_ELIGIBILITY_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_CANARY_ELIGIBILITY_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_CANARY_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_LIVE_GATE_DAY1",
+      "fixture_case": "BLOCKED_DIRECT_LIVE_GATE_DAY1_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_LIVE_GATE_DAY1_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_LIVE_GATE_DAY1_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_LIVE_GATE_DAY1_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_LIVE_GATE_DAY1_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_DASHBOARD",
+      "fixture_case": "BLOCKED_DIRECT_DASHBOARD_MUTATION_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_DASHBOARD_MUTATION_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_DASHBOARD_MUTATION_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_DASHBOARD_MUTATION_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_DASHBOARD_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_ORDER_ROUTER",
+      "fixture_case": "BLOCKED_DIRECT_ORDER_ROUTER_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "DIRECT_ORDER_ROUTER_CONSUMER",
+      "requested_immediate_consumer_class": "DIRECT_ORDER_ROUTER_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_DIRECT_ORDER_ROUTER_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIRECT_ORDER_ROUTER_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_RUNTIME_CASH_PROFIT",
+      "fixture_case": "BLOCKED_RUNTIME_CASH_PROFIT_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "RUNTIME_CASH_PROFIT_CONSUMER",
+      "requested_immediate_consumer_class": "RUNTIME_CASH_PROFIT_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_RUNTIME_CASH_PROFIT_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_RUNTIME_CASH_PROFIT_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_UNDECLARED",
+      "fixture_case": "BLOCKED_UNDECLARED_CONSUMER",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "UNDECLARED_CONSUMER",
+      "requested_immediate_consumer_class": "UNDECLARED_CONSUMER",
+      "consumer_allowlist_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "expected_authorization_state": "BLOCKED_FORBIDDEN_CONSUMER",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_UNDECLARED_CONSUMER"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_UNDECLARED_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_STALE_SNAPSHOT",
+      "fixture_case": "BLOCKED_STALE_SNAPSHOT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "STALE",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_STALE_SNAPSHOT",
+      "expected_authorization_state": "BLOCKED_STALE_SNAPSHOT",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_STALE"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_STALE_SNAPSHOT_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_STALE_INPUT_LOCK",
+      "fixture_case": "BLOCKED_STALE_INPUT_LOCK",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "STALE",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_STALE_INPUT_LOCK",
+      "expected_authorization_state": "BLOCKED_STALE_INPUT_LOCK",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK_STALE"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_STALE_INPUT_LOCK_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_SUPERSEDED_SNAPSHOT",
+      "fixture_case": "BLOCKED_SUPERSEDED_SNAPSHOT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "SUPERSEDED",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_SUPERSEDED_SNAPSHOT",
+      "expected_authorization_state": "BLOCKED_SUPERSEDED_SNAPSHOT",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_SUPERSEDED"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_SUPERSEDED_SNAPSHOT_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_CONFLICT",
+      "fixture_case": "BLOCKED_CONFLICT_STATE",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "CONFLICT_PRESENT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_CONFLICT_STATE",
+      "expected_authorization_state": "BLOCKED_CONFLICT_STATE",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_CONFLICT_STATE"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_CONFLICT_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_TARGET_MISMATCH",
+      "fixture_case": "BLOCKED_TARGET_MISMATCH",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MISMATCH",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_TARGET_MISMATCH",
+      "expected_authorization_state": "BLOCKED_TARGET_MISMATCH",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_TARGET_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_TARGET_MISMATCH_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_DIGEST_MISMATCH",
+      "fixture_case": "BLOCKED_DIGEST_MISMATCH",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MISMATCH",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_DIGEST_MISMATCH",
+      "expected_authorization_state": "BLOCKED_DIGEST_MISMATCH",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_HANDOFF_DIGEST_MISMATCH"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_DIGEST_MISMATCH_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_SNAPSHOT_PACKET",
+      "fixture_case": "BLOCKED_MISSING_SNAPSHOT_PACKET",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "MISSING",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_SNAPSHOT_PACKET_MISSING",
+      "expected_authorization_state": "BLOCKED_SNAPSHOT_PACKET_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_PACKET_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_SNAPSHOT_PACKET_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_SNAPSHOT_GATE",
+      "fixture_case": "BLOCKED_MISSING_SNAPSHOT_GATE_REPORT",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "MISSING",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_SNAPSHOT_GATE_REPORT_MISSING",
+      "expected_authorization_state": "BLOCKED_SNAPSHOT_GATE_REPORT_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_GATE_REPORT_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_SNAPSHOT_GATE_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_INPUT_LOCK",
+      "fixture_case": "BLOCKED_MISSING_INPUT_LOCK",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "MISSING",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_INPUT_LOCK_MISSING",
+      "expected_authorization_state": "BLOCKED_INPUT_LOCK_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_INPUT_LOCK_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_INPUT_LOCK_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_CONSUMER_ALLOWLIST",
+      "fixture_case": "BLOCKED_MISSING_CONSUMER_ALLOWLIST",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "MISSING",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "MISSING",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_CONSUMER_ALLOWLIST_MISSING",
+      "expected_authorization_state": "BLOCKED_CONSUMER_ALLOWLIST_MISSING",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_CONSUMER_ALLOWLIST_MISSING"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_MISSING_CONSUMER_ALLOWLIST_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_SCHEMA_ERROR",
+      "fixture_case": "BLOCKED_SCHEMA_ERROR",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_ERROR",
+      "claim_attempt_type": "NONE",
+      "expected_handoff_state": "BLOCKED_SCHEMA_ERROR",
+      "expected_authorization_state": "BLOCKED_SCHEMA_ERROR",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_HANDOFF_SCHEMA_ERROR"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_SCHEMA_ERROR_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_REPLAY_PAPER_EXECUTION_CLAIM",
+      "fixture_case": "BLOCKED_REPLAY_PAPER_EXECUTION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "REPLAY_PAPER_EXECUTION_AUTHORITY",
+      "expected_handoff_state": "BLOCKED_REPLAY_PAPER_EXECUTION_CLAIM",
+      "expected_authorization_state": "BLOCKED_REPLAY_PAPER_EXECUTION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_REPLAY_PAPER_EXECUTION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_REPLAY_PAPER_EXECUTION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_REPLAY_PAPER_RESULT_PACKET_CLAIM",
+      "fixture_case": "BLOCKED_REPLAY_PAPER_RESULT_PACKET_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "REPLAY_PAPER_RESULT_PACKET_CREATION",
+      "expected_handoff_state": "BLOCKED_REPLAY_PAPER_RESULT_PACKET_CLAIM",
+      "expected_authorization_state": "BLOCKED_REPLAY_PAPER_RESULT_PACKET_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_REPLAY_PAPER_RESULT_PACKET_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_REPLAY_PAPER_RESULT_PACKET_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "fixture_case": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "LIVE_ORDER_RUNTIME_CASH_PROFIT",
+      "expected_handoff_state": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "expected_authorization_state": "BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_LIVE_ORDER_RUNTIME_CASH_PROFIT_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_ATOMICROWS_MUTATION_CLAIM",
+      "fixture_case": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "ATOMICROWS_BUNDLE_HASH_MUTATION",
+      "expected_handoff_state": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "expected_authorization_state": "BLOCKED_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_ATOMICROWS_BUNDLE_HASH_MUTATION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_ATOMICROWS_MUTATION_CLAIM_RECEIPT"
+      ]
+    },
+    {
+      "handoff_case_record_type": "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CASE",
+      "case_id": "SYNTHETIC_PR42_CASE_BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "fixture_case": "BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "case_authority_class": "SYNTHETIC_CASE_ONLY_NOT_RUNTIME_AUTHORITY",
+      "synthetic_data_notice": "SYNTHETIC_PLACEHOLDER_ONLY_NO_REAL_SOURCE_NO_REAL_ACCEPTED_FACT",
+      "requested_immediate_consumer_id": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "requested_immediate_consumer_class": "CONCURRENT_REPLAY_PAPER_INPUT_LOCK_GATE_ONLY",
+      "consumer_allowlist_state": "ALLOWLISTED",
+      "snapshot_packet_reference_state": "PRESENT_CURRENT",
+      "input_lock_reference_state": "PRESENT_CURRENT",
+      "snapshot_gate_report_reference_state": "PRESENT_GREEN",
+      "consumer_allowlist_reference_state": "PRESENT_ALLOWLISTED",
+      "digest_match_state": "MATCHED",
+      "target_match_state": "MATCHED",
+      "conflict_state": "NO_CONFLICT",
+      "schema_state": "SCHEMA_VALID",
+      "claim_attempt_type": "BLOCKER_REDUCTION",
+      "expected_handoff_state": "BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "expected_authorization_state": "BLOCKED_BLOCKER_REDUCTION_CLAIM",
+      "blocker_codes": [
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_BLOCKER_REDUCTION_CLAIM"
+      ],
+      "receipt_ids": [
+        "SYNTHETIC_PR42_CASE_BLOCKED_BLOCKER_REDUCTION_CLAIM_RECEIPT"
+      ]
+    }
+  ]
+}

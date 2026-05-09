@@ -78,6 +78,23 @@ def test_qtt_cumulative_gate_requires_pr41_runtime_resolver_snapshot_contract_re
     assert receipt["validation_marker"] == "STAGE1_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_CHECK_OK"
 
 
+def test_qtt_cumulative_gate_requires_pr42_runtime_resolver_handoff_receipt():
+    report = _report()
+    receipt = next(
+        item
+        for item in report["prior_gate_receipts"]
+        if item["receipt_id"]
+        == "runtime_resolver_to_replay_paper_handoff_gate_receipt_present"
+    )
+
+    assert receipt["satisfied"] is True
+    assert receipt["status"] == "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER"
+    assert (
+        receipt["validation_marker"]
+        == "STAGE1_RUNTIME_RESOLVER_TO_REPLAY_PAPER_HANDOFF_CHECK_OK"
+    )
+
+
 def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap():
     report = _report()
     statuses = {item["receipt_id"]: item["status"] for item in report["prior_gate_receipts"]}
