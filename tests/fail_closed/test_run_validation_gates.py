@@ -231,6 +231,25 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            str(
+                Path("schemas")
+                / "master_plan"
+                / "generated_derivative_bootstrap_gate.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "master_plan"
+                / "synthetic_generated_derivative_bootstrap_gate.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
@@ -467,6 +486,46 @@ def test_runner_includes_atomicrows_bundle_schema_checker_after_row_specificatio
             / "fixtures"
             / "atomicrows"
             / "synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json"
+        ),
+    ]
+
+
+def test_runner_includes_generated_derivative_gate_after_bundle_checker(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    bundle_checker_index = command_names.index(
+        "validate_atomicrows_bundle_schema_checker_static.py"
+    )
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+    assert bundle_checker_index < generated_gate_index < no_runtime_index
+
+    audit_command = commands[generated_gate_index]
+    assert audit_command == [
+        python_executable,
+        str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
+        "--repo-root",
+        ".",
+        "--schema",
+        str(
+            Path("schemas")
+            / "master_plan"
+            / "generated_derivative_bootstrap_gate.schema.json"
+        ),
+        "--fixture",
+        str(
+            Path("tests")
+            / "fixtures"
+            / "master_plan"
+            / "synthetic_generated_derivative_bootstrap_gate.v1.fixture.json"
         ),
     ]
 
