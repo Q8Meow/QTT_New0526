@@ -198,6 +198,25 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_atomicrows_canonical_row_specification_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            _path(
+                "schemas",
+                "atomicrows",
+                "atomicrows_canonical_row_specification_audit.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "atomicrows",
+                "synthetic_atomicrows_canonical_row_specification_required.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_no_runtime_artifacts.py"),
             "--repo-root",
             ".",
