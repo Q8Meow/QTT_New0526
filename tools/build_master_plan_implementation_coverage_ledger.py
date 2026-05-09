@@ -5,7 +5,6 @@ import argparse
 import json
 import pathlib
 import re
-import subprocess
 from typing import Any, Sequence
 
 SUCCESS_MARKER = "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT"
@@ -21,11 +20,6 @@ CANONICAL_LEDGER_PATH = (
 CANONICAL_ATOMICROWS_BUNDLE = "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
 CANONICAL_ATOMICROWS_SHA = "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
 
-MERGE_SUBJECT_RE = re.compile(
-    r"^Merge pull request #(?P<pr_number>\d+) from (?P<branch_name>\S+)$"
-)
-SUCCESS_MARKER_RE = re.compile(r'SUCCESS_MARKER\s*=\s*"([^"]+)"')
-PRINTED_OK_RE = re.compile(r'print\(\s*"([A-Z0-9_]+_OK)"')
 HEADING_RE = re.compile(r"^#{1,6}\s+(?P<section_id>0X\.[0-9A-Z]+(?:\.[0-9A-Z]+)*)\s+(?P<title>.+)$")
 
 PR_RECORD_FALSE_FLAGS: tuple[str, ...] = (
@@ -54,7 +48,7 @@ PR_RECORD_FALSE_FLAGS: tuple[str, ...] = (
 
 AUTHORITY = {
     "authority_class": "NON_AUTHORITATIVE_IMPLEMENTATION_COVERAGE_LEDGER",
-    "derived_from": "local_git_history_and_repo_files",
+    "derived_from": "stable_pr_tracking_table_and_repo_files",
     "ledger_is_master_plan_authority": False,
     "ledger_is_source_fact_authority": False,
     "ledger_is_connector_semantic_authority": False,
@@ -306,116 +300,44 @@ STRONG_PR_RECORDS: dict[int, dict[str, Any]] = {
     },
 }
 
+TRACKED_PR_MIN = 1
+TRACKED_PR_MAX = 47
+HISTORICAL_REVIEW_REQUIRED_PR_MAX = 37
+STRONG_PR_MIN = 38
+STRONG_PR_MAX = 46
 
-def _as_repo_path(path: str | pathlib.Path) -> str:
-    return pathlib.Path(path).as_posix()
+PR47_CHANGED_PATHS = [
+    "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
+    "docs/master_plan/generated/QTTTestGate.report.json",
+    "schemas/master_plan/master_plan_implementation_coverage_ledger.schema.json",
+    "src/qtt/core/schemas/qtt_test_gate_report.schema.json",
+    "tests/core/test_qtt_cumulative_gate.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+    "tools/build_master_plan_implementation_coverage_ledger.py",
+    "tools/qtt_test_gate.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_master_plan_implementation_coverage_ledger.py",
+]
 
+PR47_GENERATED_REPORT_PATHS = [
+    "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
+    "docs/master_plan/generated/QTTTestGate.report.json",
+]
 
-def _run_git(repo_root: pathlib.Path, args: Sequence[str]) -> str:
-    completed = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return completed.stdout
+PR47_VALIDATOR_TOOLS = [
+    "tools/build_master_plan_implementation_coverage_ledger.py",
+    "tools/validate_master_plan_implementation_coverage_ledger.py",
+]
 
+PR47_TEST_PATHS = [
+    "tests/master_plan/test_master_plan_implementation_coverage_ledger.py",
+]
 
-def _git_file_text(repo_root: pathlib.Path, commit: str, rel_path: str) -> str:
-    completed = subprocess.run(
-        ["git", "show", f"{commit}:{rel_path}"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    return completed.stdout if completed.returncode == 0 else ""
-
-
-def _git_body_first_line(repo_root: pathlib.Path, commit: str) -> str | None:
-    body = _run_git(repo_root, ["show", "--no-patch", "--pretty=format:%b", commit])
-    for line in body.splitlines():
-        stripped = line.strip()
-        if stripped:
-            return stripped
-    return None
-
-
-def _changed_paths(repo_root: pathlib.Path, first_parent: str, merge_commit: str) -> list[str]:
-    output = _run_git(repo_root, ["diff", "--name-only", first_parent, merge_commit])
-    return sorted(path for path in output.splitlines() if path)
-
-
-def _merge_records_from_git(repo_root: pathlib.Path) -> list[dict[str, Any]]:
-    output = _run_git(
-        repo_root,
-        ["log", "--format=%H%x09%P%x09%s", "--merges", "--first-parent", "--reverse", "HEAD"],
-    )
-    records: list[dict[str, Any]] = []
-    for line in output.splitlines():
-        commit, parents_text, subject = line.split("\t", 2)
-        match = MERGE_SUBJECT_RE.match(subject)
-        if not match:
-            continue
-        pr_number = int(match.group("pr_number"))
-        if pr_number < 1 or pr_number > 46:
-            continue
-        parents = parents_text.split()
-        first_parent = parents[0] if parents else ""
-        branch_tip = parents[1] if len(parents) > 1 else None
-        paths = _changed_paths(repo_root, first_parent, commit) if first_parent else []
-        body_title = _git_body_first_line(repo_root, commit)
-        records.append(
-            {
-                "pr_number": pr_number,
-                "branch_name_if_known": match.group("branch_name"),
-                "local_commit_if_known": branch_tip,
-                "merge_commit_if_known": commit,
-                "merge_subject": subject,
-                "pr_title_or_subject": body_title or subject,
-                "created_or_changed_paths": paths,
-            }
-        )
-    return sorted(records, key=lambda record: record["pr_number"])
-
-
-def _paths_with_prefix(paths: Sequence[str], prefix: str) -> list[str]:
-    return sorted(path for path in paths if path.startswith(prefix))
-
-
-def _validator_tools(paths: Sequence[str]) -> list[str]:
-    tool_paths = _paths_with_prefix(paths, "tools/")
-    return sorted(
-        path
-        for path in tool_paths
-        if (
-            "validate" in pathlib.PurePosixPath(path).name
-            or pathlib.PurePosixPath(path).name.endswith("_check.py")
-            or pathlib.PurePosixPath(path).name in {"qtt_test_gate.py", "local_gate_command_matrix.py", "pr_handoff_check.py"}
-        )
-    )
-
-
-def _generated_report_paths(paths: Sequence[str]) -> list[str]:
-    return sorted(path for path in paths if path.startswith("docs/master_plan/generated/"))
-
-
-def _test_paths(paths: Sequence[str]) -> list[str]:
-    return sorted(path for path in paths if path.startswith("tests/"))
-
-
-def _validation_markers_from_tools(
-    repo_root: pathlib.Path,
-    commit: str,
-    tool_paths: Sequence[str],
-) -> list[str]:
-    markers: set[str] = set()
-    for path in tool_paths:
-        text = _git_file_text(repo_root, commit, path)
-        markers.update(SUCCESS_MARKER_RE.findall(text))
-        markers.update(PRINTED_OK_RE.findall(text))
-    return sorted(markers)
+PR47_VALIDATION_MARKERS = [
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
+]
 
 
 def _section_headings(master_plan_text: str) -> dict[str, str]:
@@ -437,56 +359,99 @@ def _section_sort_key(section_id: str) -> tuple[Any, ...]:
     return tuple(pieces)
 
 
-def _record_for_merge(
-    repo_root: pathlib.Path,
-    merge_record: dict[str, Any],
+def _base_pr_record(
+    *,
+    pr_number: int,
+    pr_title_or_subject: str,
+    implementation_status: str,
+    review_status: str,
 ) -> dict[str, Any]:
-    paths = merge_record["created_or_changed_paths"]
-    validator_tools = _validator_tools(paths)
-    markers = _validation_markers_from_tools(
-        repo_root,
-        merge_record["merge_commit_if_known"],
-        validator_tools,
-    )
     record: dict[str, Any] = {
-        "pr_number": merge_record["pr_number"],
-        "pr_title_or_subject": merge_record["pr_title_or_subject"],
-        "branch_name_if_known": merge_record["branch_name_if_known"],
-        "local_commit_if_known": merge_record["local_commit_if_known"],
-        "merge_commit_if_known": merge_record["merge_commit_if_known"],
-        "implementation_status": "TRACKING_ONLY",
+        "pr_number": pr_number,
+        "pr_title_or_subject": pr_title_or_subject,
+        "branch_name_if_known": None,
+        "local_commit_if_known": None,
+        "merge_commit_if_known": None,
+        "implementation_status": implementation_status,
         "master_plan_section_ids": [],
         "master_plan_anchor_terms": [],
-        "implemented_subject": merge_record["pr_title_or_subject"],
-        "created_or_changed_paths": paths,
-        "generated_report_paths": _generated_report_paths(paths),
-        "validator_tools": validator_tools,
-        "test_paths": _test_paths(paths),
-        "validation_markers": markers,
+        "implemented_subject": pr_title_or_subject,
+        "created_or_changed_paths": [],
+        "generated_report_paths": [],
+        "validator_tools": [],
+        "test_paths": [],
+        "validation_markers": [],
         "authority_boundary": dict(AUTHORITY_BOUNDARY),
-        "review_status": "SECTION_MAPPING_REQUIRES_OWNER_REVIEW",
+        "review_status": review_status,
     }
     for flag in PR_RECORD_FALSE_FLAGS:
         record[flag] = False
-
-    strong = STRONG_PR_RECORDS.get(record["pr_number"])
-    if strong is not None:
-        record["implementation_status"] = strong["implementation_status"]
-        record["master_plan_section_ids"] = list(strong["master_plan_section_ids"])
-        record["master_plan_anchor_terms"] = list(strong["master_plan_anchor_terms"])
-        record["implemented_subject"] = strong["implemented_subject"]
-        record["generated_report_paths"] = sorted(
-            set(record["generated_report_paths"]) | set(strong["generated_report_paths"])
-        )
-        record["validator_tools"] = sorted(
-            set(record["validator_tools"]) | set(strong["validator_tools"])
-        )
-        record["validation_markers"] = sorted(
-            set(record["validation_markers"]) | set(strong["validation_markers"])
-        )
-        record["review_status"] = "VERIFIED"
-
     return record
+
+
+def _review_required_historical_pr_record(pr_number: int) -> dict[str, Any]:
+    return _base_pr_record(
+        pr_number=pr_number,
+        pr_title_or_subject=(
+            f"PR #{pr_number} historical implementation tracking record requires owner review"
+        ),
+        implementation_status="REVIEW_REQUIRED",
+        review_status="SECTION_MAPPING_REQUIRES_OWNER_REVIEW",
+    )
+
+
+def _strong_pr_record(pr_number: int) -> dict[str, Any]:
+    strong = STRONG_PR_RECORDS[pr_number]
+    record = _base_pr_record(
+        pr_number=pr_number,
+        pr_title_or_subject=f"PR #{pr_number}: {strong['implemented_subject']}",
+        implementation_status=strong["implementation_status"],
+        review_status="VERIFIED",
+    )
+    record["master_plan_section_ids"] = list(strong["master_plan_section_ids"])
+    record["master_plan_anchor_terms"] = list(strong["master_plan_anchor_terms"])
+    record["implemented_subject"] = strong["implemented_subject"]
+    record["generated_report_paths"] = sorted(strong["generated_report_paths"])
+    record["validator_tools"] = sorted(strong["validator_tools"])
+    record["validation_markers"] = sorted(strong["validation_markers"])
+    record["created_or_changed_paths"] = sorted(
+        set(record["generated_report_paths"]) | set(record["validator_tools"])
+    )
+    return record
+
+
+def _pr47_tracking_record() -> dict[str, Any]:
+    record = _base_pr_record(
+        pr_number=47,
+        pr_title_or_subject="Add master plan implementation coverage ledger",
+        implementation_status="TRACKING_ONLY",
+        review_status="SECTION_MAPPING_REQUIRES_OWNER_REVIEW",
+    )
+    record["implemented_subject"] = "master plan implementation coverage ledger"
+    record["master_plan_anchor_terms"] = [
+        "PR47",
+        "master plan implementation coverage ledger",
+        "non-authoritative implementation coverage tracking",
+    ]
+    record["created_or_changed_paths"] = sorted(PR47_CHANGED_PATHS)
+    record["generated_report_paths"] = sorted(PR47_GENERATED_REPORT_PATHS)
+    record["validator_tools"] = sorted(PR47_VALIDATOR_TOOLS)
+    record["test_paths"] = sorted(PR47_TEST_PATHS)
+    record["validation_markers"] = sorted(PR47_VALIDATION_MARKERS)
+    return record
+
+
+def _pr_records() -> list[dict[str, Any]]:
+    records = [
+        _review_required_historical_pr_record(pr_number)
+        for pr_number in range(TRACKED_PR_MIN, HISTORICAL_REVIEW_REQUIRED_PR_MAX + 1)
+    ]
+    records.extend(
+        _strong_pr_record(pr_number)
+        for pr_number in range(STRONG_PR_MIN, STRONG_PR_MAX + 1)
+    )
+    records.append(_pr47_tracking_record())
+    return records
 
 
 def _section_records(
@@ -581,9 +546,9 @@ def _review_required_records(pr_records: Sequence[dict[str, Any]]) -> list[dict[
                 "record_type": "PR_SECTION_MAPPING_REVIEW",
                 "pr_number": record["pr_number"],
                 "reason": (
-                    "Local merge commit, changed paths, validators, tests, and generated reports "
-                    "prove implementation activity, but no exact master-plan section mapping was "
-                    "proven by PR47 without owner crosscheck."
+                    "Stable ledger tracking intentionally avoids branch names, commit hashes, "
+                    "remote refs, and checkout-depth-dependent merge metadata; exact "
+                    "master-plan section mapping remains owner-review required."
                 ),
                 "owner_review_required": True,
                 "local_evidence_paths": record["created_or_changed_paths"],
@@ -618,10 +583,7 @@ def build_ledger(repo_root: pathlib.Path) -> dict[str, Any]:
     master_plan_text = master_plan_path.read_text(encoding="utf-8")
     section_titles = _section_headings(master_plan_text)
 
-    pr_records = [
-        _record_for_merge(root, merge_record)
-        for merge_record in _merge_records_from_git(root)
-    ]
+    pr_records = _pr_records()
     section_records = _section_records(pr_records, section_titles)
     marker_records = _validation_marker_records(pr_records)
     review_required_records = _review_required_records(pr_records)
@@ -629,13 +591,14 @@ def build_ledger(repo_root: pathlib.Path) -> dict[str, Any]:
     pr_1_37_review_required_count = sum(
         1
         for record in pr_records
-        if 1 <= record["pr_number"] <= 37
+        if TRACKED_PR_MIN <= record["pr_number"] <= HISTORICAL_REVIEW_REQUIRED_PR_MAX
         and record["review_status"] == "SECTION_MAPPING_REQUIRES_OWNER_REVIEW"
     )
     strong_count = sum(
         1
         for record in pr_records
-        if 38 <= record["pr_number"] <= 46 and record["review_status"] == "VERIFIED"
+        if STRONG_PR_MIN <= record["pr_number"] <= STRONG_PR_MAX
+        and record["review_status"] == "VERIFIED"
     )
 
     return {
@@ -660,7 +623,7 @@ def build_ledger(repo_root: pathlib.Path) -> dict[str, Any]:
             ),
             "atomicrows_bundle_present": (root / pathlib.Path(CANONICAL_ATOMICROWS_BUNDLE)).exists(),
             "atomicrows_sha_present": (root / pathlib.Path(CANONICAL_ATOMICROWS_SHA)).exists(),
-            "deterministic_local_git_history_only": True,
+            "deterministic_stable_pr_tracking_table_only": True,
             "no_authority_claims_preserved": True,
         },
         "pr_records": pr_records,

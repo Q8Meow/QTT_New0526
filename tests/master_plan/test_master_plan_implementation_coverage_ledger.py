@@ -28,6 +28,11 @@ EXPECTED_STRONG_MARKERS = {
     46: "STAGE1_THREE_VENUE_CANARY_ELIGIBILITY_CONTRACT_CHECK_OK",
 }
 
+EXPECTED_PR47_MARKERS = {
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_BUILT",
+    "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
+}
+
 AUTHORITY_FIELDS = [
     "ledger_is_master_plan_authority",
     "ledger_is_source_fact_authority",
@@ -101,16 +106,38 @@ def test_strong_pr_38_through_46_records_exist_with_expected_validation_markers(
         assert record["validator_tools"]
 
 
-def test_pr_1_through_37_records_are_local_evidence_with_review_required_mapping():
+def test_pr_1_through_37_records_are_stable_review_required_tracking():
     ledger = _load_generated_ledger()
     records = {record["pr_number"]: record for record in ledger["pr_records"]}
 
     for pr_number in range(1, 38):
         record = records[pr_number]
-        assert record["merge_commit_if_known"]
-        assert record["created_or_changed_paths"]
+        assert record["implementation_status"] == "REVIEW_REQUIRED"
         assert record["review_status"] == "SECTION_MAPPING_REQUIRES_OWNER_REVIEW"
         assert record["master_plan_section_ids"] == []
+        assert record["branch_name_if_known"] is None
+        assert record["local_commit_if_known"] is None
+        assert record["merge_commit_if_known"] is None
+
+
+def test_pr47_tracking_record_is_review_required_without_checkout_specific_metadata():
+    ledger = _load_generated_ledger()
+    records = {record["pr_number"]: record for record in ledger["pr_records"]}
+    record = records[47]
+
+    assert record["implementation_status"] == "TRACKING_ONLY"
+    assert record["review_status"] == "SECTION_MAPPING_REQUIRES_OWNER_REVIEW"
+    assert record["master_plan_section_ids"] == []
+    assert record["branch_name_if_known"] is None
+    assert record["local_commit_if_known"] is None
+    assert record["merge_commit_if_known"] is None
+    assert EXPECTED_PR47_MARKERS.issubset(set(record["validation_markers"]))
+    assert "tools/build_master_plan_implementation_coverage_ledger.py" in record[
+        "validator_tools"
+    ]
+    assert "tools/validate_master_plan_implementation_coverage_ledger.py" in record[
+        "validator_tools"
+    ]
 
 
 def test_ledger_authority_flags_remain_false_for_forbidden_authorities():
