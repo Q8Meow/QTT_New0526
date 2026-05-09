@@ -1,0 +1,1595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/connectors/connector_scaffold_source_required_gate.schema.json",
+  "title": "Static Connector Scaffold Source-Required Gate Schema",
+  "description": "Static schema-only connector scaffold gate. The surface preserves SOURCE_REQUIRED placeholders and creates no runtime connector, source retrieval, source acceptance, semantic binding, network IO, order authority, AtomicRows authority, blocker reduction, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "fixture_id": {
+      "const": "SYNTHETIC_PR35_CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_BLOCKED_FIXTURE"
+    },
+    "fixture_version": {
+      "const": "PR35_CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_BLOCKED_V1"
+    },
+    "fixture_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_CONNECTOR_NOT_SOURCE_FACT"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_CONNECTOR_BINDING_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_GATE_STATIC"
+    },
+    "surface_version": {
+      "const": "PR35_CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_GATE_SCHEMA_V1"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "validation_mode": {
+      "const": "STATIC_SCHEMA_ONLY_NON_MUTATING_AUDIT"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "gate_authority": {
+      "$ref": "#/$defs/gate_authority"
+    },
+    "prerequisite_receipts": {
+      "$ref": "#/$defs/prerequisite_receipts"
+    },
+    "connector_target_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/target_field_metadata"
+      }
+    },
+    "connector_scaffold_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/connector_scaffold_record"
+      }
+    },
+    "connector_capability_cards": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/connector_capability_card"
+      }
+    },
+    "active_connector_capability_matrix": {
+      "$ref": "#/$defs/active_connector_capability_matrix"
+    },
+    "source_required_placeholder_policy": {
+      "$ref": "#/$defs/source_required_placeholder_policy"
+    },
+    "accepted_target_field_packet_policy": {
+      "$ref": "#/$defs/accepted_target_field_packet_policy"
+    },
+    "implementation_import_policy": {
+      "$ref": "#/$defs/implementation_import_policy"
+    },
+    "connector_semantic_binding_policy": {
+      "$ref": "#/$defs/connector_semantic_binding_policy"
+    },
+    "network_policy": {
+      "$ref": "#/$defs/network_policy"
+    },
+    "live_connector_policy": {
+      "$ref": "#/$defs/live_connector_policy"
+    },
+    "semantic_population_policy": {
+      "$ref": "#/$defs/semantic_population_policy"
+    },
+    "selection_policy": {
+      "$ref": "#/$defs/selection_policy"
+    },
+    "runtime_policy": {
+      "$ref": "#/$defs/runtime_policy"
+    },
+    "execution_policy": {
+      "$ref": "#/$defs/execution_policy"
+    },
+    "live_reachability_policy": {
+      "$ref": "#/$defs/live_reachability_policy"
+    },
+    "order_authority_policy": {
+      "$ref": "#/$defs/order_authority_policy"
+    },
+    "runtime_cash_policy": {
+      "$ref": "#/$defs/runtime_cash_policy"
+    },
+    "source_authority_policy": {
+      "$ref": "#/$defs/source_authority_policy"
+    },
+    "atomicrows_authority_state": {
+      "$ref": "#/$defs/atomicrows_authority_state"
+    },
+    "claim_policy": {
+      "$ref": "#/$defs/claim_policy"
+    },
+    "forbidden_action_flags": {
+      "$ref": "#/$defs/forbidden_action_flags"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/no_claim_flags"
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "const": "CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_GATE_STATIC_AUDIT"
+      }
+    }
+  },
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "mode",
+    "execution",
+    "validation_mode",
+    "deterministic_output",
+    "gate_authority",
+    "prerequisite_receipts",
+    "connector_target_fields",
+    "connector_scaffold_records",
+    "connector_capability_cards",
+    "active_connector_capability_matrix",
+    "source_required_placeholder_policy",
+    "accepted_target_field_packet_policy",
+    "implementation_import_policy",
+    "connector_semantic_binding_policy",
+    "network_policy",
+    "live_connector_policy",
+    "semantic_population_policy",
+    "selection_policy",
+    "runtime_policy",
+    "execution_policy",
+    "live_reachability_policy",
+    "order_authority_policy",
+    "runtime_cash_policy",
+    "source_authority_policy",
+    "atomicrows_authority_state",
+    "claim_policy",
+    "forbidden_action_flags",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "target_field_path": {
+      "enum": [
+        "connector.semantic.connector_semantic_values",
+        "connector.venue_api.venue_api_facts",
+        "connector.fundamentals.fundamental_facts",
+        "connector.fees.fee_semantics",
+        "connector.market.tick_semantics",
+        "connector.api.rate_limit_semantics",
+        "connector.settlement.settlement_rules",
+        "connector.order_entry.order_entry_fields",
+        "connector.order_status.status_lifecycle",
+        "connector.private_state.private_state_fields",
+        "connector.private_state.account_fields",
+        "connector.private_state.balance_fields",
+        "connector.selection.market_selection",
+        "connector.selection.contract_selection",
+        "connector.selection.event_selection",
+        "connector.selection.symbol_selection",
+        "connector.selection.live_venue_selection",
+        "connector.runtime.runtime_resolver_snapshot",
+        "connector.execution.replay_paper_execution",
+        "connector.cash.runtime_cash_value",
+        "connector.order_authority.order_authority_fields"
+      ]
+    },
+    "target_field_metadata": {
+      "type": "object",
+      "properties": {
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "field_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_class": {
+          "const": "TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE_REQUIRED"
+        },
+        "blocker_code": {
+          "const": "BLOCKER_CONNECTOR_TARGET_FIELD_SOURCE_REQUIRED"
+        },
+        "accepted_source_packet_required": {
+          "const": true
+        },
+        "accepted_source_packet_schema_ref": {
+          "const": "schemas/source_evidence/source_evidence.schema.json#/$defs/accepted_source_packet"
+        },
+        "target_field_specific_packet_required": {
+          "const": true
+        },
+        "exact_target_field_packet_required": {
+          "const": true
+        },
+        "placeholder_retention": {
+          "const": "SOURCE_REQUIRED_UNTIL_ACCEPTED_TARGET_FIELD_PACKET"
+        },
+        "semantic_binding_state": {
+          "const": "BLOCKED_PENDING_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        }
+      },
+      "required": [
+        "target_field_path",
+        "field_family",
+        "dependency_class",
+        "blocker_code",
+        "accepted_source_packet_required",
+        "accepted_source_packet_schema_ref",
+        "target_field_specific_packet_required",
+        "exact_target_field_packet_required",
+        "placeholder_retention",
+        "semantic_binding_state"
+      ],
+      "additionalProperties": false
+    },
+    "source_required_placeholder_record": {
+      "type": "object",
+      "properties": {
+        "placeholder_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "placeholder_value": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "source_dependency_state": {
+          "const": "SOURCE_REQUIRED_PLACEHOLDER"
+        },
+        "target_field_metadata": {
+          "$ref": "#/$defs/target_field_metadata"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "accepted_source_packet_reference": {
+          "const": "SOURCE_REQUIRED_NO_ACCEPTED_TARGET_FIELD_PACKET"
+        },
+        "semantic_binding_allowed": {
+          "const": false
+        },
+        "semantic_value_population_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "placeholder_id",
+        "target_field_path",
+        "placeholder_value",
+        "source_dependency_state",
+        "target_field_metadata",
+        "accepted_source_evidence_present",
+        "accepted_source_packet_reference",
+        "semantic_binding_allowed",
+        "semantic_value_population_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "connector_scaffold_record": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "CONNECTOR_SCAFFOLD_RECORD_SOURCE_REQUIRED_PLACEHOLDER"
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scaffold_state": {
+          "const": "PLACEHOLDER_ONLY_NOT_RUNTIME_CONNECTOR"
+        },
+        "connector_id": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "connector_display_name": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "implementation_reference": {
+          "const": "UNBOUND"
+        },
+        "live_connector_client_reference": {
+          "const": "UNBOUND"
+        },
+        "network_io_reference": {
+          "const": "UNBOUND"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "semantic_binding_state": {
+          "const": "BLOCKED_PENDING_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "runtime_state": {
+          "const": "DISABLED"
+        },
+        "source_required_placeholder_policy": {
+          "$ref": "#/$defs/source_required_placeholder_policy"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "scaffold_state",
+        "connector_id",
+        "connector_display_name",
+        "implementation_reference",
+        "live_connector_client_reference",
+        "network_io_reference",
+        "accepted_source_evidence_present",
+        "semantic_binding_state",
+        "runtime_state",
+        "source_required_placeholder_policy",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "connector_capability_card": {
+      "type": "object",
+      "properties": {
+        "card_type": {
+          "const": "CONNECTOR_CAPABILITY_CARD_SOURCE_REQUIRED_SCAFFOLD"
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "connector_id": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "card_state": {
+          "const": "SOURCE_REQUIRED_PLACEHOLDER_ONLY"
+        },
+        "scaffold_contract_state": {
+          "const": "CONTRACT_ONLY_NOT_RUNTIME_CONNECTOR"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "accepted_target_field_packet_count": {
+          "const": "NO_ACCEPTED_TARGET_FIELD_PACKETS"
+        },
+        "source_required_placeholders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/source_required_placeholder_record"
+          }
+        },
+        "semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_enabled": {
+          "const": false
+        },
+        "live_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "live_connector_client_created": {
+          "const": false
+        },
+        "forbidden_action_flags": {
+          "$ref": "#/$defs/forbidden_action_flags"
+        },
+        "no_claim_flags": {
+          "$ref": "#/$defs/no_claim_flags"
+        }
+      },
+      "required": [
+        "card_type",
+        "card_id",
+        "connector_id",
+        "card_state",
+        "scaffold_contract_state",
+        "accepted_source_evidence_present",
+        "accepted_target_field_packet_count",
+        "source_required_placeholders",
+        "semantic_binding_allowed",
+        "runtime_enabled",
+        "live_enabled",
+        "network_io_enabled",
+        "live_connector_client_created",
+        "forbidden_action_flags",
+        "no_claim_flags"
+      ],
+      "additionalProperties": false
+    },
+    "active_connector_capability_matrix": {
+      "type": "object",
+      "properties": {
+        "matrix_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "matrix_state": {
+          "const": "SOURCE_REQUIRED_PLACEHOLDER_ONLY"
+        },
+        "accepted_target_field_packets_present": {
+          "const": false
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "source_required_placeholder_only": {
+          "const": true
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/active_connector_capability_matrix_row"
+          }
+        }
+      },
+      "required": [
+        "matrix_id",
+        "matrix_state",
+        "accepted_target_field_packets_present",
+        "connector_semantic_binding_allowed",
+        "source_required_placeholder_only",
+        "rows"
+      ],
+      "additionalProperties": false
+    },
+    "active_connector_capability_matrix_row": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_field_path": {
+          "$ref": "#/$defs/target_field_path"
+        },
+        "capability_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "placeholder_value": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "semantic_value": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "source_dependency_state": {
+          "const": "SOURCE_REQUIRED_PLACEHOLDER"
+        },
+        "target_field_metadata": {
+          "$ref": "#/$defs/target_field_metadata"
+        },
+        "accepted_source_evidence_present": {
+          "const": false
+        },
+        "accepted_source_packet_reference": {
+          "const": "SOURCE_REQUIRED_NO_ACCEPTED_TARGET_FIELD_PACKET"
+        },
+        "semantic_binding_allowed": {
+          "const": false
+        },
+        "runtime_binding_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "row_id",
+        "target_field_path",
+        "capability_family",
+        "placeholder_value",
+        "semantic_value",
+        "source_dependency_state",
+        "target_field_metadata",
+        "accepted_source_evidence_present",
+        "accepted_source_packet_reference",
+        "semantic_binding_allowed",
+        "runtime_binding_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "gate_authority": {
+      "type": "object",
+      "properties": {
+        "static_audit_only": {
+          "const": true
+        },
+        "schema_only": {
+          "const": true
+        },
+        "non_mutating_validator": {
+          "const": true
+        },
+        "connector_scaffold_contracts_only": {
+          "const": true
+        },
+        "runtime_authority_created": {
+          "const": false
+        },
+        "connector_binding_authority_created": {
+          "const": false
+        },
+        "source_authority_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "static_audit_only",
+        "schema_only",
+        "non_mutating_validator",
+        "connector_scaffold_contracts_only",
+        "runtime_authority_created",
+        "connector_binding_authority_created",
+        "source_authority_created"
+      ],
+      "additionalProperties": false
+    },
+    "prerequisite_receipts": {
+      "type": "object",
+      "properties": {
+        "venue_neutral_prediction_adapter_gate_receipt_required": {
+          "const": true
+        },
+        "venue_neutral_prediction_adapter_gate_receipt_status": {
+          "const": "REQUIRED"
+        },
+        "source_evidence_gate_confirmation_receipt_required": {
+          "const": true
+        },
+        "source_evidence_gate_confirmation_receipt_status": {
+          "const": "REQUIRED"
+        },
+        "stage1_packet_schema_gate_receipt_required": {
+          "const": true
+        },
+        "stage1_packet_schema_gate_receipt_status": {
+          "const": "REQUIRED"
+        },
+        "prerequisite_receipts_create_runtime_authority": {
+          "const": false
+        },
+        "prerequisite_receipts_create_source_authority": {
+          "const": false
+        },
+        "prerequisite_receipts_create_connector_binding_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "venue_neutral_prediction_adapter_gate_receipt_required",
+        "venue_neutral_prediction_adapter_gate_receipt_status",
+        "source_evidence_gate_confirmation_receipt_required",
+        "source_evidence_gate_confirmation_receipt_status",
+        "stage1_packet_schema_gate_receipt_required",
+        "stage1_packet_schema_gate_receipt_status",
+        "prerequisite_receipts_create_runtime_authority",
+        "prerequisite_receipts_create_source_authority",
+        "prerequisite_receipts_create_connector_binding_authority"
+      ],
+      "additionalProperties": false
+    },
+    "source_required_placeholder_policy": {
+      "type": "object",
+      "properties": {
+        "source_required_value": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "placeholder_value_must_be_source_required": {
+          "const": true
+        },
+        "target_field_metadata_required": {
+          "const": true
+        },
+        "accepted_target_field_packets_required_before_semantic_binding": {
+          "const": true
+        },
+        "exact_target_field_packet_required": {
+          "const": true
+        },
+        "target_field_packet_validation_required": {
+          "const": true
+        },
+        "wildcard_or_venue_level_packet_unlock_allowed": {
+          "const": false
+        },
+        "placeholder_weakening_allowed": {
+          "const": false
+        },
+        "connector_semantic_value_replacement_allowed": {
+          "const": false
+        },
+        "accepted_target_field_packets_present": {
+          "const": false
+        },
+        "source_required_placeholders_preserved": {
+          "const": true
+        }
+      },
+      "required": [
+        "source_required_value",
+        "placeholder_value_must_be_source_required",
+        "target_field_metadata_required",
+        "accepted_target_field_packets_required_before_semantic_binding",
+        "exact_target_field_packet_required",
+        "target_field_packet_validation_required",
+        "wildcard_or_venue_level_packet_unlock_allowed",
+        "placeholder_weakening_allowed",
+        "connector_semantic_value_replacement_allowed",
+        "accepted_target_field_packets_present",
+        "source_required_placeholders_preserved"
+      ],
+      "additionalProperties": false
+    },
+    "accepted_target_field_packet_policy": {
+      "type": "object",
+      "properties": {
+        "accepted_source_packet_schema_ref": {
+          "const": "schemas/source_evidence/source_evidence.schema.json#/$defs/accepted_source_packet"
+        },
+        "accepted_target_field_packets_exist": {
+          "const": false
+        },
+        "accepted_target_field_packets_created": {
+          "const": false
+        },
+        "accepted_source_packet_creation_allowed": {
+          "const": false
+        },
+        "source_retrieval_claimed": {
+          "const": false
+        },
+        "source_acceptance_claimed": {
+          "const": false
+        },
+        "source_facts_accepted": {
+          "const": false
+        },
+        "connector_binding_allowed_without_accepted_target_field_packet": {
+          "const": false
+        },
+        "connector_binding_blocked_without_accepted_target_field_packet": {
+          "const": true
+        }
+      },
+      "required": [
+        "accepted_source_packet_schema_ref",
+        "accepted_target_field_packets_exist",
+        "accepted_target_field_packets_created",
+        "accepted_source_packet_creation_allowed",
+        "source_retrieval_claimed",
+        "source_acceptance_claimed",
+        "source_facts_accepted",
+        "connector_binding_allowed_without_accepted_target_field_packet",
+        "connector_binding_blocked_without_accepted_target_field_packet"
+      ],
+      "additionalProperties": false
+    },
+    "implementation_import_policy": {
+      "type": "object",
+      "properties": {
+        "venue_sdk_import_reference": {
+          "const": "UNBOUND"
+        },
+        "venue_api_module_reference": {
+          "const": "UNBOUND"
+        },
+        "implementation_authority_reference": {
+          "const": "UNBOUND"
+        },
+        "connector_runtime_module_reference": {
+          "const": "UNBOUND"
+        },
+        "venue_sdk_import_allowed": {
+          "const": false
+        },
+        "venue_api_module_import_allowed": {
+          "const": false
+        },
+        "implementation_authority_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "venue_sdk_import_reference",
+        "venue_api_module_reference",
+        "implementation_authority_reference",
+        "connector_runtime_module_reference",
+        "venue_sdk_import_allowed",
+        "venue_api_module_import_allowed",
+        "implementation_authority_created"
+      ],
+      "additionalProperties": false
+    },
+    "connector_semantic_binding_policy": {
+      "type": "object",
+      "properties": {
+        "connector_semantic_binding_blocked": {
+          "const": true
+        },
+        "connector_semantic_binding_allowed": {
+          "const": false
+        },
+        "connector_semantic_values_populated": {
+          "const": false
+        },
+        "venue_api_facts_populated": {
+          "const": false
+        },
+        "fundamental_facts_populated": {
+          "const": false
+        },
+        "source_dependent_values_populated": {
+          "const": false
+        },
+        "accepted_target_field_packet_validation_required": {
+          "const": true
+        }
+      },
+      "required": [
+        "connector_semantic_binding_blocked",
+        "connector_semantic_binding_allowed",
+        "connector_semantic_values_populated",
+        "venue_api_facts_populated",
+        "fundamental_facts_populated",
+        "source_dependent_values_populated",
+        "accepted_target_field_packet_validation_required"
+      ],
+      "additionalProperties": false
+    },
+    "network_policy": {
+      "type": "object",
+      "properties": {
+        "network_io_created": {
+          "const": false
+        },
+        "network_io_allowed": {
+          "const": false
+        },
+        "http_client_created": {
+          "const": false
+        },
+        "websocket_client_created": {
+          "const": false
+        },
+        "live_api_call_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "network_io_created",
+        "network_io_allowed",
+        "http_client_created",
+        "websocket_client_created",
+        "live_api_call_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "live_connector_policy": {
+      "type": "object",
+      "properties": {
+        "live_connector_client_created": {
+          "const": false
+        },
+        "live_connector_client_creation_allowed": {
+          "const": false
+        },
+        "live_connector_reference": {
+          "const": "UNBOUND"
+        },
+        "client_factory_reference": {
+          "const": "UNBOUND"
+        }
+      },
+      "required": [
+        "live_connector_client_created",
+        "live_connector_client_creation_allowed",
+        "live_connector_reference",
+        "client_factory_reference"
+      ],
+      "additionalProperties": false
+    },
+    "semantic_population_policy": {
+      "type": "object",
+      "properties": {
+        "connector_semantic_values_populated": {
+          "const": false
+        },
+        "venue_api_facts_populated": {
+          "const": false
+        },
+        "venue_fundamental_facts_populated": {
+          "const": false
+        },
+        "exact_fee_semantics_populated": {
+          "const": false
+        },
+        "exact_tick_semantics_populated": {
+          "const": false
+        },
+        "exact_rate_limit_semantics_populated": {
+          "const": false
+        },
+        "exact_settlement_semantics_populated": {
+          "const": false
+        },
+        "exact_order_entry_fields_populated": {
+          "const": false
+        },
+        "exact_order_status_lifecycle_populated": {
+          "const": false
+        },
+        "exact_private_state_semantics_populated": {
+          "const": false
+        },
+        "exact_account_semantics_populated": {
+          "const": false
+        },
+        "exact_balance_semantics_populated": {
+          "const": false
+        }
+      },
+      "required": [
+        "connector_semantic_values_populated",
+        "venue_api_facts_populated",
+        "venue_fundamental_facts_populated",
+        "exact_fee_semantics_populated",
+        "exact_tick_semantics_populated",
+        "exact_rate_limit_semantics_populated",
+        "exact_settlement_semantics_populated",
+        "exact_order_entry_fields_populated",
+        "exact_order_status_lifecycle_populated",
+        "exact_private_state_semantics_populated",
+        "exact_account_semantics_populated",
+        "exact_balance_semantics_populated"
+      ],
+      "additionalProperties": false
+    },
+    "selection_policy": {
+      "type": "object",
+      "properties": {
+        "exact_market_selection_claimed": {
+          "const": false
+        },
+        "exact_contract_selection_claimed": {
+          "const": false
+        },
+        "exact_event_selection_claimed": {
+          "const": false
+        },
+        "exact_symbol_selection_claimed": {
+          "const": false
+        },
+        "exact_live_venue_selection_claimed": {
+          "const": false
+        }
+      },
+      "required": [
+        "exact_market_selection_claimed",
+        "exact_contract_selection_claimed",
+        "exact_event_selection_claimed",
+        "exact_symbol_selection_claimed",
+        "exact_live_venue_selection_claimed"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_policy": {
+      "type": "object",
+      "properties": {
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_claimed": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_reference": {
+          "const": "UNBOUND"
+        }
+      },
+      "required": [
+        "runtime_resolver_snapshot_created",
+        "runtime_resolver_snapshot_creation_claimed",
+        "runtime_resolver_snapshot_reference"
+      ],
+      "additionalProperties": false
+    },
+    "execution_policy": {
+      "type": "object",
+      "properties": {
+        "replay_execution_claimed": {
+          "const": false
+        },
+        "paper_execution_claimed": {
+          "const": false
+        },
+        "runtime_replay_result_packet_created": {
+          "const": false
+        },
+        "runtime_paper_result_packet_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "replay_execution_claimed",
+        "paper_execution_claimed",
+        "runtime_replay_result_packet_created",
+        "runtime_paper_result_packet_created"
+      ],
+      "additionalProperties": false
+    },
+    "live_reachability_policy": {
+      "type": "object",
+      "properties": {
+        "live_reachability_created": {
+          "const": false
+        },
+        "live_reachability_claimed": {
+          "const": false
+        }
+      },
+      "required": [
+        "live_reachability_created",
+        "live_reachability_claimed"
+      ],
+      "additionalProperties": false
+    },
+    "order_authority_policy": {
+      "type": "object",
+      "properties": {
+        "order_authority_created": {
+          "const": false
+        },
+        "order_execution_authority_created": {
+          "const": false
+        },
+        "order_submission_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_reduce_enabled": {
+          "const": false
+        },
+        "order_close_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "order_authority_created",
+        "order_execution_authority_created",
+        "order_submission_enabled",
+        "order_cancel_enabled",
+        "order_reduce_enabled",
+        "order_close_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_cash_policy": {
+      "type": "object",
+      "properties": {
+        "runtime_cash_value_authority_created": {
+          "const": false
+        },
+        "runtime_cash_value_claimed": {
+          "const": false
+        },
+        "runtime_cash_fetch_allowed": {
+          "const": false
+        },
+        "balance_fetch_allowed": {
+          "const": false
+        },
+        "account_state_fetch_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "runtime_cash_value_authority_created",
+        "runtime_cash_value_claimed",
+        "runtime_cash_fetch_allowed",
+        "balance_fetch_allowed",
+        "account_state_fetch_allowed"
+      ],
+      "additionalProperties": false
+    },
+    "source_authority_policy": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_claimed": {
+          "const": false
+        },
+        "source_acceptance_claimed": {
+          "const": false
+        },
+        "source_facts_accepted": {
+          "const": false
+        },
+        "accepted_source_packet_created": {
+          "const": false
+        },
+        "accepted_source_evidence_packet_created": {
+          "const": false
+        },
+        "accepted_source_packet_reference": {
+          "const": "UNBOUND"
+        }
+      },
+      "required": [
+        "source_retrieval_claimed",
+        "source_acceptance_claimed",
+        "source_facts_accepted",
+        "accepted_source_packet_created",
+        "accepted_source_evidence_packet_created",
+        "accepted_source_packet_reference"
+      ],
+      "additionalProperties": false
+    },
+    "atomicrows_authority_state": {
+      "type": "object",
+      "properties": {
+        "canonical_bundle_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "canonical_bundle_sha_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        },
+        "canonical_bundle_present": {
+          "const": false
+        },
+        "canonical_bundle_sha_present": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_claimed": {
+          "const": false
+        },
+        "atomicrows_hash_creation_claimed": {
+          "const": false
+        },
+        "atomicrows_sha_authority_claimed": {
+          "const": false
+        },
+        "atomicrows_row_creation_claimed": {
+          "const": false
+        },
+        "atomicrows_completion_claimed": {
+          "const": false
+        },
+        "claims_4183_row_completion": {
+          "const": false
+        },
+        "freeze_authority_claimed": {
+          "const": false
+        }
+      },
+      "required": [
+        "canonical_bundle_path",
+        "canonical_bundle_sha_path",
+        "canonical_bundle_present",
+        "canonical_bundle_sha_present",
+        "atomicrows_bundle_creation_claimed",
+        "atomicrows_hash_creation_claimed",
+        "atomicrows_sha_authority_claimed",
+        "atomicrows_row_creation_claimed",
+        "atomicrows_completion_claimed",
+        "claims_4183_row_completion",
+        "freeze_authority_claimed"
+      ],
+      "additionalProperties": false
+    },
+    "claim_policy": {
+      "type": "object",
+      "properties": {
+        "blocker_reduction_claimed": {
+          "const": false
+        },
+        "profit_claim_created": {
+          "const": false
+        },
+        "profit_evidence_created": {
+          "const": false
+        },
+        "order_execution_authority_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "blocker_reduction_claimed",
+        "profit_claim_created",
+        "profit_evidence_created",
+        "order_execution_authority_created"
+      ],
+      "additionalProperties": false
+    },
+    "forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "accepted_source_evidence_packet_creation_enabled": {
+          "const": false
+        },
+        "accepted_source_packet_creation_enabled": {
+          "const": false
+        },
+        "account_state_fetch_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_creation_enabled": {
+          "const": false
+        },
+        "atomicrows_bundle_hash_creation_enabled": {
+          "const": false
+        },
+        "atomicrows_completion_claim_enabled": {
+          "const": false
+        },
+        "atomicrows_row_creation_enabled": {
+          "const": false
+        },
+        "atomicrows_sha_authority_enabled": {
+          "const": false
+        },
+        "atomicrows_sha_computation_enabled": {
+          "const": false
+        },
+        "balance_fetch_enabled": {
+          "const": false
+        },
+        "blocker_reduction_enabled": {
+          "const": false
+        },
+        "connector_semantic_binding_enabled": {
+          "const": false
+        },
+        "connector_semantic_value_population_enabled": {
+          "const": false
+        },
+        "exact_account_semantics_enabled": {
+          "const": false
+        },
+        "exact_balance_semantics_enabled": {
+          "const": false
+        },
+        "exact_contract_selection_enabled": {
+          "const": false
+        },
+        "exact_event_selection_enabled": {
+          "const": false
+        },
+        "exact_fee_semantics_enabled": {
+          "const": false
+        },
+        "exact_live_venue_selection_enabled": {
+          "const": false
+        },
+        "exact_market_selection_enabled": {
+          "const": false
+        },
+        "exact_order_entry_fields_enabled": {
+          "const": false
+        },
+        "exact_order_status_lifecycle_enabled": {
+          "const": false
+        },
+        "exact_private_state_semantics_enabled": {
+          "const": false
+        },
+        "exact_rate_limit_semantics_enabled": {
+          "const": false
+        },
+        "exact_settlement_semantics_enabled": {
+          "const": false
+        },
+        "exact_symbol_selection_enabled": {
+          "const": false
+        },
+        "exact_tick_semantics_enabled": {
+          "const": false
+        },
+        "freeze_authority_enabled": {
+          "const": false
+        },
+        "fundamental_fact_population_enabled": {
+          "const": false
+        },
+        "http_client_enabled": {
+          "const": false
+        },
+        "live_connector_client_creation_enabled": {
+          "const": false
+        },
+        "live_reachability_enabled": {
+          "const": false
+        },
+        "network_io_enabled": {
+          "const": false
+        },
+        "order_authority_enabled": {
+          "const": false
+        },
+        "order_cancel_enabled": {
+          "const": false
+        },
+        "order_close_enabled": {
+          "const": false
+        },
+        "order_execution_enabled": {
+          "const": false
+        },
+        "order_reduce_enabled": {
+          "const": false
+        },
+        "order_submit_enabled": {
+          "const": false
+        },
+        "paper_execution_enabled": {
+          "const": false
+        },
+        "private_state_fetch_enabled": {
+          "const": false
+        },
+        "profit_claim_enabled": {
+          "const": false
+        },
+        "profit_evidence_creation_enabled": {
+          "const": false
+        },
+        "replay_execution_enabled": {
+          "const": false
+        },
+        "runtime_cash_value_authority_enabled": {
+          "const": false
+        },
+        "runtime_paper_result_packet_creation_enabled": {
+          "const": false
+        },
+        "runtime_replay_result_packet_creation_enabled": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_enabled": {
+          "const": false
+        },
+        "source_acceptance_execution_enabled": {
+          "const": false
+        },
+        "source_fact_acceptance_enabled": {
+          "const": false
+        },
+        "source_retrieval_enabled": {
+          "const": false
+        },
+        "venue_api_fact_population_enabled": {
+          "const": false
+        },
+        "venue_api_module_import_enabled": {
+          "const": false
+        },
+        "venue_sdk_import_enabled": {
+          "const": false
+        },
+        "websocket_client_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "accepted_source_evidence_packet_creation_enabled",
+        "accepted_source_packet_creation_enabled",
+        "account_state_fetch_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "atomicrows_bundle_hash_creation_enabled",
+        "atomicrows_completion_claim_enabled",
+        "atomicrows_row_creation_enabled",
+        "atomicrows_sha_authority_enabled",
+        "atomicrows_sha_computation_enabled",
+        "balance_fetch_enabled",
+        "blocker_reduction_enabled",
+        "connector_semantic_binding_enabled",
+        "connector_semantic_value_population_enabled",
+        "exact_account_semantics_enabled",
+        "exact_balance_semantics_enabled",
+        "exact_contract_selection_enabled",
+        "exact_event_selection_enabled",
+        "exact_fee_semantics_enabled",
+        "exact_live_venue_selection_enabled",
+        "exact_market_selection_enabled",
+        "exact_order_entry_fields_enabled",
+        "exact_order_status_lifecycle_enabled",
+        "exact_private_state_semantics_enabled",
+        "exact_rate_limit_semantics_enabled",
+        "exact_settlement_semantics_enabled",
+        "exact_symbol_selection_enabled",
+        "exact_tick_semantics_enabled",
+        "freeze_authority_enabled",
+        "fundamental_fact_population_enabled",
+        "http_client_enabled",
+        "live_connector_client_creation_enabled",
+        "live_reachability_enabled",
+        "network_io_enabled",
+        "order_authority_enabled",
+        "order_cancel_enabled",
+        "order_close_enabled",
+        "order_execution_enabled",
+        "order_reduce_enabled",
+        "order_submit_enabled",
+        "paper_execution_enabled",
+        "private_state_fetch_enabled",
+        "profit_claim_enabled",
+        "profit_evidence_creation_enabled",
+        "replay_execution_enabled",
+        "runtime_cash_value_authority_enabled",
+        "runtime_paper_result_packet_creation_enabled",
+        "runtime_replay_result_packet_creation_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "source_acceptance_execution_enabled",
+        "source_fact_acceptance_enabled",
+        "source_retrieval_enabled",
+        "venue_api_fact_population_enabled",
+        "venue_api_module_import_enabled",
+        "venue_sdk_import_enabled",
+        "websocket_client_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "binds_connector_semantics": {
+          "const": false
+        },
+        "cancels_orders": {
+          "const": false
+        },
+        "claims_4183_row_completion": {
+          "const": false
+        },
+        "claims_atomicrows_completion": {
+          "const": false
+        },
+        "claims_atomicrows_sha_authority": {
+          "const": false
+        },
+        "claims_blocker_reduction": {
+          "const": false
+        },
+        "claims_source_acceptance": {
+          "const": false
+        },
+        "claims_source_fact_acceptance": {
+          "const": false
+        },
+        "claims_source_retrieval": {
+          "const": false
+        },
+        "closes_orders": {
+          "const": false
+        },
+        "computes_atomicrows_sha": {
+          "const": false
+        },
+        "contains_atomicrows_bundle": {
+          "const": false
+        },
+        "contains_atomicrows_bundle_hash": {
+          "const": false
+        },
+        "creates_accepted_source_evidence_packets": {
+          "const": false
+        },
+        "creates_accepted_source_packets": {
+          "const": false
+        },
+        "creates_atomicrows_row_records": {
+          "const": false
+        },
+        "creates_atomicrows_rows": {
+          "const": false
+        },
+        "creates_freeze_authority": {
+          "const": false
+        },
+        "creates_http_client": {
+          "const": false
+        },
+        "creates_live_connector_client": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "creates_network_io": {
+          "const": false
+        },
+        "creates_order_authority": {
+          "const": false
+        },
+        "creates_profit_claim": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        },
+        "creates_runtime_cash_value_authority": {
+          "const": false
+        },
+        "creates_runtime_paper_result_packets": {
+          "const": false
+        },
+        "creates_runtime_replay_result_packets": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshots": {
+          "const": false
+        },
+        "creates_websocket_client": {
+          "const": false
+        },
+        "encodes_exact_account_semantics": {
+          "const": false
+        },
+        "encodes_exact_balance_semantics": {
+          "const": false
+        },
+        "encodes_exact_fee_semantics": {
+          "const": false
+        },
+        "encodes_exact_order_entry_fields": {
+          "const": false
+        },
+        "encodes_exact_order_status_lifecycle": {
+          "const": false
+        },
+        "encodes_exact_private_state_semantics": {
+          "const": false
+        },
+        "encodes_exact_rate_limit_semantics": {
+          "const": false
+        },
+        "encodes_exact_settlement_semantics": {
+          "const": false
+        },
+        "encodes_exact_tick_semantics": {
+          "const": false
+        },
+        "executes_paper": {
+          "const": false
+        },
+        "executes_replay": {
+          "const": false
+        },
+        "fetches_account_state": {
+          "const": false
+        },
+        "fetches_balances": {
+          "const": false
+        },
+        "fetches_private_state": {
+          "const": false
+        },
+        "imports_venue_api_module": {
+          "const": false
+        },
+        "imports_venue_sdk": {
+          "const": false
+        },
+        "populates_connector_semantic_values": {
+          "const": false
+        },
+        "populates_fundamental_facts": {
+          "const": false
+        },
+        "populates_venue_api_facts": {
+          "const": false
+        },
+        "reduces_orders": {
+          "const": false
+        },
+        "selects_exact_contracts": {
+          "const": false
+        },
+        "selects_exact_events": {
+          "const": false
+        },
+        "selects_exact_markets": {
+          "const": false
+        },
+        "selects_exact_symbols": {
+          "const": false
+        },
+        "selects_live_venues": {
+          "const": false
+        },
+        "submits_orders": {
+          "const": false
+        }
+      },
+      "required": [
+        "binds_connector_semantics",
+        "cancels_orders",
+        "claims_4183_row_completion",
+        "claims_atomicrows_completion",
+        "claims_atomicrows_sha_authority",
+        "claims_blocker_reduction",
+        "claims_source_acceptance",
+        "claims_source_fact_acceptance",
+        "claims_source_retrieval",
+        "closes_orders",
+        "computes_atomicrows_sha",
+        "contains_atomicrows_bundle",
+        "contains_atomicrows_bundle_hash",
+        "creates_accepted_source_evidence_packets",
+        "creates_accepted_source_packets",
+        "creates_atomicrows_row_records",
+        "creates_atomicrows_rows",
+        "creates_freeze_authority",
+        "creates_http_client",
+        "creates_live_connector_client",
+        "creates_live_reachability",
+        "creates_network_io",
+        "creates_order_authority",
+        "creates_profit_claim",
+        "creates_profit_evidence",
+        "creates_runtime_cash_value_authority",
+        "creates_runtime_paper_result_packets",
+        "creates_runtime_replay_result_packets",
+        "creates_runtime_resolver_snapshots",
+        "creates_websocket_client",
+        "encodes_exact_account_semantics",
+        "encodes_exact_balance_semantics",
+        "encodes_exact_fee_semantics",
+        "encodes_exact_order_entry_fields",
+        "encodes_exact_order_status_lifecycle",
+        "encodes_exact_private_state_semantics",
+        "encodes_exact_rate_limit_semantics",
+        "encodes_exact_settlement_semantics",
+        "encodes_exact_tick_semantics",
+        "executes_paper",
+        "executes_replay",
+        "fetches_account_state",
+        "fetches_balances",
+        "fetches_private_state",
+        "imports_venue_api_module",
+        "imports_venue_sdk",
+        "populates_connector_semantic_values",
+        "populates_fundamental_facts",
+        "populates_venue_api_facts",
+        "reduces_orders",
+        "selects_exact_contracts",
+        "selects_exact_events",
+        "selects_exact_markets",
+        "selects_exact_symbols",
+        "selects_live_venues",
+        "submits_orders"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_CONNECTOR_BINDING_AUTHORITY",
+      "surface_kind": "CONNECTOR_SCAFFOLD_SOURCE_REQUIRED_GATE_STATIC",
+      "mode": "SOURCE_REQUIRED",
+      "execution": "DISABLED"
+    }
+  ]
+}
