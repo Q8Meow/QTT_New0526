@@ -87,6 +87,25 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
+            _path("tools", "validate_source_evidence_gate_confirmation_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            _path(
+                "schemas",
+                "source_evidence",
+                "source_evidence_gate_confirmation.schema.json",
+            ),
+            "--fixture",
+            _path(
+                "tests",
+                "fixtures",
+                "source_evidence",
+                "synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

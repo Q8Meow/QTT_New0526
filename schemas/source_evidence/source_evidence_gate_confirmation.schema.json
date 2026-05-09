@@ -1,0 +1,731 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/source_evidence_gate_confirmation.schema.json",
+  "title": "Static Source-Evidence Gate Confirmation Audit Schema",
+  "description": "Static/offline confirmation that connector semantic binding remains blocked unless exact target-field accepted source-evidence packets exist and validate. This schema creates no source retrieval, source acceptance, accepted packet creation, connector binding, runtime authority, live reachability, private-state fetch, order authority, AtomicRows authority, SHA authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "properties": {
+    "fixture_id": {
+      "const": "SYNTHETIC_PR32_SOURCE_EVIDENCE_GATE_CONFIRMATION_BLOCKED_FIXTURE"
+    },
+    "fixture_version": {
+      "const": "PR32_SOURCE_EVIDENCE_GATE_CONFIRMATION_BLOCKED_FIXTURE_V1"
+    },
+    "fixture_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_SOURCE_FACT"
+    },
+    "example_authority_class": {
+      "const": "SYNTHETIC_NON_AUTHORITATIVE_EXAMPLE_NOT_SOURCE_FACT"
+    },
+    "schema_authority_class": {
+      "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_SOURCE_EVIDENCE_GATE_AUTHORITY"
+    },
+    "surface_kind": {
+      "const": "SOURCE_EVIDENCE_GATE_CONFIRMATION_STATIC_AUDIT"
+    },
+    "surface_version": {
+      "const": "PR32_SOURCE_EVIDENCE_GATE_CONFIRMATION_SCHEMA_V1"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "gate_authority_class": {
+      "const": "STATIC_AUDIT_ONLY_NOT_SOURCE_RETRIEVAL_NOT_SOURCE_ACCEPTANCE_NOT_CONNECTOR_AUTHORITY"
+    },
+    "confirmation_status": {
+      "const": "CONFIRMED_BLOCKED_PENDING_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+    },
+    "fixture_no_claim_flags": {
+      "$ref": "#/$defs/source_fixture_no_claim_flags"
+    },
+    "no_claim_flags": {
+      "$ref": "#/$defs/source_root_no_claim_flags"
+    },
+    "source_evidence_gate_confirmation": {
+      "$ref": "#/$defs/source_evidence_gate_confirmation"
+    }
+  },
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "example_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "surface_version",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "gate_authority_class",
+    "confirmation_status",
+    "fixture_no_claim_flags",
+    "no_claim_flags",
+    "source_evidence_gate_confirmation"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "source_fixture_no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "retrieves_source_facts": {
+          "const": false
+        },
+        "accepts_source_facts": {
+          "const": false
+        },
+        "creates_accepted_source_evidence": {
+          "const": false
+        },
+        "unlocks_connector_semantics": {
+          "const": false
+        },
+        "creates_runtime_cash_receipts": {
+          "const": false
+        },
+        "creates_live_reachability": {
+          "const": false
+        },
+        "executes_orders": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "retrieves_source_facts",
+        "accepts_source_facts",
+        "creates_accepted_source_evidence",
+        "unlocks_connector_semantics",
+        "creates_runtime_cash_receipts",
+        "creates_live_reachability",
+        "executes_orders",
+        "creates_profit_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "source_root_no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "external_fact_authority": {
+          "const": false
+        },
+        "source_retrieval_authority": {
+          "const": false
+        },
+        "source_acceptance_execution_authority": {
+          "const": false
+        },
+        "accepted_packet_creation_authority": {
+          "const": false
+        },
+        "connector_binding_authority": {
+          "const": false
+        },
+        "runtime_authority": {
+          "const": false
+        },
+        "runtime_cash_fetch_authority": {
+          "const": false
+        },
+        "private_state_fetch_authority": {
+          "const": false
+        },
+        "order_execution_authority": {
+          "const": false
+        },
+        "replay_paper_live_execution_authority": {
+          "const": false
+        },
+        "network_io_authority": {
+          "const": false
+        },
+        "sha_freeze_authority": {
+          "const": false
+        },
+        "profit_claim_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "external_fact_authority",
+        "source_retrieval_authority",
+        "source_acceptance_execution_authority",
+        "accepted_packet_creation_authority",
+        "connector_binding_authority",
+        "runtime_authority",
+        "runtime_cash_fetch_authority",
+        "private_state_fetch_authority",
+        "order_execution_authority",
+        "replay_paper_live_execution_authority",
+        "network_io_authority",
+        "sha_freeze_authority",
+        "profit_claim_authority"
+      ],
+      "additionalProperties": false
+    },
+    "source_evidence_gate_confirmation": {
+      "type": "object",
+      "properties": {
+        "audit_id": {
+          "const": "SYNTHETIC_PR32_SOURCE_EVIDENCE_GATE_CONFIRMATION_AUDIT"
+        },
+        "audit_authority_class": {
+          "const": "STATIC_AUDIT_ONLY_NOT_SOURCE_RETRIEVAL_NOT_SOURCE_ACCEPTANCE_NOT_CONNECTOR_AUTHORITY"
+        },
+        "command_mapping": {
+          "const": "COMMAND_12_VERIFY_SOURCE_EVIDENCE_GATE_AND_CONNECTOR_SEMANTIC_BLOCKS"
+        },
+        "mode": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "execution": {
+          "const": "DISABLED"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "gate_status": {
+          "const": "CONFIRMED_BLOCKED_PENDING_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "accepted_packet_schema_contract": {
+          "$ref": "#/$defs/accepted_packet_schema_contract"
+        },
+        "source_required_placeholder_contract": {
+          "$ref": "#/$defs/source_required_placeholder_contract"
+        },
+        "connector_semantic_block_contract": {
+          "$ref": "#/$defs/connector_semantic_block_contract"
+        },
+        "blocked_semantic_families": {
+          "$ref": "#/$defs/blocked_semantic_families"
+        },
+        "runtime_block_contract": {
+          "$ref": "#/$defs/runtime_block_contract"
+        },
+        "atomicrows_authority_state": {
+          "$ref": "#/$defs/atomicrows_authority_state"
+        },
+        "forbidden_action_flags": {
+          "$ref": "#/$defs/forbidden_action_flags"
+        },
+        "audit_no_claim_flags": {
+          "$ref": "#/$defs/audit_no_claim_flags"
+        },
+        "validation_hook_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "const": "SOURCE_EVIDENCE_GATE_CONFIRMATION_STATIC_NON_MUTATING_AUDIT"
+          }
+        }
+      },
+      "required": [
+        "audit_id",
+        "audit_authority_class",
+        "command_mapping",
+        "mode",
+        "execution",
+        "deterministic_output",
+        "gate_status",
+        "accepted_packet_schema_contract",
+        "source_required_placeholder_contract",
+        "connector_semantic_block_contract",
+        "blocked_semantic_families",
+        "runtime_block_contract",
+        "atomicrows_authority_state",
+        "forbidden_action_flags",
+        "audit_no_claim_flags",
+        "validation_hook_ids"
+      ],
+      "additionalProperties": false
+    },
+    "accepted_packet_schema_contract": {
+      "type": "object",
+      "properties": {
+        "accepted_source_packet_schema_ref": {
+          "const": "schemas/source_evidence/source_evidence.schema.json#/$defs/accepted_source_packet"
+        },
+        "accepted_packet_schema_required": {
+          "const": true
+        },
+        "target_field_specific_packet_required": {
+          "const": true
+        },
+        "exact_target_field_authorization_required": {
+          "const": true
+        },
+        "exact_packet_fields_required_before_semantic_acceptance": {
+          "const": true
+        },
+        "accepted_packet_validation_required_before_semantic_binding": {
+          "const": true
+        },
+        "accepted_packet_creation_by_this_audit": {
+          "const": false
+        },
+        "source_retrieval_execution_claimed": {
+          "const": false
+        },
+        "source_acceptance_execution_claimed": {
+          "const": false
+        },
+        "source_fact_acceptance_claimed": {
+          "const": false
+        },
+        "connector_semantic_binding_claimed": {
+          "const": false
+        }
+      },
+      "required": [
+        "accepted_source_packet_schema_ref",
+        "accepted_packet_schema_required",
+        "target_field_specific_packet_required",
+        "exact_target_field_authorization_required",
+        "exact_packet_fields_required_before_semantic_acceptance",
+        "accepted_packet_validation_required_before_semantic_binding",
+        "accepted_packet_creation_by_this_audit",
+        "source_retrieval_execution_claimed",
+        "source_acceptance_execution_claimed",
+        "source_fact_acceptance_claimed",
+        "connector_semantic_binding_claimed"
+      ],
+      "additionalProperties": false
+    },
+    "source_required_placeholder_contract": {
+      "type": "object",
+      "properties": {
+        "source_required_value": {
+          "const": "SOURCE_REQUIRED"
+        },
+        "placeholder_state_without_packet": {
+          "const": "SOURCE_REQUIRED_PRESERVED"
+        },
+        "no_accepted_target_field_packet_state": {
+          "const": "NO_ACCEPTED_SOURCE_EVIDENCE_PRESENT"
+        },
+        "placeholders_preserved_without_target_field_packet": {
+          "const": true
+        },
+        "weakening_allowed": {
+          "const": false
+        },
+        "replacement_with_source_dependent_value_allowed": {
+          "const": false
+        },
+        "connector_semantic_values_remain_source_required": {
+          "const": true
+        },
+        "venue_api_fields_remain_source_required": {
+          "const": true
+        },
+        "fees_ticks_rate_limits_remain_source_required": {
+          "const": true
+        },
+        "order_settlement_private_replay_historical_remain_source_required": {
+          "const": true
+        }
+      },
+      "required": [
+        "source_required_value",
+        "placeholder_state_without_packet",
+        "no_accepted_target_field_packet_state",
+        "placeholders_preserved_without_target_field_packet",
+        "weakening_allowed",
+        "replacement_with_source_dependent_value_allowed",
+        "connector_semantic_values_remain_source_required",
+        "venue_api_fields_remain_source_required",
+        "fees_ticks_rate_limits_remain_source_required",
+        "order_settlement_private_replay_historical_remain_source_required"
+      ],
+      "additionalProperties": false
+    },
+    "connector_semantic_block_contract": {
+      "type": "object",
+      "properties": {
+        "accepted_source_evidence_present_for_target_field": {
+          "const": false
+        },
+        "connector_binding_blocked_without_target_field_packet": {
+          "const": true
+        },
+        "connector_binding_allowed_without_target_field_packet": {
+          "const": false
+        },
+        "connector_semantic_value_population_allowed_without_target_field_packet": {
+          "const": false
+        },
+        "target_field_packet_validation_required": {
+          "const": true
+        },
+        "target_field_packet_schema_validation_required": {
+          "const": true
+        },
+        "target_field_exact_match_required": {
+          "const": true
+        },
+        "wildcard_packet_unlock_allowed": {
+          "const": false
+        },
+        "venue_level_packet_unlock_allowed": {
+          "const": false
+        },
+        "source_dependent_values_blocked": {
+          "const": true
+        }
+      },
+      "required": [
+        "accepted_source_evidence_present_for_target_field",
+        "connector_binding_blocked_without_target_field_packet",
+        "connector_binding_allowed_without_target_field_packet",
+        "connector_semantic_value_population_allowed_without_target_field_packet",
+        "target_field_packet_validation_required",
+        "target_field_packet_schema_validation_required",
+        "target_field_exact_match_required",
+        "wildcard_packet_unlock_allowed",
+        "venue_level_packet_unlock_allowed",
+        "source_dependent_values_blocked"
+      ],
+      "additionalProperties": false
+    },
+    "blocked_semantic_families": {
+      "type": "object",
+      "properties": {
+        "source_dependent_values": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "venue_api_values": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "venue_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "fundamental_facts": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "fee_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "tick_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "rate_limit_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "order_entry_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "settlement_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "private_state_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "replay_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        },
+        "historical_data_semantics": {
+          "const": "BLOCKED_PENDING_EXACT_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+        }
+      },
+      "required": [
+        "source_dependent_values",
+        "venue_api_values",
+        "venue_semantics",
+        "fundamental_facts",
+        "fee_semantics",
+        "tick_semantics",
+        "rate_limit_semantics",
+        "order_entry_semantics",
+        "settlement_semantics",
+        "private_state_semantics",
+        "replay_semantics",
+        "historical_data_semantics"
+      ],
+      "additionalProperties": false
+    },
+    "runtime_block_contract": {
+      "type": "object",
+      "properties": {
+        "live_reachability_created": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "replay_execution_claimed": {
+          "const": false
+        },
+        "paper_execution_claimed": {
+          "const": false
+        },
+        "blocker_reduction_claimed": {
+          "const": false
+        },
+        "order_execution_authority_created": {
+          "const": false
+        },
+        "private_state_fetch_created": {
+          "const": false
+        },
+        "runtime_authority_created": {
+          "const": false
+        },
+        "freeze_authority_created": {
+          "const": false
+        },
+        "profit_evidence_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "live_reachability_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_claimed",
+        "paper_execution_claimed",
+        "blocker_reduction_claimed",
+        "order_execution_authority_created",
+        "private_state_fetch_created",
+        "runtime_authority_created",
+        "freeze_authority_created",
+        "profit_evidence_created"
+      ],
+      "additionalProperties": false
+    },
+    "atomicrows_authority_state": {
+      "type": "object",
+      "properties": {
+        "canonical_bundle_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "canonical_bundle_sha_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        },
+        "canonical_bundle_present": {
+          "const": false
+        },
+        "canonical_bundle_sha_present": {
+          "const": false
+        },
+        "bundle_authority_present": {
+          "const": false
+        },
+        "hash_authority_present": {
+          "const": false
+        },
+        "sha_authority_present": {
+          "const": false
+        },
+        "row_record_authority_present": {
+          "const": false
+        },
+        "completion_authority_present": {
+          "const": false
+        },
+        "claims_4183_row_completion": {
+          "const": false
+        },
+        "claimed_atomicrows_row_count": {
+          "const": "UNBOUND_NO_BUNDLE_AUTHORITY"
+        }
+      },
+      "required": [
+        "canonical_bundle_path",
+        "canonical_bundle_sha_path",
+        "canonical_bundle_present",
+        "canonical_bundle_sha_present",
+        "bundle_authority_present",
+        "hash_authority_present",
+        "sha_authority_present",
+        "row_record_authority_present",
+        "completion_authority_present",
+        "claims_4183_row_completion",
+        "claimed_atomicrows_row_count"
+      ],
+      "additionalProperties": false
+    },
+    "forbidden_action_flags": {
+      "type": "object",
+      "properties": {
+        "source_retrieval_execution_claimed": { "const": false },
+        "source_acceptance_execution_claimed": { "const": false },
+        "source_fact_acceptance_claimed": { "const": false },
+        "accepted_source_evidence_packet_creation_claimed": { "const": false },
+        "connector_binding_enabled": { "const": false },
+        "connector_semantic_binding_claimed": { "const": false },
+        "connector_semantic_value_population_enabled": { "const": false },
+        "source_dependent_value_acceptance_enabled": { "const": false },
+        "venue_api_fact_population_enabled": { "const": false },
+        "venue_semantics_acceptance_enabled": { "const": false },
+        "fundamental_fact_population_enabled": { "const": false },
+        "fee_semantics_acceptance_enabled": { "const": false },
+        "tick_semantics_acceptance_enabled": { "const": false },
+        "rate_limit_semantics_acceptance_enabled": { "const": false },
+        "order_entry_semantics_acceptance_enabled": { "const": false },
+        "settlement_semantics_acceptance_enabled": { "const": false },
+        "private_state_semantics_acceptance_enabled": { "const": false },
+        "replay_semantics_acceptance_enabled": { "const": false },
+        "historical_data_semantics_acceptance_enabled": { "const": false },
+        "live_reachability_enabled": { "const": false },
+        "runtime_resolver_snapshot_creation_enabled": { "const": false },
+        "replay_execution_enabled": { "const": false },
+        "paper_execution_enabled": { "const": false },
+        "private_state_fetch_enabled": { "const": false },
+        "runtime_enabled": { "const": false },
+        "live_enabled": { "const": false },
+        "blocker_reduction_enabled": { "const": false },
+        "order_execution_authority_enabled": { "const": false },
+        "order_submit_enabled": { "const": false },
+        "order_cancel_enabled": { "const": false },
+        "order_reduce_enabled": { "const": false },
+        "order_close_enabled": { "const": false },
+        "profit_evidence_enabled": { "const": false },
+        "atomicrows_bundle_creation_enabled": { "const": false },
+        "atomicrows_bundle_hash_creation_enabled": { "const": false },
+        "atomicrows_sha_computation_enabled": { "const": false },
+        "atomicrows_row_record_creation_enabled": { "const": false },
+        "atomicrows_completion_claim_enabled": { "const": false },
+        "sha_freeze_enabled": { "const": false }
+      },
+      "required": [
+        "source_retrieval_execution_claimed",
+        "source_acceptance_execution_claimed",
+        "source_fact_acceptance_claimed",
+        "accepted_source_evidence_packet_creation_claimed",
+        "connector_binding_enabled",
+        "connector_semantic_binding_claimed",
+        "connector_semantic_value_population_enabled",
+        "source_dependent_value_acceptance_enabled",
+        "venue_api_fact_population_enabled",
+        "venue_semantics_acceptance_enabled",
+        "fundamental_fact_population_enabled",
+        "fee_semantics_acceptance_enabled",
+        "tick_semantics_acceptance_enabled",
+        "rate_limit_semantics_acceptance_enabled",
+        "order_entry_semantics_acceptance_enabled",
+        "settlement_semantics_acceptance_enabled",
+        "private_state_semantics_acceptance_enabled",
+        "replay_semantics_acceptance_enabled",
+        "historical_data_semantics_acceptance_enabled",
+        "live_reachability_enabled",
+        "runtime_resolver_snapshot_creation_enabled",
+        "replay_execution_enabled",
+        "paper_execution_enabled",
+        "private_state_fetch_enabled",
+        "runtime_enabled",
+        "live_enabled",
+        "blocker_reduction_enabled",
+        "order_execution_authority_enabled",
+        "order_submit_enabled",
+        "order_cancel_enabled",
+        "order_reduce_enabled",
+        "order_close_enabled",
+        "profit_evidence_enabled",
+        "atomicrows_bundle_creation_enabled",
+        "atomicrows_bundle_hash_creation_enabled",
+        "atomicrows_sha_computation_enabled",
+        "atomicrows_row_record_creation_enabled",
+        "atomicrows_completion_claim_enabled",
+        "sha_freeze_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "audit_no_claim_flags": {
+      "type": "object",
+      "properties": {
+        "retrieves_sources": { "const": false },
+        "accepts_source_facts": { "const": false },
+        "creates_accepted_source_packets": { "const": false },
+        "creates_accepted_source_evidence": { "const": false },
+        "binds_connector_semantics": { "const": false },
+        "populates_connector_semantic_values": { "const": false },
+        "populates_venue_api_facts": { "const": false },
+        "populates_fundamental_facts": { "const": false },
+        "accepts_source_dependent_values": { "const": false },
+        "accepts_fee_semantics": { "const": false },
+        "accepts_tick_semantics": { "const": false },
+        "accepts_rate_limit_semantics": { "const": false },
+        "accepts_order_entry_semantics": { "const": false },
+        "accepts_settlement_semantics": { "const": false },
+        "accepts_private_state_semantics": { "const": false },
+        "accepts_replay_semantics": { "const": false },
+        "accepts_historical_data_semantics": { "const": false },
+        "creates_live_reachability": { "const": false },
+        "creates_runtime_resolver_snapshot": { "const": false },
+        "executes_replay": { "const": false },
+        "executes_paper": { "const": false },
+        "fetches_private_state": { "const": false },
+        "creates_runtime_authority": { "const": false },
+        "creates_order_authority": { "const": false },
+        "submits_orders": { "const": false },
+        "cancels_orders": { "const": false },
+        "reduces_orders": { "const": false },
+        "closes_orders": { "const": false },
+        "reduces_blockers": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_atomicrows_bundle_hash": { "const": false },
+        "computes_atomicrows_sha": { "const": false },
+        "creates_atomicrows_row_records": { "const": false },
+        "claims_atomicrows_completion": { "const": false },
+        "claims_4183_row_completion": { "const": false },
+        "creates_freeze_authority": { "const": false }
+      },
+      "required": [
+        "retrieves_sources",
+        "accepts_source_facts",
+        "creates_accepted_source_packets",
+        "creates_accepted_source_evidence",
+        "binds_connector_semantics",
+        "populates_connector_semantic_values",
+        "populates_venue_api_facts",
+        "populates_fundamental_facts",
+        "accepts_source_dependent_values",
+        "accepts_fee_semantics",
+        "accepts_tick_semantics",
+        "accepts_rate_limit_semantics",
+        "accepts_order_entry_semantics",
+        "accepts_settlement_semantics",
+        "accepts_private_state_semantics",
+        "accepts_replay_semantics",
+        "accepts_historical_data_semantics",
+        "creates_live_reachability",
+        "creates_runtime_resolver_snapshot",
+        "executes_replay",
+        "executes_paper",
+        "fetches_private_state",
+        "creates_runtime_authority",
+        "creates_order_authority",
+        "submits_orders",
+        "cancels_orders",
+        "reduces_orders",
+        "closes_orders",
+        "reduces_blockers",
+        "creates_profit_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_bundle_hash",
+        "computes_atomicrows_sha",
+        "creates_atomicrows_row_records",
+        "claims_atomicrows_completion",
+        "claims_4183_row_completion",
+        "creates_freeze_authority"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "mode": "SOURCE_REQUIRED",
+      "execution": "DISABLED",
+      "gate_authority_class": "STATIC_AUDIT_ONLY_NOT_SOURCE_RETRIEVAL_NOT_SOURCE_ACCEPTANCE_NOT_CONNECTOR_AUTHORITY",
+      "confirmation_status": "CONFIRMED_BLOCKED_PENDING_TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE"
+    }
+  ]
+}

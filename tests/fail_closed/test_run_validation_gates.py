@@ -77,6 +77,25 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_source_evidence_gate_confirmation_static.py"),
+            "--repo-root",
+            ".",
+            "--schema",
+            str(
+                Path("schemas")
+                / "source_evidence"
+                / "source_evidence_gate_confirmation.schema.json"
+            ),
+            "--fixture",
+            str(
+                Path("tests")
+                / "fixtures"
+                / "source_evidence"
+                / "synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -343,6 +362,22 @@ def test_runner_includes_no_runtime_artifact_flags(monkeypatch):
     assert "--forbid-neural-inference" in no_runtime_command
     assert "--forbid-external-repo-clone" in no_runtime_command
     assert "--forbid-package-install-scripts" in no_runtime_command
+
+
+def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    source_evidence_index = command_names.index("validate_source_evidence_static.py")
+    gate_confirmation_index = command_names.index(
+        "validate_source_evidence_gate_confirmation_static.py"
+    )
+    connector_index = command_names.index("validate_connector_capability_static.py")
+
+    assert source_evidence_index < gate_confirmation_index < connector_index
 
 
 def test_runner_includes_non_mutating_atomicrows_readiness_audit(monkeypatch):

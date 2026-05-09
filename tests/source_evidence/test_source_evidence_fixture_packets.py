@@ -36,6 +36,7 @@ EXPECTED_FIXTURE_NAMES = {
     "synthetic_accepted_source_packet.v1.fixture.json",
     "synthetic_target_field_ledger.v1.fixture.json",
     "synthetic_conflict_materiality_revalidation.v1.fixture.json",
+    "synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json",
 }
 SURFACE_FIXTURE_MAP = {
     "synthetic_acceptance_registry.v1.fixture.json": (
@@ -107,7 +108,7 @@ def test_source_evidence_fixtures_parse_as_json():
     for path in _fixture_paths():
         parsed = _load_fixture(path)
         assert isinstance(parsed, dict)
-        assert parsed["fixture_id"].startswith("SYNTHETIC_PR5_")
+        assert parsed["fixture_id"].startswith(("SYNTHETIC_PR5_", "SYNTHETIC_PR32_"))
 
 
 def test_fixtures_include_synthetic_authority_and_no_claim_flags():
