@@ -78,6 +78,21 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_qtt_owner_global_override_authority.py"),
+            "--mode",
+            "dev",
+            "--repo-root",
+            ".",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "QTTOwnerGlobalOverrideAuthority.report.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_source_evidence_static.py"),
             "--schema",
             _path("schemas", "source_evidence", "source_evidence.schema.json"),

@@ -57,6 +57,21 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_qtt_owner_global_override_authority.py"),
+            "--mode",
+            "dev",
+            "--repo-root",
+            ".",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "QTTOwnerGlobalOverrideAuthority.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_source_evidence_static.py"),
             "--schema",
             str(Path("schemas") / "source_evidence" / "source_evidence.schema.json"),
@@ -985,6 +1000,36 @@ def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
         python_executable,
         str(Path("tools") / "run_pytest_fresh_basetemp.py"),
         "-q",
+    ]
+
+
+def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    scope_index = command_names.index("validate_first_pr_scope.py")
+    owner_override_index = command_names.index(
+        "validate_qtt_owner_global_override_authority.py"
+    )
+    source_evidence_index = command_names.index("validate_source_evidence_static.py")
+
+    assert scope_index < owner_override_index < source_evidence_index
+    assert commands[owner_override_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_owner_global_override_authority.py"),
+        "--mode",
+        "dev",
+        "--repo-root",
+        ".",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        ),
     ]
 
 
