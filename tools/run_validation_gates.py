@@ -300,6 +300,22 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_lifecycle_registry_mutation_guard.py",
+            ),
+            "--mode",
+            "dev",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "AtomicRowsLifecycleRegistryMutationGuard.report.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
