@@ -381,6 +381,22 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_parameter_agent_binding_cumulative_readiness_gate.py"
+            ),
+            "--mode",
+            "dev",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
@@ -1309,6 +1325,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     parameter_agent_binding_consumer_gate_index = command_names.index(
         "validate_atomicrows_parameter_agent_binding_consumer_gate.py"
     )
+    parameter_agent_binding_cumulative_gate_index = command_names.index(
+        "validate_atomicrows_parameter_agent_binding_cumulative_readiness_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1324,6 +1343,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < lifecycle_command_matrix_index
         < parameter_agent_binding_index
         < parameter_agent_binding_consumer_gate_index
+        < parameter_agent_binding_cumulative_gate_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1433,6 +1453,22 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             / "master_plan"
             / "generated"
             / "AtomicRowsParameterAgentBindingConsumerGate.report.json"
+        ),
+    ]
+    assert commands[parameter_agent_binding_cumulative_gate_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_agent_binding_cumulative_readiness_gate.py"
+        ),
+        "--mode",
+        "dev",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json"
         ),
     ]
 
