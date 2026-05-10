@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_parameter_lifecycle_registry.schema.json",
+  "title": "AtomicRows Parameter Lifecycle Registry",
+  "description": "Static AtomicRows parameter lifecycle registry contract. It declares parameter validity, bounds, source, usefulness, and eligibility states without creating an AtomicRows bundle, bundle hash, runtime receipt, source acceptance, connector binding, live reachability, order authority, blocker reduction, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_name",
+    "registry_model",
+    "authority_class",
+    "source_master_plan",
+    "final_expected_row_coverage",
+    "lifecycle_statuses",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "registry_name": { "const": "AtomicRowsParameterLifecycleRegistry" },
+    "registry_model": { "const": "PARAMETER_LIFECYCLE_ELIGIBILITY" },
+    "authority_class": { "const": "STATIC_LIFECYCLE_REGISTRY_ONLY_NOT_ATOMICROWS_BUNDLE_AUTHORITY" },
+    "source_master_plan": { "const": "docs/master_plan/QTT_MasterPlan_Current.md" },
+    "final_expected_row_coverage": { "type": "string" },
+    "lifecycle_statuses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lifecycle_status" }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/lifecycle_entry" }
+    }
+  },
+  "$defs": {
+    "lifecycle_status": {
+      "enum": [
+        "INVENTORY_ONLY",
+        "RESEARCH_CANDIDATE",
+        "SOURCE_EVIDENCE_REQUIRED",
+        "RANGE_VALIDATED_STATIC_ONLY",
+        "REPLAY_PAPER_CANDIDATE",
+        "REPLAY_PAPER_VALIDATED",
+        "OPTIMIZER_ELIGIBLE",
+        "RUNTIME_ELIGIBLE",
+        "LIVE_ELIGIBLE",
+        "QUARANTINED_UNPROVEN",
+        "RETIRED_NOT_USEFUL"
+      ]
+    },
+    "classical_or_quantum": {
+      "enum": ["CLASSICAL", "QUANTUM"]
+    },
+    "string_list": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "optimizer_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligible",
+        "range_validated",
+        "source_evidence_accepted",
+        "evidence_validated",
+        "promotion_gate_validated",
+        "receipt_id",
+        "blocking_reason"
+      ],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "range_validated": { "type": "boolean" },
+        "source_evidence_accepted": { "type": "boolean" },
+        "evidence_validated": { "type": "boolean" },
+        "promotion_gate_validated": { "type": "boolean" },
+        "receipt_id": { "type": ["string", "null"] },
+        "blocking_reason": { "type": "string" }
+      }
+    },
+    "runtime_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligible",
+        "runtime_receipt_id",
+        "blocking_reason"
+      ],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "runtime_receipt_id": { "type": ["string", "null"] },
+        "blocking_reason": { "type": "string" }
+      }
+    },
+    "live_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligible",
+        "live_receipt_id",
+        "owner_approval_receipt_id",
+        "blocking_reason"
+      ],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "live_receipt_id": { "type": ["string", "null"] },
+        "owner_approval_receipt_id": { "type": ["string", "null"] },
+        "blocking_reason": { "type": "string" }
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_atomicrows_bundle",
+        "creates_profit_evidence",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "type": "boolean" },
+        "creates_order_authority": { "type": "boolean" },
+        "creates_runtime_cash_receipt": { "type": "boolean" },
+        "creates_source_acceptance": { "type": "boolean" },
+        "creates_connector_binding": { "type": "boolean" },
+        "creates_atomicrows_bundle": { "type": "boolean" },
+        "creates_profit_evidence": { "type": "boolean" },
+        "reduces_blockers": { "type": "boolean" }
+      }
+    },
+    "lifecycle_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atomic_parameter_row_id",
+        "row_pattern_id",
+        "lifecycle_status",
+        "parameter_family",
+        "classical_or_quantum",
+        "owner_section_id",
+        "linked_capability_id",
+        "unit",
+        "scale",
+        "allowed_range",
+        "range_required",
+        "default_value_policy",
+        "source_authority_class",
+        "evidence_required",
+        "optimizer_eligibility",
+        "runtime_eligibility",
+        "live_eligibility",
+        "research_route",
+        "promotion_gate",
+        "quarantine_reason",
+        "retirement_reason",
+        "authority_boundary"
+      ],
+      "properties": {
+        "atomic_parameter_row_id": { "type": ["string", "null"] },
+        "row_pattern_id": { "type": ["string", "null"] },
+        "lifecycle_status": { "$ref": "#/$defs/lifecycle_status" },
+        "parameter_family": { "type": "string" },
+        "classical_or_quantum": { "$ref": "#/$defs/classical_or_quantum" },
+        "owner_section_id": { "type": "string" },
+        "linked_capability_id": { "type": "string" },
+        "unit": { "type": "string" },
+        "scale": { "type": "string" },
+        "allowed_range": { "type": ["object", "array", "string", "null"] },
+        "range_required": { "type": "boolean" },
+        "default_value_policy": { "type": "string" },
+        "source_authority_class": { "type": "string" },
+        "evidence_required": { "$ref": "#/$defs/string_list" },
+        "optimizer_eligibility": { "$ref": "#/$defs/optimizer_eligibility" },
+        "runtime_eligibility": { "$ref": "#/$defs/runtime_eligibility" },
+        "live_eligibility": { "$ref": "#/$defs/live_eligibility" },
+        "research_route": { "type": "string" },
+        "promotion_gate": { "type": "string" },
+        "quarantine_reason": { "type": ["string", "null"] },
+        "retirement_reason": { "type": ["string", "null"] },
+        "authority_boundary": { "$ref": "#/$defs/authority_boundary" }
+      }
+    }
+  }
+}
