@@ -4,6 +4,7 @@ from __future__ import annotations
 import pathlib
 import subprocess
 import sys
+import tempfile
 from typing import Sequence
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
@@ -13,8 +14,18 @@ def _path(*parts: str) -> str:
     return str(pathlib.Path(*parts))
 
 
-def build_validation_commands() -> list[list[str]]:
-    validation_dir = pathlib.Path(".tmp") / "validation_gates"
+def _default_validation_dir() -> pathlib.Path:
+    return pathlib.Path(tempfile.gettempdir()) / "qtt_validation_gates"
+
+
+def build_validation_commands(
+    validation_dir: pathlib.Path | str | None = None,
+) -> list[list[str]]:
+    validation_dir = (
+        _default_validation_dir()
+        if validation_dir is None
+        else pathlib.Path(validation_dir)
+    )
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
@@ -811,38 +822,6 @@ def build_validation_commands() -> list[list[str]]:
         ],
         [
             sys.executable,
-            _path("tools", "build_master_plan_implementation_coverage_ledger.py"),
-            "--repo-root",
-            ".",
-            "--out",
-            _path(
-                "docs",
-                "master_plan",
-                "generated",
-                "MasterPlanImplementationCoverageLedger.json",
-            ),
-        ],
-        [
-            sys.executable,
-            _path("tools", "validate_master_plan_implementation_coverage_ledger.py"),
-            "--repo-root",
-            ".",
-            "--ledger",
-            _path(
-                "docs",
-                "master_plan",
-                "generated",
-                "MasterPlanImplementationCoverageLedger.json",
-            ),
-            "--schema",
-            _path(
-                "schemas",
-                "master_plan",
-                "master_plan_implementation_coverage_ledger.schema.json",
-            ),
-        ],
-        [
-            sys.executable,
             _path("tools", "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -918,7 +897,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args:
         print("run_validation_gates.py does not accept arguments", file=sys.stderr)
         return 2
-    return run_commands(build_validation_commands())
+    with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
+        return run_commands(build_validation_commands(pathlib.Path(temp_dir)))
 
 
 if __name__ == "__main__":

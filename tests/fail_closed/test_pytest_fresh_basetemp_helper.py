@@ -1,12 +1,21 @@
 from datetime import UTC, datetime
 from pathlib import Path
 import re
+import tempfile
 
 from tools import run_pytest_fresh_basetemp as helper
 
 
 def _fixed_basetemp() -> Path:
-    return Path(".tmp") / "pytest_20260508_120000_000000_1234"
+    return (
+        Path(tempfile.gettempdir())
+        / "qtt_pytest_basetemp"
+        / "pytest_20260508_120000_000000_1234"
+    )
+
+
+def _custom_basetemp() -> Path:
+    return Path(tempfile.gettempdir()) / "qtt_pytest_custom"
 
 
 def test_helper_builds_pytest_command_using_sys_executable(monkeypatch):
@@ -48,7 +57,8 @@ def test_helper_preserves_user_pytest_args():
 
 
 def test_helper_does_not_duplicate_basetemp_when_separate_arg_supplied():
-    pytest_args = ["tests/fail_closed", "--basetemp", ".tmp/custom", "-q"]
+    custom_basetemp = str(_custom_basetemp())
+    pytest_args = ["tests/fail_closed", "--basetemp", custom_basetemp, "-q"]
 
     invocation = helper.build_pytest_invocation(
         pytest_args,
@@ -56,14 +66,15 @@ def test_helper_does_not_duplicate_basetemp_when_separate_arg_supplied():
     )
 
     assert invocation.added_basetemp is False
-    assert invocation.basetemp == ".tmp/custom"
+    assert invocation.basetemp == custom_basetemp
     assert invocation.command[3:] == pytest_args
     assert invocation.command.count("--basetemp") == 1
     assert str(_fixed_basetemp()) not in invocation.command
 
 
 def test_helper_does_not_duplicate_basetemp_when_equals_arg_supplied():
-    pytest_args = ["tests/fail_closed", "--basetemp=.tmp/custom", "-q"]
+    custom_basetemp = str(_custom_basetemp())
+    pytest_args = ["tests/fail_closed", f"--basetemp={custom_basetemp}", "-q"]
 
     invocation = helper.build_pytest_invocation(
         pytest_args,
@@ -71,18 +82,18 @@ def test_helper_does_not_duplicate_basetemp_when_equals_arg_supplied():
     )
 
     assert invocation.added_basetemp is False
-    assert invocation.basetemp == ".tmp/custom"
+    assert invocation.basetemp == custom_basetemp
     assert invocation.command[3:] == pytest_args
     assert not any(arg == "--basetemp" for arg in invocation.command)
 
 
-def test_selected_fresh_basetemp_is_under_tmp():
+def test_selected_fresh_basetemp_is_under_system_temp():
     basetemp = helper.make_fresh_basetemp(
         now=datetime(2026, 5, 8, 12, 34, 56, 123456, tzinfo=UTC),
         pid=4321,
     )
 
-    assert basetemp.parts[0] == ".tmp"
+    assert basetemp.parent == Path(tempfile.gettempdir()) / "qtt_pytest_basetemp"
     assert basetemp.name == "pytest_20260508_123456_123456_4321"
 
 
@@ -109,11 +120,12 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(monkeypatch, capsys):
 
     monkeypatch.setattr(helper.subprocess, "run", fake_run)
 
-    exit_code = helper.main(["tests/fail_closed", "--basetemp", ".tmp/custom", "-q"])
+    custom_basetemp = str(_custom_basetemp())
+    exit_code = helper.main(["tests/fail_closed", "--basetemp", custom_basetemp, "-q"])
 
     assert exit_code == 7
     assert seen["command"][1:3] == ["-m", "pytest"]
-    assert capsys.readouterr().out == "pytest basetemp: .tmp/custom\n"
+    assert capsys.readouterr().out == f"pytest basetemp: {custom_basetemp}\n"
 
 
 def test_helper_introduces_no_blocked_behavior_terms():

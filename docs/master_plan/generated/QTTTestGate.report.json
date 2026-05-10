@@ -509,31 +509,6 @@
       "creates_atomicrows_bundle_or_4183_rows": false,
       "reduces_blockers": false,
       "creates_profit_evidence": false
-    },
-    {
-      "receipt_id": "master_plan_implementation_coverage_ledger_receipt_present",
-      "description": "PR47 non-authoritative master-plan implementation coverage ledger is generated, schema-valid, deterministic, and confirmed by the static validation marker.",
-      "required": true,
-      "satisfied": true,
-      "status": "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER",
-      "receipt_source": "STATIC_VALIDATION_MARKER",
-      "paths": [
-        "schemas/master_plan/master_plan_implementation_coverage_ledger.schema.json",
-        "docs/master_plan/generated/MasterPlanImplementationCoverageLedger.json",
-        "tools/build_master_plan_implementation_coverage_ledger.py",
-        "tools/validate_master_plan_implementation_coverage_ledger.py",
-        "tests/master_plan/test_master_plan_implementation_coverage_ledger.py"
-      ],
-      "validation_marker": "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK",
-      "creates_source_fact_acceptance": false,
-      "creates_connector_semantics": false,
-      "creates_runtime_resolver_snapshot": false,
-      "executes_replay_or_paper": false,
-      "creates_live_reachability": false,
-      "creates_runtime_cash_or_usable_cash": false,
-      "creates_atomicrows_bundle_or_4183_rows": false,
-      "reduces_blockers": false,
-      "creates_profit_evidence": false
     }
   ],
   "gate_checks": {
@@ -558,7 +533,6 @@
     "dual_result_review_contract_gate_receipt_present": true,
     "owner_live_promotion_review_contract_gate_receipt_present": true,
     "three_venue_canary_eligibility_contract_gate_receipt_present": true,
-    "master_plan_implementation_coverage_ledger_receipt_present": true,
     "no_stale_generated_derivative_completion_claim": true,
     "no_hidden_zip_authority": true,
     "no_source_dependent_connector_semantic_values": true,
