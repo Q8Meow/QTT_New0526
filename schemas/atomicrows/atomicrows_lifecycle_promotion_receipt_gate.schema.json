@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_lifecycle_promotion_receipt_gate.schema.json",
+  "title": "AtomicRows Lifecycle Promotion Receipt Gate",
+  "description": "Static deterministic AtomicRows lifecycle promotion receipt gate contract. It validates attempted lifecycle promotions against explicit receipt records without creating an AtomicRows bundle, bundle hash, source acceptance, connector binding, runtime receipt, live reachability, order authority, quantum backend authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "registry_path",
+    "lifecycle_report_path",
+    "receipt_types",
+    "required_promotion_transitions",
+    "attempted_promotions",
+    "authority_boundary",
+    "validation_hook_ids"
+  ],
+  "properties": {
+    "fixture_id": { "const": "SYNTHETIC_PR55_ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_BLOCKED_FIXTURE" },
+    "fixture_version": { "const": "PR55_ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_BLOCKED_FIXTURE_V1" },
+    "fixture_authority_class": { "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_PROMOTION_AUTHORITY" },
+    "schema_authority_class": { "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_PROMOTION_AUTHORITY" },
+    "surface_kind": { "const": "ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_STATIC" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "deterministic_output": { "const": true },
+    "registry_path": { "const": "docs/master_plan/atomic_rows/AtomicRowsParameterLifecycleRegistry.yaml" },
+    "lifecycle_report_path": { "const": "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json" },
+    "receipt_types": {
+      "type": "array",
+      "minItems": 14,
+      "items": { "$ref": "#/$defs/receipt_type" }
+    },
+    "required_promotion_transitions": {
+      "type": "array",
+      "minItems": 10,
+      "items": { "type": "string" }
+    },
+    "attempted_promotions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/promotion_attempt" }
+    },
+    "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "const": "ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_STATIC_VALIDATION" }
+    }
+  },
+  "$defs": {
+    "receipt_type": {
+      "enum": [
+        "OWNER_RESEARCH_TRIAGE_RECEIPT",
+        "SOURCE_EVIDENCE_TARGET_RECEIPT",
+        "SOURCE_EVIDENCE_ACCEPTANCE_RECEIPT",
+        "RANGE_VALIDATION_RECEIPT",
+        "REPLAY_PAPER_CANDIDATE_RECEIPT",
+        "REPLAY_RESULT_RECEIPT",
+        "PAPER_RESULT_RECEIPT",
+        "DUAL_RESULT_REVIEW_RECEIPT",
+        "OPTIMIZER_ELIGIBILITY_RECEIPT",
+        "RUNTIME_ELIGIBILITY_RECEIPT",
+        "LIVE_OWNER_APPROVAL_RECEIPT",
+        "LIVE_CANARY_ELIGIBILITY_RECEIPT",
+        "QUARANTINE_RECEIPT",
+        "RETIREMENT_RECEIPT"
+      ]
+    },
+    "lifecycle_status": {
+      "enum": [
+        "INVENTORY_ONLY",
+        "RESEARCH_CANDIDATE",
+        "SOURCE_EVIDENCE_REQUIRED",
+        "RANGE_VALIDATED_STATIC_ONLY",
+        "REPLAY_PAPER_CANDIDATE",
+        "REPLAY_PAPER_VALIDATED",
+        "OPTIMIZER_ELIGIBLE",
+        "RUNTIME_ELIGIBLE",
+        "LIVE_ELIGIBLE",
+        "QUARANTINED_UNPROVEN",
+        "RETIRED_NOT_USEFUL"
+      ]
+    },
+    "promotion_attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_id",
+        "atomic_parameter_row_id",
+        "row_pattern_id",
+        "from_status",
+        "to_status",
+        "receipt",
+        "declared_promotion_allowed"
+      ],
+      "properties": {
+        "attempt_id": { "type": "string" },
+        "atomic_parameter_row_id": { "type": ["string", "null"] },
+        "row_pattern_id": { "type": ["string", "null"] },
+        "from_status": { "$ref": "#/$defs/lifecycle_status" },
+        "to_status": { "$ref": "#/$defs/lifecycle_status" },
+        "receipt": { "type": ["object", "null"] },
+        "declared_promotion_allowed": { "type": "boolean" }
+      }
+    },
+    "promotion_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_type",
+        "receipt_id",
+        "receipt_path",
+        "receipt_locator",
+        "approving_authority_class",
+        "evidence_scope",
+        "deterministic_created_at_utc",
+        "source_evidence_required",
+        "range_validation_required",
+        "replay_paper_required",
+        "owner_approval_required",
+        "runtime_receipt_required",
+        "live_receipt_required",
+        "quantum_backend_provider_evidence_required",
+        "supporting_receipt_locators"
+      ],
+      "properties": {
+        "receipt_type": { "$ref": "#/$defs/receipt_type" },
+        "receipt_id": { "type": "string" },
+        "receipt_path": { "type": ["string", "null"] },
+        "receipt_locator": { "type": ["string", "null"] },
+        "approving_authority_class": { "type": "string" },
+        "evidence_scope": { "type": "string" },
+        "deterministic_created_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "source_evidence_required": { "type": "boolean" },
+        "range_validation_required": { "type": "boolean" },
+        "replay_paper_required": { "type": "boolean" },
+        "owner_approval_required": { "type": "boolean" },
+        "runtime_receipt_required": { "type": "boolean" },
+        "live_receipt_required": { "type": "boolean" },
+        "quantum_backend_provider_evidence_required": { "type": "boolean" },
+        "supporting_receipt_locators": { "$ref": "#/$defs/supporting_receipt_locators" }
+      }
+    },
+    "supporting_receipt_locators": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_evidence_target_receipt_locator",
+        "source_evidence_acceptance_receipt_locator",
+        "range_validation_receipt_locator",
+        "replay_paper_candidate_receipt_locator",
+        "replay_result_receipt_locator",
+        "paper_result_receipt_locator",
+        "dual_result_review_receipt_locator",
+        "optimizer_eligibility_receipt_locator",
+        "runtime_eligibility_receipt_locator",
+        "live_owner_approval_receipt_locator",
+        "live_canary_eligibility_receipt_locator",
+        "quantum_backend_provider_evidence_locator",
+        "quarantine_reason_receipt_locator",
+        "retirement_reason_receipt_locator"
+      ],
+      "properties": {
+        "source_evidence_target_receipt_locator": { "type": ["string", "null"] },
+        "source_evidence_acceptance_receipt_locator": { "type": ["string", "null"] },
+        "range_validation_receipt_locator": { "type": ["string", "null"] },
+        "replay_paper_candidate_receipt_locator": { "type": ["string", "null"] },
+        "replay_result_receipt_locator": { "type": ["string", "null"] },
+        "paper_result_receipt_locator": { "type": ["string", "null"] },
+        "dual_result_review_receipt_locator": { "type": ["string", "null"] },
+        "optimizer_eligibility_receipt_locator": { "type": ["string", "null"] },
+        "runtime_eligibility_receipt_locator": { "type": ["string", "null"] },
+        "live_owner_approval_receipt_locator": { "type": ["string", "null"] },
+        "live_canary_eligibility_receipt_locator": { "type": ["string", "null"] },
+        "quantum_backend_provider_evidence_locator": { "type": ["string", "null"] },
+        "quarantine_reason_receipt_locator": { "type": ["string", "null"] },
+        "retirement_reason_receipt_locator": { "type": ["string", "null"] }
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_atomicrows_bundle",
+        "creates_profit_evidence",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_receipt": { "const": false },
+        "creates_source_acceptance": { "const": false },
+        "creates_connector_binding": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "reduces_blockers": { "const": false }
+      }
+    },
+    "promotion_receipt_gate_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "attempted_promotion_count",
+        "allowed_promotion_count",
+        "blocked_promotion_count",
+        "invalid_promotion_count",
+        "optimizer_promotion_allowed_count",
+        "runtime_promotion_allowed_count",
+        "live_promotion_allowed_count",
+        "quantum_backend_promotion_allowed_count",
+        "missing_receipt_count",
+        "mismatched_receipt_type_count",
+        "missing_evidence_locator_count",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "properties": {
+        "report_type": { "const": "ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_REPORT" },
+        "deterministic_output": { "const": true },
+        "generated_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "attempted_promotion_count": { "type": "integer" },
+        "allowed_promotion_count": { "type": "integer" },
+        "blocked_promotion_count": { "type": "integer" },
+        "invalid_promotion_count": { "type": "integer" },
+        "optimizer_promotion_allowed_count": { "type": "integer" },
+        "runtime_promotion_allowed_count": { "type": "integer" },
+        "live_promotion_allowed_count": { "type": "integer" },
+        "quantum_backend_promotion_allowed_count": { "type": "integer" },
+        "missing_receipt_count": { "type": "integer" },
+        "mismatched_receipt_type_count": { "type": "integer" },
+        "missing_evidence_locator_count": { "type": "integer" },
+        "final_ready": { "type": "boolean" },
+        "authority_boundary_all_false": { "type": "boolean" }
+      }
+    }
+  }
+}
