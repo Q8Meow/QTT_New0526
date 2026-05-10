@@ -305,6 +305,22 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_lifecycle_cumulative_readiness_gate.py"
+            ),
+            "--mode",
+            "dev",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "AtomicRowsLifecycleCumulativeReadinessGate.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
@@ -1191,6 +1207,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     mutation_guard_index = command_names.index(
         "validate_atomicrows_lifecycle_registry_mutation_guard.py"
     )
+    cumulative_readiness_index = command_names.index(
+        "validate_atomicrows_lifecycle_cumulative_readiness_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1202,6 +1221,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < consumer_gate_index
         < promotion_receipt_gate_index
         < mutation_guard_index
+        < cumulative_readiness_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1253,6 +1273,22 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             / "master_plan"
             / "generated"
             / "AtomicRowsLifecycleRegistryMutationGuard.report.json"
+        ),
+    ]
+    assert commands[cumulative_readiness_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_lifecycle_cumulative_readiness_gate.py"
+        ),
+        "--mode",
+        "dev",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "AtomicRowsLifecycleCumulativeReadinessGate.report.json"
         ),
     ]
 

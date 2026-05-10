@@ -1,0 +1,31 @@
+{
+  "fixture_id": "SYNTHETIC_ATOMICROWS_LIFECYCLE_CUMULATIVE_READINESS_GATE_BLOCKED_FIXTURE",
+  "fixture_version": "ATOMICROWS_LIFECYCLE_CUMULATIVE_READINESS_GATE_BLOCKED_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_READINESS_AUTHORITY",
+  "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_READINESS_AUTHORITY",
+  "surface_kind": "ATOMICROWS_LIFECYCLE_CUMULATIVE_READINESS_GATE_STATIC",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "deterministic_output": true,
+  "upstream_report_paths": [
+    "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json",
+    "docs/master_plan/generated/AtomicRowsLifecycleConsumerGate.report.json",
+    "docs/master_plan/generated/AtomicRowsLifecyclePromotionReceiptGate.report.json",
+    "docs/master_plan/generated/AtomicRowsLifecycleRegistryMutationGuard.report.json"
+  ],
+  "bundle_file_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+  "bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+  "authority_boundary": {
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_receipt": false,
+    "creates_source_acceptance": false,
+    "creates_connector_binding": false,
+    "creates_atomicrows_bundle": false,
+    "creates_profit_evidence": false,
+    "reduces_blockers": false
+  },
+  "validation_hook_ids": [
+    "ATOMICROWS_LIFECYCLE_CUMULATIVE_READINESS_GATE_STATIC_VALIDATION"
+  ]
+}
