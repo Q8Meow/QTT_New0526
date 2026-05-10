@@ -35,7 +35,7 @@ ROOT_FIELDS = {
     "bootstrap_gate_receipt",
     "completion_mode_requirements",
     "generated_derivative_outputs",
-    "coverage_ledger_report",
+    "generated_derivative_coverage_report",
     "authority_scope_flags",
     "forbidden_action_flags",
     "no_claim_flags",
@@ -156,14 +156,14 @@ AUTHORITY_SCOPE_FLAG_EXPECTATIONS = {
     "non_mutating_validator": True,
     "atomicrows_bundle_absent_allowed_only_with_not_created_status": True,
     "atomicrows_hash_absent_allowed_only_without_sha_authority": True,
-    "coverage_ledger_reporting_allowed": True,
+    "generated_derivative_coverage_reporting_allowed": True,
     "completion_mode_allowed": False,
     "atomicrows_bundle_creation_allowed": False,
     "atomicrows_bundle_hash_creation_allowed": False,
     "atomicrows_row_creation_allowed": False,
     "atomicrows_sha_authority_allowed": False,
     "completion_authority_allowed": False,
-    "coverage_ledger_blocker_reduction_allowed": False,
+    "generated_derivative_coverage_blocker_reduction_allowed": False,
     "stage1_packet_schema_unblock_allowed": False,
     "manual_edit_authority_allowed": False,
     "source_fact_acceptance_allowed": False,
@@ -254,7 +254,7 @@ EXPECTED_SCHEMA_DEFS = {
     "generated_derivative_metadata",
     "declared_writer_identity",
     "generated_derivative_output",
-    "coverage_ledger_report",
+    "generated_derivative_coverage_report",
     "authority_scope_flags",
     "forbidden_action_flags",
     "no_claim_flags",
@@ -484,7 +484,7 @@ def _validate_schema_surfaces(schema: dict[str, Any]) -> list[str]:
         "expected_canonical_paths": "#/$defs/expected_canonical_paths",
         "bootstrap_gate_receipt": "#/$defs/bootstrap_gate_receipt",
         "completion_mode_requirements": "#/$defs/completion_mode_requirements",
-        "coverage_ledger_report": "#/$defs/coverage_ledger_report",
+        "generated_derivative_coverage_report": "#/$defs/generated_derivative_coverage_report",
         "authority_scope_flags": "#/$defs/authority_scope_flags",
         "forbidden_action_flags": "#/$defs/forbidden_action_flags",
         "no_claim_flags": "#/$defs/no_claim_flags",
@@ -527,7 +527,7 @@ def _validate_schema_surfaces(schema: dict[str, Any]) -> list[str]:
         "expected_canonical_paths": EXPECTED_PATH_CONSTS,
         "bootstrap_gate_receipt": BOOTSTRAP_GATE_RECEIPT_EXPECTATIONS,
         "completion_mode_requirements": COMPLETION_MODE_REQUIREMENT_EXPECTATIONS,
-        "coverage_ledger_report": COVERAGE_LEDGER_REPORT_EXPECTATIONS,
+        "generated_derivative_coverage_report": COVERAGE_LEDGER_REPORT_EXPECTATIONS,
         "authority_scope_flags": AUTHORITY_SCOPE_FLAG_EXPECTATIONS,
     }
     for def_name, expected in sorted(const_schema_expectations.items()):
@@ -794,7 +794,7 @@ def validate_generated_derivative_bootstrap_gate_fixture(
 
     coverage, coverage_failures = _mapping(
         fixture,
-        "coverage_ledger_report",
+        "generated_derivative_coverage_report",
         "generated derivative bootstrap gate fixture",
     )
     failures.extend(coverage_failures)
@@ -803,7 +803,7 @@ def validate_generated_derivative_bootstrap_gate_fixture(
             _validate_const_map(
                 coverage,
                 COVERAGE_LEDGER_REPORT_EXPECTATIONS,
-                "coverage_ledger_report",
+                "generated_derivative_coverage_report",
             )
         )
 
