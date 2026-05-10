@@ -1,0 +1,21 @@
+{
+  "authority_boundary_all_false": true,
+  "bundle_file_present": false,
+  "bundle_sha_present": false,
+  "cumulative_ready": false,
+  "deterministic_output": true,
+  "final_ready": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "live_authority_allowed_total": 0,
+  "optimizer_authority_allowed_total": 0,
+  "quantum_backend_authority_allowed_total": 0,
+  "report_type": "ATOMICROWS_LIFECYCLE_CUMULATIVE_READINESS_GATE_REPORT",
+  "runtime_authority_allowed_total": 0,
+  "total_invalid_claim_count": 0,
+  "upstream_report_count": 4,
+  "upstream_reports_authority_boundary_all_false_count": 4,
+  "upstream_reports_deterministic_count": 4,
+  "upstream_reports_final_ready_false_count": 4,
+  "upstream_reports_missing_count": 0,
+  "upstream_reports_present_count": 4
+}
