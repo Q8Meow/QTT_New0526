@@ -273,6 +273,22 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_lifecycle_promotion_receipt_gate.py"
+            ),
+            "--mode",
+            "dev",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "AtomicRowsLifecyclePromotionReceiptGate.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
@@ -1153,6 +1169,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     consumer_gate_index = command_names.index(
         "validate_atomicrows_lifecycle_consumer_gate.py"
     )
+    promotion_receipt_gate_index = command_names.index(
+        "validate_atomicrows_lifecycle_promotion_receipt_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1162,6 +1181,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < lifecycle_build_index
         < lifecycle_validate_index
         < consumer_gate_index
+        < promotion_receipt_gate_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1187,6 +1207,19 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             / "master_plan"
             / "generated"
             / "AtomicRowsLifecycleConsumerGate.report.json"
+        ),
+    ]
+    assert commands[promotion_receipt_gate_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_lifecycle_promotion_receipt_gate.py"),
+        "--mode",
+        "dev",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "AtomicRowsLifecyclePromotionReceiptGate.report.json"
         ),
     ]
 

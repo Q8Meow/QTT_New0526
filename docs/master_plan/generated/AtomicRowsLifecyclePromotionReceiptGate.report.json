@@ -1,0 +1,18 @@
+{
+  "allowed_promotion_count": 7,
+  "attempted_promotion_count": 14,
+  "authority_boundary_all_false": true,
+  "blocked_promotion_count": 7,
+  "deterministic_output": true,
+  "final_ready": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "invalid_promotion_count": 0,
+  "live_promotion_allowed_count": 0,
+  "mismatched_receipt_type_count": 1,
+  "missing_evidence_locator_count": 12,
+  "missing_receipt_count": 2,
+  "optimizer_promotion_allowed_count": 0,
+  "quantum_backend_promotion_allowed_count": 0,
+  "report_type": "ATOMICROWS_LIFECYCLE_PROMOTION_RECEIPT_GATE_REPORT",
+  "runtime_promotion_allowed_count": 0
+}
