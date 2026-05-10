@@ -48,8 +48,8 @@
         "$ref": "#/$defs/generated_derivative_output"
       }
     },
-    "coverage_ledger_report": {
-      "$ref": "#/$defs/coverage_ledger_report"
+    "generated_derivative_coverage_report": {
+      "$ref": "#/$defs/generated_derivative_coverage_report"
     },
     "authority_scope_flags": {
       "$ref": "#/$defs/authority_scope_flags"
@@ -83,7 +83,7 @@
     "bootstrap_gate_receipt",
     "completion_mode_requirements",
     "generated_derivative_outputs",
-    "coverage_ledger_report",
+    "generated_derivative_coverage_report",
     "authority_scope_flags",
     "forbidden_action_flags",
     "no_claim_flags",
@@ -331,7 +331,7 @@
       ],
       "additionalProperties": false
     },
-    "coverage_ledger_report": {
+    "generated_derivative_coverage_report": {
       "type": "object",
       "properties": {
         "reporting_allowed": {
@@ -389,7 +389,7 @@
         "atomicrows_hash_absent_allowed_only_without_sha_authority": {
           "const": true
         },
-        "coverage_ledger_reporting_allowed": {
+        "generated_derivative_coverage_reporting_allowed": {
           "const": true
         },
         "completion_mode_allowed": {
@@ -410,7 +410,7 @@
         "completion_authority_allowed": {
           "const": false
         },
-        "coverage_ledger_blocker_reduction_allowed": {
+        "generated_derivative_coverage_blocker_reduction_allowed": {
           "const": false
         },
         "stage1_packet_schema_unblock_allowed": {
@@ -468,14 +468,14 @@
         "non_mutating_validator",
         "atomicrows_bundle_absent_allowed_only_with_not_created_status",
         "atomicrows_hash_absent_allowed_only_without_sha_authority",
-        "coverage_ledger_reporting_allowed",
+        "generated_derivative_coverage_reporting_allowed",
         "completion_mode_allowed",
         "atomicrows_bundle_creation_allowed",
         "atomicrows_bundle_hash_creation_allowed",
         "atomicrows_row_creation_allowed",
         "atomicrows_sha_authority_allowed",
         "completion_authority_allowed",
-        "coverage_ledger_blocker_reduction_allowed",
+        "generated_derivative_coverage_blocker_reduction_allowed",
         "stage1_packet_schema_unblock_allowed",
         "manual_edit_authority_allowed",
         "source_fact_acceptance_allowed",

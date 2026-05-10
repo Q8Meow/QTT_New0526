@@ -25,23 +25,21 @@ jobs:
 
       - name: Install test dependency
         run: |
-          python -m pip \
-            install pytest
+          python -m pip install pytest
 
-      - name: Prepare validation output directory
-        run: mkdir -p "$RUNNER_TEMP/qtt_ci_validation"
+      - name: Run canonical validation gates
+        run: python tools/run_validation_gates.py
 
-      - name: Generate master plan validation reports
-        run: python tools/master_plan_ingest.py --input docs/master_plan/QTT_MasterPlan_Current.md --section-manifest-out "$RUNNER_TEMP/qtt_ci_validation/SectionManifest.json" --traceability-out "$RUNNER_TEMP/qtt_ci_validation/TraceabilityReport.json" --scope-report-out "$RUNNER_TEMP/qtt_ci_validation/FirstPrScopeReport.json"
+      - name: Compile Python sources
+        run: python -m compileall -q tools tests src
 
-      - name: Check master plan traceability
-        run: python tools/master_plan_traceability_check.py --master-plan docs/master_plan/QTT_MasterPlan_Current.md --section-manifest "$RUNNER_TEMP/qtt_ci_validation/SectionManifest.json" --traceability-report "$RUNNER_TEMP/qtt_ci_validation/TraceabilityReport.json"
-      
-      - name: Validate source-evidence static schema
-        run: python tools/validate_source_evidence_static.py --schema schemas/source_evidence/source_evidence.schema.json --owner-packet docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md
+      - name: Check diff whitespace
+        run: git diff --check
 
-      - name: Validate no runtime artifacts
-        run: python tools/validate_no_runtime_artifacts.py --repo-root . --forbid-source-retrieval --forbid-source-acceptance --forbid-connector-binding --forbid-private-state-fetch --forbid-order-execution --forbid-neural-training --forbid-neural-inference --forbid-external-repo-clone --forbid-package-install-scripts
+      - name: Verify master plan unchanged by validation
+        run: git diff --exit-code -- docs/master_plan/QTT_MasterPlan_Current.md
 
-      - name: Run tests
-        run: python tools/run_pytest_fresh_basetemp.py -q
+      - name: Verify AtomicRows bundle remains absent
+        run: |
+          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256

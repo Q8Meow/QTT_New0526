@@ -1,0 +1,511 @@
+schema_version: 1
+registry_name: QTTSectionCoverageRegistry
+coverage_model: SECTION_CAPABILITY_COVERAGE_ROUTING
+entries:
+  - capability_id: parser_visible_section_research_default
+    owner_section_ids:
+      - __ALL_PARSER_VISIBLE_SECTIONS__
+    section_title_or_capability_title: Parser-visible master-plan section research route
+    coverage_class: RESEARCH_CANDIDATE
+    current_status: RESEARCH_ROUTED
+    required_files:
+      - docs/master_plan/QTT_MasterPlan_Current.md
+    required_tools:
+      - tools/master_plan_ingest.py
+      - tools/build_master_plan_section_coverage_report.py
+      - tools/validate_master_plan_section_coverage.py
+    required_schemas:
+      - schemas/master_plan/master_plan_section_coverage_report.schema.json
+    required_tests:
+      - tests/master_plan/test_master_plan_section_coverage_report.py
+    required_reports:
+      - docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+    required_receipts: []
+    research_route: section-by-section owner-capability triage before runtime eligibility
+    unblock_condition: owner selects a section for explicit capability mapping and evidence requirements
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_master_plan_section_coverage.py --mode dev
+  - capability_id: master_plan_section_coverage_foundation
+    owner_section_ids:
+      - 0X.4O
+    section_title_or_capability_title: Master-plan section coverage report and validation foundation
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - docs/master_plan/completion/QTTSectionCoverageRegistry.yaml
+      - docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+    required_tools:
+      - tools/build_master_plan_section_coverage_report.py
+      - tools/validate_master_plan_section_coverage.py
+    required_schemas:
+      - schemas/master_plan/master_plan_section_coverage_report.schema.json
+    required_tests:
+      - tests/master_plan/test_master_plan_section_coverage_report.py
+    required_reports:
+      - docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+    required_receipts: []
+    research_route:
+    unblock_condition: final mode requires every non-complete section to be explicitly completed, owner-deferred, quarantined, or retired with evidence
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: static coverage report only
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\build_master_plan_section_coverage_report.py
+      - .\.venv\Scripts\python.exe tools\validate_master_plan_section_coverage.py --mode dev
+  - capability_id: generated_derivative_bootstrap_static_contract
+    owner_section_ids:
+      - 0X.0AL
+    section_title_or_capability_title: Generated-derivative bootstrap and AtomicRows absence gate
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - schemas/master_plan/generated_derivative_bootstrap_gate.schema.json
+      - tests/fixtures/master_plan/synthetic_generated_derivative_bootstrap_gate.v1.fixture.json
+    required_tools:
+      - tools/validate_generated_derivative_bootstrap_gate_static.py
+    required_schemas:
+      - schemas/master_plan/generated_derivative_bootstrap_gate.schema.json
+    required_tests:
+      - tests/master_plan/test_validate_generated_derivative_bootstrap_gate_static.py
+    required_reports: []
+    required_receipts: []
+    research_route:
+    unblock_condition: later generated-derivative completion requires explicit AtomicRows phase evidence
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: bootstrap permits absence reporting only and creates no completion authority
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_generated_derivative_bootstrap_gate_static.py --repo-root . --schema schemas\master_plan\generated_derivative_bootstrap_gate.schema.json --fixture tests\fixtures\master_plan\synthetic_generated_derivative_bootstrap_gate.v1.fixture.json
+  - capability_id: atomicrows_bundle_creation_blocked
+    owner_section_ids:
+      - 0X.0AL
+    section_title_or_capability_title: AtomicRows bundle creation remains blocked
+    coverage_class: QUARANTINE_REQUIRED
+    current_status: QUARANTINED_UNPROVEN
+    required_files:
+      - schemas/atomicrows/atomic_row_bundle.schema.json
+      - schemas/atomicrows/atomic_parameter_row.schema.json
+    required_tools:
+      - tools/validate_atomicrows_bundle_schema_checker_static.py
+    required_schemas:
+      - schemas/atomicrows/atomic_row_bundle.schema.json
+      - schemas/atomicrows/atomic_parameter_row.schema.json
+    required_tests:
+      - tests/atomicrows/test_validate_atomicrows_bundle_schema_checker_static.py
+    required_reports: []
+    required_receipts:
+      - future-explicit-atomicrows-phase-receipt
+    research_route: later AtomicRows phase only
+    unblock_condition: future AtomicRows phase explicitly allows canonical bundle and hash creation
+    retirement_allowed: false
+    quarantine_reason: bundle and hash are intentionally absent in this foundation
+    retirement_reason:
+    static_safety_stub: static schema checker only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_atomicrows_bundle_schema_checker_static.py --repo-root . --row-schema schemas\atomicrows\atomic_parameter_row.schema.json --bundle-schema schemas\atomicrows\atomic_row_bundle.schema.json --fixture tests\fixtures\atomicrows\synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json
+  - capability_id: venue_neutral_prediction_adapter_static_contract
+    owner_section_ids:
+      - 0X.4L
+    section_title_or_capability_title: Venue-neutral prediction adapter static contract
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json
+      - tests/fixtures/venue_neutral_prediction_adapter/synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json
+    required_tools:
+      - tools/validate_venue_neutral_prediction_adapter_gate_static.py
+    required_schemas:
+      - schemas/venue_neutral_prediction_adapter/venue_neutral_adapter_gate_report.schema.json
+    required_tests:
+      - tests/venue_neutral_prediction_adapter/test_validate_venue_neutral_prediction_adapter_gate_static.py
+    required_reports: []
+    required_receipts: []
+    research_route:
+    unblock_condition: accepted venue source evidence and later connector-specific receipts are required before runtime use
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: venue-neutral schema-only boundary
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_venue_neutral_prediction_adapter_gate_static.py --repo-root . --schema-dir schemas\venue_neutral_prediction_adapter --fixture tests\fixtures\venue_neutral_prediction_adapter\synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json
+  - capability_id: runtime_orchestration_static_contract
+    owner_section_ids:
+      - 0X.4N
+    section_title_or_capability_title: Stage-1 runtime orchestration scaffold static contract
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - schemas/runtime_orchestration/runtime_orchestration_skeleton.schema.json
+      - schemas/runtime_orchestration/stage1_runtime_scaffold_gate.schema.json
+    required_tools:
+      - tools/validate_runtime_orchestration_static.py
+      - tools/validate_stage1_runtime_scaffold_gate_static.py
+    required_schemas:
+      - schemas/runtime_orchestration/runtime_orchestration_skeleton.schema.json
+      - schemas/runtime_orchestration/stage1_runtime_scaffold_gate.schema.json
+    required_tests:
+      - tests/runtime_orchestration/test_runtime_orchestration_skeleton_static_validation.py
+      - tests/runtime_orchestration/test_validate_stage1_runtime_scaffold_gate_static.py
+    required_reports: []
+    required_receipts: []
+    research_route:
+    unblock_condition: runtime resolver snapshot, replay, paper, dashboard mutation, cash, and live paths require separate future receipts
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: scaffold gate only
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_stage1_runtime_scaffold_gate_static.py --repo-root . --schema schemas\runtime_orchestration\stage1_runtime_scaffold_gate.schema.json --fixture tests\fixtures\runtime_orchestration\synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json
+  - capability_id: source_evidence_acceptance_route
+    owner_section_ids:
+      - 0X.4Q
+    section_title_or_capability_title: Source evidence acceptance route
+    coverage_class: SOURCE_EVIDENCE_DEPENDENT
+    current_status: BLOCKED_SOURCE_EVIDENCE
+    required_files:
+      - schemas/source_evidence/source_evidence.schema.json
+      - schemas/source_evidence/source_evidence_gate_confirmation.schema.json
+      - docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md
+    required_tools:
+      - tools/validate_source_evidence_static.py
+      - tools/validate_source_evidence_gate_confirmation_static.py
+    required_schemas:
+      - schemas/source_evidence/source_evidence.schema.json
+      - schemas/source_evidence/source_evidence_gate_confirmation.schema.json
+    required_tests:
+      - tests/source_evidence/test_source_evidence_static_validator.py
+      - tests/source_evidence/test_validate_source_evidence_gate_confirmation_static.py
+    required_reports: []
+    required_receipts:
+      - accepted-source-evidence-packet-receipt
+    research_route: source retrieval, quote span capture, digest, conflict, and owner acceptance route
+    unblock_condition: validated accepted source-evidence packet exists for each target field
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: blocked source-required placeholders only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_source_evidence_gate_confirmation_static.py --repo-root . --schema schemas\source_evidence\source_evidence_gate_confirmation.schema.json --fixture tests\fixtures\source_evidence\synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json
+  - capability_id: source_fact_binding_readiness_static_contract
+    owner_section_ids:
+      - 0X.4P
+    section_title_or_capability_title: Source-fact binding readiness static contract
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - schemas/source_fact_binding_readiness/stage1_source_to_connector_field_binding_matrix.schema.json
+      - schemas/source_fact_binding_readiness/stage1_connector_semantic_readiness_gate_report.schema.json
+    required_tools:
+      - tools/validate_source_fact_binding_connector_semantic_readiness_static.py
+    required_schemas:
+      - schemas/source_fact_binding_readiness/stage1_source_to_connector_field_binding_matrix.schema.json
+      - schemas/source_fact_binding_readiness/stage1_connector_semantic_readiness_gate_report.schema.json
+    required_tests:
+      - tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py
+    required_reports: []
+    required_receipts: []
+    research_route:
+    unblock_condition: accepted source evidence is still required before connector semantic values may be populated
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: pre-acceptance readiness matrix only
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\validate_source_fact_binding_connector_semantic_readiness_static.py --repo-root .
+  - capability_id: connector_semantic_binding_source_evidence_route
+    owner_section_ids:
+      - 0X.4R
+    section_title_or_capability_title: Connector semantic binding source-evidence route
+    coverage_class: SOURCE_EVIDENCE_DEPENDENT
+    current_status: BLOCKED_SOURCE_EVIDENCE
+    required_files:
+      - src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_ledger_record.schema.json
+      - src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_consumer_contract.schema.json
+    required_tools:
+      - tools/stage1_connector_semantic_binding_ledger_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_ledger_record.schema.json
+      - src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_consumer_contract.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_connector_semantic_binding_ledger_record_contract.py
+      - tests/source_evidence/test_stage1_connector_semantic_binding_consumer_contract_blocks_direct_runtime_use.py
+    required_reports:
+      - docs/master_plan/generated/Stage1ConnectorSemanticBindingLedgerCheck.report.json
+    required_receipts:
+      - accepted-source-evidence-packet-receipt
+    research_route: connector semantic binding waits on target-field accepted source packets
+    unblock_condition: each connector semantic target field has accepted source evidence and a green binding gate
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: static ledger and consumer contracts only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_connector_semantic_binding_ledger_check.py --repo-root .
+  - capability_id: runtime_resolver_snapshot_source_dependent_route
+    owner_section_ids:
+      - 0X.4S
+    section_title_or_capability_title: Runtime resolver snapshot source-dependent route
+    coverage_class: SOURCE_EVIDENCE_DEPENDENT
+    current_status: BLOCKED_SOURCE_EVIDENCE
+    required_files:
+      - src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_manifest.schema.json
+      - src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_input_lock.schema.json
+    required_tools:
+      - tools/stage1_runtime_resolver_snapshot_contract_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_manifest.schema.json
+      - src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_input_lock.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_runtime_resolver_snapshot_manifest_gate_blocks_creation.py
+      - tests/source_evidence/test_stage1_runtime_resolver_snapshot_input_lock_contract.py
+    required_reports:
+      - docs/master_plan/generated/Stage1RuntimeResolverSnapshotContractCheck.report.json
+    required_receipts:
+      - accepted-source-evidence-packet-receipt
+      - connector-semantic-binding-gate-receipt
+    research_route: runtime resolver snapshot waits on accepted source evidence and connector semantic binding
+    unblock_condition: accepted source packets and connector semantic binding gate are green
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: static input-lock and manifest contracts only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_runtime_resolver_snapshot_contract_check.py --repo-root .
+  - capability_id: replay_paper_execution_static_boundary
+    owner_section_ids:
+      - 0X.4T
+    section_title_or_capability_title: Concurrent replay and paper execution static boundary
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_input_identity.schema.json
+      - src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_execution_gate_report.schema.json
+    required_tools:
+      - tools/stage1_concurrent_replay_paper_contract_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_input_identity.schema.json
+      - src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_execution_gate_report.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_concurrent_replay_paper_input_identity_contract.py
+      - tests/source_evidence/test_stage1_concurrent_replay_paper_result_boundaries_block_merge_and_live.py
+    required_reports:
+      - docs/master_plan/generated/Stage1ConcurrentReplayPaperContractCheck.report.json
+    required_receipts:
+      - future-runtime-resolver-snapshot-receipt
+    research_route:
+    unblock_condition: future runtime resolver snapshot and input identity receipt exist
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: static lane and result-boundary contracts only
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_concurrent_replay_paper_contract_check.py --repo-root .
+  - capability_id: dual_result_review_static_boundary
+    owner_section_ids:
+      - 0X.4U
+    section_title_or_capability_title: Dual-result review static boundary
+    coverage_class: STATIC_CONTRACT
+    current_status: STATIC_CONTRACT_IMPLEMENTED
+    required_files:
+      - src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_input_contract.schema.json
+      - src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_gate_report.schema.json
+    required_tools:
+      - tools/stage1_dual_result_review_contract_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_input_contract.schema.json
+      - src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_gate_report.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_dual_result_review_input_contract.py
+      - tests/source_evidence/test_stage1_dual_result_review_blocks_auto_promotion_live_order_profit.py
+    required_reports:
+      - docs/master_plan/generated/Stage1DualResultReviewContractCheck.report.json
+    required_receipts:
+      - future-replay-result-packet
+      - future-paper-result-packet
+    research_route:
+    unblock_condition: separate replay and paper result packets exist and validate
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: static review contract only
+    owner_deferred: false
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_dual_result_review_contract_check.py --repo-root .
+  - capability_id: owner_live_promotion_review_owner_approval_route
+    owner_section_ids:
+      - 0X.4V
+    section_title_or_capability_title: Owner live-promotion review and three-venue eligibility owner-approval route
+    coverage_class: OWNER_APPROVAL_DEPENDENT
+    current_status: BLOCKED_OWNER_APPROVAL
+    required_files:
+      - src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_live_promotion_review_input_contract.schema.json
+      - src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_canary_eligibility_input_contract.schema.json
+    required_tools:
+      - tools/stage1_owner_live_promotion_review_contract_check.py
+      - tools/stage1_three_venue_canary_eligibility_contract_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_live_promotion_review_input_contract.schema.json
+      - src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_canary_eligibility_input_contract.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_owner_live_promotion_review_input_contract.py
+      - tests/source_evidence/test_stage1_three_venue_canary_eligibility_input_contract.py
+    required_reports:
+      - docs/master_plan/generated/Stage1OwnerLivePromotionReviewContractCheck.report.json
+      - docs/master_plan/generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json
+    required_receipts:
+      - future-owner-live-promotion-approval-receipt
+      - future-three-venue-readiness-receipt
+    research_route: owner approval and three-venue eligibility review route
+    unblock_condition: owner approval receipt and green three-venue readiness evidence exist
+    retirement_allowed: false
+    quarantine_reason:
+    retirement_reason:
+    static_safety_stub: owner-review and eligibility contracts only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_owner_live_promotion_review_contract_check.py --repo-root .
+      - .\.venv\Scripts\python.exe tools\stage1_three_venue_canary_eligibility_contract_check.py --repo-root .
+  - capability_id: limited_live_canary_execution_quarantined
+    owner_section_ids:
+      - 0X.4W
+    section_title_or_capability_title: Limited-live canary execution quarantined until future receipts
+    coverage_class: QUARANTINE_REQUIRED
+    current_status: QUARANTINED_UNPROVEN
+    required_files:
+      - src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_limited_live_canary_execution_block.schema.json
+    required_tools:
+      - tools/stage1_three_venue_canary_eligibility_contract_check.py
+    required_schemas:
+      - src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_limited_live_canary_execution_block.schema.json
+    required_tests:
+      - tests/source_evidence/test_stage1_three_venue_canary_eligibility_blocks_canary_execution_order_profit.py
+    required_reports:
+      - docs/master_plan/generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json
+    required_receipts:
+      - future-limited-live-canary-execution-task-receipt
+      - future-runtime-cash-receipt
+      - future-owner-live-order-approval-receipt
+    research_route: later task packet only after owner approval, runtime cash, kill-switch, risk, and venue readiness receipts
+    unblock_condition: future validated limited-live execution receipts explicitly authorize this boundary
+    retirement_allowed: false
+    quarantine_reason: live canary execution is intentionally not implemented in this foundation
+    retirement_reason:
+    static_safety_stub: execution block schema only
+    owner_deferred: true
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+    validation_commands:
+      - .\.venv\Scripts\python.exe tools\stage1_three_venue_canary_eligibility_contract_check.py --repo-root .

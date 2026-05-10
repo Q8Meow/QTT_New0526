@@ -822,6 +822,16 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "build_master_plan_section_coverage_report.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_master_plan_section_coverage.py"),
+            "--mode",
+            "dev",
+        ],
+        [
+            sys.executable,
             _path("tools", "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",

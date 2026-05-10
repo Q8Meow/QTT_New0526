@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/master_plan/master_plan_section_coverage_report.schema.json",
+  "title": "MasterPlanSectionCoverageReport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_type",
+    "report_version",
+    "deterministic_output",
+    "generated_by",
+    "generated_at_utc",
+    "source_documents",
+    "registry",
+    "authority_boundary",
+    "coverage_summary",
+    "coverage_entries",
+    "section_coverage"
+  ],
+  "properties": {
+    "report_type": { "const": "MASTER_PLAN_SECTION_COVERAGE_REPORT" },
+    "report_version": { "const": "MASTER_PLAN_SECTION_COVERAGE_REPORT_V1" },
+    "deterministic_output": { "const": true },
+    "generated_by": { "const": "tools/build_master_plan_section_coverage_report.py" },
+    "generated_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+    "source_documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "master_plan",
+        "registry",
+        "master_plan_line_count",
+        "master_plan_file_size_bytes",
+        "master_plan_section_count",
+        "master_plan_required_markers"
+      ],
+      "properties": {
+        "master_plan": { "const": "docs/master_plan/QTT_MasterPlan_Current.md" },
+        "registry": {
+          "const": "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml"
+        },
+        "master_plan_line_count": { "type": "integer" },
+        "master_plan_file_size_bytes": { "type": "integer" },
+        "master_plan_section_count": { "type": "integer" },
+        "master_plan_required_markers": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_name",
+        "schema_version",
+        "coverage_model",
+        "entry_count"
+      ],
+      "properties": {
+        "registry_name": { "const": "QTTSectionCoverageRegistry" },
+        "schema_version": { "const": 1 },
+        "coverage_model": { "const": "SECTION_CAPABILITY_COVERAGE_ROUTING" },
+        "entry_count": { "type": "integer" }
+      }
+    },
+    "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+    "coverage_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parser_visible_section_count",
+        "registry_entry_count",
+        "sections_with_specific_capability_count",
+        "sections_using_default_research_route_count",
+        "status_counts",
+        "coverage_class_counts",
+        "blocked_or_future_entries_routed",
+        "authority_boundary_all_false",
+        "final_ready"
+      ],
+      "properties": {
+        "parser_visible_section_count": { "type": "integer" },
+        "registry_entry_count": { "type": "integer" },
+        "sections_with_specific_capability_count": { "type": "integer" },
+        "sections_using_default_research_route_count": { "type": "integer" },
+        "status_counts": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "coverage_class_counts": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "blocked_or_future_entries_routed": { "type": "boolean" },
+        "authority_boundary_all_false": { "type": "boolean" },
+        "final_ready": { "type": "boolean" }
+      }
+    },
+    "coverage_entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/coverage_entry" }
+    },
+    "section_coverage": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/section_coverage_record" }
+    }
+  },
+  "$defs": {
+    "coverage_class": {
+      "enum": [
+        "EXECUTABLE_IMPLEMENTATION",
+        "STATIC_CONTRACT",
+        "SOURCE_EVIDENCE_DEPENDENT",
+        "RUNTIME_RECEIPT_DEPENDENT",
+        "OWNER_APPROVAL_DEPENDENT",
+        "POLICY_ONLY",
+        "RESEARCH_CANDIDATE",
+        "QUARANTINE_REQUIRED",
+        "RETIRED_NOT_USEFUL"
+      ]
+    },
+    "current_status": {
+      "enum": [
+        "NOT_STARTED",
+        "PARTIAL",
+        "STATIC_CONTRACT_IMPLEMENTED",
+        "BLOCKED_SOURCE_EVIDENCE",
+        "BLOCKED_REPLAY_PAPER_EVIDENCE",
+        "BLOCKED_RUNTIME_RECEIPT",
+        "BLOCKED_OWNER_APPROVAL",
+        "RESEARCH_ROUTED",
+        "QUARANTINED_UNPROVEN",
+        "RETIRED_NOT_USEFUL",
+        "COMPLETE_VERIFIED"
+      ]
+    },
+    "string_list": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_atomicrows_bundle",
+        "creates_profit_evidence",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_receipt": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "reduces_blockers": { "const": false }
+      }
+    },
+    "coverage_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_id",
+        "owner_section_ids",
+        "section_title_or_capability_title",
+        "coverage_class",
+        "current_status",
+        "required_files",
+        "required_tools",
+        "required_schemas",
+        "required_tests",
+        "required_reports",
+        "required_receipts",
+        "research_route",
+        "unblock_condition",
+        "retirement_allowed",
+        "authority_boundary",
+        "validation_commands",
+        "quarantine_reason",
+        "retirement_reason",
+        "static_safety_stub",
+        "owner_deferred",
+        "entry_index"
+      ],
+      "properties": {
+        "capability_id": { "type": "string" },
+        "owner_section_ids": { "$ref": "#/$defs/string_list" },
+        "section_title_or_capability_title": { "type": "string" },
+        "coverage_class": { "$ref": "#/$defs/coverage_class" },
+        "current_status": { "$ref": "#/$defs/current_status" },
+        "required_files": { "$ref": "#/$defs/string_list" },
+        "required_tools": { "$ref": "#/$defs/string_list" },
+        "required_schemas": { "$ref": "#/$defs/string_list" },
+        "required_tests": { "$ref": "#/$defs/string_list" },
+        "required_reports": { "$ref": "#/$defs/string_list" },
+        "required_receipts": { "$ref": "#/$defs/string_list" },
+        "research_route": { "type": "string" },
+        "unblock_condition": { "type": "string" },
+        "retirement_allowed": { "type": "boolean" },
+        "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+        "validation_commands": { "$ref": "#/$defs/string_list" },
+        "quarantine_reason": { "type": "string" },
+        "retirement_reason": { "type": "string" },
+        "static_safety_stub": { "type": "string" },
+        "owner_deferred": { "type": "boolean" },
+        "entry_index": { "type": "integer" }
+      }
+    },
+    "section_coverage_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_index",
+        "owner_section_id",
+        "canonical_id",
+        "section_title",
+        "level",
+        "line",
+        "parser_visible",
+        "capability_id",
+        "matching_capability_ids",
+        "coverage_class",
+        "current_status",
+        "section_title_or_capability_title",
+        "required_files",
+        "required_tools",
+        "required_schemas",
+        "required_tests",
+        "required_reports",
+        "required_receipts",
+        "research_route",
+        "unblock_condition",
+        "quarantine_reason",
+        "retirement_allowed",
+        "retirement_reason",
+        "static_safety_stub",
+        "owner_deferred",
+        "authority_boundary",
+        "validation_commands",
+        "codable",
+        "policy_only",
+        "static_contract_only",
+        "source_evidence_dependent",
+        "runtime_receipt_dependent",
+        "owner_approval_dependent"
+      ],
+      "properties": {
+        "section_index": { "type": "integer" },
+        "owner_section_id": { "type": "string" },
+        "canonical_id": { "type": ["string", "null"] },
+        "section_title": { "type": "string" },
+        "level": { "type": "integer" },
+        "line": { "type": "integer" },
+        "parser_visible": { "const": true },
+        "capability_id": { "type": "string" },
+        "matching_capability_ids": { "$ref": "#/$defs/string_list" },
+        "coverage_class": { "$ref": "#/$defs/coverage_class" },
+        "current_status": { "$ref": "#/$defs/current_status" },
+        "section_title_or_capability_title": { "type": "string" },
+        "required_files": { "$ref": "#/$defs/string_list" },
+        "required_tools": { "$ref": "#/$defs/string_list" },
+        "required_schemas": { "$ref": "#/$defs/string_list" },
+        "required_tests": { "$ref": "#/$defs/string_list" },
+        "required_reports": { "$ref": "#/$defs/string_list" },
+        "required_receipts": { "$ref": "#/$defs/string_list" },
+        "research_route": { "type": "string" },
+        "unblock_condition": { "type": "string" },
+        "quarantine_reason": { "type": "string" },
+        "retirement_allowed": { "type": "boolean" },
+        "retirement_reason": { "type": "string" },
+        "static_safety_stub": { "type": "string" },
+        "owner_deferred": { "type": "boolean" },
+        "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+        "validation_commands": { "$ref": "#/$defs/string_list" },
+        "codable": { "type": "boolean" },
+        "policy_only": { "type": "boolean" },
+        "static_contract_only": { "type": "boolean" },
+        "source_evidence_dependent": { "type": "boolean" },
+        "runtime_receipt_dependent": { "type": "boolean" },
+        "owner_approval_dependent": { "type": "boolean" }
+      }
+    }
+  }
+}

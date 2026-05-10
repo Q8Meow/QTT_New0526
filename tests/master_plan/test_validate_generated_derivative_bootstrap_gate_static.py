@@ -66,7 +66,7 @@ def test_valid_bootstrap_fixture_passes():
     assert fixture["gate_mode"] == GATE_MODE
     assert _output(fixture)["derivative_status"] == DERIVATIVE_ABSENT_STATUS
     assert fixture["bootstrap_gate_receipt"]["completion_mode_claimed"] is False
-    assert fixture["coverage_ledger_report"]["blockers_reduced"] is False
+    assert fixture["generated_derivative_coverage_report"]["blockers_reduced"] is False
 
 
 def test_missing_gate_mode_fails():
@@ -99,7 +99,7 @@ def test_4183_row_coverage_claim_fails():
     fixture["completion_mode_requirements"][
         "current_pr_claims_4183_row_derivative_coverage"
     ] = True
-    fixture["coverage_ledger_report"]["claims_4183_row_derivative_coverage"] = True
+    fixture["generated_derivative_coverage_report"]["claims_4183_row_derivative_coverage"] = True
     fixture["no_claim_flags"]["claims_4183_row_derivative_coverage"] = True
 
     failures = _validate_fixture(fixture)
@@ -203,9 +203,9 @@ def test_actual_row_records_fail():
     "field_path",
     [
         ("forbidden_action_flags", "blocker_reduction_enabled"),
-        ("authority_scope_flags", "coverage_ledger_blocker_reduction_allowed"),
-        ("coverage_ledger_report", "blocker_reduction_allowed"),
-        ("coverage_ledger_report", "blockers_reduced"),
+        ("authority_scope_flags", "generated_derivative_coverage_blocker_reduction_allowed"),
+        ("generated_derivative_coverage_report", "blocker_reduction_allowed"),
+        ("generated_derivative_coverage_report", "blockers_reduced"),
         ("no_claim_flags", "claims_blocker_reduction"),
     ],
 )
@@ -224,7 +224,7 @@ def test_blocker_reduction_claim_fails(field_path):
         ("forbidden_action_flags", "stage1_packet_schema_unblock_enabled"),
         ("authority_scope_flags", "stage1_packet_schema_unblock_allowed"),
         ("bootstrap_gate_receipt", "stage1_packet_schema_unblocked"),
-        ("coverage_ledger_report", "stage1_packet_schema_unblocking_claimed"),
+        ("generated_derivative_coverage_report", "stage1_packet_schema_unblocking_claimed"),
         ("no_claim_flags", "claims_stage1_packet_schema_unblock"),
     ],
 )

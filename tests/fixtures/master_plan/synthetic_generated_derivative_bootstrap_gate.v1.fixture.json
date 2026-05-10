@@ -66,7 +66,7 @@
       "completion_authority_claimed": false
     }
   ],
-  "coverage_ledger_report": {
+  "generated_derivative_coverage_report": {
     "reporting_allowed": true,
     "blocker_reporting_allowed": true,
     "blocker_reduction_allowed": false,
@@ -82,14 +82,14 @@
     "non_mutating_validator": true,
     "atomicrows_bundle_absent_allowed_only_with_not_created_status": true,
     "atomicrows_hash_absent_allowed_only_without_sha_authority": true,
-    "coverage_ledger_reporting_allowed": true,
+    "generated_derivative_coverage_reporting_allowed": true,
     "completion_mode_allowed": false,
     "atomicrows_bundle_creation_allowed": false,
     "atomicrows_bundle_hash_creation_allowed": false,
     "atomicrows_row_creation_allowed": false,
     "atomicrows_sha_authority_allowed": false,
     "completion_authority_allowed": false,
-    "coverage_ledger_blocker_reduction_allowed": false,
+    "generated_derivative_coverage_blocker_reduction_allowed": false,
     "stage1_packet_schema_unblock_allowed": false,
     "manual_edit_authority_allowed": false,
     "source_fact_acceptance_allowed": false,
