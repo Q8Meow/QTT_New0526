@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/governance/qtt_owner_override_receipt.schema.json",
+  "title": "QTT Owner Override Receipt",
+  "description": "Static schema foundation for future deterministic owner override receipts. This schema does not create runtime, live, order, cash, source acceptance, connector binding, SHA, AtomicRows bundle, or profit evidence artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "owner_decision_options",
+    "owner_override_receipts",
+    "no_claim_flags",
+    "validation_hook_ids"
+  ],
+  "properties": {
+    "fixture_id": { "const": "SYNTHETIC_PR59_QTT_OWNER_OVERRIDE_RECEIPT_FIXTURE" },
+    "fixture_version": { "const": "PR59_QTT_OWNER_OVERRIDE_RECEIPT_FIXTURE_V1" },
+    "fixture_authority_class": { "const": "SYNTHETIC_STATIC_OWNER_OVERRIDE_RECEIPT_FIXTURE_NOT_REAL_RUNTIME_RECEIPT" },
+    "schema_authority_class": { "const": "STATIC_SCHEMA_CONTRACT_ONLY_OWNER_OVERRIDE_RECEIPT_FOUNDATION" },
+    "surface_kind": { "const": "QTT_OWNER_OVERRIDE_RECEIPT_STATIC_FOUNDATION" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "deterministic_output": { "const": true },
+    "owner_decision_options": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/owner_decision_option" },
+      "minItems": 24,
+      "uniqueItems": true
+    },
+    "owner_override_receipts": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "$ref": "#/$defs/owner_override_receipt" }
+    },
+    "no_claim_flags": { "$ref": "#/$defs/no_claim_flags" },
+    "validation_hook_ids": {
+      "type": "array",
+      "items": { "const": "QTT_OWNER_OVERRIDE_RECEIPT_STATIC_VALIDATION" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "owner_decision_option": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_OVERRIDE",
+        "APPROVE_GLOBAL_OVERRIDE",
+        "REJECT",
+        "REQUEST_MORE_INFO",
+        "WAIVE_REQUIREMENT",
+        "SET_OWNER_APPROVED_VALUE",
+        "SET_OWNER_GLOBAL_OVERRIDE",
+        "APPROVE_RESEARCH_ONLY",
+        "APPROVE_REPLAY_ONLY",
+        "APPROVE_PAPER_ONLY",
+        "APPROVE_REPLAY_PAPER",
+        "APPROVE_OPTIMIZER",
+        "APPROVE_RUNTIME",
+        "APPROVE_LIVE_USE",
+        "APPROVE_QUANTUM_BACKEND",
+        "APPROVE_SOURCE_EVIDENCE_OVERRIDE",
+        "APPROVE_FINAL_READINESS_OVERRIDE",
+        "APPROVE_VALIDATION_BLOCKER_OVERRIDE",
+        "APPLY_TO_ONE_ROW",
+        "APPLY_TO_PARAMETER_FAMILY",
+        "APPLY_TO_AGENT",
+        "APPLY_TO_DOMAIN",
+        "APPLY_GLOBALLY"
+      ]
+    },
+    "owner_approved_value_token": {
+      "enum": [
+        "OWNER_APPROVED",
+        "OWNER_APPROVED_OVERRIDE",
+        "OWNER_GLOBAL_OVERRIDE",
+        "OWNER_OVERRIDE_SATISFIED",
+        "OWNER_APPROVED_NOT_EXTERNALLY_VERIFIED",
+        "OWNER_APPROVED_UNVERIFIED",
+        "OWNER_RISK_ACCEPTED",
+        "OWNER_ASSUMED_RESPONSIBILITY",
+        "OWNER_WAIVED_REQUIREMENT",
+        "OWNER_APPROVED_VALUE",
+        "OWNER_APPROVED_MISSING_VALUE",
+        "OWNER_APPROVED_NOT_SOURCE_BACKED",
+        "OWNER_APPROVED_NOT_RECEIPT_BACKED",
+        "OWNER_APPROVED_NOT_RUNTIME_VERIFIED",
+        "OWNER_APPROVED_NOT_LIVE_VERIFIED",
+        "OWNER_APPROVED_NOT_QUANTUM_BACKEND_VERIFIED",
+        "EVIDENCE_NOT_REQUIRED_BY_OWNER_POLICY",
+        "SOURCE_EVIDENCE_REQUIREMENT_SATISFIED_BY_OWNER_OVERRIDE",
+        "FINAL_READINESS_BLOCKER_SATISFIED_BY_OWNER_OVERRIDE",
+        "VALIDATION_BLOCKER_SATISFIED_BY_OWNER_OVERRIDE",
+        "COMPLIANCE_MARKER_OWNER_APPROVED",
+        "AGENT_ASSIGNMENT_OWNER_APPROVED",
+        "OPTIMIZER_ADMISSION_OWNER_APPROVED",
+        "RUNTIME_ADMISSION_OWNER_APPROVED",
+        "LIVE_USE_ADMISSION_OWNER_APPROVED",
+        "QUANTUM_BACKEND_REQUIREMENT_OWNER_APPROVED",
+        "REPLAY_PAPER_REQUIREMENT_OWNER_APPROVED",
+        "ROW_COMPLETION_OWNER_APPROVED",
+        "CONNECTOR_BINDING_OWNER_APPROVED",
+        "RUNTIME_RESOLVER_OWNER_APPROVED",
+        "LIVE_CANARY_OWNER_APPROVED",
+        "GENERATED_REPORT_REQUIREMENT_OWNER_APPROVED",
+        "PROMOTION_BLOCKER_OWNER_APPROVED",
+        "MUTATION_BLOCKER_OWNER_APPROVED",
+        "FINAL_MODE_BLOCKER_OWNER_APPROVED"
+      ]
+    },
+    "owner_override_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_override_id",
+        "authority",
+        "owner_decision",
+        "owner_decision_options",
+        "applies_to_domain",
+        "applies_to_requirement_class",
+        "applies_to_target",
+        "owner_approved_value",
+        "owner_override_satisfaction_basis",
+        "final_qtt_internal_status",
+        "blocks_qtt_when_owner_override_present",
+        "approval_scope",
+        "owner_note",
+        "created_by_owner",
+        "deterministic_created_at_utc",
+        "receipt_locator",
+        "receipt_status",
+        "future_dashboard_source_supported",
+        "future_agent_request_source_supported"
+      ],
+      "properties": {
+        "owner_override_id": { "type": "string" },
+        "authority": { "const": "OWNER_GLOBAL_OVERRIDE" },
+        "owner_decision": { "$ref": "#/$defs/owner_decision_option" },
+        "owner_decision_options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/owner_decision_option" },
+          "minItems": 24,
+          "uniqueItems": true
+        },
+        "applies_to_domain": { "type": "string" },
+        "applies_to_requirement_class": { "type": "string" },
+        "applies_to_target": { "type": "string" },
+        "owner_approved_value": { "$ref": "#/$defs/owner_approved_value_token" },
+        "owner_override_satisfaction_basis": { "$ref": "#/$defs/owner_approved_value_token" },
+        "final_qtt_internal_status": {
+          "enum": [
+            "OWNER_OVERRIDE_SATISFIED",
+            "OWNER_APPROVED",
+            "OWNER_GLOBAL_OVERRIDE",
+            "OWNER_APPROVED_OVERRIDE"
+          ]
+        },
+        "blocks_qtt_when_owner_override_present": { "const": false },
+        "approval_scope": { "type": "string" },
+        "owner_note": { "type": "string" },
+        "created_by_owner": { "const": true },
+        "deterministic_created_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "receipt_locator": { "type": "string" },
+        "receipt_status": { "type": "string" },
+        "future_dashboard_source_supported": { "const": true },
+        "future_agent_request_source_supported": { "const": true }
+      }
+    },
+    "no_claim_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_dashboard_ui",
+        "creates_runtime_service",
+        "creates_live_trading_execution",
+        "creates_real_source_acceptance_artifact",
+        "creates_real_connector_binding_artifact",
+        "creates_real_runtime_receipts",
+        "creates_real_live_receipts",
+        "creates_order_receipts",
+        "creates_cash_receipts",
+        "creates_sha_freeze_authority",
+        "creates_profit_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_bundle_sha256"
+      ],
+      "properties": {
+        "creates_dashboard_ui": { "const": false },
+        "creates_runtime_service": { "const": false },
+        "creates_live_trading_execution": { "const": false },
+        "creates_real_source_acceptance_artifact": { "const": false },
+        "creates_real_connector_binding_artifact": { "const": false },
+        "creates_real_runtime_receipts": { "const": false },
+        "creates_real_live_receipts": { "const": false },
+        "creates_order_receipts": { "const": false },
+        "creates_cash_receipts": { "const": false },
+        "creates_sha_freeze_authority": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_atomicrows_bundle_sha256": { "const": false }
+      }
+    }
+  }
+}

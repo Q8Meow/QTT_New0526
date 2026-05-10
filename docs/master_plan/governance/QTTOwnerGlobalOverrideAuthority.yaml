@@ -1,0 +1,180 @@
+policy_id: QTT_OWNER_GLOBAL_OVERRIDE_AUTHORITY
+policy_version: PR59_STATIC_OWNER_GLOBAL_OVERRIDE_AUTHORITY_V1
+mode: SOURCE_REQUIRED
+execution: DISABLED
+deterministic_output: true
+generated_at_utc: STATIC_DETERMINISTIC_NO_WALL_CLOCK
+owner_global_override_authority: true
+owner_override_satisfies_all_qtt_internal_requirements: true
+chatgpt_authority_over_owner: false
+codex_authority_over_owner: false
+qtt_agent_authority_over_owner: false
+validator_authority_over_owner: false
+generated_report_authority_over_owner: false
+qtt_gate_authority_over_owner: false
+owner_is_sole_final_internal_workflow_authority: true
+validators_must_not_block_owner_override: true
+codex_must_not_block_owner_override: true
+chatgpt_must_not_block_owner_override: true
+qtt_agents_must_not_block_owner_override: true
+generated_reports_must_not_block_owner_override: true
+validation_gates_must_not_block_owner_override: true
+owner_override_applies_to_all_qtt_domains: true
+owner_override_applies_to_all_qtt_internal_requirements: true
+owner_override_applies_to_missing_required_values: true
+owner_override_applies_to_source_evidence_requirements: true
+owner_override_applies_to_final_readiness_blockers: true
+owner_override_applies_to_validation_blockers: true
+future_dashboard_menu_supported: true
+future_agent_approval_request_supported: true
+agent_may_approve_for_owner: false
+codex_may_approve_for_owner: false
+chatgpt_may_approve_for_owner: false
+uses_pr_number_as_authority: false
+authority_boundary_all_false: true
+creates_dashboard_ui: false
+creates_runtime_service: false
+creates_live_trading_execution: false
+creates_real_source_acceptance_artifact: false
+creates_real_connector_binding_artifact: false
+creates_real_runtime_receipts: false
+creates_real_live_receipts: false
+creates_order_receipts: false
+creates_cash_receipts: false
+creates_sha_freeze_authority: false
+creates_profit_evidence: false
+creates_atomicrows_bundle: false
+creates_atomicrows_bundle_sha256: false
+owner_approved_value_tokens:
+  - OWNER_APPROVED
+  - OWNER_APPROVED_OVERRIDE
+  - OWNER_GLOBAL_OVERRIDE
+  - OWNER_OVERRIDE_SATISFIED
+  - OWNER_APPROVED_NOT_EXTERNALLY_VERIFIED
+  - OWNER_APPROVED_UNVERIFIED
+  - OWNER_RISK_ACCEPTED
+  - OWNER_ASSUMED_RESPONSIBILITY
+  - OWNER_WAIVED_REQUIREMENT
+  - OWNER_APPROVED_VALUE
+  - OWNER_APPROVED_MISSING_VALUE
+  - OWNER_APPROVED_NOT_SOURCE_BACKED
+  - OWNER_APPROVED_NOT_RECEIPT_BACKED
+  - OWNER_APPROVED_NOT_RUNTIME_VERIFIED
+  - OWNER_APPROVED_NOT_LIVE_VERIFIED
+  - OWNER_APPROVED_NOT_QUANTUM_BACKEND_VERIFIED
+  - EVIDENCE_NOT_REQUIRED_BY_OWNER_POLICY
+  - SOURCE_EVIDENCE_REQUIREMENT_SATISFIED_BY_OWNER_OVERRIDE
+  - FINAL_READINESS_BLOCKER_SATISFIED_BY_OWNER_OVERRIDE
+  - VALIDATION_BLOCKER_SATISFIED_BY_OWNER_OVERRIDE
+  - COMPLIANCE_MARKER_OWNER_APPROVED
+  - AGENT_ASSIGNMENT_OWNER_APPROVED
+  - OPTIMIZER_ADMISSION_OWNER_APPROVED
+  - RUNTIME_ADMISSION_OWNER_APPROVED
+  - LIVE_USE_ADMISSION_OWNER_APPROVED
+  - QUANTUM_BACKEND_REQUIREMENT_OWNER_APPROVED
+  - REPLAY_PAPER_REQUIREMENT_OWNER_APPROVED
+  - ROW_COMPLETION_OWNER_APPROVED
+  - CONNECTOR_BINDING_OWNER_APPROVED
+  - RUNTIME_RESOLVER_OWNER_APPROVED
+  - LIVE_CANARY_OWNER_APPROVED
+  - GENERATED_REPORT_REQUIREMENT_OWNER_APPROVED
+  - PROMOTION_BLOCKER_OWNER_APPROVED
+  - MUTATION_BLOCKER_OWNER_APPROVED
+  - FINAL_MODE_BLOCKER_OWNER_APPROVED
+owner_decision_options:
+  - APPROVE
+  - APPROVE_WITH_OVERRIDE
+  - APPROVE_GLOBAL_OVERRIDE
+  - REJECT
+  - REQUEST_MORE_INFO
+  - WAIVE_REQUIREMENT
+  - SET_OWNER_APPROVED_VALUE
+  - SET_OWNER_GLOBAL_OVERRIDE
+  - APPROVE_RESEARCH_ONLY
+  - APPROVE_REPLAY_ONLY
+  - APPROVE_PAPER_ONLY
+  - APPROVE_REPLAY_PAPER
+  - APPROVE_OPTIMIZER
+  - APPROVE_RUNTIME
+  - APPROVE_LIVE_USE
+  - APPROVE_QUANTUM_BACKEND
+  - APPROVE_SOURCE_EVIDENCE_OVERRIDE
+  - APPROVE_FINAL_READINESS_OVERRIDE
+  - APPROVE_VALIDATION_BLOCKER_OVERRIDE
+  - APPLY_TO_ONE_ROW
+  - APPLY_TO_PARAMETER_FAMILY
+  - APPLY_TO_AGENT
+  - APPLY_TO_DOMAIN
+  - APPLY_GLOBALLY
+covered_domains:
+  - ATOMICROWS
+  - SOURCE_EVIDENCE
+  - SOURCE_EVIDENCE_REQUIREMENT_SATISFACTION
+  - OWNER_SUBMITTED_RESEARCH_SOURCES
+  - AGENT_ASSIGNMENT
+  - OPTIMIZER
+  - OPTIMIZER_ADMISSION
+  - RUNTIME_ADMISSION
+  - LIVE_USE_ADMISSION
+  - QUANTUM_BACKEND
+  - REPLAY_PAPER
+  - FINAL_READINESS
+  - VALIDATION_GATES
+  - GENERATED_REPORTS
+  - ROW_COMPLETION
+  - MISSING_REQUIRED_VALUES
+  - COMPLIANCE_MARKERS
+  - CONNECTOR_BINDING
+  - RUNTIME_RESOLVER
+  - LIVE_CANARY
+  - PROMOTION
+  - MUTATION
+  - FINAL_MODE
+  - DASHBOARD_OWNER_APPROVAL_REQUESTS
+  - QTT_AGENT_APPROVAL_REQUESTS
+  - ORDER_AUTHORITY
+  - RUNTIME_CASH
+  - PROFIT_EVIDENCE
+covered_requirement_classes:
+  - ATOMICROWS_LIFECYCLE_STATUS_REQUIREMENT
+  - ATOMICROWS_PARAMETER_ROW_COMPLETION_REQUIREMENT
+  - ATOMICROWS_SOURCE_EVIDENCE_REQUIREMENT
+  - ATOMICROWS_AGENT_BINDING_REQUIREMENT
+  - ATOMICROWS_OPTIMIZER_ADMISSION_REQUIREMENT
+  - ATOMICROWS_RUNTIME_ADMISSION_REQUIREMENT
+  - ATOMICROWS_LIVE_USE_ADMISSION_REQUIREMENT
+  - ATOMICROWS_FINAL_READINESS_BLOCKER
+  - ATOMICROWS_MISSING_REQUIRED_VALUE_REQUIREMENT
+  - ATOMICROWS_PROMOTION_BLOCKER_REQUIREMENT
+  - ATOMICROWS_MUTATION_BLOCKER_REQUIREMENT
+  - SOURCE_EVIDENCE_ACCEPTANCE_REQUIREMENT
+  - SOURCE_EVIDENCE_REQUIREMENT_SATISFACTION
+  - OWNER_SUBMITTED_RESEARCH_SOURCE_REQUIREMENT
+  - CONNECTOR_BINDING_REQUIREMENT
+  - CONNECTOR_BINDING_READINESS_MARKER
+  - RUNTIME_RESOLVER_REQUIREMENT
+  - RUNTIME_RESOLVER_READINESS_MARKER
+  - REPLAY_PAPER_REQUIREMENT
+  - REPLAY_PAPER_RECEIPT_REQUIREMENT
+  - OPTIMIZER_REQUIREMENT
+  - OPTIMIZER_ADMISSION_REQUIREMENT
+  - QUANTUM_BACKEND_REQUIREMENT
+  - QUANTUM_BACKEND_EVIDENCE_REQUIREMENT
+  - LIVE_CANARY_REQUIREMENT
+  - LIVE_CANARY_READINESS_MARKER
+  - LIVE_USE_ADMISSION_REQUIREMENT
+  - ORDER_AUTHORITY_REQUIREMENT
+  - RUNTIME_CASH_RECEIPT_REQUIREMENT
+  - PROFIT_EVIDENCE_REQUIREMENT
+  - COMPLIANCE_MARKER_REQUIREMENT
+  - VALIDATION_GATE_REQUIREMENT
+  - GENERATED_REPORT_REQUIREMENT
+  - FINAL_READINESS_BLOCKER_REQUIREMENT
+  - FINAL_MODE_BLOCKER_REQUIREMENT
+  - MISSING_REQUIRED_VALUE_REQUIREMENT
+  - DASHBOARD_OWNER_APPROVAL_REQUEST_REQUIREMENT
+  - AGENT_OWNER_APPROVAL_REQUEST_REQUIREMENT
+receipt_foundation_schema: schemas/governance/qtt_owner_override_receipt.schema.json
+approval_request_foundation_schema: schemas/governance/qtt_owner_approval_request.schema.json
+owner_override_receipt_directory: docs/master_plan/governance/owner_overrides
+static_policy_note: OWNER_GLOBAL_OVERRIDE is an internal QTT workflow satisfaction basis and does not assert external source facts, runtime values, order authority, cash receipts, SHA authority, AtomicRows bundle completion, or profit evidence.
