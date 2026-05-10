@@ -379,6 +379,22 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_parameter_agent_binding_consumer_gate.py",
+            ),
+            "--mode",
+            "dev",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "AtomicRowsParameterAgentBindingConsumerGate.report.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
