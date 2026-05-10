@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_lifecycle_gate_command_matrix.schema.json",
+  "title": "AtomicRows Lifecycle Gate Command Matrix",
+  "description": "Static deterministic AtomicRows lifecycle gate command matrix contract. It fixes the local/offline lifecycle gate command order without creating an AtomicRows bundle, bundle hash, source acceptance, connector binding, runtime receipt, live reachability, order authority, quantum backend authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "generated_report_root",
+    "bundle_file_path",
+    "bundle_sha_path",
+    "commands",
+    "authority_boundary",
+    "validation_hook_ids"
+  ],
+  "properties": {
+    "fixture_id": { "const": "SYNTHETIC_ATOMICROWS_LIFECYCLE_GATE_COMMAND_MATRIX_FIXTURE" },
+    "fixture_version": { "const": "ATOMICROWS_LIFECYCLE_GATE_COMMAND_MATRIX_FIXTURE_V1" },
+    "fixture_authority_class": { "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_COMMAND_AUTHORITY" },
+    "schema_authority_class": { "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_COMMAND_AUTHORITY" },
+    "surface_kind": { "const": "ATOMICROWS_LIFECYCLE_GATE_COMMAND_MATRIX_STATIC" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "deterministic_output": { "const": true },
+    "generated_report_root": { "const": "docs/master_plan/generated" },
+    "bundle_file_path": { "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl" },
+    "bundle_sha_path": { "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256" },
+    "commands": {
+      "type": "array",
+      "minItems": 6,
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "const": "ATOMICROWS_LIFECYCLE_GATE_COMMAND_MATRIX_STATIC_VALIDATION" }
+    }
+  },
+  "$defs": {
+    "command_name": {
+      "enum": [
+        "build_parameter_lifecycle_report",
+        "validate_parameter_lifecycle",
+        "validate_lifecycle_consumer_gate",
+        "validate_lifecycle_promotion_receipt_gate",
+        "validate_lifecycle_registry_mutation_guard",
+        "validate_lifecycle_cumulative_readiness_gate"
+      ]
+    },
+    "gate_name": {
+      "enum": [
+        "AtomicRowsParameterLifecycleReport",
+        "AtomicRowsParameterLifecycleValidation",
+        "AtomicRowsLifecycleConsumerGate",
+        "AtomicRowsLifecyclePromotionReceiptGate",
+        "AtomicRowsLifecycleRegistryMutationGuard",
+        "AtomicRowsLifecycleCumulativeReadinessGate"
+      ]
+    },
+    "tool_path": {
+      "enum": [
+        "tools/build_atomicrows_parameter_lifecycle_report.py",
+        "tools/validate_atomicrows_parameter_lifecycle.py",
+        "tools/validate_atomicrows_lifecycle_consumer_gate.py",
+        "tools/validate_atomicrows_lifecycle_promotion_receipt_gate.py",
+        "tools/validate_atomicrows_lifecycle_registry_mutation_guard.py",
+        "tools/validate_atomicrows_lifecycle_cumulative_readiness_gate.py"
+      ]
+    },
+    "schema_path": {
+      "enum": [
+        null,
+        "schemas/atomicrows/atomicrows_parameter_lifecycle_registry.schema.json",
+        "schemas/atomicrows/atomicrows_lifecycle_consumer_gate.schema.json",
+        "schemas/atomicrows/atomicrows_lifecycle_promotion_receipt_gate.schema.json",
+        "schemas/atomicrows/atomicrows_lifecycle_registry_mutation_guard.schema.json",
+        "schemas/atomicrows/atomicrows_lifecycle_cumulative_readiness_gate.schema.json"
+      ]
+    },
+    "generated_report_path": {
+      "enum": [
+        null,
+        "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json",
+        "docs/master_plan/generated/AtomicRowsLifecycleConsumerGate.report.json",
+        "docs/master_plan/generated/AtomicRowsLifecyclePromotionReceiptGate.report.json",
+        "docs/master_plan/generated/AtomicRowsLifecycleRegistryMutationGuard.report.json",
+        "docs/master_plan/generated/AtomicRowsLifecycleCumulativeReadinessGate.report.json"
+      ]
+    },
+    "operation_class": {
+      "enum": [
+        "DETERMINISTIC_REPORT_GENERATION",
+        "LOCAL_OFFLINE_STATIC_VALIDATION"
+      ]
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_live_authority",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_runtime_authority",
+        "retrieves_source_facts",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "fetches_private_state",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_bundle_sha",
+        "creates_sha_freeze_authority",
+        "creates_quantum_backend_authority",
+        "creates_profit_evidence",
+        "creates_profit_claim",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "const": false },
+        "creates_live_authority": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_receipt": { "const": false },
+        "creates_runtime_authority": { "const": false },
+        "retrieves_source_facts": { "const": false },
+        "creates_source_acceptance": { "const": false },
+        "creates_connector_binding": { "const": false },
+        "fetches_private_state": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_atomicrows_bundle_sha": { "const": false },
+        "creates_sha_freeze_authority": { "const": false },
+        "creates_quantum_backend_authority": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "creates_profit_claim": { "const": false },
+        "reduces_blockers": { "const": false }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "command_name",
+        "gate_name",
+        "command",
+        "shell",
+        "tool_path",
+        "schema_path",
+        "generated_report_path",
+        "operation_class",
+        "required",
+        "local_offline_only",
+        "deterministic_output",
+        "authority_boundary"
+      ],
+      "properties": {
+        "order": { "type": "integer" },
+        "command_name": { "$ref": "#/$defs/command_name" },
+        "gate_name": { "$ref": "#/$defs/gate_name" },
+        "command": { "type": "string" },
+        "shell": { "const": "powershell" },
+        "tool_path": { "$ref": "#/$defs/tool_path" },
+        "schema_path": { "$ref": "#/$defs/schema_path" },
+        "generated_report_path": { "$ref": "#/$defs/generated_report_path" },
+        "operation_class": { "$ref": "#/$defs/operation_class" },
+        "required": { "const": true },
+        "local_offline_only": { "const": true },
+        "deterministic_output": { "const": true },
+        "authority_boundary": { "$ref": "#/$defs/authority_boundary" }
+      }
+    },
+    "command_matrix_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "command_count",
+        "required_command_count",
+        "required_commands_present_count",
+        "missing_command_count",
+        "command_order_valid",
+        "tool_paths_present_count",
+        "missing_tool_path_count",
+        "generated_report_output_count",
+        "forbidden_bundle_command_count",
+        "forbidden_bundle_sha_command_count",
+        "forbidden_runtime_authority_command_count",
+        "forbidden_live_authority_command_count",
+        "forbidden_source_acceptance_command_count",
+        "forbidden_connector_binding_command_count",
+        "forbidden_order_authority_command_count",
+        "forbidden_profit_claim_command_count",
+        "uses_pr_number_as_authority",
+        "cumulative_ready",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "properties": {
+        "report_type": { "const": "ATOMICROWS_LIFECYCLE_GATE_COMMAND_MATRIX_REPORT" },
+        "deterministic_output": { "const": true },
+        "generated_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "command_count": { "type": "integer" },
+        "required_command_count": { "type": "integer" },
+        "required_commands_present_count": { "type": "integer" },
+        "missing_command_count": { "type": "integer" },
+        "command_order_valid": { "type": "boolean" },
+        "tool_paths_present_count": { "type": "integer" },
+        "missing_tool_path_count": { "type": "integer" },
+        "generated_report_output_count": { "type": "integer" },
+        "forbidden_bundle_command_count": { "type": "integer" },
+        "forbidden_bundle_sha_command_count": { "type": "integer" },
+        "forbidden_runtime_authority_command_count": { "type": "integer" },
+        "forbidden_live_authority_command_count": { "type": "integer" },
+        "forbidden_source_acceptance_command_count": { "type": "integer" },
+        "forbidden_connector_binding_command_count": { "type": "integer" },
+        "forbidden_order_authority_command_count": { "type": "integer" },
+        "forbidden_profit_claim_command_count": { "type": "integer" },
+        "uses_pr_number_as_authority": { "type": "boolean" },
+        "cumulative_ready": { "type": "boolean" },
+        "final_ready": { "type": "boolean" },
+        "authority_boundary_all_false": { "type": "boolean" }
+      }
+    }
+  }
+}
