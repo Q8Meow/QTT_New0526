@@ -1,0 +1,647 @@
+schema_version: 1
+registry_name: AtomicRowsParameterAgentBindingRegistry
+registry_model: PARAMETER_AGENT_BINDING_REGISTRY
+authority_class: STATIC_PARAMETER_AGENT_BINDING_REGISTRY_ONLY_NOT_ATOMICROWS_BUNDLE_AUTHORITY
+source_master_plan: docs/master_plan/QTT_MasterPlan_Current.md
+canonical_source_for_parameter_agent_assignment: true
+final_expected_row_coverage: INCOMPLETE_STATIC_BINDING_FOUNDATION_NOT_4183
+deterministic_output: true
+owner_global_override_authority: true
+owner_override_satisfies_all_qtt_internal_requirements: true
+chatgpt_authority_over_owner: false
+codex_authority_over_owner: false
+qtt_agent_authority_over_owner: false
+validator_authority_over_owner: false
+generated_report_authority_over_owner: false
+static_gate_authority_over_owner: false
+uses_pr_number_as_authority: false
+binding_statuses:
+  - ACTIVE_BINDING
+  - OWNER_APPROVED_BINDING
+  - OWNER_GLOBAL_OVERRIDE_BINDING
+  - RESEARCH_ONLY_BINDING
+  - REPLAY_PAPER_BINDING
+  - OPTIMIZER_BINDING
+  - RUNTIME_BINDING
+  - LIVE_BINDING
+  - QUANTUM_BACKEND_BINDING
+  - QUARANTINED_BINDING
+  - RETIRED_BINDING
+  - BLOCKED_PENDING_OWNER_APPROVAL
+  - BLOCKED_PENDING_AGENT_ASSIGNMENT
+  - BLOCKED_PENDING_LIFECYCLE_STATUS
+  - BLOCKED_PENDING_RECEIPTS
+agent_roles:
+  - OWNER
+  - ORCHESTRATOR_AGENT
+  - MASTER_PLAN_AGENT
+  - ATOMICROWS_AGENT
+  - ATOMICROWS_RESEARCH_AGENT
+  - ATOMICROWS_LIFECYCLE_AGENT
+  - SOURCE_EVIDENCE_AGENT
+  - CONNECTOR_AGENT
+  - RUNTIME_RESOLVER_AGENT
+  - REPLAY_AGENT
+  - PAPER_AGENT
+  - DUAL_RESULT_REVIEW_AGENT
+  - OPTIMIZER_AGENT
+  - RISK_AGENT
+  - SIZING_AGENT
+  - EXECUTION_LATENCY_AGENT
+  - ORDER_ROUTER_AGENT
+  - LIVE_CANARY_AGENT
+  - QUANTUM_RESEARCH_AGENT
+  - QUANTUM_BACKEND_AGENT
+  - DASHBOARD_AGENT
+  - GOVERNANCE_AGENT
+  - VALIDATION_AGENT
+  - COMPLIANCE_MARKER_AGENT
+  - OWNER_APPROVAL_REQUEST_AGENT
+consumer_classes:
+  - INVENTORY_INDEX
+  - RESEARCH_TRIAGE
+  - SOURCE_EVIDENCE_RETRIEVAL
+  - RANGE_VALIDATION
+  - REPLAY_CANDIDATE_SELECTION
+  - PAPER_CANDIDATE_SELECTION
+  - OPTIMIZER_SEARCH
+  - OPTIMIZER_DEFAULTS
+  - RISK_MODEL_INPUT
+  - SIZING_MODEL_INPUT
+  - QUANTUM_CIRCUIT_CONSTRUCTION
+  - QUANTUM_BACKEND_EXECUTION
+  - RUNTIME_RESOLVER_INPUT
+  - LIVE_ORDER_ROUTING
+  - LIVE_EXECUTION
+agent_use_scopes:
+  - INVENTORY_ONLY
+  - RESEARCH_ONLY
+  - SOURCE_EVIDENCE_ONLY
+  - RANGE_VALIDATION_ONLY
+  - REPLAY_ONLY
+  - PAPER_ONLY
+  - REPLAY_PAPER_ONLY
+  - OPTIMIZER_ONLY
+  - RISK_ONLY
+  - SIZING_ONLY
+  - RUNTIME_ONLY
+  - LIVE_ONLY
+  - QUANTUM_RESEARCH_ONLY
+  - QUANTUM_BACKEND_ONLY
+  - OWNER_APPROVED_SCOPE
+  - OWNER_GLOBAL_OVERRIDE_SCOPE
+  - QUARANTINE_REVIEW_ONLY
+  - RETIREMENT_AUDIT_ONLY
+lifecycle_statuses:
+  - INVENTORY_ONLY
+  - RESEARCH_CANDIDATE
+  - SOURCE_EVIDENCE_REQUIRED
+  - RANGE_VALIDATED_STATIC_ONLY
+  - REPLAY_PAPER_CANDIDATE
+  - REPLAY_PAPER_VALIDATED
+  - OPTIMIZER_ELIGIBLE
+  - RUNTIME_ELIGIBLE
+  - LIVE_ELIGIBLE
+  - QUARANTINED_UNPROVEN
+  - RETIRED_NOT_USEFUL
+owner_override_tokens:
+  - OWNER_APPROVED
+  - OWNER_APPROVED_OVERRIDE
+  - OWNER_GLOBAL_OVERRIDE
+  - OWNER_OVERRIDE_SATISFIED
+  - AGENT_ASSIGNMENT_OWNER_APPROVED
+  - OWNER_APPROVED_NOT_EXTERNALLY_VERIFIED
+  - OWNER_APPROVED_UNVERIFIED
+  - OWNER_RISK_ACCEPTED
+  - OWNER_ASSUMED_RESPONSIBILITY
+  - OWNER_WAIVED_REQUIREMENT
+  - ROW_COMPLETION_OWNER_APPROVED
+authority_boundary:
+  real_runtime_artifact_created: false
+  real_live_artifact_created: false
+  real_order_artifact_created: false
+  real_quantum_backend_artifact_created: false
+  real_profit_artifact_created: false
+  creates_source_acceptance: false
+  creates_connector_binding: false
+  creates_runtime_receipts: false
+  creates_live_receipts: false
+  creates_order_receipts: false
+  creates_cash_receipts: false
+  creates_atomicrows_bundle: false
+  creates_atomicrows_bundle_sha: false
+  creates_sha_freeze_authority: false
+  creates_dashboard_runtime_ui: false
+  creates_live_trading_execution: false
+  fetches_private_account_state: false
+  materializes_secrets: false
+  clones_external_repos: false
+  installs_packages: false
+  reduces_blockers: false
+  validator_authority_over_owner: false
+  codex_authority_over_owner: false
+  qtt_agent_authority_over_owner: false
+  chatgpt_authority_over_owner: false
+  generated_report_authority_over_owner: false
+  static_gate_authority_over_owner: false
+bindings:
+  - binding_id: binding_research_source_candidate_family_to_research_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_RESEARCH_SOURCE_CANDIDATE_ROUTING
+    parameter_family: RESEARCH_SOURCE_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: research_source_candidate_family_pattern
+    owning_agent_role: ATOMICROWS_RESEARCH_AGENT
+    authorized_agent_roles:
+      - ATOMICROWS_RESEARCH_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+      - LIVE_CANARY_AGENT
+    authorized_agent_ids:
+      - agent.atomicrows_research.primary
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - INVENTORY_INDEX
+      - RESEARCH_TRIAGE
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: RESEARCH_ONLY
+    requires_lifecycle_status_at_least: RESEARCH_CANDIDATE
+    requires_receipts: []
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: true
+    source_evidence_use_allowed: false
+    binding_notes: family-level research routing only and not row existence proof
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_source_evidence_candidate_row_to_source_evidence_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_SOURCE_EVIDENCE_ROUTING
+    parameter_family: SOURCE_EVIDENCE_CANDIDATE_FAMILY
+    atomic_parameter_row_id: AROW_SYNTH_SOURCE_EVIDENCE_001
+    row_pattern_id: null
+    owning_agent_role: SOURCE_EVIDENCE_AGENT
+    authorized_agent_roles:
+      - SOURCE_EVIDENCE_AGENT
+    blocked_agent_roles:
+      - OPTIMIZER_AGENT
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - SOURCE_EVIDENCE_RETRIEVAL
+    blocked_consumer_classes:
+      - OPTIMIZER_SEARCH
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: SOURCE_EVIDENCE_ONLY
+    requires_lifecycle_status_at_least: SOURCE_EVIDENCE_REQUIRED
+    requires_receipts:
+      - future_source_evidence_receipt_before_external_fact_claim
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: true
+    binding_notes: row-level binding for retrieval workflow only and not source acceptance
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_replay_paper_candidate_family_to_replay_and_paper_agents
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_REPLAY_PAPER_ROUTING
+    parameter_family: REPLAY_PAPER_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: replay_paper_candidate_family_pattern
+    owning_agent_role: REPLAY_AGENT
+    authorized_agent_roles:
+      - REPLAY_AGENT
+      - PAPER_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+      - LIVE_CANARY_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - REPLAY_CANDIDATE_SELECTION
+      - PAPER_CANDIDATE_SELECTION
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: REPLAY_PAPER_ONLY
+    requires_lifecycle_status_at_least: REPLAY_PAPER_CANDIDATE
+    requires_receipts:
+      - future_replay_receipt_before_promotion
+      - future_paper_receipt_before_promotion
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: true
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: replay and paper selection binding only and not execution evidence
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_optimizer_candidate_family_to_optimizer_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_OPTIMIZER_SEARCH_ROUTING
+    parameter_family: OPTIMIZER_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: optimizer_candidate_family_pattern
+    owning_agent_role: OPTIMIZER_AGENT
+    authorized_agent_roles:
+      - OPTIMIZER_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+      - LIVE_CANARY_AGENT
+      - QUANTUM_BACKEND_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids:
+      - agent.live_order_writer.unapproved
+    authorized_consumer_classes:
+      - OPTIMIZER_SEARCH
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+      - QUANTUM_BACKEND_EXECUTION
+    agent_use_scope: OPTIMIZER_ONLY
+    requires_lifecycle_status_at_least: OPTIMIZER_ELIGIBLE
+    requires_receipts:
+      - future_optimizer_receipt_before_default_use
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: true
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: optimizer search only with no live or order authority
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_risk_candidate_family_to_risk_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_RISK_MODEL_ROUTING
+    parameter_family: RISK_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: risk_candidate_family_pattern
+    owning_agent_role: RISK_AGENT
+    authorized_agent_roles:
+      - RISK_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - RISK_MODEL_INPUT
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: RISK_ONLY
+    requires_lifecycle_status_at_least: REPLAY_PAPER_VALIDATED
+    requires_receipts:
+      - future_risk_model_receipt_before_live_promotion
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: risk model input binding only and not execution authority
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_sizing_candidate_family_to_sizing_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_SIZING_MODEL_ROUTING
+    parameter_family: SIZING_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: sizing_candidate_family_pattern
+    owning_agent_role: SIZING_AGENT
+    authorized_agent_roles:
+      - SIZING_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - SIZING_MODEL_INPUT
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: SIZING_ONLY
+    requires_lifecycle_status_at_least: REPLAY_PAPER_VALIDATED
+    requires_receipts:
+      - future_sizing_model_receipt_before_live_promotion
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: sizing model input binding only and not execution authority
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_execution_latency_family_to_execution_latency_agent
+    binding_status: OWNER_GLOBAL_OVERRIDE_BINDING
+    binding_authority_basis: OWNER_GLOBAL_OVERRIDE
+    owner_override_allowed: true
+    owner_override_applied: true
+    owner_override_satisfaction_basis: OWNER_OVERRIDE_SATISFIED
+    owner_approved_value: OWNER_GLOBAL_OVERRIDE_INTERNAL_RUNTIME_ROUTING_ONLY
+    parameter_family: EXECUTION_LATENCY_INTERNAL_ROUTING_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: execution_latency_internal_routing_pattern
+    owning_agent_role: EXECUTION_LATENCY_AGENT
+    authorized_agent_roles:
+      - EXECUTION_LATENCY_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - RUNTIME_RESOLVER_INPUT
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: RUNTIME_ONLY
+    requires_lifecycle_status_at_least: RUNTIME_ELIGIBLE
+    requires_receipts:
+      - runtime_receipt_required_before_external_runtime_claim
+    requires_owner_override_when_missing: true
+    runtime_use_allowed: true
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: owner override permits internal runtime routing but creates no runtime artifact
+    final_qtt_internal_status: OWNER_OVERRIDE_SATISFIED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_live_use_family_to_live_canary_and_order_router_agents
+    binding_status: OWNER_GLOBAL_OVERRIDE_BINDING
+    binding_authority_basis: OWNER_GLOBAL_OVERRIDE
+    owner_override_allowed: true
+    owner_override_applied: true
+    owner_override_satisfaction_basis: OWNER_OVERRIDE_SATISFIED
+    owner_approved_value: OWNER_GLOBAL_OVERRIDE_INTERNAL_LIVE_ROUTING_ONLY
+    parameter_family: LIVE_USE_INTERNAL_ROUTING_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: live_use_internal_routing_pattern
+    owning_agent_role: LIVE_CANARY_AGENT
+    authorized_agent_roles:
+      - LIVE_CANARY_AGENT
+      - ORDER_ROUTER_AGENT
+    blocked_agent_roles: []
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    blocked_consumer_classes: []
+    agent_use_scope: LIVE_ONLY
+    requires_lifecycle_status_at_least: LIVE_ELIGIBLE
+    requires_receipts:
+      - live_receipt_required_before_external_live_claim
+      - order_receipt_required_before_order_authority_claim
+    requires_owner_override_when_missing: true
+    runtime_use_allowed: false
+    live_use_allowed: true
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: owner override permits internal live routing policy but creates no order artifact
+    final_qtt_internal_status: OWNER_OVERRIDE_SATISFIED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_quantum_research_family_to_quantum_research_agent
+    binding_status: OWNER_APPROVED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_QUANTUM_RESEARCH_ROUTING
+    parameter_family: QUANTUM_RESEARCH_CANDIDATE_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: quantum_research_candidate_pattern
+    owning_agent_role: QUANTUM_RESEARCH_AGENT
+    authorized_agent_roles:
+      - QUANTUM_RESEARCH_AGENT
+    blocked_agent_roles:
+      - QUANTUM_BACKEND_AGENT
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - QUANTUM_CIRCUIT_CONSTRUCTION
+    blocked_consumer_classes:
+      - QUANTUM_BACKEND_EXECUTION
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: QUANTUM_RESEARCH_ONLY
+    requires_lifecycle_status_at_least: RESEARCH_CANDIDATE
+    requires_receipts:
+      - future_quantum_research_receipt_before_backend_use
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: true
+    source_evidence_use_allowed: false
+    binding_notes: quantum research only and no backend execution artifact
+    final_qtt_internal_status: OWNER_APPROVED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_quantum_backend_family_to_quantum_backend_agent
+    binding_status: OWNER_GLOBAL_OVERRIDE_BINDING
+    binding_authority_basis: OWNER_GLOBAL_OVERRIDE
+    owner_override_allowed: true
+    owner_override_applied: true
+    owner_override_satisfaction_basis: OWNER_OVERRIDE_SATISFIED
+    owner_approved_value: OWNER_GLOBAL_OVERRIDE_INTERNAL_QUANTUM_BACKEND_ROUTING_ONLY
+    parameter_family: QUANTUM_BACKEND_INTERNAL_ROUTING_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: quantum_backend_internal_routing_pattern
+    owning_agent_role: QUANTUM_BACKEND_AGENT
+    authorized_agent_roles:
+      - QUANTUM_BACKEND_AGENT
+    blocked_agent_roles:
+      - ORDER_ROUTER_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - QUANTUM_BACKEND_EXECUTION
+    blocked_consumer_classes:
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: QUANTUM_BACKEND_ONLY
+    requires_lifecycle_status_at_least: RUNTIME_ELIGIBLE
+    requires_receipts:
+      - quantum_backend_receipt_required_before_external_backend_claim
+    requires_owner_override_when_missing: true
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: true
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: owner override permits internal quantum backend routing but creates no backend artifact
+    final_qtt_internal_status: OWNER_OVERRIDE_SATISFIED
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_quarantine_family_to_governance_validation_agents
+    binding_status: QUARANTINED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_QUARANTINE_REVIEW_ROUTING
+    parameter_family: QUARANTINED_UNPROVEN_PARAMETER_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: quarantined_unproven_parameter_pattern
+    owning_agent_role: GOVERNANCE_AGENT
+    authorized_agent_roles:
+      - GOVERNANCE_AGENT
+      - VALIDATION_AGENT
+    blocked_agent_roles:
+      - OPTIMIZER_AGENT
+      - ORDER_ROUTER_AGENT
+      - LIVE_CANARY_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - INVENTORY_INDEX
+      - RESEARCH_TRIAGE
+    blocked_consumer_classes:
+      - OPTIMIZER_SEARCH
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: QUARANTINE_REVIEW_ONLY
+    requires_lifecycle_status_at_least: QUARANTINED_UNPROVEN
+    requires_receipts:
+      - future_unquarantine_receipt_before_active_use
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: true
+    source_evidence_use_allowed: false
+    binding_notes: quarantine review only unless owner override is applied later
+    final_qtt_internal_status: QUARANTINED_BINDING
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_retired_family_to_governance_validation_agents
+    binding_status: RETIRED_BINDING
+    binding_authority_basis: OWNER_APPROVED
+    owner_override_allowed: true
+    owner_override_applied: false
+    owner_override_satisfaction_basis: null
+    owner_approved_value: OWNER_APPROVED_RETIREMENT_AUDIT_ROUTING
+    parameter_family: RETIRED_PARAMETER_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: retired_parameter_audit_pattern
+    owning_agent_role: GOVERNANCE_AGENT
+    authorized_agent_roles:
+      - GOVERNANCE_AGENT
+      - VALIDATION_AGENT
+    blocked_agent_roles:
+      - OPTIMIZER_AGENT
+      - ORDER_ROUTER_AGENT
+      - LIVE_CANARY_AGENT
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes:
+      - INVENTORY_INDEX
+    blocked_consumer_classes:
+      - RESEARCH_TRIAGE
+      - OPTIMIZER_SEARCH
+      - LIVE_ORDER_ROUTING
+      - LIVE_EXECUTION
+    agent_use_scope: RETIREMENT_AUDIT_ONLY
+    requires_lifecycle_status_at_least: RETIRED_NOT_USEFUL
+    requires_receipts:
+      - future_reinstatement_receipt_before_active_use
+    requires_owner_override_when_missing: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: retirement audit only unless owner override is applied later
+    final_qtt_internal_status: RETIRED_BINDING
+    blocks_qtt_when_owner_override_present: false
+  - binding_id: binding_owner_override_missing_agent_assignment_satisfied
+    binding_status: OWNER_GLOBAL_OVERRIDE_BINDING
+    binding_authority_basis: OWNER_GLOBAL_OVERRIDE
+    owner_override_allowed: true
+    owner_override_applied: true
+    owner_override_satisfaction_basis: AGENT_ASSIGNMENT_OWNER_APPROVED
+    owner_approved_value: OWNER_GLOBAL_OVERRIDE_MISSING_AGENT_ASSIGNMENT_SATISFIED
+    parameter_family: OWNER_OVERRIDE_MISSING_AGENT_ASSIGNMENT_FAMILY
+    atomic_parameter_row_id: null
+    row_pattern_id: owner_override_missing_agent_assignment_pattern
+    owning_agent_role: null
+    authorized_agent_roles: []
+    blocked_agent_roles: []
+    authorized_agent_ids: []
+    blocked_agent_ids: []
+    authorized_consumer_classes: []
+    blocked_consumer_classes: []
+    agent_use_scope: OWNER_GLOBAL_OVERRIDE_SCOPE
+    requires_lifecycle_status_at_least: null
+    requires_receipts:
+      - agent_assignment_receipt_missing_but_owner_approved
+    requires_owner_override_when_missing: true
+    runtime_use_allowed: false
+    live_use_allowed: false
+    optimizer_use_allowed: false
+    quantum_backend_use_allowed: false
+    replay_paper_use_allowed: false
+    research_use_allowed: false
+    source_evidence_use_allowed: false
+    binding_notes: missing normal agent assignment is internally satisfied by owner global override
+    final_qtt_internal_status: OWNER_OVERRIDE_SATISFIED
+    blocks_qtt_when_owner_override_present: false
