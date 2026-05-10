@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_lifecycle_consumer_gate.schema.json",
+  "title": "AtomicRows Lifecycle Consumer Gate",
+  "description": "Static deterministic AtomicRows lifecycle consumer gate contract. It validates attempted parameter consumer access against the lifecycle registry without creating an AtomicRows bundle, bundle hash, source acceptance, connector binding, runtime receipt, live reachability, order authority, quantum backend authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "registry_path",
+    "lifecycle_report_path",
+    "consumer_classes",
+    "attempted_consumer_access",
+    "authority_boundary",
+    "validation_hook_ids"
+  ],
+  "properties": {
+    "fixture_id": { "const": "SYNTHETIC_PR54_ATOMICROWS_LIFECYCLE_CONSUMER_GATE_BLOCKED_FIXTURE" },
+    "fixture_version": { "const": "PR54_ATOMICROWS_LIFECYCLE_CONSUMER_GATE_BLOCKED_FIXTURE_V1" },
+    "fixture_authority_class": { "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_CONSUMER_AUTHORITY" },
+    "schema_authority_class": { "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_CONSUMER_AUTHORITY" },
+    "surface_kind": { "const": "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_STATIC" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "deterministic_output": { "const": true },
+    "registry_path": { "const": "docs/master_plan/atomic_rows/AtomicRowsParameterLifecycleRegistry.yaml" },
+    "lifecycle_report_path": { "const": "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json" },
+    "consumer_classes": {
+      "type": "array",
+      "minItems": 15,
+      "items": { "$ref": "#/$defs/consumer_class" }
+    },
+    "attempted_consumer_access": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/access_attempt" }
+    },
+    "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "const": "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_STATIC_VALIDATION" }
+    }
+  },
+  "$defs": {
+    "consumer_class": {
+      "enum": [
+        "INVENTORY_INDEX",
+        "RESEARCH_TRIAGE",
+        "SOURCE_EVIDENCE_RETRIEVAL",
+        "RANGE_VALIDATION",
+        "REPLAY_CANDIDATE_SELECTION",
+        "PAPER_CANDIDATE_SELECTION",
+        "OPTIMIZER_SEARCH",
+        "OPTIMIZER_DEFAULTS",
+        "RISK_MODEL_INPUT",
+        "SIZING_MODEL_INPUT",
+        "QUANTUM_CIRCUIT_CONSTRUCTION",
+        "QUANTUM_BACKEND_EXECUTION",
+        "RUNTIME_RESOLVER_INPUT",
+        "LIVE_ORDER_ROUTING",
+        "LIVE_EXECUTION"
+      ]
+    },
+    "lifecycle_status": {
+      "enum": [
+        "INVENTORY_ONLY",
+        "RESEARCH_CANDIDATE",
+        "SOURCE_EVIDENCE_REQUIRED",
+        "RANGE_VALIDATED_STATIC_ONLY",
+        "REPLAY_PAPER_CANDIDATE",
+        "REPLAY_PAPER_VALIDATED",
+        "OPTIMIZER_ELIGIBLE",
+        "RUNTIME_ELIGIBLE",
+        "LIVE_ELIGIBLE",
+        "QUARANTINED_UNPROVEN",
+        "RETIRED_NOT_USEFUL"
+      ]
+    },
+    "access_attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_id",
+        "atomic_parameter_row_id",
+        "row_pattern_id",
+        "consumer_class",
+        "declared_consumer_access_allowed"
+      ],
+      "properties": {
+        "attempt_id": { "type": "string" },
+        "atomic_parameter_row_id": { "type": ["string", "null"] },
+        "row_pattern_id": { "type": ["string", "null"] },
+        "consumer_class": { "$ref": "#/$defs/consumer_class" },
+        "declared_consumer_access_allowed": { "type": "boolean" }
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_atomicrows_bundle",
+        "creates_profit_evidence",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_receipt": { "const": false },
+        "creates_source_acceptance": { "const": false },
+        "creates_connector_binding": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "reduces_blockers": { "const": false }
+      }
+    },
+    "lifecycle_gate_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "attempted_consumer_access_count",
+        "allowed_consumer_access_count",
+        "blocked_consumer_access_count",
+        "invalid_consumer_access_count",
+        "optimizer_access_allowed_count",
+        "runtime_access_allowed_count",
+        "live_access_allowed_count",
+        "quantum_backend_execution_allowed_count",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "properties": {
+        "report_type": { "const": "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_REPORT" },
+        "deterministic_output": { "const": true },
+        "generated_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "attempted_consumer_access_count": { "type": "integer" },
+        "allowed_consumer_access_count": { "type": "integer" },
+        "blocked_consumer_access_count": { "type": "integer" },
+        "invalid_consumer_access_count": { "type": "integer" },
+        "optimizer_access_allowed_count": { "type": "integer" },
+        "runtime_access_allowed_count": { "type": "integer" },
+        "live_access_allowed_count": { "type": "integer" },
+        "quantum_backend_execution_allowed_count": { "type": "integer" },
+        "final_ready": { "type": "boolean" },
+        "authority_boundary_all_false": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -274,6 +274,19 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_atomicrows_lifecycle_consumer_gate.py"),
+            "--mode",
+            "dev",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "AtomicRowsLifecycleConsumerGate.report.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
