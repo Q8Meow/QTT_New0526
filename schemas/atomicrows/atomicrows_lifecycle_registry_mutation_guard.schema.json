@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_lifecycle_registry_mutation_guard.schema.json",
+  "title": "AtomicRows Lifecycle Registry Mutation Guard",
+  "description": "Static deterministic AtomicRows lifecycle registry mutation guard contract. It validates proposed lifecycle registry mutations against promotion receipts and scoped owner override receipts without creating an AtomicRows bundle, bundle hash, source acceptance, connector binding, runtime receipt, live reachability, order authority, quantum backend authority, freeze authority, or profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "fixture_version",
+    "fixture_authority_class",
+    "schema_authority_class",
+    "surface_kind",
+    "mode",
+    "execution",
+    "deterministic_output",
+    "registry_path",
+    "lifecycle_report_path",
+    "promotion_receipt_gate_report_path",
+    "mutation_classes",
+    "owner_override_receipt_types",
+    "attempted_mutations",
+    "authority_boundary",
+    "validation_hook_ids"
+  ],
+  "properties": {
+    "fixture_id": { "const": "SYNTHETIC_PR56_ATOMICROWS_LIFECYCLE_REGISTRY_MUTATION_GUARD_BLOCKED_FIXTURE" },
+    "fixture_version": { "const": "PR56_ATOMICROWS_LIFECYCLE_REGISTRY_MUTATION_GUARD_BLOCKED_FIXTURE_V1" },
+    "fixture_authority_class": { "const": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_MUTATION_AUTHORITY" },
+    "schema_authority_class": { "const": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_MUTATION_AUTHORITY" },
+    "surface_kind": { "const": "ATOMICROWS_LIFECYCLE_REGISTRY_MUTATION_GUARD_STATIC" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "deterministic_output": { "const": true },
+    "registry_path": { "const": "docs/master_plan/atomic_rows/AtomicRowsParameterLifecycleRegistry.yaml" },
+    "lifecycle_report_path": { "const": "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json" },
+    "promotion_receipt_gate_report_path": { "const": "docs/master_plan/generated/AtomicRowsLifecyclePromotionReceiptGate.report.json" },
+    "mutation_classes": {
+      "type": "array",
+      "minItems": 21,
+      "items": { "$ref": "#/$defs/mutation_class" }
+    },
+    "owner_override_receipt_types": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/owner_override_receipt_type" }
+    },
+    "attempted_mutations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/mutation_attempt" }
+    },
+    "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "const": "ATOMICROWS_LIFECYCLE_REGISTRY_MUTATION_GUARD_STATIC_VALIDATION" }
+    }
+  },
+  "$defs": {
+    "mutation_class": {
+      "enum": [
+        "STATUS_CHANGE",
+        "PARAMETER_FAMILY_CHANGE",
+        "CLASSICAL_OR_QUANTUM_CHANGE",
+        "OWNER_SECTION_ID_CHANGE",
+        "LINKED_CAPABILITY_ID_CHANGE",
+        "UNIT_CHANGE",
+        "SCALE_CHANGE",
+        "ALLOWED_RANGE_CHANGE",
+        "DEFAULT_VALUE_POLICY_CHANGE",
+        "SOURCE_AUTHORITY_CLASS_CHANGE",
+        "EVIDENCE_REQUIRED_CHANGE",
+        "OPTIMIZER_ELIGIBILITY_CHANGE",
+        "RUNTIME_ELIGIBILITY_CHANGE",
+        "LIVE_ELIGIBILITY_CHANGE",
+        "RESEARCH_ROUTE_CHANGE",
+        "PROMOTION_GATE_CHANGE",
+        "QUARANTINE_REASON_CHANGE",
+        "RETIREMENT_REASON_CHANGE",
+        "ROW_ID_ADDITION",
+        "ROW_ID_REMOVAL",
+        "OWNER_OVERRIDE_MUTATION"
+      ]
+    },
+    "owner_override_receipt_type": {
+      "enum": [
+        "OWNER_LIFECYCLE_OVERRIDE_RECEIPT",
+        "OWNER_PROMOTION_OVERRIDE_RECEIPT"
+      ]
+    },
+    "lifecycle_status": {
+      "enum": [
+        "INVENTORY_ONLY",
+        "RESEARCH_CANDIDATE",
+        "SOURCE_EVIDENCE_REQUIRED",
+        "RANGE_VALIDATED_STATIC_ONLY",
+        "REPLAY_PAPER_CANDIDATE",
+        "REPLAY_PAPER_VALIDATED",
+        "OPTIMIZER_ELIGIBLE",
+        "RUNTIME_ELIGIBLE",
+        "LIVE_ELIGIBLE",
+        "QUARANTINED_UNPROVEN",
+        "RETIRED_NOT_USEFUL"
+      ]
+    },
+    "mutation_attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_id",
+        "mutation_class",
+        "atomic_parameter_row_id",
+        "row_pattern_id",
+        "from_status",
+        "to_status",
+        "before_value",
+        "after_value",
+        "receipt",
+        "owner_override_receipt",
+        "declared_mutation_allowed"
+      ],
+      "properties": {
+        "attempt_id": { "type": "string" },
+        "mutation_class": { "$ref": "#/$defs/mutation_class" },
+        "atomic_parameter_row_id": { "type": ["string", "null"] },
+        "row_pattern_id": { "type": ["string", "null"] },
+        "from_status": { "$ref": "#/$defs/lifecycle_status" },
+        "to_status": { "$ref": "#/$defs/lifecycle_status" },
+        "before_value": { "type": ["object", "array", "string", "number", "boolean", "null"] },
+        "after_value": { "type": ["object", "array", "string", "number", "boolean", "null"] },
+        "receipt": { "type": ["object", "null"] },
+        "owner_override_receipt": { "type": ["object", "null"] },
+        "declared_mutation_allowed": { "type": "boolean" }
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "creates_live_reachability",
+        "creates_order_authority",
+        "creates_runtime_cash_receipt",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_atomicrows_bundle",
+        "creates_profit_evidence",
+        "reduces_blockers"
+      ],
+      "properties": {
+        "creates_live_reachability": { "const": false },
+        "creates_order_authority": { "const": false },
+        "creates_runtime_cash_receipt": { "const": false },
+        "creates_source_acceptance": { "const": false },
+        "creates_connector_binding": { "const": false },
+        "creates_atomicrows_bundle": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "reduces_blockers": { "const": false }
+      }
+    },
+    "mutation_guard_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "attempted_mutation_count",
+        "allowed_mutation_count",
+        "blocked_mutation_count",
+        "invalid_mutation_count",
+        "authority_increasing_mutation_count",
+        "authority_increasing_allowed_count",
+        "status_change_count",
+        "status_change_allowed_count",
+        "optimizer_authority_mutation_allowed_count",
+        "runtime_authority_mutation_allowed_count",
+        "live_authority_mutation_allowed_count",
+        "quantum_backend_authority_mutation_allowed_count",
+        "row_addition_count",
+        "row_removal_count",
+        "missing_receipt_count",
+        "mismatched_receipt_count",
+        "owner_override_mutation_count",
+        "owner_override_allowed_count",
+        "owner_override_blocked_count",
+        "owner_override_external_fact_fabrication_blocked_count",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "properties": {
+        "report_type": { "const": "ATOMICROWS_LIFECYCLE_REGISTRY_MUTATION_GUARD_REPORT" },
+        "deterministic_output": { "const": true },
+        "generated_at_utc": { "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK" },
+        "attempted_mutation_count": { "type": "integer" },
+        "allowed_mutation_count": { "type": "integer" },
+        "blocked_mutation_count": { "type": "integer" },
+        "invalid_mutation_count": { "type": "integer" },
+        "authority_increasing_mutation_count": { "type": "integer" },
+        "authority_increasing_allowed_count": { "type": "integer" },
+        "status_change_count": { "type": "integer" },
+        "status_change_allowed_count": { "type": "integer" },
+        "optimizer_authority_mutation_allowed_count": { "type": "integer" },
+        "runtime_authority_mutation_allowed_count": { "type": "integer" },
+        "live_authority_mutation_allowed_count": { "type": "integer" },
+        "quantum_backend_authority_mutation_allowed_count": { "type": "integer" },
+        "row_addition_count": { "type": "integer" },
+        "row_removal_count": { "type": "integer" },
+        "missing_receipt_count": { "type": "integer" },
+        "mismatched_receipt_count": { "type": "integer" },
+        "owner_override_mutation_count": { "type": "integer" },
+        "owner_override_allowed_count": { "type": "integer" },
+        "owner_override_blocked_count": { "type": "integer" },
+        "owner_override_external_fact_fabrication_blocked_count": { "type": "integer" },
+        "final_ready": { "type": "boolean" },
+        "authority_boundary_all_false": { "type": "boolean" }
+      }
+    }
+  }
+}
