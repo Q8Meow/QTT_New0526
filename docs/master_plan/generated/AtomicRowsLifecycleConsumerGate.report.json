@@ -1,0 +1,15 @@
+{
+  "allowed_consumer_access_count": 9,
+  "attempted_consumer_access_count": 23,
+  "authority_boundary_all_false": true,
+  "blocked_consumer_access_count": 14,
+  "deterministic_output": true,
+  "final_ready": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "invalid_consumer_access_count": 0,
+  "live_access_allowed_count": 0,
+  "optimizer_access_allowed_count": 0,
+  "quantum_backend_execution_allowed_count": 0,
+  "report_type": "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_REPORT",
+  "runtime_access_allowed_count": 0
+}

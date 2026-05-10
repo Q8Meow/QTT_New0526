@@ -1,0 +1,205 @@
+{
+  "fixture_id": "SYNTHETIC_PR54_ATOMICROWS_LIFECYCLE_CONSUMER_GATE_BLOCKED_FIXTURE",
+  "fixture_version": "PR54_ATOMICROWS_LIFECYCLE_CONSUMER_GATE_BLOCKED_FIXTURE_V1",
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_ATOMICROWS_CONSUMER_AUTHORITY",
+  "schema_authority_class": "STATIC_SCHEMA_CONTRACT_ONLY_NOT_ATOMICROWS_CONSUMER_AUTHORITY",
+  "surface_kind": "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_STATIC",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "deterministic_output": true,
+  "registry_path": "docs/master_plan/atomic_rows/AtomicRowsParameterLifecycleRegistry.yaml",
+  "lifecycle_report_path": "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json",
+  "consumer_classes": [
+    "INVENTORY_INDEX",
+    "RESEARCH_TRIAGE",
+    "SOURCE_EVIDENCE_RETRIEVAL",
+    "RANGE_VALIDATION",
+    "REPLAY_CANDIDATE_SELECTION",
+    "PAPER_CANDIDATE_SELECTION",
+    "OPTIMIZER_SEARCH",
+    "OPTIMIZER_DEFAULTS",
+    "RISK_MODEL_INPUT",
+    "SIZING_MODEL_INPUT",
+    "QUANTUM_CIRCUIT_CONSTRUCTION",
+    "QUANTUM_BACKEND_EXECUTION",
+    "RUNTIME_RESOLVER_INPUT",
+    "LIVE_ORDER_ROUTING",
+    "LIVE_EXECUTION"
+  ],
+  "attempted_consumer_access": [
+    {
+      "attempt_id": "inventory_only_to_inventory_index_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "atomicrows_inventory_only_bundle_absent_pattern",
+      "consumer_class": "INVENTORY_INDEX",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "inventory_only_to_research_triage_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "atomicrows_inventory_only_bundle_absent_pattern",
+      "consumer_class": "RESEARCH_TRIAGE",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "inventory_only_to_optimizer_search_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "atomicrows_inventory_only_bundle_absent_pattern",
+      "consumer_class": "OPTIMIZER_SEARCH",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "inventory_only_to_live_execution_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "atomicrows_inventory_only_bundle_absent_pattern",
+      "consumer_class": "LIVE_EXECUTION",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "research_candidate_to_source_evidence_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "external_microstructure_feature_candidate_pattern",
+      "consumer_class": "SOURCE_EVIDENCE_RETRIEVAL",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "research_candidate_to_range_validation_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "external_microstructure_feature_candidate_pattern",
+      "consumer_class": "RANGE_VALIDATION",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "source_evidence_required_to_source_evidence_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "source_dependent_parameter_value_pattern",
+      "consumer_class": "SOURCE_EVIDENCE_RETRIEVAL",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "source_evidence_required_to_optimizer_defaults_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "source_dependent_parameter_value_pattern",
+      "consumer_class": "OPTIMIZER_DEFAULTS",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "source_evidence_required_to_risk_model_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "source_dependent_parameter_value_pattern",
+      "consumer_class": "RISK_MODEL_INPUT",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "source_evidence_required_to_sizing_model_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "source_dependent_parameter_value_pattern",
+      "consumer_class": "SIZING_MODEL_INPUT",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "range_validated_static_to_range_validation_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "selector_field_static_range_pattern",
+      "consumer_class": "RANGE_VALIDATION",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "range_validated_static_to_runtime_resolver_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "selector_field_static_range_pattern",
+      "consumer_class": "RUNTIME_RESOLVER_INPUT",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "range_validated_static_to_live_routing_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "selector_field_static_range_pattern",
+      "consumer_class": "LIVE_ORDER_ROUTING",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "range_validated_static_to_quantum_backend_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "selector_field_static_range_pattern",
+      "consumer_class": "QUANTUM_BACKEND_EXECUTION",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "replay_paper_candidate_to_replay_selection_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "edge_parameter_stack_replay_candidate_pattern",
+      "consumer_class": "REPLAY_CANDIDATE_SELECTION",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "replay_paper_candidate_to_paper_selection_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "edge_parameter_stack_replay_candidate_pattern",
+      "consumer_class": "PAPER_CANDIDATE_SELECTION",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "replay_paper_candidate_to_optimizer_search_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "edge_parameter_stack_replay_candidate_pattern",
+      "consumer_class": "OPTIMIZER_SEARCH",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "quantum_research_candidate_to_circuit_construction_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "quantum_advisory_parameter_candidate_pattern",
+      "consumer_class": "QUANTUM_CIRCUIT_CONSTRUCTION",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "quantum_research_candidate_to_backend_execution_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "quantum_advisory_parameter_candidate_pattern",
+      "consumer_class": "QUANTUM_BACKEND_EXECUTION",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "quarantined_to_research_triage_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "unproven_false_eligibility_claim_pattern",
+      "consumer_class": "RESEARCH_TRIAGE",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "quarantined_to_optimizer_search_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "unproven_false_eligibility_claim_pattern",
+      "consumer_class": "OPTIMIZER_SEARCH",
+      "declared_consumer_access_allowed": false
+    },
+    {
+      "attempt_id": "retired_to_inventory_index_allowed",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "negative_or_rejected_row_retirement_pattern",
+      "consumer_class": "INVENTORY_INDEX",
+      "declared_consumer_access_allowed": true
+    },
+    {
+      "attempt_id": "retired_to_research_triage_blocked",
+      "atomic_parameter_row_id": null,
+      "row_pattern_id": "negative_or_rejected_row_retirement_pattern",
+      "consumer_class": "RESEARCH_TRIAGE",
+      "declared_consumer_access_allowed": false
+    }
+  ],
+  "authority_boundary": {
+    "creates_live_reachability": false,
+    "creates_order_authority": false,
+    "creates_runtime_cash_receipt": false,
+    "creates_source_acceptance": false,
+    "creates_connector_binding": false,
+    "creates_atomicrows_bundle": false,
+    "creates_profit_evidence": false,
+    "reduces_blockers": false
+  },
+  "validation_hook_ids": [
+    "ATOMICROWS_LIFECYCLE_CONSUMER_GATE_STATIC_VALIDATION"
+  ]
+}

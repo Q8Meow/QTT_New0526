@@ -260,6 +260,19 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_atomicrows_lifecycle_consumer_gate.py"),
+            "--mode",
+            "dev",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "AtomicRowsLifecycleConsumerGate.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
@@ -1137,6 +1150,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     lifecycle_validate_index = command_names.index(
         "validate_atomicrows_parameter_lifecycle.py"
     )
+    consumer_gate_index = command_names.index(
+        "validate_atomicrows_lifecycle_consumer_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1145,6 +1161,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         bundle_checker_index
         < lifecycle_build_index
         < lifecycle_validate_index
+        < consumer_gate_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1159,6 +1176,19 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "dev",
     ]
     assert "final" not in commands[lifecycle_validate_index]
+    assert commands[consumer_gate_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_lifecycle_consumer_gate.py"),
+        "--mode",
+        "dev",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "AtomicRowsLifecycleConsumerGate.report.json"
+        ),
+    ]
 
     audit_command = commands[generated_gate_index]
     assert audit_command == [
