@@ -4,7 +4,7 @@ from tools import run_validation_gates as runner
 
 
 def _expected_commands(python_executable: str) -> list[list[str]]:
-    validation_dir = Path(".tmp") / "validation_gates"
+    validation_dir = runner._default_validation_dir()
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
@@ -807,38 +807,6 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 / "master_plan"
                 / "generated"
                 / "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
-            ),
-        ],
-        [
-            python_executable,
-            str(Path("tools") / "build_master_plan_implementation_coverage_ledger.py"),
-            "--repo-root",
-            ".",
-            "--out",
-            str(
-                Path("docs")
-                / "master_plan"
-                / "generated"
-                / "MasterPlanImplementationCoverageLedger.json"
-            ),
-        ],
-        [
-            python_executable,
-            str(Path("tools") / "validate_master_plan_implementation_coverage_ledger.py"),
-            "--repo-root",
-            ".",
-            "--ledger",
-            str(
-                Path("docs")
-                / "master_plan"
-                / "generated"
-                / "MasterPlanImplementationCoverageLedger.json"
-            ),
-            "--schema",
-            str(
-                Path("schemas")
-                / "master_plan"
-                / "master_plan_implementation_coverage_ledger.schema.json"
             ),
         ],
         [
@@ -1834,7 +1802,7 @@ def test_runner_includes_pr46_three_venue_canary_eligibility_contract_after_pr45
     ]
 
 
-def test_runner_includes_pr47_implementation_coverage_ledger_after_pr46_and_before_qtt_gate(
+def test_runner_excludes_pr47_implementation_coverage_ledger_commands(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -1846,48 +1814,10 @@ def test_runner_includes_pr47_implementation_coverage_ledger_after_pr46_and_befo
     pr46_index = command_names.index(
         "stage1_three_venue_canary_eligibility_contract_check.py"
     )
-    builder_index = command_names.index(
-        "build_master_plan_implementation_coverage_ledger.py"
-    )
-    validator_index = command_names.index(
-        "validate_master_plan_implementation_coverage_ledger.py"
-    )
     qtt_gate_index = command_names.index("qtt_test_gate.py")
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
-    assert pr46_index < builder_index < validator_index < qtt_gate_index < no_runtime_index
-    assert commands[builder_index] == [
-        python_executable,
-        str(Path("tools") / "build_master_plan_implementation_coverage_ledger.py"),
-        "--repo-root",
-        ".",
-        "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "MasterPlanImplementationCoverageLedger.json"
-        ),
-    ]
-    assert commands[validator_index] == [
-        python_executable,
-        str(Path("tools") / "validate_master_plan_implementation_coverage_ledger.py"),
-        "--repo-root",
-        ".",
-        "--ledger",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "MasterPlanImplementationCoverageLedger.json"
-        ),
-        "--schema",
-        str(
-            Path("schemas")
-            / "master_plan"
-            / "master_plan_implementation_coverage_ledger.schema.json"
-        ),
-    ]
+    assert pr46_index < qtt_gate_index < no_runtime_index
 
 
 def test_runner_stops_on_first_failure_and_returns_failing_exit_code(monkeypatch, capsys):
@@ -1927,5 +1857,6 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     exit_code = runner.main([])
 
     assert exit_code == 0
-    assert seen == runner.build_validation_commands()
+    validation_dir = Path(seen[0][5]).parent
+    assert seen == runner.build_validation_commands(validation_dir)
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER

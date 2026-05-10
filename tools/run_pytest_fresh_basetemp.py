@@ -5,11 +5,13 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Sequence
 
-MAX_BASETEMP_TEXT_LENGTH = 64
+MAX_BASETEMP_TEXT_LENGTH = 160
 
 
 @dataclass(frozen=True)
@@ -29,7 +31,11 @@ def make_fresh_basetemp(
         moment = moment.astimezone(UTC)
     timestamp = moment.strftime("%Y%m%d_%H%M%S_%f")
     process_id = os.getpid() if pid is None else pid
-    return pathlib.Path(".tmp") / f"pytest_{timestamp}_{process_id}"
+    return (
+        pathlib.Path(tempfile.gettempdir())
+        / "qtt_pytest_basetemp"
+        / f"pytest_{timestamp}_{process_id}"
+    )
 
 
 def find_explicit_basetemp(pytest_args: Sequence[str]) -> str | None:
@@ -68,9 +74,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     invocation = build_pytest_invocation(sys.argv[1:] if argv is None else argv)
     if invocation.added_basetemp:
         pathlib.Path(invocation.basetemp).parent.mkdir(parents=True, exist_ok=True)
-    print(f"pytest basetemp: {invocation.basetemp}", flush=True)
-    completed = subprocess.run(invocation.command)
-    return completed.returncode
+    try:
+        print(f"pytest basetemp: {invocation.basetemp}", flush=True)
+        completed = subprocess.run(invocation.command)
+        return completed.returncode
+    finally:
+        if invocation.added_basetemp:
+            basetemp = pathlib.Path(invocation.basetemp)
+            shutil.rmtree(basetemp, ignore_errors=True)
+            try:
+                basetemp.parent.rmdir()
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":

@@ -29,13 +29,13 @@ jobs:
             install pytest
 
       - name: Prepare validation output directory
-        run: mkdir -p .tmp/ci_validation
+        run: mkdir -p "$RUNNER_TEMP/qtt_ci_validation"
 
       - name: Generate master plan validation reports
-        run: python tools/master_plan_ingest.py --input docs/master_plan/QTT_MasterPlan_Current.md --section-manifest-out .tmp/ci_validation/SectionManifest.json --traceability-out .tmp/ci_validation/TraceabilityReport.json --scope-report-out .tmp/ci_validation/FirstPrScopeReport.json
+        run: python tools/master_plan_ingest.py --input docs/master_plan/QTT_MasterPlan_Current.md --section-manifest-out "$RUNNER_TEMP/qtt_ci_validation/SectionManifest.json" --traceability-out "$RUNNER_TEMP/qtt_ci_validation/TraceabilityReport.json" --scope-report-out "$RUNNER_TEMP/qtt_ci_validation/FirstPrScopeReport.json"
 
       - name: Check master plan traceability
-        run: python tools/master_plan_traceability_check.py --master-plan docs/master_plan/QTT_MasterPlan_Current.md --section-manifest .tmp/ci_validation/SectionManifest.json --traceability-report .tmp/ci_validation/TraceabilityReport.json
+        run: python tools/master_plan_traceability_check.py --master-plan docs/master_plan/QTT_MasterPlan_Current.md --section-manifest "$RUNNER_TEMP/qtt_ci_validation/SectionManifest.json" --traceability-report "$RUNNER_TEMP/qtt_ci_validation/TraceabilityReport.json"
       
       - name: Validate source-evidence static schema
         run: python tools/validate_source_evidence_static.py --schema schemas/source_evidence/source_evidence.schema.json --owner-packet docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md

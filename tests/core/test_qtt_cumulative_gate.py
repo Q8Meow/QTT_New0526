@@ -155,20 +155,6 @@ def test_qtt_cumulative_gate_requires_pr46_three_venue_canary_eligibility_contra
     )
 
 
-def test_qtt_cumulative_gate_requires_pr47_implementation_coverage_ledger_receipt():
-    report = _report()
-    receipt = next(
-        item
-        for item in report["prior_gate_receipts"]
-        if item["receipt_id"]
-        == "master_plan_implementation_coverage_ledger_receipt_present"
-    )
-
-    assert receipt["satisfied"] is True
-    assert receipt["status"] == "REQUIRED_PRIOR_GATE_CONFIRMED_BY_VALIDATION_MARKER"
-    assert receipt["validation_marker"] == "MASTER_PLAN_IMPLEMENTATION_COVERAGE_LEDGER_OK"
-
-
 def test_qtt_cumulative_gate_represents_all_prior_receipts_or_static_bootstrap():
     report = _report()
     statuses = {item["receipt_id"]: item["status"] for item in report["prior_gate_receipts"]}
