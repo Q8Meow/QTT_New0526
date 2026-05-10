@@ -309,6 +309,7 @@ TEXT_SUFFIXES = {
     ".yaml",
     ".yml",
 }
+PACKAGE_INSTALL_TEXT_SUFFIXES = TEXT_SUFFIXES | {".md", ".rst", ".txt"}
 SKIP_DIR_PARTS = {
     ".git",
     ".venv",
@@ -327,6 +328,14 @@ SKIP_CONTENT_PATHS = {
     pathlib.PurePosixPath("tools/validate_no_runtime_artifacts.py"),
 }
 SKIP_CONTENT_TOP_LEVEL_DIRS = {"docs"}
+
+# CI_TEST_DEPENDENCY_ALLOWLIST is the only package-install exception: CI may
+# install pytest before running the repository's canonical validation gates.
+CI_TEST_DEPENDENCY_ALLOWLIST = {
+    pathlib.PurePosixPath(".github/workflows/qtt_validation.yml"): (
+        "python -m pip install pytest"
+    ),
+}
 
 CONTENT_PATTERNS = {
     "forbid_source_retrieval": [
@@ -524,6 +533,18 @@ def _should_scan_content(path: pathlib.Path, root: pathlib.Path) -> bool:
     if rel.parts and rel.parts[0] == "tests" and path.suffix.lower() != ".py":
         return False
     return path.is_file() and path.suffix.lower() in TEXT_SUFFIXES
+
+
+def _should_scan_package_install_text(path: pathlib.Path, root: pathlib.Path) -> bool:
+    rel = _rel_path(path, root)
+    if rel in SKIP_CONTENT_PATHS:
+        return False
+    return (
+        rel.parts
+        and rel.parts[0] in {"docs", "tests"}
+        and path.is_file()
+        and path.suffix.lower() in PACKAGE_INSTALL_TEXT_SUFFIXES
+    )
 
 
 def _dotted_name(node: ast.AST) -> str | None:
@@ -793,11 +814,56 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
     ]
 
 
-def _scan_text_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
+def _matched_line(text: str, match: re.Match[str]) -> str:
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    line_end = text.find("\n", match.end())
+    if line_end == -1:
+        line_end = len(text)
+    return text[line_start:line_end].strip()
+
+
+def _is_ci_test_dependency_allowlisted_pip_install(
+    path: pathlib.PurePosixPath,
+    text: str,
+    match: re.Match[str],
+    allowlist_hits: dict[pathlib.PurePosixPath, int],
+) -> bool:
+    allowed_command = CI_TEST_DEPENDENCY_ALLOWLIST.get(path)
+    if allowed_command is None:
+        return False
+    if _matched_line(text, match) != allowed_command:
+        return False
+
+    allowlist_hits[path] = allowlist_hits.get(path, 0) + 1
+    return allowlist_hits[path] == 1
+
+
+def _scan_text_content(
+    path: pathlib.PurePosixPath, text: str, enabled_flags: list[str]
+) -> list[str]:
     violations: list[str] = []
+    ci_test_dependency_allowlist_hits: dict[pathlib.PurePosixPath, int] = {}
     for flag in enabled_flags:
         for label, pattern in CONTENT_PATTERNS.get(flag, []):
-            if re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE):
+            matches = list(re.finditer(pattern, text, flags=re.IGNORECASE | re.MULTILINE))
+            if not matches:
+                continue
+            if flag == "forbid_package_install_scripts" and label == "pip install command":
+                forbidden_matches = [
+                    match
+                    for match in matches
+                    if not _is_ci_test_dependency_allowlisted_pip_install(
+                        path,
+                        text,
+                        match,
+                        ci_test_dependency_allowlist_hits,
+                    )
+                ]
+                if forbidden_matches:
+                    violations.append(f"forbidden {label} in {path}")
+                continue
+
+            if matches:
                 violations.append(f"forbidden {label} in {path}")
     return violations
 
@@ -843,6 +909,14 @@ def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
             violations.append(f"forbidden package install script present: {rel}")
 
         if not _should_scan_content(path, root):
+            if options.forbid_package_install_scripts and _should_scan_package_install_text(
+                path,
+                root,
+            ):
+                text = path.read_text(encoding="utf-8", errors="ignore")
+                violations.extend(
+                    _scan_text_content(rel, text, ["forbid_package_install_scripts"])
+                )
             continue
 
         text = path.read_text(encoding="utf-8", errors="ignore")

@@ -19,6 +19,30 @@ def _strict_options() -> ScanOptions:
     )
 
 
+def _write_ci_validation_workflow(tmp_path, install_commands: list[str]) -> Path:
+    workflow = tmp_path / ".github" / "workflows" / "qtt_validation.yml"
+    workflow.parent.mkdir(parents=True)
+    install_command_block = "\n".join(f"          {command}" for command in install_commands)
+    workflow.write_text(
+        "\n".join(
+            [
+                "name: QTT Validation",
+                "jobs:",
+                "  validation:",
+                "    steps:",
+                "      - name: Install test dependency",
+                "        run: |",
+                install_command_block,
+                "      - name: Run canonical validation gates",
+                "        run: python tools/run_validation_gates.py",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return workflow
+
+
 def test_scanner_rejects_secret_and_runtime_artifact_names(tmp_path):
     (tmp_path / ".env").write_text("TOKEN=value\n", encoding="utf-8")
     (tmp_path / "credentials.json").write_text("{}", encoding="utf-8")
@@ -47,6 +71,137 @@ def test_scanner_rejects_flagged_runtime_paths_and_install_scripts(tmp_path):
 
     assert any("order-execution path" in violation for violation in violations)
     assert any("package install script" in violation for violation in violations)
+
+
+def test_scanner_allows_exact_ci_test_dependency_pytest_install(tmp_path):
+    _write_ci_validation_workflow(tmp_path, ["python -m pip install pytest"])
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert violations == []
+
+
+@pytest.mark.parametrize(
+    "install_command",
+    [
+        "python -m pip install requests",
+        "python -m pip install pytest requests",
+        "python -m pip install pytest --upgrade",
+        "pip install pytest",
+    ],
+)
+def test_scanner_rejects_non_allowlisted_pip_installs_in_ci_workflow(
+    tmp_path, install_command
+):
+    _write_ci_validation_workflow(tmp_path, [install_command])
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("pip install command" in violation for violation in violations)
+
+
+def test_scanner_rejects_duplicate_ci_pytest_dependency_install(tmp_path):
+    _write_ci_validation_workflow(
+        tmp_path,
+        [
+            "python -m pip install pytest",
+            "python -m pip install pytest",
+        ],
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("pip install command" in violation for violation in violations)
+
+
+def test_scanner_rejects_ci_pytest_dependency_install_outside_allowlisted_workflow(
+    tmp_path,
+):
+    workflow = tmp_path / ".github" / "workflows" / "other_validation.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text(
+        "\n".join(
+            [
+                "name: Other Validation",
+                "jobs:",
+                "  validation:",
+                "    steps:",
+                "      - run: |",
+                "          python -m pip install pytest",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("pip install command" in violation for violation in violations)
+
+
+@pytest.mark.parametrize(
+    "install_command",
+    [
+        "pip install -r requirements.txt",
+        "python -m pip install -r requirements.txt",
+    ],
+)
+def test_scanner_rejects_requirements_installs(tmp_path, install_command):
+    _write_ci_validation_workflow(tmp_path, [install_command])
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("pip install command" in violation for violation in violations)
+
+
+@pytest.mark.parametrize(
+    "install_command, expected_fragment",
+    [
+        ("npm install", "npm install command"),
+        ("poetry install", "poetry install command"),
+    ],
+)
+def test_scanner_rejects_non_pip_package_installs_in_ci_workflow(
+    tmp_path, install_command, expected_fragment
+):
+    _write_ci_validation_workflow(tmp_path, [install_command])
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any(expected_fragment in violation for violation in violations)
+
+
+def test_scanner_rejects_package_install_scripts_even_with_allowed_ci_dependency(
+    tmp_path,
+):
+    _write_ci_validation_workflow(tmp_path, ["python -m pip install pytest"])
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "install.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("package install script" in violation for violation in violations)
+
+
+@pytest.mark.parametrize(
+    "path_text",
+    [
+        "docs/package_install_notes.md",
+        "docs/master_plan/generated/GeneratedReport.md",
+        "tests/fixtures/package_install_fixture.yaml",
+    ],
+)
+def test_scanner_rejects_package_installs_in_docs_generated_outputs_and_test_fixtures(
+    tmp_path, path_text
+):
+    path = tmp_path / path_text
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("python -m pip install pytest\n", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("pip install command" in violation for violation in violations)
 
 
 def test_scanner_rejects_static_blocked_action_code(tmp_path):
