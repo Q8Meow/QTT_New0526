@@ -264,6 +264,16 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "build_atomicrows_parameter_lifecycle_report.py"),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_atomicrows_parameter_lifecycle.py"),
+            "--mode",
+            "dev",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",

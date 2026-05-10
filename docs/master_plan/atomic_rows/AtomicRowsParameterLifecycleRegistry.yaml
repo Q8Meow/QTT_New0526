@@ -1,0 +1,394 @@
+schema_version: 1
+registry_name: AtomicRowsParameterLifecycleRegistry
+registry_model: PARAMETER_LIFECYCLE_ELIGIBILITY
+authority_class: STATIC_LIFECYCLE_REGISTRY_ONLY_NOT_ATOMICROWS_BUNDLE_AUTHORITY
+source_master_plan: docs/master_plan/QTT_MasterPlan_Current.md
+final_expected_row_coverage: INCOMPLETE_PATTERN_FOUNDATION_NOT_4183
+lifecycle_statuses:
+  - INVENTORY_ONLY
+  - RESEARCH_CANDIDATE
+  - SOURCE_EVIDENCE_REQUIRED
+  - RANGE_VALIDATED_STATIC_ONLY
+  - REPLAY_PAPER_CANDIDATE
+  - REPLAY_PAPER_VALIDATED
+  - OPTIMIZER_ELIGIBLE
+  - RUNTIME_ELIGIBLE
+  - LIVE_ELIGIBLE
+  - QUARANTINED_UNPROVEN
+  - RETIRED_NOT_USEFUL
+entries:
+  - atomic_parameter_row_id: null
+    row_pattern_id: atomicrows_inventory_only_bundle_absent_pattern
+    lifecycle_status: INVENTORY_ONLY
+    parameter_family: ATOMICROWS_BUNDLE_ABSENT_BOOTSTRAP
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5F.1
+    linked_capability_id: atomicrows_bundle_creation_blocked
+    unit: QTT_INTERNAL_RECORD
+    scale: NOT_APPLICABLE
+    allowed_range: null
+    range_required: false
+    default_value_policy: NO_DEFAULT_VALUE_BY_INVENTORY_EXISTENCE
+    source_authority_class: CURRENT_MASTER_PLAN_EXPLICIT_SOURCE
+    evidence_required:
+      - canonical bundle and hash remain absent in bootstrap
+      - future bundle authority required before row completion
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: inventory-only bootstrap is not optimizer input
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: no runtime receipt exists
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: no live receipt or owner live approval exists
+    research_route: later AtomicRows bundle phase after explicit owner authority
+    promotion_gate: canonical bundle and hash creation gate remains blocked
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: source_dependent_parameter_value_pattern
+    lifecycle_status: SOURCE_EVIDENCE_REQUIRED
+    parameter_family: SOURCE_DEPENDENT_PARAMETER_VALUES
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5C
+    linked_capability_id: source_evidence_acceptance_route
+    unit: SOURCE_DEFINED
+    scale: SOURCE_DEFINED
+    allowed_range: null
+    range_required: true
+    default_value_policy: NO_DEFAULT_UNLESS_ACCEPTED_SOURCE_OR_OWNER_APPROVED
+    source_authority_class: ACCEPTED_SOURCE_EVIDENCE_PACKET_REQUIRED
+    evidence_required:
+      - accepted source-evidence packet for exact target field
+      - source span and digest validation
+      - conflict and staleness checks
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: source evidence and range validation are missing
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: no runtime observation receipt exists
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: source-required values have no live receipts
+    research_route: source-evidence packet route before value or range acceptance
+    promotion_gate: accepted source evidence plus validation hook before optimizer consideration
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: external_microstructure_feature_candidate_pattern
+    lifecycle_status: RESEARCH_CANDIDATE
+    parameter_family: EXTERNAL_MICROSTRUCTURE_FEATURE_FAMILY_CANDIDATE
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5F.12
+    linked_capability_id: external_repo_research_input_route
+    unit: RESEARCH_PROPOSAL
+    scale: NOT_APPLICABLE
+    allowed_range: null
+    range_required: true
+    default_value_policy: PROPOSE_ONLY_NOT_MUTATE
+    source_authority_class: RESEARCH_INPUT_NOT_SOURCE_FACT
+    evidence_required:
+      - dataset digest packet
+      - source schema map packet
+      - owner review before bundle candidate update
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: research candidates cannot enter optimizer defaults
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: external research input has no runtime receipt
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: proposal-only row cannot be live eligible
+    research_route: candidate proposal intake only
+    promotion_gate: replay paper calibration and owner review before bundle regeneration
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: selector_field_static_range_pattern
+    lifecycle_status: RANGE_VALIDATED_STATIC_ONLY
+    parameter_family: SELECTOR_FIELD_ENUM_GUARD
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5F.11
+    linked_capability_id: atomicrows_selector_field_schema_and_inventory_no_mutation
+    unit: ENUM_FIELD_SET
+    scale: MASTER_PLAN_DECLARED_SELECTOR_FIELDS_ONLY
+    allowed_range:
+      range_state: STATIC_SELECTOR_FIELD_SET_DECLARED
+      authority: CURRENT_MASTER_PLAN_SELECTOR_FIELD_REQUIREMENT_LIST
+    range_required: true
+    default_value_policy: FIELD_PRESENCE_ONLY_NO_ROW_DEFAULT
+    source_authority_class: CURRENT_MASTER_PLAN_EXPLICIT_SOURCE
+    evidence_required:
+      - selector field schema validation
+      - no bundle mutation check
+    optimizer_eligibility:
+      eligible: false
+      range_validated: true
+      source_evidence_accepted: false
+      evidence_validated: true
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: static schema range does not create optimizer eligibility
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: static selector fields have no runtime receipt
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: selector schema cannot create live eligibility
+    research_route: schema-only selector validation
+    promotion_gate: row-specific evidence and replay/paper receipts required before active use
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: edge_parameter_stack_replay_candidate_pattern
+    lifecycle_status: REPLAY_PAPER_CANDIDATE
+    parameter_family: EDGE_PARAMETER_STACK_SELECTION_CANDIDATE
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5F.10
+    linked_capability_id: atomicrows_edge_inventory_stack_selection_route
+    unit: STACK_SELECTION_PACKET
+    scale: ROLE_COMPLETE_STACK_ONLY
+    allowed_range: null
+    range_required: true
+    default_value_policy: NO_SINGLE_PARAMETER_OR_SINGLE_ALGORITHM_DEFAULT
+    source_authority_class: CURRENT_MASTER_PLAN_EXPLICIT_SOURCE_PLUS_FUTURE_RECEIPTS
+    evidence_required:
+      - edge parameter stack selection packet
+      - role completion report
+      - compatibility receipt
+      - replay paper competition manifest
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: replay/paper candidate has no validated replay and paper receipts
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: no runtime resolver or runtime receipt exists
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: stack candidate cannot create live reachability
+    research_route: role-complete stack selection and non-live replay/paper competition
+    promotion_gate: dual replay/paper evidence plus owner review before any runtime or live route
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: quantum_advisory_parameter_candidate_pattern
+    lifecycle_status: RESEARCH_CANDIDATE
+    parameter_family: QUANTUM_ADVISORY_PARAMETER_CANDIDATE
+    classical_or_quantum: QUANTUM
+    owner_section_id: 0X.5F.10
+    linked_capability_id: quantum_optimizer_advisory_boundary
+    unit: ADVISORY_RANKING
+    scale: OFF_CRITICAL_PATH_ONLY
+    allowed_range: null
+    range_required: true
+    default_value_policy: NO_QUANTUM_BACKEND_DEFAULT_WITHOUT_PROVIDER_EVIDENCE
+    source_authority_class: QUANTUM_BACKEND_OR_OWNER_RUNTIME_EVIDENCE_REQUIRED
+    evidence_required:
+      - explicit backend or provider evidence before executable quantum runtime
+      - classical comparator discipline
+      - replay/paper candidate evidence before promotion
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: quantum advisory candidate has no backend/provider evidence
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: no explicit quantum runtime backend receipt exists
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: quantum path may not directly create live order authority
+    research_route: quantum advisory ranking only after explicit evidence
+    promotion_gate: explicit backend evidence, classical comparator, replay/paper, and owner gates
+    quarantine_reason: null
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: unproven_false_eligibility_claim_pattern
+    lifecycle_status: QUARANTINED_UNPROVEN
+    parameter_family: UNPROVEN_OR_FALSE_ELIGIBILITY_CLAIMS
+    classical_or_quantum: QUANTUM
+    owner_section_id: 0X.5F.8
+    linked_capability_id: atomicrows_no_implicit_content_gate
+    unit: CLAIM_GUARD
+    scale: NOT_APPLICABLE
+    allowed_range: null
+    range_required: true
+    default_value_policy: NO_DEFAULT_WHILE_QUARANTINED
+    source_authority_class: EXPLICIT_EVIDENCE_REQUIRED
+    evidence_required:
+      - proof from current master plan, accepted source packet, runtime receipt, or replay/paper receipt
+      - no implicit content audit
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: quarantined claims cannot enter optimizer search
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: quarantined claims have no runtime receipt
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: quarantined claims cannot become live eligible
+    research_route: evidence reconstruction or rejection archive
+    promotion_gate: remove quarantine only with explicit accepted evidence and validation
+    quarantine_reason: false or implicit eligibility claims are blocked until proven
+    retirement_reason: null
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false
+  - atomic_parameter_row_id: null
+    row_pattern_id: negative_or_rejected_row_retirement_pattern
+    lifecycle_status: RETIRED_NOT_USEFUL
+    parameter_family: NEGATIVE_NET_PROFIT_OR_REJECTED_ROWS_ARCHIVE
+    classical_or_quantum: CLASSICAL
+    owner_section_id: 0X.5F.10
+    linked_capability_id: parameter_rehabilitation_lifecycle_or_rejected_archive
+    unit: ARCHIVE_RECEIPT
+    scale: NOT_APPLICABLE
+    allowed_range: null
+    range_required: false
+    default_value_policy: DO_NOT_USE_RETIRED_VALUE
+    source_authority_class: RETIREMENT_RECEIPT_REQUIRED
+    evidence_required:
+      - rejection or retirement receipt
+      - reason preserving why the row is not useful
+    optimizer_eligibility:
+      eligible: false
+      range_validated: false
+      source_evidence_accepted: false
+      evidence_validated: false
+      promotion_gate_validated: false
+      receipt_id: null
+      blocking_reason: retired rows cannot be optimizer eligible
+    runtime_eligibility:
+      eligible: false
+      runtime_receipt_id: null
+      blocking_reason: retired rows cannot be runtime eligible
+    live_eligibility:
+      eligible: false
+      live_receipt_id: null
+      owner_approval_receipt_id: null
+      blocking_reason: retired rows cannot be live eligible
+    research_route: archived for traceability only
+    promotion_gate: no promotion; future reinstatement requires new proposal lifecycle
+    quarantine_reason: null
+    retirement_reason: negative, rejected, or no-longer-useful row pattern is archived from active use
+    authority_boundary:
+      creates_live_reachability: false
+      creates_order_authority: false
+      creates_runtime_cash_receipt: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_atomicrows_bundle: false
+      creates_profit_evidence: false
+      reduces_blockers: false

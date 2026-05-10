@@ -250,6 +250,16 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "build_atomicrows_parameter_lifecycle_report.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_atomicrows_parameter_lifecycle.py"),
+            "--mode",
+            "dev",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
@@ -1121,11 +1131,34 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     bundle_checker_index = command_names.index(
         "validate_atomicrows_bundle_schema_checker_static.py"
     )
+    lifecycle_build_index = command_names.index(
+        "build_atomicrows_parameter_lifecycle_report.py"
+    )
+    lifecycle_validate_index = command_names.index(
+        "validate_atomicrows_parameter_lifecycle.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
-    assert bundle_checker_index < generated_gate_index < no_runtime_index
+    assert (
+        bundle_checker_index
+        < lifecycle_build_index
+        < lifecycle_validate_index
+        < generated_gate_index
+        < no_runtime_index
+    )
+    assert commands[lifecycle_build_index] == [
+        python_executable,
+        str(Path("tools") / "build_atomicrows_parameter_lifecycle_report.py"),
+    ]
+    assert commands[lifecycle_validate_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_parameter_lifecycle.py"),
+        "--mode",
+        "dev",
+    ]
+    assert "final" not in commands[lifecycle_validate_index]
 
     audit_command = commands[generated_gate_index]
     assert audit_command == [

@@ -1,0 +1,23 @@
+{
+  "authority_boundary_all_false": true,
+  "classical_entry_count": 6,
+  "deterministic_output": true,
+  "final_ready": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "invalid_eligibility_claim_count": 0,
+  "inventory_only_count": 1,
+  "live_eligible_count": 0,
+  "optimizer_eligible_count": 0,
+  "parameter_family_count": 8,
+  "quantum_entry_count": 2,
+  "quarantined_unproven_count": 1,
+  "range_validated_static_only_count": 1,
+  "registry_entry_count": 8,
+  "replay_paper_candidate_count": 1,
+  "replay_paper_validated_count": 0,
+  "report_type": "ATOMICROWS_PARAMETER_LIFECYCLE_REPORT",
+  "research_candidate_count": 2,
+  "retired_not_useful_count": 1,
+  "runtime_eligible_count": 0,
+  "source_evidence_required_count": 1
+}
