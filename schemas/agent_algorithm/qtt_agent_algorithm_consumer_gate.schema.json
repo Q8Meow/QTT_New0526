@@ -1,0 +1,1019 @@
+{
+  "$defs": {
+    "agent_algorithm_consumer_gate_report": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "agent_algorithm_binding_registry_dependency": {
+          "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml"
+        },
+        "agent_algorithm_binding_registry_used_for_binding_validation": {
+          "type": "boolean"
+        },
+        "agent_algorithm_command_matrix_created": {
+          "type": "boolean"
+        },
+        "agent_algorithm_cumulative_readiness_gate_created": {
+          "type": "boolean"
+        },
+        "agent_charter_registry_dependency": {
+          "const": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+        },
+        "agent_charter_registry_used_for_role_validation": {
+          "type": "boolean"
+        },
+        "agent_role_count_from_charter_registry": {
+          "type": "integer"
+        },
+        "algorithm_family_count_from_algorithm_registry": {
+          "type": "integer"
+        },
+        "algorithm_formula_family_registry_dependency": {
+          "const": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml"
+        },
+        "algorithm_formula_family_registry_used_for_family_validation": {
+          "type": "boolean"
+        },
+        "allowed_attempts_with_owner_override_count": {
+          "type": "integer"
+        },
+        "alpha_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "architecture_emphasis": {
+          "const": "INSTITUTIONAL_AGENT_ALGORITHM_CONSUMER_GATE_NOT_LOOSE_EXAMPLES"
+        },
+        "attempts_with_duplicate_id_count": {
+          "type": "integer"
+        },
+        "authority_boundary_all_false": {
+          "type": "boolean"
+        },
+        "binding_count_from_binding_registry": {
+          "type": "integer"
+        },
+        "blocked_attempt_count": {
+          "type": "integer"
+        },
+        "blocked_attempts_with_owner_override_count": {
+          "type": "integer"
+        },
+        "bundle_file_present": {
+          "type": "boolean"
+        },
+        "bundle_sha_present": {
+          "type": "boolean"
+        },
+        "connector_binding_artifact_created": {
+          "type": "boolean"
+        },
+        "deterministic_output": {
+          "type": "boolean"
+        },
+        "execution_superiority_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "existing_pr_patterns_used_for_style_only": {
+          "type": "boolean"
+        },
+        "expected_allowed_attempt_count_from_binding_registry": {
+          "type": "integer"
+        },
+        "final_ready": {
+          "type": "boolean"
+        },
+        "gate_generation_policy": {
+          "const": "ONE_ALLOWED_ATTEMPT_PER_AGENT_ALGORITHM_BINDING_PLUS_STATIC_BLOCK_AND_OWNER_OVERRIDE_CASES"
+        },
+        "generated_at_utc": {
+          "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+        },
+        "invalid_agent_role_attempt_count": {
+          "type": "integer"
+        },
+        "invalid_algorithm_family_attempt_count": {
+          "type": "integer"
+        },
+        "invalid_binding_attempt_count": {
+          "type": "integer"
+        },
+        "invalid_consumer_class_authorization_count": {
+          "type": "integer"
+        },
+        "invalid_trade_context_authorization_count": {
+          "type": "integer"
+        },
+        "latency_superiority_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "live_artifact_created": {
+          "type": "boolean"
+        },
+        "master_plan_followed_as_controlling_doctrine": {
+          "type": "boolean"
+        },
+        "missing_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "missing_binding_block_covered": {
+          "type": "boolean"
+        },
+        "order_artifact_created": {
+          "type": "boolean"
+        },
+        "owner_override_attempt_count": {
+          "type": "integer"
+        },
+        "owner_override_attempts_fabricating_binding_rows_count": {
+          "type": "integer"
+        },
+        "owner_override_attempts_without_satisfaction_count": {
+          "type": "integer"
+        },
+        "owner_override_missing_binding_covered": {
+          "type": "boolean"
+        },
+        "owner_override_unauthorized_consumer_class_covered": {
+          "type": "boolean"
+        },
+        "owner_override_unauthorized_trade_context_covered": {
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "type": "boolean"
+        },
+        "pr67_is_scope_boundary_not_runtime_consumer_authority": {
+          "type": "boolean"
+        },
+        "profit_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "quantum_allowed_attempts_with_owner_can_force_quantum_priority_count": {
+          "type": "integer"
+        },
+        "quantum_allowed_attempts_with_owner_quantum_priority_supported_count": {
+          "type": "integer"
+        },
+        "quantum_backend_artifact_created": {
+          "type": "boolean"
+        },
+        "quantum_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "quantum_forward_design_supported": {
+          "type": "boolean"
+        },
+        "quantum_or_quantum_compatible_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "replay_execution_created": {
+          "type": "boolean"
+        },
+        "report_type": {
+          "const": "QTT_AGENT_ALGORITHM_CONSUMER_GATE_REPORT"
+        },
+        "runtime_artifact_created": {
+          "type": "boolean"
+        },
+        "runtime_resolver_snapshot_created": {
+          "type": "boolean"
+        },
+        "source_acceptance_artifact_created": {
+          "type": "boolean"
+        },
+        "source_of_gate_substance": {
+          "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+        },
+        "static_agent_algorithm_consumer_gate_created": {
+          "type": "boolean"
+        },
+        "unauthorized_consumer_class_block_covered": {
+          "type": "boolean"
+        },
+        "unauthorized_trade_context_block_covered": {
+          "type": "boolean"
+        },
+        "unexpected_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "uses_pr_number_as_authority": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "source_of_gate_substance",
+        "agent_charter_registry_dependency",
+        "algorithm_formula_family_registry_dependency",
+        "agent_algorithm_binding_registry_dependency",
+        "gate_generation_policy",
+        "master_plan_followed_as_controlling_doctrine",
+        "agent_charter_registry_used_for_role_validation",
+        "algorithm_formula_family_registry_used_for_family_validation",
+        "agent_algorithm_binding_registry_used_for_binding_validation",
+        "existing_pr_patterns_used_for_style_only",
+        "pr67_is_scope_boundary_not_runtime_consumer_authority",
+        "architecture_emphasis",
+        "agent_role_count_from_charter_registry",
+        "algorithm_family_count_from_algorithm_registry",
+        "binding_count_from_binding_registry",
+        "expected_allowed_attempt_count_from_binding_registry",
+        "actual_allowed_attempt_count",
+        "missing_allowed_attempt_count",
+        "unexpected_allowed_attempt_count",
+        "blocked_attempt_count",
+        "owner_override_attempt_count",
+        "invalid_agent_role_attempt_count",
+        "invalid_algorithm_family_attempt_count",
+        "invalid_binding_attempt_count",
+        "invalid_consumer_class_authorization_count",
+        "invalid_trade_context_authorization_count",
+        "attempts_with_duplicate_id_count",
+        "allowed_attempts_with_owner_override_count",
+        "blocked_attempts_with_owner_override_count",
+        "owner_override_attempts_without_satisfaction_count",
+        "owner_override_attempts_fabricating_binding_rows_count",
+        "missing_binding_block_covered",
+        "unauthorized_consumer_class_block_covered",
+        "unauthorized_trade_context_block_covered",
+        "owner_override_missing_binding_covered",
+        "owner_override_unauthorized_consumer_class_covered",
+        "owner_override_unauthorized_trade_context_covered",
+        "quantum_forward_design_supported",
+        "quantum_or_quantum_compatible_allowed_attempt_count",
+        "quantum_allowed_attempts_with_owner_quantum_priority_supported_count",
+        "quantum_allowed_attempts_with_owner_can_force_quantum_priority_count",
+        "alpha_evidence_claim_created",
+        "profit_evidence_claim_created",
+        "latency_superiority_evidence_claim_created",
+        "execution_superiority_evidence_claim_created",
+        "quantum_evidence_claim_created",
+        "static_agent_algorithm_consumer_gate_created",
+        "agent_algorithm_cumulative_readiness_gate_created",
+        "agent_algorithm_command_matrix_created",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "quantum_backend_artifact_created",
+        "bundle_file_present",
+        "bundle_sha_present",
+        "uses_pr_number_as_authority",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "type": "object"
+    },
+    "agent_role": {
+      "enum": [
+        "OWNER",
+        "ORCHESTRATOR_AGENT",
+        "MASTER_PLAN_AGENT",
+        "ATOMICROWS_AGENT",
+        "ATOMICROWS_RESEARCH_AGENT",
+        "ATOMICROWS_LIFECYCLE_AGENT",
+        "SOURCE_EVIDENCE_AGENT",
+        "CONNECTOR_AGENT",
+        "RUNTIME_RESOLVER_AGENT",
+        "REPLAY_AGENT",
+        "PAPER_AGENT",
+        "DUAL_RESULT_REVIEW_AGENT",
+        "OPTIMIZER_AGENT",
+        "RISK_AGENT",
+        "SIZING_AGENT",
+        "EXECUTION_LATENCY_AGENT",
+        "ORDER_ROUTER_AGENT",
+        "LIVE_CANARY_AGENT",
+        "QUANTUM_RESEARCH_AGENT",
+        "QUANTUM_BACKEND_AGENT",
+        "DASHBOARD_AGENT",
+        "GOVERNANCE_AGENT",
+        "VALIDATION_AGENT",
+        "COMPLIANCE_MARKER_AGENT",
+        "OWNER_APPROVAL_REQUEST_AGENT"
+      ]
+    },
+    "agent_role_id": {
+      "enum": [
+        "QTT_AGENT_ROLE_001_OWNER",
+        "QTT_AGENT_ROLE_002_ORCHESTRATOR_AGENT",
+        "QTT_AGENT_ROLE_003_MASTER_PLAN_AGENT",
+        "QTT_AGENT_ROLE_004_ATOMICROWS_AGENT",
+        "QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT",
+        "QTT_AGENT_ROLE_006_ATOMICROWS_LIFECYCLE_AGENT",
+        "QTT_AGENT_ROLE_007_SOURCE_EVIDENCE_AGENT",
+        "QTT_AGENT_ROLE_008_CONNECTOR_AGENT",
+        "QTT_AGENT_ROLE_009_RUNTIME_RESOLVER_AGENT",
+        "QTT_AGENT_ROLE_010_REPLAY_AGENT",
+        "QTT_AGENT_ROLE_011_PAPER_AGENT",
+        "QTT_AGENT_ROLE_012_DUAL_RESULT_REVIEW_AGENT",
+        "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+        "QTT_AGENT_ROLE_014_RISK_AGENT",
+        "QTT_AGENT_ROLE_015_SIZING_AGENT",
+        "QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT",
+        "QTT_AGENT_ROLE_017_ORDER_ROUTER_AGENT",
+        "QTT_AGENT_ROLE_018_LIVE_CANARY_AGENT",
+        "QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT",
+        "QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT",
+        "QTT_AGENT_ROLE_021_DASHBOARD_AGENT",
+        "QTT_AGENT_ROLE_022_GOVERNANCE_AGENT",
+        "QTT_AGENT_ROLE_023_VALIDATION_AGENT",
+        "QTT_AGENT_ROLE_024_COMPLIANCE_MARKER_AGENT",
+        "QTT_AGENT_ROLE_025_OWNER_APPROVAL_REQUEST_AGENT"
+      ]
+    },
+    "algorithm_family_id": {
+      "enum": [
+        "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_002_CLASSICAL_SCORING_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_003_CLASSICAL_RISK_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_004_CLASSICAL_SIZING_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_005_CLASSICAL_EXECUTION_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_006_CLASSICAL_LATENCY_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_007_QUANTUM_INSPIRED_OPTIMIZER",
+        "QTT_ALGORITHM_FAMILY_008_TRUE_QUANTUM_OPTIMIZER",
+        "QTT_ALGORITHM_FAMILY_009_HYBRID_CLASSICAL_QUANTUM_OPTIMIZER",
+        "QTT_ALGORITHM_FAMILY_010_QUBO_COMPATIBLE_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_011_ISING_COMPATIBLE_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_012_QAOA_COMPATIBLE_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_013_VQE_COMPATIBLE_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_014_ANNEALING_COMPATIBLE_ALGORITHM",
+        "QTT_ALGORITHM_FAMILY_015_QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_ALGORITHM"
+      ]
+    },
+    "algorithm_family_name": {
+      "enum": [
+        "CLASSICAL_SIGNAL_ALGORITHM",
+        "CLASSICAL_SCORING_ALGORITHM",
+        "CLASSICAL_RISK_ALGORITHM",
+        "CLASSICAL_SIZING_ALGORITHM",
+        "CLASSICAL_EXECUTION_ALGORITHM",
+        "CLASSICAL_LATENCY_ALGORITHM",
+        "QUANTUM_INSPIRED_OPTIMIZER",
+        "TRUE_QUANTUM_OPTIMIZER",
+        "HYBRID_CLASSICAL_QUANTUM_OPTIMIZER",
+        "QUBO_COMPATIBLE_ALGORITHM",
+        "ISING_COMPATIBLE_ALGORITHM",
+        "QAOA_COMPATIBLE_ALGORITHM",
+        "VQE_COMPATIBLE_ALGORITHM",
+        "ANNEALING_COMPATIBLE_ALGORITHM",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_ALGORITHM"
+      ]
+    },
+    "consumer_attempt": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_authorized_by_algorithm_family": {
+          "type": "boolean"
+        },
+        "agent_role": {
+          "enum": [
+            "OWNER",
+            "ORCHESTRATOR_AGENT",
+            "MASTER_PLAN_AGENT",
+            "ATOMICROWS_AGENT",
+            "ATOMICROWS_RESEARCH_AGENT",
+            "ATOMICROWS_LIFECYCLE_AGENT",
+            "SOURCE_EVIDENCE_AGENT",
+            "CONNECTOR_AGENT",
+            "RUNTIME_RESOLVER_AGENT",
+            "REPLAY_AGENT",
+            "PAPER_AGENT",
+            "DUAL_RESULT_REVIEW_AGENT",
+            "OPTIMIZER_AGENT",
+            "RISK_AGENT",
+            "SIZING_AGENT",
+            "EXECUTION_LATENCY_AGENT",
+            "ORDER_ROUTER_AGENT",
+            "LIVE_CANARY_AGENT",
+            "QUANTUM_RESEARCH_AGENT",
+            "QUANTUM_BACKEND_AGENT",
+            "DASHBOARD_AGENT",
+            "GOVERNANCE_AGENT",
+            "VALIDATION_AGENT",
+            "COMPLIANCE_MARKER_AGENT",
+            "OWNER_APPROVAL_REQUEST_AGENT"
+          ]
+        },
+        "agent_role_id": {
+          "enum": [
+            "QTT_AGENT_ROLE_001_OWNER",
+            "QTT_AGENT_ROLE_002_ORCHESTRATOR_AGENT",
+            "QTT_AGENT_ROLE_003_MASTER_PLAN_AGENT",
+            "QTT_AGENT_ROLE_004_ATOMICROWS_AGENT",
+            "QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT",
+            "QTT_AGENT_ROLE_006_ATOMICROWS_LIFECYCLE_AGENT",
+            "QTT_AGENT_ROLE_007_SOURCE_EVIDENCE_AGENT",
+            "QTT_AGENT_ROLE_008_CONNECTOR_AGENT",
+            "QTT_AGENT_ROLE_009_RUNTIME_RESOLVER_AGENT",
+            "QTT_AGENT_ROLE_010_REPLAY_AGENT",
+            "QTT_AGENT_ROLE_011_PAPER_AGENT",
+            "QTT_AGENT_ROLE_012_DUAL_RESULT_REVIEW_AGENT",
+            "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+            "QTT_AGENT_ROLE_014_RISK_AGENT",
+            "QTT_AGENT_ROLE_015_SIZING_AGENT",
+            "QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT",
+            "QTT_AGENT_ROLE_017_ORDER_ROUTER_AGENT",
+            "QTT_AGENT_ROLE_018_LIVE_CANARY_AGENT",
+            "QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT",
+            "QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT",
+            "QTT_AGENT_ROLE_021_DASHBOARD_AGENT",
+            "QTT_AGENT_ROLE_022_GOVERNANCE_AGENT",
+            "QTT_AGENT_ROLE_023_VALIDATION_AGENT",
+            "QTT_AGENT_ROLE_024_COMPLIANCE_MARKER_AGENT",
+            "QTT_AGENT_ROLE_025_OWNER_APPROVAL_REQUEST_AGENT"
+          ]
+        },
+        "agent_role_id_matches": {
+          "type": "boolean"
+        },
+        "agent_role_valid": {
+          "type": "boolean"
+        },
+        "algorithm_family_id": {
+          "enum": [
+            "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_002_CLASSICAL_SCORING_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_003_CLASSICAL_RISK_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_004_CLASSICAL_SIZING_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_005_CLASSICAL_EXECUTION_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_006_CLASSICAL_LATENCY_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_007_QUANTUM_INSPIRED_OPTIMIZER",
+            "QTT_ALGORITHM_FAMILY_008_TRUE_QUANTUM_OPTIMIZER",
+            "QTT_ALGORITHM_FAMILY_009_HYBRID_CLASSICAL_QUANTUM_OPTIMIZER",
+            "QTT_ALGORITHM_FAMILY_010_QUBO_COMPATIBLE_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_011_ISING_COMPATIBLE_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_012_QAOA_COMPATIBLE_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_013_VQE_COMPATIBLE_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_014_ANNEALING_COMPATIBLE_ALGORITHM",
+            "QTT_ALGORITHM_FAMILY_015_QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_ALGORITHM"
+          ]
+        },
+        "algorithm_family_id_matches": {
+          "type": "boolean"
+        },
+        "algorithm_family_name": {
+          "enum": [
+            "CLASSICAL_SIGNAL_ALGORITHM",
+            "CLASSICAL_SCORING_ALGORITHM",
+            "CLASSICAL_RISK_ALGORITHM",
+            "CLASSICAL_SIZING_ALGORITHM",
+            "CLASSICAL_EXECUTION_ALGORITHM",
+            "CLASSICAL_LATENCY_ALGORITHM",
+            "QUANTUM_INSPIRED_OPTIMIZER",
+            "TRUE_QUANTUM_OPTIMIZER",
+            "HYBRID_CLASSICAL_QUANTUM_OPTIMIZER",
+            "QUBO_COMPATIBLE_ALGORITHM",
+            "ISING_COMPATIBLE_ALGORITHM",
+            "QAOA_COMPATIBLE_ALGORITHM",
+            "VQE_COMPATIBLE_ALGORITHM",
+            "ANNEALING_COMPATIBLE_ALGORITHM",
+            "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_ALGORITHM"
+          ]
+        },
+        "algorithm_family_valid": {
+          "type": "boolean"
+        },
+        "attempt_description": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "attempt_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "attempt_type": {
+          "enum": [
+            "ALLOWED_BOUND_CONSUMPTION",
+            "BLOCKED_MISSING_BINDING",
+            "BLOCKED_UNAUTHORIZED_CONSUMER_CLASS",
+            "BLOCKED_UNAUTHORIZED_TRADE_CONTEXT",
+            "BLOCKED_DIRECT_ORDER_AUTHORITY",
+            "BLOCKED_METADATA_MISMATCH",
+            "OWNER_OVERRIDE_MISSING_BINDING",
+            "OWNER_OVERRIDE_UNAUTHORIZED_CONSUMER_CLASS",
+            "OWNER_OVERRIDE_UNAUTHORIZED_TRADE_CONTEXT",
+            "OWNER_OVERRIDE_METADATA_MISMATCH"
+          ]
+        },
+        "authorized_consumer_classes_from_binding": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "binding_exists": {
+          "type": "boolean"
+        },
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "binding_row_fabricated_by_owner_override": {
+          "const": false
+        },
+        "classical_or_quantum": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "connector_binding_artifact_created": {
+          "const": false
+        },
+        "consumer_class_authorized_by_binding": {
+          "type": "boolean"
+        },
+        "consumer_gate_derivation_summary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "deterministic_selection_role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "direct_order_submission_allowed_by_binding": {
+          "type": "boolean"
+        },
+        "external_fact_claim_created": {
+          "const": false
+        },
+        "fallback_bundle_required": {
+          "type": "boolean"
+        },
+        "family_category": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "final_qtt_internal_status": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "gate_decision": {
+          "enum": [
+            "ALLOW",
+            "BLOCK",
+            "OWNER_OVERRIDE_ALLOW_INTERNAL_WORKFLOW"
+          ]
+        },
+        "input_parameter_families": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "live_artifact_created": {
+          "const": false
+        },
+        "live_evidence_required_before_profit_claim": {
+          "type": "boolean"
+        },
+        "master_plan_doctrine_terms_used": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "optimizer_compatibility": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "order_artifact_created": {
+          "const": false
+        },
+        "output_artifact_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "output_signal_type": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "owner_can_force_quantum_priority": {
+          "type": "boolean"
+        },
+        "owner_override_basis": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "owner_override_present": {
+          "type": "boolean"
+        },
+        "owner_override_satisfaction_result": {
+          "enum": [
+            "NOT_APPLICABLE",
+            "OWNER_OVERRIDE_SATISFIED",
+            "OWNER_OVERRIDE_NOT_PRESENT"
+          ]
+        },
+        "owner_quantum_priority_supported": {
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "const": false
+        },
+        "profit_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_algorithm_family_access": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_applicability": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_backend_artifact_created": {
+          "const": false
+        },
+        "quantum_classical_arbitration_role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "quantum_parameter_family_access": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "reason_codes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "replay_execution_created": {
+          "const": false
+        },
+        "replay_paper_evidence_required_before_advantage_claim": {
+          "type": "boolean"
+        },
+        "requested_consumer_class": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "requested_trade_context": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_artifact_created": {
+          "const": false
+        },
+        "runtime_live_order_authority_created_by_binding": {
+          "type": "boolean"
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "scoring_ranking_role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_acceptance_artifact_created": {
+          "const": false
+        },
+        "strongest_classical_comparator_required": {
+          "type": "boolean"
+        },
+        "trade_context_applicability_from_binding": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "trade_context_authorized_by_binding": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "attempt_type",
+        "attempt_description",
+        "agent_role",
+        "agent_role_id",
+        "algorithm_family_name",
+        "algorithm_family_id",
+        "binding_id",
+        "requested_consumer_class",
+        "requested_trade_context",
+        "binding_exists",
+        "agent_role_valid",
+        "agent_role_id_matches",
+        "algorithm_family_valid",
+        "algorithm_family_id_matches",
+        "agent_authorized_by_algorithm_family",
+        "consumer_class_authorized_by_binding",
+        "trade_context_authorized_by_binding",
+        "direct_order_submission_allowed_by_binding",
+        "runtime_live_order_authority_created_by_binding",
+        "owner_override_present",
+        "owner_override_basis",
+        "owner_override_satisfaction_result",
+        "binding_row_fabricated_by_owner_override",
+        "gate_decision",
+        "reason_codes",
+        "authorized_consumer_classes_from_binding",
+        "trade_context_applicability_from_binding",
+        "input_parameter_families",
+        "output_signal_type",
+        "output_artifact_types",
+        "family_category",
+        "classical_or_quantum",
+        "optimizer_compatibility",
+        "quantum_applicability",
+        "quantum_algorithm_family_access",
+        "quantum_parameter_family_access",
+        "deterministic_selection_role",
+        "scoring_ranking_role",
+        "quantum_classical_arbitration_role",
+        "strongest_classical_comparator_required",
+        "fallback_bundle_required",
+        "replay_paper_evidence_required_before_advantage_claim",
+        "live_evidence_required_before_profit_claim",
+        "owner_quantum_priority_supported",
+        "owner_can_force_quantum_priority",
+        "external_fact_claim_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "profit_evidence_claim_created",
+        "quantum_backend_artifact_created",
+        "master_plan_doctrine_terms_used",
+        "consumer_gate_derivation_summary",
+        "final_qtt_internal_status"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://qtt.local/schemas/agent_algorithm/qtt_agent_algorithm_consumer_gate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Static deterministic QTT agent-algorithm consumer gate schema. It authorizes agent consumption of algorithm/formula families only through canonical bindings, authorized consumer classes, authorized trade contexts, or owner override for internal workflow satisfaction.",
+  "properties": {
+    "agent_algorithm_binding_registry_dependency": {
+      "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml"
+    },
+    "agent_algorithm_binding_registry_used_for_binding_validation": {
+      "const": true
+    },
+    "agent_algorithm_command_matrix_created": {
+      "const": false
+    },
+    "agent_algorithm_cumulative_readiness_gate_created": {
+      "const": false
+    },
+    "agent_charter_registry_dependency": {
+      "const": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+    },
+    "agent_charter_registry_used_for_role_validation": {
+      "const": true
+    },
+    "algorithm_formula_family_registry_dependency": {
+      "const": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml"
+    },
+    "algorithm_formula_family_registry_used_for_family_validation": {
+      "const": true
+    },
+    "alpha_evidence_claim_created": {
+      "const": false
+    },
+    "architecture_emphasis": {
+      "const": "INSTITUTIONAL_AGENT_ALGORITHM_CONSUMER_GATE_NOT_LOOSE_EXAMPLES"
+    },
+    "binding_row_fabrication_by_owner_override_allowed": {
+      "const": false
+    },
+    "bundle_file_present": {
+      "const": false
+    },
+    "bundle_sha_present": {
+      "const": false
+    },
+    "chatgpt_authority_over_owner": {
+      "const": false
+    },
+    "codex_authority_over_owner": {
+      "const": false
+    },
+    "connector_binding_artifact_created": {
+      "const": false
+    },
+    "consumer_attempts": {
+      "items": {
+        "$ref": "#/$defs/consumer_attempt"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "execution_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "existing_pr_patterns_used_for_style_only": {
+      "const": true
+    },
+    "final_ready": {
+      "const": false
+    },
+    "fixture_authority_class": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fixture_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fixture_version": {
+      "const": "v1"
+    },
+    "gate_generation_policy": {
+      "const": "ONE_ALLOWED_ATTEMPT_PER_AGENT_ALGORITHM_BINDING_PLUS_STATIC_BLOCK_AND_OWNER_OVERRIDE_CASES"
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "latency_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "live_artifact_created": {
+      "const": false
+    },
+    "master_plan_followed_as_controlling_doctrine": {
+      "const": true
+    },
+    "missing_binding_owner_override_supported": {
+      "const": true
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "normal_binding_required_for_consumption": {
+      "const": true
+    },
+    "normal_consumer_class_required_for_consumption": {
+      "const": true
+    },
+    "normal_trade_context_required_for_consumption": {
+      "const": true
+    },
+    "order_artifact_created": {
+      "const": false
+    },
+    "owner_global_override_authority": {
+      "const": true
+    },
+    "owner_override_satisfies_all_qtt_internal_requirements": {
+      "const": true
+    },
+    "owner_override_satisfies_missing_binding_for_internal_workflow": {
+      "const": true
+    },
+    "paper_execution_created": {
+      "const": false
+    },
+    "pr67_is_scope_boundary_not_runtime_consumer_authority": {
+      "const": true
+    },
+    "profit_evidence_claim_created": {
+      "const": false
+    },
+    "qtt_agent_authority_over_owner": {
+      "const": false
+    },
+    "quantum_backend_artifact_created": {
+      "const": false
+    },
+    "quantum_evidence_claim_created": {
+      "const": false
+    },
+    "quantum_forward_design_supported": {
+      "const": true
+    },
+    "registry_type": {
+      "const": "QTT_AGENT_ALGORITHM_CONSUMER_GATE"
+    },
+    "registry_version": {
+      "const": "v1"
+    },
+    "replay_execution_created": {
+      "const": false
+    },
+    "runtime_artifact_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "source_acceptance_artifact_created": {
+      "const": false
+    },
+    "source_of_gate_substance": {
+      "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+    },
+    "static_agent_algorithm_consumer_gate_created": {
+      "const": true
+    },
+    "uses_pr_number_as_authority": {
+      "const": false
+    }
+  },
+  "required": [
+    "registry_type",
+    "registry_version",
+    "deterministic_output",
+    "generated_at_utc",
+    "source_of_gate_substance",
+    "agent_charter_registry_dependency",
+    "algorithm_formula_family_registry_dependency",
+    "agent_algorithm_binding_registry_dependency",
+    "gate_generation_policy",
+    "master_plan_followed_as_controlling_doctrine",
+    "agent_charter_registry_used_for_role_validation",
+    "algorithm_formula_family_registry_used_for_family_validation",
+    "agent_algorithm_binding_registry_used_for_binding_validation",
+    "existing_pr_patterns_used_for_style_only",
+    "pr67_is_scope_boundary_not_runtime_consumer_authority",
+    "architecture_emphasis",
+    "owner_global_override_authority",
+    "owner_override_satisfies_all_qtt_internal_requirements",
+    "normal_binding_required_for_consumption",
+    "normal_consumer_class_required_for_consumption",
+    "normal_trade_context_required_for_consumption",
+    "missing_binding_owner_override_supported",
+    "owner_override_satisfies_missing_binding_for_internal_workflow",
+    "binding_row_fabrication_by_owner_override_allowed",
+    "chatgpt_authority_over_owner",
+    "codex_authority_over_owner",
+    "qtt_agent_authority_over_owner",
+    "quantum_forward_design_supported",
+    "quantum_evidence_claim_created",
+    "alpha_evidence_claim_created",
+    "profit_evidence_claim_created",
+    "latency_superiority_evidence_claim_created",
+    "execution_superiority_evidence_claim_created",
+    "static_agent_algorithm_consumer_gate_created",
+    "agent_algorithm_cumulative_readiness_gate_created",
+    "agent_algorithm_command_matrix_created",
+    "runtime_artifact_created",
+    "live_artifact_created",
+    "order_artifact_created",
+    "source_acceptance_artifact_created",
+    "connector_binding_artifact_created",
+    "runtime_resolver_snapshot_created",
+    "replay_execution_created",
+    "paper_execution_created",
+    "quantum_backend_artifact_created",
+    "bundle_file_present",
+    "bundle_sha_present",
+    "uses_pr_number_as_authority",
+    "final_ready",
+    "consumer_attempts"
+  ],
+  "title": "QTT Agent Algorithm Consumer Gate",
+  "type": "object"
+}
