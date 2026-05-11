@@ -1,5 +1,8 @@
 from pathlib import Path
 
+from tools import (
+    validate_atomicrows_research_provenance_evidence_tier_classification as research_provenance_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -489,6 +492,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 / "master_plan"
                 / "generated"
                 / "AtomicRowsParameterAgentBindingCommandMatrix.json"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
             ),
         ],
         [
@@ -1288,6 +1298,13 @@ def test_runner_exposes_agent_algorithm_command_matrix_success_marker():
     assert command_matrix_gate.SUCCESS_MARKER == "QTT_AGENT_ALGORITHM_COMMAND_MATRIX_OK"
 
 
+def test_runner_exposes_atomicrows_research_provenance_success_marker():
+    assert (
+        research_provenance_gate.SUCCESS_MARKER
+        == "ATOMICROWS_RESEARCH_PROVENANCE_EVIDENCE_TIER_CLASSIFICATION_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1538,6 +1555,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     parameter_agent_binding_command_matrix_index = command_names.index(
         "validate_atomicrows_parameter_agent_binding_command_matrix.py"
     )
+    research_provenance_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1555,6 +1575,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < parameter_agent_binding_consumer_gate_index
         < parameter_agent_binding_cumulative_gate_index
         < parameter_agent_binding_command_matrix_index
+        < research_provenance_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1696,6 +1717,13 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             / "master_plan"
             / "generated"
             / "AtomicRowsParameterAgentBindingCommandMatrix.json"
+        ),
+    ]
+    assert commands[research_provenance_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
         ),
     ]
 
