@@ -1,0 +1,3478 @@
+{
+  "agent_charters": [
+    {
+      "agent_description": "Synthetic valid fixture charter: Final QTT internal policy authority for approvals, overrides, vetoes, risk tolerance, launch scope, dashboard control, and quantum priority.",
+      "agent_role": "OWNER",
+      "agent_role_id": "QTT_AGENT_ROLE_001_OWNER",
+      "applicable_algorithm_family_scopes": [
+        "OWNER_APPROVED_ALGORITHM_SCOPE",
+        "OWNER_FORCED_QUANTUM_PRIORITY_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "OWNER_POLICY_PARAMETER_SCOPE",
+        "OWNER_QUANTUM_PRIORITY_SCOPE"
+      ],
+      "approval_request_behavior": "Receives approval requests and emits owner decision receipts in later scoped workflows.",
+      "atomicrows_scope": "OWNER_CAN_DIRECT_PARAMETER_POLICY_WITHOUT_CREATING_BUNDLE_OR_HASH",
+      "authorized_consumer_classes": [
+        "GOVERNANCE",
+        "DASHBOARD_CONTROL",
+        "APPROVAL_ROUTING"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "OWNER_CLASSICAL_POLICY_AND_REVIEW_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "OWNER_APPROVAL_CONSUMER_OF_CONNECTOR_READINESS_NOT_BINDING_CREATOR",
+      "consumed_artifacts": [
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "GOVERNANCE_BOUNDARY_PACKET",
+        "RISK_ESCALATION_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Coverage and health monitoring must show owner authority without treating it as external fact evidence.",
+      "dashboard_owner_control_relationship": "Owner controls dashboard decisions; dashboard surfaces requests and status, not autonomous trades.",
+      "dashboard_scope": "OWNER_CONTROL_AND_APPROVAL_SURFACE_FOR_LATER_DASHBOARD_IMPLEMENTATION",
+      "decision_authority_scope": "May decide internal QTT policy, approval, override, launch scope, and quantum-priority settings.",
+      "emitted_artifacts": [
+        "OWNER_APPROVAL_RECEIPT",
+        "OWNER_OVERRIDE_RECEIPT",
+        "OWNER_POLICY_CHANGE_RECEIPT",
+        "OWNER_QUANTUM_PRIORITY_RECEIPT"
+      ],
+      "escalation_behavior": "Owner receives unresolved governance, risk, launch, and quantum-priority escalations.",
+      "execution_router_relationship": "Owner approval is necessary for live scope but the Execution Router remains final order-submission authority.",
+      "fallback_behavior": "When owner policy is absent, stricter gates and explicit approval queues apply.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "Cannot fabricate accepted source facts, runtime receipts, fills, balances, or profit evidence.",
+        "Cannot replace source, connector, resolver, replay, paper, risk, cash, or router evidence gates."
+      ],
+      "handoff_inputs": [
+        "OWNER_DECISION_QUEUE",
+        "ESCALATION_PACKET"
+      ],
+      "handoff_outputs": [
+        "OWNER_DECISION_RECEIPT",
+        "OWNER_POLICY_ROUTE"
+      ],
+      "input_packet_types": [
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "OWNER_OVERRIDE_REQUEST_PACKET"
+      ],
+      "live_scope": "OWNER_LIVE_SCOPE_DECISION_SURFACE_ONLY_NO_LIVE_ARTIFACT_CREATED",
+      "master_plan_doctrine_terms_used": [
+        "owner final policy authority",
+        "owner_source_evidence_definitions_packet_external_fact_acceptance_authority",
+        "owner quantum priority",
+        "QTT orchestration-spine law"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for OWNER; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Owner decisions can satisfy QTT internal workflow requirements but cannot make external facts, fills, cash, replay, paper, quantum execution, or profit evidence true by assertion.",
+      "master_plan_static_authority_basis": "Static charter records owner policy authority and future receipt surfaces without creating source, runtime, or live evidence.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Owner may force quantum-priority policy, while optimizer arbitration still requires objective, comparator, and evidence.",
+      "orchestration_spine_relationship": "Owner is the top internal authority consumed by the Decision Orchestrator.",
+      "output_packet_types": [
+        "OWNER_APPROVAL_RECEIPT",
+        "OWNER_OVERRIDE_RECEIPT"
+      ],
+      "owned_surfaces": [
+        "OWNER_POLICY",
+        "OWNER_APPROVAL",
+        "OWNER_OVERRIDE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_LAUNCH_SCOPE",
+        "OWNER_RISK_TOLERANCE"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_INTERNAL_POLICY_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Set internal QTT policy, launch scope, risk tolerance, and quantum-priority direction.",
+        "Approve, override, veto, pause, disable, or de-scope QTT internal workflows.",
+        "Receive escalation packets and issue owner approval or override receipts in later phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "OWNER_QUANTUM_PRIORITY_AND_OWNER_FORCED_QUANTUM_POLICY_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Owner approvals and overrides are future receipt events recorded in the event log.",
+      "replay_paper_dual_review_relationship": "Owner reviews replay and paper outcomes; owner review does not merge non-live evidence into live proof.",
+      "risk_gate_relationship": "Owner sets risk tolerance and can demand stricter gates; Risk Gate still evaluates evidence.",
+      "runtime_scope": "STATIC_OWNER_CHARTER_ONLY_NO_RUNTIME_RECEIPT_CREATED",
+      "secondary_duties": [
+        "Choose stricter gates when uncertainty, stale evidence, or conflict is present.",
+        "Direct dashboard control decisions without granting dashboard trading authority."
+      ],
+      "source_evidence_scope": "OWNER_SOURCE_POLICY_INPUT_ONLY_NOT_ACCEPTED_FACT_AUTHORITY",
+      "source_to_connector_to_resolver_relationship": "Owner may define source policy, but accepted source packets and resolver snapshots require evidence workflows.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Coordinates governed QTT agent handoffs through the master-plan orchestration spine.",
+      "agent_role": "ORCHESTRATOR_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_002_ORCHESTRATOR_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "DETERMINISTIC_ROUTING_ALGORITHM",
+        "FAIL_CLOSED_DEPENDENCY_SORT"
+      ],
+      "applicable_parameter_family_scopes": [
+        "ORCHESTRATION_PARAMETER_UNIVERSE",
+        "AGENT_TASK_PRIORITY_PARAMETERS"
+      ],
+      "approval_request_behavior": "Packages workflow blockers for owner approval through the request agent.",
+      "atomicrows_scope": "ROUTES_ATOMICROWS_PARAMETER_INVENTORY_WITHOUT_CREATING_BUNDLE",
+      "authorized_consumer_classes": [
+        "ORCHESTRATION",
+        "VALIDATION",
+        "DASHBOARD_STATUS"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_DETERMINISTIC_DEPENDENCY_ROUTING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "ROUTES_CONNECTOR_READINESS_WITHOUT_CREATING_BINDINGS",
+      "consumed_artifacts": [
+        "AGENT_STATUS_PACKET",
+        "DEPENDENCY_STATUS_PACKET",
+        "OWNER_POLICY_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Feeds agent KPI, missed-duty, trust-score, and reroute status to health monitoring.",
+      "dashboard_owner_control_relationship": "Feeds owner-visible workflow status and approval needs to dashboard surfaces.",
+      "dashboard_scope": "OWNER_VISIBLE_ORCHESTRATION_STATUS_FOR_LATER_DASHBOARD",
+      "decision_authority_scope": "May decide internal routing order and escalation path for registered QTT agents.",
+      "emitted_artifacts": [
+        "ORCHESTRATION_HANDOFF_PACKET",
+        "DEPENDENCY_STATUS_PACKET"
+      ],
+      "escalation_behavior": "Escalates stale, conflicted, missing, or unauthorized paths fail-closed.",
+      "execution_router_relationship": "Routes only approved intents toward the Execution Router after prerequisite gates.",
+      "fallback_behavior": "If dependencies are absent, reroute to validation, governance, or owner approval.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not approve for owner.",
+        "May not send orders, bypass risk, or make source evidence true."
+      ],
+      "handoff_inputs": [
+        "SOURCE_EVIDENCE_STATUS",
+        "CONNECTOR_READINESS_STATUS",
+        "OPTIMIZER_CANDIDATE_STATUS"
+      ],
+      "handoff_outputs": [
+        "NEXT_AGENT_HANDOFF",
+        "FAIL_CLOSED_ESCALATION"
+      ],
+      "input_packet_types": [
+        "AGENT_TASK_PACKET",
+        "DEPENDENCY_STATUS_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY; FUTURE LIVE HANDOFFS REQUIRE ALL GATES",
+      "master_plan_doctrine_terms_used": [
+        "Decision Orchestrator",
+        "QTT orchestration-spine law",
+        "agent_autonomy_class",
+        "execution_router_remains_final_order_submission_authority_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for ORCHESTRATOR_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not self-authorize trades or create runtime handoff receipts in this package.",
+      "master_plan_static_authority_basis": "Static charter records workflow ownership and dependency ordering only.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Routes edge hypotheses and AtomicRows inventory toward deterministic optimizer arbitration.",
+      "orchestration_spine_relationship": "Owns the Decision Orchestrator relationship for all agent-to-agent handoffs.",
+      "output_packet_types": [
+        "ORCHESTRATION_HANDOFF_PACKET",
+        "MISSING_DEPENDENCY_PACKET"
+      ],
+      "owned_surfaces": [
+        "WORKFLOW_ROUTING",
+        "DEPENDENCY_ORDER",
+        "FAIL_CLOSED_ESCALATION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_ORCHESTRATION_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Route decisions across source evidence, connector readiness, resolver readiness, AtomicRows, optimizer, risk, sizing, latency, router, replay, paper, dual review, owner approval, and validation.",
+        "Maintain dependency order and fail-closed escalation when required inputs are absent.",
+        "Emit orchestration handoff and dependency status packet definitions for later workflows."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_AWARE_ROUTING_SCOPE_WITH_NO_BACKEND_EXECUTION",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Defines handoff packet expectations for the future Receipt / Event Log.",
+      "replay_paper_dual_review_relationship": "Coordinates replay and paper lanes as separate non-live evidence flows.",
+      "risk_gate_relationship": "Sends risk-relevant proposed intents to Risk Gate and honors risk blocks.",
+      "runtime_scope": "STATIC_ORCHESTRATION_CHARTER_ONLY_NO_RUNTIME_SERVICE_CREATED",
+      "secondary_duties": [
+        "Coordinate agent retry, reroute, quarantine, and candidate replacement requests under governance.",
+        "Expose missing duty and trust-score inputs to validation and health monitoring."
+      ],
+      "source_evidence_scope": "ROUTES_SOURCE_EVIDENCE_STATUS_WITHOUT_ACCEPTING_FACTS",
+      "source_to_connector_to_resolver_relationship": "Routes source to connector to resolver only when upstream prerequisites are present.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Maps controlling master-plan doctrine into implementation-facing static contracts.",
+      "agent_role": "MASTER_PLAN_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_003_MASTER_PLAN_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "DETERMINISTIC_TERM_MAPPING",
+        "SECTION_OWNER_LOOKUP"
+      ],
+      "applicable_parameter_family_scopes": [
+        "MASTER_PLAN_TRACEABILITY_PARAMETERS"
+      ],
+      "approval_request_behavior": "Escalates doctrine ambiguity to owner approval request packaging.",
+      "atomicrows_scope": "ATOMICROWS_INVENTORY_DOCTRINE_MAPPING_ONLY",
+      "authorized_consumer_classes": [
+        "VALIDATION",
+        "GOVERNANCE",
+        "ORCHESTRATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_STATIC_DOCTRINE_MAPPING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONNECTOR_DOCTRINE_MAPPING_ONLY",
+      "consumed_artifacts": [
+        "QTT_MASTER_PLAN_CURRENT",
+        "MASTER_PLAN_TERM_SEARCH_RESULTS"
+      ],
+      "coverage_health_monitor_relationship": "Supports health monitor checks proving coded behavior still follows the plan.",
+      "dashboard_owner_control_relationship": "Maps dashboard owner-control and research-intake boundaries.",
+      "dashboard_scope": "MAY_FEED_STATIC_DOCTRINE_STATUS_TO_LATER_DASHBOARD",
+      "decision_authority_scope": "May classify which master-plan terms support each static charter field.",
+      "emitted_artifacts": [
+        "MASTER_PLAN_DERIVATION_SUMMARY",
+        "STATIC_DOCTRINE_MAP"
+      ],
+      "escalation_behavior": "Escalates master-plan conflict or missing doctrine to governance and owner request agents.",
+      "execution_router_relationship": "Identifies Execution Router doctrine without creating order-routing authority.",
+      "fallback_behavior": "If doctrine is ambiguous, preserve stricter boundary and escalate.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not edit the master plan in this package.",
+        "May not promote prompt text over master-plan doctrine."
+      ],
+      "handoff_inputs": [
+        "MASTER_PLAN_TEXT",
+        "TERM_SEARCH_SET"
+      ],
+      "handoff_outputs": [
+        "DOCTRINE_DERIVATION_PACKET",
+        "CONFLICT_SURFACE_PACKET"
+      ],
+      "input_packet_types": [
+        "MASTER_PLAN_SCAN_PACKET"
+      ],
+      "live_scope": "NO_LIVE_SCOPE_CREATED",
+      "master_plan_doctrine_terms_used": [
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "master plan source of truth",
+        "QTT orchestration-spine law"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for MASTER_PLAN_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not edit the master plan or create runtime behavior in this package.",
+      "master_plan_static_authority_basis": "Reads and maps doctrine for static implementation artifacts; preserves the master plan unchanged.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Maps deterministic scoring, ranking, and quantum/classical arbitration doctrine.",
+      "orchestration_spine_relationship": "Supplies doctrine maps to the orchestrator for governed role routing.",
+      "output_packet_types": [
+        "ROLE_DERIVATION_PACKET",
+        "STATIC_DOCTRINE_MAP_PACKET"
+      ],
+      "owned_surfaces": [
+        "DOCTRINE_MAPPING",
+        "ROLE_DERIVATION",
+        "SECTION_OWNER_LOOKUP"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_DOCTRINE_MAPPING_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Read and map master-plan doctrine into role derivation summaries.",
+        "Surface doctrine conflicts, section ownership, and static authority bases.",
+        "Preserve no-edit master-plan behavior for this static package."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_DOCTRINE_MAPPING_SCOPE_WITH_NO_EVIDENCE_CLAIM",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Maps receipt/event-log doctrine for later packet producers.",
+      "replay_paper_dual_review_relationship": "Maps replay, paper, and dual review doctrine as separate future evidence lanes.",
+      "risk_gate_relationship": "Identifies master-plan risk gate doctrine but does not make risk decisions.",
+      "runtime_scope": "STATIC_DOCTRINE_AGENT_ONLY_NO_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Support validation traceability from registry fields to doctrine terms."
+      ],
+      "source_evidence_scope": "SOURCE_EVIDENCE_DOCTRINE_MAPPING_ONLY",
+      "source_to_connector_to_resolver_relationship": "Maps source, connector, and resolver doctrine without accepting sources or bindings.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns AtomicRows parameter and algorithm inventory surfaces as inventory, not trading authority.",
+      "agent_role": "ATOMICROWS_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_004_ATOMICROWS_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "INVENTORY_LOOKUP",
+        "PARAMETER_FAMILY_GROUPING"
+      ],
+      "applicable_parameter_family_scopes": [
+        "PARAMETER_ALGORITHM_INVENTORY",
+        "SELECTION_UNIVERSE_REFERENCE"
+      ],
+      "approval_request_behavior": "Escalates missing row ownership or bundle authority questions to owner request routing.",
+      "atomicrows_scope": "PRIMARY_ATOMICROWS_INVENTORY_OWNER",
+      "authorized_consumer_classes": [
+        "OPTIMIZER",
+        "REPLAY",
+        "PAPER",
+        "RISK",
+        "SIZING",
+        "QUANTUM_RESEARCH"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_PARAMETER_INVENTORY_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "DOES_NOT_CREATE_CONNECTOR_BINDINGS",
+      "consumed_artifacts": [
+        "PARAMETER_FAMILY_REFERENCE",
+        "ALGORITHM_FAMILY_REFERENCE",
+        "LIFECYCLE_STATUS"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates inventory references and absence of bundle/hash artifacts.",
+      "dashboard_owner_control_relationship": "May expose inventory status to owner dashboards without trading authority.",
+      "dashboard_scope": "OWNER_VISIBLE_PARAMETER_INVENTORY_STATUS_ONLY",
+      "decision_authority_scope": "May classify parameter and algorithm inventory surfaces for future consumers.",
+      "emitted_artifacts": [
+        "INVENTORY_CONSUMER_PACKET",
+        "PARAMETER_FAMILY_SURFACE_REFERENCE"
+      ],
+      "escalation_behavior": "Escalates missing ownership, incomplete rows, or forbidden bundle creation attempts.",
+      "execution_router_relationship": "No direct router path; router receives only approved intents after all gates.",
+      "fallback_behavior": "If inventory rows are incomplete, mark selection universe blocked pending lifecycle or owner route.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not trade or create direct trade paths.",
+        "May not create the AtomicRows bundle or hash in this package."
+      ],
+      "handoff_inputs": [
+        "RESEARCH_PARAMETER_CANDIDATE",
+        "LIFECYCLE_STATUS_PACKET"
+      ],
+      "handoff_outputs": [
+        "ATOMICROWS_INVENTORY_REFERENCE",
+        "PARAMETER_SELECTION_UNIVERSE_POINTER"
+      ],
+      "input_packet_types": [
+        "PARAMETER_FAMILY_PACKET",
+        "ALGORITHM_FAMILY_PACKET"
+      ],
+      "live_scope": "NO_LIVE_SCOPE_CREATED_BY_INVENTORY",
+      "master_plan_doctrine_terms_used": [
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "Parameter Pack Registry"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for ATOMICROWS_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not create AtomicRows.bundle.jsonl or AtomicRows.bundle.sha256 here.",
+      "master_plan_static_authority_basis": "Records inventory consumer duties without creating bundle or hash artifacts.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds deterministic scoring and ranking with parameter and algorithm inventory.",
+      "orchestration_spine_relationship": "Feeds the orchestrator with inventory references for parameter-stack selection.",
+      "output_packet_types": [
+        "INVENTORY_CONSUMER_PACKET",
+        "PARAMETER_SURFACE_PACKET"
+      ],
+      "owned_surfaces": [
+        "ATOMICROWS_INVENTORY",
+        "PARAMETER_FAMILY_SURFACE",
+        "ALGORITHM_FAMILY_SURFACE"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_ATOMICROWS_INVENTORY_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Maintain AtomicRows as parameter and algorithm inventory authority.",
+        "Expose parameter-family and algorithm-family surfaces to selection and optimizer consumers.",
+        "Preserve inventory boundaries so AtomicRows does not become a trader."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_PARAMETER_FAMILY_INVENTORY_COMPATIBILITY_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future inventory access and lifecycle changes must produce receipts.",
+      "replay_paper_dual_review_relationship": "Supplies candidate parameter stacks for future replay and paper lanes.",
+      "risk_gate_relationship": "Provides risk with parameter-family identity but does not approve risk.",
+      "runtime_scope": "STATIC_INVENTORY_CHARTER_ONLY_NO_RUNTIME_BUNDLE_CREATED",
+      "secondary_duties": [
+        "Coordinate with lifecycle and research agents for readiness and candidate intake."
+      ],
+      "source_evidence_scope": "USES_ACCEPTED_SOURCE_DEPENDENCIES_ONLY_WHEN_FUTURE_PARAMETERS_REQUIRE_THEM",
+      "source_to_connector_to_resolver_relationship": "Inventory is downstream of source/connector constraints where parameters depend on external semantics.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Converts research inputs into candidate parameter and algorithm family surfaces.",
+      "agent_role": "ATOMICROWS_RESEARCH_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "RESEARCH_CANDIDATE_ALGORITHM_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "RESEARCH_CANDIDATE_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests owner approval for research scope expansion or high-materiality candidate promotion.",
+      "atomicrows_scope": "CANDIDATE_INPUT_TO_ATOMICROWS_REVIEW",
+      "authorized_consumer_classes": [
+        "ATOMICROWS",
+        "SOURCE_EVIDENCE",
+        "OPTIMIZER"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_RESEARCH_CANDIDATE_MAPPING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "DOES_NOT_BIND_CONNECTOR_SEMANTICS",
+      "consumed_artifacts": [
+        "OWNER_RESEARCH_INPUT",
+        "EXTERNAL_REPO_RESEARCH_SIGNAL",
+        "EDGE_HYPOTHESIS_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor can score research-output quality and missed candidate duties.",
+      "dashboard_owner_control_relationship": "Dashboard may collect research input and show candidate status to owner.",
+      "dashboard_scope": "RESEARCH_INTAKE_DISPLAY_AND_OWNER_REVIEW_ONLY",
+      "decision_authority_scope": "May classify research into candidate parameter and algorithm families.",
+      "emitted_artifacts": [
+        "CANDIDATE_PARAMETER_FAMILY_PACKET",
+        "CANDIDATE_ALGORITHM_FAMILY_PACKET"
+      ],
+      "escalation_behavior": "Escalates materiality conflicts and promotion requests to owner approval routing.",
+      "execution_router_relationship": "No router access; research never produces approved order intents.",
+      "fallback_behavior": "If research lacks evidence, keep candidate quarantined or route to source evidence.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not declare source facts accepted.",
+        "May not create live trading authority from research."
+      ],
+      "handoff_inputs": [
+        "RESEARCH_NOTE",
+        "OWNER_SUBMITTED_URL",
+        "EDGE_HYPOTHESIS_PACKET"
+      ],
+      "handoff_outputs": [
+        "RESEARCH_CANDIDATE_PACKET",
+        "ATOMICROWS_REVIEW_REQUEST"
+      ],
+      "input_packet_types": [
+        "RESEARCH_INPUT_PACKET",
+        "EDGE_HYPOTHESIS_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_RESEARCH_INPUT",
+      "master_plan_doctrine_terms_used": [
+        "owner_submitted_website_authority_class",
+        "external_prediction_market_research_repo_authority_class",
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for ATOMICROWS_RESEARCH_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not make websites, X posts, news, or repos accepted source facts.",
+      "master_plan_static_authority_basis": "Records research-to-candidate duties only.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds candidate surfaces into deterministic optimizer universe construction.",
+      "orchestration_spine_relationship": "Receives research intake from orchestrator and hands candidates to AtomicRows and source evidence flows.",
+      "output_packet_types": [
+        "PARAMETER_RESEARCH_PACKET",
+        "ALGORITHM_RESEARCH_PACKET"
+      ],
+      "owned_surfaces": [
+        "RESEARCH_INTAKE",
+        "CANDIDATE_PARAMETER_FAMILY",
+        "CANDIDATE_ALGORITHM_FAMILY"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_RESEARCH_CANDIDATE_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Convert research, owner-submitted materials, and candidate hypotheses into parameter-family candidates.",
+        "Route candidate algorithm families toward evidence and AtomicRows review.",
+        "Preserve research input as candidate-only until source evidence and replay/paper validation exist."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_RESEARCH_CANDIDATE_SURFACE_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future research intake and candidate handoffs require event records.",
+      "replay_paper_dual_review_relationship": "Routes candidate families for future replay/paper testing after prerequisite evidence.",
+      "risk_gate_relationship": "Risk treats outputs as candidate-only until validated evidence exists.",
+      "runtime_scope": "STATIC_RESEARCH_CHARTER_ONLY_NO_RUNTIME_INGESTION_SERVICE_CREATED",
+      "secondary_duties": [
+        "Document candidate assumptions, materiality, and missing evidence needs."
+      ],
+      "source_evidence_scope": "MAY_REQUEST_SOURCE_REVIEW_NOT_ACCEPT_SOURCE_FACTS",
+      "source_to_connector_to_resolver_relationship": "Can request source evidence review but cannot accept facts or create connector semantics.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns AtomicRows lifecycle state, mutation guard, promotion, and readiness gating surfaces.",
+      "agent_role": "ATOMICROWS_LIFECYCLE_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_006_ATOMICROWS_LIFECYCLE_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "LIFECYCLE_PROMOTION_ALGORITHM_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "LIFECYCLE_GATED_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Routes blocked promotions and override satisfaction requests to owner approval packaging.",
+      "atomicrows_scope": "PRIMARY_LIFECYCLE_GUARD_FOR_ATOMICROWS",
+      "authorized_consumer_classes": [
+        "ATOMICROWS",
+        "VALIDATION",
+        "OPTIMIZER"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_LIFECYCLE_READINESS_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "DOES_NOT_CREATE_CONNECTOR_BINDINGS",
+      "consumed_artifacts": [
+        "ATOMICROWS_REGISTRY_STATE",
+        "PROMOTION_RECEIPT",
+        "OWNER_OVERRIDE_RECEIPT"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates lifecycle gates, mutation guards, and readiness counts.",
+      "dashboard_owner_control_relationship": "Exposes lifecycle readiness and owner override status for later owner panels.",
+      "dashboard_scope": "OWNER_VISIBLE_LIFECYCLE_STATUS_ONLY",
+      "decision_authority_scope": "May classify AtomicRows lifecycle readiness and mutation blockers.",
+      "emitted_artifacts": [
+        "LIFECYCLE_READINESS_PACKET",
+        "MUTATION_BLOCKER_PACKET",
+        "OWNER_OVERRIDE_SATISFACTION_PACKET"
+      ],
+      "escalation_behavior": "Escalates mutation, promotion, and owner override conflicts.",
+      "execution_router_relationship": "Router cannot receive intents from lifecycle state alone.",
+      "fallback_behavior": "If lifecycle state is missing or conflicted, block selection and request review.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not self-promote runtime or live authority.",
+        "May not create bundle/hash artifacts."
+      ],
+      "handoff_inputs": [
+        "ATOMICROWS_REGISTRY_STATE",
+        "PROMOTION_REQUEST_PACKET"
+      ],
+      "handoff_outputs": [
+        "LIFECYCLE_READINESS_PACKET",
+        "MUTATION_BLOCKER_PACKET"
+      ],
+      "input_packet_types": [
+        "LIFECYCLE_STATUS_PACKET",
+        "PROMOTION_RECEIPT_PACKET"
+      ],
+      "live_scope": "NO_LIVE_PROMOTION_FROM_STATIC_LIFECYCLE_CHARTER",
+      "master_plan_doctrine_terms_used": [
+        "AtomicRows lifecycle registry",
+        "promotion receipt",
+        "owner override satisfaction",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for ATOMICROWS_LIFECYCLE_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No lifecycle runtime promotion or bundle authority is created here.",
+      "master_plan_static_authority_basis": "Records lifecycle duties without self-promoting runtime or live authority.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Restricts optimizer universe to lifecycle-eligible parameter rows.",
+      "orchestration_spine_relationship": "Provides readiness states to orchestrator before parameter-stack selection.",
+      "output_packet_types": [
+        "LIFECYCLE_GATE_PACKET",
+        "MUTATION_GUARD_PACKET"
+      ],
+      "owned_surfaces": [
+        "LIFECYCLE_STATE",
+        "MUTATION_GUARD",
+        "PROMOTION_RECEIPT_SEMANTICS"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_LIFECYCLE_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Manage lifecycle state, mutation guards, readiness gates, and promotion receipt semantics.",
+        "Consume AtomicRows registry state and promotion receipts for readiness decisions.",
+        "Emit lifecycle readiness and mutation blocker packets for future phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_PARAMETER_LIFECYCLE_COMPATIBILITY_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Lifecycle promotions and blockers are future receipt/event-log surfaces.",
+      "replay_paper_dual_review_relationship": "Promotes only eligible candidate rows toward replay/paper lanes.",
+      "risk_gate_relationship": "Risk consumes lifecycle readiness for stale or incomplete parameter blocks.",
+      "runtime_scope": "STATIC_LIFECYCLE_CHARTER_ONLY_NO_RUNTIME_PROMOTION_CREATED",
+      "secondary_duties": [
+        "Support owner override satisfaction packets for internal lifecycle requirements."
+      ],
+      "source_evidence_scope": "BLOCKS_SOURCE_DEPENDENT_ROWS_UNTIL_ACCEPTED_PACKET_EXISTS",
+      "source_to_connector_to_resolver_relationship": "Lifecycle marks source-dependent rows blocked until accepted evidence exists.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns source-evidence readiness, candidate, acceptance, revalidation, conflict, and materiality surfaces.",
+      "agent_role": "SOURCE_EVIDENCE_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_007_SOURCE_EVIDENCE_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "SOURCE_REVALIDATION_ALGORITHM_SCOPE",
+        "CONFLICT_CLASSIFICATION_ALGORITHM_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "SOURCE_DEPENDENT_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests owner approval for source policy ambiguity without converting facts.",
+      "atomicrows_scope": "MARKS_SOURCE_DEPENDENT_PARAMETER_ROWS_PENDING_EVIDENCE",
+      "authorized_consumer_classes": [
+        "CONNECTOR",
+        "RUNTIME_RESOLVER",
+        "RISK",
+        "VALIDATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_SOURCE_REVALIDATION_AND_CONFLICT_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "UPSTREAM_EVIDENCE_PROVIDER_FOR_CONNECTOR_BINDINGS",
+      "consumed_artifacts": [
+        "OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET",
+        "OFFICIAL_SOURCE_TARGET",
+        "SOURCE_REVIEW_INPUT"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates source readiness, revalidation, and conflict coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may show source status and owner review queues without accepting facts.",
+      "dashboard_scope": "OWNER_VISIBLE_SOURCE_STATUS_AND_REVIEW_QUEUE_ONLY",
+      "decision_authority_scope": "May decide source-evidence readiness and conflict classification in future evidence workflows.",
+      "emitted_artifacts": [
+        "SOURCE_READINESS_RECORD",
+        "CANDIDATE_SOURCE_PACKET",
+        "ACCEPTED_SOURCE_PACKET_REFERENCE",
+        "CONFLICT_CLASSIFICATION"
+      ],
+      "escalation_behavior": "Escalates material conflicts, stale packets, and owner source policy questions.",
+      "execution_router_relationship": "Router remains blocked when required accepted source packets are absent.",
+      "fallback_behavior": "If evidence is stale, missing, or conflicted, fail closed and block downstream use.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not populate connector semantics without accepted packets.",
+        "May not create source acceptance artifacts in this package."
+      ],
+      "handoff_inputs": [
+        "SOURCE_TARGET_SCOPE",
+        "OWNER_SOURCE_DEFINITION",
+        "SOURCE_REVIEW_INPUT"
+      ],
+      "handoff_outputs": [
+        "SOURCE_READINESS_STATUS",
+        "ACCEPTED_SOURCE_REFERENCE_OR_BLOCK"
+      ],
+      "input_packet_types": [
+        "SOURCE_RETRIEVAL_TARGET_PACKET",
+        "SOURCE_REVIEW_PACKET"
+      ],
+      "live_scope": "NO_LIVE_OR_SHADOW_SOURCE_DEPENDENT_FIELD_WITHOUT_ACCEPTED_PACKET",
+      "master_plan_doctrine_terms_used": [
+        "source_evidence_requirements_suspended_as_freeze_blockers_only_flag",
+        "stage1_source_queue_authority",
+        "source_dependent_live_or_shadow_field_still_requires_accepted_source_packet"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for SOURCE_EVIDENCE_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No source retrieval execution, source acceptance packet, or external fact artifact is created here.",
+      "master_plan_static_authority_basis": "Records source-evidence roles without retrieving or accepting sources.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Optimizer may consume source-backed edge context only after evidence prerequisites.",
+      "orchestration_spine_relationship": "Receives source-evidence tasks from orchestrator before connector and resolver routing.",
+      "output_packet_types": [
+        "SOURCE_READINESS_PACKET",
+        "SOURCE_CONFLICT_PACKET"
+      ],
+      "owned_surfaces": [
+        "SOURCE_READINESS",
+        "SOURCE_CANDIDATE",
+        "SOURCE_ACCEPTANCE_BOUNDARY",
+        "REVALIDATION_STATE"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_SOURCE_EVIDENCE_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Govern source retrieval readiness, source candidates, accepted packet references, revalidation, conflict, and materiality surfaces.",
+        "Separate retrieval targets from accepted facts for downstream connector and resolver consumers.",
+        "Emit source readiness, candidate, conflict, and revalidation states in later phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CANDIDATES_REQUIRE_SOURCE_EVIDENCE_GATE_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future source candidate, acceptance, conflict, and revalidation events require receipts.",
+      "replay_paper_dual_review_relationship": "Provides source-backed historical semantics for future replay and paper inputs.",
+      "risk_gate_relationship": "Risk consumes freshness, conflict, materiality, and source acceptance states.",
+      "runtime_scope": "STATIC_SOURCE_CHARTER_ONLY_NO_RETRIEVAL_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Consume owner source-evidence definitions and official source target scopes."
+      ],
+      "source_evidence_scope": "PRIMARY_SOURCE_EVIDENCE_OWNER",
+      "source_to_connector_to_resolver_relationship": "Owns upstream source packet surfaces consumed by Connector and Runtime Resolver agents.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns Connector Registry and semantic binding readiness surfaces.",
+      "agent_role": "CONNECTOR_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_008_CONNECTOR_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "CONNECTOR_SEMANTIC_BINDING_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "CONNECTOR_BOUND_PARAMETER_SCOPE",
+        "VENUE_SEMANTIC_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates connector binding gaps and source prerequisites to owner request routing.",
+      "atomicrows_scope": "SUPPLIES_CONNECTOR_FEASIBILITY_TO_PARAMETER_CONSUMERS_IN_LATER_PHASES",
+      "authorized_consumer_classes": [
+        "RUNTIME_RESOLVER",
+        "RISK",
+        "ORDER_ROUTER",
+        "VALIDATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_CONNECTOR_SEMANTIC_BINDING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "PRIMARY_CONNECTOR_REGISTRY_OWNER",
+      "consumed_artifacts": [
+        "ACCEPTED_SOURCE_PACKET",
+        "FRESH_REVALIDATION_STATE",
+        "CONFLICT_CLEARANCE",
+        "TARGET_FIELD_SCOPE_MATCH"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates connector registry, binding readiness, and no private-state fetch in static scope.",
+      "dashboard_owner_control_relationship": "Dashboard may show connector readiness, downgraded state, and owner-visible blocks.",
+      "dashboard_scope": "OWNER_VISIBLE_CONNECTOR_READINESS_STATUS_ONLY",
+      "decision_authority_scope": "May decide connector readiness and binding eligibility after accepted source prerequisites.",
+      "emitted_artifacts": [
+        "CONNECTOR_READINESS_RECORD",
+        "SEMANTIC_BINDING_RECORD"
+      ],
+      "escalation_behavior": "Escalates semantic conflicts, stale source packets, and connector readiness blockers.",
+      "execution_router_relationship": "Execution Router requires connector readiness before venue-specific order instructions.",
+      "fallback_behavior": "If accepted source prerequisites are absent or stale, connector remains blocked or downgraded.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not fetch private account state here.",
+        "May not bind semantics without accepted source packets."
+      ],
+      "handoff_inputs": [
+        "ACCEPTED_SOURCE_REFERENCE",
+        "CONNECTOR_TARGET_FIELD_SCOPE"
+      ],
+      "handoff_outputs": [
+        "CONNECTOR_READINESS_STATUS",
+        "SEMANTIC_BINDING_REFERENCE"
+      ],
+      "input_packet_types": [
+        "ACCEPTED_SOURCE_PACKET_REFERENCE",
+        "CONNECTOR_TARGET_FIELD_PACKET"
+      ],
+      "live_scope": "NO_LIVE_CONNECTOR_REACHABILITY_CREATED",
+      "master_plan_doctrine_terms_used": [
+        "Connector Registry",
+        "runtime_cash_component_field_map_requires_accepted_source_packet_per_component_flag",
+        "source_dependent_live_or_shadow_field_still_requires_accepted_source_packet"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for CONNECTOR_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not fetch private account state or bind connector semantics in this package.",
+      "master_plan_static_authority_basis": "Records connector duties without creating connector binding artifacts.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Optimizer consumes connector feasibility masks only after binding prerequisites.",
+      "orchestration_spine_relationship": "Runs after source evidence and before runtime resolver in orchestrated flow.",
+      "output_packet_types": [
+        "CONNECTOR_READINESS_PACKET",
+        "CONNECTOR_SEMANTIC_BINDING_PACKET"
+      ],
+      "owned_surfaces": [
+        "CONNECTOR_REGISTRY",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "CONNECTOR_READINESS"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_CONNECTOR_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Maintain connector registry readiness for venue/API/account/orderbook/order-entry semantics.",
+        "Consume accepted source packets before future semantic binding records.",
+        "Emit connector readiness and semantic binding records only when prerequisites exist."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_OUTPUT_SUBORDINATE_TO_CONNECTOR_SEMANTICS_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future connector binding, downgrade, and failure-mode events require receipts.",
+      "replay_paper_dual_review_relationship": "Provides connector semantics for future replay and paper configuration.",
+      "risk_gate_relationship": "Risk consumes connector readiness and stale/conflict states.",
+      "runtime_scope": "STATIC_CONNECTOR_CHARTER_ONLY_NO_PRIVATE_STATE_FETCH_CREATED",
+      "secondary_duties": [
+        "Track rate-limit, authentication-state, order-shape, data-state, and failure-mode hooks."
+      ],
+      "source_evidence_scope": "CONSUMES_ACCEPTED_SOURCE_PACKETS_ONLY",
+      "source_to_connector_to_resolver_relationship": "Owns the connector layer between accepted source evidence and runtime resolver snapshots.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns runtime resolver snapshot contracts and identity normalization surfaces.",
+      "agent_role": "RUNTIME_RESOLVER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_009_RUNTIME_RESOLVER_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "CONTRACT_NORMALIZATION_ALGORITHM",
+        "MARKET_IDENTITY_NORMALIZATION_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "RUNTIME_RESOLVED_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates unresolved identity or source-backed mapping gaps.",
+      "atomicrows_scope": "SUPPLIES_RESOLVED_CONTEXT_FOR_PARAMETER_STACK_SELECTION",
+      "authorized_consumer_classes": [
+        "REPLAY",
+        "PAPER",
+        "RISK",
+        "OPTIMIZER"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_RESOLVER_NORMALIZATION_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_SEMANTIC_BINDINGS",
+      "consumed_artifacts": [
+        "CONNECTOR_SEMANTIC_BINDING",
+        "SOURCE_BACKED_IDENTITY_INPUT"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates resolver contract coverage and snapshot boundary adherence.",
+      "dashboard_owner_control_relationship": "Dashboard may show resolver readiness and unresolved identity blockers.",
+      "dashboard_scope": "OWNER_VISIBLE_RESOLVER_STATUS_ONLY",
+      "decision_authority_scope": "May decide resolver input completeness and normalization eligibility in future runtime workflows.",
+      "emitted_artifacts": [
+        "RUNTIME_RESOLVER_SNAPSHOT_REFERENCE",
+        "RESOLVER_HANDOFF_PACKET"
+      ],
+      "escalation_behavior": "Escalates unresolved identity, stale binding, and missing source prerequisites.",
+      "execution_router_relationship": "Router cannot act on unresolved identities.",
+      "fallback_behavior": "If identity inputs are incomplete, block downstream replay, paper, risk, and live use.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create runtime snapshots in this package.",
+        "May not resolve identities without source and connector prerequisites."
+      ],
+      "handoff_inputs": [
+        "CONNECTOR_SEMANTIC_BINDING_REFERENCE",
+        "SOURCE_BACKED_IDENTITY_PACKET"
+      ],
+      "handoff_outputs": [
+        "RESOLVER_SNAPSHOT_STATUS",
+        "REPLAY_PAPER_HANDOFF_REFERENCE"
+      ],
+      "input_packet_types": [
+        "RESOLVER_INPUT_LOCK_PACKET",
+        "CONNECTOR_BINDING_REFERENCE_PACKET"
+      ],
+      "live_scope": "NO_LIVE_RESOLVER_OUTPUT_CREATED",
+      "master_plan_doctrine_terms_used": [
+        "runtime resolver snapshot",
+        "source_dependent_live_or_shadow_field_still_requires_accepted_source_packet",
+        "connector semantic binding"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for RUNTIME_RESOLVER_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No runtime resolver snapshot is created in this package.",
+      "master_plan_static_authority_basis": "Records resolver contracts without creating resolver snapshots.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Supplies resolved context for deterministic optimizer candidate evaluation.",
+      "orchestration_spine_relationship": "Runs after connector readiness and before replay/paper or runtime consumers.",
+      "output_packet_types": [
+        "RUNTIME_RESOLVER_SNAPSHOT_PACKET",
+        "RESOLVER_HANDOFF_PACKET"
+      ],
+      "owned_surfaces": [
+        "RUNTIME_RESOLVER_CONTRACT",
+        "INPUT_IDENTITY",
+        "MARKET_IDENTITY_NORMALIZATION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_RUNTIME_RESOLVER_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Define runtime resolver snapshot contracts and input identity requirements.",
+        "Normalize contract and market identity after connector and source prerequisites.",
+        "Emit resolver snapshots only in later scoped workflows."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CANDIDATES_REQUIRE_RESOLVED_CONTEXT_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future resolver snapshot creation and handoff events require receipts.",
+      "replay_paper_dual_review_relationship": "Provides locked input identity for separate replay and paper lanes.",
+      "risk_gate_relationship": "Risk consumes resolver completeness and identity uncertainty flags.",
+      "runtime_scope": "STATIC_RESOLVER_CHARTER_ONLY_NO_SNAPSHOT_CREATED",
+      "secondary_duties": [
+        "Prepare handoff surfaces for replay, paper, risk, and optimizer consumers."
+      ],
+      "source_evidence_scope": "CONSUMES_SOURCE_BACKED_INPUTS",
+      "source_to_connector_to_resolver_relationship": "Owns the resolver layer after source and connector prerequisites.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns the non-live replay evidence lane.",
+      "agent_role": "REPLAY_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_010_REPLAY_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "REPLAY_EVALUATION_ALGORITHM_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "REPLAY_PARAMETER_STACK_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates replay blockers or promotion requests to owner approval packaging.",
+      "atomicrows_scope": "CONSUMES_REPLAY_ELIGIBLE_PARAMETER_STACKS",
+      "authorized_consumer_classes": [
+        "DUAL_RESULT_REVIEW",
+        "OPTIMIZER",
+        "RISK"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_REPLAY_EVIDENCE_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_HISTORICAL_SEMANTICS",
+      "consumed_artifacts": [
+        "RUNTIME_RESOLVER_SNAPSHOT",
+        "CANDIDATE_PARAMETER_STACK",
+        "CONNECTOR_SOURCE_BACKED_HISTORICAL_SEMANTICS"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates replay lane separation and output coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may show replay status and result summaries for owner review.",
+      "dashboard_scope": "OWNER_VISIBLE_REPLAY_STATUS_ONLY",
+      "decision_authority_scope": "May decide replay-lane pass, fail, or blocker states in future non-live evidence workflows.",
+      "emitted_artifacts": [
+        "REPLAY_RESULT_PACKET",
+        "REPLAY_BLOCKER_PACKET"
+      ],
+      "escalation_behavior": "Escalates replay/paper divergence, input gaps, and blocker states.",
+      "execution_router_relationship": "No router path; replay is non-live evidence only.",
+      "fallback_behavior": "If replay inputs are missing, block result creation and request resolver or source repair.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create paper or live approval.",
+        "May not claim profit or live readiness from replay alone."
+      ],
+      "handoff_inputs": [
+        "RESOLVER_SNAPSHOT_REFERENCE",
+        "PARAMETER_STACK_CANDIDATE"
+      ],
+      "handoff_outputs": [
+        "REPLAY_RESULT_REFERENCE",
+        "DUAL_REVIEW_REPLAY_INPUT"
+      ],
+      "input_packet_types": [
+        "REPLAY_RUN_INPUT_PACKET",
+        "PARAMETER_STACK_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_REPLAY",
+      "master_plan_doctrine_terms_used": [
+        "stage1_replay_and_paper_run_mode",
+        "stage1_replay_and_paper_results_must_remain_separate_flag",
+        "runtime resolver snapshot"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for REPLAY_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No replay execution or replay result packet is created here.",
+      "master_plan_static_authority_basis": "Records replay lane duties without executing replay.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds replay feedback into deterministic optimizer scoring and candidate competition.",
+      "orchestration_spine_relationship": "Receives locked replay tasks from orchestrator and returns results to dual review.",
+      "output_packet_types": [
+        "REPLAY_RESULT_PACKET",
+        "REPLAY_BLOCKER_PACKET"
+      ],
+      "owned_surfaces": [
+        "REPLAY_LANE",
+        "REPLAY_INPUT_LOCK",
+        "REPLAY_RESULT_BOUNDARY"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_REPLAY_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Run the future non-live replay lane using locked resolver snapshots and candidate parameter stacks.",
+        "Keep replay inputs and outputs separate from paper and live workflows.",
+        "Emit replay result packets only in later evidence phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CANDIDATES_REQUIRE_REPLAY_EVIDENCE_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future replay start, block, and result events require receipts.",
+      "replay_paper_dual_review_relationship": "Owns replay side of separate replay/paper lanes.",
+      "risk_gate_relationship": "Risk may consume replay outcomes but replay cannot approve risk.",
+      "runtime_scope": "STATIC_REPLAY_CHARTER_ONLY_NO_REPLAY_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Report replay blockers, data gaps, and parameter-stack compatibility failures."
+      ],
+      "source_evidence_scope": "CONSUMES_SOURCE_BACKED_HISTORICAL_SEMANTICS",
+      "source_to_connector_to_resolver_relationship": "Consumes resolver snapshots derived from source and connector prerequisites.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns the non-live paper evidence lane.",
+      "agent_role": "PAPER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_011_PAPER_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "PAPER_EVALUATION_ALGORITHM_SCOPE"
+      ],
+      "applicable_parameter_family_scopes": [
+        "PAPER_PARAMETER_STACK_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates paper blockers or promotion requests to owner approval packaging.",
+      "atomicrows_scope": "CONSUMES_PAPER_ELIGIBLE_PARAMETER_STACKS",
+      "authorized_consumer_classes": [
+        "DUAL_RESULT_REVIEW",
+        "OPTIMIZER",
+        "RISK"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_PAPER_EVIDENCE_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_BACKED_CONFIG",
+      "consumed_artifacts": [
+        "SHARED_INPUT_LOCK",
+        "CANDIDATE_PARAMETER_STACK",
+        "PAPER_EXECUTION_CONFIGURATION"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates paper lane separation and output coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may show paper status and summaries for owner review.",
+      "dashboard_scope": "OWNER_VISIBLE_PAPER_STATUS_ONLY",
+      "decision_authority_scope": "May decide paper-lane pass, fail, or blocker states in future non-live workflows.",
+      "emitted_artifacts": [
+        "PAPER_RESULT_PACKET",
+        "PAPER_BLOCKER_PACKET"
+      ],
+      "escalation_behavior": "Escalates replay/paper divergence, input gaps, and blocker states.",
+      "execution_router_relationship": "No router path; paper is non-live evidence only.",
+      "fallback_behavior": "If paper inputs are missing, block result creation and request repair.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create replay or live approval.",
+        "May not treat paper outputs as fills or profit evidence."
+      ],
+      "handoff_inputs": [
+        "SHARED_INPUT_LOCK_REFERENCE",
+        "PAPER_CONFIGURATION_PACKET"
+      ],
+      "handoff_outputs": [
+        "PAPER_RESULT_REFERENCE",
+        "DUAL_REVIEW_PAPER_INPUT"
+      ],
+      "input_packet_types": [
+        "PAPER_RUN_INPUT_PACKET",
+        "PARAMETER_STACK_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_PAPER",
+      "master_plan_doctrine_terms_used": [
+        "stage1_pre_live_validation_mode",
+        "CONCURRENT_SEPARATE_LANES_AFTER_SHARED_INPUT_LOCK",
+        "stage1_replay_and_paper_results_must_remain_separate_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for PAPER_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No paper execution or paper result packet is created here.",
+      "master_plan_static_authority_basis": "Records paper lane duties without executing paper mode.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds paper feedback into deterministic optimizer scoring and candidate competition.",
+      "orchestration_spine_relationship": "Receives paper tasks from orchestrator and returns separate results to dual review.",
+      "output_packet_types": [
+        "PAPER_RESULT_PACKET",
+        "PAPER_BLOCKER_PACKET"
+      ],
+      "owned_surfaces": [
+        "PAPER_LANE",
+        "PAPER_EXECUTION_CONFIG",
+        "PAPER_RESULT_BOUNDARY"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_PAPER_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Run the future non-live paper lane from shared input locks and candidate stacks.",
+        "Keep paper outputs separate from replay and live approval.",
+        "Emit paper result packets only in later evidence phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CANDIDATES_REQUIRE_PAPER_EVIDENCE_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future paper start, block, and result events require receipts.",
+      "replay_paper_dual_review_relationship": "Owns paper side of separate replay/paper lanes.",
+      "risk_gate_relationship": "Risk may consume paper evidence but paper cannot approve risk.",
+      "runtime_scope": "STATIC_PAPER_CHARTER_ONLY_NO_PAPER_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Report paper blockers, execution configuration gaps, and divergence inputs."
+      ],
+      "source_evidence_scope": "CONSUMES_SOURCE_BACKED_INPUTS",
+      "source_to_connector_to_resolver_relationship": "Consumes locked inputs downstream of source, connector, and resolver prerequisites.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns comparison of separate replay and paper evidence outputs.",
+      "agent_role": "DUAL_RESULT_REVIEW_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_012_DUAL_RESULT_REVIEW_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "REPLAY_PAPER_COMPARISON_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "DUAL_REVIEW_PARAMETER_STACK_SCOPE"
+      ],
+      "approval_request_behavior": "Packages promotion handoffs for owner review without approving for owner.",
+      "atomicrows_scope": "RELATES_RESULTS_TO_PARAMETER_STACKS",
+      "authorized_consumer_classes": [
+        "OWNER_APPROVAL",
+        "RISK",
+        "OPTIMIZER",
+        "LIVE_CANARY"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_DUAL_REVIEW_COMPARISON_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_BACKED_EVIDENCE_LINEAGE",
+      "consumed_artifacts": [
+        "REPLAY_RESULT_PACKET",
+        "PAPER_RESULT_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates dual review coverage and separation rules.",
+      "dashboard_owner_control_relationship": "Dashboard may show comparison summaries and owner review queue.",
+      "dashboard_scope": "OWNER_VISIBLE_DUAL_REVIEW_SUMMARY_ONLY",
+      "decision_authority_scope": "May decide comparison pass, fail, or divergence states in later non-live review.",
+      "emitted_artifacts": [
+        "DUAL_REVIEW_COMPARISON_MATRIX",
+        "OWNER_HANDOFF_PACKET"
+      ],
+      "escalation_behavior": "Escalates divergence, missing result packets, and promotion ambiguity.",
+      "execution_router_relationship": "Router remains blocked until later owner, risk, and live gates pass.",
+      "fallback_behavior": "If replay and paper disagree or are incomplete, block promotion and request review.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not merge replay/paper into live approval.",
+        "May not bypass owner promotion review."
+      ],
+      "handoff_inputs": [
+        "REPLAY_RESULT_REFERENCE",
+        "PAPER_RESULT_REFERENCE"
+      ],
+      "handoff_outputs": [
+        "DUAL_REVIEW_MATRIX",
+        "OWNER_PROMOTION_REVIEW_HANDOFF"
+      ],
+      "input_packet_types": [
+        "REPLAY_RESULT_PACKET",
+        "PAPER_RESULT_PACKET"
+      ],
+      "live_scope": "NO_LIVE_PROMOTION_CREATED_BY_DUAL_REVIEW",
+      "master_plan_doctrine_terms_used": [
+        "stage1_replay_and_paper_results_must_remain_separate_flag",
+        "dual result review",
+        "owner live promotion review"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for DUAL_RESULT_REVIEW_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No dual-result runtime packet is created here.",
+      "master_plan_static_authority_basis": "Records dual review duties without comparing real results.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds comparison outcomes back to optimizer ranking and candidate competition.",
+      "orchestration_spine_relationship": "Receives replay and paper outputs after both lanes complete.",
+      "output_packet_types": [
+        "DUAL_RESULT_REVIEW_PACKET",
+        "OWNER_HANDOFF_PACKET"
+      ],
+      "owned_surfaces": [
+        "DUAL_RESULT_REVIEW",
+        "REPLAY_PAPER_COMPARISON",
+        "OWNER_HANDOFF_BLOCK"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_DUAL_REVIEW_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Compare replay and paper result packets from separate lanes in later phases.",
+        "Emit comparison matrices and owner handoff packets without auto-promoting live.",
+        "Surface divergence, uncertainty, and evidence gaps for owner and risk review."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_ADVANTAGE_HYPOTHESIS_REQUIRES_DUAL_REVIEW_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future dual review matrices and handoffs require event receipts.",
+      "replay_paper_dual_review_relationship": "Owns the comparison bridge between separate replay and paper lanes.",
+      "risk_gate_relationship": "Risk consumes comparison and divergence flags before approval.",
+      "runtime_scope": "STATIC_DUAL_REVIEW_CHARTER_ONLY_NO_RUNTIME_PACKET_CREATED",
+      "secondary_duties": [
+        "Preserve replay/paper separation through owner promotion review."
+      ],
+      "source_evidence_scope": "CONSUMES_SOURCE_BACKED_EVIDENCE_LINEAGE",
+      "source_to_connector_to_resolver_relationship": "Reviews outputs whose inputs trace to source, connector, and resolver prerequisites.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns deterministic parameter-stack generation, scoring, ranking, competition, and quantum/classical arbitration surfaces.",
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "DETERMINISTIC_SCORING",
+        "DETERMINISTIC_RANKING",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK"
+      ],
+      "applicable_parameter_family_scopes": [
+        "EDGE_PARAMETER_STACK_SCOPE",
+        "QUANTUM_PARAMETER_STACK_SCOPE",
+        "CLASSICAL_COMPARATOR_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests owner approval for quantum priority, live intent enablement, or unresolved arbitration policy.",
+      "atomicrows_scope": "CONSUMES_ATOMICROWS_INVENTORY_FOR_PARAMETER_STACK_SELECTION",
+      "authorized_consumer_classes": [
+        "REPLAY",
+        "PAPER",
+        "RISK",
+        "SIZING",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "STRONGEST_CLASSICAL_COMPARATOR_AND_DETERMINISTIC_RANKING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CANNOT_OVERRIDE_CONNECTOR_SEMANTICS",
+      "consumed_artifacts": [
+        "ATOMICROWS_INVENTORY",
+        "EDGE_HYPOTHESIS_PACKET",
+        "TRADE_CONTEXT_PACKET",
+        "REPLAY_PAPER_FEEDBACK",
+        "RISK_CONSTRAINTS"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates deterministic scoring, no random selection, and arbitration coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may display ranked candidates and owner quantum-priority controls.",
+      "dashboard_scope": "OWNER_VISIBLE_OPTIMIZER_RANKING_AND_QUANTUM_PRIORITY_CONTROL",
+      "decision_authority_scope": "May decide ranked candidate ordering and optimizer selection for later evidence lanes.",
+      "emitted_artifacts": [
+        "RANKED_PARAMETER_STACK_PACKET",
+        "OPTIMIZER_SELECTION_PACKET",
+        "ARBITRATION_PACKET",
+        "REPLAY_PAPER_CANDIDATE_PACK"
+      ],
+      "escalation_behavior": "Escalates missing comparator, missing fallback, quantum policy ambiguity, and risk blocks.",
+      "execution_router_relationship": "Optimizer cannot route orders; approved future intents still pass Execution Router.",
+      "fallback_behavior": "If objective, comparator, fallback bundle, or evidence is missing, block or downgrade candidate.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not claim alpha, profit, or quantum advantage without evidence.",
+        "May not submit live orders directly."
+      ],
+      "handoff_inputs": [
+        "EDGE_HYPOTHESIS_PACKET",
+        "ATOMICROWS_SELECTION_UNIVERSE",
+        "RISK_CONSTRAINT_PACKET"
+      ],
+      "handoff_outputs": [
+        "RANKED_PARAMETER_STACKS",
+        "QUANTUM_CLASSICAL_ARBITRATION_PACKET"
+      ],
+      "input_packet_types": [
+        "PARAMETER_STACK_INPUT_PACKET",
+        "QUANTUM_CANDIDATE_PACKET"
+      ],
+      "live_scope": "FUTURE_OWNER_ENABLED_TRADE_INTENT_ONLY_AFTER_ALL_GATES_NO_ORDER_AUTHORITY",
+      "master_plan_doctrine_terms_used": [
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "quantum_optimizer_replay_paper_candidate_trigger_allowed_flag",
+        "quantum_output_may_not_override_source_evidence_connector_semantic_runtime_cash_or_owner_approval_gates"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for OPTIMIZER_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No replay, paper, live, backend, or trade-intent artifact is created here.",
+      "master_plan_static_authority_basis": "Records optimizer authority surfaces without claiming alpha, profit, or quantum advantage evidence.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Owns optimizer arbitration surface including strongest-classical comparator and quantum tie-break policy.",
+      "orchestration_spine_relationship": "Receives edge and inventory inputs through orchestrator and hands candidates to evidence lanes.",
+      "output_packet_types": [
+        "RANKED_PARAMETER_STACK_PACKET",
+        "ARBITRATION_PACKET"
+      ],
+      "owned_surfaces": [
+        "PARAMETER_STACK_GENERATION",
+        "DETERMINISTIC_SCORING",
+        "DETERMINISTIC_RANKING",
+        "QUANTUM_CLASSICAL_ARBITRATION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_OPTIMIZER_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Generate deterministic parameter-stack candidates from AtomicRows inventory and edge hypotheses.",
+        "Score, rank, and arbitrate candidate stacks using strongest-classical comparators and quantum/classical policy.",
+        "Reject random parameter or single-algorithm direct trade selection paths.",
+        "Emit ranked stacks, arbitration packets, and replay/paper candidate packs in later phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "TRUE_QUANTUM_QUANTUM_INSPIRED_HYBRID_ARBITRATION_SCOPE_WITH_NO_ADVANTAGE_CLAIM",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future optimizer selections and arbitration results require event receipts.",
+      "replay_paper_dual_review_relationship": "Creates candidate packs for replay/paper evidence before promotion.",
+      "risk_gate_relationship": "Risk can block optimizer outputs for stale, conflicted, infeasible, or excessive exposure inputs.",
+      "runtime_scope": "STATIC_OPTIMIZER_CHARTER_ONLY_NO_RUNTIME_OPTIMIZER_CREATED",
+      "secondary_duties": [
+        "Consume replay/paper feedback, risk, sizing, latency, and quantum candidate surfaces."
+      ],
+      "source_evidence_scope": "CANNOT_OVERRIDE_SOURCE_EVIDENCE",
+      "source_to_connector_to_resolver_relationship": "Optimizer outputs remain subordinate to source evidence, connector semantics, and resolver snapshots.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns the Risk Gate for exposure, uncertainty, source freshness, kill conditions, and capital constraints.",
+      "agent_role": "RISK_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_014_RISK_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "RISK_SCORING_ALGORITHM",
+        "FAIL_CLOSED_RISK_CLASSIFIER"
+      ],
+      "applicable_parameter_family_scopes": [
+        "RISK_LIMIT_PARAMETER_SCOPE",
+        "QUANTUM_FEASIBILITY_MASK_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates risk tolerance, stale evidence, and kill-switch conflicts to owner request routing.",
+      "atomicrows_scope": "CONSUMES_PARAMETER_STACK_RISK_ATTRIBUTES",
+      "authorized_consumer_classes": [
+        "SIZING",
+        "ORDER_ROUTER",
+        "LIVE_CANARY",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_RISK_GATE_AND_EXPOSURE_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "FAILS_CLOSED_ON_MISSING_OR_DOWNGRADED_CONNECTOR_READINESS",
+      "consumed_artifacts": [
+        "PROPOSED_TRADE_INTENT",
+        "RANKED_PARAMETER_STACK_PACKET",
+        "SIZING_SUGGESTION",
+        "SOURCE_FRESHNESS_STATE",
+        "RUNTIME_CASH_STATE"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates risk decisions, stale-input blocks, and exposure constraint coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may show risk state, blocks, and owner policy controls.",
+      "dashboard_scope": "OWNER_VISIBLE_RISK_GATE_STATUS_ONLY",
+      "decision_authority_scope": "May approve, block, or constrain future risk-gated intents.",
+      "emitted_artifacts": [
+        "RISK_APPROVAL_PACKET",
+        "RISK_BLOCK_PACKET",
+        "RISK_LIMIT_PACKET",
+        "KILL_SWITCH_RECOMMENDATION"
+      ],
+      "escalation_behavior": "Escalates risk tolerance, exposure, kill-switch, and uncertainty blockers.",
+      "execution_router_relationship": "Router only receives intents that clear risk, owner, source, connector, cash, latency, and kill-switch gates.",
+      "fallback_behavior": "Unknown, stale, conflicted, or infeasible input blocks new or increased exposure.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not approve for owner.",
+        "May not fabricate cash, source, connector, replay, or paper evidence."
+      ],
+      "handoff_inputs": [
+        "OPTIMIZER_SELECTION_PACKET",
+        "SIZING_SUGGESTION_PACKET",
+        "SOURCE_CONNECTOR_RESOLVER_STATUS"
+      ],
+      "handoff_outputs": [
+        "RISK_GATE_DECISION",
+        "EXPOSURE_CONSTRAINT_PACKET"
+      ],
+      "input_packet_types": [
+        "RISK_EVALUATION_PACKET",
+        "KILL_SWITCH_STATE_PACKET"
+      ],
+      "live_scope": "FUTURE_LIVE_RISK_GATE_ONLY_AFTER_ALL_PREREQUISITES",
+      "master_plan_doctrine_terms_used": [
+        "Risk Gate",
+        "runtime_cash_component_unknown_blocks_new_or_increased_exposure_flag",
+        "risk_manager_may_block_quantum_triggered_trade"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for RISK_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No risk approval receipt or live gate artifact is created here.",
+      "master_plan_static_authority_basis": "Records risk-gate duties without approving real trades.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Can block or constrain optimizer and quantum-triggered outputs.",
+      "orchestration_spine_relationship": "Receives proposed intents through orchestrator before sizing and router advancement.",
+      "output_packet_types": [
+        "RISK_APPROVAL_PACKET",
+        "RISK_BLOCK_PACKET"
+      ],
+      "owned_surfaces": [
+        "RISK_GATE",
+        "EXPOSURE_LIMITS",
+        "KILL_CONDITIONS",
+        "UNCERTAINTY_FLAGS"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_RISK_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Evaluate future proposed trades, parameter stacks, optimizer outputs, source freshness, connector readiness, cash state, exposure, and kill-switch state.",
+        "Fail closed on unknown, stale, conflicted, or unauthorized inputs.",
+        "Emit risk approvals, blocks, limit packets, and exposure constraints in later phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CANDIDATE_RISK_AND_FEASIBILITY_MASK_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future risk approvals, blocks, and kill-switch recommendations require receipts.",
+      "replay_paper_dual_review_relationship": "Consumes replay/paper and dual review evidence before live eligibility.",
+      "risk_gate_relationship": "Primary owner of Risk Gate decisions and fail-closed blocks.",
+      "runtime_scope": "STATIC_RISK_CHARTER_ONLY_NO_RUNTIME_RISK_DECISION_CREATED",
+      "secondary_duties": [
+        "Apply owner risk policy and quantum-triggered trade constraints."
+      ],
+      "source_evidence_scope": "FAILS_CLOSED_ON_STALE_OR_CONFLICTED_SOURCE_INPUTS",
+      "source_to_connector_to_resolver_relationship": "Consumes source freshness, connector readiness, and resolver completeness as risk inputs.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Transforms approved risk and capital constraints into future position sizing recommendations.",
+      "agent_role": "SIZING_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_015_SIZING_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "POSITION_SIZING_ALGORITHM",
+        "CAPITAL_ALLOCATION_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "SIZING_PARAMETER_SCOPE",
+        "CAPITAL_CONSTRAINT_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates capital policy, unknown cash, or sizing conflicts to owner request routing.",
+      "atomicrows_scope": "CONSUMES_PARAMETER_STACK_CONFIDENCE_AND_SIZING_ROWS",
+      "authorized_consumer_classes": [
+        "RISK",
+        "ORDER_ROUTER",
+        "LIVE_CANARY",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_POSITION_SIZING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_CASH_SEMANTICS_IN_LATER_PHASES",
+      "consumed_artifacts": [
+        "RISK_CONSTRAINT_PACKET",
+        "RUNTIME_CASH_RECEIPT",
+        "PARAMETER_STACK_CONFIDENCE",
+        "OWNER_CAPITAL_POLICY"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates sizing prerequisites and absence of fabricated cash.",
+      "dashboard_owner_control_relationship": "Dashboard may show sizing recommendations and capital policy controls.",
+      "dashboard_scope": "OWNER_VISIBLE_SIZING_AND_CAPITAL_STATUS_ONLY",
+      "decision_authority_scope": "May recommend future sizing within approved risk and cash constraints.",
+      "emitted_artifacts": [
+        "SIZING_PACKET",
+        "CAPITAL_ALLOCATION_RECOMMENDATION"
+      ],
+      "escalation_behavior": "Escalates unknown cash, capital conflict, and risk/sizing mismatch.",
+      "execution_router_relationship": "Router receives sizing only as part of approved trade intent after all gates.",
+      "fallback_behavior": "If usable capital or cash semantics are unknown, block sizing for new or increased exposure.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not fabricate balances or cash receipts.",
+        "May not route orders or approve for owner."
+      ],
+      "handoff_inputs": [
+        "RISK_LIMIT_PACKET",
+        "USABLE_CAPITAL_STATE",
+        "VOLATILITY_LIQUIDITY_ASSUMPTIONS"
+      ],
+      "handoff_outputs": [
+        "SIZING_RECOMMENDATION_PACKET",
+        "CAPITAL_CONSTRAINT_PACKET"
+      ],
+      "input_packet_types": [
+        "SIZING_INPUT_PACKET",
+        "RUNTIME_CASH_RECEIPT_PACKET"
+      ],
+      "live_scope": "NO_LIVE_SIZING_AUTHORITY_WITHOUT_RUNTIME_CASH_AND_RISK_GATES",
+      "master_plan_doctrine_terms_used": [
+        "runtime_cash_component_field_map_requires_accepted_source_packet_per_component_flag",
+        "usable capital gate",
+        "Risk Gate"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for SIZING_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No runtime cash receipt or sizing packet is created here.",
+      "master_plan_static_authority_basis": "Records sizing duties without fabricating balances or cash receipts.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Consumes optimizer confidence and quantum feasibility masks after arbitration.",
+      "orchestration_spine_relationship": "Runs after risk constraints and before latency/router handoffs in the orchestrated flow.",
+      "output_packet_types": [
+        "SIZING_PACKET",
+        "CAPITAL_ALLOCATION_PACKET"
+      ],
+      "owned_surfaces": [
+        "POSITION_SIZING",
+        "CAPITAL_ALLOCATION",
+        "USABLE_CAPITAL_TRANSLATION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_SIZING_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Transform approved risk and capital constraints into future position sizing recommendations.",
+        "Consume runtime cash receipts, volatility, liquidity, confidence, and owner capital policy in later phases.",
+        "Emit sizing packets only after evidence and cash prerequisites exist."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_PORTFOLIO_OPTIMIZATION_FEASIBILITY_SCOPE_WITH_CASH_GATE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future sizing and capital allocation recommendations require receipts.",
+      "replay_paper_dual_review_relationship": "Uses replay/paper confidence only as non-live evidence input.",
+      "risk_gate_relationship": "Consumes and obeys risk constraints; cannot override Risk Gate blocks.",
+      "runtime_scope": "STATIC_SIZING_CHARTER_ONLY_NO_CASH_RECEIPT_CREATED",
+      "secondary_duties": [
+        "Apply quantum feasibility masks and capital-allocation constraints when owner quantum priority is active."
+      ],
+      "source_evidence_scope": "REQUIRES_ACCEPTED_SOURCE_PACKET_FOR_CASH_COMPONENT_MAPS",
+      "source_to_connector_to_resolver_relationship": "Sizing depends on source-backed runtime cash semantics and resolved market context.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns latency-sensitive architecture, live-path exclusions, and precomputed control-plane snapshot policies.",
+      "agent_role": "EXECUTION_LATENCY_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "LATENCY_CLASSIFICATION_ALGORITHM",
+        "EXECUTION_QUALITY_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "LATENCY_PARAMETER_SCOPE",
+        "EXECUTION_QUALITY_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates live-path dependency or quantum backend placement questions to owner request routing.",
+      "atomicrows_scope": "CONSUMES_LATENCY_RELEVANT_PARAMETER_ROWS",
+      "authorized_consumer_classes": [
+        "RISK",
+        "ORDER_ROUTER",
+        "OPTIMIZER",
+        "LIVE_CANARY"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_LATENCY_AND_EXECUTION_QUALITY_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CONSUMES_CONNECTOR_LATENCY_AND_ORDERBOOK_SEMANTICS",
+      "consumed_artifacts": [
+        "VENUE_LATENCY_MAP",
+        "ORDERBOOK_STATE_SEMANTICS",
+        "EXECUTION_ROUTER_CONSTRAINTS",
+        "OPTIMIZER_PATH_LATENCY"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates latency gates and live-path dependency exclusions.",
+      "dashboard_owner_control_relationship": "Dashboard may show latency policy, exclusions, and execution-quality status.",
+      "dashboard_scope": "OWNER_VISIBLE_LATENCY_AND_EXECUTION_QUALITY_STATUS_ONLY",
+      "decision_authority_scope": "May classify latency policy and exclude unapproved live-path dependencies.",
+      "emitted_artifacts": [
+        "LATENCY_POLICY_PACKET",
+        "LIVE_PATH_EXCLUSION_RULE",
+        "EXECUTION_QUALITY_CONSTRAINT"
+      ],
+      "escalation_behavior": "Escalates live-path dependency conflicts and unbounded latency risks.",
+      "execution_router_relationship": "Router receives latency-cleared constraints before future order submission.",
+      "fallback_behavior": "If latency dependency is unapproved or unknown, exclude from live path and require precompute or review.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not submit orders.",
+        "May not authorize remote quantum backend dependency in live pretrade path."
+      ],
+      "handoff_inputs": [
+        "ROUTER_CONSTRAINT_PACKET",
+        "OPTIMIZER_LATENCY_PACKET",
+        "VENUE_LATENCY_PACKET"
+      ],
+      "handoff_outputs": [
+        "LATENCY_POLICY_DECISION",
+        "EXECUTION_QUALITY_CONSTRAINT_PACKET"
+      ],
+      "input_packet_types": [
+        "LATENCY_INPUT_PACKET",
+        "EXECUTION_PATH_PACKET"
+      ],
+      "live_scope": "FUTURE_LIVE_PATH_EXCLUSION_GATE_ONLY_AFTER_ALL_GATES",
+      "master_plan_doctrine_terms_used": [
+        "execution latency component model",
+        "quantum_optimizer_live_pretrade_remote_backend_dependency_allowed",
+        "Execution Router"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for EXECUTION_LATENCY_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No latency runtime service or live observation artifact is created here.",
+      "master_plan_static_authority_basis": "Records latency policy duties without creating live path telemetry.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Constrains optimizer and quantum backend placement relative to live path.",
+      "orchestration_spine_relationship": "Runs as a gate between optimizer/sizing outputs and execution-router eligibility.",
+      "output_packet_types": [
+        "LATENCY_POLICY_PACKET",
+        "LIVE_PATH_EXCLUSION_PACKET"
+      ],
+      "owned_surfaces": [
+        "EXECUTION_LATENCY_POLICY",
+        "LIVE_PATH_EXCLUSION",
+        "PRECOMPUTED_SNAPSHOT_POLICY"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_EXECUTION_LATENCY_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Govern latency-sensitive architecture, live-path weight, and control-plane separation.",
+        "Ensure heavy quantum/backend/control-plane work stays outside live pretrade path unless precomputed and approved later.",
+        "Emit latency policy packets and live-path exclusion rules in later phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_BACKEND_PRECOMPUTED_CONTROL_PLANE_ONLY_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future latency policy decisions and exclusions require receipts.",
+      "replay_paper_dual_review_relationship": "Can feed execution-quality constraints into replay/paper calibration.",
+      "risk_gate_relationship": "Risk consumes latency uncertainty and live-path exclusion signals.",
+      "runtime_scope": "STATIC_LATENCY_CHARTER_ONLY_NO_RUNTIME_TELEMETRY_CREATED",
+      "secondary_duties": [
+        "Consume venue latency maps, orderbook semantics, router constraints, and optimizer path latency."
+      ],
+      "source_evidence_scope": "CONSUMES_SOURCE_CHANGE_SNAPSHOT_STATUS_IN_LATER_PHASES",
+      "source_to_connector_to_resolver_relationship": "Consumes source-change snapshots, connector state, and resolver context for latency-sensitive decisions.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns the future Execution Router final order-submission authority after all gates.",
+      "agent_role": "ORDER_ROUTER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_017_ORDER_ROUTER_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "ORDER_ROUTING_ALGORITHM",
+        "VENUE_ADAPTER_SELECTION_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "ORDER_ROUTING_PARAMETER_SCOPE",
+        "VENUE_ORDER_SHAPE_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates missing owner live authorization or gate conflicts to owner approval routing.",
+      "atomicrows_scope": "CONSUMES_APPROVED_PARAMETER_STACK_ONLY_AS_PART_OF_GATED_INTENT",
+      "authorized_consumer_classes": [
+        "LIVE_CANARY",
+        "RECEIPT_EVENT_LOG",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_ORDER_ROUTING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "REQUIRES_CONNECTOR_BINDING_AND_READINESS",
+      "consumed_artifacts": [
+        "APPROVED_TRADE_INTENT",
+        "RISK_APPROVAL_PACKET",
+        "SIZING_PACKET",
+        "LATENCY_POLICY_PACKET",
+        "CONNECTOR_READINESS_RECORD"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates router prerequisites and absence of static order artifacts.",
+      "dashboard_owner_control_relationship": "Dashboard may display router readiness and owner live controls without routing authority.",
+      "dashboard_scope": "OWNER_VISIBLE_ROUTER_STATUS_AND_LIVE_SCOPE_CONTROL_ONLY",
+      "decision_authority_scope": "May submit future venue-specific orders only after all gates and owner live authorization.",
+      "emitted_artifacts": [
+        "VENUE_ORDER_INSTRUCTION",
+        "ORDER_RECEIPT"
+      ],
+      "escalation_behavior": "Escalates gate mismatch, missing owner live scope, or connector/order-shape conflicts.",
+      "execution_router_relationship": "Primary owner of the future final Execution Router role.",
+      "fallback_behavior": "If any gate is missing, stale, conflicted, or blocked, do not route and emit blocker.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create order artifacts in this package.",
+        "May not accept raw agent desires or ungated quantum outputs."
+      ],
+      "handoff_inputs": [
+        "APPROVED_TRADE_INTENT_PACKET",
+        "ALL_GATES_GREEN_PACKET"
+      ],
+      "handoff_outputs": [
+        "VENUE_ORDER_INSTRUCTION_PACKET",
+        "ORDER_RECEIPT_REFERENCE"
+      ],
+      "input_packet_types": [
+        "APPROVED_TRADE_INTENT_PACKET",
+        "ROUTER_GATE_PACKET"
+      ],
+      "live_scope": "FUTURE_FINAL_ORDER_SUBMISSION_AUTHORITY_AFTER_ALL_GATES",
+      "master_plan_doctrine_terms_used": [
+        "Execution Router",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "quantum_optimizer_direct_live_order_submission_allowed_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for ORDER_ROUTER_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No order instruction, order receipt, live reachability, or venue call is created here.",
+      "master_plan_static_authority_basis": "Records router role without creating order path or order artifacts.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Consumes only approved optimizer outputs converted into gated trade intents.",
+      "orchestration_spine_relationship": "Sits after all prerequisite gates in the orchestrated live path.",
+      "output_packet_types": [
+        "VENUE_ORDER_INSTRUCTION_PACKET",
+        "ORDER_RECEIPT_PACKET"
+      ],
+      "owned_surfaces": [
+        "EXECUTION_ROUTER",
+        "ORDER_SUBMISSION_AUTHORITY",
+        "VENUE_ORDER_INSTRUCTION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_ORDER_ROUTER_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Receive only approved future trade intents after owner, risk, source, connector, resolver, cash, latency, kill-switch, and permission gates.",
+        "Convert approved intents into venue-specific order instructions in later live-authorized phases.",
+        "Remain final order-submission authority in future approved live phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_OUTPUT_MAY_CREATE_ONLY_GATED_INTENT_NOT_DIRECT_ORDER_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future order instructions, submissions, cancels, fills, and failures require receipts.",
+      "replay_paper_dual_review_relationship": "Receives live eligibility only after replay, paper, dual review, and owner promotion gates.",
+      "risk_gate_relationship": "Consumes and obeys risk approval; risk blocks stop router submission.",
+      "runtime_scope": "STATIC_ROUTER_CHARTER_ONLY_NO_ORDER_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Reject raw agent desires and quantum outputs that bypass required gates."
+      ],
+      "source_evidence_scope": "REQUIRES_ACCEPTED_SOURCE_EVIDENCE_FOR_SOURCE_DEPENDENT_FIELDS",
+      "source_to_connector_to_resolver_relationship": "Requires source, connector, resolver, and cash prerequisites before order eligibility.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns later limited-live canary staging and safety contract after all gates and owner approval.",
+      "agent_role": "LIVE_CANARY_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_018_LIVE_CANARY_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "CANARY_SAFETY_ALGORITHM",
+        "LIMITED_LIVE_ELIGIBILITY_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "CANARY_PARAMETER_SCOPE",
+        "LIMITED_LIVE_RISK_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests explicit owner live canary approval and escalation for blockers.",
+      "atomicrows_scope": "CONSUMES_PROMOTED_PARAMETER_STACKS_ONLY",
+      "authorized_consumer_classes": [
+        "ORDER_ROUTER",
+        "RISK",
+        "DASHBOARD",
+        "GOVERNANCE"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_LIMITED_LIVE_CANARY_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "REQUIRES_CONNECTOR_AND_ROUTER_READINESS",
+      "consumed_artifacts": [
+        "OWNER_LIVE_APPROVAL",
+        "DUAL_RESULT_REVIEW_PACKET",
+        "RISK_APPROVAL_PACKET",
+        "ROUTER_READINESS_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates canary prerequisites and safety packet coverage.",
+      "dashboard_owner_control_relationship": "Dashboard may show canary readiness and owner live controls.",
+      "dashboard_scope": "OWNER_VISIBLE_CANARY_READINESS_AND_CONTROL_STATUS_ONLY",
+      "decision_authority_scope": "May classify future canary readiness after all prerequisites and owner approval.",
+      "emitted_artifacts": [
+        "CANARY_READINESS_PACKET",
+        "CANARY_EXECUTION_RECEIPT",
+        "POST_TRADE_HANDOFF_PACKET"
+      ],
+      "escalation_behavior": "Escalates live-scope, safety, kill-switch, or readiness blockers.",
+      "execution_router_relationship": "Canary execution uses Execution Router as final order-submission authority.",
+      "fallback_behavior": "If any canary precondition fails, remain not eligible and route blocker.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create live canary artifacts in this package.",
+        "May not bypass owner approval or router authority."
+      ],
+      "handoff_inputs": [
+        "OWNER_LIVE_APPROVAL_PACKET",
+        "ALL_GATES_GREEN_PACKET"
+      ],
+      "handoff_outputs": [
+        "CANARY_READINESS_STATUS",
+        "CANARY_SAFETY_PACKET"
+      ],
+      "input_packet_types": [
+        "CANARY_ELIGIBILITY_PACKET",
+        "OWNER_LIVE_APPROVAL_PACKET"
+      ],
+      "live_scope": "FUTURE_LIMITED_LIVE_CANARY_ONLY_AFTER_ALL_GATES_AND_OWNER_APPROVAL",
+      "master_plan_doctrine_terms_used": [
+        "stage1_limited_live_canary_execution_scope",
+        "owner live promotion review",
+        "Execution Router"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for LIVE_CANARY_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No live canary readiness packet, canary execution receipt, or live artifact is created here.",
+      "master_plan_static_authority_basis": "Records canary readiness duties without creating live canary artifacts.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Consumes only gated optimizer candidates promoted through owner and risk review.",
+      "orchestration_spine_relationship": "Runs after owner live approval and all evidence/risk/router gates.",
+      "output_packet_types": [
+        "CANARY_READINESS_PACKET",
+        "CANARY_SAFETY_PACKET"
+      ],
+      "owned_surfaces": [
+        "LIMITED_LIVE_CANARY",
+        "CANARY_SAFETY_CONTRACT",
+        "POST_TRADE_HANDOFF"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_LIVE_CANARY_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Manage later limited-live canary staging and canary safety contract.",
+        "Consume owner live approval, dual review, risk, connector/source/runtime/cash readiness, latency, kill-switch, and router readiness.",
+        "Emit limited-live readiness and safety packets only in later live-authorized phases."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_ORIGINATED_CANARY_INTENT_REQUIRES_ALL_GATES_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future canary readiness, execution, and post-trade events require receipts.",
+      "replay_paper_dual_review_relationship": "Requires positive replay/paper evidence and dual review before canary.",
+      "risk_gate_relationship": "Consumes risk approvals and kill-switch state; risk can block canary.",
+      "runtime_scope": "STATIC_CANARY_CHARTER_ONLY_NO_CANARY_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Coordinate post-trade handoff and canary safety reporting when live canary exists."
+      ],
+      "source_evidence_scope": "REQUIRES_ACCEPTED_SOURCE_PACKETS",
+      "source_to_connector_to_resolver_relationship": "Requires source, connector, resolver, and cash readiness before canary eligibility.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns true quantum, quantum-inspired, and hybrid classical-quantum research candidate surfaces.",
+      "agent_role": "QUANTUM_RESEARCH_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "QUBO",
+        "ISING",
+        "QAOA",
+        "VQE",
+        "ANNEALING",
+        "HYBRID_CLASSICAL_QUANTUM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "QUANTUM_PARAMETER_FAMILY_SCOPE",
+        "QUBO_PARAMETER_SCOPE",
+        "PORTFOLIO_OPTIMIZATION_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests owner approval for quantum priority, backend eligibility, and candidate promotion.",
+      "atomicrows_scope": "REQUESTS_QUANTUM_PARAMETER_FAMILIES_FROM_ATOMICROWS",
+      "authorized_consumer_classes": [
+        "OPTIMIZER",
+        "QUANTUM_BACKEND",
+        "REPLAY",
+        "PAPER",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "STRONGEST_CLASSICAL_COMPARATOR_RESEARCH_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CANNOT_OVERRIDE_CONNECTOR_SEMANTICS",
+      "consumed_artifacts": [
+        "ATOMICROWS_PARAMETER_FAMILY",
+        "OBJECTIVE_FORMULA",
+        "STRONGEST_CLASSICAL_COMPARATOR",
+        "REPLAY_PAPER_FEEDBACK"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates objective, comparator, fallback, and no-advantage-claim rules.",
+      "dashboard_owner_control_relationship": "Dashboard may show quantum candidate drilldowns and owner priority controls.",
+      "dashboard_scope": "OWNER_VISIBLE_QUANTUM_RESEARCH_AND_PRIORITY_STATUS_ONLY",
+      "decision_authority_scope": "May propose quantum candidate templates and compatibility mappings for later evidence lanes.",
+      "emitted_artifacts": [
+        "QUANTUM_CANDIDATE_TEMPLATE_PACK",
+        "OBJECTIVE_COMPARATOR_MAPPING_PACKET",
+        "FALLBACK_BUNDLE_PACKET",
+        "KNOWN_FAILURE_MODE_PACKET"
+      ],
+      "escalation_behavior": "Escalates missing objective/comparator, backend policy, and quantum-priority conflicts.",
+      "execution_router_relationship": "No router access; quantum research cannot submit orders.",
+      "fallback_behavior": "If objective, comparator, fallback, or Day-1 parameter rows are missing, block candidate.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not claim validated quantum advantage without evidence.",
+        "May not call real quantum backends in this package."
+      ],
+      "handoff_inputs": [
+        "PARAMETER_FAMILY_REFERENCE",
+        "OBJECTIVE_FORMULA_PACKET",
+        "CLASSICAL_COMPARATOR_PACKET"
+      ],
+      "handoff_outputs": [
+        "QUANTUM_CANDIDATE_TEMPLATE_PACKET",
+        "QUANTUM_PARAMETER_FAMILY_REQUEST"
+      ],
+      "input_packet_types": [
+        "QUANTUM_RESEARCH_INPUT_PACKET",
+        "OBJECTIVE_COMPARATOR_PACKET"
+      ],
+      "live_scope": "NO_LIVE_TRADE_AUTHORITY_FROM_QUANTUM_RESEARCH",
+      "master_plan_doctrine_terms_used": [
+        "quantum_candidate_requires_objective_and_comparator",
+        "quantum_candidate_requires_fallback_bundle",
+        "quantum_candidate_parameter_rows_day1_complete",
+        "quantum optimizer"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for QUANTUM_RESEARCH_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No true quantum backend execution, provider call, or quantum evidence artifact is created here.",
+      "master_plan_static_authority_basis": "Records quantum research surfaces without claiming validated quantum advantage.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds optimizer with quantum candidate surfaces and comparator mappings.",
+      "orchestration_spine_relationship": "Feeds quantum candidate templates to optimizer through orchestrated research routes.",
+      "output_packet_types": [
+        "QUANTUM_CANDIDATE_TEMPLATE_PACKET",
+        "QUANTUM_FALLBACK_BUNDLE_PACKET"
+      ],
+      "owned_surfaces": [
+        "QUANTUM_RESEARCH",
+        "QUANTUM_CANDIDATE_TEMPLATE",
+        "OBJECTIVE_COMPARATOR_MAPPING",
+        "FALLBACK_BUNDLE_MAPPING"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_QUANTUM_RESEARCH_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Define true quantum, quantum-inspired, and hybrid candidate template packs.",
+        "Map objectives, strongest-classical comparators, fallback bundles, failure modes, and parameter-family requests.",
+        "Treat quantum advantage as a hypothesis until replay, paper, live, and owner-approved evidence exists."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "TRUE_QUANTUM_QUANTUM_INSPIRED_HYBRID_RESEARCH_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future quantum candidate lifecycle events require receipts.",
+      "replay_paper_dual_review_relationship": "Quantum candidates require replay and paper evidence before advantage claims.",
+      "risk_gate_relationship": "Risk receives quantum failure modes, feasibility masks, and evidence limitations.",
+      "runtime_scope": "STATIC_QUANTUM_RESEARCH_CHARTER_ONLY_NO_BACKEND_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Support QUBO, Ising, QAOA, VQE, annealing, and portfolio optimization compatibility surfaces."
+      ],
+      "source_evidence_scope": "CANNOT_OVERRIDE_SOURCE_EVIDENCE",
+      "source_to_connector_to_resolver_relationship": "Quantum outputs cannot override source, connector, resolver, cash, or owner gates.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns future quantum backend compatibility and provider execution boundary surfaces.",
+      "agent_role": "QUANTUM_BACKEND_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "QPU_COMPATIBILITY_CHECK",
+        "SIMULATOR_COMPATIBILITY_CHECK",
+        "HYBRID_BACKEND_SELECTION"
+      ],
+      "applicable_parameter_family_scopes": [
+        "QUANTUM_BACKEND_PARAMETER_SCOPE",
+        "RESOURCE_ENVELOPE_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Requests owner approval for backend policy, provider eligibility, and execution readiness.",
+      "atomicrows_scope": "CONSUMES_QUANTUM_PARAMETER_ROWS_AND_FALLBACK_BUNDLES",
+      "authorized_consumer_classes": [
+        "OPTIMIZER",
+        "QUANTUM_RESEARCH",
+        "EXECUTION_LATENCY",
+        "DASHBOARD"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_FALLBACK_AND_SIMULATOR_COMPATIBILITY_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "CANNOT_OVERRIDE_CONNECTOR_OR_RUNTIME_CASH_GATES",
+      "consumed_artifacts": [
+        "APPROVED_QUANTUM_CANDIDATE_PACK",
+        "RESOURCE_ENVELOPE_CLASS",
+        "FALLBACK_BUNDLE",
+        "OWNER_BACKEND_POLICY"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates no provider calls, no credentials, and backend boundary adherence.",
+      "dashboard_owner_control_relationship": "Dashboard may show backend eligibility and owner backend policy controls.",
+      "dashboard_scope": "OWNER_VISIBLE_BACKEND_COMPATIBILITY_STATUS_ONLY",
+      "decision_authority_scope": "May classify future backend compatibility and resource eligibility.",
+      "emitted_artifacts": [
+        "BACKEND_COMPATIBILITY_RECORD",
+        "BACKEND_READINESS_STATE"
+      ],
+      "escalation_behavior": "Escalates backend policy, provider eligibility, credential, and fallback conflicts.",
+      "execution_router_relationship": "Backend outputs cannot route orders and cannot be live pretrade dependencies without later gates.",
+      "fallback_behavior": "If backend eligibility, resource envelope, or fallback bundle is missing, block backend use.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not execute real quantum backends here.",
+        "May not materialize provider credentials or live backend dependency."
+      ],
+      "handoff_inputs": [
+        "QUANTUM_CANDIDATE_TEMPLATE_PACKET",
+        "OWNER_BACKEND_POLICY_PACKET"
+      ],
+      "handoff_outputs": [
+        "BACKEND_COMPATIBILITY_STATUS",
+        "BACKEND_READINESS_BLOCK"
+      ],
+      "input_packet_types": [
+        "QUANTUM_BACKEND_ELIGIBILITY_PACKET",
+        "RESOURCE_ENVELOPE_PACKET"
+      ],
+      "live_scope": "NO_LIVE_PRETRADE_BACKEND_DEPENDENCY_CREATED",
+      "master_plan_doctrine_terms_used": [
+        "quantum backend compatibility",
+        "quantum_optimizer_live_pretrade_remote_backend_dependency_allowed",
+        "fallback_bundle_id"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for QUANTUM_BACKEND_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No QPU/provider call, credential, backend execution, or real quantum artifact is created here.",
+      "master_plan_static_authority_basis": "Records backend compatibility surfaces only.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Feeds optimizer with backend feasibility and fallback state.",
+      "orchestration_spine_relationship": "Receives approved quantum candidates through orchestrator and returns backend compatibility status.",
+      "output_packet_types": [
+        "BACKEND_COMPATIBILITY_PACKET",
+        "BACKEND_READINESS_PACKET"
+      ],
+      "owned_surfaces": [
+        "QUANTUM_BACKEND_COMPATIBILITY",
+        "PROVIDER_BOUNDARY",
+        "RESOURCE_ENVELOPE"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_QUANTUM_BACKEND_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Define future quantum backend compatibility and provider/backend eligibility records.",
+        "Consume approved quantum candidate packs, resource-envelope class, fallback bundle, and owner/backend policy in later phases.",
+        "Emit backend compatibility and readiness states only in later scoped workflows."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "TRUE_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+        "STRONGEST_CLASSICAL_COMPARATOR_REQUIRED",
+        "FALLBACK_BUNDLE_REQUIRED",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "TRUE_QUANTUM_BACKEND_COMPATIBILITY_SCOPE_WITH_NO_EXECUTION_CREATED",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future backend compatibility and execution readiness states require receipts.",
+      "replay_paper_dual_review_relationship": "Backend compatibility may support replay/paper candidates but does not prove advantage.",
+      "risk_gate_relationship": "Risk consumes backend uncertainty, fallback, and infeasible candidate states.",
+      "runtime_scope": "STATIC_BACKEND_CHARTER_ONLY_NO_QPU_OR_PROVIDER_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Keep backend work outside live pretrade path unless precomputed and later approved."
+      ],
+      "source_evidence_scope": "CANNOT_OVERRIDE_SOURCE_EVIDENCE",
+      "source_to_connector_to_resolver_relationship": "Backend outputs remain subordinate to source, connector, resolver, cash, and owner gates.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns owner-visible controls, status panels, approval menus, quantum-priority controls, and research intake displays.",
+      "agent_role": "DASHBOARD_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_021_DASHBOARD_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "DASHBOARD_STATUS_AGGREGATION",
+        "OWNER_QUEUE_PRIORITIZATION"
+      ],
+      "applicable_parameter_family_scopes": [
+        "DASHBOARD_DISPLAY_PARAMETER_SCOPE",
+        "OWNER_CONTROL_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Packages owner UI decisions into approval request and receipt workflows.",
+      "atomicrows_scope": "DISPLAYS_PARAMETER_INVENTORY_AND_LIFECYCLE_STATUS_ONLY",
+      "authorized_consumer_classes": [
+        "OWNER",
+        "GOVERNANCE",
+        "VALIDATION",
+        "ORCHESTRATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_DASHBOARD_STATUS_AGGREGATION_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "DISPLAYS_CONNECTOR_STATUS_ONLY",
+      "consumed_artifacts": [
+        "VALIDATION_REPORT",
+        "AGENT_STATUS_PACKET",
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "OPTIMIZER_SUMMARY",
+        "RISK_STATE_PACKET"
+      ],
+      "coverage_health_monitor_relationship": "Displays role health, KPIs, missed duties, and validation status.",
+      "dashboard_owner_control_relationship": "Primary owner-visible interface surface for later implementation.",
+      "dashboard_scope": "PRIMARY_DASHBOARD_OWNER_CONTROL_AND_RESEARCH_INTAKE_SCOPE",
+      "decision_authority_scope": "May organize owner-visible status and control requests in later dashboard work.",
+      "emitted_artifacts": [
+        "OWNER_UI_CONTROL_PACKET",
+        "DASHBOARD_RESEARCH_INTAKE_PACKET"
+      ],
+      "escalation_behavior": "Escalates owner UI control ambiguity, approval queue conflicts, and runtime service blockers.",
+      "execution_router_relationship": "May show router readiness but cannot submit orders.",
+      "fallback_behavior": "If dashboard service is absent, keep controls as static request surfaces.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not trade or submit orders.",
+        "May not approve for owner or create runtime dashboard access here."
+      ],
+      "handoff_inputs": [
+        "AGENT_STATUS_PACKET",
+        "APPROVAL_REQUEST_PACKET",
+        "RESEARCH_INPUT"
+      ],
+      "handoff_outputs": [
+        "OWNER_CONTROL_REQUEST",
+        "DASHBOARD_STATUS_PACKET"
+      ],
+      "input_packet_types": [
+        "DASHBOARD_STATUS_INPUT_PACKET",
+        "RESEARCH_INTAKE_PACKET"
+      ],
+      "live_scope": "NO_TRADING_AUTHORITY_FROM_DASHBOARD_OR_TELEGRAM",
+      "master_plan_doctrine_terms_used": [
+        "dashboard_access_currently_available_flag",
+        "dashboard_runtime_ui_service_required_before_access_flag",
+        "dashboard_and_telegram_owner_interfaces_create_research_intake_not_trading_authority_flag"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for DASHBOARD_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No dashboard runtime, Telegram runtime, or trading interface is created here.",
+      "master_plan_static_authority_basis": "Records dashboard surfaces without creating a dashboard UI or runtime service.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Displays optimizer and quantum candidate summaries plus owner quantum controls.",
+      "orchestration_spine_relationship": "Displays orchestrated agent status and handoff needs for owner review.",
+      "output_packet_types": [
+        "OWNER_CONTROL_PACKET",
+        "DASHBOARD_STATUS_PACKET"
+      ],
+      "owned_surfaces": [
+        "OWNER_DASHBOARD_CONTROL",
+        "APPROVAL_MENU",
+        "ROLE_HEALTH_PANEL",
+        "QUANTUM_PRIORITY_CONTROL",
+        "RESEARCH_INTAKE_DISPLAY"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_DASHBOARD_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Expose owner control, approval, review, role health, validation status, quantum priority, and research intake surfaces in later dashboard work.",
+        "Consume validation reports, agent status, owner approval requests, optimizer/quantum summaries, risk states, source states, and live-readiness states.",
+        "Emit owner UI/control packets only in later dashboard-scoped workflows."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "OWNER_QUANTUM_PRIORITY_CONTROL_DISPLAY_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future dashboard actions and owner control packets require receipts.",
+      "replay_paper_dual_review_relationship": "Displays replay/paper/dual review status without promotion authority.",
+      "risk_gate_relationship": "Shows risk states and blocks without overriding Risk Gate.",
+      "runtime_scope": "STATIC_DASHBOARD_CHARTER_ONLY_NO_UI_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Preserve dashboard and Telegram as research intake/control requests, not trading authority."
+      ],
+      "source_evidence_scope": "DISPLAYS_SOURCE_STATUS_ONLY",
+      "source_to_connector_to_resolver_relationship": "Displays source, connector, and resolver readiness without creating facts or bindings.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns governance, authority classification, owner override doctrine, and internal/external fact separation.",
+      "agent_role": "GOVERNANCE_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_022_GOVERNANCE_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "AUTHORITY_CLASSIFICATION_ALGORITHM",
+        "POLICY_ROUTING_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "GOVERNANCE_PARAMETER_SCOPE",
+        "AUTHORITY_CLASS_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Routes governance conflicts and policy changes to owner approval request packaging.",
+      "atomicrows_scope": "ENFORCES_ATOMICROWS_INVENTORY_NOT_TRADER_BOUNDARY",
+      "authorized_consumer_classes": [
+        "ORCHESTRATION",
+        "VALIDATION",
+        "DASHBOARD",
+        "OWNER_APPROVAL"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_GOVERNANCE_CLASSIFICATION_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "PREVENTS_CONNECTOR_BINDING_WITHOUT_EVIDENCE",
+      "consumed_artifacts": [
+        "MASTER_PLAN_DOCTRINE",
+        "OWNER_DECISION",
+        "VALIDATION_REPORT",
+        "COMPLIANCE_MARKER",
+        "ROLE_CHARTER"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates governance boundaries and role ownership maps.",
+      "dashboard_owner_control_relationship": "Feeds owner-visible governance and authority-class reports.",
+      "dashboard_scope": "OWNER_VISIBLE_GOVERNANCE_STATUS_ONLY",
+      "decision_authority_scope": "May classify internal authority and governance boundaries.",
+      "emitted_artifacts": [
+        "GOVERNANCE_PACKET",
+        "AUTHORITY_CLASS_REPORT",
+        "OWNER_POLICY_RECEIPT",
+        "BOUNDARY_AUDIT_REPORT"
+      ],
+      "escalation_behavior": "Escalates authority conflicts, owner policy changes, and external-fact boundary risks.",
+      "execution_router_relationship": "Governance enforces owner and gate prerequisites before router eligibility.",
+      "fallback_behavior": "If authority class is ambiguous, use stricter boundary and escalate.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create external fact truth.",
+        "May not approve for owner."
+      ],
+      "handoff_inputs": [
+        "ROLE_CHARTER_PACKET",
+        "OWNER_DECISION_RECEIPT",
+        "VALIDATION_REPORT"
+      ],
+      "handoff_outputs": [
+        "AUTHORITY_CLASSIFICATION_PACKET",
+        "GOVERNANCE_BOUNDARY_PACKET"
+      ],
+      "input_packet_types": [
+        "GOVERNANCE_INPUT_PACKET",
+        "OWNER_POLICY_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_GOVERNANCE_CLASSIFICATION",
+      "master_plan_doctrine_terms_used": [
+        "owner final policy authority",
+        "agent_autonomy_class",
+        "owner_source_evidence_definitions_packet_external_fact_acceptance_authority"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for GOVERNANCE_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No governance runtime packet or external fact evidence is created here.",
+      "master_plan_static_authority_basis": "Records governance classification without creating live or fact authority.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Enforces optimizer and quantum authority boundaries.",
+      "orchestration_spine_relationship": "Supplies authority classifications to orchestrator before handoffs proceed.",
+      "output_packet_types": [
+        "GOVERNANCE_PACKET",
+        "AUTHORITY_CLASS_REPORT"
+      ],
+      "owned_surfaces": [
+        "GOVERNANCE",
+        "AUTHORITY_CLASSIFICATION",
+        "OWNER_OVERRIDE_DOCTRINE",
+        "POLICY_ROUTING"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_GOVERNANCE_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Enforce authority classification, owner override doctrine, and internal-policy versus external-fact separation.",
+        "Route canonical policy decisions, validation reports, compliance markers, role charters, and override receipts.",
+        "Prevent internal overrides from being misused as external fact truth."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_AUTHORITY_BOUNDARY_GOVERNANCE_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future governance decisions and owner-policy receipts require event records.",
+      "replay_paper_dual_review_relationship": "Enforces evidence boundaries around replay/paper and live promotion.",
+      "risk_gate_relationship": "Governance prevents risk overrides from becoming external fact claims.",
+      "runtime_scope": "STATIC_GOVERNANCE_CHARTER_ONLY_NO_RUNTIME_PACKET_CREATED",
+      "secondary_duties": [
+        "Classify agent autonomy and permission boundaries for bounded tool-using agents."
+      ],
+      "source_evidence_scope": "SEPARATES_OWNER_POLICY_FROM_ACCEPTED_SOURCE_FACTS",
+      "source_to_connector_to_resolver_relationship": "Enforces source/connector/resolver fact boundaries.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns schema validation, deterministic gates, reports, role coverage, and fail-closed behavior.",
+      "agent_role": "VALIDATION_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_023_VALIDATION_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "SCHEMA_VALIDATION_ALGORITHM",
+        "FAIL_CLOSED_ASSERTION_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "VALIDATION_PARAMETER_SCOPE",
+        "REPORT_COUNT_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates validation blockers and final-readiness gaps to owner approval request packaging.",
+      "atomicrows_scope": "VALIDATES_NO_ATOMICROWS_BUNDLE_OR_HASH_CREATED",
+      "authorized_consumer_classes": [
+        "GOVERNANCE",
+        "DASHBOARD",
+        "ORCHESTRATION",
+        "OWNER"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_STATIC_VALIDATION_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "VALIDATES_NO_CONNECTOR_BINDING_ARTIFACT_CREATED",
+      "consumed_artifacts": [
+        "SCHEMA_FILE",
+        "REGISTRY_FILE",
+        "FIXTURE_FILE",
+        "REPORT_FILE",
+        "TEST_OUTPUT"
+      ],
+      "coverage_health_monitor_relationship": "Primary static owner of coverage/health monitor validation for this package.",
+      "dashboard_owner_control_relationship": "Feeds dashboard validation status in later UI phases.",
+      "dashboard_scope": "OWNER_VISIBLE_VALIDATION_STATUS_ONLY",
+      "decision_authority_scope": "May pass or fail static validation gates based on deterministic checks.",
+      "emitted_artifacts": [
+        "VALIDATION_REPORT",
+        "BLOCKER_REPORT",
+        "GATE_SUCCESS_MARKER"
+      ],
+      "escalation_behavior": "Escalates schema, report, role coverage, artifact, and gate failures.",
+      "execution_router_relationship": "Validates router boundary and absence of order artifacts.",
+      "fallback_behavior": "If any invariant fails, fail closed and withhold success marker.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not approve for owner.",
+        "May not weaken existing gates or create runtime artifacts."
+      ],
+      "handoff_inputs": [
+        "VALIDATION_TARGET_SET",
+        "GATE_RESULT_PACKET"
+      ],
+      "handoff_outputs": [
+        "VALIDATION_DECISION",
+        "BLOCKER_REPORT"
+      ],
+      "input_packet_types": [
+        "VALIDATION_INPUT_PACKET",
+        "TEST_RESULT_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_VALIDATION",
+      "master_plan_doctrine_terms_used": [
+        "Coverage / Health Monitor",
+        "validation gates",
+        "agent_quality_scorecard_required",
+        "agent_output_trust_score_required"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for VALIDATION_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "Does not weaken gates or create runtime artifacts.",
+      "master_plan_static_authority_basis": "Records validation duties and validates this static package.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Validates deterministic scoring/arbitration and quantum no-evidence claims.",
+      "orchestration_spine_relationship": "Provides gate outcomes to orchestrator before workflows advance.",
+      "output_packet_types": [
+        "VALIDATION_REPORT_PACKET",
+        "GATE_SUCCESS_PACKET"
+      ],
+      "owned_surfaces": [
+        "SCHEMA_VALIDATION",
+        "STATIC_GATE_ENFORCEMENT",
+        "DETERMINISTIC_REPORT_VALIDATION",
+        "FAIL_CLOSED_TESTS"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_VALIDATION_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Validate schemas, registries, fixtures, deterministic reports, role coverage, and fail-closed tests.",
+        "Integrate static validators into run_validation_gates without weakening existing gates.",
+        "Prove this package follows the master plan and creates no forbidden artifacts."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_FORWARD_FIELD_VALIDATION_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future validation events and gate results are event-log candidates.",
+      "replay_paper_dual_review_relationship": "Validates replay/paper/dual review boundaries and absence of executions.",
+      "risk_gate_relationship": "Validates risk-gate surfaces but does not decide risk.",
+      "runtime_scope": "STATIC_VALIDATION_ONLY_NO_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Track role ownership, output trust, missed duties, and deterministic report readiness."
+      ],
+      "source_evidence_scope": "VALIDATES_NO_SOURCE_ACCEPTANCE_ARTIFACT_CREATED",
+      "source_to_connector_to_resolver_relationship": "Validates source, connector, and resolver boundaries and absence of created artifacts.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Owns compliance/control-state labels without creating legal conclusions or external facts.",
+      "agent_role": "COMPLIANCE_MARKER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_024_COMPLIANCE_MARKER_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "CONTROL_STATE_CLASSIFICATION_ALGORITHM"
+      ],
+      "applicable_parameter_family_scopes": [
+        "COMPLIANCE_MARKER_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Escalates ambiguous or material control-state labels to owner request routing.",
+      "atomicrows_scope": "LABELS_ATOMICROWS_CONTROL_STATE_ONLY",
+      "authorized_consumer_classes": [
+        "GOVERNANCE",
+        "DASHBOARD",
+        "VALIDATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_CONTROL_STATE_LABELING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "LABELS_CONNECTOR_STATE_ONLY",
+      "consumed_artifacts": [
+        "GOVERNANCE_PACKET",
+        "VALIDATION_REPORT",
+        "SOURCE_STATE",
+        "RISK_STATE",
+        "OWNER_POLICY"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor consumes marker status for control coverage.",
+      "dashboard_owner_control_relationship": "Feeds owner-visible control-state labels to later dashboard panels.",
+      "dashboard_scope": "OWNER_VISIBLE_CONTROL_STATE_LABELS_ONLY",
+      "decision_authority_scope": "May classify internal control-state labels.",
+      "emitted_artifacts": [
+        "COMPLIANCE_MARKER_PACKET",
+        "CONTROL_STATE_LABEL"
+      ],
+      "escalation_behavior": "Escalates material ambiguity and governance boundary conflicts.",
+      "execution_router_relationship": "Labels router control state without order authority.",
+      "fallback_behavior": "If marker evidence is incomplete, label as blocked, unknown, or review required.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not create legal conclusions.",
+        "May not create external facts or trading authority."
+      ],
+      "handoff_inputs": [
+        "GOVERNANCE_BOUNDARY_PACKET",
+        "VALIDATION_STATUS_PACKET"
+      ],
+      "handoff_outputs": [
+        "COMPLIANCE_STATUS_LABEL",
+        "CONTROL_STATE_PACKET"
+      ],
+      "input_packet_types": [
+        "COMPLIANCE_INPUT_PACKET",
+        "CONTROL_STATE_INPUT_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_MARKERS",
+      "master_plan_doctrine_terms_used": [
+        "governance",
+        "authority classification",
+        "control state classification"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for COMPLIANCE_MARKER_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No legal, external fact, or runtime compliance artifact is created here.",
+      "master_plan_static_authority_basis": "Records marker duties without legal conclusions.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Labels optimizer and quantum control states without evidence claims.",
+      "orchestration_spine_relationship": "Provides status labels to orchestrator for governed workflow display.",
+      "output_packet_types": [
+        "COMPLIANCE_MARKER_PACKET",
+        "CONTROL_STATE_PACKET"
+      ],
+      "owned_surfaces": [
+        "COMPLIANCE_MARKER",
+        "CONTROL_STATE_LABEL",
+        "NON_LEGAL_STATUS_CLASSIFICATION"
+      ],
+      "owner_approved_scope": "OWNER_APPROVED_COMPLIANCE_MARKER_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Label compliance and control states from governance, validation, source, risk, live-scope, and owner policy inputs.",
+        "Emit compliance marker packets and status labels in later workflows.",
+        "Keep markers non-legal and non-fact-creating."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_CONTROL_STATE_LABELING_SCOPE_WITH_NO_ADVANTAGE_CLAIM",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future compliance marker changes require event records when material.",
+      "replay_paper_dual_review_relationship": "Labels replay/paper evidence states without live promotion.",
+      "risk_gate_relationship": "Labels risk control states without overriding Risk Gate.",
+      "runtime_scope": "STATIC_MARKER_CHARTER_ONLY_NO_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Support dashboard and governance review with status labels."
+      ],
+      "source_evidence_scope": "LABELS_SOURCE_STATE_ONLY",
+      "source_to_connector_to_resolver_relationship": "Labels source/connector/resolver control states without creating facts.",
+      "true_quantum_execution_created": false
+    },
+    {
+      "agent_description": "Synthetic valid fixture charter: Packages owner approval and override requests; never approves for owner.",
+      "agent_role": "OWNER_APPROVAL_REQUEST_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_025_OWNER_APPROVAL_REQUEST_AGENT",
+      "applicable_algorithm_family_scopes": [
+        "REQUEST_PACKAGING_ALGORITHM",
+        "OWNER_QUEUE_PRIORITIZATION"
+      ],
+      "applicable_parameter_family_scopes": [
+        "OWNER_REQUEST_PARAMETER_SCOPE"
+      ],
+      "approval_request_behavior": "Creates request packets and waits for owner decision receipt; never approves.",
+      "atomicrows_scope": "PACKAGES_ATOMICROWS_PROMOTION_OR_OVERRIDE_REQUESTS",
+      "authorized_consumer_classes": [
+        "OWNER",
+        "DASHBOARD",
+        "GOVERNANCE",
+        "ORCHESTRATION"
+      ],
+      "blocks_qtt_when_owner_override_present": false,
+      "chatgpt_may_approve_for_owner": false,
+      "classical_scope": "CLASSICAL_OWNER_REQUEST_PACKAGING_SCOPE",
+      "codex_may_approve_for_owner": false,
+      "connector_scope": "PACKAGES_CONNECTOR_POLICY_REQUESTS_ONLY",
+      "consumed_artifacts": [
+        "UNRESOLVED_BLOCKER",
+        "PROMOTION_REQUEST",
+        "QUANTUM_PRIORITY_REQUEST",
+        "RISK_ESCALATION",
+        "GOVERNANCE_ESCALATION"
+      ],
+      "coverage_health_monitor_relationship": "Health monitor validates request packaging and unresolved blocker routing.",
+      "dashboard_owner_control_relationship": "Feeds owner approval queues to later dashboard surfaces.",
+      "dashboard_scope": "OWNER_VISIBLE_APPROVAL_QUEUE_STATUS_ONLY",
+      "decision_authority_scope": "May decide request completeness and routing priority, not approval outcome.",
+      "emitted_artifacts": [
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "OWNER_DECISION_QUEUE_RECORD"
+      ],
+      "escalation_behavior": "Escalates complete approval requests to owner queue and governance visibility.",
+      "execution_router_relationship": "Packages live/router approval requests but cannot authorize routing.",
+      "fallback_behavior": "If request context is incomplete, return to originating agent for missing evidence.",
+      "final_qtt_internal_status": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED",
+      "forbidden_decision_authority": [
+        "May not approve for owner.",
+        "May not convert requests into live authority."
+      ],
+      "handoff_inputs": [
+        "BLOCKER_PACKET",
+        "PROMOTION_REQUEST_PACKET",
+        "QUANTUM_PRIORITY_REQUEST_PACKET"
+      ],
+      "handoff_outputs": [
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "OWNER_DECISION_QUEUE_RECORD"
+      ],
+      "input_packet_types": [
+        "OWNER_APPROVAL_REQUEST_INPUT_PACKET",
+        "ESCALATION_PACKET"
+      ],
+      "live_scope": "NO_LIVE_AUTHORITY_FROM_REQUEST_PACKAGING",
+      "master_plan_doctrine_terms_used": [
+        "owner approval required",
+        "owner override",
+        "dashboard owner control"
+      ],
+      "master_plan_role_derivation_summary": "Synthetic non-authoritative placeholder for OWNER_APPROVAL_REQUEST_AGENT; preserves the same master-plan-derived duties without evidence claims.",
+      "master_plan_runtime_boundary_basis": "No owner approval receipt is created here.",
+      "master_plan_static_authority_basis": "Records request packaging without creating owner decisions.",
+      "may_approve_for_owner": false,
+      "may_request_owner_approval": true,
+      "optimizer_arbitration_relationship": "Packages optimizer, quantum priority, and arbitration policy requests.",
+      "orchestration_spine_relationship": "Receives escalations from orchestrator and returns owner decision queue records.",
+      "output_packet_types": [
+        "OWNER_APPROVAL_REQUEST_PACKET",
+        "OWNER_DECISION_QUEUE_PACKET"
+      ],
+      "owned_surfaces": [
+        "OWNER_APPROVAL_REQUEST",
+        "OWNER_DECISION_QUEUE",
+        "OVERRIDE_REQUEST_PACKAGING"
+      ],
+      "owner_approved_scope": "OWNER_APPROVAL_REQUEST_PACKAGING_SCOPE",
+      "owner_can_force_quantum_priority": true,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS",
+      "owner_override_supported": true,
+      "owner_quantum_priority_supported": true,
+      "primary_duties": [
+        "Package owner approval and override requests from unresolved blockers, promotion requests, quantum-priority requests, dashboard requests, risk escalation, and governance escalation.",
+        "Emit owner approval request packets and owner decision queue records in later workflows.",
+        "Preserve that the agent may request but never approve for owner."
+      ],
+      "qtt_agent_authority_over_owner": false,
+      "quantum_algorithm_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_applicability_scope": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "quantum_evidence_claim_created": false,
+      "quantum_parameter_family_access": [
+        "OWNER_QUANTUM_PRIORITY",
+        "OWNER_FORCED_QUANTUM",
+        "REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM"
+      ],
+      "quantum_priority_forward_compatible": true,
+      "quantum_runtime_authority_created": false,
+      "quantum_scope": "QUANTUM_PRIORITY_REQUEST_PACKAGING_SCOPE",
+      "quantum_scoring_policy_reference": "STATIC_FORWARD_REFERENCE_ONLY",
+      "receipt_event_log_relationship": "Future approval requests and owner decisions require event records.",
+      "replay_paper_dual_review_relationship": "Packages replay/paper promotion requests for owner review.",
+      "risk_gate_relationship": "Packages risk escalations for owner review without overriding risk decisions.",
+      "runtime_scope": "STATIC_REQUEST_AGENT_CHARTER_ONLY_NO_APPROVAL_RUNTIME_CREATED",
+      "secondary_duties": [
+        "Normalize request context, required evidence, and decision options for owner review."
+      ],
+      "source_evidence_scope": "PACKAGES_SOURCE_POLICY_REQUESTS_ONLY",
+      "source_to_connector_to_resolver_relationship": "Packages source, connector, and resolver blockers for owner review when policy is needed.",
+      "true_quantum_execution_created": false
+    }
+  ],
+  "architecture_emphasis": "INSTITUTIONAL_AGENT_OPERATING_CHARTER_NOT_PROHIBITION_LIST",
+  "bundle_file_present": false,
+  "bundle_sha_present": false,
+  "chatgpt_authority_over_owner": false,
+  "codex_authority_over_owner": false,
+  "connector_binding_artifact_created": false,
+  "deterministic_output": true,
+  "execution": "DISABLED",
+  "existing_pr_patterns_used_for_style_only": true,
+  "final_ready": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "live_artifact_created": false,
+  "master_plan_followed_as_controlling_doctrine": true,
+  "mode": "SOURCE_REQUIRED",
+  "order_artifact_created": false,
+  "owner_can_force_quantum_priority": true,
+  "owner_global_override_authority": true,
+  "owner_override_satisfies_all_qtt_internal_requirements": true,
+  "owner_quantum_priority_supported": true,
+  "paper_execution_created": false,
+  "pr64_is_scope_boundary_not_role_authority": true,
+  "profit_artifact_created": false,
+  "qtt_agent_authority_over_owner": false,
+  "quantum_backend_artifact_created": false,
+  "quantum_evidence_claim_created": false,
+  "quantum_forward_design_supported": true,
+  "quantum_priority_forward_compatible": true,
+  "registry_type": "QTT_AGENT_ROLE_OPERATING_CHARTER_REGISTRY",
+  "registry_version": "v1",
+  "replay_execution_created": false,
+  "runtime_artifact_created": false,
+  "runtime_resolver_snapshot_created": false,
+  "source_acceptance_artifact_created": false,
+  "source_of_role_substance": "docs/master_plan/QTT_MasterPlan_Current.md",
+  "uses_pr_number_as_authority": false
+}

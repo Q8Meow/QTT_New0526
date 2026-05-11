@@ -1,0 +1,883 @@
+{
+  "$defs": {
+    "agent_charter": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_description": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "agent_role": {
+          "enum": [
+            "OWNER",
+            "ORCHESTRATOR_AGENT",
+            "MASTER_PLAN_AGENT",
+            "ATOMICROWS_AGENT",
+            "ATOMICROWS_RESEARCH_AGENT",
+            "ATOMICROWS_LIFECYCLE_AGENT",
+            "SOURCE_EVIDENCE_AGENT",
+            "CONNECTOR_AGENT",
+            "RUNTIME_RESOLVER_AGENT",
+            "REPLAY_AGENT",
+            "PAPER_AGENT",
+            "DUAL_RESULT_REVIEW_AGENT",
+            "OPTIMIZER_AGENT",
+            "RISK_AGENT",
+            "SIZING_AGENT",
+            "EXECUTION_LATENCY_AGENT",
+            "ORDER_ROUTER_AGENT",
+            "LIVE_CANARY_AGENT",
+            "QUANTUM_RESEARCH_AGENT",
+            "QUANTUM_BACKEND_AGENT",
+            "DASHBOARD_AGENT",
+            "GOVERNANCE_AGENT",
+            "VALIDATION_AGENT",
+            "COMPLIANCE_MARKER_AGENT",
+            "OWNER_APPROVAL_REQUEST_AGENT"
+          ]
+        },
+        "agent_role_id": {
+          "enum": [
+            "QTT_AGENT_ROLE_001_OWNER",
+            "QTT_AGENT_ROLE_002_ORCHESTRATOR_AGENT",
+            "QTT_AGENT_ROLE_003_MASTER_PLAN_AGENT",
+            "QTT_AGENT_ROLE_004_ATOMICROWS_AGENT",
+            "QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT",
+            "QTT_AGENT_ROLE_006_ATOMICROWS_LIFECYCLE_AGENT",
+            "QTT_AGENT_ROLE_007_SOURCE_EVIDENCE_AGENT",
+            "QTT_AGENT_ROLE_008_CONNECTOR_AGENT",
+            "QTT_AGENT_ROLE_009_RUNTIME_RESOLVER_AGENT",
+            "QTT_AGENT_ROLE_010_REPLAY_AGENT",
+            "QTT_AGENT_ROLE_011_PAPER_AGENT",
+            "QTT_AGENT_ROLE_012_DUAL_RESULT_REVIEW_AGENT",
+            "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+            "QTT_AGENT_ROLE_014_RISK_AGENT",
+            "QTT_AGENT_ROLE_015_SIZING_AGENT",
+            "QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT",
+            "QTT_AGENT_ROLE_017_ORDER_ROUTER_AGENT",
+            "QTT_AGENT_ROLE_018_LIVE_CANARY_AGENT",
+            "QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT",
+            "QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT",
+            "QTT_AGENT_ROLE_021_DASHBOARD_AGENT",
+            "QTT_AGENT_ROLE_022_GOVERNANCE_AGENT",
+            "QTT_AGENT_ROLE_023_VALIDATION_AGENT",
+            "QTT_AGENT_ROLE_024_COMPLIANCE_MARKER_AGENT",
+            "QTT_AGENT_ROLE_025_OWNER_APPROVAL_REQUEST_AGENT"
+          ]
+        },
+        "applicable_algorithm_family_scopes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "applicable_parameter_family_scopes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "approval_request_behavior": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "atomicrows_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "authorized_consumer_classes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "blocks_qtt_when_owner_override_present": {
+          "const": false
+        },
+        "chatgpt_may_approve_for_owner": {
+          "const": false
+        },
+        "classical_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "codex_may_approve_for_owner": {
+          "const": false
+        },
+        "connector_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "consumed_artifacts": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "coverage_health_monitor_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "dashboard_owner_control_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "dashboard_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "decision_authority_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "emitted_artifacts": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "escalation_behavior": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "execution_router_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "fallback_behavior": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "final_qtt_internal_status": {
+          "const": "STATIC_CHARTER_DECLARED_NOT_FINAL_PRODUCTION_READY_OWNER_OVERRIDE_SUPPORTED"
+        },
+        "forbidden_decision_authority": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "handoff_inputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "handoff_outputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "input_packet_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "live_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "master_plan_doctrine_terms_used": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "master_plan_role_derivation_summary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "master_plan_runtime_boundary_basis": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "master_plan_static_authority_basis": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "may_approve_for_owner": {
+          "const": false
+        },
+        "may_request_owner_approval": {
+          "const": true
+        },
+        "optimizer_arbitration_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "orchestration_spine_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "output_packet_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "owned_surfaces": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "owner_approved_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "owner_can_force_quantum_priority": {
+          "const": true
+        },
+        "owner_override_satisfaction_basis": {
+          "const": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS"
+        },
+        "owner_override_supported": {
+          "const": true
+        },
+        "owner_quantum_priority_supported": {
+          "const": true
+        },
+        "primary_duties": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "qtt_agent_authority_over_owner": {
+          "const": false
+        },
+        "quantum_algorithm_family_access": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_applicability_scope": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_backend_artifact_created": {
+          "const": false
+        },
+        "quantum_classical_arbitration_reference": {
+          "const": "STATIC_FORWARD_REFERENCE_ONLY"
+        },
+        "quantum_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_parameter_family_access": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_priority_forward_compatible": {
+          "const": true
+        },
+        "quantum_runtime_authority_created": {
+          "const": false
+        },
+        "quantum_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "quantum_scoring_policy_reference": {
+          "const": "STATIC_FORWARD_REFERENCE_ONLY"
+        },
+        "receipt_event_log_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "replay_paper_dual_review_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "risk_gate_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "secondary_duties": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "source_evidence_scope": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_to_connector_to_resolver_relationship": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "true_quantum_execution_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "agent_role",
+        "agent_role_id",
+        "agent_description",
+        "master_plan_doctrine_terms_used",
+        "master_plan_role_derivation_summary",
+        "master_plan_static_authority_basis",
+        "master_plan_runtime_boundary_basis",
+        "primary_duties",
+        "secondary_duties",
+        "owned_surfaces",
+        "consumed_artifacts",
+        "emitted_artifacts",
+        "decision_authority_scope",
+        "forbidden_decision_authority",
+        "handoff_inputs",
+        "handoff_outputs",
+        "input_packet_types",
+        "output_packet_types",
+        "applicable_parameter_family_scopes",
+        "applicable_algorithm_family_scopes",
+        "authorized_consumer_classes",
+        "orchestration_spine_relationship",
+        "risk_gate_relationship",
+        "execution_router_relationship",
+        "receipt_event_log_relationship",
+        "coverage_health_monitor_relationship",
+        "source_to_connector_to_resolver_relationship",
+        "replay_paper_dual_review_relationship",
+        "optimizer_arbitration_relationship",
+        "dashboard_owner_control_relationship",
+        "owner_override_supported",
+        "owner_override_satisfaction_basis",
+        "owner_approved_scope",
+        "may_request_owner_approval",
+        "approval_request_behavior",
+        "may_approve_for_owner",
+        "codex_may_approve_for_owner",
+        "chatgpt_may_approve_for_owner",
+        "qtt_agent_authority_over_owner",
+        "blocks_qtt_when_owner_override_present",
+        "classical_scope",
+        "quantum_scope",
+        "quantum_applicability_scope",
+        "quantum_algorithm_family_access",
+        "quantum_parameter_family_access",
+        "quantum_priority_forward_compatible",
+        "owner_quantum_priority_supported",
+        "owner_can_force_quantum_priority",
+        "quantum_backend_artifact_created",
+        "quantum_runtime_authority_created",
+        "true_quantum_execution_created",
+        "quantum_evidence_claim_created",
+        "quantum_scoring_policy_reference",
+        "quantum_classical_arbitration_reference",
+        "runtime_scope",
+        "live_scope",
+        "dashboard_scope",
+        "source_evidence_scope",
+        "connector_scope",
+        "atomicrows_scope",
+        "fallback_behavior",
+        "escalation_behavior",
+        "final_qtt_internal_status"
+      ],
+      "type": "object"
+    },
+    "agent_role": {
+      "enum": [
+        "OWNER",
+        "ORCHESTRATOR_AGENT",
+        "MASTER_PLAN_AGENT",
+        "ATOMICROWS_AGENT",
+        "ATOMICROWS_RESEARCH_AGENT",
+        "ATOMICROWS_LIFECYCLE_AGENT",
+        "SOURCE_EVIDENCE_AGENT",
+        "CONNECTOR_AGENT",
+        "RUNTIME_RESOLVER_AGENT",
+        "REPLAY_AGENT",
+        "PAPER_AGENT",
+        "DUAL_RESULT_REVIEW_AGENT",
+        "OPTIMIZER_AGENT",
+        "RISK_AGENT",
+        "SIZING_AGENT",
+        "EXECUTION_LATENCY_AGENT",
+        "ORDER_ROUTER_AGENT",
+        "LIVE_CANARY_AGENT",
+        "QUANTUM_RESEARCH_AGENT",
+        "QUANTUM_BACKEND_AGENT",
+        "DASHBOARD_AGENT",
+        "GOVERNANCE_AGENT",
+        "VALIDATION_AGENT",
+        "COMPLIANCE_MARKER_AGENT",
+        "OWNER_APPROVAL_REQUEST_AGENT"
+      ]
+    },
+    "agent_role_id": {
+      "enum": [
+        "QTT_AGENT_ROLE_001_OWNER",
+        "QTT_AGENT_ROLE_002_ORCHESTRATOR_AGENT",
+        "QTT_AGENT_ROLE_003_MASTER_PLAN_AGENT",
+        "QTT_AGENT_ROLE_004_ATOMICROWS_AGENT",
+        "QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT",
+        "QTT_AGENT_ROLE_006_ATOMICROWS_LIFECYCLE_AGENT",
+        "QTT_AGENT_ROLE_007_SOURCE_EVIDENCE_AGENT",
+        "QTT_AGENT_ROLE_008_CONNECTOR_AGENT",
+        "QTT_AGENT_ROLE_009_RUNTIME_RESOLVER_AGENT",
+        "QTT_AGENT_ROLE_010_REPLAY_AGENT",
+        "QTT_AGENT_ROLE_011_PAPER_AGENT",
+        "QTT_AGENT_ROLE_012_DUAL_RESULT_REVIEW_AGENT",
+        "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+        "QTT_AGENT_ROLE_014_RISK_AGENT",
+        "QTT_AGENT_ROLE_015_SIZING_AGENT",
+        "QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT",
+        "QTT_AGENT_ROLE_017_ORDER_ROUTER_AGENT",
+        "QTT_AGENT_ROLE_018_LIVE_CANARY_AGENT",
+        "QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT",
+        "QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT",
+        "QTT_AGENT_ROLE_021_DASHBOARD_AGENT",
+        "QTT_AGENT_ROLE_022_GOVERNANCE_AGENT",
+        "QTT_AGENT_ROLE_023_VALIDATION_AGENT",
+        "QTT_AGENT_ROLE_024_COMPLIANCE_MARKER_AGENT",
+        "QTT_AGENT_ROLE_025_OWNER_APPROVAL_REQUEST_AGENT"
+      ]
+    },
+    "agent_role_operating_charter_report": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_role_count": {
+          "type": "integer"
+        },
+        "agents_block_owner_override_count": {
+          "type": "integer"
+        },
+        "agents_may_approve_for_owner_count": {
+          "type": "integer"
+        },
+        "agents_with_algorithm_family_scope_count": {
+          "type": "integer"
+        },
+        "agents_with_classical_scope_count": {
+          "type": "integer"
+        },
+        "agents_with_consumed_artifacts_count": {
+          "type": "integer"
+        },
+        "agents_with_coverage_health_monitor_relationship_count": {
+          "type": "integer"
+        },
+        "agents_with_emitted_artifacts_count": {
+          "type": "integer"
+        },
+        "agents_with_execution_router_relationship_count": {
+          "type": "integer"
+        },
+        "agents_with_handoff_inputs_count": {
+          "type": "integer"
+        },
+        "agents_with_handoff_outputs_count": {
+          "type": "integer"
+        },
+        "agents_with_input_packets_count": {
+          "type": "integer"
+        },
+        "agents_with_master_plan_derivation_summary_count": {
+          "type": "integer"
+        },
+        "agents_with_master_plan_doctrine_terms_count": {
+          "type": "integer"
+        },
+        "agents_with_optimizer_arbitration_relationship_count": {
+          "type": "integer"
+        },
+        "agents_with_orchestration_relationship_count": {
+          "type": "integer"
+        },
+        "agents_with_output_packets_count": {
+          "type": "integer"
+        },
+        "agents_with_owned_surfaces_count": {
+          "type": "integer"
+        },
+        "agents_with_owner_override_supported_count": {
+          "type": "integer"
+        },
+        "agents_with_parameter_family_scope_count": {
+          "type": "integer"
+        },
+        "agents_with_primary_duties_count": {
+          "type": "integer"
+        },
+        "agents_with_quantum_scope_count": {
+          "type": "integer"
+        },
+        "agents_with_receipt_event_log_relationship_count": {
+          "type": "integer"
+        },
+        "agents_with_risk_gate_relationship_count": {
+          "type": "integer"
+        },
+        "architecture_emphasis": {
+          "const": "INSTITUTIONAL_AGENT_OPERATING_CHARTER_NOT_PROHIBITION_LIST"
+        },
+        "authority_boundary_all_false": {
+          "type": "boolean"
+        },
+        "bundle_file_present": {
+          "type": "boolean"
+        },
+        "bundle_sha_present": {
+          "type": "boolean"
+        },
+        "chatgpt_may_approve_for_owner_count": {
+          "type": "integer"
+        },
+        "codex_may_approve_for_owner_count": {
+          "type": "integer"
+        },
+        "connector_binding_artifact_created": {
+          "type": "boolean"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "existing_pr_patterns_used_for_style_only": {
+          "type": "boolean"
+        },
+        "final_ready": {
+          "type": "boolean"
+        },
+        "generated_at_utc": {
+          "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+        },
+        "live_artifact_created": {
+          "type": "boolean"
+        },
+        "master_plan_followed_as_controlling_doctrine": {
+          "type": "boolean"
+        },
+        "missing_agent_role_count": {
+          "type": "integer"
+        },
+        "order_artifact_created": {
+          "type": "boolean"
+        },
+        "owner_can_force_quantum_priority_count": {
+          "type": "integer"
+        },
+        "owner_quantum_priority_supported": {
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "type": "boolean"
+        },
+        "pr64_is_scope_boundary_not_role_authority": {
+          "type": "boolean"
+        },
+        "profit_artifact_created": {
+          "type": "boolean"
+        },
+        "qtt_agent_authority_over_owner_count": {
+          "type": "integer"
+        },
+        "quantum_backend_artifact_created": {
+          "type": "boolean"
+        },
+        "quantum_evidence_claim_created": {
+          "type": "boolean"
+        },
+        "quantum_forward_design_supported": {
+          "type": "boolean"
+        },
+        "quantum_priority_forward_compatible": {
+          "type": "boolean"
+        },
+        "replay_execution_created": {
+          "type": "boolean"
+        },
+        "report_type": {
+          "const": "QTT_AGENT_ROLE_OPERATING_CHARTER_REPORT"
+        },
+        "required_agent_role_count": {
+          "type": "integer"
+        },
+        "required_agent_roles_present_count": {
+          "type": "integer"
+        },
+        "runtime_artifact_created": {
+          "type": "boolean"
+        },
+        "runtime_resolver_snapshot_created": {
+          "type": "boolean"
+        },
+        "source_acceptance_artifact_created": {
+          "type": "boolean"
+        },
+        "source_of_role_substance": {
+          "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+        },
+        "uses_pr_number_as_authority": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "source_of_role_substance",
+        "master_plan_followed_as_controlling_doctrine",
+        "existing_pr_patterns_used_for_style_only",
+        "pr64_is_scope_boundary_not_role_authority",
+        "architecture_emphasis",
+        "agent_role_count",
+        "required_agent_role_count",
+        "required_agent_roles_present_count",
+        "missing_agent_role_count",
+        "agents_with_master_plan_doctrine_terms_count",
+        "agents_with_master_plan_derivation_summary_count",
+        "agents_with_primary_duties_count",
+        "agents_with_owned_surfaces_count",
+        "agents_with_consumed_artifacts_count",
+        "agents_with_emitted_artifacts_count",
+        "agents_with_handoff_inputs_count",
+        "agents_with_handoff_outputs_count",
+        "agents_with_input_packets_count",
+        "agents_with_output_packets_count",
+        "agents_with_parameter_family_scope_count",
+        "agents_with_algorithm_family_scope_count",
+        "agents_with_quantum_scope_count",
+        "agents_with_classical_scope_count",
+        "agents_with_orchestration_relationship_count",
+        "agents_with_risk_gate_relationship_count",
+        "agents_with_execution_router_relationship_count",
+        "agents_with_receipt_event_log_relationship_count",
+        "agents_with_coverage_health_monitor_relationship_count",
+        "agents_with_optimizer_arbitration_relationship_count",
+        "agents_with_owner_override_supported_count",
+        "agents_block_owner_override_count",
+        "agents_may_approve_for_owner_count",
+        "codex_may_approve_for_owner_count",
+        "chatgpt_may_approve_for_owner_count",
+        "qtt_agent_authority_over_owner_count",
+        "quantum_forward_design_supported",
+        "quantum_evidence_claim_created",
+        "quantum_priority_forward_compatible",
+        "owner_quantum_priority_supported",
+        "owner_can_force_quantum_priority_count",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "quantum_backend_artifact_created",
+        "profit_artifact_created",
+        "bundle_file_present",
+        "bundle_sha_present",
+        "uses_pr_number_as_authority",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://qtt.local/schemas/agents/qtt_agent_role_operating_charter_registry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Static deterministic institutional QTT agent operating-charter registry schema. It defines role duties, handoffs, owner authority, quantum-forward compatibility, and no-evidence/no-runtime boundaries.",
+  "properties": {
+    "agent_charters": {
+      "items": {
+        "$ref": "#/$defs/agent_charter"
+      },
+      "maxItems": 25,
+      "minItems": 25,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "architecture_emphasis": {
+      "const": "INSTITUTIONAL_AGENT_OPERATING_CHARTER_NOT_PROHIBITION_LIST"
+    },
+    "bundle_file_present": {
+      "const": false
+    },
+    "bundle_sha_present": {
+      "const": false
+    },
+    "chatgpt_authority_over_owner": {
+      "const": false
+    },
+    "codex_authority_over_owner": {
+      "const": false
+    },
+    "connector_binding_artifact_created": {
+      "const": false
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "existing_pr_patterns_used_for_style_only": {
+      "const": true
+    },
+    "final_ready": {
+      "const": false
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "live_artifact_created": {
+      "const": false
+    },
+    "master_plan_followed_as_controlling_doctrine": {
+      "const": true
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "order_artifact_created": {
+      "const": false
+    },
+    "owner_can_force_quantum_priority": {
+      "const": true
+    },
+    "owner_global_override_authority": {
+      "const": true
+    },
+    "owner_override_satisfies_all_qtt_internal_requirements": {
+      "const": true
+    },
+    "owner_quantum_priority_supported": {
+      "const": true
+    },
+    "paper_execution_created": {
+      "const": false
+    },
+    "pr64_is_scope_boundary_not_role_authority": {
+      "const": true
+    },
+    "profit_artifact_created": {
+      "const": false
+    },
+    "qtt_agent_authority_over_owner": {
+      "const": false
+    },
+    "quantum_backend_artifact_created": {
+      "const": false
+    },
+    "quantum_evidence_claim_created": {
+      "const": false
+    },
+    "quantum_forward_design_supported": {
+      "const": true
+    },
+    "quantum_priority_forward_compatible": {
+      "const": true
+    },
+    "registry_type": {
+      "const": "QTT_AGENT_ROLE_OPERATING_CHARTER_REGISTRY"
+    },
+    "registry_version": {
+      "const": "v1"
+    },
+    "replay_execution_created": {
+      "const": false
+    },
+    "runtime_artifact_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "source_acceptance_artifact_created": {
+      "const": false
+    },
+    "source_of_role_substance": {
+      "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+    },
+    "uses_pr_number_as_authority": {
+      "const": false
+    }
+  },
+  "required": [
+    "registry_type",
+    "registry_version",
+    "deterministic_output",
+    "generated_at_utc",
+    "source_of_role_substance",
+    "master_plan_followed_as_controlling_doctrine",
+    "existing_pr_patterns_used_for_style_only",
+    "pr64_is_scope_boundary_not_role_authority",
+    "architecture_emphasis",
+    "owner_global_override_authority",
+    "owner_override_satisfies_all_qtt_internal_requirements",
+    "chatgpt_authority_over_owner",
+    "codex_authority_over_owner",
+    "qtt_agent_authority_over_owner",
+    "quantum_forward_design_supported",
+    "quantum_evidence_claim_created",
+    "quantum_priority_forward_compatible",
+    "owner_quantum_priority_supported",
+    "owner_can_force_quantum_priority",
+    "runtime_artifact_created",
+    "live_artifact_created",
+    "order_artifact_created",
+    "source_acceptance_artifact_created",
+    "connector_binding_artifact_created",
+    "runtime_resolver_snapshot_created",
+    "replay_execution_created",
+    "paper_execution_created",
+    "quantum_backend_artifact_created",
+    "profit_artifact_created",
+    "bundle_file_present",
+    "bundle_sha_present",
+    "uses_pr_number_as_authority",
+    "final_ready",
+    "agent_charters"
+  ],
+  "title": "QTT Agent Role Operating Charter Registry",
+  "type": "object"
+}
