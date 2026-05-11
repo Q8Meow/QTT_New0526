@@ -183,6 +183,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_qtt_agent_algorithm_command_matrix.py"),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_source_evidence_static.py"),
             "--schema",
             _path("schemas", "source_evidence", "source_evidence.schema.json"),

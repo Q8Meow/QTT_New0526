@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
 
@@ -144,6 +145,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 / "generated"
                 / "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
             ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_qtt_agent_algorithm_command_matrix.py"),
         ],
         [
             python_executable,
@@ -1167,6 +1172,9 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
     agent_algorithm_cumulative_readiness_index = command_names.index(
         "validate_qtt_agent_algorithm_cumulative_readiness_gate.py"
     )
+    agent_algorithm_command_matrix_index = command_names.index(
+        "validate_qtt_agent_algorithm_command_matrix.py"
+    )
     source_evidence_index = command_names.index("validate_source_evidence_static.py")
 
     assert (
@@ -1177,6 +1185,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         < agent_algorithm_binding_index
         < agent_algorithm_consumer_gate_index
         < agent_algorithm_cumulative_readiness_index
+        < agent_algorithm_command_matrix_index
         < source_evidence_index
     )
     assert commands[owner_override_index] == [
@@ -1269,6 +1278,14 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
             / "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
         ),
     ]
+    assert commands[agent_algorithm_command_matrix_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_agent_algorithm_command_matrix.py"),
+    ]
+
+
+def test_runner_exposes_agent_algorithm_command_matrix_success_marker():
+    assert command_matrix_gate.SUCCESS_MARKER == "QTT_AGENT_ALGORITHM_COMMAND_MATRIX_OK"
 
 
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):

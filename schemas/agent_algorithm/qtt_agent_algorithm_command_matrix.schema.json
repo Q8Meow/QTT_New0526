@@ -1,0 +1,476 @@
+{
+  "$defs": {
+    "command": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "$ref": "#/$defs/command_id"
+        },
+        "command_type": {
+          "enum": [
+            "VALIDATOR",
+            "VALIDATION_HANDOFF",
+            "OWNER_MANUAL_COMMAND_SEQUENCE"
+          ]
+        },
+        "creates_cash_receipt": {
+          "const": false
+        },
+        "creates_connector_binding_artifact": {
+          "const": false
+        },
+        "creates_live_artifact": {
+          "const": false
+        },
+        "creates_order_artifact": {
+          "const": false
+        },
+        "creates_paper_execution": {
+          "const": false
+        },
+        "creates_profit_evidence": {
+          "const": false
+        },
+        "creates_quantum_backend_artifact": {
+          "const": false
+        },
+        "creates_replay_execution": {
+          "const": false
+        },
+        "creates_runtime_artifact": {
+          "const": false
+        },
+        "creates_runtime_resolver_snapshot": {
+          "const": false
+        },
+        "creates_sha_freeze_authority": {
+          "const": false
+        },
+        "creates_source_acceptance_artifact": {
+          "const": false
+        },
+        "expected_outputs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 7,
+          "type": "array"
+        },
+        "ordinal": {
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        "owner_override_supported": {
+          "const": true
+        },
+        "quantum_forward_compatible": {
+          "type": "boolean"
+        },
+        "success_marker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "validation_scope": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "ordinal",
+        "command_type",
+        "validation_scope",
+        "owner_override_supported",
+        "quantum_forward_compatible",
+        "creates_runtime_artifact",
+        "creates_live_artifact",
+        "creates_order_artifact",
+        "creates_profit_evidence",
+        "creates_quantum_backend_artifact",
+        "creates_source_acceptance_artifact",
+        "creates_connector_binding_artifact",
+        "creates_runtime_resolver_snapshot",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_cash_receipt",
+        "creates_sha_freeze_authority"
+      ],
+      "type": "object"
+    },
+    "command_id": {
+      "enum": [
+        "QTT_AGENT_ALGORITHM_COMMAND_001_OWNER_GLOBAL_OVERRIDE_AUTHORITY",
+        "QTT_AGENT_ALGORITHM_COMMAND_002_AGENT_ROLE_OPERATING_CHARTER_REGISTRY",
+        "QTT_AGENT_ALGORITHM_COMMAND_003_ALGORITHM_FORMULA_FAMILY_REGISTRY",
+        "QTT_AGENT_ALGORITHM_COMMAND_004_AGENT_ALGORITHM_BINDING_REGISTRY",
+        "QTT_AGENT_ALGORITHM_COMMAND_005_AGENT_ALGORITHM_CONSUMER_GATE",
+        "QTT_AGENT_ALGORITHM_COMMAND_006_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE",
+        "QTT_AGENT_ALGORITHM_COMMAND_007_RUN_VALIDATION_GATES_CUMULATIVE_HANDOFF",
+        "QTT_AGENT_ALGORITHM_COMMAND_008_POST_MERGE_OWNER_VERIFICATION"
+      ]
+    },
+    "command_matrix_report": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_algorithm_binding_command_present": {
+          "const": true
+        },
+        "agent_algorithm_consumer_gate_command_present": {
+          "const": true
+        },
+        "agent_algorithm_cumulative_readiness_command_present": {
+          "const": true
+        },
+        "agent_role_command_present": {
+          "const": true
+        },
+        "algorithm_formula_command_present": {
+          "const": true
+        },
+        "alpha_evidence_claim_created": {
+          "const": false
+        },
+        "authority_boundary_all_false": {
+          "const": true
+        },
+        "bundle_file_present": {
+          "const": false
+        },
+        "bundle_sha_present": {
+          "const": false
+        },
+        "cash_receipt_artifact_created": {
+          "const": false
+        },
+        "command_count": {
+          "const": 8
+        },
+        "command_ids": {
+          "items": {
+            "$ref": "#/$defs/command_id"
+          },
+          "minItems": 8,
+          "type": "array"
+        },
+        "command_matrix_type": {
+          "const": "QTT_AGENT_ALGORITHM_COMMAND_MATRIX"
+        },
+        "commands": {
+          "items": {
+            "$ref": "#/$defs/command"
+          },
+          "maxItems": 8,
+          "minItems": 8,
+          "type": "array"
+        },
+        "commands_with_success_marker_count": {
+          "type": "integer"
+        },
+        "commands_with_tool_path_count": {
+          "type": "integer"
+        },
+        "connector_binding_artifact_created": {
+          "const": false
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "execution_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "final_ready": {
+          "const": false
+        },
+        "generated_at_utc": {
+          "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+        },
+        "invalid_command_order_count": {
+          "const": 0
+        },
+        "latency_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "live_artifact_created": {
+          "const": false
+        },
+        "missing_command_count": {
+          "const": 0
+        },
+        "order_artifact_created": {
+          "const": false
+        },
+        "owner_global_override_authority": {
+          "const": true
+        },
+        "owner_global_override_command_present": {
+          "const": true
+        },
+        "owner_override_satisfies_all_qtt_internal_requirements": {
+          "const": true
+        },
+        "paper_execution_created": {
+          "const": false
+        },
+        "post_merge_owner_verification_command_present": {
+          "const": true
+        },
+        "profit_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_backend_artifact_created": {
+          "const": false
+        },
+        "quantum_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_forward_design_supported": {
+          "const": true
+        },
+        "replay_execution_created": {
+          "const": false
+        },
+        "report_type": {
+          "const": "QTT_AGENT_ALGORITHM_COMMAND_MATRIX_REPORT"
+        },
+        "required_command_count": {
+          "const": 8
+        },
+        "required_commands_present_count": {
+          "const": 8
+        },
+        "runtime_artifact_created": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "sha_freeze_authority_created": {
+          "const": false
+        },
+        "source_acceptance_artifact_created": {
+          "const": false
+        },
+        "source_of_command_matrix_substance": {
+          "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+        },
+        "uses_pr_number_as_authority": {
+          "const": false
+        },
+        "validation_gate_handoff_command_present": {
+          "const": true
+        }
+      },
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "source_of_command_matrix_substance",
+        "command_matrix_type",
+        "owner_global_override_authority",
+        "owner_override_satisfies_all_qtt_internal_requirements",
+        "command_count",
+        "required_command_count",
+        "required_commands_present_count",
+        "missing_command_count",
+        "invalid_command_order_count",
+        "commands_with_tool_path_count",
+        "commands_with_success_marker_count",
+        "owner_global_override_command_present",
+        "agent_role_command_present",
+        "algorithm_formula_command_present",
+        "agent_algorithm_binding_command_present",
+        "agent_algorithm_consumer_gate_command_present",
+        "agent_algorithm_cumulative_readiness_command_present",
+        "validation_gate_handoff_command_present",
+        "post_merge_owner_verification_command_present",
+        "quantum_forward_design_supported",
+        "quantum_evidence_claim_created",
+        "alpha_evidence_claim_created",
+        "profit_evidence_claim_created",
+        "latency_superiority_evidence_claim_created",
+        "execution_superiority_evidence_claim_created",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "quantum_backend_artifact_created",
+        "cash_receipt_artifact_created",
+        "sha_freeze_authority_created",
+        "bundle_file_present",
+        "bundle_sha_present",
+        "uses_pr_number_as_authority",
+        "final_ready",
+        "authority_boundary_all_false",
+        "command_ids",
+        "commands"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://qtt.local/schemas/agent_algorithm/qtt_agent_algorithm_command_matrix.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Static deterministic command matrix for QTT agent-role and algorithm validation order. The matrix validates command references and artifact boundaries without executing command rows.",
+  "properties": {
+    "alpha_evidence_claim_created": {
+      "const": false
+    },
+    "authority_boundary_all_false": {
+      "const": true
+    },
+    "bundle_file_present": {
+      "const": false
+    },
+    "bundle_sha_present": {
+      "const": false
+    },
+    "cash_receipt_artifact_created": {
+      "const": false
+    },
+    "command_matrix_type": {
+      "const": "QTT_AGENT_ALGORITHM_COMMAND_MATRIX"
+    },
+    "commands": {
+      "items": {
+        "$ref": "#/$defs/command"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "type": "array"
+    },
+    "connector_binding_artifact_created": {
+      "const": false
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "execution_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "final_ready": {
+      "const": false
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "latency_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "live_artifact_created": {
+      "const": false
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "order_artifact_created": {
+      "const": false
+    },
+    "owner_global_override_authority": {
+      "const": true
+    },
+    "owner_override_basis": {
+      "const": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE"
+    },
+    "owner_override_satisfies_all_qtt_internal_requirements": {
+      "const": true
+    },
+    "paper_execution_created": {
+      "const": false
+    },
+    "profit_evidence_claim_created": {
+      "const": false
+    },
+    "quantum_backend_artifact_created": {
+      "const": false
+    },
+    "quantum_evidence_claim_created": {
+      "const": false
+    },
+    "quantum_forward_design_supported": {
+      "const": true
+    },
+    "replay_execution_created": {
+      "const": false
+    },
+    "runtime_artifact_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "schema_version": {
+      "const": "v1"
+    },
+    "sha_freeze_authority_created": {
+      "const": false
+    },
+    "source_acceptance_artifact_created": {
+      "const": false
+    },
+    "source_of_command_matrix_substance": {
+      "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+    },
+    "uses_pr_number_as_authority": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "execution",
+    "command_matrix_type",
+    "source_of_command_matrix_substance",
+    "deterministic_output",
+    "generated_at_utc",
+    "owner_global_override_authority",
+    "owner_override_satisfies_all_qtt_internal_requirements",
+    "owner_override_basis",
+    "quantum_forward_design_supported",
+    "quantum_evidence_claim_created",
+    "alpha_evidence_claim_created",
+    "profit_evidence_claim_created",
+    "latency_superiority_evidence_claim_created",
+    "execution_superiority_evidence_claim_created",
+    "runtime_artifact_created",
+    "live_artifact_created",
+    "order_artifact_created",
+    "source_acceptance_artifact_created",
+    "connector_binding_artifact_created",
+    "runtime_resolver_snapshot_created",
+    "replay_execution_created",
+    "paper_execution_created",
+    "quantum_backend_artifact_created",
+    "cash_receipt_artifact_created",
+    "sha_freeze_authority_created",
+    "bundle_file_present",
+    "bundle_sha_present",
+    "uses_pr_number_as_authority",
+    "final_ready",
+    "authority_boundary_all_false",
+    "commands"
+  ],
+  "title": "QTT Agent Algorithm Command Matrix",
+  "type": "object"
+}

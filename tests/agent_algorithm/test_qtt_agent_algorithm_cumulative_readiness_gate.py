@@ -210,8 +210,8 @@ def test_static_internal_readiness_and_future_boundaries_are_encoded():
         assert value["normal_static_agent_algorithm_coverage_ready"] is True
         assert value["normal_full_agent_algorithm_coverage_ready"] is False
         assert value["qtt_internal_agent_algorithm_ready"] is True
-        assert value["future_command_matrix_required"] is True
-        assert value["agent_algorithm_command_matrix_created"] is False
+        assert value["future_command_matrix_required"] is False
+        assert value["agent_algorithm_command_matrix_created"] is True
         assert value["future_parameter_stack_layers_required"] is True
         assert value["future_scoring_ranking_layers_required"] is True
         assert value["future_quantum_classical_arbitration_required"] is True
@@ -248,7 +248,6 @@ def test_no_runtime_live_order_source_connector_replay_paper_profit_or_backend_a
         "latency_superiority_evidence_claim_created",
         "execution_superiority_evidence_claim_created",
         "quantum_evidence_claim_created",
-        "agent_algorithm_command_matrix_created",
         "runtime_artifact_created",
         "live_artifact_created",
         "order_artifact_created",
