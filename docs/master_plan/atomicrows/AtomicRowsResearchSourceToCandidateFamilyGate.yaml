@@ -1,0 +1,231 @@
+gate_id: ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+gate_version: v1
+authority_class: STATIC_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE_NOT_SOURCE_FACT_NOT_ACCEPTED_PACKET_NOT_ATOMICROWS_BUNDLE_NOT_RUNTIME_AUTHORITY
+depends_on_research_provenance_classifier:
+  schema_path: schemas/atomicrows/atomicrows_research_provenance_evidence_tier_classification.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsResearchProvenanceEvidenceTierClassification.yaml
+  report_path: docs/master_plan/generated/AtomicRowsResearchProvenanceEvidenceTierClassification.report.json
+depends_on_owner_submitted_research_source_intake_registry:
+  schema_path: schemas/atomicrows/atomicrows_owner_submitted_research_source_intake_registry.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.yaml
+  report_path: docs/master_plan/generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json
+supported_source_types:
+  - OWNER_SUBMITTED_RESEARCH_SOURCE
+  - PUBLIC_WEBSITE
+  - RESEARCH_ARTICLE
+  - ACADEMIC_RESEARCH_PAPER
+  - X_POST
+  - NEWS_ARTICLE
+  - GITHUB_REPOSITORY
+  - WHITEPAPER
+  - BLOG_POST
+  - FORUM_OR_COMMUNITY_POST
+  - UPLOADED_DOCUMENT
+  - SCREENSHOT_OR_OWNER_NOTE
+  - OFFICIAL_SOURCE_EVIDENCE
+  - OWNER_GLOBAL_OVERRIDE
+supported_candidate_routes:
+  - RESEARCH_ARCHIVE_ONLY
+  - PR72_PARAMETER_FAMILY_CANDIDATE_REVIEW
+  - PR72_ALGORITHM_FAMILY_CANDIDATE_REVIEW
+  - PR72_AGENT_BINDING_REQUEST_REVIEW
+  - PR72_OWNER_OVERRIDE_RECEIPT_REFERENCE_REVIEW
+  - RETRIEVAL_TARGET_REVIEW_ONLY
+  - OWNER_REVIEW_REQUIRED
+  - BLOCKED_NO_OWNER_APPROVAL
+  - SYNTHETIC_FIXTURE_ONLY_NOT_REAL_ROUTE
+output_packet_types:
+  - candidate_parameter_family_packet
+  - candidate_algorithm_family_packet
+  - candidate_agent_binding_request
+  - owner_override_receipt_reference
+conversion_rules:
+  - candidate_route: PR72_PARAMETER_FAMILY_CANDIDATE_REVIEW
+    produced_output_packet_type: candidate_parameter_family_packet
+    produces_candidate_packet: true
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: PR72_ALGORITHM_FAMILY_CANDIDATE_REVIEW
+    produced_output_packet_type: candidate_algorithm_family_packet
+    produces_candidate_packet: true
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: PR72_AGENT_BINDING_REQUEST_REVIEW
+    produced_output_packet_type: candidate_agent_binding_request
+    produces_candidate_packet: true
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: PR72_OWNER_OVERRIDE_RECEIPT_REFERENCE_REVIEW
+    produced_output_packet_type: owner_override_receipt_reference
+    produces_candidate_packet: true
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: RESEARCH_ARCHIVE_ONLY
+    produced_output_packet_type: null
+    produces_candidate_packet: false
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: RETRIEVAL_TARGET_REVIEW_ONLY
+    produced_output_packet_type: null
+    produces_candidate_packet: false
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: OWNER_REVIEW_REQUIRED
+    produced_output_packet_type: null
+    produces_candidate_packet: false
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: BLOCKED_NO_OWNER_APPROVAL
+    produced_output_packet_type: null
+    produces_candidate_packet: false
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+  - candidate_route: SYNTHETIC_FIXTURE_ONLY_NOT_REAL_ROUTE
+    produced_output_packet_type: null
+    produces_candidate_packet: false
+    production_requires_owner_approval_or_override: true
+    synthetic_fixture_only_allowed: true
+quantum_forward_conversion_policy:
+  quantum_metadata_only: true
+  supported_quantum_routes:
+    - NONE
+    - QUANTUM_RESEARCH_REVIEW
+    - QUANTUM_OPTIMIZER_CANDIDATE_REVIEW
+    - TRUE_QUANTUM_REVIEW
+    - QUANTUM_INSPIRED_REVIEW
+    - HYBRID_CLASSICAL_QUANTUM_REVIEW
+    - QUBO_COMPATIBILITY_REVIEW
+    - ISING_COMPATIBILITY_REVIEW
+    - QAOA_COMPATIBILITY_REVIEW
+    - VQE_COMPATIBILITY_REVIEW
+    - ANNEALING_COMPATIBILITY_REVIEW
+    - QUANTUM_PORTFOLIO_OPTIMIZATION_REVIEW
+    - OWNER_FORCED_QUANTUM_REVIEW
+    - SYNTHETIC_FIXTURE_ONLY_NOT_REAL_ROUTE
+  target_quantum_algorithm_families_supported:
+    - OWNER_UNSET_PENDING_REVIEW
+    - NONE
+    - TRUE_QUANTUM_OPTIMIZER
+    - QUANTUM_INSPIRED_OPTIMIZER
+    - HYBRID_CLASSICAL_QUANTUM_OPTIMIZER
+    - QUBO_COMPATIBLE_ALGORITHM
+    - ISING_COMPATIBLE_ALGORITHM
+    - QAOA_COMPATIBLE_ALGORITHM
+    - VQE_COMPATIBLE_ALGORITHM
+    - ANNEALING_COMPATIBLE_ALGORITHM
+    - QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_ALGORITHM
+    - SYNTHETIC_FIXTURE_ONLY_NOT_REAL_FAMILY
+  future_quantum_flags_supported:
+    - TRUE_QUANTUM
+    - QUANTUM_INSPIRED
+    - HYBRID_CLASSICAL_QUANTUM
+    - QUBO_COMPATIBLE
+    - ISING_COMPATIBLE
+    - QAOA_COMPATIBLE
+    - VQE_COMPATIBLE
+    - ANNEALING_COMPATIBLE
+    - QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE
+    - OWNER_QUANTUM_PRIORITY
+    - OWNER_FORCED_QUANTUM
+    - HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK
+    - STRONGEST_CLASSICAL_COMPARATOR_REQUIRED
+    - FALLBACK_BUNDLE_REQUIRED
+    - REPLAY_PAPER_EVIDENCE_REQUIRED_BEFORE_ADVANTAGE_CLAIM
+    - LIVE_EVIDENCE_REQUIRED_BEFORE_PROFIT_CLAIM
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+production_input_summary:
+  production_intake_entries_count: 0
+  real_owner_intake_entry_count: 0
+  intake_entries_empty: true
+  real_owner_intakes_invented: false
+  source_registry_synthetic_fixture_only: true
+production_outputs:
+  candidate_parameter_family_packets: []
+  candidate_algorithm_family_packets: []
+  candidate_agent_binding_requests: []
+  owner_override_receipt_references: []
+candidate_parameter_family_packet_count: 0
+candidate_algorithm_family_packet_count: 0
+candidate_agent_binding_request_count: 0
+owner_override_receipt_reference_count: 0
+real_candidate_outputs_invented: false
+synthetic_fixture_only: true
+conversion_gate_contract_ready: true
+production_conversion_ready: false
+final_ready: false
+forbidden_artifact_flags:
+  source_retrieval: false
+  source_acceptance: false
+  accepted_source_packets: false
+  connector_semantics: false
+  runtime_artifacts: false
+  runtime_receipts: false
+  live_receipts: false
+  order_receipts: false
+  cash_receipts: false
+  replay_results: false
+  paper_results: false
+  live_readiness: false
+  order_authority: false
+  profit_evidence: false
+  quantum_backend_evidence: false
+  quantum_advantage_claim: false
+  latency_superiority_claim: false
+  execution_superiority_claim: false
+  atomicrows_bundle_rows: false
+  atomicrows_bundle_jsonl: false
+  atomicrows_bundle_sha256: false
+  ranking: false
+  scoring: false
+  optimizer_arbitration: false
+  trade_context_routing: false
+  runtime_live_use: false
+retrieves_source_facts: false
+accepts_source_facts: false
+creates_accepted_source_packets: false
+creates_connector_semantics: false
+creates_runtime_artifacts: false
+creates_atomicrows_bundle_rows: false
+creates_atomicrows_bundle_jsonl: false
+creates_atomicrows_bundle_sha256: false
+creates_replay_results: false
+creates_paper_results: false
+creates_live_readiness: false
+creates_order_authority: false
+creates_cash_receipts: false
+creates_profit_evidence: false
+creates_quantum_backend_evidence: false
+creates_quantum_advantage_claim: false
+creates_latency_superiority_claim: false
+creates_execution_superiority_claim: false
+creates_ranking: false
+creates_scoring: false
+creates_optimizer_arbitration: false
+creates_trade_context_routing: false
+creates_runtime_or_live_trading_authority: false
+implements_random_selection: false
+implements_stack_selection: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfaction_basis_supported: true
+  owner_override_satisfies_internal_workflow_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+validation_invariants:
+  - Production candidate outputs must be empty while owner intake production entries are empty.
+  - Production output counts must match production output arrays.
+  - Supported source types must exactly match the provenance classifier.
+  - Candidate routes must exactly match the route universe.
+  - Output packet types must exactly match the four roadmap output types.
+  - Source acceptance must not be created.
+  - Runtime live order profit and quantum backend authority must not be created.
+  - AtomicRows bundle rows must not be created.
+  - Ranking scoring arbitration and trade context routing must not be implemented.

@@ -535,6 +535,13 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_research_source_to_candidate_family_gate.py",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",

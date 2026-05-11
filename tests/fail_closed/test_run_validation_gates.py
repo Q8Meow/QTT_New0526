@@ -6,6 +6,9 @@ from tools import (
 from tools import (
     validate_atomicrows_owner_submitted_research_source_intake_registry as owner_intake_gate,
 )
+from tools import (
+    validate_atomicrows_research_source_to_candidate_family_gate as candidate_family_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -509,6 +512,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_research_source_to_candidate_family_gate.py"
             ),
         ],
         [
@@ -1322,6 +1332,13 @@ def test_runner_exposes_owner_submitted_research_source_intake_success_marker():
     )
 
 
+def test_runner_exposes_research_source_to_candidate_family_gate_success_marker():
+    assert (
+        candidate_family_gate.SUCCESS_MARKER
+        == "ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1399,12 +1416,21 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
     owner_intake_index = command_names.index(
         "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
     )
+    candidate_family_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
-    assert pr70_index < owner_intake_index < generated_gate_index < no_runtime_index
+    assert (
+        pr70_index
+        < owner_intake_index
+        < candidate_family_index
+        < generated_gate_index
+        < no_runtime_index
+    )
     assert commands[pr70_index] == [
         python_executable,
         str(
@@ -1417,6 +1443,13 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
         str(
             Path("tools")
             / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+        ),
+    ]
+    assert commands[candidate_family_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_research_source_to_candidate_family_gate.py"
         ),
     ]
 
@@ -1633,6 +1666,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     owner_intake_index = command_names.index(
         "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
     )
+    candidate_family_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1652,6 +1688,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < parameter_agent_binding_command_matrix_index
         < research_provenance_index
         < owner_intake_index
+        < candidate_family_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1807,6 +1844,13 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         str(
             Path("tools")
             / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+        ),
+    ]
+    assert commands[candidate_family_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_research_source_to_candidate_family_gate.py"
         ),
     ]
 
@@ -2581,6 +2625,45 @@ def test_runner_does_not_emit_success_marker_if_owner_intake_validator_fails(
 
     assert exit_code == 7
     assert seen == commands[:2]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_candidate_family_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        [
+            "python",
+            "validate_atomicrows_research_provenance_evidence_tier_classification.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_owner_submitted_research_source_intake_registry.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_research_source_to_candidate_family_gate.py",
+        ],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 11, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 11
+    assert seen == commands[:3]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
