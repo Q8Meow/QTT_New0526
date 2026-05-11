@@ -111,6 +111,24 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_qtt_algorithm_formula_family_registry.py",
+            ),
+            "--mode",
+            "dev",
+            "--repo-root",
+            ".",
+            "--out",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "QTTAlgorithmFormulaFamilyReport.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_source_evidence_static.py"),
             "--schema",
             _path("schemas", "source_evidence", "source_evidence.schema.json"),
