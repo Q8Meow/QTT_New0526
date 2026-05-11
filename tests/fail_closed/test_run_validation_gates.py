@@ -132,6 +132,21 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_qtt_agent_algorithm_cumulative_readiness_gate.py"),
+            "--mode",
+            "dev",
+            "--repo-root",
+            ".",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_source_evidence_static.py"),
             "--schema",
             str(Path("schemas") / "source_evidence" / "source_evidence.schema.json"),
@@ -1149,6 +1164,9 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
     agent_algorithm_consumer_gate_index = command_names.index(
         "validate_qtt_agent_algorithm_consumer_gate.py"
     )
+    agent_algorithm_cumulative_readiness_index = command_names.index(
+        "validate_qtt_agent_algorithm_cumulative_readiness_gate.py"
+    )
     source_evidence_index = command_names.index("validate_source_evidence_static.py")
 
     assert (
@@ -1158,6 +1176,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         < algorithm_registry_index
         < agent_algorithm_binding_index
         < agent_algorithm_consumer_gate_index
+        < agent_algorithm_cumulative_readiness_index
         < source_evidence_index
     )
     assert commands[owner_override_index] == [
@@ -1233,6 +1252,21 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
             / "master_plan"
             / "generated"
             / "QTTAgentAlgorithmConsumerGate.report.json"
+        ),
+    ]
+    assert commands[agent_algorithm_cumulative_readiness_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_agent_algorithm_cumulative_readiness_gate.py"),
+        "--mode",
+        "dev",
+        "--repo-root",
+        ".",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
         ),
     ]
 
