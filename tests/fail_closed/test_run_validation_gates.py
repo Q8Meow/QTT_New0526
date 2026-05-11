@@ -87,6 +87,21 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_qtt_algorithm_formula_family_registry.py"),
+            "--mode",
+            "dev",
+            "--repo-root",
+            ".",
+            "--out",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "QTTAlgorithmFormulaFamilyReport.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_source_evidence_static.py"),
             "--schema",
             str(Path("schemas") / "source_evidence" / "source_evidence.schema.json"),
@@ -1095,9 +1110,18 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
     agent_charter_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
+    algorithm_registry_index = command_names.index(
+        "validate_qtt_algorithm_formula_family_registry.py"
+    )
     source_evidence_index = command_names.index("validate_source_evidence_static.py")
 
-    assert scope_index < owner_override_index < agent_charter_index < source_evidence_index
+    assert (
+        scope_index
+        < owner_override_index
+        < agent_charter_index
+        < algorithm_registry_index
+        < source_evidence_index
+    )
     assert commands[owner_override_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_owner_global_override_authority.py"),
@@ -1126,6 +1150,21 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
             / "master_plan"
             / "generated"
             / "QTTAgentRoleOperatingCharterReport.json"
+        ),
+    ]
+    assert commands[algorithm_registry_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_algorithm_formula_family_registry.py"),
+        "--mode",
+        "dev",
+        "--repo-root",
+        ".",
+        "--out",
+        str(
+            Path("docs")
+            / "master_plan"
+            / "generated"
+            / "QTTAlgorithmFormulaFamilyReport.json"
         ),
     ]
 
