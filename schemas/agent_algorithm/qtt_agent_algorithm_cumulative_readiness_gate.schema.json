@@ -1,0 +1,766 @@
+{
+  "$defs": {
+    "agent_algorithm_cumulative_readiness_gate_report": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_algorithm_binding_registry_dependency": {
+          "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml"
+        },
+        "agent_algorithm_binding_report_dependency": {
+          "const": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"
+        },
+        "agent_algorithm_command_matrix_created": {
+          "const": false
+        },
+        "agent_algorithm_consumer_gate_dependency": {
+          "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
+        },
+        "agent_algorithm_consumer_gate_report_dependency": {
+          "const": "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+        },
+        "agent_charter_registry_dependency": {
+          "const": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+        },
+        "agent_role_count_from_charter_registry": {
+          "type": "integer"
+        },
+        "agent_role_report_dependency": {
+          "const": "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json"
+        },
+        "algorithm_family_count_from_algorithm_registry": {
+          "type": "integer"
+        },
+        "algorithm_formula_family_registry_dependency": {
+          "const": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml"
+        },
+        "algorithm_formula_family_report_dependency": {
+          "const": "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json"
+        },
+        "alpha_evidence_claim_created": {
+          "const": false
+        },
+        "architecture_emphasis": {
+          "const": "INSTITUTIONAL_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE_NOT_FINAL_READINESS"
+        },
+        "authority_boundary_all_false": {
+          "const": true
+        },
+        "binding_count_from_binding_registry": {
+          "type": "integer"
+        },
+        "bundle_file_present": {
+          "const": false
+        },
+        "bundle_sha_present": {
+          "const": false
+        },
+        "component_count": {
+          "type": "integer"
+        },
+        "components_present_count": {
+          "type": "integer"
+        },
+        "connector_binding_artifact_created": {
+          "const": false
+        },
+        "consumer_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "consumer_blocked_attempt_count": {
+          "type": "integer"
+        },
+        "consumer_owner_override_attempt_count": {
+          "type": "integer"
+        },
+        "deterministic_output": {
+          "const": true
+        },
+        "execution_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "expected_binding_count_from_binding_report": {
+          "type": "integer"
+        },
+        "final_ready": {
+          "const": false
+        },
+        "future_atomicrows_bundle_hash_required": {
+          "const": true
+        },
+        "future_command_matrix_required": {
+          "const": true
+        },
+        "future_parameter_stack_layers_required": {
+          "const": true
+        },
+        "future_quantum_classical_arbitration_required": {
+          "const": true
+        },
+        "future_replay_paper_evidence_required": {
+          "const": true
+        },
+        "future_runtime_live_readiness_required": {
+          "const": true
+        },
+        "future_scoring_ranking_layers_required": {
+          "const": true
+        },
+        "generated_at_utc": {
+          "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+        },
+        "invalid_agent_role_count": {
+          "type": "integer"
+        },
+        "invalid_algorithm_family_count": {
+          "type": "integer"
+        },
+        "invalid_binding_count": {
+          "type": "integer"
+        },
+        "invalid_component_order_count": {
+          "type": "integer"
+        },
+        "invalid_consumer_authorization_count": {
+          "type": "integer"
+        },
+        "latency_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "live_artifact_created": {
+          "const": false
+        },
+        "master_plan_followed_as_controlling_doctrine": {
+          "const": true
+        },
+        "missing_component_count": {
+          "type": "integer"
+        },
+        "normal_full_agent_algorithm_coverage_ready": {
+          "const": false
+        },
+        "normal_static_agent_algorithm_coverage_ready": {
+          "const": true
+        },
+        "order_artifact_created": {
+          "const": false
+        },
+        "owner_can_force_quantum_priority_supported": {
+          "const": true
+        },
+        "owner_global_override_authority": {
+          "const": true
+        },
+        "owner_global_override_report_dependency": {
+          "const": "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json"
+        },
+        "owner_override_satisfies_agent_algorithm_readiness": {
+          "const": true
+        },
+        "owner_override_satisfies_all_qtt_internal_requirements": {
+          "const": true
+        },
+        "owner_quantum_priority_supported": {
+          "const": true
+        },
+        "paper_execution_created": {
+          "const": false
+        },
+        "profit_evidence_claim_created": {
+          "const": false
+        },
+        "qtt_internal_agent_algorithm_ready": {
+          "const": true
+        },
+        "quantum_algorithm_family_count": {
+          "type": "integer"
+        },
+        "quantum_backend_artifact_created": {
+          "const": false
+        },
+        "quantum_binding_count": {
+          "type": "integer"
+        },
+        "quantum_consumer_allowed_attempt_count": {
+          "type": "integer"
+        },
+        "quantum_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_forward_design_supported": {
+          "const": true
+        },
+        "readiness_generation_policy": {
+          "const": "CUMULATIVE_STATIC_FOUNDATION_FROM_OWNER_AGENT_ALGORITHM_BINDING_AND_CONSUMER_GATE_ARTIFACTS"
+        },
+        "replay_execution_created": {
+          "const": false
+        },
+        "report_type": {
+          "const": "QTT_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE_REPORT"
+        },
+        "required_component_count": {
+          "const": 8
+        },
+        "runtime_artifact_created": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "source_acceptance_artifact_created": {
+          "const": false
+        },
+        "source_of_readiness_substance": {
+          "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+        },
+        "static_agent_algorithm_cumulative_readiness_gate_created": {
+          "const": true
+        },
+        "static_agent_algorithm_foundation_ready": {
+          "const": true
+        },
+        "uses_pr_number_as_authority": {
+          "const": false
+        }
+      },
+      "required": [
+        "report_type",
+        "deterministic_output",
+        "generated_at_utc",
+        "source_of_readiness_substance",
+        "agent_charter_registry_dependency",
+        "algorithm_formula_family_registry_dependency",
+        "agent_algorithm_binding_registry_dependency",
+        "agent_algorithm_consumer_gate_dependency",
+        "owner_global_override_report_dependency",
+        "agent_role_report_dependency",
+        "algorithm_formula_family_report_dependency",
+        "agent_algorithm_binding_report_dependency",
+        "agent_algorithm_consumer_gate_report_dependency",
+        "readiness_generation_policy",
+        "master_plan_followed_as_controlling_doctrine",
+        "architecture_emphasis",
+        "component_count",
+        "required_component_count",
+        "components_present_count",
+        "missing_component_count",
+        "invalid_component_order_count",
+        "agent_role_count_from_charter_registry",
+        "algorithm_family_count_from_algorithm_registry",
+        "binding_count_from_binding_registry",
+        "expected_binding_count_from_binding_report",
+        "consumer_allowed_attempt_count",
+        "consumer_blocked_attempt_count",
+        "consumer_owner_override_attempt_count",
+        "invalid_agent_role_count",
+        "invalid_algorithm_family_count",
+        "invalid_binding_count",
+        "invalid_consumer_authorization_count",
+        "owner_global_override_authority",
+        "owner_override_satisfies_all_qtt_internal_requirements",
+        "owner_override_satisfies_agent_algorithm_readiness",
+        "static_agent_algorithm_foundation_ready",
+        "normal_static_agent_algorithm_coverage_ready",
+        "normal_full_agent_algorithm_coverage_ready",
+        "qtt_internal_agent_algorithm_ready",
+        "future_command_matrix_required",
+        "agent_algorithm_command_matrix_created",
+        "future_parameter_stack_layers_required",
+        "future_scoring_ranking_layers_required",
+        "future_quantum_classical_arbitration_required",
+        "future_replay_paper_evidence_required",
+        "future_runtime_live_readiness_required",
+        "future_atomicrows_bundle_hash_required",
+        "quantum_forward_design_supported",
+        "quantum_algorithm_family_count",
+        "quantum_binding_count",
+        "quantum_consumer_allowed_attempt_count",
+        "owner_quantum_priority_supported",
+        "owner_can_force_quantum_priority_supported",
+        "alpha_evidence_claim_created",
+        "profit_evidence_claim_created",
+        "latency_superiority_evidence_claim_created",
+        "execution_superiority_evidence_claim_created",
+        "quantum_evidence_claim_created",
+        "static_agent_algorithm_cumulative_readiness_gate_created",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "quantum_backend_artifact_created",
+        "bundle_file_present",
+        "bundle_sha_present",
+        "uses_pr_number_as_authority",
+        "final_ready",
+        "authority_boundary_all_false"
+      ],
+      "type": "object"
+    },
+    "readiness_component": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha_evidence_claim_created": {
+          "const": false
+        },
+        "bundle_file_present": {
+          "const": false
+        },
+        "bundle_sha_present": {
+          "const": false
+        },
+        "component_category": {
+          "type": "string"
+        },
+        "component_description": {
+          "type": "string"
+        },
+        "component_id": {
+          "enum": [
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_001_OWNER_GLOBAL_OVERRIDE_AUTHORITY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_002_AGENT_ROLE_OPERATING_CHARTER_REGISTRY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_003_ALGORITHM_FORMULA_FAMILY_REGISTRY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_004_AGENT_ALGORITHM_BINDING_REGISTRY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_005_AGENT_ALGORITHM_CONSUMER_GATE",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_006_QUANTUM_FORWARD_COMPATIBILITY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_007_STATIC_NO_RUNTIME_NO_EVIDENCE_BOUNDARY",
+            "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_008_FUTURE_PR_DEPENDENCY_BOUNDARY"
+          ]
+        },
+        "component_name": {
+          "type": "string"
+        },
+        "component_present": {
+          "type": "boolean"
+        },
+        "component_validated": {
+          "type": "boolean"
+        },
+        "connector_binding_artifact_created": {
+          "const": false
+        },
+        "dependency_paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "dependency_reports": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "evidence_claim_created": {
+          "const": false
+        },
+        "execution_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "expected_success_markers": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "external_fact_claim_created": {
+          "const": false
+        },
+        "external_repo_clone_created": {
+          "const": false
+        },
+        "final_ready_contribution": {
+          "const": false
+        },
+        "future_pr_dependency_reason": {
+          "type": "string"
+        },
+        "latency_superiority_evidence_claim_created": {
+          "const": false
+        },
+        "live_artifact_created": {
+          "const": false
+        },
+        "measured_counts": {
+          "type": "object"
+        },
+        "normal_full_ready_contribution": {
+          "type": "boolean"
+        },
+        "normal_static_ready_contribution": {
+          "type": "boolean"
+        },
+        "order_artifact_created": {
+          "const": false
+        },
+        "owner_override_satisfaction_basis": {
+          "const": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE"
+        },
+        "owner_override_supported": {
+          "const": true
+        },
+        "package_install_created": {
+          "const": false
+        },
+        "paper_execution_created": {
+          "const": false
+        },
+        "private_state_fetch_created": {
+          "const": false
+        },
+        "profit_artifact_created": {
+          "const": false
+        },
+        "profit_evidence_claim_created": {
+          "const": false
+        },
+        "qtt_internal_ready_contribution": {
+          "type": "boolean"
+        },
+        "quantum_backend_artifact_created": {
+          "const": false
+        },
+        "quantum_evidence_claim_created": {
+          "const": false
+        },
+        "quantum_forward_contribution": {
+          "type": "boolean"
+        },
+        "real_live_artifact_created": {
+          "const": false
+        },
+        "real_order_artifact_created": {
+          "const": false
+        },
+        "real_profit_artifact_created": {
+          "const": false
+        },
+        "real_quantum_backend_artifact_created": {
+          "const": false
+        },
+        "real_runtime_artifact_created": {
+          "const": false
+        },
+        "reason_codes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "replay_execution_created": {
+          "const": false
+        },
+        "runtime_artifact_created": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_created": {
+          "const": false
+        },
+        "secret_materialization_created": {
+          "const": false
+        },
+        "source_acceptance_artifact_created": {
+          "const": false
+        },
+        "static_foundation_contribution": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_id",
+        "component_name",
+        "component_category",
+        "component_description",
+        "dependency_paths",
+        "dependency_reports",
+        "expected_success_markers",
+        "measured_counts",
+        "component_present",
+        "component_validated",
+        "static_foundation_contribution",
+        "owner_override_supported",
+        "owner_override_satisfaction_basis",
+        "qtt_internal_ready_contribution",
+        "normal_static_ready_contribution",
+        "normal_full_ready_contribution",
+        "final_ready_contribution",
+        "quantum_forward_contribution",
+        "future_pr_dependency_reason",
+        "evidence_claim_created",
+        "alpha_evidence_claim_created",
+        "profit_evidence_claim_created",
+        "latency_superiority_evidence_claim_created",
+        "execution_superiority_evidence_claim_created",
+        "quantum_evidence_claim_created",
+        "runtime_artifact_created",
+        "live_artifact_created",
+        "order_artifact_created",
+        "source_acceptance_artifact_created",
+        "connector_binding_artifact_created",
+        "runtime_resolver_snapshot_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "quantum_backend_artifact_created",
+        "bundle_file_present",
+        "bundle_sha_present",
+        "reason_codes"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "agent_algorithm_binding_registry_dependency": {
+      "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml"
+    },
+    "agent_algorithm_binding_report_dependency": {
+      "const": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"
+    },
+    "agent_algorithm_command_matrix_created": {
+      "const": false
+    },
+    "agent_algorithm_consumer_gate_dependency": {
+      "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
+    },
+    "agent_algorithm_consumer_gate_report_dependency": {
+      "const": "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+    },
+    "agent_charter_registry_dependency": {
+      "const": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+    },
+    "agent_role_report_dependency": {
+      "const": "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json"
+    },
+    "algorithm_formula_family_registry_dependency": {
+      "const": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml"
+    },
+    "algorithm_formula_family_report_dependency": {
+      "const": "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json"
+    },
+    "alpha_evidence_claim_created": {
+      "const": false
+    },
+    "bundle_file_present": {
+      "const": false
+    },
+    "bundle_sha_present": {
+      "const": false
+    },
+    "chatgpt_authority_over_owner": {
+      "const": false
+    },
+    "codex_authority_over_owner": {
+      "const": false
+    },
+    "connector_binding_artifact_created": {
+      "const": false
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "execution_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "final_ready": {
+      "const": false
+    },
+    "fixture_authority_class": {
+      "type": "string"
+    },
+    "fixture_id": {
+      "type": "string"
+    },
+    "fixture_version": {
+      "type": "string"
+    },
+    "future_atomicrows_bundle_hash_required": {
+      "const": true
+    },
+    "future_command_matrix_required": {
+      "const": true
+    },
+    "future_parameter_stack_layers_required": {
+      "const": true
+    },
+    "future_quantum_classical_arbitration_required": {
+      "const": true
+    },
+    "future_replay_paper_evidence_required": {
+      "const": true
+    },
+    "future_runtime_live_readiness_required": {
+      "const": true
+    },
+    "future_scoring_ranking_layers_required": {
+      "const": true
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "latency_superiority_evidence_claim_created": {
+      "const": false
+    },
+    "live_artifact_created": {
+      "const": false
+    },
+    "master_plan_followed_as_controlling_doctrine": {
+      "const": true
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "normal_full_agent_algorithm_coverage_ready": {
+      "const": false
+    },
+    "normal_static_agent_algorithm_coverage_ready": {
+      "const": true
+    },
+    "order_artifact_created": {
+      "const": false
+    },
+    "owner_global_override_authority": {
+      "const": true
+    },
+    "owner_global_override_report_dependency": {
+      "const": "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json"
+    },
+    "owner_override_satisfies_agent_algorithm_readiness": {
+      "const": true
+    },
+    "owner_override_satisfies_all_qtt_internal_requirements": {
+      "const": true
+    },
+    "paper_execution_created": {
+      "const": false
+    },
+    "profit_evidence_claim_created": {
+      "const": false
+    },
+    "qtt_agent_authority_over_owner": {
+      "const": false
+    },
+    "qtt_internal_agent_algorithm_ready": {
+      "const": true
+    },
+    "quantum_backend_artifact_created": {
+      "const": false
+    },
+    "quantum_evidence_claim_created": {
+      "const": false
+    },
+    "quantum_forward_design_supported": {
+      "const": true
+    },
+    "readiness_components": {
+      "items": {
+        "$ref": "#/$defs/readiness_component"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "readiness_generation_policy": {
+      "const": "CUMULATIVE_STATIC_FOUNDATION_FROM_OWNER_AGENT_ALGORITHM_BINDING_AND_CONSUMER_GATE_ARTIFACTS"
+    },
+    "registry_type": {
+      "const": "QTT_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE"
+    },
+    "registry_version": {
+      "const": "v1"
+    },
+    "replay_execution_created": {
+      "const": false
+    },
+    "runtime_artifact_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "source_acceptance_artifact_created": {
+      "const": false
+    },
+    "source_of_readiness_substance": {
+      "const": "docs/master_plan/QTT_MasterPlan_Current.md"
+    },
+    "static_agent_algorithm_cumulative_readiness_gate_created": {
+      "const": true
+    },
+    "static_agent_algorithm_foundation_ready": {
+      "const": true
+    },
+    "uses_pr_number_as_authority": {
+      "const": false
+    }
+  },
+  "required": [
+    "registry_type",
+    "registry_version",
+    "deterministic_output",
+    "generated_at_utc",
+    "source_of_readiness_substance",
+    "agent_charter_registry_dependency",
+    "algorithm_formula_family_registry_dependency",
+    "agent_algorithm_binding_registry_dependency",
+    "agent_algorithm_consumer_gate_dependency",
+    "owner_global_override_report_dependency",
+    "agent_role_report_dependency",
+    "algorithm_formula_family_report_dependency",
+    "agent_algorithm_binding_report_dependency",
+    "agent_algorithm_consumer_gate_report_dependency",
+    "readiness_generation_policy",
+    "master_plan_followed_as_controlling_doctrine",
+    "owner_global_override_authority",
+    "owner_override_satisfies_all_qtt_internal_requirements",
+    "owner_override_satisfies_agent_algorithm_readiness",
+    "static_agent_algorithm_foundation_ready",
+    "normal_static_agent_algorithm_coverage_ready",
+    "normal_full_agent_algorithm_coverage_ready",
+    "qtt_internal_agent_algorithm_ready",
+    "future_command_matrix_required",
+    "agent_algorithm_command_matrix_created",
+    "future_parameter_stack_layers_required",
+    "future_scoring_ranking_layers_required",
+    "future_quantum_classical_arbitration_required",
+    "future_replay_paper_evidence_required",
+    "future_runtime_live_readiness_required",
+    "future_atomicrows_bundle_hash_required",
+    "chatgpt_authority_over_owner",
+    "codex_authority_over_owner",
+    "qtt_agent_authority_over_owner",
+    "quantum_forward_design_supported",
+    "quantum_evidence_claim_created",
+    "alpha_evidence_claim_created",
+    "profit_evidence_claim_created",
+    "latency_superiority_evidence_claim_created",
+    "execution_superiority_evidence_claim_created",
+    "static_agent_algorithm_cumulative_readiness_gate_created",
+    "runtime_artifact_created",
+    "live_artifact_created",
+    "order_artifact_created",
+    "source_acceptance_artifact_created",
+    "connector_binding_artifact_created",
+    "runtime_resolver_snapshot_created",
+    "replay_execution_created",
+    "paper_execution_created",
+    "quantum_backend_artifact_created",
+    "bundle_file_present",
+    "bundle_sha_present",
+    "uses_pr_number_as_authority",
+    "final_ready",
+    "readiness_components"
+  ],
+  "type": "object"
+}

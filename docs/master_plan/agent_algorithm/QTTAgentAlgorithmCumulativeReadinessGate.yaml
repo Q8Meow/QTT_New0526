@@ -1,0 +1,505 @@
+{
+  "agent_algorithm_binding_registry_dependency": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml",
+  "agent_algorithm_binding_report_dependency": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+  "agent_algorithm_command_matrix_created": false,
+  "agent_algorithm_consumer_gate_dependency": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml",
+  "agent_algorithm_consumer_gate_report_dependency": "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json",
+  "agent_charter_registry_dependency": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+  "agent_role_report_dependency": "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json",
+  "algorithm_formula_family_registry_dependency": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml",
+  "algorithm_formula_family_report_dependency": "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json",
+  "alpha_evidence_claim_created": false,
+  "bundle_file_present": false,
+  "bundle_sha_present": false,
+  "chatgpt_authority_over_owner": false,
+  "codex_authority_over_owner": false,
+  "connector_binding_artifact_created": false,
+  "deterministic_output": true,
+  "execution_superiority_evidence_claim_created": false,
+  "final_ready": false,
+  "future_atomicrows_bundle_hash_required": true,
+  "future_command_matrix_required": true,
+  "future_parameter_stack_layers_required": true,
+  "future_quantum_classical_arbitration_required": true,
+  "future_replay_paper_evidence_required": true,
+  "future_runtime_live_readiness_required": true,
+  "future_scoring_ranking_layers_required": true,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "latency_superiority_evidence_claim_created": false,
+  "live_artifact_created": false,
+  "master_plan_followed_as_controlling_doctrine": true,
+  "normal_full_agent_algorithm_coverage_ready": false,
+  "normal_static_agent_algorithm_coverage_ready": true,
+  "order_artifact_created": false,
+  "owner_global_override_authority": true,
+  "owner_global_override_report_dependency": "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json",
+  "owner_override_satisfies_agent_algorithm_readiness": true,
+  "owner_override_satisfies_all_qtt_internal_requirements": true,
+  "paper_execution_created": false,
+  "profit_evidence_claim_created": false,
+  "qtt_agent_authority_over_owner": false,
+  "qtt_internal_agent_algorithm_ready": true,
+  "quantum_backend_artifact_created": false,
+  "quantum_evidence_claim_created": false,
+  "quantum_forward_design_supported": true,
+  "readiness_components": [
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "AUTHORITY",
+      "component_description": "Owner authority report confirms owner override satisfies QTT internal workflow requirements while preserving evidence boundaries.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_001_OWNER_GLOBAL_OVERRIDE_AUTHORITY",
+      "component_name": "OWNER_GLOBAL_OVERRIDE_AUTHORITY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/governance/QTTOwnerGlobalOverrideAuthority.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_OWNER_GLOBAL_OVERRIDE_AUTHORITY_VALIDATION_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "owner_approved_value_token_count": 35,
+        "owner_override_blocked_case_count": 0,
+        "owner_override_satisfied_case_count": 38
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "OWNER_GLOBAL_OVERRIDE_PRESENT",
+        "OWNER_OVERRIDE_SATISFIES_INTERNAL_WORKFLOW",
+        "OWNER_OVERRIDE_DOES_NOT_FABRICATE_EXTERNAL_FACTS"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "AGENT_ROLE_STATIC_FOUNDATION",
+      "component_description": "Agent role registry and report provide the 25 validated role charters consumed by algorithm bindings.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_002_AGENT_ROLE_OPERATING_CHARTER_REGISTRY",
+      "component_name": "AGENT_ROLE_OPERATING_CHARTER_REGISTRY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_AGENT_ROLE_OPERATING_CHARTER_REGISTRY_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "agent_role_count_from_charter_registry": 25,
+        "agent_role_count_from_report": 25,
+        "agents_with_owner_override_supported_count": 25,
+        "missing_agent_role_count": 0
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "AGENT_ROLE_CHARTER_REGISTRY_PRESENT",
+        "AGENT_ROLE_COUNT_MATCHES_REPORT",
+        "AGENT_ROLES_SUPPORT_OWNER_OVERRIDE_AND_QUANTUM_SCOPE"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "ALGORITHM_STATIC_FOUNDATION",
+      "component_description": "Algorithm registry and report provide the 15 validated formula families, including quantum-compatible families.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_003_ALGORITHM_FORMULA_FAMILY_REGISTRY",
+      "component_name": "ALGORITHM_FORMULA_FAMILY_REGISTRY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_ALGORITHM_FORMULA_FAMILY_REGISTRY_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "algorithm_family_count_from_algorithm_registry": 15,
+        "algorithm_family_count_from_report": 15,
+        "missing_algorithm_family_count": 0,
+        "quantum_algorithm_family_count": 9
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "ALGORITHM_FORMULA_FAMILY_REGISTRY_PRESENT",
+        "ALGORITHM_FAMILY_COUNT_MATCHES_REPORT",
+        "QUANTUM_COMPATIBLE_FAMILIES_PRESERVED"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "BINDING_STATIC_FOUNDATION",
+      "component_description": "Binding registry and report prove every authorized algorithm-family role pair has one static binding.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_004_AGENT_ALGORITHM_BINDING_REGISTRY",
+      "component_name": "AGENT_ALGORITHM_BINDING_REGISTRY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_AGENT_ALGORITHM_BINDING_REGISTRY_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "binding_count_from_binding_registry": 71,
+        "expected_binding_count_from_algorithm_registry": 71,
+        "expected_binding_count_from_binding_report": 71,
+        "quantum_binding_count": 27
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "AGENT_ALGORITHM_BINDING_REGISTRY_PRESENT",
+        "BINDING_COUNT_MATCHES_AUTHORIZED_ROLE_PAIRS",
+        "BINDINGS_REMAIN_STATIC_AND_NON_ORDERING"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "CONSUMER_STATIC_FOUNDATION",
+      "component_description": "Consumer gate and report prove one allowed attempt per binding plus blocked and owner-override fail-closed cases.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_005_AGENT_ALGORITHM_CONSUMER_GATE",
+      "component_name": "AGENT_ALGORITHM_CONSUMER_GATE",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_AGENT_ALGORITHM_CONSUMER_GATE_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "consumer_allowed_attempt_count": 71,
+        "consumer_blocked_attempt_count": 5,
+        "consumer_owner_override_attempt_count": 5,
+        "quantum_consumer_allowed_attempt_count": 43
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "AGENT_ALGORITHM_CONSUMER_GATE_PRESENT",
+        "ALLOWED_ATTEMPTS_MATCH_BINDINGS",
+        "BLOCKED_AND_OWNER_OVERRIDE_CASES_COVERED"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "QUANTUM_FORWARD_STATIC_COMPATIBILITY",
+      "component_description": "Quantum-compatible family, binding, and consumer counts remain available without claiming backend execution or advantage evidence.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_006_QUANTUM_FORWARD_COMPATIBILITY",
+      "component_name": "QUANTUM_FORWARD_COMPATIBILITY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml",
+        "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml",
+        "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json",
+        "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+        "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_ALGORITHM_FORMULA_FAMILY_REGISTRY_OK",
+        "QTT_AGENT_ALGORITHM_BINDING_REGISTRY_OK",
+        "QTT_AGENT_ALGORITHM_CONSUMER_GATE_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "owner_can_force_quantum_priority_supported": true,
+        "owner_quantum_priority_supported": true,
+        "quantum_algorithm_family_count": 9,
+        "quantum_binding_count": 27,
+        "quantum_consumer_allowed_attempt_count": 43
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "QUANTUM_FORWARD_DESIGN_SUPPORTED",
+        "STRONGEST_CLASSICAL_COMPARATOR_AND_FALLBACK_BUNDLE_REQUIREMENTS_PRESERVED",
+        "NO_QUANTUM_ADVANTAGE_OR_BACKEND_EVIDENCE_CLAIMED"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "STATIC_SCOPE_BOUNDARY",
+      "component_description": "Cumulative readiness remains static and creates no runtime, live, order, source, connector, replay, paper, profit, or backend artifact.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_007_STATIC_NO_RUNTIME_NO_EVIDENCE_BOUNDARY",
+      "component_name": "STATIC_NO_RUNTIME_NO_EVIDENCE_BOUNDARY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/QTT_MasterPlan_Current.md"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json",
+        "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json",
+        "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json",
+        "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+        "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "agent_algorithm_command_matrix_created": false,
+        "bundle_file_present": false,
+        "bundle_sha_present": false,
+        "forbidden_artifact_true": false
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "STATIC_ONLY_BOUNDARY_CONFIRMED",
+        "NO_RUNTIME_OR_LIVE_ARTIFACT_CREATED",
+        "NO_SOURCE_CONNECTOR_REPLAY_PAPER_PROFIT_OR_BACKEND_EVIDENCE_CREATED"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    },
+    {
+      "alpha_evidence_claim_created": false,
+      "bundle_file_present": false,
+      "bundle_sha_present": false,
+      "component_category": "FUTURE_LAYER_BOUNDARY",
+      "component_description": "Full and final readiness remain false until later command matrix, parameter-stack, scoring, arbitration, replay, paper, runtime, live, and bundle/hash layers exist.",
+      "component_id": "QTT_AGENT_ALGORITHM_CUMULATIVE_COMPONENT_008_FUTURE_PR_DEPENDENCY_BOUNDARY",
+      "component_name": "FUTURE_PR_DEPENDENCY_BOUNDARY",
+      "component_present": true,
+      "component_validated": true,
+      "connector_binding_artifact_created": false,
+      "dependency_paths": [
+        "docs/master_plan/QTT_MasterPlan_Current.md"
+      ],
+      "dependency_reports": [
+        "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+        "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"
+      ],
+      "evidence_claim_created": false,
+      "execution_superiority_evidence_claim_created": false,
+      "expected_success_markers": [
+        "QTT_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE_OK"
+      ],
+      "final_ready_contribution": false,
+      "future_pr_dependency_reason": "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS",
+      "latency_superiority_evidence_claim_created": false,
+      "live_artifact_created": false,
+      "measured_counts": {
+        "future_atomicrows_bundle_hash_required": true,
+        "future_command_matrix_required": true,
+        "future_parameter_stack_layers_required": true,
+        "future_quantum_classical_arbitration_required": true,
+        "future_replay_paper_evidence_required": true,
+        "future_runtime_live_readiness_required": true,
+        "future_scoring_ranking_layers_required": true
+      },
+      "normal_full_ready_contribution": false,
+      "normal_static_ready_contribution": true,
+      "order_artifact_created": false,
+      "owner_override_satisfaction_basis": "OWNER_GLOBAL_OVERRIDE_SATISFIES_QTT_INTERNAL_WORKFLOW_REQUIREMENTS_WITHOUT_FABRICATING_EXTERNAL_FACTS_OR_EVIDENCE",
+      "owner_override_supported": true,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "qtt_internal_ready_contribution": true,
+      "quantum_backend_artifact_created": false,
+      "quantum_evidence_claim_created": false,
+      "quantum_forward_contribution": true,
+      "reason_codes": [
+        "NORMAL_FULL_READINESS_REMAINS_FALSE",
+        "FINAL_READY_REMAINS_FALSE",
+        "FUTURE_SELECTION_SCORING_ARBITRATION_AND_LIVE_LAYERS_REQUIRED"
+      ],
+      "replay_execution_created": false,
+      "runtime_artifact_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "source_acceptance_artifact_created": false,
+      "static_foundation_contribution": true
+    }
+  ],
+  "readiness_generation_policy": "CUMULATIVE_STATIC_FOUNDATION_FROM_OWNER_AGENT_ALGORITHM_BINDING_AND_CONSUMER_GATE_ARTIFACTS",
+  "registry_type": "QTT_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE",
+  "registry_version": "v1",
+  "replay_execution_created": false,
+  "runtime_artifact_created": false,
+  "runtime_resolver_snapshot_created": false,
+  "source_acceptance_artifact_created": false,
+  "source_of_readiness_substance": "docs/master_plan/QTT_MasterPlan_Current.md",
+  "static_agent_algorithm_cumulative_readiness_gate_created": true,
+  "static_agent_algorithm_foundation_ready": true,
+  "uses_pr_number_as_authority": false
+}
