@@ -3,6 +3,9 @@ from pathlib import Path
 from tools import (
     validate_atomicrows_research_provenance_evidence_tier_classification as research_provenance_gate,
 )
+from tools import (
+    validate_atomicrows_owner_submitted_research_source_intake_registry as owner_intake_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -499,6 +502,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
             ),
         ],
         [
@@ -1305,6 +1315,13 @@ def test_runner_exposes_atomicrows_research_provenance_success_marker():
     )
 
 
+def test_runner_exposes_owner_submitted_research_source_intake_success_marker():
+    assert (
+        owner_intake_gate.SUCCESS_MARKER
+        == "ATOMICROWS_OWNER_SUBMITTED_RESEARCH_SOURCE_INTAKE_REGISTRY_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1347,6 +1364,61 @@ def test_runner_includes_no_runtime_artifact_flags(monkeypatch):
     assert "--forbid-neural-inference" in no_runtime_command
     assert "--forbid-external-repo-clone" in no_runtime_command
     assert "--forbid-package-install-scripts" in no_runtime_command
+
+
+def test_runner_keeps_scope_runtime_live_order_profit_and_source_blocks(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    scope_command = next(
+        command
+        for command in commands
+        if command[1] == str(Path("tools") / "validate_first_pr_scope.py")
+    )
+
+    assert "--block-runtime" in scope_command
+    assert "--block-live" in scope_command
+    assert "--block-profit-claims" in scope_command
+    assert "--block-source-retrieval" in scope_command
+    assert "--block-source-acceptance" in scope_command
+    assert "--block-connector-binding" in scope_command
+    assert "--block-order-execution" in scope_command
+
+
+def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr70_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
+    owner_intake_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert pr70_index < owner_intake_index < generated_gate_index < no_runtime_index
+    assert commands[pr70_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+        ),
+    ]
+    assert commands[owner_intake_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+        ),
+    ]
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
@@ -1558,6 +1630,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     research_provenance_index = command_names.index(
         "validate_atomicrows_research_provenance_evidence_tier_classification.py"
     )
+    owner_intake_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1576,6 +1651,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < parameter_agent_binding_cumulative_gate_index
         < parameter_agent_binding_command_matrix_index
         < research_provenance_index
+        < owner_intake_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1724,6 +1800,13 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         str(
             Path("tools")
             / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+        ),
+    ]
+    assert commands[owner_intake_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
         ),
     ]
 
@@ -2462,6 +2545,41 @@ def test_runner_stops_on_first_failure_and_returns_failing_exit_code(monkeypatch
     exit_code = runner.run_commands(commands)
 
     assert exit_code == 9
+    assert seen == commands[:2]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_owner_intake_validator_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        [
+            "python",
+            "validate_atomicrows_research_provenance_evidence_tier_classification.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_owner_submitted_research_source_intake_registry.py",
+        ],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 7, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 7
     assert seen == commands[:2]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
