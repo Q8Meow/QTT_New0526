@@ -1,0 +1,980 @@
+registry_id: ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY
+registry_version: v1
+authority_class: STATIC_PARAMETER_STACK_ROLE_TAXONOMY_NOT_STACK_COMPLETENESS_NOT_STACK_COMPATIBILITY_NOT_STACK_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY
+upstream_dependency_contract:
+  pr70_classifier_dependency_preserved: true
+  pr71_intake_registry_dependency_preserved: true
+  pr72_candidate_family_gate_dependency_preserved: true
+  upstream_semantics_mutated_by_this_registry: false
+required_stack_roles:
+  - SIGNAL
+  - SCORING
+  - NORMALIZATION
+  - RISK
+  - EXECUTION
+  - CAPITAL
+  - LATENCY
+  - ERROR_GUARD
+  - QUANTUM_ADVISORY
+minimum_required_role_count: 9
+role_order_policy:
+  required_stack_roles_order_is_canonical: true
+  role_order_must_be_stable: true
+  role_order_must_not_be_random: true
+role_definitions:
+  - role_id: SIGNAL
+    role_name: Signal
+    role_order: 1
+    role_required: true
+    role_authority_class: STATIC_SIGNAL_ROLE_TAXONOMY_NOT_TRADE_AUTHORITY
+    role_description: Static role for future signal-family contribution.
+    institutional_purpose: captures predictive or edge signal contribution.
+    primary_purpose: Supports future signal-family IDs without trade authority or alpha evidence.
+    canonical_inputs:
+      - future_signal_family_id
+      - future_owner_review_metadata
+    canonical_outputs:
+      - signal_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPLETENESS_GATE_FUTURE
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: false
+      ising_compatible_review: false
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: false
+      quantum_portfolio_optimization_review: false
+      owner_quantum_priority_compatible: false
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: false
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: SIGNAL
+      role_order: 1
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_001_SIGNAL
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: SCORING
+    role_name: Scoring
+    role_order: 2
+    role_required: true
+    role_authority_class: STATIC_SCORING_ROLE_TAXONOMY_NOT_SCORE_COMPUTATION
+    role_description: Static role for future deterministic score contribution readiness.
+    institutional_purpose: supports future score contribution and ranking readiness.
+    primary_purpose: Supports future deterministic scoring policy consumption without computing scores or ranking stacks.
+    canonical_inputs:
+      - future_score_feature_family_id
+      - future_scoring_policy_reference
+    canonical_outputs:
+      - scoring_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - DETERMINISTIC_SCORING_POLICY_CONSUMER_FUTURE
+      - STACK_RANKING_GATE_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: false
+      ising_compatible_review: false
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: false
+      quantum_portfolio_optimization_review: false
+      owner_quantum_priority_compatible: true
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: SCORING
+      role_order: 2
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_002_SCORING
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: NORMALIZATION
+    role_name: Normalization
+    role_order: 3
+    role_required: true
+    role_authority_class: STATIC_NORMALIZATION_ROLE_TAXONOMY_NOT_RUNTIME_NORMALIZATION
+    role_description: Static role for future comparability across scales and contexts.
+    institutional_purpose: supports scale unit venue market and context comparability.
+    primary_purpose: Supports future comparable parameter-stack inputs without live normalized values or source-dependent numeric fabrication.
+    canonical_inputs:
+      - future_unit_family_id
+      - future_market_context_family_id
+    canonical_outputs:
+      - normalization_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+      - TRADE_CONTEXT_ROUTING_GATE_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: false
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: NORMALIZATION
+      role_order: 3
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_003_NORMALIZATION
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: RISK
+    role_name: Risk
+    role_order: 4
+    role_required: true
+    role_authority_class: STATIC_RISK_ROLE_TAXONOMY_NOT_RUNTIME_RISK_LIMIT_AUTHORITY
+    role_description: Static role for future exposure and drawdown compatibility.
+    institutional_purpose: supports future exposure drawdown loss-limit and capital-at-risk compatibility.
+    primary_purpose: Supports future risk compatibility without runtime risk limits, live restrictions, or live order blocks.
+    canonical_inputs:
+      - future_exposure_family_id
+      - future_drawdown_family_id
+    canonical_outputs:
+      - risk_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+      - OWNER_LIVE_PROMOTION_REVIEW_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: false
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: RISK
+      role_order: 4
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_004_RISK
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: EXECUTION
+    role_name: Execution
+    role_order: 5
+    role_required: true
+    role_authority_class: STATIC_EXECUTION_ROLE_TAXONOMY_NOT_ORDER_ROUTING_AUTHORITY
+    role_description: Static role for future execution-cost and order-intent compatibility.
+    institutional_purpose: supports execution-cost order-intent liquidity and slippage compatibility.
+    primary_purpose: Supports future execution compatibility while preserving execution router final order authority.
+    canonical_inputs:
+      - future_execution_cost_family_id
+      - future_order_intent_family_id
+    canonical_outputs:
+      - execution_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+      - ORDER_INTENT_EXECUTION_ROUTER_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: false
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: EXECUTION
+      role_order: 5
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_005_EXECUTION
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: CAPITAL
+    role_name: Capital
+    role_order: 6
+    role_required: true
+    role_authority_class: STATIC_CAPITAL_ROLE_TAXONOMY_NOT_ACCOUNT_STATE_AUTHORITY
+    role_description: Static role for future sizing and allocation compatibility.
+    institutional_purpose: supports sizing available-capital capital-intensity and allocation compatibility.
+    primary_purpose: Supports future capital compatibility without balances, cash receipts, private state, runtime capital values, or capital authority.
+    canonical_inputs:
+      - future_sizing_family_id
+      - future_allocation_family_id
+    canonical_outputs:
+      - capital_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+      - CAPITAL_ALLOCATION_POLICY_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: true
+      vqe_compatible_review: true
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: true
+      owner_forced_quantum_compatible: true
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: CAPITAL
+      role_order: 6
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_006_CAPITAL
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: LATENCY
+    role_name: Latency
+    role_order: 7
+    role_required: true
+    role_authority_class: STATIC_LATENCY_ROLE_TAXONOMY_NOT_LOW_LATENCY_LIVE_PATH
+    role_description: Static role for future timeliness and path separation compatibility.
+    institutional_purpose: supports latency sensitivity timeliness and control-plane live-path separation.
+    primary_purpose: Supports future latency sensitivity without latency superiority claims or low-latency live path logic.
+    canonical_inputs:
+      - future_latency_sensitivity_family_id
+      - future_timeliness_family_id
+    canonical_outputs:
+      - latency_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+      - TRADE_CONTEXT_STACK_SELECTION_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: false
+      ising_compatible_review: false
+      qaoa_compatible_review: false
+      vqe_compatible_review: false
+      annealing_compatible_review: false
+      quantum_portfolio_optimization_review: false
+      owner_quantum_priority_compatible: false
+      owner_forced_quantum_compatible: false
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: LATENCY
+      role_order: 7
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_007_LATENCY
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: ERROR_GUARD
+    role_name: Error Guard
+    role_order: 8
+    role_required: true
+    role_authority_class: STATIC_ERROR_GUARD_ROLE_TAXONOMY_NOT_RUNTIME_DISABLEMENT
+    role_description: Static role for future fail-closed and invalid-state compatibility.
+    institutional_purpose: supports fail-closed guardrails stale-data detection missing-input handling and invalid-state protection.
+    primary_purpose: Supports future guard compatibility without runtime kill switch execution or live disablement behavior.
+    canonical_inputs:
+      - future_missing_input_policy_family_id
+      - future_invalid_state_policy_family_id
+    canonical_outputs:
+      - error_guard_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - PARAMETER_STACK_COMPLETENESS_GATE_FUTURE
+      - PARAMETER_STACK_COMPATIBILITY_GATE_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: false
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: true
+      vqe_compatible_review: true
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: true
+      owner_forced_quantum_compatible: true
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: ERROR_GUARD
+      role_order: 8
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_008_ERROR_GUARD
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+  - role_id: QUANTUM_ADVISORY
+    role_name: Quantum Advisory
+    role_order: 9
+    role_required: true
+    role_authority_class: STATIC_QUANTUM_ADVISORY_ROLE_TAXONOMY_NOT_QUANTUM_BACKEND_AUTHORITY
+    role_description: Static role for future quantum optimizer and advisory compatibility.
+    institutional_purpose: supports future quantum optimizer advisory compatibility.
+    primary_purpose: Requires later quantum applicability scoring ranking and arbitration gates before any quantum selection.
+    canonical_inputs:
+      - future_quantum_optimizer_family_id
+      - future_quantum_advisory_family_id
+    canonical_outputs:
+      - quantum_advisory_role_coverage_requirement
+    upstream_dependencies:
+      - ATOMICROWS_RESEARCH_SOURCE_TO_CANDIDATE_FAMILY_GATE
+    downstream_consumers:
+      - QUANTUM_APPLICABILITY_REGISTRY_FUTURE
+      - QUANTUM_CLASSICAL_ARBITRATION_GATE_FUTURE
+    missing_role_normal_state: BLOCKS_NORMAL_STACK_READINESS
+    missing_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+    owner_override_supported: true
+    owner_override_satisfaction_basis_allowed:
+      - OWNER_GLOBAL_OVERRIDE
+      - OWNER_APPROVED
+      - OWNER_OVERRIDE_SATISFIED
+      - OWNER_APPROVED_OVERRIDE
+    single_parameter_satisfies_role: false
+    single_algorithm_satisfies_role: false
+    runtime_use_allowed: false
+    live_use_allowed: false
+    order_authority_created: false
+    replay_paper_evidence_created: false
+    profit_evidence_created: false
+    quantum_backend_evidence_created: false
+    quantum_forward_compatibility:
+      true_quantum_review_compatible: true
+      quantum_inspired_review_compatible: true
+      hybrid_classical_quantum_review_compatible: true
+      qubo_compatible_review: true
+      ising_compatible_review: true
+      qaoa_compatible_review: true
+      vqe_compatible_review: true
+      annealing_compatible_review: true
+      quantum_portfolio_optimization_review: true
+      owner_quantum_priority_compatible: true
+      owner_forced_quantum_compatible: true
+      hybrid_compare_then_quantum_tiebreak_compatible: true
+      strongest_classical_comparator_required: true
+      fallback_bundle_required: true
+      replay_paper_evidence_required_before_advantage_claim: true
+      live_evidence_required_before_profit_claim: true
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+    deterministic_trace:
+      role_id: QUANTUM_ADVISORY
+      role_order: 9
+      deterministic_role_id: ATOMICROWS_PARAMETER_STACK_ROLE_009_QUANTUM_ADVISORY
+      random_selection_used: false
+      ranking_used: false
+      scoring_used: false
+      optimizer_arbitration_used: false
+      trade_context_routing_used: false
+      stack_selection_used: false
+    no_claim_flags:
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      connector_semantics_created: false
+      runtime_artifacts_created: false
+      live_readiness_created: false
+      order_authority_created: false
+      cash_receipts_created: false
+      replay_results_created: false
+      paper_results_created: false
+      profit_evidence_created: false
+      quantum_backend_evidence_created: false
+      quantum_advantage_claim_created: false
+      latency_superiority_claim_created: false
+      execution_superiority_claim_created: false
+      atomicrows_bundle_rows_created: false
+      atomicrows_bundle_jsonl_created: false
+      atomicrows_bundle_sha256_created: false
+      ranking_created: false
+      scoring_created: false
+      optimizer_arbitration_created: false
+      trade_context_routing_created: false
+      stack_selection_created: false
+      stack_completeness_gate_created: false
+      stack_compatibility_gate_created: false
+      runtime_live_use_created: false
+single_parameter_set_policy:
+  single_parameter_set_complete_without_owner_override: false
+  single_parameter_set_complete_with_owner_override: true
+  owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+  external_fact_fabrication_allowed: false
+  accepted_source_packet_fabrication_allowed: false
+  runtime_use_created: false
+  live_use_created: false
+  order_authority_created: false
+  profit_evidence_created: false
+single_algorithm_set_policy:
+  single_algorithm_set_complete_without_owner_override: false
+  single_algorithm_set_complete_with_owner_override: true
+  owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+  external_fact_fabrication_allowed: false
+  accepted_source_packet_fabrication_allowed: false
+  runtime_use_created: false
+  live_use_created: false
+  order_authority_created: false
+  profit_evidence_created: false
+missing_role_policy:
+  missing_required_role_blocks_normal_stack_readiness: true
+  missing_required_role_owner_override_state: OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY
+  missing_required_role_creates_final_ready: false
+  missing_required_role_creates_runtime_use: false
+  missing_required_role_creates_live_use: false
+  missing_required_role_creates_order_authority: false
+  missing_required_role_creates_profit_evidence: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfaction_basis_supported: true
+  owner_override_satisfies_internal_stack_readiness_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+quantum_forward_role_policy:
+  quantum_advisory_role_required: true
+  quantum_advisory_role_is_static_taxonomy_only: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_latency_superiority_claim_created: false
+  quantum_execution_superiority_claim_created: false
+  quantum_scoring_created: false
+  quantum_arbitration_created: false
+  future_quantum_applicability_registry_required_before_quantum_selection: true
+  future_owner_quantum_priority_policy_required_before_quantum_priority: true
+  future_scoring_ranking_gate_required_before_quantum_ranking: true
+  future_quantum_classical_arbitration_gate_required_before_quantum_selection: true
+  strongest_classical_comparator_required_before_quantum_advantage_claim: true
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+future_consumer_contract:
+  pr74_completeness_gate_consumer_ready: true
+  pr75_compatibility_gate_consumer_ready: true
+  pr76_selection_packet_consumer_ready: true
+  pr77_trade_context_consumer_ready: true
+  pr78_selection_universe_consumer_ready: true
+  pr81_quantum_applicability_consumer_ready: true
+  pr82_owner_quantum_priority_consumer_ready: true
+  pr83_scoring_policy_consumer_ready: true
+  pr84_scoring_ranking_consumer_ready: true
+  pr85_quantum_classical_arbitration_consumer_ready: true
+  pr86_candidate_stack_generation_consumer_ready: true
+  pr87_trade_context_stack_selection_consumer_ready: true
+  consumer_contract_static_only: true
+  runtime_consumer_created: false
+  live_consumer_created: false
+forbidden_artifact_flags:
+  source_retrieval: false
+  source_acceptance: false
+  accepted_source_packets: false
+  connector_semantics: false
+  runtime_artifacts: false
+  runtime_receipts: false
+  live_receipts: false
+  order_receipts: false
+  cash_receipts: false
+  replay_results: false
+  paper_results: false
+  live_readiness: false
+  order_authority: false
+  profit_evidence: false
+  quantum_backend_evidence: false
+  quantum_advantage_claim: false
+  latency_superiority_claim: false
+  execution_superiority_claim: false
+  atomicrows_bundle_rows: false
+  atomicrows_bundle_jsonl: false
+  atomicrows_bundle_sha256: false
+  ranking: false
+  scoring: false
+  optimizer_arbitration: false
+  trade_context_routing: false
+  stack_selection: false
+  stack_completeness_gate: false
+  stack_compatibility_gate: false
+  runtime_live_use: false
+validation_invariants:
+  - Required stack roles must equal the canonical nine-role order.
+  - Role definitions must contain exactly one definition for each required role.
+  - Missing required role blocks normal stack readiness unless owner override satisfies internal readiness only.
+  - Single parameter and single algorithm sets are incomplete without owner override.
+  - Owner override cannot fabricate source facts evidence receipts replay paper profit or quantum backend evidence.
+  - Quantum advisory is required as static taxonomy only.
+  - Stack completeness compatibility selection scoring ranking arbitration and trade-context routing are future gates only.
+  - AtomicRows bundle rows bundle jsonl and bundle sha256 are forbidden in this taxonomy.
+role_taxonomy_contract_ready: true
+stack_completeness_evaluated_by_this_registry: false
+stack_compatibility_evaluated_by_this_registry: false
+stack_selection_created_by_this_registry: false
+stack_scoring_created_by_this_registry: false
+optimizer_arbitration_created_by_this_registry: false
+trade_context_routing_created_by_this_registry: false
+production_stack_ready: false
+retrieves_source_facts: false
+accepts_source_facts: false
+creates_accepted_source_packets: false
+creates_connector_semantics: false
+creates_runtime_artifacts: false
+creates_atomicrows_bundle_rows: false
+creates_atomicrows_bundle_jsonl: false
+creates_atomicrows_bundle_sha256: false
+creates_replay_results: false
+creates_paper_results: false
+creates_live_readiness: false
+creates_order_authority: false
+creates_cash_receipts: false
+creates_profit_evidence: false
+creates_quantum_backend_evidence: false
+creates_quantum_advantage_claim: false
+creates_latency_superiority_claim: false
+creates_execution_superiority_claim: false
+creates_ranking: false
+creates_scoring: false
+creates_optimizer_arbitration: false
+creates_trade_context_routing: false
+creates_stack_selection: false
+creates_stack_completeness_gate: false
+creates_stack_compatibility_gate: false
+creates_runtime_or_live_trading_authority: false
+final_ready: false
