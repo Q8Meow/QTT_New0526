@@ -1,0 +1,731 @@
+{
+  "agent_algorithm_binding_registry_dependency": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml",
+  "agent_algorithm_binding_registry_used_for_binding_validation": true,
+  "agent_algorithm_command_matrix_created": false,
+  "agent_algorithm_cumulative_readiness_gate_created": false,
+  "agent_charter_registry_dependency": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
+  "agent_charter_registry_used_for_role_validation": true,
+  "algorithm_formula_family_registry_dependency": "docs/master_plan/algorithms/QTTAlgorithmFormulaFamilyRegistry.yaml",
+  "algorithm_formula_family_registry_used_for_family_validation": true,
+  "alpha_evidence_claim_created": false,
+  "architecture_emphasis": "INSTITUTIONAL_AGENT_ALGORITHM_CONSUMER_GATE_NOT_LOOSE_EXAMPLES",
+  "binding_row_fabrication_by_owner_override_allowed": false,
+  "bundle_file_present": false,
+  "bundle_sha_present": false,
+  "chatgpt_authority_over_owner": false,
+  "codex_authority_over_owner": false,
+  "connector_binding_artifact_created": false,
+  "consumer_attempts": [
+    {
+      "agent_authorized_by_algorithm_family": true,
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "Canonical binding-backed static consumption attempt using the first deterministic consumer class and trade context authorized by the binding.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_ALLOW_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "attempt_type": "ALLOWED_BOUND_CONSUMPTION",
+      "authorized_consumer_classes_from_binding": [
+        "OPTIMIZER_SEARCH",
+        "REPLAY_PAPER_SELECTION",
+        "VALIDATION_GATE"
+      ],
+      "binding_exists": true,
+      "binding_id": "QTT_AGENT_ALGORITHM_BINDING_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": true,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "STATIC_BOUND_CONSUMPTION_ALLOWED_NOT_FINAL_READY",
+      "gate_decision": "ALLOW",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "NOT_APPLICABLE",
+      "owner_override_present": false,
+      "owner_override_satisfaction_result": "NOT_APPLICABLE",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "CANONICAL_BINDING_CONSUMPTION_ALLOWED"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "OPTIMIZER_SEARCH",
+      "requested_trade_context": "EDGE_HYPOTHESIS_CONTEXT",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "EDGE_HYPOTHESIS_CONTEXT",
+        "RESEARCH_SIGNAL_CONTEXT"
+      ],
+      "trade_context_authorized_by_binding": true
+    },
+    {
+      "agent_authorized_by_algorithm_family": false,
+      "agent_role": "OWNER",
+      "agent_role_id": "QTT_AGENT_ROLE_001_OWNER",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "No canonical static binding exists for the requested agent-role and algorithm-family pair.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_BLOCK_001_MISSING_BINDING",
+      "attempt_type": "BLOCKED_MISSING_BINDING",
+      "authorized_consumer_classes_from_binding": [
+        "STATIC_FORWARD_REFERENCE_ONLY"
+      ],
+      "binding_exists": false,
+      "binding_id": "NO_CANONICAL_BINDING_ROW_OWNER__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": false,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "STATIC_CONSUMPTION_BLOCKED_FAIL_CLOSED",
+      "gate_decision": "BLOCK",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "NOT_APPLICABLE",
+      "owner_override_present": false,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_NOT_PRESENT",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "MISSING_CANONICAL_AGENT_ALGORITHM_BINDING"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "OPTIMIZER_SEARCH",
+      "requested_trade_context": "EDGE_HYPOTHESIS_CONTEXT",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "STATIC_FORWARD_REFERENCE_ONLY"
+      ],
+      "trade_context_authorized_by_binding": false
+    },
+    {
+      "agent_authorized_by_algorithm_family": true,
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "Binding exists, but the requested consumer class is not declared by the canonical binding.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_BLOCK_002_UNAUTHORIZED_CONSUMER_CLASS",
+      "attempt_type": "BLOCKED_UNAUTHORIZED_CONSUMER_CLASS",
+      "authorized_consumer_classes_from_binding": [
+        "OPTIMIZER_SEARCH",
+        "REPLAY_PAPER_SELECTION",
+        "VALIDATION_GATE"
+      ],
+      "binding_exists": true,
+      "binding_id": "QTT_AGENT_ALGORITHM_BINDING_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": false,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "STATIC_CONSUMPTION_BLOCKED_FAIL_CLOSED",
+      "gate_decision": "BLOCK",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "NOT_APPLICABLE",
+      "owner_override_present": false,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_NOT_PRESENT",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "REQUESTED_CONSUMER_CLASS_NOT_AUTHORIZED_BY_BINDING"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "UNAUTHORIZED_CONSUMER_CLASS_FOR_GATE",
+      "requested_trade_context": "EDGE_HYPOTHESIS_CONTEXT",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "EDGE_HYPOTHESIS_CONTEXT",
+        "RESEARCH_SIGNAL_CONTEXT"
+      ],
+      "trade_context_authorized_by_binding": true
+    },
+    {
+      "agent_authorized_by_algorithm_family": true,
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "Binding exists, but the requested trade context is not declared by the canonical binding.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_BLOCK_003_UNAUTHORIZED_TRADE_CONTEXT",
+      "attempt_type": "BLOCKED_UNAUTHORIZED_TRADE_CONTEXT",
+      "authorized_consumer_classes_from_binding": [
+        "OPTIMIZER_SEARCH",
+        "REPLAY_PAPER_SELECTION",
+        "VALIDATION_GATE"
+      ],
+      "binding_exists": true,
+      "binding_id": "QTT_AGENT_ALGORITHM_BINDING_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": true,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "STATIC_CONSUMPTION_BLOCKED_FAIL_CLOSED",
+      "gate_decision": "BLOCK",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "NOT_APPLICABLE",
+      "owner_override_present": false,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_NOT_PRESENT",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "REQUESTED_TRADE_CONTEXT_NOT_AUTHORIZED_BY_BINDING"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "OPTIMIZER_SEARCH",
+      "requested_trade_context": "UNAUTHORIZED_TRADE_CONTEXT_FOR_GATE",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "EDGE_HYPOTHESIS_CONTEXT",
+        "RESEARCH_SIGNAL_CONTEXT"
+      ],
+      "trade_context_authorized_by_binding": false
+    },
+    {
+      "agent_authorized_by_algorithm_family": false,
+      "agent_role": "OWNER",
+      "agent_role_id": "QTT_AGENT_ROLE_001_OWNER",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "No canonical static binding exists for the requested agent-role and algorithm-family pair.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_OWNER_OVERRIDE_001_MISSING_BINDING",
+      "attempt_type": "OWNER_OVERRIDE_MISSING_BINDING",
+      "authorized_consumer_classes_from_binding": [
+        "STATIC_FORWARD_REFERENCE_ONLY"
+      ],
+      "binding_exists": false,
+      "binding_id": "NO_CANONICAL_BINDING_ROW_OWNER__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": false,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "OWNER_OVERRIDE_SATISFIED_INTERNAL_WORKFLOW_NOT_RUNTIME_AUTHORITY",
+      "gate_decision": "OWNER_OVERRIDE_ALLOW_INTERNAL_WORKFLOW",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_SATISFIED",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "OWNER_OVERRIDE_SATISFIES_MISSING_BINDING_INTERNAL_WORKFLOW_BLOCKER"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "OPTIMIZER_SEARCH",
+      "requested_trade_context": "EDGE_HYPOTHESIS_CONTEXT",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "STATIC_FORWARD_REFERENCE_ONLY"
+      ],
+      "trade_context_authorized_by_binding": false
+    },
+    {
+      "agent_authorized_by_algorithm_family": true,
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "Owner override satisfies the internal workflow blocker for an unauthorized consumer-class request without changing the binding.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_OWNER_OVERRIDE_002_UNAUTHORIZED_CONSUMER_CLASS",
+      "attempt_type": "OWNER_OVERRIDE_UNAUTHORIZED_CONSUMER_CLASS",
+      "authorized_consumer_classes_from_binding": [
+        "OPTIMIZER_SEARCH",
+        "REPLAY_PAPER_SELECTION",
+        "VALIDATION_GATE"
+      ],
+      "binding_exists": true,
+      "binding_id": "QTT_AGENT_ALGORITHM_BINDING_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": false,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "OWNER_OVERRIDE_SATISFIED_INTERNAL_WORKFLOW_NOT_RUNTIME_AUTHORITY",
+      "gate_decision": "OWNER_OVERRIDE_ALLOW_INTERNAL_WORKFLOW",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_SATISFIED",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "OWNER_OVERRIDE_SATISFIES_CONSUMER_CLASS_INTERNAL_WORKFLOW_BLOCKER"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "UNAUTHORIZED_CONSUMER_CLASS_FOR_GATE",
+      "requested_trade_context": "EDGE_HYPOTHESIS_CONTEXT",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "EDGE_HYPOTHESIS_CONTEXT",
+        "RESEARCH_SIGNAL_CONTEXT"
+      ],
+      "trade_context_authorized_by_binding": true
+    },
+    {
+      "agent_authorized_by_algorithm_family": true,
+      "agent_role": "OPTIMIZER_AGENT",
+      "agent_role_id": "QTT_AGENT_ROLE_013_OPTIMIZER_AGENT",
+      "agent_role_id_matches": true,
+      "agent_role_valid": true,
+      "algorithm_family_id": "QTT_ALGORITHM_FAMILY_001_CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_id_matches": true,
+      "algorithm_family_name": "CLASSICAL_SIGNAL_ALGORITHM",
+      "algorithm_family_valid": true,
+      "attempt_description": "Owner override satisfies the internal workflow blocker for an unauthorized trade-context request without changing the binding.",
+      "attempt_id": "QTT_AGENT_ALGORITHM_CONSUMER_ATTEMPT_OWNER_OVERRIDE_003_UNAUTHORIZED_TRADE_CONTEXT",
+      "attempt_type": "OWNER_OVERRIDE_UNAUTHORIZED_TRADE_CONTEXT",
+      "authorized_consumer_classes_from_binding": [
+        "OPTIMIZER_SEARCH",
+        "REPLAY_PAPER_SELECTION",
+        "VALIDATION_GATE"
+      ],
+      "binding_exists": true,
+      "binding_id": "QTT_AGENT_ALGORITHM_BINDING_001_OPTIMIZER_AGENT__CLASSICAL_SIGNAL_ALGORITHM",
+      "binding_row_fabricated_by_owner_override": false,
+      "classical_or_quantum": "CLASSICAL",
+      "connector_binding_artifact_created": false,
+      "consumer_class_authorized_by_binding": true,
+      "consumer_gate_derivation_summary": "Static consumer gate evaluation derived from canonical agent role, algorithm family, and agent-algorithm binding registries; no runtime, live, order, source-acceptance, profit, or quantum-backend authority is created.",
+      "deterministic_selection_role": "DETERMINISTIC_SIGNAL_FAMILY_SELECTION",
+      "direct_order_submission_allowed_by_binding": false,
+      "external_fact_claim_created": false,
+      "fallback_bundle_required": false,
+      "family_category": "SIGNAL_GENERATION",
+      "final_qtt_internal_status": "OWNER_OVERRIDE_SATISFIED_INTERNAL_WORKFLOW_NOT_RUNTIME_AUTHORITY",
+      "gate_decision": "OWNER_OVERRIDE_ALLOW_INTERNAL_WORKFLOW",
+      "input_parameter_families": [
+        "EDGE_HYPOTHESIS_PARAMETERS",
+        "MICROSTRUCTURE_FEATURE_PARAMETERS",
+        "SOURCE_DERIVED_FEATURE_PARAMETERS",
+        "ATOMICROWS_PARAMETER_ALGORITHM_INVENTORY"
+      ],
+      "live_artifact_created": false,
+      "live_evidence_required_before_profit_claim": true,
+      "master_plan_doctrine_terms_used": [
+        "edge_hypothesis_packet_required_before_parameter_stack_selection_flag",
+        "edge_parameter_stack_selection_required_flag",
+        "single_parameter_or_single_algorithm_trade_selection_allowed_flag",
+        "atomicrows_bundle_is_parameter_algorithm_inventory_not_trader_flag",
+        "execution_router_remains_final_order_submission_authority_flag",
+        "microstructure_feature_family_names"
+      ],
+      "optimizer_compatibility": [
+        "DETERMINISTIC_SIGNAL_FAMILY_SELECTION_INPUT",
+        "OPTIMIZER_CANDIDATE_FEATURE_INPUT"
+      ],
+      "order_artifact_created": false,
+      "output_artifact_types": [
+        "STATIC_SIGNAL_FEATURE_FAMILY_SURFACE"
+      ],
+      "output_signal_type": "SIGNAL_FEATURE_CANDIDATE_SET",
+      "owner_can_force_quantum_priority": false,
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "owner_override_satisfaction_result": "OWNER_OVERRIDE_SATISFIED",
+      "owner_quantum_priority_supported": false,
+      "paper_execution_created": false,
+      "profit_evidence_claim_created": false,
+      "quantum_algorithm_family_access": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_applicability": [
+        "NO_TRUE_QUANTUM_BACKEND_ACCESS",
+        "MAY_FEED_QUANTUM_ARBITRATION_AS_CLASSICAL_INPUT"
+      ],
+      "quantum_backend_artifact_created": false,
+      "quantum_classical_arbitration_role": "CLASSICAL_INPUT_TO_FUTURE_QUANTUM_CLASSICAL_ARBITRATION",
+      "quantum_parameter_family_access": [
+        "CLASSICAL_COMPARATOR_PARAMETER_SURFACE",
+        "NO_BACKEND_PARAMETER_ACCESS"
+      ],
+      "reason_codes": [
+        "OWNER_OVERRIDE_SATISFIES_TRADE_CONTEXT_INTERNAL_WORKFLOW_BLOCKER"
+      ],
+      "replay_execution_created": false,
+      "replay_paper_evidence_required_before_advantage_claim": true,
+      "requested_consumer_class": "OPTIMIZER_SEARCH",
+      "requested_trade_context": "UNAUTHORIZED_TRADE_CONTEXT_FOR_GATE",
+      "runtime_artifact_created": false,
+      "runtime_live_order_authority_created_by_binding": false,
+      "runtime_resolver_snapshot_created": false,
+      "scoring_ranking_role": "PROVIDES_SCORING_FEATURE_INPUTS",
+      "source_acceptance_artifact_created": false,
+      "strongest_classical_comparator_required": false,
+      "trade_context_applicability_from_binding": [
+        "EDGE_HYPOTHESIS_CONTEXT",
+        "RESEARCH_SIGNAL_CONTEXT"
+      ],
+      "trade_context_authorized_by_binding": false
+    }
+  ],
+  "deterministic_output": true,
+  "execution": "DISABLED",
+  "execution_superiority_evidence_claim_created": false,
+  "existing_pr_patterns_used_for_style_only": true,
+  "final_ready": false,
+  "fixture_authority_class": "SYNTHETIC_NON_AUTHORITATIVE_FIXTURE_NOT_AGENT_ALGORITHM_CONSUMER_AUTHORITY",
+  "fixture_id": "synthetic_qtt_agent_algorithm_consumer_gate_v1",
+  "fixture_version": "v1",
+  "gate_generation_policy": "ONE_ALLOWED_ATTEMPT_PER_AGENT_ALGORITHM_BINDING_PLUS_STATIC_BLOCK_AND_OWNER_OVERRIDE_CASES",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "latency_superiority_evidence_claim_created": false,
+  "live_artifact_created": false,
+  "master_plan_followed_as_controlling_doctrine": true,
+  "missing_binding_owner_override_supported": true,
+  "mode": "SOURCE_REQUIRED",
+  "normal_binding_required_for_consumption": true,
+  "normal_consumer_class_required_for_consumption": true,
+  "normal_trade_context_required_for_consumption": true,
+  "order_artifact_created": false,
+  "owner_global_override_authority": true,
+  "owner_override_satisfies_all_qtt_internal_requirements": true,
+  "owner_override_satisfies_missing_binding_for_internal_workflow": true,
+  "paper_execution_created": false,
+  "pr67_is_scope_boundary_not_runtime_consumer_authority": true,
+  "profit_evidence_claim_created": false,
+  "qtt_agent_authority_over_owner": false,
+  "quantum_backend_artifact_created": false,
+  "quantum_evidence_claim_created": false,
+  "quantum_forward_design_supported": true,
+  "registry_type": "QTT_AGENT_ALGORITHM_CONSUMER_GATE",
+  "registry_version": "v1",
+  "replay_execution_created": false,
+  "runtime_artifact_created": false,
+  "runtime_resolver_snapshot_created": false,
+  "source_acceptance_artifact_created": false,
+  "source_of_gate_substance": "docs/master_plan/QTT_MasterPlan_Current.md",
+  "static_agent_algorithm_consumer_gate_created": true,
+  "uses_pr_number_as_authority": false
+}
