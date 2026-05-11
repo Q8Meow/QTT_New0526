@@ -1,0 +1,172 @@
+{
+  "execution": "DISABLED",
+  "fixture_cases": [
+    {
+      "case_id": "SYNTHETIC_VALID_ALL_ROLES_CANONICAL_ORDER",
+      "case_type": "VALID_STATIC_TAXONOMY",
+      "expected_state": {
+        "final_ready": false,
+        "normal_stack_readiness_blocked": false,
+        "owner_override_state": "OWNER_OVERRIDE_NOT_REQUIRED_SYNTHETIC",
+        "role_taxonomy_contract_ready": true,
+        "runtime_use_created": false
+      },
+      "owner_override_present": false,
+      "role_ids": [
+        "SIGNAL",
+        "SCORING",
+        "NORMALIZATION",
+        "RISK",
+        "EXECUTION",
+        "CAPITAL",
+        "LATENCY",
+        "ERROR_GUARD",
+        "QUANTUM_ADVISORY"
+      ],
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_MISSING_ROLE_BLOCKS_NORMAL_READINESS",
+      "case_type": "MISSING_REQUIRED_ROLE_NORMAL_BLOCK",
+      "expected_state": {
+        "final_ready": false,
+        "missing_role": "RISK",
+        "normal_stack_readiness_blocked": true,
+        "owner_override_state": "OWNER_OVERRIDE_NOT_PRESENT",
+        "runtime_use_created": false
+      },
+      "owner_override_present": false,
+      "role_ids": [
+        "SIGNAL",
+        "SCORING",
+        "NORMALIZATION",
+        "EXECUTION",
+        "CAPITAL",
+        "LATENCY",
+        "ERROR_GUARD",
+        "QUANTUM_ADVISORY"
+      ],
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_MISSING_ROLE_OWNER_OVERRIDE_INTERNAL_ONLY",
+      "case_type": "MISSING_REQUIRED_ROLE_OWNER_OVERRIDE",
+      "expected_state": {
+        "evidence_fabricated": false,
+        "final_ready": false,
+        "missing_role": "RISK",
+        "normal_stack_readiness_blocked": true,
+        "owner_override_state": "OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY",
+        "runtime_use_created": false
+      },
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "role_ids": [
+        "SIGNAL",
+        "SCORING",
+        "NORMALIZATION",
+        "EXECUTION",
+        "CAPITAL",
+        "LATENCY",
+        "ERROR_GUARD",
+        "QUANTUM_ADVISORY"
+      ],
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_SINGLE_PARAMETER_INCOMPLETE_WITHOUT_OWNER_OVERRIDE",
+      "case_type": "SINGLE_PARAMETER_NORMAL_BLOCK",
+      "expected_state": {
+        "evidence_fabricated": false,
+        "normal_stack_readiness_blocked": true,
+        "owner_override_state": "OWNER_OVERRIDE_NOT_PRESENT",
+        "single_parameter_set_complete": false
+      },
+      "owner_override_present": false,
+      "single_parameter_set": {
+        "parameter_set_id": "SYNTHETIC-SINGLE-PARAMETER-SET-001",
+        "role_ids": [
+          "SIGNAL"
+        ],
+        "synthetic_case_only": true
+      },
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_SINGLE_PARAMETER_OWNER_OVERRIDE_INTERNAL_ONLY",
+      "case_type": "SINGLE_PARAMETER_OWNER_OVERRIDE",
+      "expected_state": {
+        "evidence_fabricated": false,
+        "owner_override_state": "OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY",
+        "single_parameter_set_complete": true
+      },
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "single_parameter_set": {
+        "parameter_set_id": "SYNTHETIC-SINGLE-PARAMETER-SET-OWNER-OVERRIDE-001",
+        "role_ids": [
+          "SIGNAL"
+        ],
+        "synthetic_case_only": true
+      },
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_SINGLE_ALGORITHM_INCOMPLETE_WITHOUT_OWNER_OVERRIDE",
+      "case_type": "SINGLE_ALGORITHM_NORMAL_BLOCK",
+      "expected_state": {
+        "evidence_fabricated": false,
+        "normal_stack_readiness_blocked": true,
+        "owner_override_state": "OWNER_OVERRIDE_NOT_PRESENT",
+        "single_algorithm_set_complete": false
+      },
+      "owner_override_present": false,
+      "single_algorithm_set": {
+        "algorithm_set_id": "SYNTHETIC-SINGLE-ALGORITHM-SET-001",
+        "role_ids": [
+          "SCORING"
+        ],
+        "synthetic_case_only": true
+      },
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_SINGLE_ALGORITHM_OWNER_OVERRIDE_INTERNAL_ONLY",
+      "case_type": "SINGLE_ALGORITHM_OWNER_OVERRIDE",
+      "expected_state": {
+        "evidence_fabricated": false,
+        "owner_override_state": "OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY",
+        "single_algorithm_set_complete": true
+      },
+      "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+      "owner_override_present": true,
+      "single_algorithm_set": {
+        "algorithm_set_id": "SYNTHETIC-SINGLE-ALGORITHM-SET-OWNER-OVERRIDE-001",
+        "role_ids": [
+          "SCORING"
+        ],
+        "synthetic_case_only": true
+      },
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "SYNTHETIC_QUANTUM_ADVISORY_STATIC_ONLY",
+      "case_type": "QUANTUM_ADVISORY_STATIC_TAXONOMY_ONLY",
+      "expected_state": {
+        "quantum_advisory_role_required": true,
+        "quantum_advisory_role_is_static_taxonomy_only": true,
+        "quantum_arbitration_created": false,
+        "quantum_backend_execution_created": false,
+        "quantum_scoring_created": false
+      },
+      "owner_override_present": false,
+      "role_ids": [
+        "QUANTUM_ADVISORY"
+      ],
+      "synthetic_case_only": true
+    }
+  ],
+  "fixture_id": "SYNTHETIC_ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_FIXTURE",
+  "fixture_version": "SYNTHETIC_ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED"
+}
