@@ -1,7 +1,7 @@
 {
   "agent_algorithm_binding_registry_dependency": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmBindingRegistry.yaml",
   "agent_algorithm_binding_report_dependency": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
-  "agent_algorithm_command_matrix_created": false,
+  "agent_algorithm_command_matrix_created": true,
   "agent_algorithm_consumer_gate_dependency": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml",
   "agent_algorithm_consumer_gate_report_dependency": "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json",
   "agent_charter_registry_dependency": "docs/master_plan/agents/QTTAgentRoleOperatingCharterRegistry.yaml",
@@ -27,7 +27,7 @@
   "expected_binding_count_from_binding_report": 71,
   "final_ready": false,
   "future_atomicrows_bundle_hash_required": true,
-  "future_command_matrix_required": true,
+  "future_command_matrix_required": false,
   "future_parameter_stack_layers_required": true,
   "future_quantum_classical_arbitration_required": true,
   "future_replay_paper_evidence_required": true,

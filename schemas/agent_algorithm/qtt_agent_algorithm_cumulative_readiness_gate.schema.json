@@ -10,7 +10,7 @@
           "const": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"
         },
         "agent_algorithm_command_matrix_created": {
-          "const": false
+          "const": true
         },
         "agent_algorithm_consumer_gate_dependency": {
           "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
@@ -88,7 +88,7 @@
           "const": true
         },
         "future_command_matrix_required": {
-          "const": true
+          "const": false
         },
         "future_parameter_stack_layers_required": {
           "const": true
@@ -525,7 +525,7 @@
       "const": "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"
     },
     "agent_algorithm_command_matrix_created": {
-      "const": false
+      "const": true
     },
     "agent_algorithm_consumer_gate_dependency": {
       "const": "docs/master_plan/agent_algorithm/QTTAgentAlgorithmConsumerGate.yaml"
@@ -588,7 +588,7 @@
       "const": true
     },
     "future_command_matrix_required": {
-      "const": true
+      "const": false
     },
     "future_parameter_stack_layers_required": {
       "const": true

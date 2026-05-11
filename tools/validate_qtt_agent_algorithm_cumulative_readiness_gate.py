@@ -318,7 +318,7 @@ TOP_FALSE_FIELDS = (
     "profit_evidence_claim_created",
     "latency_superiority_evidence_claim_created",
     "execution_superiority_evidence_claim_created",
-    "agent_algorithm_command_matrix_created",
+    "future_command_matrix_required",
     "runtime_artifact_created",
     "live_artifact_created",
     "order_artifact_created",
@@ -343,7 +343,7 @@ TOP_TRUE_FIELDS = (
     "static_agent_algorithm_foundation_ready",
     "normal_static_agent_algorithm_coverage_ready",
     "qtt_internal_agent_algorithm_ready",
-    "future_command_matrix_required",
+    "agent_algorithm_command_matrix_created",
     "future_parameter_stack_layers_required",
     "future_scoring_ranking_layers_required",
     "future_quantum_classical_arbitration_required",
@@ -620,7 +620,6 @@ def collect_metrics(
         )
         and not forbidden_artifact_true
         and not upstream_final_ready_true
-        and not command_matrix_present
         and not bundle_file_present
         and not bundle_sha_present
     )
@@ -667,7 +666,6 @@ def collect_metrics(
     )
     normal_static_ready = (
         static_foundation_ready
-        and not command_matrix_present
         and not bundle_file_present
         and not bundle_sha_present
     )
@@ -808,7 +806,7 @@ def build_registry(
         consumer_report=consumer_report,
     )
     future_reason = (
-        "FUTURE_COMMAND_MATRIX_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS"
+        "FUTURE_PARAMETER_STACK_SCORING_ARBITRATION_REPLAY_PAPER_RUNTIME_LIVE_AND_ATOMICROWS_HASH_LAYERS_REQUIRED_BEFORE_FULL_OR_FINAL_READINESS"
     )
     components = [
         _component(
@@ -1054,7 +1052,9 @@ def build_registry(
             ),
             expected_success_markers=(SUCCESS_MARKER,),
             measured_counts={
-                "future_command_matrix_required": True,
+                "future_command_matrix_required": not metrics[
+                    "agent_algorithm_command_matrix_created"
+                ],
                 "future_parameter_stack_layers_required": True,
                 "future_scoring_ranking_layers_required": True,
                 "future_quantum_classical_arbitration_required": True,
@@ -1124,8 +1124,12 @@ def build_registry(
         "qtt_internal_agent_algorithm_ready": metrics[
             "qtt_internal_agent_algorithm_ready"
         ],
-        "future_command_matrix_required": True,
-        "agent_algorithm_command_matrix_created": False,
+        "future_command_matrix_required": not metrics[
+            "agent_algorithm_command_matrix_created"
+        ],
+        "agent_algorithm_command_matrix_created": metrics[
+            "agent_algorithm_command_matrix_created"
+        ],
         "future_parameter_stack_layers_required": True,
         "future_scoring_ranking_layers_required": True,
         "future_quantum_classical_arbitration_required": True,
@@ -1287,8 +1291,9 @@ def build_report(
             "qtt_internal_agent_algorithm_ready"
         )
         is True,
-        "future_command_matrix_required": registry.get("future_command_matrix_required")
-        is True,
+        "future_command_matrix_required": not metrics[
+            "agent_algorithm_command_matrix_created"
+        ],
         "agent_algorithm_command_matrix_created": registry.get(
             "agent_algorithm_command_matrix_created"
         )
@@ -1451,7 +1456,8 @@ def build_schema() -> dict[str, Any]:
         "normal_static_agent_algorithm_coverage_ready": true_bool,
         "normal_full_agent_algorithm_coverage_ready": false_bool,
         "qtt_internal_agent_algorithm_ready": true_bool,
-        "future_command_matrix_required": true_bool,
+        "future_command_matrix_required": false_bool,
+        "agent_algorithm_command_matrix_created": true_bool,
         "future_parameter_stack_layers_required": true_bool,
         "future_scoring_ranking_layers_required": true_bool,
         "future_quantum_classical_arbitration_required": true_bool,
@@ -1530,8 +1536,8 @@ def build_schema() -> dict[str, Any]:
         "normal_static_agent_algorithm_coverage_ready": true_bool,
         "normal_full_agent_algorithm_coverage_ready": false_bool,
         "qtt_internal_agent_algorithm_ready": true_bool,
-        "future_command_matrix_required": true_bool,
-        "agent_algorithm_command_matrix_created": false_bool,
+        "future_command_matrix_required": false_bool,
+        "agent_algorithm_command_matrix_created": true_bool,
         "future_parameter_stack_layers_required": true_bool,
         "future_scoring_ranking_layers_required": true_bool,
         "future_quantum_classical_arbitration_required": true_bool,
@@ -1843,7 +1849,7 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "static_agent_algorithm_foundation_ready",
         "normal_static_agent_algorithm_coverage_ready",
         "qtt_internal_agent_algorithm_ready",
-        "future_command_matrix_required",
+        "agent_algorithm_command_matrix_created",
         "future_parameter_stack_layers_required",
         "future_scoring_ranking_layers_required",
         "future_quantum_classical_arbitration_required",
@@ -1860,7 +1866,7 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
             failures.append(f"report.{field} must be true")
     for field in (
         "normal_full_agent_algorithm_coverage_ready",
-        "agent_algorithm_command_matrix_created",
+        "future_command_matrix_required",
         "alpha_evidence_claim_created",
         "profit_evidence_claim_created",
         "latency_superiority_evidence_claim_created",
@@ -1980,8 +1986,8 @@ def validate(
             consumer_report=consumer_report,
         )
     )
-    if metrics["agent_algorithm_command_matrix_created"]:
-        failures.append("agent-algorithm command matrix must not be created")
+    if not metrics["agent_algorithm_command_matrix_created"]:
+        failures.append("agent-algorithm command matrix must be created")
     if metrics["bundle_file_present"]:
         failures.append("AtomicRows.bundle.jsonl must be absent")
     if metrics["bundle_sha_present"]:
