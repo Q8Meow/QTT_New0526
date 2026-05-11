@@ -12,6 +12,9 @@ from tools import (
 from tools import (
     validate_atomicrows_parameter_stack_role_taxonomy as parameter_stack_role_gate,
 )
+from tools import (
+    validate_atomicrows_parameter_stack_completeness_gate as parameter_stack_completeness_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -527,6 +530,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         [
             python_executable,
             str(Path("tools") / "validate_atomicrows_parameter_stack_role_taxonomy.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_parameter_stack_completeness_gate.py"
+            ),
         ],
         [
             python_executable,
@@ -1353,6 +1363,13 @@ def test_runner_exposes_parameter_stack_role_taxonomy_success_marker():
     )
 
 
+def test_runner_exposes_parameter_stack_completeness_gate_success_marker():
+    assert (
+        parameter_stack_completeness_gate.SUCCESS_MARKER
+        == "ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1436,6 +1453,9 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
     parameter_stack_role_index = command_names.index(
         "validate_atomicrows_parameter_stack_role_taxonomy.py"
     )
+    parameter_stack_completeness_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1446,6 +1466,7 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
         < owner_intake_index
         < candidate_family_index
         < parameter_stack_role_index
+        < parameter_stack_completeness_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1474,6 +1495,53 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
         python_executable,
         str(Path("tools") / "validate_atomicrows_parameter_stack_role_taxonomy.py"),
     ]
+    assert commands[parameter_stack_completeness_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
+    ]
+
+
+def test_runner_pr74_completeness_gate_has_no_runtime_source_or_bundle_args(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr73_index = command_names.index("validate_atomicrows_parameter_stack_role_taxonomy.py")
+    pr74_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
+    pr70_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
+    pr71_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
+    pr72_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
+
+    assert pr70_index < pr71_index < pr72_index < pr73_index < pr74_index
+    assert commands[pr74_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
+    ]
+    pr74_text = " ".join(commands[pr74_index]).lower()
+    assert "source-retrieval" not in pr74_text
+    assert "source-acceptance" not in pr74_text
+    assert "connector" not in pr74_text
+    assert "runtime" not in pr74_text
+    assert "live" not in pr74_text
+    assert "order" not in pr74_text
+    assert "profit" not in pr74_text
+    assert "atomicrows.bundle.jsonl" not in pr74_text
+    assert "atomicrows.bundle.sha256" not in pr74_text
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
@@ -1694,6 +1762,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     parameter_stack_role_index = command_names.index(
         "validate_atomicrows_parameter_stack_role_taxonomy.py"
     )
+    parameter_stack_completeness_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1715,6 +1786,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < owner_intake_index
         < candidate_family_index
         < parameter_stack_role_index
+        < parameter_stack_completeness_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1882,6 +1954,13 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     assert commands[parameter_stack_role_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_parameter_stack_role_taxonomy.py"),
+    ]
+    assert commands[parameter_stack_completeness_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
     ]
 
     audit_command = commands[generated_gate_index]
@@ -2734,6 +2813,47 @@ def test_runner_does_not_emit_success_marker_if_parameter_stack_role_taxonomy_fa
 
     assert exit_code == 13
     assert seen == commands[:4]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_parameter_stack_completeness_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        [
+            "python",
+            "validate_atomicrows_research_provenance_evidence_tier_classification.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_owner_submitted_research_source_intake_registry.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_research_source_to_candidate_family_gate.py",
+        ],
+        ["python", "validate_atomicrows_parameter_stack_role_taxonomy.py"],
+        ["python", "validate_atomicrows_parameter_stack_completeness_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 17, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 17
+    assert seen == commands[:5]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 

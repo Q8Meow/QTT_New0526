@@ -1,0 +1,128 @@
+gate_id: ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE
+gate_version: v1
+authority_class: STATIC_PARAMETER_STACK_COMPLETENESS_GATE_NOT_STACK_COMPATIBILITY_NOT_STACK_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY
+depends_on_parameter_stack_role_taxonomy:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+required_stack_roles:
+  - SIGNAL
+  - SCORING
+  - NORMALIZATION
+  - RISK
+  - EXECUTION
+  - CAPITAL
+  - LATENCY
+  - ERROR_GUARD
+  - QUANTUM_ADVISORY
+completeness_cases: []
+completeness_policy:
+  all_required_roles_required_for_normal_completeness: true
+  missing_required_role_blocks_normal_stack_readiness: true
+  duplicate_role_ids_block_normal_stack_readiness: true
+  single_parameter_set_complete_without_owner_override: false
+  single_algorithm_set_complete_without_owner_override: false
+  owner_override_may_satisfy_internal_stack_readiness: true
+  final_ready_created_by_this_gate: false
+production_readiness:
+  completeness_gate_contract_ready: true
+  production_complete_stack_count: 0
+  production_incomplete_stack_count: 0
+  production_owner_override_satisfied_stack_count: 0
+  production_stack_completeness_evaluated: false
+  production_stack_ready: false
+  final_ready: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfies_internal_stack_readiness_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+quantum_advisory_policy:
+  quantum_advisory_role_required_for_normal_completeness: true
+  missing_quantum_advisory_blocks_normal_completeness: true
+  quantum_advisory_is_static_completeness_role_only: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_scoring_created: false
+  quantum_arbitration_created: false
+  future_quantum_applicability_registry_required_before_quantum_selection: true
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+explicit_no_claim_flags:
+  retrieves_source_facts: false
+  accepts_source_facts: false
+  creates_accepted_source_packets: false
+  creates_connector_semantics: false
+  creates_runtime_artifacts: false
+  creates_atomicrows_bundle_rows: false
+  creates_atomicrows_bundle_jsonl: false
+  creates_atomicrows_bundle_sha256: false
+  creates_replay_results: false
+  creates_paper_results: false
+  creates_live_readiness: false
+  creates_order_authority: false
+  creates_cash_receipts: false
+  creates_profit_evidence: false
+  creates_quantum_backend_evidence: false
+  creates_quantum_advantage_claim: false
+  creates_latency_superiority_claim: false
+  creates_execution_superiority_claim: false
+  creates_ranking: false
+  creates_scoring: false
+  creates_optimizer_arbitration: false
+  creates_trade_context_routing: false
+  creates_stack_selection: false
+  creates_stack_compatibility_gate: false
+  creates_runtime_or_live_trading_authority: false
+future_consumer_contract:
+  compatibility_gate_may_consume: true
+  scoring_gate_may_consume: true
+  selection_gate_may_consume: true
+  optimizer_arbitration_gate_may_consume: true
+  this_gate_performs_compatibility: false
+  this_gate_performs_scoring: false
+  this_gate_performs_selection: false
+  this_gate_performs_arbitration: false
+  this_gate_routes_trade_context: false
+forbidden_artifact_flags:
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  connector_semantics_created: false
+  runtime_artifacts_created: false
+  live_readiness_created: false
+  order_authority_created: false
+  cash_receipts_created: false
+  replay_results_created: false
+  paper_results_created: false
+  profit_evidence_created: false
+  quantum_backend_evidence_created: false
+  quantum_advantage_claim_created: false
+  latency_superiority_claim_created: false
+  execution_superiority_claim_created: false
+  atomicrows_bundle_rows_created: false
+  atomicrows_bundle_jsonl_created: false
+  atomicrows_bundle_sha256_created: false
+  ranking_created: false
+  scoring_created: false
+  optimizer_arbitration_created: false
+  trade_context_routing_created: false
+  stack_selection_created: false
+  stack_compatibility_gate_created: false
+  runtime_live_use_created: false
+validation_invariants:
+  - Required stack roles must equal the PR73 canonical nine-role order.
+  - Missing required role blocks normal stack readiness unless owner override satisfies internal readiness only.
+  - Missing QUANTUM_ADVISORY blocks normal completeness unless owner override satisfies internal readiness only.
+  - Duplicate role IDs block normal stack readiness.
+  - Single-parameter and single-algorithm sets are incomplete without owner override.
+  - Owner override cannot fabricate source facts evidence receipts replay paper profit or quantum backend evidence.
+  - This gate does not create compatibility selection scoring ranking arbitration routing runtime live order profit replay paper or quantum backend evidence.
+  - AtomicRows bundle rows bundle jsonl and bundle sha256 remain forbidden artifacts.
+final_ready: false
