@@ -19,6 +19,7 @@ from tools import (
     validate_atomicrows_parameter_stack_compatibility_gate as parameter_stack_compatibility_gate,
 )
 from tools import validate_edge_parameter_stack_selection_packet as edge_packet_gate
+from tools import validate_qtt_trade_context_packet as trade_context_gate
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -552,6 +553,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         [
             python_executable,
             str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_qtt_trade_context_packet.py"),
         ],
         [
             python_executable,
@@ -1396,6 +1401,10 @@ def test_runner_exposes_edge_parameter_stack_selection_packet_success_marker():
     assert edge_packet_gate.SUCCESS_MARKER == "EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_OK"
 
 
+def test_runner_exposes_qtt_trade_context_packet_success_marker():
+    assert trade_context_gate.SUCCESS_MARKER == "QTT_TRADE_CONTEXT_PACKET_SCHEMA_OK"
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1488,6 +1497,7 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
     edge_packet_index = command_names.index(
         "validate_edge_parameter_stack_selection_packet.py"
     )
+    trade_context_index = command_names.index("validate_qtt_trade_context_packet.py")
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1501,6 +1511,7 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
         < parameter_stack_completeness_index
         < parameter_stack_compatibility_index
         < edge_packet_index
+        < trade_context_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1546,6 +1557,10 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
     assert commands[edge_packet_index] == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+    ]
+    assert commands[trade_context_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_trade_context_packet.py"),
     ]
 
 
@@ -1781,6 +1796,54 @@ def test_runner_includes_pr77_edge_packet_after_pr75_and_before_generated_deriva
     ]
 
 
+def test_runner_includes_pr78_trade_context_packet_after_pr77_and_before_generated_derivative(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr70_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
+    pr71_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
+    pr72_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
+    pr73_index = command_names.index("validate_atomicrows_parameter_stack_role_taxonomy.py")
+    pr74_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
+    pr75_index = command_names.index(
+        "validate_atomicrows_parameter_stack_compatibility_gate.py"
+    )
+    pr77_index = command_names.index("validate_edge_parameter_stack_selection_packet.py")
+    pr78_index = command_names.index("validate_qtt_trade_context_packet.py")
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+
+    assert (
+        pr70_index
+        < pr71_index
+        < pr72_index
+        < pr73_index
+        < pr74_index
+        < pr75_index
+        < pr77_index
+        < pr78_index
+        < generated_gate_index
+    )
+    assert commands[pr78_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_trade_context_packet.py"),
+    ]
+
+
 def test_runner_pr77_edge_packet_has_no_runtime_source_connector_or_live_args(
     monkeypatch,
 ):
@@ -1856,6 +1919,83 @@ def test_pr77_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / edge_packet_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / edge_packet_gate.PR76_OLD_LONG_TEST).exists()
+
+
+def test_runner_pr78_trade_context_packet_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr78_command = commands[command_names.index("validate_qtt_trade_context_packet.py")]
+
+    assert pr78_command == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_trade_context_packet.py"),
+    ]
+    pr78_text = " ".join(pr78_command).lower()
+    assert "source-retrieval" not in pr78_text
+    assert "source-acceptance" not in pr78_text
+    assert "connector-binding" not in pr78_text
+    assert "runtime-live" not in pr78_text
+    assert "live-use" not in pr78_text
+    assert "order-authority" not in pr78_text
+    assert "profit-evidence" not in pr78_text
+    assert "replay-execution" not in pr78_text
+    assert "paper-execution" not in pr78_text
+    assert "quantum-backend" not in pr78_text
+    assert "quantum-advantage" not in pr78_text
+    assert "atomicrows.bundle.jsonl" not in pr78_text
+    assert "atomicrows.bundle.sha256" not in pr78_text
+
+
+def test_pr78_static_contract_preserves_no_claim_boundaries():
+    production = trade_context_gate.load_yaml(trade_context_gate.DEFAULT_PRODUCTION_PACKET)
+    flags = production["explicit_no_claim_flags"]
+    future = production["future_consumer_contract"]
+    quantum = production["quantum_priority_boundary_policy"]
+    source = production["source_evidence_boundary_policy"]
+    connector = production["connector_semantic_boundary_policy"]
+    runtime = production["runtime_live_order_boundary_policy"]
+    readiness = production["production_readiness"]
+    context = production["context_static_policy"]
+
+    assert context["trade_context_is_static_schema_only"] is True
+    assert context["trade_context_routes_selection_universe"] is False
+    assert context["trade_context_selects_stack"] is False
+    assert context["trade_context_scores_stack"] is False
+    assert context["trade_context_ranks_stack"] is False
+    assert context["trade_context_arbitrates_optimizer"] is False
+    assert context["trade_context_executes_replay_or_paper"] is False
+    assert context["trade_context_executes_runtime_or_live"] is False
+    assert source["source_retrieval_created"] is False
+    assert source["source_acceptance_created"] is False
+    assert source["accepted_source_packets_created"] is False
+    assert connector["connector_semantics_created"] is False
+    assert connector["connector_semantic_binding_created"] is False
+    assert runtime["runtime_artifacts_created"] is False
+    assert runtime["runtime_resolver_execution_created"] is False
+    assert runtime["runtime_live_use_created"] is False
+    assert runtime["order_authority_created"] is False
+    assert runtime["profit_evidence_created"] is False
+    assert quantum["quantum_backend_execution_created"] is False
+    assert quantum["quantum_advantage_claim_created"] is False
+    assert quantum["quantum_selection_created"] is False
+    assert quantum["quantum_arbitration_created"] is False
+    assert readiness["qtt_trade_context_packet_schema_ready"] is True
+    assert readiness["production_trade_context_evaluated"] is False
+    assert readiness["production_trade_context_ready"] is False
+    assert readiness["production_routing_ready"] is False
+    assert readiness["production_selection_ready"] is False
+    assert readiness["final_ready"] is False
+    assert all(flags[field] is False for field in trade_context_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS)
+    assert all(future[field] is False for field in trade_context_gate.FUTURE_CONSUMER_FALSE_FIELDS)
+    assert not (Path(".") / trade_context_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / trade_context_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / trade_context_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / trade_context_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
@@ -3272,6 +3412,50 @@ def test_runner_does_not_emit_success_marker_if_edge_packet_validator_fails(
 
     assert exit_code == 23
     assert seen == commands[:7]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_qtt_trade_context_packet_validator_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        [
+            "python",
+            "validate_atomicrows_research_provenance_evidence_tier_classification.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_owner_submitted_research_source_intake_registry.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_research_source_to_candidate_family_gate.py",
+        ],
+        ["python", "validate_atomicrows_parameter_stack_role_taxonomy.py"],
+        ["python", "validate_atomicrows_parameter_stack_completeness_gate.py"],
+        ["python", "validate_atomicrows_parameter_stack_compatibility_gate.py"],
+        ["python", "validate_edge_parameter_stack_selection_packet.py"],
+        ["python", "validate_qtt_trade_context_packet.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 0, 0, 0, 29, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 29
+    assert seen == commands[:8]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
