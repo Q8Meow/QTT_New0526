@@ -30,6 +30,9 @@ from tools import (
 from tools import (
     validate_trade_context_selection_universe_routing_gate as trade_context_routing_gate,
 )
+from tools import (
+    validate_quantum_applicability_classification_registry as quantum_applicability_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -587,6 +590,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_trade_context_selection_universe_routing_gate.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_quantum_applicability_classification_registry.py"
             ),
         ],
         [
@@ -1450,6 +1460,13 @@ def test_runner_exposes_trade_context_selection_universe_routing_gate_success_ma
     )
 
 
+def test_runner_exposes_quantum_applicability_classification_registry_success_marker():
+    assert (
+        quantum_applicability_gate.SUCCESS_MARKER
+        == "QTT_QUANTUM_APPLICABILITY_CLASSIFICATION_REGISTRY_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2179,7 +2196,7 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_runner_includes_pr80_consumer_gate_and_pr81_routing_gate_after_pr79(
+def test_runner_includes_pr80_pr81_and_pr82_quantum_gate_after_pr79(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -2215,6 +2232,9 @@ def test_runner_includes_pr80_consumer_gate_and_pr81_routing_gate_after_pr79(
     pr81_index = command_names.index(
         "validate_trade_context_selection_universe_routing_gate.py"
     )
+    pr82_index = command_names.index(
+        "validate_quantum_applicability_classification_registry.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2232,6 +2252,7 @@ def test_runner_includes_pr80_consumer_gate_and_pr81_routing_gate_after_pr79(
         < pr79_index
         < pr80_index
         < pr81_index
+        < pr82_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2247,6 +2268,13 @@ def test_runner_includes_pr80_consumer_gate_and_pr81_routing_gate_after_pr79(
         str(
             Path("tools")
             / "validate_trade_context_selection_universe_routing_gate.py"
+        ),
+    ]
+    assert commands[pr82_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_quantum_applicability_classification_registry.py"
         ),
     ]
 
@@ -2307,6 +2335,37 @@ def test_runner_does_not_emit_success_marker_if_trade_context_routing_gate_fails
 
     assert exit_code == 41
     assert seen == commands[:3]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_quantum_applicability_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "validate_quantum_applicability_classification_registry.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 43, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 43
+    assert seen == commands[:4]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
@@ -2451,6 +2510,41 @@ def test_runner_pr81_routing_gate_has_no_runtime_source_connector_or_live_args(
     assert "atomicrows.bundle.sha256" not in pr81_text
 
 
+def test_runner_pr82_quantum_applicability_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr82_command = commands[
+        command_names.index("validate_quantum_applicability_classification_registry.py")
+    ]
+
+    assert pr82_command == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_quantum_applicability_classification_registry.py"
+        ),
+    ]
+    pr82_text = " ".join(pr82_command).lower()
+    assert "source-retrieval" not in pr82_text
+    assert "source-acceptance" not in pr82_text
+    assert "connector-binding" not in pr82_text
+    assert "runtime-live" not in pr82_text
+    assert "live-use" not in pr82_text
+    assert "order-authority" not in pr82_text
+    assert "profit-evidence" not in pr82_text
+    assert "replay-execution" not in pr82_text
+    assert "paper-execution" not in pr82_text
+    assert "quantum-backend" not in pr82_text
+    assert "quantum-simulator" not in pr82_text
+    assert "atomicrows.bundle.jsonl" not in pr82_text
+    assert "atomicrows.bundle.sha256" not in pr82_text
+
+
 def test_pr81_static_contract_preserves_route_only_boundaries():
     production = trade_context_routing_gate.load_yaml(
         trade_context_routing_gate.DEFAULT_PRODUCTION_GATE
@@ -2487,6 +2581,45 @@ def test_pr81_static_contract_preserves_route_only_boundaries():
     )
     assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_SHA256).exists()
+
+
+def test_pr82_static_contract_preserves_metadata_only_boundaries():
+    production = quantum_applicability_gate.load_yaml(
+        quantum_applicability_gate.DEFAULT_PRODUCTION_REGISTRY
+    )
+    report = json.loads(
+        quantum_applicability_gate.DEFAULT_REPORT.read_text(encoding="utf-8")
+    )
+
+    assert production["semantic_task_id"] == "ROADMAP-QUANTUM-APPLICABILITY-REGISTRY"
+    assert production["registry_scope"] == "STATIC_QUANTUM_APPLICABILITY_METADATA_ONLY"
+    assert production["static_only_flag"] is True
+    assert production["metadata_only_flag"] is True
+    assert report["classification_is_metadata_only"] is True
+    assert report["backend_execution_created"] is False
+    assert report["quantum_backend_execution_created"] is False
+    assert report["quantum_simulator_execution_created"] is False
+    assert report["optimizer_arbitration_created"] is False
+    assert report["scoring_execution_created"] is False
+    assert report["ranking_created"] is False
+    assert report["selection_created"] is False
+    assert report["runtime_authority_created"] is False
+    assert report["live_authority_created"] is False
+    assert report["order_authority_created"] is False
+    assert report["source_retrieval_created"] is False
+    assert report["source_acceptance_created"] is False
+    assert report["connector_semantic_binding_created"] is False
+    assert report["quantum_advantage_claim_created"] is False
+    assert report["profit_evidence_created"] is False
+    assert report["random_classification_used"] is False
+    assert report["future_owner_quantum_priority_policy_required"] is True
+    assert report["future_scoring_policy_required"] is True
+    assert report["future_optimizer_arbitration_required"] is True
+    assert report["missing_canonical_family_ids"] == []
+    assert not (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / quantum_applicability_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / quantum_applicability_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
