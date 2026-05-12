@@ -23,6 +23,9 @@ from tools import validate_qtt_trade_context_packet as trade_context_gate
 from tools import (
     validate_atomicrows_parameter_selection_universe_registry as selection_universe_gate,
 )
+from tools import (
+    validate_atomicrows_parameter_selection_universe_consumer_gate as selection_universe_consumer_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -566,6 +569,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_parameter_selection_universe_registry.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
             ),
         ],
         [
@@ -1415,6 +1425,13 @@ def test_runner_exposes_qtt_trade_context_packet_success_marker():
     assert trade_context_gate.SUCCESS_MARKER == "QTT_TRADE_CONTEXT_PACKET_SCHEMA_OK"
 
 
+def test_runner_exposes_parameter_selection_universe_consumer_gate_success_marker():
+    assert (
+        selection_universe_consumer_gate.SUCCESS_MARKER
+        == "ATOMICROWS_PARAMETER_SELECTION_UNIVERSE_CONSUMER_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2142,6 +2159,205 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / selection_universe_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / selection_universe_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
+
+
+def test_runner_includes_pr80_consumer_gate_after_pr79_and_before_future_routing_work(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr70_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
+    pr71_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
+    pr72_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
+    pr73_index = command_names.index("validate_atomicrows_parameter_stack_role_taxonomy.py")
+    pr74_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
+    pr75_index = command_names.index(
+        "validate_atomicrows_parameter_stack_compatibility_gate.py"
+    )
+    pr77_index = command_names.index("validate_edge_parameter_stack_selection_packet.py")
+    pr78_index = command_names.index("validate_qtt_trade_context_packet.py")
+    pr79_index = command_names.index(
+        "validate_atomicrows_parameter_selection_universe_registry.py"
+    )
+    pr80_index = command_names.index(
+        "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+    )
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert (
+        pr70_index
+        < pr71_index
+        < pr72_index
+        < pr73_index
+        < pr74_index
+        < pr75_index
+        < pr77_index
+        < pr78_index
+        < pr79_index
+        < pr80_index
+        < generated_gate_index
+        < no_runtime_index
+    )
+    assert commands[pr80_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+        ),
+    ]
+
+
+def test_runner_does_not_emit_success_marker_if_selection_universe_consumer_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 37, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 37
+    assert seen == commands[:2]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_pr80_consumer_gate_has_no_runtime_source_connector_or_routing_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr80_command = commands[
+        command_names.index(
+            "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+        )
+    ]
+
+    assert pr80_command == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+        ),
+    ]
+    pr80_text = " ".join(pr80_command).lower()
+    assert "source-retrieval" not in pr80_text
+    assert "source-acceptance" not in pr80_text
+    assert "connector-binding" not in pr80_text
+    assert "runtime-live" not in pr80_text
+    assert "live-use" not in pr80_text
+    assert "order-authority" not in pr80_text
+    assert "profit-evidence" not in pr80_text
+    assert "replay-execution" not in pr80_text
+    assert "paper-execution" not in pr80_text
+    assert "quantum-backend" not in pr80_text
+    assert "quantum-advantage" not in pr80_text
+    assert "atomicrows.bundle.jsonl" not in pr80_text
+    assert "atomicrows.bundle.sha256" not in pr80_text
+
+
+def test_pr80_static_contract_preserves_consumer_gate_no_claim_boundaries():
+    production = selection_universe_consumer_gate.load_yaml(
+        selection_universe_consumer_gate.DEFAULT_PRODUCTION_GATE
+    )
+    flags = production["explicit_no_claim_flags"]
+    static = production["gate_static_policy"]
+    source = production["source_evidence_boundary_policy"]
+    connector = production["connector_semantic_boundary_policy"]
+    runtime = production["runtime_live_order_boundary_policy"]
+    quantum = production["quantum_consumer_policy"]
+    readiness = production["production_readiness"]
+    future = production["future_consumer_contract"]
+
+    assert static["selection_universe_consumer_gate_is_static_only"] is True
+    assert static["agent_universe_consumer_access_is_deterministic"] is True
+    assert static["trade_context_to_selection_universe_routing_created"] is False
+    assert static["routed_universe_ids_created"] is False
+    assert static["route_result_created"] is False
+    assert static["selected_stack_created"] is False
+    assert static["stack_selection_created"] is False
+    assert static["scoring_created"] is False
+    assert static["ranking_created"] is False
+    assert static["optimizer_arbitration_created"] is False
+    assert static["candidate_stack_generation_created"] is False
+    assert static["replay_paper_execution_created"] is False
+    assert static["runtime_live_order_authority_created"] is False
+    assert source["source_retrieval_created"] is False
+    assert source["source_acceptance_created"] is False
+    assert source["accepted_source_packets_created"] is False
+    assert connector["connector_semantics_created"] is False
+    assert connector["connector_semantic_binding_created"] is False
+    assert runtime["runtime_artifacts_created"] is False
+    assert runtime["runtime_resolver_execution_created"] is False
+    assert runtime["live_readiness_created"] is False
+    assert runtime["runtime_live_use_created"] is False
+    assert runtime["private_state_fetch_created"] is False
+    assert runtime["order_intent_authority_created"] is False
+    assert runtime["order_authority_created"] is False
+    assert runtime["cash_receipts_created"] is False
+    assert runtime["order_receipts_created"] is False
+    assert runtime["fill_receipts_created"] is False
+    assert runtime["profit_evidence_created"] is False
+    assert quantum["quantum_backend_execution_created"] is False
+    assert quantum["quantum_advantage_claim_created"] is False
+    assert quantum["quantum_selection_created"] is False
+    assert quantum["quantum_arbitration_created"] is False
+    assert future["this_pr_performs_routing"] is False
+    assert future["this_pr_performs_scoring"] is False
+    assert future["this_pr_performs_ranking"] is False
+    assert future["this_pr_performs_selection"] is False
+    assert future["this_pr_performs_arbitration"] is False
+    assert future["this_pr_generates_candidate_stacks"] is False
+    assert future["this_pr_executes_replay_or_paper"] is False
+    assert future["this_pr_executes_runtime_or_live"] is False
+    assert readiness["parameter_selection_universe_consumer_gate_ready"] is True
+    assert readiness["production_selection_universe_consumer_gate_evaluated"] is False
+    assert readiness["production_selection_universe_consumer_gate_ready"] is False
+    assert readiness["production_consumer_access_evaluated"] is False
+    assert readiness["production_routing_evaluated"] is False
+    assert readiness["production_routing_ready"] is False
+    assert readiness["production_selection_ready"] is False
+    assert readiness["final_ready"] is False
+    assert all(
+        flags[field] is False
+        for field in selection_universe_consumer_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS
+    )
+    assert not (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / selection_universe_consumer_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / selection_universe_consumer_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
