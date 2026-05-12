@@ -1,0 +1,503 @@
+gate_id: ATOMICROWS_PARAMETER_STACK_COMPATIBILITY_GATE
+gate_version: v1
+authority_class: STATIC_PARAMETER_STACK_COMPATIBILITY_GATE_NOT_COMPLETENESS_NOT_STACK_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY
+depends_on_parameter_stack_role_taxonomy:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_role_taxonomy.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_OK
+depends_on_parameter_stack_completeness_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_completeness_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompletenessGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_completeness_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK
+required_stack_roles:
+  - SIGNAL
+  - SCORING
+  - NORMALIZATION
+  - RISK
+  - EXECUTION
+  - CAPITAL
+  - LATENCY
+  - ERROR_GUARD
+  - QUANTUM_ADVISORY
+role_interface_contracts:
+  - role_id: SIGNAL
+    consumes_interfaces:
+      - research_input_interface
+      - market_hypothesis_input_interface
+      - future_runtime_resolver_snapshot_interface_later_gate_only
+    produces_interfaces:
+      - signal_candidate_interface
+    required_authority_class: STATIC_SIGNAL_COMPATIBILITY_INTERFACE_NOT_ORDER_NOT_LIVE_NOT_PROFIT_AUTHORITY
+    allowed_upstream_roles: []
+    allowed_downstream_roles:
+      - SCORING
+      - NORMALIZATION
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - order_authority
+      - live_readiness_authority
+      - profit_evidence_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - produces_signal_candidate_interface_only
+      - future_runtime_snapshot_consumption_requires_later_gate
+      - preserves_no_order_live_profit_authority
+  - role_id: SCORING
+    consumes_interfaces:
+      - signal_candidate_interface
+    produces_interfaces:
+      - score_candidate_interface
+    required_authority_class: STATIC_SCORING_COMPATIBILITY_INTERFACE_NOT_RANKING_NOT_SELECTION_NOT_RUNTIME_AUTHORITY
+    allowed_upstream_roles:
+      - SIGNAL
+    allowed_downstream_roles:
+      - NORMALIZATION
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - score_computation_authority
+      - stack_ranking_authority
+      - stack_selection_authority
+      - live_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_signal_candidate_interface
+      - produces_static_score_candidate_interface_without_ranking
+      - preserves_no_stack_selection_or_live_authority
+  - role_id: NORMALIZATION
+    consumes_interfaces:
+      - signal_candidate_interface
+      - score_candidate_interface
+    produces_interfaces:
+      - normalized_candidate_interface
+    required_authority_class: STATIC_NORMALIZATION_COMPATIBILITY_INTERFACE_NOT_CONNECTOR_SEMANTIC_NOT_SOURCE_FACT_AUTHORITY
+    allowed_upstream_roles:
+      - SIGNAL
+      - SCORING
+    allowed_downstream_roles:
+      - RISK
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - connector_semantic_authority
+      - source_fact_fabrication_authority
+      - live_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_signal_and_score_candidate_interfaces
+      - produces_normalized_candidate_interface
+      - cannot_create_connector_semantics_or_source_fact_values
+  - role_id: RISK
+    consumes_interfaces:
+      - normalized_candidate_interface
+      - capital_candidate_interface
+    produces_interfaces:
+      - risk_constraint_interface
+    required_authority_class: STATIC_RISK_COMPATIBILITY_INTERFACE_NOT_ORDER_LIFECYCLE_NOT_LIVE_AUTHORITY
+    allowed_upstream_roles:
+      - NORMALIZATION
+      - CAPITAL
+    allowed_downstream_roles:
+      - EXECUTION
+      - CAPITAL
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - order_submission_authority
+      - order_cancel_authority
+      - order_replace_authority
+      - order_reduce_authority
+      - order_close_authority
+      - live_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_normalized_and_capital_candidate_interfaces
+      - produces_risk_constraint_interface
+      - order_lifecycle_authority_remains_forbidden
+  - role_id: EXECUTION
+    consumes_interfaces:
+      - risk_constraint_interface
+      - latency_constraint_interface
+    produces_interfaces:
+      - execution_constraint_interface
+    required_authority_class: STATIC_EXECUTION_COMPATIBILITY_INTERFACE_NOT_ORDER_ROUTER_NOT_RUNTIME_AUTHORITY
+    allowed_upstream_roles:
+      - RISK
+      - LATENCY
+    allowed_downstream_roles:
+      - LATENCY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - order_authority
+      - live_order_authority
+      - order_submission_authority
+      - connector_semantic_binding_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: true
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_risk_and_latency_constraint_interfaces_as_static_metadata
+      - produces_execution_constraint_interface
+      - execution_router_remains_future_final_order_submission_authority
+  - role_id: CAPITAL
+    consumes_interfaces:
+      - risk_constraint_interface
+    produces_interfaces:
+      - capital_candidate_interface
+    required_authority_class: STATIC_CAPITAL_COMPATIBILITY_INTERFACE_NOT_CASH_RECEIPT_NOT_PRIVATE_STATE_AUTHORITY
+    allowed_upstream_roles:
+      - RISK
+    allowed_downstream_roles:
+      - RISK
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - cash_receipt_authority
+      - private_state_fetch_authority
+      - balance_semantic_authority
+      - live_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_risk_constraint_interface
+      - produces_capital_candidate_interface
+      - cannot_create_cash_receipts_or_private_state_fetches
+  - role_id: LATENCY
+    consumes_interfaces:
+      - execution_constraint_interface
+    produces_interfaces:
+      - latency_constraint_interface
+    required_authority_class: STATIC_LATENCY_COMPATIBILITY_INTERFACE_NOT_LATENCY_SUPERIORITY_NOT_LIVE_PATH_AUTHORITY
+    allowed_upstream_roles:
+      - EXECUTION
+    allowed_downstream_roles:
+      - EXECUTION
+      - QUANTUM_ADVISORY
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - latency_superiority_claim_authority
+      - low_latency_live_path_authority
+      - runtime_path_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_execution_constraint_interface
+      - produces_latency_constraint_interface
+      - cannot_create_latency_superiority_or_runtime_path_behavior
+  - role_id: ERROR_GUARD
+    consumes_interfaces:
+      - signal_candidate_interface
+      - score_candidate_interface
+      - normalized_candidate_interface
+      - risk_constraint_interface
+      - execution_constraint_interface
+      - capital_candidate_interface
+      - latency_constraint_interface
+      - quantum_advisory_candidate_interface
+    produces_interfaces:
+      - guardrail_constraint_interface
+    required_authority_class: STATIC_ERROR_GUARD_COMPATIBILITY_INTERFACE_FAIL_CLOSED_NOT_RUNTIME_DISABLEMENT_AUTHORITY
+    allowed_upstream_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - EXECUTION
+      - CAPITAL
+      - LATENCY
+      - QUANTUM_ADVISORY
+    allowed_downstream_roles: []
+    forbidden_downstream_authorities:
+      - blocker_bypass_authority
+      - silent_bypass_authority
+      - runtime_disablement_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_all_role_interfaces_as_safety_metadata
+      - produces_guardrail_constraint_interface
+      - preserves_fail_closed_behavior_without_silent_bypass
+  - role_id: QUANTUM_ADVISORY
+    consumes_interfaces:
+      - signal_candidate_interface
+      - score_candidate_interface
+      - normalized_candidate_interface
+      - risk_constraint_interface
+      - capital_candidate_interface
+      - latency_constraint_interface
+    produces_interfaces:
+      - quantum_advisory_candidate_interface
+    required_authority_class: STATIC_QUANTUM_ADVISORY_COMPATIBILITY_INTERFACE_NOT_BACKEND_NOT_ARBITRATION_NOT_ADVANTAGE_AUTHORITY
+    allowed_upstream_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - CAPITAL
+      - LATENCY
+    allowed_downstream_roles:
+      - ERROR_GUARD
+    forbidden_downstream_authorities:
+      - quantum_backend_execution_authority
+      - optimizer_arbitration_authority
+      - stack_scoring_authority
+      - stack_ranking_authority
+      - stack_selection_authority
+      - quantum_advantage_claim_authority
+    source_fact_dependency_allowed: true
+    accepted_source_packet_required_for_external_fact: true
+    connector_semantic_dependency_allowed: false
+    connector_semantic_requires_accepted_source_packet: true
+    runtime_artifact_dependency_allowed: false
+    live_order_authority_allowed: false
+    quantum_backend_execution_allowed: false
+    profit_evidence_created: false
+    compatibility_notes:
+      - consumes_candidate_and_constraint_interfaces_as_static_metadata
+      - produces_quantum_advisory_candidate_interface
+      - future_quantum_applicability_registry_required_before_quantum_selection
+compatibility_cases: []
+compatibility_policy:
+  upstream_completeness_required_for_normal_compatibility: true
+  all_required_role_interfaces_required_for_normal_compatibility: true
+  missing_interface_blocks_normal_compatibility: true
+  interface_mismatch_blocks_normal_compatibility: true
+  duplicate_interface_blocks_normal_compatibility: true
+  incompatible_authority_transition_blocks_normal_compatibility: true
+  source_fact_boundary_violation_blocks_normal_compatibility: true
+  connector_semantic_boundary_violation_blocks_normal_compatibility: true
+  runtime_live_order_boundary_violation_blocks_normal_compatibility: true
+  quantum_boundary_violation_blocks_normal_compatibility: true
+  owner_override_may_satisfy_internal_stack_compatibility: true
+  owner_override_creates_external_fact: false
+  owner_override_creates_runtime_authority: false
+  owner_override_creates_live_authority: false
+  final_ready_created_by_this_gate: false
+production_readiness:
+  compatibility_gate_contract_ready: true
+  production_compatible_stack_count: 0
+  production_incompatible_stack_count: 0
+  production_owner_override_satisfied_stack_count: 0
+  production_stack_compatibility_evaluated: false
+  production_stack_compatible: false
+  production_stack_ready: false
+  final_ready: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfies_internal_stack_compatibility_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+quantum_compatibility_policy:
+  quantum_advisory_role_required_for_normal_completeness: true
+  quantum_advisory_role_required_for_normal_compatibility: true
+  quantum_advisory_static_compatibility_metadata_only: true
+  true_quantum_metadata_supported_for_future_gates: true
+  quantum_inspired_metadata_supported_for_future_gates: true
+  hybrid_classical_quantum_metadata_supported_for_future_gates: true
+  qubo_compatible_metadata_supported_for_future_gates: true
+  ising_compatible_metadata_supported_for_future_gates: true
+  qaoa_compatible_metadata_supported_for_future_gates: true
+  vqe_compatible_metadata_supported_for_future_gates: true
+  annealing_compatible_metadata_supported_for_future_gates: true
+  quantum_portfolio_optimization_compatible_metadata_supported_for_future_gates: true
+  owner_quantum_priority_metadata_supported_for_future_gates: true
+  owner_forced_quantum_metadata_supported_for_future_gates: true
+  hybrid_compare_then_quantum_tiebreak_metadata_supported_for_future_gates: true
+  strongest_classical_comparator_required: true
+  fallback_bundle_required: true
+  future_quantum_applicability_registry_required_before_quantum_selection: true
+  future_owner_quantum_priority_policy_required_before_quantum_priority_selection: true
+  future_optimizer_arbitration_gate_required_before_optimizer_choice: true
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_scoring_created: false
+  quantum_ranking_created: false
+  quantum_selection_created: false
+  quantum_arbitration_created: false
+source_evidence_boundary_policy:
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  owner_policy_may_authorize_retrieval_scope: true
+  owner_policy_may_authorize_external_fact_value: false
+  external_fact_requires_accepted_source_packet: true
+  source_fact_boundary_violation_blocks_normal_compatibility: true
+connector_semantic_boundary_policy:
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  connector_unlock_requires_accepted_target_field_packet: true
+  connector_unlock_requires_fresh_revalidation_state: true
+  connector_unlock_requires_target_field_scope_match: true
+  retrieval_receipt_does_not_unlock_connector_semantics: true
+  candidate_source_packet_does_not_unlock_connector_semantics: true
+  owner_source_definitions_packet_does_not_unlock_connector_semantics: true
+runtime_live_order_boundary_policy:
+  runtime_artifacts_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  private_state_fetch_created: false
+  order_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  profit_evidence_created: false
+  execution_router_remains_future_final_order_submission_authority: true
+  compatibility_gate_creates_order_authority: false
+future_consumer_contract:
+  edge_parameter_stack_selection_packet_schema_may_consume: true
+  trade_context_packet_schema_may_consume: true
+  selection_universe_registry_may_consume: true
+  trade_context_to_selection_universe_routing_gate_may_consume: true
+  quantum_applicability_classification_registry_may_consume: true
+  owner_quantum_priority_policy_registry_may_consume: true
+  scoring_policy_registry_may_consume: true
+  stack_scoring_ranking_gate_may_consume: true
+  optimizer_arbitration_gate_may_consume: true
+  candidate_stack_generation_gate_may_consume: true
+  trade_context_stack_selection_gate_may_consume: true
+  replay_paper_candidate_stack_competition_gate_may_consume: true
+  this_gate_performs_completeness: false
+  this_gate_performs_scoring: false
+  this_gate_performs_ranking: false
+  this_gate_performs_selection: false
+  this_gate_performs_arbitration: false
+  this_gate_routes_trade_context: false
+  this_gate_executes_replay_or_paper: false
+  this_gate_executes_runtime_or_live: false
+explicit_no_claim_flags:
+  retrieves_source_facts: false
+  accepts_source_facts: false
+  creates_accepted_source_packets: false
+  creates_connector_semantics: false
+  creates_connector_semantic_binding: false
+  creates_runtime_artifacts: false
+  creates_live_readiness: false
+  creates_runtime_live_use: false
+  creates_private_state_fetch: false
+  creates_order_authority: false
+  creates_cash_receipts: false
+  creates_order_receipts: false
+  creates_fill_receipts: false
+  creates_replay_results: false
+  creates_paper_results: false
+  creates_profit_evidence: false
+  creates_quantum_backend_evidence: false
+  creates_quantum_advantage_claim: false
+  creates_latency_superiority_claim: false
+  creates_execution_superiority_claim: false
+  creates_atomicrows_bundle_rows: false
+  creates_atomicrows_bundle_jsonl: false
+  creates_atomicrows_bundle_sha256: false
+  creates_ranking: false
+  creates_scoring: false
+  creates_optimizer_arbitration: false
+  creates_trade_context_routing: false
+  creates_stack_selection: false
+  creates_candidate_stack_generation: false
+forbidden_artifact_flags:
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  runtime_artifacts_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  private_state_fetch_created: false
+  order_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  replay_results_created: false
+  paper_results_created: false
+  profit_evidence_created: false
+  quantum_backend_evidence_created: false
+  quantum_advantage_claim_created: false
+  latency_superiority_claim_created: false
+  execution_superiority_claim_created: false
+  atomicrows_bundle_rows_created: false
+  atomicrows_bundle_jsonl_created: false
+  atomicrows_bundle_sha256_created: false
+  ranking_created: false
+  scoring_created: false
+  optimizer_arbitration_created: false
+  trade_context_routing_created: false
+  stack_selection_created: false
+  candidate_stack_generation_created: false
+  source_fact_value_created: false
+  connector_semantic_value_created: false
+  runtime_cash_value_created: false
+validation_invariants:
+  - Required stack roles must equal the PR73 and PR74 canonical nine-role order.
+  - PR74 completeness must pass before normal compatibility may pass.
+  - All nine role interface contracts must be present.
+  - Missing mismatched duplicate and authority-incompatible interfaces block normal compatibility.
+  - Source evidence connector semantic runtime live order and quantum boundary violations block normal compatibility.
+  - OWNER_GLOBAL_OVERRIDE satisfies internal compatibility only and does not fabricate external facts or evidence.
+  - This gate does not perform completeness scoring ranking selection arbitration routing replay paper runtime live or order behavior.
+  - AtomicRows bundle rows bundle jsonl and bundle sha256 remain forbidden artifacts.
+final_ready: false
