@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from tools import (
@@ -25,6 +26,9 @@ from tools import (
 )
 from tools import (
     validate_atomicrows_parameter_selection_universe_consumer_gate as selection_universe_consumer_gate,
+)
+from tools import (
+    validate_trade_context_selection_universe_routing_gate as trade_context_routing_gate,
 )
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
@@ -576,6 +580,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_trade_context_selection_universe_routing_gate.py"
             ),
         ],
         [
@@ -1432,6 +1443,13 @@ def test_runner_exposes_parameter_selection_universe_consumer_gate_success_marke
     )
 
 
+def test_runner_exposes_trade_context_selection_universe_routing_gate_success_marker():
+    assert (
+        trade_context_routing_gate.SUCCESS_MARKER
+        == "QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2161,7 +2179,7 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_runner_includes_pr80_consumer_gate_after_pr79_and_before_future_routing_work(
+def test_runner_includes_pr80_consumer_gate_and_pr81_routing_gate_after_pr79(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -2194,6 +2212,9 @@ def test_runner_includes_pr80_consumer_gate_after_pr79_and_before_future_routing
     pr80_index = command_names.index(
         "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
     )
+    pr81_index = command_names.index(
+        "validate_trade_context_selection_universe_routing_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2210,6 +2231,7 @@ def test_runner_includes_pr80_consumer_gate_after_pr79_and_before_future_routing
         < pr78_index
         < pr79_index
         < pr80_index
+        < pr81_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2218,6 +2240,13 @@ def test_runner_includes_pr80_consumer_gate_after_pr79_and_before_future_routing
         str(
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
+        ),
+    ]
+    assert commands[pr81_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_trade_context_selection_universe_routing_gate.py"
         ),
     ]
 
@@ -2248,6 +2277,36 @@ def test_runner_does_not_emit_success_marker_if_selection_universe_consumer_gate
 
     assert exit_code == 37
     assert seen == commands[:2]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_trade_context_routing_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 41, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 41
+    assert seen == commands[:3]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
@@ -2358,6 +2417,76 @@ def test_pr80_static_contract_preserves_consumer_gate_no_claim_boundaries():
     assert not (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / selection_universe_consumer_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / selection_universe_consumer_gate.PR76_OLD_LONG_TEST).exists()
+
+
+def test_runner_pr81_routing_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr81_command = commands[
+        command_names.index("validate_trade_context_selection_universe_routing_gate.py")
+    ]
+
+    assert pr81_command == [
+        python_executable,
+        str(Path("tools") / "validate_trade_context_selection_universe_routing_gate.py"),
+    ]
+    pr81_text = " ".join(pr81_command).lower()
+    assert "source-retrieval" not in pr81_text
+    assert "source-acceptance" not in pr81_text
+    assert "connector-binding" not in pr81_text
+    assert "runtime-live" not in pr81_text
+    assert "live-use" not in pr81_text
+    assert "order-authority" not in pr81_text
+    assert "profit-evidence" not in pr81_text
+    assert "replay-execution" not in pr81_text
+    assert "paper-execution" not in pr81_text
+    assert "quantum-backend" not in pr81_text
+    assert "quantum-advantage" not in pr81_text
+    assert "atomicrows.bundle.jsonl" not in pr81_text
+    assert "atomicrows.bundle.sha256" not in pr81_text
+
+
+def test_pr81_static_contract_preserves_route_only_boundaries():
+    production = trade_context_routing_gate.load_yaml(
+        trade_context_routing_gate.DEFAULT_PRODUCTION_GATE
+    )
+    report = json.loads(
+        trade_context_routing_gate.DEFAULT_REPORT.read_text(encoding="utf-8")
+    )
+
+    assert production["routing_static_policy"]["routing_gate_is_static_only"] is True
+    assert production["routing_static_policy"][
+        "trade_context_to_selection_universe_static_routing_gate_created"
+    ] is True
+    assert report["route_scope"] == (
+        "STATIC_TRADE_CONTEXT_TO_SELECTION_UNIVERSE_ELIGIBILITY_ONLY"
+    )
+    assert report["route_is_selection"] is False
+    assert report["stack_selection_created"] is False
+    assert report["selected_stack_id"] is None
+    assert report["score_breakdown_created"] is False
+    assert report["optimizer_arbitration_created"] is False
+    assert report["runtime_authority_created"] is False
+    assert report["live_authority_created"] is False
+    assert report["order_authority_created"] is False
+    assert report["source_retrieval_created"] is False
+    assert report["source_acceptance_created"] is False
+    assert report["connector_semantic_binding_created"] is False
+    assert report["quantum_backend_execution_created"] is False
+    assert report["quantum_advantage_claim_created"] is False
+    assert report["profit_evidence_created"] is False
+    assert report["random_selection_used"] is False
+    assert all(
+        production["explicit_no_claim_flags"][field] is False
+        for field in trade_context_routing_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS
+    )
+    assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_SHA256).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):

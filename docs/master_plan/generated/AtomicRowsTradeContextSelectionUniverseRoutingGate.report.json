@@ -1,0 +1,157 @@
+{
+  "accepted_source_packets_created": false,
+  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_sha256_exists": false,
+  "authority_class": "STATIC_ROUTE_ELIGIBILITY_REPORT_NOT_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY",
+  "blocked_universes": [
+    {
+      "blocked_reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_TIME_HORIZON_MISMATCH"
+      ],
+      "universe_id": "FORECASTEX_IBKR_EVENT_RISK_HEDGE"
+    },
+    {
+      "blocked_reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_EDGE_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_RISK_MODE_MISMATCH"
+      ],
+      "universe_id": "POLYMARKET_EVENT_MARKET_MOMENTUM"
+    },
+    {
+      "blocked_reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_VENUE_SCOPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_EDGE_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_QUANTUM_PRIORITY_MODE_MISMATCH",
+        "ROUTE_BLOCKED_CONSUMER_ACCESS_DENIED"
+      ],
+      "universe_id": "QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION"
+    }
+  ],
+  "candidate_stack_generation_created": false,
+  "connector_semantic_binding_created": false,
+  "consumer_class": "TRADE_CONTEXT_ROUTING_GATE_CONSUMER_FUTURE_PR81",
+  "depends_on_pr73_role_taxonomy": true,
+  "depends_on_pr74_completeness_gate": true,
+  "depends_on_pr75_compatibility_gate": true,
+  "depends_on_pr77_edge_packet_schema": true,
+  "depends_on_pr78_trade_context_packet_schema": true,
+  "depends_on_pr79_selection_universe_registry": true,
+  "depends_on_pr80_selection_universe_consumer_gate": true,
+  "eligible_universe_ids": [
+    "KALSHI_BINARY_SHORT_HORIZON"
+  ],
+  "final_route_eligible_universe_ids": [
+    "KALSHI_BINARY_SHORT_HORIZON"
+  ],
+  "fixture_path": "tests/fixtures/atomicrows/synthetic_atomicrows_trade_context_selection_universe_routing_gate.v1.fixture.json",
+  "live_authority_created": false,
+  "optimizer_arbitration_created": false,
+  "order_authority_created": false,
+  "owner_override_applied": false,
+  "owner_override_basis": "NONE",
+  "owner_override_eligible_universe_ids": [],
+  "owner_override_external_fact_fabrication_created": false,
+  "production_gate_path": "docs/master_plan/atomicrows/AtomicRowsTradeContextSelectionUniverseRoutingGate.yaml",
+  "profit_evidence_created": false,
+  "quantum_advantage_claim_created": false,
+  "quantum_backend_execution_created": false,
+  "quantum_forward_metadata": {
+    "future_owner_quantum_priority_policy_required": true,
+    "future_quantum_applicability_registry_required": true,
+    "optimizer_arbitration_created": false,
+    "quantum_advantage_claim_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_forward_metadata_preserved_flag": true,
+    "quantum_priority_mode": "QUANTUM_NEUTRAL",
+    "quantum_route_candidate_flag": true
+  },
+  "random_selection_used": false,
+  "report_version": "v1",
+  "requested_universe_ids": [
+    "FORECASTEX_IBKR_EVENT_RISK_HEDGE",
+    "KALSHI_BINARY_SHORT_HORIZON",
+    "POLYMARKET_EVENT_MARKET_MOMENTUM",
+    "QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION"
+  ],
+  "requesting_agent_role": "VALIDATION_AGENT",
+  "route_candidates": [
+    {
+      "consumer_access_normal_allowed": true,
+      "explicit_field_match": false,
+      "reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_TIME_HORIZON_MISMATCH"
+      ],
+      "route_eligible": false,
+      "route_eligible_by_owner_override": false,
+      "universe_id": "FORECASTEX_IBKR_EVENT_RISK_HEDGE"
+    },
+    {
+      "consumer_access_normal_allowed": true,
+      "explicit_field_match": true,
+      "reason_codes": [
+        "ROUTE_ALLOWED_EXPLICIT_MATCH"
+      ],
+      "route_eligible": true,
+      "route_eligible_by_owner_override": false,
+      "universe_id": "KALSHI_BINARY_SHORT_HORIZON"
+    },
+    {
+      "consumer_access_normal_allowed": true,
+      "explicit_field_match": false,
+      "reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_EDGE_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_RISK_MODE_MISMATCH"
+      ],
+      "route_eligible": false,
+      "route_eligible_by_owner_override": false,
+      "universe_id": "POLYMARKET_EVENT_MARKET_MOMENTUM"
+    },
+    {
+      "consumer_access_normal_allowed": false,
+      "explicit_field_match": false,
+      "reason_codes": [
+        "ROUTE_BLOCKED_PLATFORM_MISMATCH",
+        "ROUTE_BLOCKED_MARKET_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_VENUE_SCOPE_MISMATCH",
+        "ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH",
+        "ROUTE_BLOCKED_EDGE_TYPE_MISMATCH",
+        "ROUTE_BLOCKED_QUANTUM_PRIORITY_MODE_MISMATCH",
+        "ROUTE_BLOCKED_CONSUMER_ACCESS_DENIED"
+      ],
+      "route_eligible": false,
+      "route_eligible_by_owner_override": false,
+      "universe_id": "QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION"
+    }
+  ],
+  "route_is_selection": false,
+  "route_scope": "STATIC_TRADE_CONTEXT_TO_SELECTION_UNIVERSE_ELIGIBILITY_ONLY",
+  "routing_gate_id": "QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE",
+  "routing_report_id": "QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE_REPORT",
+  "routing_request_id": "STATIC_ROUTE_REQUEST_KALSHI_BINARY_SHORT_HORIZON",
+  "runtime_authority_created": false,
+  "schema_path": "schemas/atomicrows/atomicrows_trade_context_selection_universe_routing_gate.schema.json",
+  "score_breakdown_created": false,
+  "selected_stack_id": null,
+  "semantic_task_id": "ROADMAP-TRADE-CONTEXT-ROUTING-GATE",
+  "source_acceptance_created": false,
+  "source_retrieval_created": false,
+  "stack_selection_created": false,
+  "trade_context_id": "TRADE_CONTEXT_KALSHI_BINARY_SHORT_HORIZON_STATIC_ROUTE",
+  "validation_marker": "QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE_OK",
+  "validator": "validate_trade_context_selection_universe_routing_gate.py"
+}
