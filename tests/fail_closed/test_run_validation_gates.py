@@ -18,6 +18,7 @@ from tools import (
 from tools import (
     validate_atomicrows_parameter_stack_compatibility_gate as parameter_stack_compatibility_gate,
 )
+from tools import validate_edge_parameter_stack_selection_packet as edge_packet_gate
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -547,6 +548,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 Path("tools")
                 / "validate_atomicrows_parameter_stack_compatibility_gate.py"
             ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
         ],
         [
             python_executable,
@@ -1387,6 +1392,10 @@ def test_runner_exposes_parameter_stack_compatibility_gate_success_marker():
     )
 
 
+def test_runner_exposes_edge_parameter_stack_selection_packet_success_marker():
+    assert edge_packet_gate.SUCCESS_MARKER == "EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_OK"
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -1476,6 +1485,9 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
     parameter_stack_compatibility_index = command_names.index(
         "validate_atomicrows_parameter_stack_compatibility_gate.py"
     )
+    edge_packet_index = command_names.index(
+        "validate_edge_parameter_stack_selection_packet.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1488,6 +1500,7 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
         < parameter_stack_role_index
         < parameter_stack_completeness_index
         < parameter_stack_compatibility_index
+        < edge_packet_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1529,6 +1542,10 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+    ]
+    assert commands[edge_packet_index] == [
+        python_executable,
+        str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
     ]
 
 
@@ -1596,6 +1613,7 @@ def test_runner_includes_pr75_compatibility_gate_after_pr74_and_before_generated
     pr75_index = command_names.index(
         "validate_atomicrows_parameter_stack_compatibility_gate.py"
     )
+    pr77_index = command_names.index("validate_edge_parameter_stack_selection_packet.py")
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1608,6 +1626,7 @@ def test_runner_includes_pr75_compatibility_gate_after_pr74_and_before_generated
         < pr73_index
         < pr74_index
         < pr75_index
+        < pr77_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -1617,6 +1636,10 @@ def test_runner_includes_pr75_compatibility_gate_after_pr74_and_before_generated
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+    ]
+    assert commands[pr77_index] == [
+        python_executable,
+        str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
     ]
 
 
@@ -1710,6 +1733,129 @@ def test_pr75_static_contract_preserves_no_claim_boundaries():
     assert not (
         Path(".") / parameter_stack_compatibility_gate.CANONICAL_BUNDLE_SHA256
     ).exists()
+
+
+def test_runner_includes_pr77_edge_packet_after_pr75_and_before_generated_derivative(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr70_index = command_names.index(
+        "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+    )
+    pr71_index = command_names.index(
+        "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+    )
+    pr72_index = command_names.index(
+        "validate_atomicrows_research_source_to_candidate_family_gate.py"
+    )
+    pr73_index = command_names.index("validate_atomicrows_parameter_stack_role_taxonomy.py")
+    pr74_index = command_names.index(
+        "validate_atomicrows_parameter_stack_completeness_gate.py"
+    )
+    pr75_index = command_names.index(
+        "validate_atomicrows_parameter_stack_compatibility_gate.py"
+    )
+    pr77_index = command_names.index("validate_edge_parameter_stack_selection_packet.py")
+    generated_gate_index = command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
+
+    assert (
+        pr70_index
+        < pr71_index
+        < pr72_index
+        < pr73_index
+        < pr74_index
+        < pr75_index
+        < pr77_index
+        < generated_gate_index
+    )
+    assert commands[pr77_index] == [
+        python_executable,
+        str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+    ]
+
+
+def test_runner_pr77_edge_packet_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr77_command = commands[
+        command_names.index("validate_edge_parameter_stack_selection_packet.py")
+    ]
+
+    assert pr77_command == [
+        python_executable,
+        str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+    ]
+    pr77_text = " ".join(pr77_command).lower()
+    assert "source-retrieval" not in pr77_text
+    assert "source-acceptance" not in pr77_text
+    assert "connector-binding" not in pr77_text
+    assert "runtime-live" not in pr77_text
+    assert "live-use" not in pr77_text
+    assert "order-authority" not in pr77_text
+    assert "profit-evidence" not in pr77_text
+    assert "replay-execution" not in pr77_text
+    assert "paper-execution" not in pr77_text
+    assert "quantum-backend" not in pr77_text
+    assert "quantum-advantage" not in pr77_text
+    assert "atomicrows.bundle.jsonl" not in pr77_text
+    assert "atomicrows.bundle.sha256" not in pr77_text
+
+
+def test_pr77_static_contract_preserves_no_claim_boundaries():
+    production = edge_packet_gate.load_yaml(edge_packet_gate.DEFAULT_PRODUCTION_PACKET)
+    flags = production["explicit_no_claim_flags"]
+    future = production["future_consumer_contract"]
+    quantum = production["quantum_advisory_policy"]
+    source = production["source_evidence_boundary_policy"]
+    bundle = production["atomicrows_bundle_boundary_policy"]
+    readiness = production["production_readiness"]
+    static_policy = production["static_packet_policy"]
+
+    assert production["selected_stack_id"] == "SYNTHETIC_SELECTED_STACK_ID_SCHEMA_FIELD_ONLY"
+    assert production["candidate_stack_generation_count"] == 0
+    assert production["replay_paper_competition_required_flag"] is True
+    assert production["owner_review_required_flag"] is True
+    assert source["source_retrieval_created"] is False
+    assert source["source_acceptance_created"] is False
+    assert source["accepted_source_packets_created"] is False
+    assert source["source_dependency_state_is_static_metadata_only"] is True
+    assert bundle["atomicrows_bundle_digest_ref_static_placeholder_allowed"] is True
+    assert bundle["atomicrows_bundle_file_created_by_this_pr"] is False
+    assert bundle["atomicrows_bundle_sha_created_by_this_pr"] is False
+    assert bundle["atomicrows_bundle_hash_authority_created_by_this_pr"] is False
+    assert bundle["atomicrows_bundle_rows_created_by_this_pr"] is False
+    assert quantum["selected_quantum_advisory_family_ids_required"] is True
+    assert quantum["quantum_advisory_static_metadata_only"] is True
+    assert quantum["quantum_backend_execution_created"] is False
+    assert quantum["quantum_advantage_claim_created"] is False
+    assert quantum["quantum_scoring_created"] is False
+    assert quantum["quantum_ranking_created"] is False
+    assert quantum["quantum_selection_created"] is False
+    assert quantum["quantum_arbitration_created"] is False
+    assert readiness["edge_parameter_stack_selection_packet_schema_ready"] is True
+    assert readiness["production_edge_packet_evaluated"] is False
+    assert readiness["production_edge_packet_ready"] is False
+    assert readiness["production_stack_selected"] is False
+    assert readiness["final_ready"] is False
+    assert static_policy["selected_stack_id_is_static_schema_field_only"] is True
+    assert all(flags[field] is False for field in edge_packet_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS)
+    assert all(future[field] is False for field in edge_packet_gate.FUTURE_CONSUMER_FALSE_FIELDS)
+    assert not (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / edge_packet_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / edge_packet_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
@@ -1936,6 +2082,9 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     parameter_stack_compatibility_index = command_names.index(
         "validate_atomicrows_parameter_stack_compatibility_gate.py"
     )
+    edge_packet_index = command_names.index(
+        "validate_edge_parameter_stack_selection_packet.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -1959,6 +2108,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         < parameter_stack_role_index
         < parameter_stack_completeness_index
         < parameter_stack_compatibility_index
+        < edge_packet_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2140,6 +2290,10 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+    ]
+    assert commands[edge_packet_index] == [
+        python_executable,
+        str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
     ]
 
     audit_command = commands[generated_gate_index]
@@ -3075,6 +3229,49 @@ def test_runner_does_not_emit_success_marker_if_parameter_stack_compatibility_ga
 
     assert exit_code == 19
     assert seen == commands[:6]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_edge_packet_validator_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        [
+            "python",
+            "validate_atomicrows_research_provenance_evidence_tier_classification.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_owner_submitted_research_source_intake_registry.py",
+        ],
+        [
+            "python",
+            "validate_atomicrows_research_source_to_candidate_family_gate.py",
+        ],
+        ["python", "validate_atomicrows_parameter_stack_role_taxonomy.py"],
+        ["python", "validate_atomicrows_parameter_stack_completeness_gate.py"],
+        ["python", "validate_atomicrows_parameter_stack_compatibility_gate.py"],
+        ["python", "validate_edge_parameter_stack_selection_packet.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 0, 0, 23, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 23
+    assert seen == commands[:7]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 

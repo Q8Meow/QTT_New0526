@@ -1,0 +1,639 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-edge-parameter-stack-selection-packet",
+  "title": "EDGE Parameter Stack Selection Packet",
+  "description": "Static deterministic EDGE parameter-stack selection packet schema. This contract defines packet shape only; it does not perform stack selection, scoring, ranking, routing, candidate generation, replay or paper execution, runtime use, live use, order authority, source retrieval, source acceptance, connector semantic binding, AtomicRows bundle or hash creation, profit evidence, quantum backend execution, or quantum advantage claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_id",
+    "packet_version",
+    "semantic_task_id",
+    "authority_class",
+    "depends_on_parameter_stack_role_taxonomy",
+    "depends_on_parameter_stack_completeness_gate",
+    "depends_on_parameter_stack_compatibility_gate",
+    "required_stack_role_family_fields",
+    "minimum_required_packet_fields",
+    "static_packet_policy",
+    "edge_id",
+    "edge_hypothesis_packet_id",
+    "atomicrows_bundle_digest_ref",
+    "selected_stack_id",
+    "venue_scope",
+    "edge_type",
+    "strategy_class",
+    "market_type",
+    "latency_sensitivity_class",
+    "capital_intensity_class",
+    "source_dependency_state",
+    "selected_signal_family_ids",
+    "selected_scoring_family_ids",
+    "selected_normalization_family_ids",
+    "selected_risk_family_ids",
+    "selected_execution_family_ids",
+    "selected_capital_family_ids",
+    "selected_latency_family_ids",
+    "selected_error_guard_family_ids",
+    "selected_quantum_advisory_family_ids",
+    "blocked_row_ids_and_reasons",
+    "role_completion_state",
+    "compatibility_state",
+    "candidate_stack_generation_count",
+    "replay_paper_competition_required_flag",
+    "owner_review_required_flag",
+    "owner_override_policy",
+    "quantum_advisory_policy",
+    "source_evidence_boundary_policy",
+    "atomicrows_bundle_boundary_policy",
+    "future_consumer_contract",
+    "explicit_no_claim_flags",
+    "validation_invariants",
+    "production_readiness",
+    "final_ready"
+  ],
+  "properties": {
+    "fixture_id": { "type": "string" },
+    "fixture_version": { "type": "string" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "fixture_cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fixture_case" }
+    },
+    "packet_id": { "const": "EDGE_PARAMETER_STACK_SELECTION_PACKET" },
+    "packet_version": { "const": "v1" },
+    "semantic_task_id": { "const": "ROADMAP-EDGE-PACKET-SCHEMA" },
+    "authority_class": {
+      "const": "STATIC_EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_ONLY_NOT_STACK_SELECTION_NOT_SCORING_NOT_ROUTING_NOT_RUNTIME_AUTHORITY"
+    },
+    "depends_on_parameter_stack_role_taxonomy": {
+      "$ref": "#/$defs/depends_on_parameter_stack_role_taxonomy"
+    },
+    "depends_on_parameter_stack_completeness_gate": {
+      "$ref": "#/$defs/depends_on_parameter_stack_completeness_gate"
+    },
+    "depends_on_parameter_stack_compatibility_gate": {
+      "$ref": "#/$defs/depends_on_parameter_stack_compatibility_gate"
+    },
+    "required_stack_role_family_fields": {
+      "const": {
+        "SIGNAL": "selected_signal_family_ids",
+        "SCORING": "selected_scoring_family_ids",
+        "NORMALIZATION": "selected_normalization_family_ids",
+        "RISK": "selected_risk_family_ids",
+        "EXECUTION": "selected_execution_family_ids",
+        "CAPITAL": "selected_capital_family_ids",
+        "LATENCY": "selected_latency_family_ids",
+        "ERROR_GUARD": "selected_error_guard_family_ids",
+        "QUANTUM_ADVISORY": "selected_quantum_advisory_family_ids"
+      }
+    },
+    "minimum_required_packet_fields": {
+      "const": [
+        "edge_id",
+        "edge_hypothesis_packet_id",
+        "atomicrows_bundle_digest_ref",
+        "selected_stack_id",
+        "venue_scope",
+        "edge_type",
+        "strategy_class",
+        "market_type",
+        "latency_sensitivity_class",
+        "capital_intensity_class",
+        "source_dependency_state",
+        "selected_signal_family_ids",
+        "selected_scoring_family_ids",
+        "selected_normalization_family_ids",
+        "selected_risk_family_ids",
+        "selected_execution_family_ids",
+        "selected_capital_family_ids",
+        "selected_latency_family_ids",
+        "selected_error_guard_family_ids",
+        "selected_quantum_advisory_family_ids",
+        "blocked_row_ids_and_reasons",
+        "role_completion_state",
+        "compatibility_state",
+        "candidate_stack_generation_count",
+        "replay_paper_competition_required_flag",
+        "owner_review_required_flag"
+      ]
+    },
+    "static_packet_policy": { "$ref": "#/$defs/static_packet_policy" },
+    "edge_id": { "type": "string" },
+    "edge_hypothesis_packet_id": { "type": "string" },
+    "atomicrows_bundle_digest_ref": {
+      "enum": [
+        "ATOMICROWS_BUNDLE_DIGEST_DEFERRED_UNTIL_APPROVED_BUNDLE_PR",
+        "ATOMICROWS_BUNDLE_DIGEST_NOT_CREATED_STATIC_SCHEMA_ONLY"
+      ]
+    },
+    "selected_stack_id": { "type": "string" },
+    "venue_scope": { "type": "string" },
+    "edge_type": { "type": "string" },
+    "strategy_class": { "type": "string" },
+    "market_type": { "type": "string" },
+    "latency_sensitivity_class": { "type": "string" },
+    "capital_intensity_class": { "type": "string" },
+    "source_dependency_state": {
+      "enum": [
+        "SOURCE_DEPENDENCY_STATIC_DECLARED_NOT_ACCEPTED",
+        "SOURCE_DEPENDENCY_ACCEPTED_PACKET_REQUIRED_BEFORE_CONNECTOR_OR_LIVE_USE",
+        "SOURCE_DEPENDENCY_OWNER_POLICY_SCOPE_ONLY_NOT_EXTERNAL_FACT",
+        "SOURCE_DEPENDENCY_BLOCKED_PENDING_ACCEPTED_SOURCE_PACKET",
+        "SYNTHETIC_FIXTURE_ONLY_NOT_SOURCE_AUTHORITY"
+      ]
+    },
+    "selected_signal_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_scoring_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_normalization_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_risk_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_execution_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_capital_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_latency_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_error_guard_family_ids": { "$ref": "#/$defs/family_ids" },
+    "selected_quantum_advisory_family_ids": { "$ref": "#/$defs/family_ids" },
+    "blocked_row_ids_and_reasons": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blocked_row" }
+    },
+    "role_completion_state": {
+      "enum": [
+        "ROLE_COMPLETE",
+        "ROLE_INCOMPLETE_MISSING_REQUIRED_ROLE",
+        "ROLE_INCOMPLETE_DUPLICATE_ROLE",
+        "ROLE_INCOMPLETE_SINGLE_PARAMETER_ONLY",
+        "ROLE_INCOMPLETE_SINGLE_ALGORITHM_ONLY",
+        "OWNER_OVERRIDE_SATISFIED_INTERNAL_STACK_READINESS_ONLY",
+        "SYNTHETIC_FIXTURE_ONLY_NOT_PRODUCTION_READY"
+      ]
+    },
+    "compatibility_state": {
+      "enum": [
+        "COMPATIBILITY_COMPLETE",
+        "COMPATIBILITY_BLOCKED_UPSTREAM_ROLE_INCOMPLETE",
+        "COMPATIBILITY_INCOMPLETE_MISSING_INTERFACE",
+        "COMPATIBILITY_INCOMPLETE_INTERFACE_MISMATCH",
+        "COMPATIBILITY_INCOMPLETE_DUPLICATE_INTERFACE",
+        "COMPATIBILITY_INCOMPATIBLE_AUTHORITY_TRANSITION",
+        "COMPATIBILITY_INCOMPATIBLE_SOURCE_FACT_BOUNDARY",
+        "COMPATIBILITY_INCOMPATIBLE_CONNECTOR_SEMANTIC_BOUNDARY",
+        "COMPATIBILITY_INCOMPATIBLE_RUNTIME_LIVE_ORDER_BOUNDARY",
+        "COMPATIBILITY_INCOMPATIBLE_QUANTUM_BOUNDARY",
+        "OWNER_OVERRIDE_SATISFIED_INTERNAL_COMPATIBILITY_ONLY",
+        "SYNTHETIC_FIXTURE_ONLY_NOT_PRODUCTION_READY"
+      ]
+    },
+    "candidate_stack_generation_count": { "const": 0 },
+    "replay_paper_competition_required_flag": { "const": true },
+    "owner_review_required_flag": { "const": true },
+    "owner_override_policy": { "$ref": "#/$defs/owner_override_policy" },
+    "quantum_advisory_policy": { "$ref": "#/$defs/quantum_advisory_policy" },
+    "source_evidence_boundary_policy": { "$ref": "#/$defs/source_evidence_boundary_policy" },
+    "atomicrows_bundle_boundary_policy": { "$ref": "#/$defs/atomicrows_bundle_boundary_policy" },
+    "future_consumer_contract": { "$ref": "#/$defs/future_consumer_contract" },
+    "explicit_no_claim_flags": { "$ref": "#/$defs/explicit_no_claim_flags" },
+    "validation_invariants": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "production_readiness": { "$ref": "#/$defs/production_readiness" },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "family_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "blocked_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_id",
+        "reason"
+      ],
+      "properties": {
+        "row_id": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "depends_on_parameter_stack_role_taxonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_path",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "schema_path": {
+          "const": "schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json"
+        },
+        "registry_path": {
+          "const": "docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml"
+        },
+        "report_path": {
+          "const": "docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json"
+        },
+        "validator_path": {
+          "const": "tools/validate_atomicrows_parameter_stack_role_taxonomy.py"
+        },
+        "validation_marker": {
+          "const": "ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_OK"
+        }
+      }
+    },
+    "depends_on_parameter_stack_completeness_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_path",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "schema_path": {
+          "const": "schemas/atomicrows/atomicrows_parameter_stack_completeness_gate.schema.json"
+        },
+        "registry_path": {
+          "const": "docs/master_plan/atomicrows/AtomicRowsParameterStackCompletenessGate.yaml"
+        },
+        "report_path": {
+          "const": "docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json"
+        },
+        "validator_path": {
+          "const": "tools/validate_atomicrows_parameter_stack_completeness_gate.py"
+        },
+        "validation_marker": {
+          "const": "ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK"
+        }
+      }
+    },
+    "depends_on_parameter_stack_compatibility_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_path",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "schema_path": {
+          "const": "schemas/atomicrows/atomicrows_parameter_stack_compatibility_gate.schema.json"
+        },
+        "registry_path": {
+          "const": "docs/master_plan/atomicrows/AtomicRowsParameterStackCompatibilityGate.yaml"
+        },
+        "report_path": {
+          "const": "docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json"
+        },
+        "validator_path": {
+          "const": "tools/validate_atomicrows_parameter_stack_compatibility_gate.py"
+        },
+        "validation_marker": {
+          "const": "ATOMICROWS_PARAMETER_STACK_COMPATIBILITY_GATE_OK"
+        }
+      }
+    },
+    "owner_override_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_override_supported",
+        "owner_override_satisfies_internal_edge_packet_readiness_only",
+        "owner_override_fabricates_external_fact",
+        "owner_override_fabricates_accepted_source_packet",
+        "owner_override_fabricates_connector_semantic",
+        "owner_override_fabricates_runtime_cash_receipt",
+        "owner_override_fabricates_order_receipt",
+        "owner_override_fabricates_replay_paper_result",
+        "owner_override_fabricates_quantum_backend_execution",
+        "owner_override_fabricates_profit_evidence"
+      ],
+      "properties": {
+        "owner_override_supported": { "const": true },
+        "owner_override_satisfies_internal_edge_packet_readiness_only": { "const": true },
+        "owner_override_fabricates_external_fact": { "const": false },
+        "owner_override_fabricates_accepted_source_packet": { "const": false },
+        "owner_override_fabricates_connector_semantic": { "const": false },
+        "owner_override_fabricates_runtime_cash_receipt": { "const": false },
+        "owner_override_fabricates_order_receipt": { "const": false },
+        "owner_override_fabricates_replay_paper_result": { "const": false },
+        "owner_override_fabricates_quantum_backend_execution": { "const": false },
+        "owner_override_fabricates_profit_evidence": { "const": false }
+      }
+    },
+    "quantum_advisory_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_quantum_advisory_family_ids_required",
+        "quantum_advisory_static_metadata_only",
+        "future_quantum_applicability_registry_required_before_quantum_selection",
+        "future_owner_quantum_priority_policy_required_before_quantum_priority_selection",
+        "future_optimizer_arbitration_gate_required_before_optimizer_choice",
+        "strongest_classical_comparator_required_before_quantum_advantage_claim",
+        "fallback_bundle_required_before_quantum_runtime_use",
+        "replay_paper_evidence_required_before_advantage_claim",
+        "live_evidence_required_before_profit_claim",
+        "quantum_backend_execution_created",
+        "quantum_advantage_claim_created",
+        "quantum_scoring_created",
+        "quantum_ranking_created",
+        "quantum_selection_created",
+        "quantum_arbitration_created"
+      ],
+      "properties": {
+        "selected_quantum_advisory_family_ids_required": { "const": true },
+        "quantum_advisory_static_metadata_only": { "const": true },
+        "future_quantum_applicability_registry_required_before_quantum_selection": { "const": true },
+        "future_owner_quantum_priority_policy_required_before_quantum_priority_selection": { "const": true },
+        "future_optimizer_arbitration_gate_required_before_optimizer_choice": { "const": true },
+        "strongest_classical_comparator_required_before_quantum_advantage_claim": { "const": true },
+        "fallback_bundle_required_before_quantum_runtime_use": { "const": true },
+        "replay_paper_evidence_required_before_advantage_claim": { "const": true },
+        "live_evidence_required_before_profit_claim": { "const": true },
+        "quantum_backend_execution_created": { "const": false },
+        "quantum_advantage_claim_created": { "const": false },
+        "quantum_scoring_created": { "const": false },
+        "quantum_ranking_created": { "const": false },
+        "quantum_selection_created": { "const": false },
+        "quantum_arbitration_created": { "const": false }
+      }
+    },
+    "source_evidence_boundary_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "accepted_source_packets_created",
+        "owner_policy_may_authorize_retrieval_scope",
+        "owner_policy_may_authorize_external_fact_value",
+        "external_fact_requires_accepted_source_packet",
+        "connector_semantic_requires_accepted_source_packet",
+        "source_dependency_state_is_static_metadata_only"
+      ],
+      "properties": {
+        "source_retrieval_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "accepted_source_packets_created": { "const": false },
+        "owner_policy_may_authorize_retrieval_scope": { "const": true },
+        "owner_policy_may_authorize_external_fact_value": { "const": false },
+        "external_fact_requires_accepted_source_packet": { "const": true },
+        "connector_semantic_requires_accepted_source_packet": { "const": true },
+        "source_dependency_state_is_static_metadata_only": { "const": true }
+      }
+    },
+    "atomicrows_bundle_boundary_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atomicrows_bundle_jsonl_required_for_live_use",
+        "atomicrows_bundle_sha_required_for_freeze_authority",
+        "atomicrows_bundle_digest_ref_static_placeholder_allowed",
+        "atomicrows_bundle_file_created_by_this_pr",
+        "atomicrows_bundle_sha_created_by_this_pr",
+        "atomicrows_bundle_hash_authority_created_by_this_pr",
+        "atomicrows_bundle_rows_created_by_this_pr"
+      ],
+      "properties": {
+        "atomicrows_bundle_jsonl_required_for_live_use": { "const": true },
+        "atomicrows_bundle_sha_required_for_freeze_authority": { "const": true },
+        "atomicrows_bundle_digest_ref_static_placeholder_allowed": { "const": true },
+        "atomicrows_bundle_file_created_by_this_pr": { "const": false },
+        "atomicrows_bundle_sha_created_by_this_pr": { "const": false },
+        "atomicrows_bundle_hash_authority_created_by_this_pr": { "const": false },
+        "atomicrows_bundle_rows_created_by_this_pr": { "const": false }
+      }
+    },
+    "static_packet_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_stack_id_is_static_schema_field_only",
+        "selected_stack_authority_created",
+        "stack_selection_created",
+        "scoring_created",
+        "ranking_created",
+        "optimizer_arbitration_created",
+        "trade_context_routing_created",
+        "candidate_stack_generation_created",
+        "replay_paper_execution_created",
+        "runtime_live_order_authority_created",
+        "final_ready_created_by_this_pr"
+      ],
+      "properties": {
+        "selected_stack_id_is_static_schema_field_only": { "const": true },
+        "selected_stack_authority_created": { "const": false },
+        "stack_selection_created": { "const": false },
+        "scoring_created": { "const": false },
+        "ranking_created": { "const": false },
+        "optimizer_arbitration_created": { "const": false },
+        "trade_context_routing_created": { "const": false },
+        "candidate_stack_generation_created": { "const": false },
+        "replay_paper_execution_created": { "const": false },
+        "runtime_live_order_authority_created": { "const": false },
+        "final_ready_created_by_this_pr": { "const": false }
+      }
+    },
+    "future_consumer_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qtt_trade_context_packet_schema_may_consume",
+        "atomicrows_parameter_selection_universe_registry_may_consume",
+        "parameter_selection_universe_consumer_gate_may_consume",
+        "trade_context_to_selection_universe_routing_gate_may_consume",
+        "quantum_applicability_classification_registry_may_consume",
+        "owner_quantum_priority_policy_registry_may_consume",
+        "scoring_policy_registry_may_consume",
+        "parameter_stack_scoring_ranking_gate_may_consume",
+        "quantum_classical_optimizer_arbitration_gate_may_consume",
+        "candidate_parameter_stack_generation_gate_may_consume",
+        "trade_context_parameter_stack_selection_gate_may_consume",
+        "selected_parameter_stack_handoff_packet_may_consume",
+        "replay_paper_candidate_stack_competition_gate_may_consume",
+        "this_pr_performs_trade_context_schema",
+        "this_pr_performs_selection_universe_registry",
+        "this_pr_performs_routing",
+        "this_pr_performs_scoring",
+        "this_pr_performs_ranking",
+        "this_pr_performs_selection",
+        "this_pr_performs_arbitration",
+        "this_pr_generates_candidate_stacks",
+        "this_pr_executes_replay_or_paper",
+        "this_pr_executes_runtime_or_live"
+      ],
+      "properties": {
+        "qtt_trade_context_packet_schema_may_consume": { "const": true },
+        "atomicrows_parameter_selection_universe_registry_may_consume": { "const": true },
+        "parameter_selection_universe_consumer_gate_may_consume": { "const": true },
+        "trade_context_to_selection_universe_routing_gate_may_consume": { "const": true },
+        "quantum_applicability_classification_registry_may_consume": { "const": true },
+        "owner_quantum_priority_policy_registry_may_consume": { "const": true },
+        "scoring_policy_registry_may_consume": { "const": true },
+        "parameter_stack_scoring_ranking_gate_may_consume": { "const": true },
+        "quantum_classical_optimizer_arbitration_gate_may_consume": { "const": true },
+        "candidate_parameter_stack_generation_gate_may_consume": { "const": true },
+        "trade_context_parameter_stack_selection_gate_may_consume": { "const": true },
+        "selected_parameter_stack_handoff_packet_may_consume": { "const": true },
+        "replay_paper_candidate_stack_competition_gate_may_consume": { "const": true },
+        "this_pr_performs_trade_context_schema": { "const": false },
+        "this_pr_performs_selection_universe_registry": { "const": false },
+        "this_pr_performs_routing": { "const": false },
+        "this_pr_performs_scoring": { "const": false },
+        "this_pr_performs_ranking": { "const": false },
+        "this_pr_performs_selection": { "const": false },
+        "this_pr_performs_arbitration": { "const": false },
+        "this_pr_generates_candidate_stacks": { "const": false },
+        "this_pr_executes_replay_or_paper": { "const": false },
+        "this_pr_executes_runtime_or_live": { "const": false }
+      }
+    },
+    "explicit_no_claim_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_stack_authority_created",
+        "stack_selection_created",
+        "scoring_created",
+        "ranking_created",
+        "optimizer_arbitration_created",
+        "trade_context_routing_created",
+        "trade_context_packet_created",
+        "selection_universe_registry_created",
+        "selection_universe_consumer_gate_created",
+        "candidate_stack_generation_created",
+        "selected_stack_handoff_created",
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "accepted_source_packets_created",
+        "connector_semantics_created",
+        "connector_semantic_binding_created",
+        "runtime_artifacts_created",
+        "runtime_resolver_execution_created",
+        "live_readiness_created",
+        "runtime_live_use_created",
+        "private_state_fetch_created",
+        "order_authority_created",
+        "cash_receipts_created",
+        "order_receipts_created",
+        "fill_receipts_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "replay_results_created",
+        "paper_results_created",
+        "profit_evidence_created",
+        "quantum_backend_evidence_created",
+        "quantum_advantage_claim_created",
+        "latency_superiority_claim_created",
+        "execution_superiority_claim_created",
+        "atomicrows_bundle_rows_created",
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created",
+        "atomicrows_bundle_hash_authority_created",
+        "runtime_cash_value_created",
+        "connector_semantic_value_created",
+        "external_fact_value_created",
+        "owner_approval_receipt_created",
+        "owner_review_dashboard_runtime_created"
+      ],
+      "properties": {
+        "selected_stack_authority_created": { "const": false },
+        "stack_selection_created": { "const": false },
+        "scoring_created": { "const": false },
+        "ranking_created": { "const": false },
+        "optimizer_arbitration_created": { "const": false },
+        "trade_context_routing_created": { "const": false },
+        "trade_context_packet_created": { "const": false },
+        "selection_universe_registry_created": { "const": false },
+        "selection_universe_consumer_gate_created": { "const": false },
+        "candidate_stack_generation_created": { "const": false },
+        "selected_stack_handoff_created": { "const": false },
+        "source_retrieval_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "accepted_source_packets_created": { "const": false },
+        "connector_semantics_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "runtime_artifacts_created": { "const": false },
+        "runtime_resolver_execution_created": { "const": false },
+        "live_readiness_created": { "const": false },
+        "runtime_live_use_created": { "const": false },
+        "private_state_fetch_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "cash_receipts_created": { "const": false },
+        "order_receipts_created": { "const": false },
+        "fill_receipts_created": { "const": false },
+        "replay_execution_created": { "const": false },
+        "paper_execution_created": { "const": false },
+        "replay_results_created": { "const": false },
+        "paper_results_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "quantum_backend_evidence_created": { "const": false },
+        "quantum_advantage_claim_created": { "const": false },
+        "latency_superiority_claim_created": { "const": false },
+        "execution_superiority_claim_created": { "const": false },
+        "atomicrows_bundle_rows_created": { "const": false },
+        "atomicrows_bundle_jsonl_created": { "const": false },
+        "atomicrows_bundle_sha256_created": { "const": false },
+        "atomicrows_bundle_hash_authority_created": { "const": false },
+        "runtime_cash_value_created": { "const": false },
+        "connector_semantic_value_created": { "const": false },
+        "external_fact_value_created": { "const": false },
+        "owner_approval_receipt_created": { "const": false },
+        "owner_review_dashboard_runtime_created": { "const": false }
+      }
+    },
+    "production_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_parameter_stack_selection_packet_schema_ready",
+        "production_edge_packet_evaluated",
+        "production_edge_packet_ready",
+        "production_stack_selected",
+        "final_ready"
+      ],
+      "properties": {
+        "edge_parameter_stack_selection_packet_schema_ready": { "const": true },
+        "production_edge_packet_evaluated": { "const": false },
+        "production_edge_packet_ready": { "const": false },
+        "production_stack_selected": { "const": false },
+        "final_ready": { "const": false }
+      }
+    },
+    "fixture_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "synthetic_case_only",
+        "expected_schema_valid",
+        "expected_normal_packet_ready",
+        "expected_block_reason",
+        "missing_fields",
+        "packet_overrides"
+      ],
+      "properties": {
+        "case_id": { "type": "string" },
+        "synthetic_case_only": { "const": true },
+        "expected_schema_valid": { "type": "boolean" },
+        "expected_normal_packet_ready": { "const": false },
+        "expected_block_reason": { "type": "string" },
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "packet_overrides": { "type": "object" }
+      }
+    }
+  }
+}
