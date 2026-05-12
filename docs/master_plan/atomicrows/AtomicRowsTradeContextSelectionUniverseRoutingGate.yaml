@@ -1,0 +1,357 @@
+routing_gate_id: QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE
+routing_gate_version: v1
+authority_class: STATIC_TRADE_CONTEXT_TO_SELECTION_UNIVERSE_ROUTING_GATE_ONLY_NOT_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY
+semantic_task_id: ROADMAP-TRADE-CONTEXT-ROUTING-GATE
+depends_on_selection_universe_consumer_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_selection_universe_consumer_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterSelectionUniverseConsumerGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_selection_universe_consumer_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_SELECTION_UNIVERSE_CONSUMER_GATE_OK
+depends_on_selection_universe_registry:
+  schema_path: schemas/atomicrows/atomicrows_parameter_selection_universe_registry.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterSelectionUniverseRegistry.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json
+  validator_path: tools/validate_atomicrows_parameter_selection_universe_registry.py
+  validation_marker: ATOMICROWS_PARAMETER_SELECTION_UNIVERSE_REGISTRY_OK
+depends_on_qtt_trade_context_packet:
+  schema_path: schemas/edge/qtt_trade_context_packet.schema.json
+  registry_path: docs/master_plan/edge/QTTTradeContextPacket.yaml
+  report_path: docs/master_plan/generated/QTTTradeContextPacket.report.json
+  validator_path: tools/validate_qtt_trade_context_packet.py
+  validation_marker: QTT_TRADE_CONTEXT_PACKET_SCHEMA_OK
+depends_on_edge_parameter_stack_selection_packet:
+  schema_path: schemas/edge/edge_parameter_stack_selection_packet.schema.json
+  registry_path: docs/master_plan/edge/EDGEParameterStackSelectionPacket.yaml
+  report_path: docs/master_plan/generated/EDGEParameterStackSelectionPacket.report.json
+  validator_path: tools/validate_edge_parameter_stack_selection_packet.py
+  validation_marker: EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_OK
+depends_on_parameter_stack_role_taxonomy:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_role_taxonomy.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_OK
+depends_on_parameter_stack_completeness_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_completeness_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompletenessGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_completeness_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK
+depends_on_parameter_stack_compatibility_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_compatibility_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompatibilityGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPATIBILITY_GATE_OK
+required_selection_universe_ids:
+  - KALSHI_BINARY_SHORT_HORIZON
+  - POLYMARKET_EVENT_MARKET_MOMENTUM
+  - FORECASTEX_IBKR_EVENT_RISK_HEDGE
+  - QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION
+required_trade_context_fields:
+  - trade_context_id
+  - platform
+  - market_type
+  - venue_scope
+  - strategy_class
+  - edge_type
+  - order_intent_type
+  - latency_sensitivity_class
+  - capital_intensity_class
+  - risk_mode
+  - liquidity_context
+  - time_horizon
+  - owner_override_basis
+  - quantum_priority_mode
+routing_match_dimensions:
+  - platform
+  - market_type
+  - venue_scope
+  - strategy_class
+  - edge_type
+  - latency_sensitivity_class
+  - capital_intensity_class
+  - risk_mode
+  - liquidity_context
+  - time_horizon
+  - quantum_priority_mode
+  - owner_override_basis
+  - consumer_class
+  - requesting_agent_role
+routing_request_contract:
+  routing_request_id: STATIC_ROUTE_REQUEST_KALSHI_BINARY_SHORT_HORIZON
+  trade_context:
+    trade_context_id: TRADE_CONTEXT_KALSHI_BINARY_SHORT_HORIZON_STATIC_ROUTE
+    platform: KALSHI
+    market_type: BINARY_OUTCOME
+    venue_scope: SINGLE_PLATFORM
+    strategy_class: MARKET_MAKING_CANDIDATE_STATIC_ONLY
+    edge_type: OWNER_SUBMITTED_EDGE_STATIC_ONLY
+    order_intent_type: NO_ORDER_INTENT_SCHEMA_ONLY
+    latency_sensitivity_class: LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+    capital_intensity_class: CAPITAL_LOW_STATIC_CONTEXT_ONLY
+    risk_mode: RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+    liquidity_context: LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+    time_horizon: INTRADAY_STATIC_CONTEXT_ONLY
+    owner_override_basis:
+      owner_override_present: false
+      owner_override_token: NONE
+      owner_override_scope: NONE
+      owner_override_satisfaction_basis: NONE
+      owner_override_internal_workflow_only: true
+      owner_override_fabricates_external_fact: false
+      owner_override_fabricates_accepted_source_packet: false
+      owner_override_fabricates_connector_semantic: false
+      owner_override_fabricates_runtime_cash_receipt: false
+      owner_override_fabricates_order_receipt: false
+      owner_override_fabricates_replay_paper_result: false
+      owner_override_fabricates_quantum_backend_execution: false
+      owner_override_fabricates_profit_evidence: false
+    quantum_priority_mode: QUANTUM_NEUTRAL
+  requesting_agent_role: VALIDATION_AGENT
+  requesting_agent_id: QTT_AGENT_ROLE_023_VALIDATION_AGENT
+  consumer_class: TRADE_CONTEXT_ROUTING_GATE_CONSUMER_FUTURE_PR81
+  trade_context_reference_mode: FUTURE_PR81_ROUTING_INPUT_REFERENCE_ONLY
+  requested_universe_ids:
+    - FORECASTEX_IBKR_EVENT_RISK_HEDGE
+    - KALSHI_BINARY_SHORT_HORIZON
+    - POLYMARKET_EVENT_MARKET_MOMENTUM
+    - QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION
+  owner_override_forced_universe_ids: []
+  universe_binding_required: true
+  universe_binding_present: true
+route_output_contract:
+  routing_report_id: QTT_TRADE_CONTEXT_SELECTION_UNIVERSE_ROUTING_GATE_REPORT
+  semantic_task_id: ROADMAP-TRADE-CONTEXT-ROUTING-GATE
+  route_scope: STATIC_TRADE_CONTEXT_TO_SELECTION_UNIVERSE_ELIGIBILITY_ONLY
+  route_is_selection: false
+  stack_selection_created: false
+  selected_stack_id:
+  score_breakdown_created: false
+  optimizer_arbitration_created: false
+  runtime_authority_created: false
+  live_authority_created: false
+  order_authority_created: false
+  source_retrieval_created: false
+  source_acceptance_created: false
+  connector_semantic_binding_created: false
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  profit_evidence_created: false
+  random_selection_used: false
+  owner_override_external_fact_fabrication_created: false
+  allowed_reason_codes:
+    - ROUTE_ALLOWED_EXPLICIT_MATCH
+    - ROUTE_ALLOWED_OWNER_OVERRIDE_INTERNAL_ONLY
+    - ROUTE_BLOCKED_PLATFORM_MISMATCH
+    - ROUTE_BLOCKED_MARKET_TYPE_MISMATCH
+    - ROUTE_BLOCKED_VENUE_SCOPE_MISMATCH
+    - ROUTE_BLOCKED_STRATEGY_CLASS_MISMATCH
+    - ROUTE_BLOCKED_EDGE_TYPE_MISMATCH
+    - ROUTE_BLOCKED_LATENCY_CLASS_MISMATCH
+    - ROUTE_BLOCKED_CAPITAL_INTENSITY_MISMATCH
+    - ROUTE_BLOCKED_RISK_MODE_MISMATCH
+    - ROUTE_BLOCKED_LIQUIDITY_CONTEXT_MISMATCH
+    - ROUTE_BLOCKED_TIME_HORIZON_MISMATCH
+    - ROUTE_BLOCKED_QUANTUM_PRIORITY_MODE_MISMATCH
+    - ROUTE_BLOCKED_OWNER_OVERRIDE_BASIS_MISMATCH
+    - ROUTE_BLOCKED_CONSUMER_ACCESS_MISSING
+    - ROUTE_BLOCKED_CONSUMER_ACCESS_DENIED
+    - ROUTE_BLOCKED_UNKNOWN_TRADE_CONTEXT_FIELD
+    - ROUTE_BLOCKED_UNKNOWN_TRADE_CONTEXT_VALUE
+    - ROUTE_BLOCKED_MISSING_REQUIRED_TRADE_CONTEXT_FIELD
+    - ROUTE_BLOCKED_EMPTY_REQUIRED_TRADE_CONTEXT_FIELD
+    - ROUTE_BLOCKED_UNKNOWN_UNIVERSE
+    - ROUTE_BLOCKED_OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT
+    - ROUTE_BLOCKED_OWNER_OVERRIDE_MISSING_UNIVERSE
+    - ROUTE_BLOCKED_OWNER_OVERRIDE_CONSUMER_RELATIONSHIP_MISSING
+    - ROUTE_BLOCKED_RANDOM_ROUTING_FORBIDDEN
+    - ROUTE_BLOCKED_SELECTION_FORBIDDEN
+    - ROUTE_BLOCKED_SCORE_BREAKDOWN_FORBIDDEN
+    - ROUTE_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN
+    - ROUTE_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN
+    - ROUTE_BLOCKED_SOURCE_RETRIEVAL_OR_ACCEPTANCE_FORBIDDEN
+    - ROUTE_BLOCKED_CONNECTOR_SEMANTIC_BINDING_FORBIDDEN
+    - ROUTE_BLOCKED_QUANTUM_BACKEND_EXECUTION_FORBIDDEN
+    - ROUTE_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN
+    - ROUTE_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN
+routing_static_policy:
+  routing_gate_is_static_only: true
+  trade_context_to_selection_universe_static_routing_gate_created: true
+  routing_report_created: true
+  deterministic_universe_sort_required: true
+  consumer_gate_access_required: true
+  random_routing_allowed: false
+  stack_selection_created: false
+  selected_stack_authority_created: false
+  scoring_created: false
+  ranking_created: false
+  score_breakdown_created: false
+  optimizer_arbitration_created: false
+  candidate_stack_generation_created: false
+  replay_paper_execution_created: false
+  runtime_live_order_authority_created: false
+  route_result_authority_created: false
+  final_ready_created_by_this_pr: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfies_internal_routing_eligibility_only: true
+  owner_override_may_force_static_route_eligibility_internal_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_fill: false
+  owner_override_fabricates_replay_result: false
+  owner_override_fabricates_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_alpha_evidence: false
+  owner_override_fabricates_latency_superiority_evidence: false
+  owner_override_fabricates_execution_superiority_evidence: false
+  owner_override_fabricates_quantum_advantage_evidence: false
+  owner_override_fabricates_profit_evidence: false
+source_evidence_boundary_policy:
+  routing_source_dependency_values_are_static_labels_only: true
+  external_fact_requires_accepted_source_packet: true
+  market_data_fact_requires_accepted_source_packet: true
+  liquidity_fact_requires_accepted_source_packet: true
+  connector_semantic_requires_accepted_source_packet: true
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  source_fact_acceptance_created: false
+  owner_policy_may_authorize_external_fact_value: false
+connector_semantic_boundary_policy:
+  routing_gate_does_not_unlock_connector_semantics: true
+  connector_unlock_requires_accepted_target_field_packet: true
+  connector_unlock_requires_fresh_revalidation_state: true
+  connector_unlock_requires_target_field_scope_match: true
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  connector_semantic_value_created: false
+runtime_live_order_boundary_policy:
+  routing_gate_is_not_runtime_signal: true
+  routing_gate_is_not_live_order_instruction: true
+  runtime_artifacts_created: false
+  runtime_resolver_execution_created: false
+  private_state_fetch_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  order_authority_created: false
+  order_intent_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  profit_evidence_created: false
+quantum_forward_policy:
+  quantum_route_candidate_flag_supported: true
+  quantum_forward_metadata_preserved_flag: true
+  future_quantum_applicability_registry_required: true
+  future_owner_quantum_priority_policy_required: true
+  strongest_classical_comparator_required_before_quantum_advantage_claim: true
+  fallback_bundle_required_before_quantum_runtime_use: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_score_created: false
+  quantum_ranking_created: false
+  quantum_selection_created: false
+  optimizer_arbitration_created: false
+future_consumer_contract:
+  quantum_applicability_classification_registry_may_consume: true
+  owner_quantum_priority_policy_registry_may_consume: true
+  scoring_policy_registry_may_consume: true
+  parameter_stack_scoring_ranking_gate_may_consume: true
+  quantum_classical_optimizer_arbitration_gate_may_consume: true
+  candidate_parameter_stack_generation_gate_may_consume: true
+  trade_context_parameter_stack_selection_gate_may_consume: true
+  this_pr_performs_stack_selection: false
+  this_pr_performs_scoring: false
+  this_pr_performs_ranking: false
+  this_pr_performs_optimizer_arbitration: false
+  this_pr_generates_candidate_stacks: false
+  this_pr_executes_replay_or_paper: false
+  this_pr_executes_runtime_or_live: false
+forbidden_output_fields_policy:
+  route_result_id_forbidden: true
+  selected_stack_id_non_null_forbidden: true
+  score_breakdown_forbidden: true
+  ranking_fields_forbidden: true
+  optimizer_arbitration_forbidden: true
+  runtime_live_order_authority_forbidden: true
+  source_acceptance_forbidden: true
+  connector_semantic_binding_forbidden: true
+  quantum_backend_execution_forbidden: true
+  quantum_advantage_claim_forbidden: true
+  profit_evidence_forbidden: true
+  atomicrows_bundle_jsonl_forbidden: true
+  atomicrows_bundle_sha256_forbidden: true
+explicit_no_claim_flags:
+  stack_selection_created: false
+  selected_stack_authority_created: false
+  scoring_created: false
+  ranking_created: false
+  score_breakdown_created: false
+  optimizer_arbitration_created: false
+  candidate_stack_generation_created: false
+  selected_stack_handoff_created: false
+  runtime_authority_created: false
+  runtime_artifacts_created: false
+  runtime_resolver_execution_created: false
+  live_authority_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  private_state_fetch_created: false
+  order_authority_created: false
+  order_intent_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  replay_results_created: false
+  paper_results_created: false
+  profit_evidence_created: false
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  source_fact_acceptance_created: false
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  connector_semantic_value_created: false
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_score_created: false
+  quantum_ranking_created: false
+  quantum_selection_created: false
+  latency_superiority_claim_created: false
+  execution_superiority_claim_created: false
+  alpha_evidence_created: false
+  atomicrows_bundle_rows_created: false
+  atomicrows_bundle_jsonl_created: false
+  atomicrows_bundle_sha256_created: false
+  atomicrows_bundle_hash_authority_created: false
+  runtime_cash_value_created: false
+  external_fact_value_created: false
+  market_data_fact_created: false
+  liquidity_fact_created: false
+production_readiness:
+  trade_context_selection_universe_routing_gate_ready: true
+  production_trade_context_routing_evaluated: false
+  production_routing_ready: false
+  production_selection_ready: false
+  final_ready: false
+validation_invariants:
+  - Trade context selection universe routing is static route eligibility only.
+  - Required trade context fields are consumed deterministically and unknown fields fail closed.
+  - Selection universe metadata comes from the PR79 static registry.
+  - Consumer access metadata comes from the PR80 static consumer gate.
+  - Route candidates are sorted by canonical universe_id ascending.
+  - Owner override satisfies internal route eligibility only and fabricates no external facts or evidence.
+  - Quantum metadata is preserved only as future-compatible static metadata.
+  - No stack selection scoring ranking optimizer arbitration candidate generation replay paper runtime live order source connector profit or quantum backend authority is created.
+  - AtomicRows bundle rows bundle JSONL bundle SHA and bundle hash authority are not created.
+final_ready: false
