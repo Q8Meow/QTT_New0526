@@ -1,0 +1,1189 @@
+registry_id: ATOMICROWS_PARAMETER_SELECTION_UNIVERSE_REGISTRY
+registry_version: v1
+authority_class: STATIC_PARAMETER_SELECTION_UNIVERSE_REGISTRY_ONLY_NOT_CONSUMER_GATE_NOT_ROUTING_NOT_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY
+semantic_task_id: ROADMAP-SELECTION-UNIVERSE-REGISTRY
+depends_on_qtt_trade_context_packet:
+  schema_path: schemas/edge/qtt_trade_context_packet.schema.json
+  registry_path: docs/master_plan/edge/QTTTradeContextPacket.yaml
+  report_path: docs/master_plan/generated/QTTTradeContextPacket.report.json
+  validator_path: tools/validate_qtt_trade_context_packet.py
+  validation_marker: QTT_TRADE_CONTEXT_PACKET_SCHEMA_OK
+depends_on_edge_parameter_stack_selection_packet:
+  schema_path: schemas/edge/edge_parameter_stack_selection_packet.schema.json
+  registry_path: docs/master_plan/edge/EDGEParameterStackSelectionPacket.yaml
+  report_path: docs/master_plan/generated/EDGEParameterStackSelectionPacket.report.json
+  validator_path: tools/validate_edge_parameter_stack_selection_packet.py
+  validation_marker: EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_OK
+depends_on_parameter_stack_role_taxonomy:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_role_taxonomy.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_OK
+depends_on_parameter_stack_completeness_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_completeness_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompletenessGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_completeness_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK
+depends_on_parameter_stack_compatibility_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_compatibility_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompatibilityGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPATIBILITY_GATE_OK
+depends_on_qtt_agent_algorithm_foundation:
+  generated_report_paths:
+    - docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json
+    - docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json
+    - docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json
+    - docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json
+    - docs/master_plan/generated/QTTAgentAlgorithmCumulativeReadinessGate.report.json
+    - docs/master_plan/generated/QTTAgentAlgorithmCommandMatrix.json
+depends_on_atomicrows_lifecycle_and_binding_foundation:
+  generated_report_paths:
+    - docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json
+    - docs/master_plan/generated/AtomicRowsLifecycleConsumerGate.report.json
+    - docs/master_plan/generated/AtomicRowsLifecycleCumulativeReadinessGate.report.json
+    - docs/master_plan/generated/AtomicRowsParameterAgentBindingReport.json
+    - docs/master_plan/generated/AtomicRowsParameterAgentBindingConsumerGate.report.json
+    - docs/master_plan/generated/AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json
+    - docs/master_plan/generated/AtomicRowsParameterAgentBindingCommandMatrix.json
+required_selection_universe_ids:
+  - KALSHI_BINARY_SHORT_HORIZON
+  - POLYMARKET_EVENT_MARKET_MOMENTUM
+  - FORECASTEX_IBKR_EVENT_RISK_HEDGE
+  - QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION
+registry_static_policy:
+  selection_universe_registry_is_static_only: true
+  universe_definitions_are_static: true
+  universe_membership_filters_are_deterministic: true
+  random_universe_selection_allowed: false
+  dynamic_membership_evaluation_created: false
+  member_row_ids_created: false
+  selection_universe_consumer_gate_created: false
+  trade_context_to_selection_universe_routing_created: false
+  route_result_created: false
+  selected_stack_created: false
+  stack_selection_created: false
+  scoring_created: false
+  ranking_created: false
+  optimizer_arbitration_created: false
+  candidate_stack_generation_created: false
+  replay_paper_execution_created: false
+  runtime_live_order_authority_created: false
+  final_ready_created_by_this_pr: false
+universe_membership_policy:
+  membership_defined_by_static_filters_only: true
+  membership_evaluated_against_atomicrows_bundle: false
+  membership_evaluated_against_live_data: false
+  membership_evaluated_against_source_retrieval: false
+  membership_evaluated_against_connector_semantics: false
+  membership_evaluated_against_private_state: false
+  membership_evaluated_against_runtime_cash: false
+  membership_uses_random_sampling: false
+  membership_uses_current_timestamp: false
+  membership_uses_external_api_call: false
+atomicrows_bundle_dependency_policy:
+  atomicrows_bundle_jsonl_required_for_live_use: true
+  atomicrows_bundle_sha_required_for_freeze_authority: true
+  universe_registry_does_not_require_bundle_for_static_schema: true
+  universe_registry_creates_bundle_rows: false
+  universe_registry_creates_bundle_jsonl: false
+  universe_registry_creates_bundle_sha256: false
+  universe_registry_creates_bundle_hash_authority: false
+  member_row_ids_created_by_this_pr: false
+  production_membership_evaluated_by_this_pr: false
+quantum_universe_policy:
+  quantum_optimized_portfolio_selection_universe_required: true
+  quantum_universe_static_metadata_only: true
+  quantum_applicability_mode_static_metadata_only: true
+  quantum_priority_mode_compatibility_static_metadata_only: true
+  quantum_advisory_stack_role_required: true
+  future_quantum_applicability_registry_required_before_quantum_selection: true
+  future_owner_quantum_priority_policy_required_before_quantum_priority_selection: true
+  future_optimizer_arbitration_gate_required_before_optimizer_choice: true
+  strongest_classical_comparator_required_before_quantum_advantage_claim: true
+  fallback_bundle_required_before_quantum_runtime_use: true
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_scoring_created: false
+  quantum_ranking_created: false
+  quantum_selection_created: false
+  quantum_arbitration_created: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfies_internal_selection_universe_registry_readiness_only: true
+  owner_override_may_force_static_universe_availability_internal_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+source_evidence_boundary_policy:
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  universe_source_dependency_values_are_static_labels_only: true
+  owner_policy_may_authorize_retrieval_scope: true
+  owner_policy_may_authorize_external_fact_value: false
+  external_fact_requires_accepted_source_packet: true
+  market_data_fact_requires_accepted_source_packet: true
+  liquidity_fact_requires_accepted_source_packet: true
+  connector_semantic_requires_accepted_source_packet: true
+connector_semantic_boundary_policy:
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  connector_semantic_value_created: false
+  connector_unlock_requires_accepted_target_field_packet: true
+  connector_unlock_requires_fresh_revalidation_state: true
+  connector_unlock_requires_target_field_scope_match: true
+  selection_universe_registry_does_not_unlock_connector_semantics: true
+runtime_live_order_boundary_policy:
+  runtime_artifacts_created: false
+  runtime_resolver_execution_created: false
+  private_state_fetch_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  order_authority_created: false
+  order_intent_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  profit_evidence_created: false
+  selection_universe_registry_is_not_runtime_signal: true
+  selection_universe_registry_is_not_live_order_instruction: true
+future_consumer_contract:
+  selection_universe_consumer_gate_may_consume: true
+  trade_context_to_selection_universe_routing_gate_may_consume: true
+  quantum_applicability_classification_registry_may_consume: true
+  owner_quantum_priority_policy_registry_may_consume: true
+  scoring_policy_registry_may_consume: true
+  parameter_stack_scoring_ranking_gate_may_consume: true
+  quantum_classical_optimizer_arbitration_gate_may_consume: true
+  candidate_parameter_stack_generation_gate_may_consume: true
+  trade_context_parameter_stack_selection_gate_may_consume: true
+  selected_parameter_stack_handoff_packet_may_consume: true
+  replay_paper_candidate_stack_competition_gate_may_consume: true
+  this_pr_performs_selection_universe_consumer_gate: false
+  this_pr_performs_routing: false
+  this_pr_performs_scoring: false
+  this_pr_performs_ranking: false
+  this_pr_performs_selection: false
+  this_pr_performs_arbitration: false
+  this_pr_generates_candidate_stacks: false
+  this_pr_executes_replay_or_paper: false
+  this_pr_executes_runtime_or_live: false
+forbidden_output_fields_policy:
+  routed_universe_ids_output_forbidden_in_this_pr: true
+  route_result_id_forbidden_in_this_pr: true
+  selected_stack_id_forbidden_in_this_pr: true
+  selected_parameter_families_forbidden_in_this_pr: true
+  selected_algorithm_families_forbidden_in_this_pr: true
+  score_breakdown_forbidden_in_this_pr: true
+  optimizer_arbitration_result_forbidden_in_this_pr: true
+  replay_result_id_forbidden_in_this_pr: true
+  paper_result_id_forbidden_in_this_pr: true
+  order_id_forbidden_in_this_pr: true
+  fill_id_forbidden_in_this_pr: true
+  cash_receipt_id_forbidden_in_this_pr: true
+  profit_evidence_id_forbidden_in_this_pr: true
+explicit_no_claim_flags:
+  selection_universe_consumer_gate_created: false
+  trade_context_routing_created: false
+  selection_universe_routing_created: false
+  route_result_created: false
+  selected_stack_authority_created: false
+  stack_selection_created: false
+  scoring_created: false
+  ranking_created: false
+  optimizer_arbitration_created: false
+  candidate_stack_generation_created: false
+  selected_stack_handoff_created: false
+  order_intent_authority_created: false
+  order_authority_created: false
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  connector_semantic_value_created: false
+  runtime_artifacts_created: false
+  runtime_resolver_execution_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  private_state_fetch_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  replay_results_created: false
+  paper_results_created: false
+  profit_evidence_created: false
+  quantum_backend_evidence_created: false
+  quantum_advantage_claim_created: false
+  quantum_selection_created: false
+  quantum_arbitration_created: false
+  latency_superiority_claim_created: false
+  execution_superiority_claim_created: false
+  atomicrows_bundle_rows_created: false
+  atomicrows_bundle_jsonl_created: false
+  atomicrows_bundle_sha256_created: false
+  atomicrows_bundle_hash_authority_created: false
+  runtime_cash_value_created: false
+  external_fact_value_created: false
+  market_data_fact_created: false
+  liquidity_fact_created: false
+  production_membership_evaluated: false
+production_readiness:
+  atomicrows_parameter_selection_universe_registry_ready: true
+  production_selection_universe_registry_evaluated: false
+  production_selection_universe_registry_ready: false
+  production_universe_membership_evaluated: false
+  production_routing_evaluated: false
+  production_routing_ready: false
+  production_selection_ready: false
+  final_ready: false
+universe_definitions:
+  - universe_id: KALSHI_BINARY_SHORT_HORIZON
+    universe_version: v1
+    universe_name: Kalshi Binary Short Horizon
+    universe_authority_class: STATIC_SELECTION_UNIVERSE_DEFINITION_ONLY_NOT_ROUTING_NOT_SELECTION_NOT_RUNTIME_AUTHORITY
+    universe_description: Static universe envelope for future Kalshi binary short horizon contexts.
+    platform_scope:
+      - KALSHI
+    market_type_scope:
+      - BINARY_OUTCOME
+      - PREDICTION_MARKET
+    venue_scope:
+      - SINGLE_PLATFORM
+    strategy_class_scope:
+      - MARKET_MAKING_CANDIDATE_STATIC_ONLY
+      - LIQUIDITY_SENSITIVE_CANDIDATE_STATIC_ONLY
+    edge_type_scope:
+      - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+      - RESEARCH_EDGE_STATIC_ONLY
+    trade_context_field_filters:
+      platform:
+        - KALSHI
+      market_type:
+        - BINARY_OUTCOME
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - MARKET_MAKING_CANDIDATE_STATIC_ONLY
+        - LIQUIDITY_SENSITIVE_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+        - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - SHORT_HORIZON_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    latency_sensitivity_classes:
+      - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+    capital_intensity_classes:
+      - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+      - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+    risk_modes:
+      - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+      - RISK_BALANCED_STATIC_CONTEXT_ONLY
+    liquidity_contexts:
+      - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+      - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+    time_horizons:
+      - INTRADAY_STATIC_CONTEXT_ONLY
+      - SHORT_HORIZON_STATIC_CONTEXT_ONLY
+    allowed_agent_roles:
+      - QTT_AGENT_ROLE_004_ATOMICROWS_AGENT
+      - QTT_AGENT_ROLE_013_OPTIMIZER_AGENT
+      - QTT_AGENT_ROLE_014_RISK_AGENT
+      - QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT
+    authorized_consumer_classes:
+      - FUTURE_SELECTION_UNIVERSE_CONSUMER_GATE_STATIC_ONLY
+      - FUTURE_TRADE_CONTEXT_ROUTING_GATE_STATIC_ONLY
+    required_stack_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - EXECUTION
+      - CAPITAL
+      - LATENCY
+      - ERROR_GUARD
+      - QUANTUM_ADVISORY
+    required_role_family_fields:
+      SIGNAL: selected_signal_family_ids
+      SCORING: selected_scoring_family_ids
+      NORMALIZATION: selected_normalization_family_ids
+      RISK: selected_risk_family_ids
+      EXECUTION: selected_execution_family_ids
+      CAPITAL: selected_capital_family_ids
+      LATENCY: selected_latency_family_ids
+      ERROR_GUARD: selected_error_guard_family_ids
+      QUANTUM_ADVISORY: selected_quantum_advisory_family_ids
+    universe_membership_rule_type: STATIC_DETERMINISTIC_FILTERS_ONLY
+    deterministic_filter_keys:
+      - platform
+      - market_type
+      - venue_scope
+      - strategy_class
+      - edge_type
+      - latency_sensitivity_class
+      - capital_intensity_class
+      - risk_mode
+      - liquidity_context
+      - time_horizon
+      - quantum_priority_mode
+      - owner_override_basis
+    static_membership_filters:
+      platform:
+        - KALSHI
+      market_type:
+        - BINARY_OUTCOME
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - MARKET_MAKING_CANDIDATE_STATIC_ONLY
+        - LIQUIDITY_SENSITIVE_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+        - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - SHORT_HORIZON_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    atomicrows_bundle_dependency_policy:
+      atomicrows_bundle_jsonl_required_for_live_use: true
+      atomicrows_bundle_sha_required_for_freeze_authority: true
+      universe_registry_does_not_require_bundle_for_static_schema: true
+      universe_registry_creates_bundle_rows: false
+      universe_registry_creates_bundle_jsonl: false
+      universe_registry_creates_bundle_sha256: false
+      universe_registry_creates_bundle_hash_authority: false
+      member_row_ids_created_by_this_pr: false
+      production_membership_evaluated_by_this_pr: false
+    source_dependency_policy:
+      source_dependency_values_static_labels_only: true
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      market_data_fact_created: false
+      liquidity_fact_created: false
+      connector_semantic_value_created: false
+    quantum_applicability_mode: QUANTUM_COMPATIBLE_STATIC_METADATA
+    quantum_priority_mode_compatibility:
+      - QUANTUM_NEUTRAL_COMPATIBLE
+      - OWNER_QUANTUM_PRIORITY_POLICY_PENDING_PR83
+    owner_override_policy:
+      owner_override_supported: true
+      owner_override_satisfies_internal_selection_universe_registry_readiness_only: true
+      owner_override_may_force_static_universe_availability_internal_only: true
+      owner_override_fabricates_external_fact: false
+      owner_override_fabricates_accepted_source_packet: false
+      owner_override_fabricates_connector_semantic: false
+      owner_override_fabricates_runtime_cash_receipt: false
+      owner_override_fabricates_order_receipt: false
+      owner_override_fabricates_replay_paper_result: false
+      owner_override_fabricates_quantum_backend_execution: false
+      owner_override_fabricates_profit_evidence: false
+    future_consumer_contract:
+      selection_universe_consumer_gate_may_consume: true
+      trade_context_to_selection_universe_routing_gate_may_consume: true
+      quantum_applicability_classification_registry_may_consume: true
+      owner_quantum_priority_policy_registry_may_consume: true
+      scoring_policy_registry_may_consume: true
+      parameter_stack_scoring_ranking_gate_may_consume: true
+      quantum_classical_optimizer_arbitration_gate_may_consume: true
+      candidate_parameter_stack_generation_gate_may_consume: true
+      trade_context_parameter_stack_selection_gate_may_consume: true
+      selected_parameter_stack_handoff_packet_may_consume: true
+      replay_paper_candidate_stack_competition_gate_may_consume: true
+      this_pr_performs_selection_universe_consumer_gate: false
+      this_pr_performs_routing: false
+      this_pr_performs_scoring: false
+      this_pr_performs_ranking: false
+      this_pr_performs_selection: false
+      this_pr_performs_arbitration: false
+      this_pr_generates_candidate_stacks: false
+      this_pr_executes_replay_or_paper: false
+      this_pr_executes_runtime_or_live: false
+    no_claim_flags:
+      member_row_ids_created: false
+      selection_universe_routing_created: false
+      route_result_created: false
+      selected_stack_id_created: false
+      stack_selection_created: false
+      scoring_created: false
+      ranking_created: false
+      optimizer_arbitration_created: false
+      candidate_stack_generation_created: false
+      source_retrieval_created: false
+      source_acceptance_created: false
+      connector_semantic_binding_created: false
+      runtime_live_order_authority_created: false
+      replay_paper_execution_created: false
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+      profit_evidence_created: false
+  - universe_id: POLYMARKET_EVENT_MARKET_MOMENTUM
+    universe_version: v1
+    universe_name: Polymarket Event Market Momentum
+    universe_authority_class: STATIC_SELECTION_UNIVERSE_DEFINITION_ONLY_NOT_ROUTING_NOT_SELECTION_NOT_RUNTIME_AUTHORITY
+    universe_description: Static universe envelope for future Polymarket event market momentum contexts.
+    platform_scope:
+      - POLYMARKET
+    market_type_scope:
+      - EVENT_MARKET
+      - PREDICTION_MARKET
+    venue_scope:
+      - SINGLE_PLATFORM
+    strategy_class_scope:
+      - MOMENTUM_CANDIDATE_STATIC_ONLY
+    edge_type_scope:
+      - MICROSTRUCTURE_EDGE_STATIC_ONLY
+      - RESEARCH_EDGE_STATIC_ONLY
+    trade_context_field_filters:
+      platform:
+        - POLYMARKET
+      market_type:
+        - EVENT_MARKET
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - MOMENTUM_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - MICROSTRUCTURE_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+        - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+        - RISK_AGGRESSIVE_CANDIDATE_STATIC_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PREFERRED
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    latency_sensitivity_classes:
+      - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+    capital_intensity_classes:
+      - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+      - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+    risk_modes:
+      - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      - RISK_AGGRESSIVE_CANDIDATE_STATIC_ONLY
+    liquidity_contexts:
+      - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+      - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+    time_horizons:
+      - INTRADAY_STATIC_CONTEXT_ONLY
+      - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+    allowed_agent_roles:
+      - QTT_AGENT_ROLE_004_ATOMICROWS_AGENT
+      - QTT_AGENT_ROLE_005_ATOMICROWS_RESEARCH_AGENT
+      - QTT_AGENT_ROLE_013_OPTIMIZER_AGENT
+      - QTT_AGENT_ROLE_014_RISK_AGENT
+    authorized_consumer_classes:
+      - FUTURE_SELECTION_UNIVERSE_CONSUMER_GATE_STATIC_ONLY
+      - FUTURE_TRADE_CONTEXT_ROUTING_GATE_STATIC_ONLY
+    required_stack_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - EXECUTION
+      - CAPITAL
+      - LATENCY
+      - ERROR_GUARD
+      - QUANTUM_ADVISORY
+    required_role_family_fields:
+      SIGNAL: selected_signal_family_ids
+      SCORING: selected_scoring_family_ids
+      NORMALIZATION: selected_normalization_family_ids
+      RISK: selected_risk_family_ids
+      EXECUTION: selected_execution_family_ids
+      CAPITAL: selected_capital_family_ids
+      LATENCY: selected_latency_family_ids
+      ERROR_GUARD: selected_error_guard_family_ids
+      QUANTUM_ADVISORY: selected_quantum_advisory_family_ids
+    universe_membership_rule_type: STATIC_DETERMINISTIC_FILTERS_ONLY
+    deterministic_filter_keys:
+      - platform
+      - market_type
+      - venue_scope
+      - strategy_class
+      - edge_type
+      - latency_sensitivity_class
+      - capital_intensity_class
+      - risk_mode
+      - liquidity_context
+      - time_horizon
+      - quantum_priority_mode
+      - owner_override_basis
+    static_membership_filters:
+      platform:
+        - POLYMARKET
+      market_type:
+        - EVENT_MARKET
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - MOMENTUM_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - MICROSTRUCTURE_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+        - LATENCY_HIGH_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+        - RISK_AGGRESSIVE_CANDIDATE_STATIC_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PREFERRED
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    atomicrows_bundle_dependency_policy:
+      atomicrows_bundle_jsonl_required_for_live_use: true
+      atomicrows_bundle_sha_required_for_freeze_authority: true
+      universe_registry_does_not_require_bundle_for_static_schema: true
+      universe_registry_creates_bundle_rows: false
+      universe_registry_creates_bundle_jsonl: false
+      universe_registry_creates_bundle_sha256: false
+      universe_registry_creates_bundle_hash_authority: false
+      member_row_ids_created_by_this_pr: false
+      production_membership_evaluated_by_this_pr: false
+    source_dependency_policy:
+      source_dependency_values_static_labels_only: true
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      market_data_fact_created: false
+      liquidity_fact_created: false
+      connector_semantic_value_created: false
+    quantum_applicability_mode: QUANTUM_INSPIRED_CANDIDATE_STATIC_METADATA_ONLY
+    quantum_priority_mode_compatibility:
+      - QUANTUM_NEUTRAL_COMPATIBLE
+      - QUANTUM_PREFERRED_COMPATIBLE_STATIC_ONLY
+      - OWNER_QUANTUM_PRIORITY_POLICY_PENDING_PR83
+    owner_override_policy:
+      owner_override_supported: true
+      owner_override_satisfies_internal_selection_universe_registry_readiness_only: true
+      owner_override_may_force_static_universe_availability_internal_only: true
+      owner_override_fabricates_external_fact: false
+      owner_override_fabricates_accepted_source_packet: false
+      owner_override_fabricates_connector_semantic: false
+      owner_override_fabricates_runtime_cash_receipt: false
+      owner_override_fabricates_order_receipt: false
+      owner_override_fabricates_replay_paper_result: false
+      owner_override_fabricates_quantum_backend_execution: false
+      owner_override_fabricates_profit_evidence: false
+    future_consumer_contract:
+      selection_universe_consumer_gate_may_consume: true
+      trade_context_to_selection_universe_routing_gate_may_consume: true
+      quantum_applicability_classification_registry_may_consume: true
+      owner_quantum_priority_policy_registry_may_consume: true
+      scoring_policy_registry_may_consume: true
+      parameter_stack_scoring_ranking_gate_may_consume: true
+      quantum_classical_optimizer_arbitration_gate_may_consume: true
+      candidate_parameter_stack_generation_gate_may_consume: true
+      trade_context_parameter_stack_selection_gate_may_consume: true
+      selected_parameter_stack_handoff_packet_may_consume: true
+      replay_paper_candidate_stack_competition_gate_may_consume: true
+      this_pr_performs_selection_universe_consumer_gate: false
+      this_pr_performs_routing: false
+      this_pr_performs_scoring: false
+      this_pr_performs_ranking: false
+      this_pr_performs_selection: false
+      this_pr_performs_arbitration: false
+      this_pr_generates_candidate_stacks: false
+      this_pr_executes_replay_or_paper: false
+      this_pr_executes_runtime_or_live: false
+    no_claim_flags:
+      member_row_ids_created: false
+      selection_universe_routing_created: false
+      route_result_created: false
+      selected_stack_id_created: false
+      stack_selection_created: false
+      scoring_created: false
+      ranking_created: false
+      optimizer_arbitration_created: false
+      candidate_stack_generation_created: false
+      source_retrieval_created: false
+      source_acceptance_created: false
+      connector_semantic_binding_created: false
+      runtime_live_order_authority_created: false
+      replay_paper_execution_created: false
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+      profit_evidence_created: false
+  - universe_id: FORECASTEX_IBKR_EVENT_RISK_HEDGE
+    universe_version: v1
+    universe_name: ForecastEx IBKR Event Risk Hedge
+    universe_authority_class: STATIC_SELECTION_UNIVERSE_DEFINITION_ONLY_NOT_ROUTING_NOT_SELECTION_NOT_RUNTIME_AUTHORITY
+    universe_description: Static universe envelope for future ForecastEx IBKR event risk hedge contexts.
+    platform_scope:
+      - FORECASTEX_IBKR
+    market_type_scope:
+      - FORECAST_CONTRACT
+      - EVENT_MARKET
+      - PREDICTION_MARKET
+    venue_scope:
+      - SINGLE_PLATFORM
+    strategy_class_scope:
+      - EVENT_RISK_HEDGE_CANDIDATE_STATIC_ONLY
+    edge_type_scope:
+      - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+      - RESEARCH_EDGE_STATIC_ONLY
+    trade_context_field_filters:
+      platform:
+        - FORECASTEX_IBKR
+      market_type:
+        - FORECAST_CONTRACT
+        - EVENT_MARKET
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - EVENT_RISK_HEDGE_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_LOW_STATIC_CONTEXT_ONLY
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_LOW_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+        - MULTI_DAY_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    latency_sensitivity_classes:
+      - LATENCY_LOW_STATIC_CONTEXT_ONLY
+      - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+    capital_intensity_classes:
+      - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+      - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+    risk_modes:
+      - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+      - RISK_BALANCED_STATIC_CONTEXT_ONLY
+    liquidity_contexts:
+      - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+      - LIQUIDITY_LOW_STATIC_CONTEXT_ONLY
+      - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+    time_horizons:
+      - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+      - MULTI_DAY_STATIC_CONTEXT_ONLY
+    allowed_agent_roles:
+      - QTT_AGENT_ROLE_004_ATOMICROWS_AGENT
+      - QTT_AGENT_ROLE_014_RISK_AGENT
+      - QTT_AGENT_ROLE_015_SIZING_AGENT
+      - QTT_AGENT_ROLE_016_EXECUTION_LATENCY_AGENT
+    authorized_consumer_classes:
+      - FUTURE_SELECTION_UNIVERSE_CONSUMER_GATE_STATIC_ONLY
+      - FUTURE_TRADE_CONTEXT_ROUTING_GATE_STATIC_ONLY
+    required_stack_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - EXECUTION
+      - CAPITAL
+      - LATENCY
+      - ERROR_GUARD
+      - QUANTUM_ADVISORY
+    required_role_family_fields:
+      SIGNAL: selected_signal_family_ids
+      SCORING: selected_scoring_family_ids
+      NORMALIZATION: selected_normalization_family_ids
+      RISK: selected_risk_family_ids
+      EXECUTION: selected_execution_family_ids
+      CAPITAL: selected_capital_family_ids
+      LATENCY: selected_latency_family_ids
+      ERROR_GUARD: selected_error_guard_family_ids
+      QUANTUM_ADVISORY: selected_quantum_advisory_family_ids
+    universe_membership_rule_type: STATIC_DETERMINISTIC_FILTERS_ONLY
+    deterministic_filter_keys:
+      - platform
+      - market_type
+      - venue_scope
+      - strategy_class
+      - edge_type
+      - latency_sensitivity_class
+      - capital_intensity_class
+      - risk_mode
+      - liquidity_context
+      - time_horizon
+      - quantum_priority_mode
+      - owner_override_basis
+    static_membership_filters:
+      platform:
+        - FORECASTEX_IBKR
+      market_type:
+        - FORECAST_CONTRACT
+        - EVENT_MARKET
+        - PREDICTION_MARKET
+      venue_scope:
+        - SINGLE_PLATFORM
+      strategy_class:
+        - EVENT_RISK_HEDGE_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - OWNER_SUBMITTED_EDGE_STATIC_ONLY
+        - RESEARCH_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_LOW_STATIC_CONTEXT_ONLY
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_LOW_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      time_horizon:
+        - EVENT_DRIVEN_STATIC_CONTEXT_ONLY
+        - MULTI_DAY_STATIC_CONTEXT_ONLY
+      quantum_priority_mode:
+        - QUANTUM_NEUTRAL
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    atomicrows_bundle_dependency_policy:
+      atomicrows_bundle_jsonl_required_for_live_use: true
+      atomicrows_bundle_sha_required_for_freeze_authority: true
+      universe_registry_does_not_require_bundle_for_static_schema: true
+      universe_registry_creates_bundle_rows: false
+      universe_registry_creates_bundle_jsonl: false
+      universe_registry_creates_bundle_sha256: false
+      universe_registry_creates_bundle_hash_authority: false
+      member_row_ids_created_by_this_pr: false
+      production_membership_evaluated_by_this_pr: false
+    source_dependency_policy:
+      source_dependency_values_static_labels_only: true
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      market_data_fact_created: false
+      liquidity_fact_created: false
+      connector_semantic_value_created: false
+    quantum_applicability_mode: HYBRID_CLASSICAL_QUANTUM_CANDIDATE_STATIC_METADATA_ONLY
+    quantum_priority_mode_compatibility:
+      - QUANTUM_NEUTRAL_COMPATIBLE
+      - OWNER_QUANTUM_PRIORITY_POLICY_PENDING_PR83
+    owner_override_policy:
+      owner_override_supported: true
+      owner_override_satisfies_internal_selection_universe_registry_readiness_only: true
+      owner_override_may_force_static_universe_availability_internal_only: true
+      owner_override_fabricates_external_fact: false
+      owner_override_fabricates_accepted_source_packet: false
+      owner_override_fabricates_connector_semantic: false
+      owner_override_fabricates_runtime_cash_receipt: false
+      owner_override_fabricates_order_receipt: false
+      owner_override_fabricates_replay_paper_result: false
+      owner_override_fabricates_quantum_backend_execution: false
+      owner_override_fabricates_profit_evidence: false
+    future_consumer_contract:
+      selection_universe_consumer_gate_may_consume: true
+      trade_context_to_selection_universe_routing_gate_may_consume: true
+      quantum_applicability_classification_registry_may_consume: true
+      owner_quantum_priority_policy_registry_may_consume: true
+      scoring_policy_registry_may_consume: true
+      parameter_stack_scoring_ranking_gate_may_consume: true
+      quantum_classical_optimizer_arbitration_gate_may_consume: true
+      candidate_parameter_stack_generation_gate_may_consume: true
+      trade_context_parameter_stack_selection_gate_may_consume: true
+      selected_parameter_stack_handoff_packet_may_consume: true
+      replay_paper_candidate_stack_competition_gate_may_consume: true
+      this_pr_performs_selection_universe_consumer_gate: false
+      this_pr_performs_routing: false
+      this_pr_performs_scoring: false
+      this_pr_performs_ranking: false
+      this_pr_performs_selection: false
+      this_pr_performs_arbitration: false
+      this_pr_generates_candidate_stacks: false
+      this_pr_executes_replay_or_paper: false
+      this_pr_executes_runtime_or_live: false
+    no_claim_flags:
+      member_row_ids_created: false
+      selection_universe_routing_created: false
+      route_result_created: false
+      selected_stack_id_created: false
+      stack_selection_created: false
+      scoring_created: false
+      ranking_created: false
+      optimizer_arbitration_created: false
+      candidate_stack_generation_created: false
+      source_retrieval_created: false
+      source_acceptance_created: false
+      connector_semantic_binding_created: false
+      runtime_live_order_authority_created: false
+      replay_paper_execution_created: false
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+      profit_evidence_created: false
+  - universe_id: QUANTUM_OPTIMIZED_PORTFOLIO_SELECTION
+    universe_version: v1
+    universe_name: Quantum Optimized Portfolio Selection
+    universe_authority_class: STATIC_SELECTION_UNIVERSE_DEFINITION_ONLY_NOT_ROUTING_NOT_SELECTION_NOT_RUNTIME_AUTHORITY
+    universe_description: Static universe envelope for future quantum forward portfolio and stack optimization contexts.
+    platform_scope:
+      - MULTI_PLATFORM_PARALLEL
+      - SYNTHETIC_PLATFORM_SCHEMA_ONLY
+    market_type_scope:
+      - PREDICTION_MARKET
+      - EVENT_MARKET
+      - SYNTHETIC_MARKET_TYPE_SCHEMA_ONLY
+    venue_scope:
+      - MULTI_PLATFORM_PARALLEL
+      - CROSS_VENUE_STATIC_CONTEXT_ONLY
+    strategy_class_scope:
+      - QUANTUM_OPTIMIZATION_CANDIDATE_STATIC_ONLY
+    edge_type_scope:
+      - QUANTUM_ADVISORY_EDGE_STATIC_ONLY
+    trade_context_field_filters:
+      platform:
+        - MULTI_PLATFORM_PARALLEL
+        - SYNTHETIC_PLATFORM_SCHEMA_ONLY
+      market_type:
+        - PREDICTION_MARKET
+        - EVENT_MARKET
+        - SYNTHETIC_MARKET_TYPE_SCHEMA_ONLY
+      venue_scope:
+        - MULTI_PLATFORM_PARALLEL
+        - CROSS_VENUE_STATIC_CONTEXT_ONLY
+      strategy_class:
+        - QUANTUM_OPTIMIZATION_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - QUANTUM_ADVISORY_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_LOW_STATIC_CONTEXT_ONLY
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_PAPER_ONLY_STATIC_CONTEXT
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+        - SYNTHETIC_LIQUIDITY_CONTEXT_SCHEMA_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - MULTI_DAY_STATIC_CONTEXT_ONLY
+        - SYNTHETIC_TIME_HORIZON_SCHEMA_ONLY
+      quantum_priority_mode:
+        - QUANTUM_PREFERRED
+        - QUANTUM_STRONGLY_PREFERRED
+        - QUANTUM_FIRST_REQUESTED_STATIC_ONLY
+        - OWNER_FORCED_QUANTUM_REQUESTED_STATIC_ONLY
+        - HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK_REQUESTED_STATIC_ONLY
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    latency_sensitivity_classes:
+      - LATENCY_LOW_STATIC_CONTEXT_ONLY
+      - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+    capital_intensity_classes:
+      - CAPITAL_PAPER_ONLY_STATIC_CONTEXT
+      - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+      - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+    risk_modes:
+      - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+      - RISK_BALANCED_STATIC_CONTEXT_ONLY
+    liquidity_contexts:
+      - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+      - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+      - SYNTHETIC_LIQUIDITY_CONTEXT_SCHEMA_ONLY
+    time_horizons:
+      - INTRADAY_STATIC_CONTEXT_ONLY
+      - MULTI_DAY_STATIC_CONTEXT_ONLY
+      - SYNTHETIC_TIME_HORIZON_SCHEMA_ONLY
+    allowed_agent_roles:
+      - QTT_AGENT_ROLE_013_OPTIMIZER_AGENT
+      - QTT_AGENT_ROLE_019_QUANTUM_RESEARCH_AGENT
+      - QTT_AGENT_ROLE_020_QUANTUM_BACKEND_AGENT
+      - QTT_AGENT_ROLE_023_VALIDATION_AGENT
+    authorized_consumer_classes:
+      - FUTURE_SELECTION_UNIVERSE_CONSUMER_GATE_STATIC_ONLY
+      - FUTURE_QUANTUM_APPLICABILITY_CLASSIFICATION_STATIC_ONLY
+      - FUTURE_OWNER_QUANTUM_PRIORITY_POLICY_STATIC_ONLY
+      - FUTURE_OPTIMIZER_ARBITRATION_GATE_STATIC_ONLY
+    required_stack_roles:
+      - SIGNAL
+      - SCORING
+      - NORMALIZATION
+      - RISK
+      - EXECUTION
+      - CAPITAL
+      - LATENCY
+      - ERROR_GUARD
+      - QUANTUM_ADVISORY
+    required_role_family_fields:
+      SIGNAL: selected_signal_family_ids
+      SCORING: selected_scoring_family_ids
+      NORMALIZATION: selected_normalization_family_ids
+      RISK: selected_risk_family_ids
+      EXECUTION: selected_execution_family_ids
+      CAPITAL: selected_capital_family_ids
+      LATENCY: selected_latency_family_ids
+      ERROR_GUARD: selected_error_guard_family_ids
+      QUANTUM_ADVISORY: selected_quantum_advisory_family_ids
+    universe_membership_rule_type: STATIC_DETERMINISTIC_FILTERS_ONLY
+    deterministic_filter_keys:
+      - platform
+      - market_type
+      - venue_scope
+      - strategy_class
+      - edge_type
+      - latency_sensitivity_class
+      - capital_intensity_class
+      - risk_mode
+      - liquidity_context
+      - time_horizon
+      - quantum_priority_mode
+      - owner_override_basis
+    static_membership_filters:
+      platform:
+        - MULTI_PLATFORM_PARALLEL
+        - SYNTHETIC_PLATFORM_SCHEMA_ONLY
+      market_type:
+        - PREDICTION_MARKET
+        - EVENT_MARKET
+        - SYNTHETIC_MARKET_TYPE_SCHEMA_ONLY
+      venue_scope:
+        - MULTI_PLATFORM_PARALLEL
+        - CROSS_VENUE_STATIC_CONTEXT_ONLY
+      strategy_class:
+        - QUANTUM_OPTIMIZATION_CANDIDATE_STATIC_ONLY
+      edge_type:
+        - QUANTUM_ADVISORY_EDGE_STATIC_ONLY
+      latency_sensitivity_class:
+        - LATENCY_LOW_STATIC_CONTEXT_ONLY
+        - LATENCY_MEDIUM_STATIC_CONTEXT_ONLY
+      capital_intensity_class:
+        - CAPITAL_PAPER_ONLY_STATIC_CONTEXT
+        - CAPITAL_LOW_STATIC_CONTEXT_ONLY
+        - CAPITAL_MEDIUM_STATIC_CONTEXT_ONLY
+      risk_mode:
+        - RISK_CONSERVATIVE_STATIC_CONTEXT_ONLY
+        - RISK_BALANCED_STATIC_CONTEXT_ONLY
+      liquidity_context:
+        - LIQUIDITY_UNKNOWN_STATIC_CONTEXT_ONLY
+        - LIQUIDITY_MEDIUM_STATIC_CONTEXT_ONLY
+        - SYNTHETIC_LIQUIDITY_CONTEXT_SCHEMA_ONLY
+      time_horizon:
+        - INTRADAY_STATIC_CONTEXT_ONLY
+        - MULTI_DAY_STATIC_CONTEXT_ONLY
+        - SYNTHETIC_TIME_HORIZON_SCHEMA_ONLY
+      quantum_priority_mode:
+        - QUANTUM_PREFERRED
+        - QUANTUM_STRONGLY_PREFERRED
+        - QUANTUM_FIRST_REQUESTED_STATIC_ONLY
+        - OWNER_FORCED_QUANTUM_REQUESTED_STATIC_ONLY
+        - HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK_REQUESTED_STATIC_ONLY
+        - QUANTUM_PRIORITY_POLICY_PENDING_PR83
+      owner_override_basis:
+        - NONE
+        - OWNER_GLOBAL_OVERRIDE
+        - OWNER_APPROVED
+        - OWNER_OVERRIDE_SATISFIED
+        - OWNER_APPROVED_OVERRIDE
+    atomicrows_bundle_dependency_policy:
+      atomicrows_bundle_jsonl_required_for_live_use: true
+      atomicrows_bundle_sha_required_for_freeze_authority: true
+      universe_registry_does_not_require_bundle_for_static_schema: true
+      universe_registry_creates_bundle_rows: false
+      universe_registry_creates_bundle_jsonl: false
+      universe_registry_creates_bundle_sha256: false
+      universe_registry_creates_bundle_hash_authority: false
+      member_row_ids_created_by_this_pr: false
+      production_membership_evaluated_by_this_pr: false
+    source_dependency_policy:
+      source_dependency_values_static_labels_only: true
+      source_retrieval_created: false
+      source_acceptance_created: false
+      accepted_source_packets_created: false
+      market_data_fact_created: false
+      liquidity_fact_created: false
+      connector_semantic_value_created: false
+    quantum_applicability_mode: QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_STATIC_METADATA
+    quantum_priority_mode_compatibility:
+      - QUANTUM_PREFERRED_COMPATIBLE_STATIC_ONLY
+      - QUANTUM_STRONGLY_PREFERRED_COMPATIBLE_STATIC_ONLY
+      - QUANTUM_FIRST_REQUEST_COMPATIBLE_STATIC_ONLY
+      - OWNER_FORCED_QUANTUM_REQUEST_COMPATIBLE_STATIC_ONLY
+      - HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK_COMPATIBLE_STATIC_ONLY
+      - OWNER_QUANTUM_PRIORITY_POLICY_PENDING_PR83
+    owner_override_policy:
+      owner_override_supported: true
+      owner_override_satisfies_internal_selection_universe_registry_readiness_only: true
+      owner_override_may_force_static_universe_availability_internal_only: true
+      owner_override_fabricates_external_fact: false
+      owner_override_fabricates_accepted_source_packet: false
+      owner_override_fabricates_connector_semantic: false
+      owner_override_fabricates_runtime_cash_receipt: false
+      owner_override_fabricates_order_receipt: false
+      owner_override_fabricates_replay_paper_result: false
+      owner_override_fabricates_quantum_backend_execution: false
+      owner_override_fabricates_profit_evidence: false
+    future_consumer_contract:
+      selection_universe_consumer_gate_may_consume: true
+      trade_context_to_selection_universe_routing_gate_may_consume: true
+      quantum_applicability_classification_registry_may_consume: true
+      owner_quantum_priority_policy_registry_may_consume: true
+      scoring_policy_registry_may_consume: true
+      parameter_stack_scoring_ranking_gate_may_consume: true
+      quantum_classical_optimizer_arbitration_gate_may_consume: true
+      candidate_parameter_stack_generation_gate_may_consume: true
+      trade_context_parameter_stack_selection_gate_may_consume: true
+      selected_parameter_stack_handoff_packet_may_consume: true
+      replay_paper_candidate_stack_competition_gate_may_consume: true
+      this_pr_performs_selection_universe_consumer_gate: false
+      this_pr_performs_routing: false
+      this_pr_performs_scoring: false
+      this_pr_performs_ranking: false
+      this_pr_performs_selection: false
+      this_pr_performs_arbitration: false
+      this_pr_generates_candidate_stacks: false
+      this_pr_executes_replay_or_paper: false
+      this_pr_executes_runtime_or_live: false
+    no_claim_flags:
+      member_row_ids_created: false
+      selection_universe_routing_created: false
+      route_result_created: false
+      selected_stack_id_created: false
+      stack_selection_created: false
+      scoring_created: false
+      ranking_created: false
+      optimizer_arbitration_created: false
+      candidate_stack_generation_created: false
+      source_retrieval_created: false
+      source_acceptance_created: false
+      connector_semantic_binding_created: false
+      runtime_live_order_authority_created: false
+      replay_paper_execution_created: false
+      quantum_backend_execution_created: false
+      quantum_advantage_claim_created: false
+      profit_evidence_created: false
+validation_invariants:
+  - Selection universe definitions are static filter envelopes only.
+  - Universe membership filters are deterministic metadata only.
+  - Required stack roles match PR73 PR74 and PR75 canonical order.
+  - Required role family fields align with the PR77 EDGE packet role-family field surface.
+  - Trade context filter keys align with the PR78 QTT trade-context packet field surface.
+  - Owner override satisfies internal universe registry readiness only and fabricates no external facts or evidence.
+  - Source dependent labels do not retrieve accept or bind source facts.
+  - Connector semantics runtime live order profit replay paper scoring ranking routing selection and quantum backend authority are not created.
+  - AtomicRows bundle rows bundle JSONL bundle SHA and bundle hash authority are not created.
+final_ready: false
