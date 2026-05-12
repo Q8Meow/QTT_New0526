@@ -1,0 +1,236 @@
+packet_id: EDGE_PARAMETER_STACK_SELECTION_PACKET
+packet_version: v1
+semantic_task_id: ROADMAP-EDGE-PACKET-SCHEMA
+authority_class: STATIC_EDGE_PARAMETER_STACK_SELECTION_PACKET_SCHEMA_ONLY_NOT_STACK_SELECTION_NOT_SCORING_NOT_ROUTING_NOT_RUNTIME_AUTHORITY
+depends_on_parameter_stack_role_taxonomy:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_role_taxonomy.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackRoleTaxonomy.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_role_taxonomy.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_ROLE_TAXONOMY_OK
+depends_on_parameter_stack_completeness_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_completeness_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompletenessGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_completeness_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPLETENESS_GATE_OK
+depends_on_parameter_stack_compatibility_gate:
+  schema_path: schemas/atomicrows/atomicrows_parameter_stack_compatibility_gate.schema.json
+  registry_path: docs/master_plan/atomicrows/AtomicRowsParameterStackCompatibilityGate.yaml
+  report_path: docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json
+  validator_path: tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+  validation_marker: ATOMICROWS_PARAMETER_STACK_COMPATIBILITY_GATE_OK
+required_stack_role_family_fields:
+  SIGNAL: selected_signal_family_ids
+  SCORING: selected_scoring_family_ids
+  NORMALIZATION: selected_normalization_family_ids
+  RISK: selected_risk_family_ids
+  EXECUTION: selected_execution_family_ids
+  CAPITAL: selected_capital_family_ids
+  LATENCY: selected_latency_family_ids
+  ERROR_GUARD: selected_error_guard_family_ids
+  QUANTUM_ADVISORY: selected_quantum_advisory_family_ids
+minimum_required_packet_fields:
+  - edge_id
+  - edge_hypothesis_packet_id
+  - atomicrows_bundle_digest_ref
+  - selected_stack_id
+  - venue_scope
+  - edge_type
+  - strategy_class
+  - market_type
+  - latency_sensitivity_class
+  - capital_intensity_class
+  - source_dependency_state
+  - selected_signal_family_ids
+  - selected_scoring_family_ids
+  - selected_normalization_family_ids
+  - selected_risk_family_ids
+  - selected_execution_family_ids
+  - selected_capital_family_ids
+  - selected_latency_family_ids
+  - selected_error_guard_family_ids
+  - selected_quantum_advisory_family_ids
+  - blocked_row_ids_and_reasons
+  - role_completion_state
+  - compatibility_state
+  - candidate_stack_generation_count
+  - replay_paper_competition_required_flag
+  - owner_review_required_flag
+static_packet_policy:
+  selected_stack_id_is_static_schema_field_only: true
+  selected_stack_authority_created: false
+  stack_selection_created: false
+  scoring_created: false
+  ranking_created: false
+  optimizer_arbitration_created: false
+  trade_context_routing_created: false
+  candidate_stack_generation_created: false
+  replay_paper_execution_created: false
+  runtime_live_order_authority_created: false
+  final_ready_created_by_this_pr: false
+edge_id: SYNTHETIC_EDGE_ID_SCHEMA_ONLY
+edge_hypothesis_packet_id: SYNTHETIC_EDGE_HYPOTHESIS_PACKET_ID_SCHEMA_ONLY
+atomicrows_bundle_digest_ref: ATOMICROWS_BUNDLE_DIGEST_NOT_CREATED_STATIC_SCHEMA_ONLY
+selected_stack_id: SYNTHETIC_SELECTED_STACK_ID_SCHEMA_FIELD_ONLY
+venue_scope: SYNTHETIC_VENUE_SCOPE_SCHEMA_ONLY
+edge_type: SYNTHETIC_EDGE_TYPE_SCHEMA_ONLY
+strategy_class: SYNTHETIC_STRATEGY_CLASS_SCHEMA_ONLY
+market_type: SYNTHETIC_MARKET_TYPE_SCHEMA_ONLY
+latency_sensitivity_class: SYNTHETIC_LATENCY_SENSITIVITY_SCHEMA_ONLY
+capital_intensity_class: SYNTHETIC_CAPITAL_INTENSITY_SCHEMA_ONLY
+source_dependency_state: SOURCE_DEPENDENCY_STATIC_DECLARED_NOT_ACCEPTED
+selected_signal_family_ids:
+  - SYNTHETIC_SIGNAL_FAMILY_SCHEMA_ONLY
+selected_scoring_family_ids:
+  - SYNTHETIC_SCORING_FAMILY_SCHEMA_ONLY
+selected_normalization_family_ids:
+  - SYNTHETIC_NORMALIZATION_FAMILY_SCHEMA_ONLY
+selected_risk_family_ids:
+  - SYNTHETIC_RISK_FAMILY_SCHEMA_ONLY
+selected_execution_family_ids:
+  - SYNTHETIC_EXECUTION_FAMILY_SCHEMA_ONLY
+selected_capital_family_ids:
+  - SYNTHETIC_CAPITAL_FAMILY_SCHEMA_ONLY
+selected_latency_family_ids:
+  - SYNTHETIC_LATENCY_FAMILY_SCHEMA_ONLY
+selected_error_guard_family_ids:
+  - SYNTHETIC_ERROR_GUARD_FAMILY_SCHEMA_ONLY
+selected_quantum_advisory_family_ids:
+  - SYNTHETIC_QUANTUM_ADVISORY_FAMILY_SCHEMA_ONLY
+blocked_row_ids_and_reasons: []
+role_completion_state: ROLE_COMPLETE
+compatibility_state: COMPATIBILITY_COMPLETE
+candidate_stack_generation_count: 0
+replay_paper_competition_required_flag: true
+owner_review_required_flag: true
+production_readiness:
+  edge_parameter_stack_selection_packet_schema_ready: true
+  production_edge_packet_evaluated: false
+  production_edge_packet_ready: false
+  production_stack_selected: false
+  final_ready: false
+atomicrows_bundle_boundary_policy:
+  atomicrows_bundle_jsonl_required_for_live_use: true
+  atomicrows_bundle_sha_required_for_freeze_authority: true
+  atomicrows_bundle_digest_ref_static_placeholder_allowed: true
+  atomicrows_bundle_file_created_by_this_pr: false
+  atomicrows_bundle_sha_created_by_this_pr: false
+  atomicrows_bundle_hash_authority_created_by_this_pr: false
+  atomicrows_bundle_rows_created_by_this_pr: false
+quantum_advisory_policy:
+  selected_quantum_advisory_family_ids_required: true
+  quantum_advisory_static_metadata_only: true
+  future_quantum_applicability_registry_required_before_quantum_selection: true
+  future_owner_quantum_priority_policy_required_before_quantum_priority_selection: true
+  future_optimizer_arbitration_gate_required_before_optimizer_choice: true
+  strongest_classical_comparator_required_before_quantum_advantage_claim: true
+  fallback_bundle_required_before_quantum_runtime_use: true
+  replay_paper_evidence_required_before_advantage_claim: true
+  live_evidence_required_before_profit_claim: true
+  quantum_backend_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_scoring_created: false
+  quantum_ranking_created: false
+  quantum_selection_created: false
+  quantum_arbitration_created: false
+owner_override_policy:
+  owner_override_supported: true
+  owner_override_satisfies_internal_edge_packet_readiness_only: true
+  owner_override_fabricates_external_fact: false
+  owner_override_fabricates_accepted_source_packet: false
+  owner_override_fabricates_connector_semantic: false
+  owner_override_fabricates_runtime_cash_receipt: false
+  owner_override_fabricates_order_receipt: false
+  owner_override_fabricates_replay_paper_result: false
+  owner_override_fabricates_quantum_backend_execution: false
+  owner_override_fabricates_profit_evidence: false
+source_evidence_boundary_policy:
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  owner_policy_may_authorize_retrieval_scope: true
+  owner_policy_may_authorize_external_fact_value: false
+  external_fact_requires_accepted_source_packet: true
+  connector_semantic_requires_accepted_source_packet: true
+  source_dependency_state_is_static_metadata_only: true
+future_consumer_contract:
+  qtt_trade_context_packet_schema_may_consume: true
+  atomicrows_parameter_selection_universe_registry_may_consume: true
+  parameter_selection_universe_consumer_gate_may_consume: true
+  trade_context_to_selection_universe_routing_gate_may_consume: true
+  quantum_applicability_classification_registry_may_consume: true
+  owner_quantum_priority_policy_registry_may_consume: true
+  scoring_policy_registry_may_consume: true
+  parameter_stack_scoring_ranking_gate_may_consume: true
+  quantum_classical_optimizer_arbitration_gate_may_consume: true
+  candidate_parameter_stack_generation_gate_may_consume: true
+  trade_context_parameter_stack_selection_gate_may_consume: true
+  selected_parameter_stack_handoff_packet_may_consume: true
+  replay_paper_candidate_stack_competition_gate_may_consume: true
+  this_pr_performs_trade_context_schema: false
+  this_pr_performs_selection_universe_registry: false
+  this_pr_performs_routing: false
+  this_pr_performs_scoring: false
+  this_pr_performs_ranking: false
+  this_pr_performs_selection: false
+  this_pr_performs_arbitration: false
+  this_pr_generates_candidate_stacks: false
+  this_pr_executes_replay_or_paper: false
+  this_pr_executes_runtime_or_live: false
+explicit_no_claim_flags:
+  selected_stack_authority_created: false
+  stack_selection_created: false
+  scoring_created: false
+  ranking_created: false
+  optimizer_arbitration_created: false
+  trade_context_routing_created: false
+  trade_context_packet_created: false
+  selection_universe_registry_created: false
+  selection_universe_consumer_gate_created: false
+  candidate_stack_generation_created: false
+  selected_stack_handoff_created: false
+  source_retrieval_created: false
+  source_acceptance_created: false
+  accepted_source_packets_created: false
+  connector_semantics_created: false
+  connector_semantic_binding_created: false
+  runtime_artifacts_created: false
+  runtime_resolver_execution_created: false
+  live_readiness_created: false
+  runtime_live_use_created: false
+  private_state_fetch_created: false
+  order_authority_created: false
+  cash_receipts_created: false
+  order_receipts_created: false
+  fill_receipts_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  replay_results_created: false
+  paper_results_created: false
+  profit_evidence_created: false
+  quantum_backend_evidence_created: false
+  quantum_advantage_claim_created: false
+  latency_superiority_claim_created: false
+  execution_superiority_claim_created: false
+  atomicrows_bundle_rows_created: false
+  atomicrows_bundle_jsonl_created: false
+  atomicrows_bundle_sha256_created: false
+  atomicrows_bundle_hash_authority_created: false
+  runtime_cash_value_created: false
+  connector_semantic_value_created: false
+  external_fact_value_created: false
+  owner_approval_receipt_created: false
+  owner_review_dashboard_runtime_created: false
+validation_invariants:
+  - Required stack role family fields match PR73 PR74 and PR75 canonical roles.
+  - selected_stack_id is a static schema field only.
+  - candidate_stack_generation_count remains zero and does not create candidate stacks.
+  - replay_paper_competition_required_flag records future requirement only.
+  - owner_review_required_flag records future owner review requirement only.
+  - source_dependency_state is static metadata only and does not accept source facts.
+  - atomicrows_bundle_digest_ref is deferred static metadata only.
+  - OWNER_GLOBAL_OVERRIDE satisfies internal EDGE packet readiness only.
+  - Quantum advisory metadata is required but static only.
+  - This packet does not create selection scoring ranking arbitration routing replay paper runtime live order source connector bundle profit or quantum evidence.
+final_ready: false
