@@ -1,0 +1,386 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-quantum-classical-optimizer-arbitration-gate",
+  "title": "QTT Quantum Classical Optimizer Arbitration Gate",
+  "description": "Static deterministic quantum/classical optimizer arbitration contract over synthetic fixture optimizer-output metadata only. This schema permits fixture-only arbitration semantics and forbids classical optimizer execution, quantum optimizer execution, backend/simulator execution, QAOA/VQE/annealing/QUBO/Ising execution, real optimizer results, real candidate generation, final selection, replay/paper/live/order authority, source retrieval or acceptance, connector binding, runtime cash/private-state authority, profit evidence, quantum advantage claims, latency/execution superiority claims, and AtomicRows bundle/hash creation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gate_registry_id",
+    "optimizer_arbitration_gate_id",
+    "semantic_task_id",
+    "gate_scope",
+    "policy_version",
+    "static_only_flag",
+    "metadata_only_flag",
+    "synthetic_fixture_only_flag",
+    "optimizer_arbitration_contract_only_flag",
+    "quantum_applicability_source",
+    "owner_quantum_priority_source",
+    "scoring_policy_source",
+    "scoring_ranking_gate_source",
+    "upstream_dependencies",
+    "future_consumers",
+    "arbitration_modes",
+    "arbitration_inputs",
+    "arbitration_outputs",
+    "arbitration_policy",
+    "blocked_arbitration_policy",
+    "reason_codes",
+    "required_no_authority_flags",
+    "stage1_prediction_market_contexts",
+    "final_ready"
+  ],
+  "properties": {
+    "gate_registry_id": { "const": "QTT_QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_GATE" },
+    "optimizer_arbitration_gate_id": { "const": "QTT_QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_GATE_V1" },
+    "semantic_task_id": { "const": "ROADMAP-QUANTUM-CLASSICAL-OPTIMIZER-ARBITRATION-GATE" },
+    "gate_scope": { "const": "STATIC_QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_CONTRACT_ONLY" },
+    "policy_version": { "const": "v1" },
+    "static_only_flag": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "synthetic_fixture_only_flag": { "const": true },
+    "optimizer_arbitration_contract_only_flag": { "const": true },
+    "quantum_applicability_source": { "$ref": "#/$defs/source_ref" },
+    "owner_quantum_priority_source": { "$ref": "#/$defs/source_ref" },
+    "scoring_policy_source": { "$ref": "#/$defs/source_ref" },
+    "scoring_ranking_gate_source": { "$ref": "#/$defs/source_ref" },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "future_consumers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_consumer" }
+    },
+    "arbitration_modes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/arbitration_mode" }
+    },
+    "arbitration_inputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "arbitration_outputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "arbitration_policy": { "$ref": "#/$defs/arbitration_policy" },
+    "blocked_arbitration_policy": { "$ref": "#/$defs/blocked_arbitration_policy" },
+    "reason_codes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reason_code" }
+    },
+    "required_no_authority_flags": { "$ref": "#/$defs/no_authority_flags" },
+    "stage1_prediction_market_contexts": {
+      "type": "array",
+      "items": { "enum": ["KALSHI", "POLYMARKET", "FORECASTEX_IBKR"] }
+    },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" },
+        "classification_registry_id": { "type": "string" },
+        "policy_source_id": { "type": "string" },
+        "policy_registry_id": { "type": "string" },
+        "ranking_gate_id": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "delivery_label",
+        "title",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "future_consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_id",
+        "delivery_label",
+        "title",
+        "consumer_scope",
+        "pr86_creates_consumer_execution"
+      ],
+      "properties": {
+        "consumer_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "consumer_scope": { "type": "string" },
+        "pr86_creates_consumer_execution": { "const": false }
+      }
+    },
+    "arbitration_mode": {
+      "enum": [
+        "CLASSICAL_BASELINE",
+        "QUANTUM_CHALLENGER",
+        "HYBRID_COMPARE_THEN_SELECT",
+        "QUANTUM_FIRST",
+        "OWNER_FORCED_QUANTUM",
+        "OWNER_FORCED_CLASSICAL"
+      ]
+    },
+    "arbitration_decision": {
+      "enum": [
+        "USE_CLASSICAL_BASELINE_FIXTURE",
+        "USE_QUANTUM_CHALLENGER_FIXTURE",
+        "USE_HYBRID_COMPARISON_FIXTURE",
+        "USE_QUANTUM_FIRST_FIXTURE",
+        "USE_OWNER_FORCED_QUANTUM_FIXTURE",
+        "USE_OWNER_FORCED_CLASSICAL_FIXTURE",
+        "BLOCK_ARBITRATION_FIXTURE"
+      ]
+    },
+    "arbitration_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arbitration_policy_id",
+        "arbitration_contract_version",
+        "scoring_ranking_gate_id",
+        "blocked_arbitration_policy_id",
+        "tie_break_policy_id",
+        "stable_sort_required",
+        "random_arbitration_allowed",
+        "final_selection_created",
+        "selected_stack_created",
+        "tie_break_order"
+      ],
+      "properties": {
+        "arbitration_policy_id": { "const": "QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_POLICY_V1" },
+        "arbitration_contract_version": { "const": "v1" },
+        "scoring_ranking_gate_id": { "const": "QTT_PARAMETER_STACK_SCORING_AND_RANKING_GATE_V1" },
+        "blocked_arbitration_policy_id": { "const": "QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_BLOCKED_POLICY_V1" },
+        "tie_break_policy_id": { "const": "QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_TIE_BREAK_POLICY_V1" },
+        "stable_sort_required": { "const": true },
+        "random_arbitration_allowed": { "const": false },
+        "final_selection_created": { "const": false },
+        "selected_stack_created": { "const": false },
+        "tie_break_order": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "blocked_arbitration_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocked_arbitration_policy_id",
+        "blocked_fixtures_remain_traceable",
+        "blocked_fixtures_receive_static_decision_only",
+        "blocked_fixtures_retain_reason_codes",
+        "blocked_reason_code_order"
+      ],
+      "properties": {
+        "blocked_arbitration_policy_id": { "const": "QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_BLOCKED_POLICY_V1" },
+        "blocked_fixtures_remain_traceable": { "const": true },
+        "blocked_fixtures_receive_static_decision_only": { "const": true },
+        "blocked_fixtures_retain_reason_codes": { "const": true },
+        "blocked_reason_code_order": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "arbitration_fixture": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "arbitration_fixture_id",
+        "arbitration_mode",
+        "arbitration_fixture_source",
+        "arbitration_fixture_authority",
+        "arbitration_decision",
+        "arbitration_decision_authority",
+        "valid_for_arbitration_flag",
+        "classical_comparator_required",
+        "classical_comparator_present",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "arbitration_fixture_id": { "type": "string" },
+        "arbitration_mode": { "$ref": "#/$defs/arbitration_mode" },
+        "arbitration_fixture_source": { "const": "SYNTHETIC_STATIC_FIXTURE_ONLY" },
+        "arbitration_fixture_authority": { "const": "NON_RUNTIME_NON_LIVE_TEST_FIXTURE" },
+        "arbitration_decision": { "$ref": "#/$defs/arbitration_decision" },
+        "arbitration_decision_authority": { "const": "STATIC_FIXTURE_ONLY_NOT_SELECTION" },
+        "valid_for_arbitration_flag": { "type": "boolean" },
+        "classical_comparator_required": { "type": "boolean" },
+        "classical_comparator_present": { "type": "boolean" },
+        "blocked_reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "reason_code": {
+      "enum": [
+        "OPTIMIZER_ARBITRATION_ALLOWED_STATIC_FIXTURE_ONLY",
+        "OPTIMIZER_ARBITRATION_ALLOWED_CLASSICAL_BASELINE_FIXTURE",
+        "OPTIMIZER_ARBITRATION_ALLOWED_QUANTUM_CHALLENGER_FIXTURE",
+        "OPTIMIZER_ARBITRATION_ALLOWED_HYBRID_COMPARE_THEN_SELECT_FIXTURE",
+        "OPTIMIZER_ARBITRATION_ALLOWED_QUANTUM_FIRST_FIXTURE",
+        "OPTIMIZER_ARBITRATION_ALLOWED_OWNER_FORCED_QUANTUM_INTERNAL_ONLY",
+        "OPTIMIZER_ARBITRATION_ALLOWED_OWNER_FORCED_CLASSICAL_INTERNAL_ONLY",
+        "OPTIMIZER_ARBITRATION_ALLOWED_PR82_QUANTUM_APPLICABILITY_METADATA",
+        "OPTIMIZER_ARBITRATION_ALLOWED_PR83_OWNER_QUANTUM_PRIORITY_POLICY",
+        "OPTIMIZER_ARBITRATION_ALLOWED_PR84_SCORING_POLICY",
+        "OPTIMIZER_ARBITRATION_ALLOWED_PR85_RANKING_FIXTURE",
+        "OPTIMIZER_ARBITRATION_ALLOWED_CLASSICAL_COMPARATOR",
+        "OPTIMIZER_ARBITRATION_ALLOWED_CLASSICAL_FALLBACK",
+        "OPTIMIZER_ARBITRATION_BLOCKED_UNKNOWN_ARBITRATION_MODE",
+        "OPTIMIZER_ARBITRATION_BLOCKED_DUPLICATE_ARBITRATION_FIXTURE",
+        "OPTIMIZER_ARBITRATION_BLOCKED_MISSING_REQUIRED_FIXTURE_FIELD",
+        "OPTIMIZER_ARBITRATION_BLOCKED_MISSING_CLASSICAL_COMPARATOR",
+        "OPTIMIZER_ARBITRATION_BLOCKED_MISSING_QUANTUM_CHALLENGER",
+        "OPTIMIZER_ARBITRATION_BLOCKED_UNKNOWN_QUANTUM_APPLICABILITY_LABEL",
+        "OPTIMIZER_ARBITRATION_BLOCKED_UNKNOWN_OWNER_QUANTUM_PRIORITY_MODE",
+        "OPTIMIZER_ARBITRATION_BLOCKED_OWNER_FORCED_MODE_WITHOUT_OWNER_BASIS",
+        "OPTIMIZER_ARBITRATION_BLOCKED_QUANTUM_PRIORITY_NOT_PERMITTED",
+        "OPTIMIZER_ARBITRATION_BLOCKED_RANDOM_ARBITRATION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_TIE_BREAK_AMBIGUOUS",
+        "OPTIMIZER_ARBITRATION_BLOCKED_CLASSICAL_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_QUANTUM_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_REAL_OPTIMIZER_RESULT_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_QAOA_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_VQE_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_ANNEALING_EXECUTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_QUBO_SOLVE_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_ISING_SOLVE_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_REAL_GENERATED_CANDIDATE_CLAIM",
+        "OPTIMIZER_ARBITRATION_BLOCKED_FINAL_SELECTION_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_SELECTED_STACK_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_REPLAY_PAPER_RESULT_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_SOURCE_RETRIEVAL_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_RUNTIME_CASH_RECEIPT_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_PRIVATE_STATE_FETCH_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+        "OPTIMIZER_ARBITRATION_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ]
+    },
+    "no_authority_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classical_optimizer_execution_created",
+        "quantum_optimizer_execution_created",
+        "optimizer_execution_created",
+        "optimizer_arbitration_execution_created",
+        "backend_execution_created",
+        "real_optimizer_result_created",
+        "quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "qaoa_execution_created",
+        "vqe_execution_created",
+        "annealing_execution_created",
+        "qubo_solve_execution_created",
+        "ising_solve_execution_created",
+        "real_candidate_stack_generation_created",
+        "generated_candidate_stack_claim_created",
+        "real_generated_candidate_claim_created",
+        "final_selection_created",
+        "selected_stack_created",
+        "selected_trade_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "runtime_authority_created",
+        "live_authority_created",
+        "order_authority_created",
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_cash_receipt_created",
+        "private_state_fetch_created",
+        "expected_profit_claim_created",
+        "profit_evidence_created",
+        "quantum_advantage_claim_created",
+        "latency_superiority_claim_created",
+        "execution_superiority_claim_created",
+        "random_arbitration_used",
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created"
+      ],
+      "properties": {
+        "classical_optimizer_execution_created": { "const": false },
+        "quantum_optimizer_execution_created": { "const": false },
+        "optimizer_execution_created": { "const": false },
+        "optimizer_arbitration_execution_created": { "const": false },
+        "backend_execution_created": { "const": false },
+        "real_optimizer_result_created": { "const": false },
+        "quantum_backend_execution_created": { "const": false },
+        "quantum_simulator_execution_created": { "const": false },
+        "qaoa_execution_created": { "const": false },
+        "vqe_execution_created": { "const": false },
+        "annealing_execution_created": { "const": false },
+        "qubo_solve_execution_created": { "const": false },
+        "ising_solve_execution_created": { "const": false },
+        "real_candidate_stack_generation_created": { "const": false },
+        "generated_candidate_stack_claim_created": { "const": false },
+        "real_generated_candidate_claim_created": { "const": false },
+        "final_selection_created": { "const": false },
+        "selected_stack_created": { "const": false },
+        "selected_trade_created": { "const": false },
+        "replay_execution_created": { "const": false },
+        "paper_execution_created": { "const": false },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "source_retrieval_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "runtime_cash_receipt_created": { "const": false },
+        "private_state_fetch_created": { "const": false },
+        "expected_profit_claim_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "quantum_advantage_claim_created": { "const": false },
+        "latency_superiority_claim_created": { "const": false },
+        "execution_superiority_claim_created": { "const": false },
+        "random_arbitration_used": { "const": false },
+        "atomicrows_bundle_jsonl_created": { "const": false },
+        "atomicrows_bundle_sha256_created": { "const": false }
+      }
+    }
+  }
+}
