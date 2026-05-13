@@ -5,6 +5,7 @@ import argparse
 import copy
 from dataclasses import dataclass
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -74,6 +75,8 @@ GENERATION_AUTHORITY_CLASS = (
 )
 SUCCESS_MARKER = "QTT_CANDIDATE_PARAMETER_STACK_GENERATION_GATE_OK"
 FAILURE_MARKER = "QTT_CANDIDATE_PARAMETER_STACK_GENERATION_GATE_FAILED"
+CI_DETACHED_HEAD_MODE_MARKER = "CI_DETACHED_HEAD_MODE_ACTIVE"
+CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = "CI_SHALLOW_FETCH_ANCESTRY_CHECK_SKIPPED"
 
 ROLE_ORDER = (
     "SIGNAL",
@@ -370,6 +373,7 @@ class ValidationResult:
     ok: bool
     failures: tuple[str, ...]
     report: dict[str, Any] | None
+    info_lines: tuple[str, ...] = ()
 
 
 def _resolve(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
@@ -453,8 +457,14 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
     return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
 
 
+def _github_actions_active() -> bool:
+    return os.getenv("GITHUB_ACTIONS") == "true"
+
+
 def validate_pr87_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
     failures: list[str] = []
+    info_lines: list[str] = []
+    github_actions = _github_actions_active()
     roadmap = load_json(_resolve(repo_root, ROADMAP_INDEX))
     blueprint = load_json(_resolve(repo_root, BLUEPRINT_INDEX))
     roadmap_entries = _list_of_mappings(roadmap.get("pr_entries"))
@@ -488,19 +498,32 @@ def validate_pr87_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
 
     branch_rc, branch, branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
     if branch_rc != 0:
-        failures.append(f"git branch check failed: {branch_err}")
+        if github_actions:
+            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
+        else:
+            failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
+        if github_actions:
+            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
+        else:
+            failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
     head_rc, head, head_err = _git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
     if head_rc != 0:
         failures.append(f"git HEAD check failed: {head_err}")
-    ancestor_rc, _, ancestor_err = _git_stdout(
-        repo_root, ["merge-base", "--is-ancestor", EXPECTED_BASELINE_ANCESTOR, "HEAD"]
+    baseline_rc, _, _baseline_err = _git_stdout(
+        repo_root, ["cat-file", "-e", f"{EXPECTED_BASELINE_ANCESTOR}^{{commit}}"]
     )
-    if ancestor_rc != 0:
-        failures.append(
-            f"HEAD must descend from {EXPECTED_BASELINE_ANCESTOR}: {ancestor_err}"
+    if github_actions and baseline_rc != 0:
+        info_lines.append(CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER)
+    else:
+        ancestor_rc, _, ancestor_err = _git_stdout(
+            repo_root,
+            ["merge-base", "--is-ancestor", EXPECTED_BASELINE_ANCESTOR, "HEAD"],
         )
+        if ancestor_rc != 0:
+            failures.append(
+                f"HEAD must descend from {EXPECTED_BASELINE_ANCESTOR}: {ancestor_err}"
+            )
 
     return failures, {
         "roadmap_pr_label": ROADMAP_PR_LABEL,
@@ -514,6 +537,7 @@ def validate_pr87_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
         "validator_marker_source": (
             f"{ROADMAP_INDEX.as_posix()} and {BLUEPRINT_INDEX.as_posix()}"
         ),
+        "ci_info_lines": tuple(info_lines),
         "roadmap_index_entry_verified": not failures,
         "blueprint_index_entry_verified": not failures,
     }
@@ -1476,6 +1500,7 @@ def validate(
         return ValidationResult(False, tuple(failures), None)
 
     metadata_failures, metadata = validate_pr87_roadmap_metadata(repo_root)
+    info_lines = tuple(metadata.get("ci_info_lines", ()))
     failures.extend(metadata_failures)
     upstream_failures, upstream = validate_upstream_reports(repo_root)
     failures.extend(upstream_failures)
@@ -1495,10 +1520,10 @@ def validate(
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:
-        return ValidationResult(False, tuple(failures), report)
+        return ValidationResult(False, tuple(failures), report, info_lines)
 
     write_json_report(report, output_abs)
-    return ValidationResult(True, tuple(), report)
+    return ValidationResult(True, tuple(), report, info_lines)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1519,9 +1544,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     if result.ok:
         print(SUCCESS_MARKER)
+        for line in result.info_lines:
+            print(line)
         return 0
 
     print(FAILURE_MARKER)
+    for line in result.info_lines:
+        print(line)
     for failure in result.failures:
         print(f"- {failure}")
     return 1

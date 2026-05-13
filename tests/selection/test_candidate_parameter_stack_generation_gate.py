@@ -27,6 +27,42 @@ def _report() -> dict:
     return json.loads((REPO_ROOT / gate.DEFAULT_REPORT).read_text(encoding="utf-8"))
 
 
+def _mock_git_stdout(monkeypatch, responses: dict[tuple[str, ...], tuple[int, str, str]]) -> None:
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        key = tuple(args)
+        if key not in responses:
+            raise AssertionError(f"unexpected git command: {args}")
+        return responses[key]
+
+    monkeypatch.setattr(gate, "_git_stdout", fake_git_stdout)
+
+
+def _git_metadata_responses(
+    *,
+    branch: str = gate.TARGET_BRANCH,
+    head: str = "abc1234",
+    baseline_rc: int = 0,
+    baseline_err: str = "",
+    ancestor_rc: int = 0,
+    ancestor_err: str = "",
+) -> dict[tuple[str, ...], tuple[int, str, str]]:
+    return {
+        ("branch", "--show-current"): (0, branch, ""),
+        ("rev-parse", "--short", "HEAD"): (0, head, ""),
+        (
+            "cat-file",
+            "-e",
+            f"{gate.EXPECTED_BASELINE_ANCESTOR}^{{commit}}",
+        ): (baseline_rc, "", baseline_err),
+        (
+            "merge-base",
+            "--is-ancestor",
+            gate.EXPECTED_BASELINE_ANCESTOR,
+            "HEAD",
+        ): (ancestor_rc, "", ancestor_err),
+    }
+
+
 def _seed(payload: dict, seed_id: str) -> dict:
     for item in payload["candidate_seed_descriptors"]:
         if item["seed_descriptor_id"] == seed_id:
@@ -42,6 +78,92 @@ def _packet_from(payload: dict) -> dict:
     )
     assert failures == []
     return packet
+
+
+def test_local_mode_still_fails_on_wrong_branch(monkeypatch):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_metadata_responses(branch="wrong-pr87-branch"),
+    )
+
+    failures, metadata = gate.validate_pr87_roadmap_metadata(REPO_ROOT)
+
+    assert any(
+        f"current branch must be {gate.TARGET_BRANCH}, got wrong-pr87-branch" in failure
+        for failure in failures
+    )
+    assert metadata["ci_info_lines"] == ()
+
+
+def test_ci_detached_head_mode_skips_branch_name_equality(monkeypatch):
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    _mock_git_stdout(
+        monkeypatch,
+        _git_metadata_responses(branch=""),
+    )
+
+    failures, metadata = gate.validate_pr87_roadmap_metadata(REPO_ROOT)
+
+    assert failures == []
+    assert metadata["branch"] == ""
+    assert metadata["ci_info_lines"] == (gate.CI_DETACHED_HEAD_MODE_MARKER,)
+
+
+def test_ci_shallow_fetch_mode_skips_missing_baseline_ancestry(
+    monkeypatch,
+    tmp_path,
+    capsys,
+):
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    responses = _git_metadata_responses(
+        baseline_rc=128,
+        baseline_err=f"fatal: Not a valid object name {gate.EXPECTED_BASELINE_ANCESTOR}",
+    )
+    responses.pop(
+        (
+            "merge-base",
+            "--is-ancestor",
+            gate.EXPECTED_BASELINE_ANCESTOR,
+            "HEAD",
+        )
+    )
+    _mock_git_stdout(monkeypatch, responses)
+
+    output_path = tmp_path / "CandidateParameterStackGenerationGate.report.json"
+    assert gate.main(["--out", str(output_path)]) == 0
+
+    assert capsys.readouterr().out.splitlines() == [
+        gate.SUCCESS_MARKER,
+        gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER,
+    ]
+    report = json.loads(output_path.read_text(encoding="utf-8"))
+    assert report["final_selection"] is False
+    assert report["live_order_authority"] is False
+    assert report["order_authority_created"] is False
+    assert report["profit_evidence_created"] is False
+    assert report["quantum_backend_execution_created"] is False
+
+
+def test_local_mode_still_enforces_ancestry(monkeypatch):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_metadata_responses(
+            baseline_rc=128,
+            baseline_err=f"fatal: Not a valid object name {gate.EXPECTED_BASELINE_ANCESTOR}",
+            ancestor_rc=128,
+            ancestor_err=f"fatal: Not a valid object name {gate.EXPECTED_BASELINE_ANCESTOR}",
+        ),
+    )
+
+    failures, metadata = gate.validate_pr87_roadmap_metadata(REPO_ROOT)
+
+    assert any(
+        f"HEAD must descend from {gate.EXPECTED_BASELINE_ANCESTOR}" in failure
+        for failure in failures
+    )
+    assert metadata["ci_info_lines"] == ()
 
 
 def test_pr87_metadata_and_semantic_task_id_are_verified_or_marked_needs_owner_confirmation():
