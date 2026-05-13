@@ -1,0 +1,302 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-parameter-stack-scoring-and-ranking-gate",
+  "title": "QTT Parameter Stack Scoring And Ranking Gate",
+  "description": "Static deterministic parameter-stack scoring and ranking contract over synthetic candidate descriptors only. This schema permits deterministic fixture scoring/ranking for contract validation and forbids real candidate generation, final selection, optimizer execution or arbitration, replay/paper/live execution, source retrieval or acceptance, connector binding, runtime cash/private-state authority, order authority, profit evidence, quantum advantage claims, latency/execution superiority claims, and AtomicRows bundle/hash creation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gate_registry_id",
+    "parameter_stack_scoring_ranking_gate_id",
+    "semantic_task_id",
+    "gate_scope",
+    "policy_version",
+    "static_only_flag",
+    "metadata_only_flag",
+    "synthetic_fixture_only_flag",
+    "scoring_ranking_contract_only_flag",
+    "static_candidate_descriptor_fixture_only",
+    "policy_source",
+    "quantum_applicability_source",
+    "owner_quantum_priority_source",
+    "upstream_dependencies",
+    "future_consumers",
+    "ranking_inputs",
+    "ranking_outputs",
+    "ranking_policy",
+    "blocked_candidate_policy",
+    "reason_codes",
+    "required_no_authority_flags",
+    "stage1_prediction_market_contexts",
+    "final_ready"
+  ],
+  "properties": {
+    "gate_registry_id": { "const": "QTT_PARAMETER_STACK_SCORING_AND_RANKING_GATE" },
+    "parameter_stack_scoring_ranking_gate_id": { "const": "QTT_PARAMETER_STACK_SCORING_AND_RANKING_GATE_V1" },
+    "semantic_task_id": { "const": "ROADMAP-PARAMETER-STACK-SCORING-AND-RANKING-GATE" },
+    "gate_scope": { "const": "STATIC_PARAMETER_STACK_SCORING_AND_RANKING_CONTRACT_ONLY" },
+    "policy_version": { "const": "v1" },
+    "static_only_flag": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "synthetic_fixture_only_flag": { "const": true },
+    "scoring_ranking_contract_only_flag": { "const": true },
+    "static_candidate_descriptor_fixture_only": { "const": true },
+    "policy_source": { "$ref": "#/$defs/source_ref" },
+    "quantum_applicability_source": { "$ref": "#/$defs/source_ref" },
+    "owner_quantum_priority_source": { "$ref": "#/$defs/source_ref" },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "future_consumers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_consumer" }
+    },
+    "ranking_inputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ranking_outputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ranking_policy": { "$ref": "#/$defs/ranking_policy" },
+    "blocked_candidate_policy": { "$ref": "#/$defs/blocked_candidate_policy" },
+    "reason_codes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reason_code" }
+    },
+    "required_no_authority_flags": { "$ref": "#/$defs/no_authority_flags" },
+    "stage1_prediction_market_contexts": {
+      "type": "array",
+      "items": { "enum": ["KALSHI", "POLYMARKET", "FORECASTEX_IBKR"] }
+    },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" },
+        "policy_registry_id": { "type": "string" },
+        "classification_registry_id": { "type": "string" },
+        "policy_source_id": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "delivery_label",
+        "title",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "future_consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_id",
+        "delivery_label",
+        "title",
+        "consumer_scope",
+        "pr85_creates_consumer_execution"
+      ],
+      "properties": {
+        "consumer_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "consumer_scope": { "type": "string" },
+        "pr85_creates_consumer_execution": { "const": false }
+      }
+    },
+    "ranking_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ranking_policy_id",
+        "ranking_contract_version",
+        "score_formula_registry_id",
+        "candidate_descriptor_schema_id",
+        "blocked_candidate_policy_id",
+        "tie_break_policy_id",
+        "score_sort_order",
+        "rank_assignment_policy",
+        "stable_sort_required",
+        "random_sort_allowed",
+        "final_selection_created",
+        "selected_stack_created",
+        "tie_break_order"
+      ],
+      "properties": {
+        "ranking_policy_id": { "const": "PARAMETER_STACK_SCORING_RANKING_POLICY_V1" },
+        "ranking_contract_version": { "const": "v1" },
+        "score_formula_registry_id": { "const": "QTT_PARAMETER_ALGORITHM_SCORING_POLICY_REGISTRY" },
+        "candidate_descriptor_schema_id": { "const": "QTT_PARAMETER_STACK_SCORING_AND_RANKING_GATE_SCHEMA_V1" },
+        "blocked_candidate_policy_id": { "const": "PARAMETER_STACK_SCORING_RANKING_BLOCKED_CANDIDATE_POLICY_V1" },
+        "tie_break_policy_id": { "const": "PARAMETER_STACK_SCORING_RANKING_TIE_BREAK_POLICY_V1" },
+        "score_sort_order": { "const": "DESCENDING_FINAL_SELECTION_SCORE" },
+        "rank_assignment_policy": { "const": "SEQUENTIAL_RANK" },
+        "stable_sort_required": { "const": true },
+        "random_sort_allowed": { "const": false },
+        "final_selection_created": { "const": false },
+        "selected_stack_created": { "const": false },
+        "tie_break_order": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "blocked_candidate_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocked_candidate_policy_id",
+        "blocked_candidates_remain_traceable",
+        "blocked_candidates_ranked",
+        "blocked_candidates_retain_reason_codes",
+        "blocked_reason_code_order"
+      ],
+      "properties": {
+        "blocked_candidate_policy_id": { "const": "PARAMETER_STACK_SCORING_RANKING_BLOCKED_CANDIDATE_POLICY_V1" },
+        "blocked_candidates_remain_traceable": { "const": true },
+        "blocked_candidates_ranked": { "const": false },
+        "blocked_candidates_retain_reason_codes": { "const": true },
+        "blocked_reason_code_order": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "reason_code": {
+      "enum": [
+        "STACK_SCORING_RANKING_ALLOWED_STATIC_FIXTURE_ONLY",
+        "STACK_SCORING_RANKING_ALLOWED_PR84_FORMULA_POLICY",
+        "STACK_SCORING_RANKING_ALLOWED_PR82_QUANTUM_APPLICABILITY_METADATA",
+        "STACK_SCORING_RANKING_ALLOWED_PR83_OWNER_QUANTUM_PRIORITY_POLICY",
+        "STACK_SCORING_RANKING_ALLOWED_CLASSICAL_COMPARATOR",
+        "STACK_SCORING_RANKING_ALLOWED_QUANTUM_PRIORITY_WHEN_OWNER_ENABLED",
+        "STACK_SCORING_RANKING_ALLOWED_HYBRID_TIEBREAK_WITH_CLASSICAL_COMPARATOR",
+        "STACK_SCORING_RANKING_ALLOWED_OWNER_INTERNAL_PRIORITY",
+        "STACK_SCORING_RANKING_BLOCKED_UNKNOWN_CANDIDATE_DESCRIPTOR",
+        "STACK_SCORING_RANKING_BLOCKED_DUPLICATE_CANDIDATE_DESCRIPTOR",
+        "STACK_SCORING_RANKING_BLOCKED_MISSING_REQUIRED_DESCRIPTOR_FIELD",
+        "STACK_SCORING_RANKING_BLOCKED_UNKNOWN_SCORING_COMPONENT",
+        "STACK_SCORING_RANKING_BLOCKED_MISSING_SCORE_BREAKDOWN",
+        "STACK_SCORING_RANKING_BLOCKED_INVALID_SCORE_TYPE",
+        "STACK_SCORING_RANKING_BLOCKED_UNKNOWN_QUANTUM_APPLICABILITY_LABEL",
+        "STACK_SCORING_RANKING_BLOCKED_OWNER_QUANTUM_PRIORITY_NOT_PERMITTED",
+        "STACK_SCORING_RANKING_BLOCKED_CLASSICAL_COMPARATOR_MISSING",
+        "STACK_SCORING_RANKING_BLOCKED_RANDOM_RANKING_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_TIE_BREAK_AMBIGUOUS",
+        "STACK_SCORING_RANKING_BLOCKED_REAL_GENERATED_CANDIDATE_CLAIM",
+        "STACK_SCORING_RANKING_BLOCKED_FINAL_SELECTION_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_SELECTED_STACK_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_REPLAY_PAPER_RESULT_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_SOURCE_RETRIEVAL_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_RUNTIME_CASH_RECEIPT_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_PRIVATE_STATE_FETCH_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+        "STACK_SCORING_RANKING_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ]
+    },
+    "no_authority_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "real_candidate_stack_generation_created",
+        "generated_candidate_stack_claim_created",
+        "final_selection_created",
+        "selected_stack_created",
+        "selected_trade_created",
+        "optimizer_execution_created",
+        "optimizer_arbitration_created",
+        "quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "runtime_authority_created",
+        "live_authority_created",
+        "order_authority_created",
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_cash_receipt_created",
+        "private_state_fetch_created",
+        "expected_profit_claim_created",
+        "profit_evidence_created",
+        "quantum_advantage_claim_created",
+        "latency_superiority_claim_created",
+        "execution_superiority_claim_created",
+        "random_ranking_used",
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created"
+      ],
+      "properties": {
+        "real_candidate_stack_generation_created": { "const": false },
+        "generated_candidate_stack_claim_created": { "const": false },
+        "final_selection_created": { "const": false },
+        "selected_stack_created": { "const": false },
+        "selected_trade_created": { "const": false },
+        "optimizer_execution_created": { "const": false },
+        "optimizer_arbitration_created": { "const": false },
+        "quantum_backend_execution_created": { "const": false },
+        "quantum_simulator_execution_created": { "const": false },
+        "replay_execution_created": { "const": false },
+        "paper_execution_created": { "const": false },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "source_retrieval_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "runtime_cash_receipt_created": { "const": false },
+        "private_state_fetch_created": { "const": false },
+        "expected_profit_claim_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "quantum_advantage_claim_created": { "const": false },
+        "latency_superiority_claim_created": { "const": false },
+        "execution_superiority_claim_created": { "const": false },
+        "random_ranking_used": { "const": false },
+        "atomicrows_bundle_jsonl_created": { "const": false },
+        "atomicrows_bundle_sha256_created": { "const": false }
+      }
+    }
+  }
+}

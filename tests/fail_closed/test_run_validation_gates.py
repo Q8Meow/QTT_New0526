@@ -39,6 +39,9 @@ from tools import (
 from tools import (
     validate_parameter_algorithm_scoring_policy_registry as scoring_policy_gate,
 )
+from tools import (
+    validate_parameter_stack_scoring_and_ranking_gate as stack_scoring_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -617,6 +620,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_parameter_algorithm_scoring_policy_registry.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_parameter_stack_scoring_and_ranking_gate.py"
             ),
         ],
         [
@@ -1501,6 +1511,13 @@ def test_runner_exposes_parameter_algorithm_scoring_policy_registry_success_mark
     )
 
 
+def test_runner_exposes_parameter_stack_scoring_and_ranking_gate_success_marker():
+    assert (
+        stack_scoring_gate.SUCCESS_MARKER
+        == "QTT_PARAMETER_STACK_SCORING_AND_RANKING_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2275,6 +2292,9 @@ def test_runner_includes_pr80_pr81_pr82_and_pr83_quantum_gates_after_pr79(
     pr84_index = command_names.index(
         "validate_parameter_algorithm_scoring_policy_registry.py"
     )
+    pr85_index = command_names.index(
+        "validate_parameter_stack_scoring_and_ranking_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2295,6 +2315,7 @@ def test_runner_includes_pr80_pr81_pr82_and_pr83_quantum_gates_after_pr79(
         < pr82_index
         < pr83_index
         < pr84_index
+        < pr85_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2326,6 +2347,10 @@ def test_runner_includes_pr80_pr81_pr82_and_pr83_quantum_gates_after_pr79(
     assert commands[pr84_index] == [
         python_executable,
         str(Path("tools") / "validate_parameter_algorithm_scoring_policy_registry.py"),
+    ]
+    assert commands[pr85_index] == [
+        python_executable,
+        str(Path("tools") / "validate_parameter_stack_scoring_and_ranking_gate.py"),
     ]
 
 
@@ -2481,6 +2506,40 @@ def test_runner_does_not_emit_success_marker_if_parameter_algorithm_scoring_poli
 
     assert exit_code == 53
     assert seen == commands[:6]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_parameter_stack_scoring_and_ranking_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "validate_quantum_applicability_classification_registry.py"],
+        ["python", "validate_owner_quantum_priority_policy_registry.py"],
+        ["python", "validate_parameter_algorithm_scoring_policy_registry.py"],
+        ["python", "validate_parameter_stack_scoring_and_ranking_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 0, 0, 59, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 59
+    assert seen == commands[:7]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
@@ -2734,6 +2793,40 @@ def test_runner_pr84_parameter_algorithm_scoring_policy_gate_has_no_runtime_sour
     assert "atomicrows.bundle.sha256" not in pr84_text
 
 
+def test_runner_pr85_parameter_stack_scoring_and_ranking_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr85_command = commands[
+        command_names.index("validate_parameter_stack_scoring_and_ranking_gate.py")
+    ]
+
+    assert pr85_command == [
+        python_executable,
+        str(Path("tools") / "validate_parameter_stack_scoring_and_ranking_gate.py"),
+    ]
+    pr85_text = " ".join(pr85_command).lower()
+    assert "source-retrieval" not in pr85_text
+    assert "source-acceptance" not in pr85_text
+    assert "connector-binding" not in pr85_text
+    assert "runtime-live" not in pr85_text
+    assert "live-use" not in pr85_text
+    assert "order-authority" not in pr85_text
+    assert "profit-evidence" not in pr85_text
+    assert "replay-execution" not in pr85_text
+    assert "paper-execution" not in pr85_text
+    assert "quantum-backend" not in pr85_text
+    assert "quantum-simulator" not in pr85_text
+    assert "optimizer-execution" not in pr85_text
+    assert "optimizer-arbitration" not in pr85_text
+    assert "atomicrows.bundle.jsonl" not in pr85_text
+    assert "atomicrows.bundle.sha256" not in pr85_text
+
+
 def test_pr81_static_contract_preserves_route_only_boundaries():
     production = trade_context_routing_gate.load_yaml(
         trade_context_routing_gate.DEFAULT_PRODUCTION_GATE
@@ -2892,6 +2985,55 @@ def test_pr84_static_contract_preserves_formula_registry_only_boundaries():
     assert not (Path(".") / scoring_policy_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / scoring_policy_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / scoring_policy_gate.PR76_OLD_LONG_TEST).exists()
+
+
+def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries():
+    assert stack_scoring_gate.main([]) == 0
+    production = stack_scoring_gate.load_yaml(
+        stack_scoring_gate.DEFAULT_PRODUCTION_REGISTRY
+    )
+    report = json.loads(
+        stack_scoring_gate.DEFAULT_REPORT.read_text(encoding="utf-8")
+    )
+
+    assert production["semantic_task_id"] == (
+        "ROADMAP-PARAMETER-STACK-SCORING-AND-RANKING-GATE"
+    )
+    assert production["gate_scope"] == (
+        "STATIC_PARAMETER_STACK_SCORING_AND_RANKING_CONTRACT_ONLY"
+    )
+    assert production["static_only_flag"] is True
+    assert production["metadata_only_flag"] is True
+    assert production["synthetic_fixture_only_flag"] is True
+    assert production["scoring_ranking_contract_only_flag"] is True
+    assert report["pr82_quantum_applicability_labels"] == list(
+        stack_scoring_gate.pr84_gate.PR82_LABEL_ORDER
+    )
+    assert report["pr83_supported_quantum_priority_modes"] == list(
+        stack_scoring_gate.pr84_gate.PR83_MODE_ORDER
+    )
+    assert report["pr84_formula_ids"] == list(stack_scoring_gate.FORMULA_ORDER)
+    assert report["ranked_candidate_descriptor_ids"] == [
+        "OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+        "QUANTUM_APPLICABLE_PREFERRED_STACK_FIXTURE",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK_STACK_FIXTURE",
+        "CLASSICAL_BASELINE_COMPARATOR_STACK_FIXTURE",
+        "TIE_BREAK_STABILITY_FIXTURE_A",
+        "TIE_BREAK_STABILITY_FIXTURE_B",
+    ]
+    assert report["blocked_candidate_descriptor_ids"] == [
+        "BLOCKED_INVALID_STACK_FIXTURE"
+    ]
+    assert report["highest_ranked_candidate_is_final_selected_stack"] is False
+    assert report["future_pr86_optimizer_arbitration_implemented"] is False
+    assert report["future_pr87_candidate_generation_implemented"] is False
+    assert report["future_pr88_trade_context_selection_implemented"] is False
+    for field in stack_scoring_gate.REPORT_FALSE_FIELDS:
+        assert report[field] is False
+    assert not (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / stack_scoring_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / stack_scoring_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
