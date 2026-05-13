@@ -33,6 +33,9 @@ from tools import (
 from tools import (
     validate_quantum_applicability_classification_registry as quantum_applicability_gate,
 )
+from tools import (
+    validate_owner_quantum_priority_policy_registry as owner_quantum_priority_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -597,6 +600,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_quantum_applicability_classification_registry.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_owner_quantum_priority_policy_registry.py"
             ),
         ],
         [
@@ -2196,7 +2206,7 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_runner_includes_pr80_pr81_and_pr82_quantum_gate_after_pr79(
+def test_runner_includes_pr80_pr81_pr82_and_pr83_quantum_gates_after_pr79(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -2235,6 +2245,9 @@ def test_runner_includes_pr80_pr81_and_pr82_quantum_gate_after_pr79(
     pr82_index = command_names.index(
         "validate_quantum_applicability_classification_registry.py"
     )
+    pr83_index = command_names.index(
+        "validate_owner_quantum_priority_policy_registry.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2253,6 +2266,7 @@ def test_runner_includes_pr80_pr81_and_pr82_quantum_gate_after_pr79(
         < pr80_index
         < pr81_index
         < pr82_index
+        < pr83_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2276,6 +2290,10 @@ def test_runner_includes_pr80_pr81_and_pr82_quantum_gate_after_pr79(
             Path("tools")
             / "validate_quantum_applicability_classification_registry.py"
         ),
+    ]
+    assert commands[pr83_index] == [
+        python_executable,
+        str(Path("tools") / "validate_owner_quantum_priority_policy_registry.py"),
     ]
 
 
@@ -2366,6 +2384,38 @@ def test_runner_does_not_emit_success_marker_if_quantum_applicability_gate_fails
 
     assert exit_code == 43
     assert seen == commands[:4]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_owner_quantum_priority_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "validate_quantum_applicability_classification_registry.py"],
+        ["python", "validate_owner_quantum_priority_policy_registry.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 47, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 47
+    assert seen == commands[:5]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
@@ -2545,6 +2595,43 @@ def test_runner_pr82_quantum_applicability_gate_has_no_runtime_source_connector_
     assert "atomicrows.bundle.sha256" not in pr82_text
 
 
+def test_runner_pr83_owner_quantum_priority_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr83_command = commands[
+        command_names.index("validate_owner_quantum_priority_policy_registry.py")
+    ]
+
+    assert pr83_command == [
+        python_executable,
+        str(Path("tools") / "validate_owner_quantum_priority_policy_registry.py"),
+    ]
+    pr83_text = " ".join(pr83_command).lower()
+    assert "source-retrieval" not in pr83_text
+    assert "source-acceptance" not in pr83_text
+    assert "connector-binding" not in pr83_text
+    assert "runtime-live" not in pr83_text
+    assert "live-use" not in pr83_text
+    assert "order-authority" not in pr83_text
+    assert "profit-evidence" not in pr83_text
+    assert "replay-execution" not in pr83_text
+    assert "paper-execution" not in pr83_text
+    assert "quantum-backend" not in pr83_text
+    assert "quantum-simulator" not in pr83_text
+    assert "optimizer-execution" not in pr83_text
+    assert "optimizer-arbitration" not in pr83_text
+    assert "scoring-execution" not in pr83_text
+    assert "ranking" not in pr83_text
+    assert "selection" not in pr83_text
+    assert "atomicrows.bundle.jsonl" not in pr83_text
+    assert "atomicrows.bundle.sha256" not in pr83_text
+
+
 def test_pr81_static_contract_preserves_route_only_boundaries():
     production = trade_context_routing_gate.load_yaml(
         trade_context_routing_gate.DEFAULT_PRODUCTION_GATE
@@ -2620,6 +2707,43 @@ def test_pr82_static_contract_preserves_metadata_only_boundaries():
     assert not (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / quantum_applicability_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / quantum_applicability_gate.PR76_OLD_LONG_TEST).exists()
+
+
+def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries():
+    assert owner_quantum_priority_gate.main([]) == 0
+    production = owner_quantum_priority_gate.load_yaml(
+        owner_quantum_priority_gate.DEFAULT_PRODUCTION_REGISTRY
+    )
+    report = json.loads(
+        owner_quantum_priority_gate.DEFAULT_REPORT.read_text(encoding="utf-8")
+    )
+
+    assert production["semantic_task_id"] == "ROADMAP-OWNER-QUANTUM-PRIORITY-POLICY"
+    assert production["policy_scope"] == "STATIC_OWNER_QUANTUM_PRIORITY_POLICY_ONLY"
+    assert production["static_only_flag"] is True
+    assert production["metadata_only_flag"] is True
+    assert report["policy_is_metadata_only"] is True
+    assert report["owner_quantum_priority_enabled"] is True
+    assert report["default_quantum_priority_mode"] == "QUANTUM_PREFERRED"
+    assert report["supported_quantum_priority_modes"] == list(
+        owner_quantum_priority_gate.MODE_ORDER
+    )
+    assert report["classical_only_families_valid_as_comparators"] is True
+    assert report["hybrid_compare_requires_classical_comparator"] is True
+    assert report["future_scoring_policy_required"] is True
+    assert report["future_stack_ranking_gate_required"] is True
+    assert report["future_optimizer_arbitration_required"] is True
+    assert report["future_candidate_stack_generation_required"] is True
+    assert report["future_trade_context_stack_selection_required"] is True
+    assert report["future_consumer_contract_execution_created"] is False
+    assert report["pr82_quantum_applicability_registry_consumed"] is True
+    assert report["classical_only_label_validated_from_pr82"] is True
+    for field in owner_quantum_priority_gate.ROOT_FALSE_FIELDS:
+        assert report[field] is False
+    assert not (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert not (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_SHA256).exists()
+    assert (Path(".") / owner_quantum_priority_gate.PR76_SHORT_TEST).exists()
+    assert not (Path(".") / owner_quantum_priority_gate.PR76_OLD_LONG_TEST).exists()
 
 
 def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monkeypatch):
