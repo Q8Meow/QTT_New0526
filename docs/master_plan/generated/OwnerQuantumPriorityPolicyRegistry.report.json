@@ -1,0 +1,522 @@
+{
+  "annealing_execution_created": false,
+  "atomicrows_bundle_jsonl_created": false,
+  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_sha256_created": false,
+  "atomicrows_bundle_sha256_exists": false,
+  "backend_execution_created": false,
+  "blocked_policies": [
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_UNKNOWN_MODE"
+      ],
+      "mode_or_policy_id": "UNKNOWN_QUANTUM_PRIORITY_MODE"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_DUPLICATE_MODE"
+      ],
+      "mode_or_policy_id": "DUPLICATE_QUANTUM_PRIORITY_MODE"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_MISSING_REQUIRED_MODE"
+      ],
+      "mode_or_policy_id": "MISSING_REQUIRED_QUANTUM_PRIORITY_MODE"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_DEFAULT_MODE"
+      ],
+      "mode_or_policy_id": "INVALID_DEFAULT_QUANTUM_PRIORITY_MODE"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_MULTIPLIER"
+      ],
+      "mode_or_policy_id": "INVALID_QUANTUM_PRIORITY_MULTIPLIER"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_APPLICABILITY_LABEL"
+      ],
+      "mode_or_policy_id": "INVALID_PR82_APPLICABILITY_LABEL"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_FORCED_MODE_WITHOUT_OWNER_BASIS"
+      ],
+      "mode_or_policy_id": "OWNER_FORCED_QUANTUM_WITHOUT_OWNER_BASIS"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT"
+      ],
+      "mode_or_policy_id": "OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_BACKEND_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "BACKEND_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "SIMULATOR_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QAOA_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "QAOA_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_VQE_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "VQE_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ANNEALING_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "ANNEALING_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUBO_SOLVE_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "QUBO_SOLVE_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ISING_SOLVE_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "ISING_SOLVE_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "OPTIMIZER_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "OPTIMIZER_ARBITRATION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SCORING_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "SCORING_EXECUTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANKING_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "RANKING_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SELECTION_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "SELECTION_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "RUNTIME_LIVE_ORDER_AUTHORITY_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "SOURCE_ACCEPTANCE_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_CONNECTOR_BINDING_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "CONNECTOR_BINDING_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_REPLAY_PAPER_PROOF_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "REPLAY_PAPER_PROOF_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "QUANTUM_ADVANTAGE_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "PROFIT_EVIDENCE_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "LATENCY_SUPERIORITY_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "EXECUTION_SUPERIORITY_CLAIM"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANDOM_POLICY_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "RANDOM_POLICY_ATTEMPT"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "ATOMICROWS_BUNDLE_JSONL_CREATION"
+    },
+    {
+      "blocked_reason_codes": [
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ],
+      "mode_or_policy_id": "ATOMICROWS_BUNDLE_SHA256_CREATION"
+    }
+  ],
+  "classical_only_families_valid_as_comparators": true,
+  "classical_only_label_validated_from_pr82": true,
+  "connector_semantic_binding_created": false,
+  "default_quantum_priority_mode": "QUANTUM_PREFERRED",
+  "deterministic_policy_ordering": true,
+  "execution_superiority_claim_created": false,
+  "final_ready": false,
+  "future_candidate_stack_generation_required": true,
+  "future_consumer_contract_execution_created": false,
+  "future_consumer_contract_fields": [
+    "owner_priority_boost",
+    "quantum_boost",
+    "final_selection_score",
+    "quantum_priority_applied",
+    "owner_override_applied",
+    "score_breakdown",
+    "blocked_candidates",
+    "reason_codes"
+  ],
+  "future_optimizer_arbitration_required": true,
+  "future_scoring_policy_required": true,
+  "future_stack_ranking_gate_required": true,
+  "future_trade_context_stack_selection_required": true,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "hybrid_compare_requires_classical_comparator": true,
+  "ising_solve_execution_created": false,
+  "latency_superiority_claim_created": false,
+  "live_authority_created": false,
+  "metadata_only_flag": true,
+  "mode_policies": [
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": false,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": false,
+      "metadata_only_flag": true,
+      "mode": "QUANTUM_NEUTRAL",
+      "mode_enabled": true,
+      "owner_can_force": false,
+      "owner_selectable": true,
+      "priority_multiplier": 1.0,
+      "quantum_applicable_family_multiplier": 1.0,
+      "tie_breaker_enabled": false
+    },
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": true,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": false,
+      "metadata_only_flag": true,
+      "mode": "QUANTUM_PREFERRED",
+      "mode_enabled": true,
+      "owner_can_force": false,
+      "owner_selectable": true,
+      "priority_multiplier": 1.1,
+      "quantum_applicable_family_multiplier": 1.05,
+      "tie_breaker_enabled": true
+    },
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": true,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": false,
+      "metadata_only_flag": true,
+      "mode": "QUANTUM_STRONGLY_PREFERRED",
+      "mode_enabled": true,
+      "owner_can_force": false,
+      "owner_selectable": true,
+      "priority_multiplier": 1.25,
+      "quantum_applicable_family_multiplier": 1.1,
+      "tie_breaker_enabled": true
+    },
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": true,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": false,
+      "metadata_only_flag": true,
+      "mode": "QUANTUM_FIRST",
+      "mode_enabled": true,
+      "owner_can_force": false,
+      "owner_selectable": true,
+      "priority_multiplier": 1.35,
+      "quantum_applicable_family_multiplier": 1.15,
+      "tie_breaker_enabled": true
+    },
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": true,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": false,
+      "metadata_only_flag": true,
+      "mode": "OWNER_FORCED_QUANTUM",
+      "mode_enabled": true,
+      "owner_can_force": true,
+      "owner_selectable": true,
+      "priority_multiplier": 1.5,
+      "quantum_applicable_family_multiplier": 1.2,
+      "tie_breaker_enabled": true
+    },
+    {
+      "allowed_applicability_labels": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ],
+      "allowed_primary_quantum_applicability_classes": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ],
+      "blocked_reason_codes": [],
+      "classical_comparator_required": true,
+      "future_optimizer_arbitration_required": true,
+      "future_scoring_policy_required": true,
+      "hybrid_compare_required_before_quantum_preference": true,
+      "metadata_only_flag": true,
+      "mode": "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK",
+      "mode_enabled": true,
+      "owner_can_force": false,
+      "owner_selectable": true,
+      "priority_multiplier": 1.15,
+      "quantum_applicable_family_multiplier": 1.05,
+      "tie_breaker_enabled": true
+    }
+  ],
+  "optimizer_arbitration_created": false,
+  "optimizer_execution_created": false,
+  "order_authority_created": false,
+  "owner_can_force_quantum_selection": true,
+  "owner_forced_quantum_bypasses_future_gates": false,
+  "owner_forced_quantum_internal_only": true,
+  "owner_override_applied": true,
+  "owner_override_basis": "OWNER_GLOBAL_OVERRIDE",
+  "owner_override_external_fact_fabrication_created": false,
+  "owner_quantum_priority_enabled": true,
+  "paper_execution_created": false,
+  "policy_is_metadata_only": true,
+  "policy_registry_id": "QTT_OWNER_QUANTUM_PRIORITY_POLICY_REGISTRY",
+  "policy_scope": "STATIC_OWNER_QUANTUM_PRIORITY_POLICY_ONLY",
+  "pr82_applicability_labels": [
+    "TRUE_QUANTUM",
+    "HYBRID_CLASSICAL_QUANTUM",
+    "QUANTUM_INSPIRED",
+    "QUBO_COMPATIBLE",
+    "ISING_COMPATIBLE",
+    "QAOA_COMPATIBLE",
+    "VQE_COMPATIBLE",
+    "ANNEALING_COMPATIBLE",
+    "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+    "CLASSICAL_ONLY"
+  ],
+  "pr82_quantum_applicability_registry_consumed": true,
+  "pr82_semantic_task_id": "ROADMAP-QUANTUM-APPLICABILITY-REGISTRY",
+  "profit_evidence_created": false,
+  "qaoa_execution_created": false,
+  "quantum_advantage_claim_created": false,
+  "quantum_backend_execution_created": false,
+  "quantum_simulator_execution_created": false,
+  "qubo_solve_execution_created": false,
+  "random_policy_used": false,
+  "ranking_created": false,
+  "reason_codes": [
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_METADATA_ONLY",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_NEUTRAL_MODE",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_PREFERRED_MODE",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_STRONGLY_PREFERRED_MODE",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_QUANTUM_FIRST_MODE",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_OWNER_FORCED_QUANTUM_INTERNAL_ONLY",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_HYBRID_TIEBREAK_INTERNAL_ONLY",
+    "OWNER_QUANTUM_PRIORITY_ALLOWED_CLASSICAL_COMPARATOR",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_UNKNOWN_MODE",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_DUPLICATE_MODE",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_MISSING_REQUIRED_MODE",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_DEFAULT_MODE",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_MULTIPLIER",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_APPLICABILITY_LABEL",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_FORCED_MODE_WITHOUT_OWNER_BASIS",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_QAOA_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_VQE_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_ANNEALING_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_QUBO_SOLVE_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_ISING_SOLVE_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_SCORING_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_RANKING_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_SELECTION_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_REPLAY_PAPER_PROOF_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_RANDOM_POLICY_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+    "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+  ],
+  "replay_execution_created": false,
+  "report_id": "QTT_OWNER_QUANTUM_PRIORITY_POLICY_REGISTRY_REPORT",
+  "report_version": "v1",
+  "runtime_authority_created": false,
+  "scoring_execution_created": false,
+  "selection_created": false,
+  "semantic_task_id": "ROADMAP-OWNER-QUANTUM-PRIORITY-POLICY",
+  "source_acceptance_created": false,
+  "source_retrieval_created": false,
+  "static_only_flag": true,
+  "supported_quantum_priority_modes": [
+    "QUANTUM_NEUTRAL",
+    "QUANTUM_PREFERRED",
+    "QUANTUM_STRONGLY_PREFERRED",
+    "QUANTUM_FIRST",
+    "OWNER_FORCED_QUANTUM",
+    "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK"
+  ],
+  "validation_marker": "QTT_OWNER_QUANTUM_PRIORITY_POLICY_REGISTRY_OK",
+  "vqe_execution_created": false
+}

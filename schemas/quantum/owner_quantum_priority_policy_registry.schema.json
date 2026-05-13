@@ -1,0 +1,404 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-owner-quantum-priority-policy-registry",
+  "title": "QTT Owner Quantum Priority Policy Registry",
+  "description": "Static deterministic owner-controlled quantum priority policy metadata. This schema permits metadata policy only and forbids quantum backend execution, simulator execution, optimizer execution, optimizer arbitration, scoring, ranking, selection, source acceptance, connector semantic binding, runtime/live/order authority, replay/paper proof, quantum advantage claims, latency/execution superiority claims, and profit evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_registry_id",
+    "semantic_task_id",
+    "policy_scope",
+    "policy_version",
+    "policy_is_metadata_only",
+    "metadata_only_flag",
+    "static_only_flag",
+    "owner_quantum_priority_enabled",
+    "default_quantum_priority_mode",
+    "supported_quantum_priority_modes",
+    "quantum_priority_multiplier",
+    "quantum_applicable_family_multiplier",
+    "quantum_tie_breaker_enabled",
+    "owner_can_force_quantum_selection",
+    "owner_override_basis",
+    "owner_override_applied",
+    "owner_override_external_fact_fabrication_created",
+    "owner_forced_quantum_internal_only",
+    "owner_forced_quantum_bypasses_future_gates",
+    "classical_only_families_valid_as_comparators",
+    "hybrid_compare_requires_classical_comparator",
+    "future_scoring_policy_required",
+    "future_stack_ranking_gate_required",
+    "future_optimizer_arbitration_required",
+    "future_candidate_stack_generation_required",
+    "future_trade_context_stack_selection_required",
+    "future_consumer_contract_fields",
+    "future_consumer_contract_execution_created",
+    "backend_execution_created",
+    "quantum_backend_execution_created",
+    "quantum_simulator_execution_created",
+    "qaoa_execution_created",
+    "vqe_execution_created",
+    "annealing_execution_created",
+    "qubo_solve_execution_created",
+    "ising_solve_execution_created",
+    "optimizer_execution_created",
+    "optimizer_arbitration_created",
+    "scoring_execution_created",
+    "ranking_created",
+    "selection_created",
+    "runtime_authority_created",
+    "live_authority_created",
+    "order_authority_created",
+    "source_retrieval_created",
+    "source_acceptance_created",
+    "connector_semantic_binding_created",
+    "replay_execution_created",
+    "paper_execution_created",
+    "quantum_advantage_claim_created",
+    "profit_evidence_created",
+    "latency_superiority_claim_created",
+    "execution_superiority_claim_created",
+    "random_policy_used",
+    "deterministic_policy_ordering",
+    "atomicrows_bundle_jsonl_created",
+    "atomicrows_bundle_sha256_created",
+    "final_ready",
+    "mode_policies",
+    "blocked_policies",
+    "reason_codes",
+    "depends_on_artifacts"
+  ],
+  "properties": {
+    "fixture_id": { "type": "string" },
+    "fixture_version": { "type": "string" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "fixture_cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fixture_case" }
+    },
+    "policy_registry_id": { "const": "QTT_OWNER_QUANTUM_PRIORITY_POLICY_REGISTRY" },
+    "semantic_task_id": { "const": "ROADMAP-OWNER-QUANTUM-PRIORITY-POLICY" },
+    "policy_scope": { "const": "STATIC_OWNER_QUANTUM_PRIORITY_POLICY_ONLY" },
+    "policy_version": { "const": "v1" },
+    "policy_is_metadata_only": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "static_only_flag": { "const": true },
+    "owner_quantum_priority_enabled": { "type": "boolean" },
+    "default_quantum_priority_mode": { "$ref": "#/$defs/quantum_priority_mode" },
+    "supported_quantum_priority_modes": {
+      "const": [
+        "QUANTUM_NEUTRAL",
+        "QUANTUM_PREFERRED",
+        "QUANTUM_STRONGLY_PREFERRED",
+        "QUANTUM_FIRST",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK"
+      ]
+    },
+    "quantum_priority_multiplier": { "type": "number" },
+    "quantum_applicable_family_multiplier": { "type": "number" },
+    "quantum_tie_breaker_enabled": { "type": "boolean" },
+    "owner_can_force_quantum_selection": { "type": "boolean" },
+    "owner_override_basis": { "$ref": "#/$defs/owner_override_basis" },
+    "owner_override_applied": { "type": "boolean" },
+    "owner_override_external_fact_fabrication_created": { "const": false },
+    "owner_forced_quantum_internal_only": { "const": true },
+    "owner_forced_quantum_bypasses_future_gates": { "const": false },
+    "classical_only_families_valid_as_comparators": { "const": true },
+    "hybrid_compare_requires_classical_comparator": { "const": true },
+    "future_scoring_policy_required": { "const": true },
+    "future_stack_ranking_gate_required": { "const": true },
+    "future_optimizer_arbitration_required": { "const": true },
+    "future_candidate_stack_generation_required": { "const": true },
+    "future_trade_context_stack_selection_required": { "const": true },
+    "future_consumer_contract_fields": {
+      "const": [
+        "owner_priority_boost",
+        "quantum_boost",
+        "final_selection_score",
+        "quantum_priority_applied",
+        "owner_override_applied",
+        "score_breakdown",
+        "blocked_candidates",
+        "reason_codes"
+      ]
+    },
+    "future_consumer_contract_execution_created": { "const": false },
+    "backend_execution_created": { "const": false },
+    "quantum_backend_execution_created": { "const": false },
+    "quantum_simulator_execution_created": { "const": false },
+    "qaoa_execution_created": { "const": false },
+    "vqe_execution_created": { "const": false },
+    "annealing_execution_created": { "const": false },
+    "qubo_solve_execution_created": { "const": false },
+    "ising_solve_execution_created": { "const": false },
+    "optimizer_execution_created": { "const": false },
+    "optimizer_arbitration_created": { "const": false },
+    "scoring_execution_created": { "const": false },
+    "ranking_created": { "const": false },
+    "selection_created": { "const": false },
+    "runtime_authority_created": { "const": false },
+    "live_authority_created": { "const": false },
+    "order_authority_created": { "const": false },
+    "source_retrieval_created": { "const": false },
+    "source_acceptance_created": { "const": false },
+    "connector_semantic_binding_created": { "const": false },
+    "replay_execution_created": { "const": false },
+    "paper_execution_created": { "const": false },
+    "quantum_advantage_claim_created": { "const": false },
+    "profit_evidence_created": { "const": false },
+    "latency_superiority_claim_created": { "const": false },
+    "execution_superiority_claim_created": { "const": false },
+    "random_policy_used": { "const": false },
+    "deterministic_policy_ordering": { "const": true },
+    "atomicrows_bundle_jsonl_created": { "const": false },
+    "atomicrows_bundle_sha256_created": { "const": false },
+    "final_ready": { "const": false },
+    "mode_policies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/mode_policy" }
+    },
+    "blocked_policies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blocked_policy" }
+    },
+    "reason_codes": {
+      "const": [
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_METADATA_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_NEUTRAL_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_PREFERRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_STRONGLY_PREFERRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_QUANTUM_FIRST_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_OWNER_FORCED_QUANTUM_INTERNAL_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_HYBRID_TIEBREAK_INTERNAL_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_CLASSICAL_COMPARATOR",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_UNKNOWN_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_DUPLICATE_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_MISSING_REQUIRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_DEFAULT_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_MULTIPLIER",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_APPLICABILITY_LABEL",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_FORCED_MODE_WITHOUT_OWNER_BASIS",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QAOA_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_VQE_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ANNEALING_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUBO_SOLVE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ISING_SOLVE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SCORING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANKING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SELECTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_REPLAY_PAPER_PROOF_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANDOM_POLICY_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ]
+    },
+    "depends_on_artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    }
+  },
+  "$defs": {
+    "quantum_priority_mode": {
+      "enum": [
+        "QUANTUM_NEUTRAL",
+        "QUANTUM_PREFERRED",
+        "QUANTUM_STRONGLY_PREFERRED",
+        "QUANTUM_FIRST",
+        "OWNER_FORCED_QUANTUM",
+        "HYBRID_COMPARE_THEN_QUANTUM_TIEBREAK"
+      ]
+    },
+    "primary_class": {
+      "enum": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "CLASSICAL_ONLY"
+      ]
+    },
+    "applicability_label": {
+      "enum": [
+        "TRUE_QUANTUM",
+        "HYBRID_CLASSICAL_QUANTUM",
+        "QUANTUM_INSPIRED",
+        "QUBO_COMPATIBLE",
+        "ISING_COMPATIBLE",
+        "QAOA_COMPATIBLE",
+        "VQE_COMPATIBLE",
+        "ANNEALING_COMPATIBLE",
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE",
+        "CLASSICAL_ONLY"
+      ]
+    },
+    "owner_override_basis": {
+      "enum": [
+        "NONE",
+        "OWNER_APPROVED",
+        "OWNER_APPROVED_OVERRIDE",
+        "OWNER_GLOBAL_OVERRIDE",
+        "OWNER_OVERRIDE_SATISFIED",
+        "AGENT_ASSIGNMENT_OWNER_APPROVED",
+        "OWNER_APPROVED_NOT_EXTERNALLY_VERIFIED",
+        "OWNER_APPROVED_UNVERIFIED",
+        "OWNER_RISK_ACCEPTED",
+        "OWNER_ASSUMED_RESPONSIBILITY",
+        "OWNER_WAIVED_REQUIREMENT",
+        "ROW_COMPLETION_OWNER_APPROVED"
+      ]
+    },
+    "reason_code": {
+      "enum": [
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_METADATA_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_NEUTRAL_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_PREFERRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_STRONGLY_PREFERRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_QUANTUM_FIRST_MODE",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_OWNER_FORCED_QUANTUM_INTERNAL_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_HYBRID_TIEBREAK_INTERNAL_ONLY",
+        "OWNER_QUANTUM_PRIORITY_ALLOWED_CLASSICAL_COMPARATOR",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_UNKNOWN_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_DUPLICATE_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_MISSING_REQUIRED_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_DEFAULT_MODE",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_MULTIPLIER",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_INVALID_APPLICABILITY_LABEL",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_FORCED_MODE_WITHOUT_OWNER_BASIS",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OWNER_OVERRIDE_EXTERNAL_FACT_ATTEMPT",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QAOA_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_VQE_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ANNEALING_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUBO_SOLVE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ISING_SOLVE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SCORING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANKING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SELECTION_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_REPLAY_PAPER_PROOF_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_RANDOM_POLICY_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+        "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ]
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "mode_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "mode_enabled",
+        "owner_selectable",
+        "owner_can_force",
+        "priority_multiplier",
+        "quantum_applicable_family_multiplier",
+        "tie_breaker_enabled",
+        "hybrid_compare_required_before_quantum_preference",
+        "classical_comparator_required",
+        "allowed_primary_quantum_applicability_classes",
+        "allowed_applicability_labels",
+        "metadata_only_flag",
+        "future_scoring_policy_required",
+        "future_optimizer_arbitration_required",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "mode": { "$ref": "#/$defs/quantum_priority_mode" },
+        "mode_enabled": { "type": "boolean" },
+        "owner_selectable": { "type": "boolean" },
+        "owner_can_force": { "type": "boolean" },
+        "priority_multiplier": { "type": "number" },
+        "quantum_applicable_family_multiplier": { "type": "number" },
+        "tie_breaker_enabled": { "type": "boolean" },
+        "hybrid_compare_required_before_quantum_preference": { "type": "boolean" },
+        "classical_comparator_required": { "type": "boolean" },
+        "allowed_primary_quantum_applicability_classes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/primary_class" }
+        },
+        "allowed_applicability_labels": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/applicability_label" }
+        },
+        "metadata_only_flag": { "const": true },
+        "future_scoring_policy_required": { "const": true },
+        "future_optimizer_arbitration_required": { "const": true },
+        "blocked_reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "blocked_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode_or_policy_id",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "mode_or_policy_id": { "type": "string" },
+        "blocked_reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "fixture_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "expected_schema_valid",
+        "expected_reason_code",
+        "synthetic_case_only"
+      ],
+      "properties": {
+        "case_id": { "type": "string" },
+        "expected_schema_valid": { "type": "boolean" },
+        "expected_reason_code": { "$ref": "#/$defs/reason_code" },
+        "synthetic_case_only": { "const": true }
+      }
+    }
+  }
+}
