@@ -1,0 +1,386 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-parameter-algorithm-scoring-policy-registry",
+  "title": "QTT Parameter And Algorithm Scoring Policy Registry",
+  "description": "Static deterministic parameter and algorithm scoring formula registry. This schema permits symbolic formula definitions only and forbids scoring execution, ranking, selection, optimizer execution or arbitration, replay/paper/live execution, source retrieval or acceptance, connector binding, runtime cash/private-state authority, order authority, profit evidence, quantum advantage claims, latency/execution superiority claims, and AtomicRows bundle/hash creation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_registry_id",
+    "semantic_task_id",
+    "policy_scope",
+    "policy_version",
+    "static_only_flag",
+    "metadata_only_flag",
+    "formula_registry_only_flag",
+    "formula_definition_allowed",
+    "formula_execution_allowed",
+    "scoring_result_allowed",
+    "ranking_result_allowed",
+    "selected_stack_allowed",
+    "pr82_quantum_applicability_metadata_consumed",
+    "pr83_owner_quantum_priority_policy_consumed",
+    "pr82_quantum_applicability_registry_path",
+    "pr83_owner_quantum_priority_policy_registry_path",
+    "upstream_dependencies",
+    "future_consumers",
+    "scoring_components",
+    "formula_definitions",
+    "blocked_policies",
+    "reason_codes",
+    "required_no_authority_flags",
+    "final_ready"
+  ],
+  "properties": {
+    "fixture_id": { "type": "string" },
+    "fixture_version": { "type": "string" },
+    "mode": { "const": "SOURCE_REQUIRED" },
+    "execution": { "const": "DISABLED" },
+    "fixture_only": { "type": "boolean" },
+    "fixture_cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fixture_case" }
+    },
+    "policy_registry_id": { "const": "QTT_PARAMETER_ALGORITHM_SCORING_POLICY_REGISTRY" },
+    "semantic_task_id": { "const": "ROADMAP-PARAMETER-AND-ALGORITHM-SCORING-POLICY-REGISTRY" },
+    "policy_scope": { "const": "STATIC_PARAMETER_AND_ALGORITHM_SCORING_FORMULA_REGISTRY_ONLY" },
+    "policy_version": { "const": "v1" },
+    "static_only_flag": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "formula_registry_only_flag": { "const": true },
+    "formula_definition_allowed": { "const": true },
+    "formula_execution_allowed": { "const": false },
+    "scoring_result_allowed": { "const": false },
+    "ranking_result_allowed": { "const": false },
+    "selected_stack_allowed": { "const": false },
+    "pr82_quantum_applicability_metadata_consumed": { "const": true },
+    "pr83_owner_quantum_priority_policy_consumed": { "const": true },
+    "pr82_quantum_applicability_registry_path": { "const": "docs/master_plan/quantum/QuantumApplicabilityClassificationRegistry.yaml" },
+    "pr83_owner_quantum_priority_policy_registry_path": { "const": "docs/master_plan/quantum/OwnerQuantumPriorityPolicyRegistry.yaml" },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "future_consumers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_consumer" }
+    },
+    "scoring_components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scoring_component" }
+    },
+    "formula_definitions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/formula_definition" }
+    },
+    "blocked_policies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blocked_policy" }
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reason_code" }
+    },
+    "required_no_authority_flags": { "$ref": "#/$defs/no_authority_flags" },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "component_class": {
+      "enum": [
+        "POSITIVE_COMPONENT",
+        "PENALTY_COMPONENT",
+        "BOOST_COMPONENT",
+        "READINESS_COMPONENT",
+        "QUANTUM_COMPONENT",
+        "OWNER_COMPONENT",
+        "PLACEHOLDER_COMPONENT"
+      ]
+    },
+    "input_source_class": {
+      "enum": [
+        "STATIC_METADATA",
+        "FUTURE_REPLAY_PAPER_RESULT",
+        "FUTURE_RUNTIME_RECEIPT",
+        "FUTURE_SOURCE_CURRENTNESS",
+        "FUTURE_OPTIMIZER_RESULT",
+        "FUTURE_OWNER_POLICY",
+        "FUTURE_CONNECTOR_RECEIPT"
+      ]
+    },
+    "output_class": {
+      "enum": [
+        "SCORE_FORMULA_OUTPUT",
+        "BOOST_FORMULA_OUTPUT",
+        "PENALTY_FORMULA_OUTPUT",
+        "READINESS_FORMULA_OUTPUT"
+      ]
+    },
+    "reason_code": {
+      "enum": [
+        "SCORING_POLICY_ALLOWED_FORMULA_REGISTRY_ONLY",
+        "SCORING_POLICY_ALLOWED_STATIC_METADATA_ONLY",
+        "SCORING_POLICY_ALLOWED_PR82_QUANTUM_APPLICABILITY_METADATA",
+        "SCORING_POLICY_ALLOWED_PR83_OWNER_QUANTUM_PRIORITY_POLICY",
+        "SCORING_POLICY_ALLOWED_CLASSICAL_COMPARATOR",
+        "SCORING_POLICY_ALLOWED_OWNER_INTERNAL_PRIORITY",
+        "SCORING_POLICY_ALLOWED_FUTURE_REPLAY_PAPER_COMPONENT_PLACEHOLDER",
+        "SCORING_POLICY_ALLOWED_FUTURE_OPTIMIZER_COMPONENT_PLACEHOLDER",
+        "SCORING_POLICY_ALLOWED_FUTURE_RUNTIME_READINESS_PLACEHOLDER",
+        "SCORING_POLICY_ALLOWED_EXPECTED_NET_PROFIT_PLACEHOLDER_NOT_EVIDENCE",
+        "SCORING_POLICY_BLOCKED_UNKNOWN_COMPONENT",
+        "SCORING_POLICY_BLOCKED_DUPLICATE_COMPONENT",
+        "SCORING_POLICY_BLOCKED_MISSING_REQUIRED_COMPONENT",
+        "SCORING_POLICY_BLOCKED_UNKNOWN_FORMULA",
+        "SCORING_POLICY_BLOCKED_DUPLICATE_FORMULA",
+        "SCORING_POLICY_BLOCKED_MISSING_REQUIRED_FORMULA",
+        "SCORING_POLICY_BLOCKED_INVALID_FORMULA_INPUT",
+        "SCORING_POLICY_BLOCKED_INVALID_FORMULA_OUTPUT",
+        "SCORING_POLICY_BLOCKED_FORMULA_EXECUTION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_SCORING_RESULT_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_RANKING_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_SELECTION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_OPTIMIZER_ARBITRATION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_BACKEND_EXECUTION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_SIMULATOR_EXECUTION_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_REPLAY_PAPER_RESULT_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_RUNTIME_LIVE_ORDER_AUTHORITY_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_SOURCE_RETRIEVAL_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_SOURCE_ACCEPTANCE_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_CONNECTOR_BINDING_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_RUNTIME_CASH_RECEIPT_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_PRIVATE_STATE_FETCH_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_PROFIT_EVIDENCE_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_LATENCY_SUPERIORITY_CLAIM_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_RANDOM_POLICY_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN",
+        "SCORING_POLICY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN"
+      ]
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "delivery_label",
+        "title",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "future_consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_id",
+        "delivery_label",
+        "title",
+        "consumer_scope",
+        "pr84_creates_consumer_execution"
+      ],
+      "properties": {
+        "consumer_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "consumer_scope": { "type": "string" },
+        "pr84_creates_consumer_execution": { "const": false }
+      }
+    },
+    "scoring_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component_id",
+        "component_name",
+        "component_class",
+        "input_source_class",
+        "allowed_value_range",
+        "default_static_placeholder_value",
+        "creates_real_score",
+        "creates_runtime_evidence",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_optimizer_execution",
+        "creates_runtime_readiness_receipt",
+        "creates_replay_paper_result",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_venue_fee_tick_cost_fact",
+        "internal_only_flag",
+        "consumes_pr82_quantum_applicability_metadata",
+        "consumes_pr83_owner_quantum_priority_policy",
+        "future_required_gate",
+        "boundary_note"
+      ],
+      "properties": {
+        "component_id": { "type": "string" },
+        "component_name": { "type": "string" },
+        "component_class": { "$ref": "#/$defs/component_class" },
+        "input_source_class": { "$ref": "#/$defs/input_source_class" },
+        "allowed_value_range": { "type": "string" },
+        "default_static_placeholder_value": { "type": "string" },
+        "creates_real_score": { "const": false },
+        "creates_runtime_evidence": { "const": false },
+        "creates_profit_evidence": { "const": false },
+        "creates_quantum_advantage_evidence": { "const": false },
+        "creates_latency_superiority_evidence": { "const": false },
+        "creates_execution_superiority_evidence": { "const": false },
+        "creates_optimizer_execution": { "const": false },
+        "creates_runtime_readiness_receipt": { "const": false },
+        "creates_replay_paper_result": { "const": false },
+        "creates_source_retrieval": { "const": false },
+        "creates_source_acceptance": { "const": false },
+        "creates_venue_fee_tick_cost_fact": { "const": false },
+        "internal_only_flag": { "type": "boolean" },
+        "consumes_pr82_quantum_applicability_metadata": { "type": "boolean" },
+        "consumes_pr83_owner_quantum_priority_policy": { "type": "boolean" },
+        "future_required_gate": { "type": "string" },
+        "boundary_note": { "type": "string" }
+      }
+    },
+    "formula_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formula_id",
+        "formula_name",
+        "formula_expression",
+        "formula_definition_type",
+        "allowed_input_components",
+        "output_name",
+        "output_class",
+        "deterministic_order",
+        "upstream_metadata_sources",
+        "formula_execution_created",
+        "scoring_result_created",
+        "ranking_created",
+        "selection_created"
+      ],
+      "properties": {
+        "formula_id": { "type": "string" },
+        "formula_name": { "type": "string" },
+        "formula_expression": { "type": "string" },
+        "formula_definition_type": { "const": "SYMBOLIC_STATIC_FORMULA_DEFINITION_ONLY" },
+        "allowed_input_components": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "output_name": { "type": "string" },
+        "output_class": { "$ref": "#/$defs/output_class" },
+        "deterministic_order": { "type": "integer" },
+        "upstream_metadata_sources": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "formula_execution_created": { "const": false },
+        "scoring_result_created": { "const": false },
+        "ranking_created": { "const": false },
+        "selection_created": { "const": false }
+      }
+    },
+    "blocked_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "policy_id": { "type": "string" },
+        "blocked_reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reason_code" }
+        }
+      }
+    },
+    "no_authority_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scoring_execution_created",
+        "ranking_created",
+        "selection_created",
+        "optimizer_execution_created",
+        "optimizer_arbitration_created",
+        "quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "runtime_authority_created",
+        "live_authority_created",
+        "order_authority_created",
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_cash_receipt_created",
+        "private_state_fetch_created",
+        "expected_profit_claim_created",
+        "profit_evidence_created",
+        "quantum_advantage_claim_created",
+        "latency_superiority_claim_created",
+        "execution_superiority_claim_created",
+        "random_scoring_policy_used",
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created"
+      ],
+      "properties": {
+        "scoring_execution_created": { "const": false },
+        "ranking_created": { "const": false },
+        "selection_created": { "const": false },
+        "optimizer_execution_created": { "const": false },
+        "optimizer_arbitration_created": { "const": false },
+        "quantum_backend_execution_created": { "const": false },
+        "quantum_simulator_execution_created": { "const": false },
+        "replay_execution_created": { "const": false },
+        "paper_execution_created": { "const": false },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "source_retrieval_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "runtime_cash_receipt_created": { "const": false },
+        "private_state_fetch_created": { "const": false },
+        "expected_profit_claim_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "quantum_advantage_claim_created": { "const": false },
+        "latency_superiority_claim_created": { "const": false },
+        "execution_superiority_claim_created": { "const": false },
+        "random_scoring_policy_used": { "const": false },
+        "atomicrows_bundle_jsonl_created": { "const": false },
+        "atomicrows_bundle_sha256_created": { "const": false }
+      }
+    },
+    "fixture_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "expected_schema_valid",
+        "expected_reason_code",
+        "synthetic_case_only"
+      ],
+      "properties": {
+        "case_id": { "type": "string" },
+        "expected_schema_valid": { "type": "boolean" },
+        "expected_reason_code": { "$ref": "#/$defs/reason_code" },
+        "synthetic_case_only": { "const": true }
+      }
+    }
+  }
+}
