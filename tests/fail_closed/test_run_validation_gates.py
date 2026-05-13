@@ -48,6 +48,9 @@ from tools import (
 from tools import (
     validate_candidate_parameter_stack_generation_gate as candidate_generation_gate,
 )
+from tools import (
+    validate_trade_context_parameter_stack_selection_gate as trade_context_stack_selection_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -647,6 +650,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_candidate_parameter_stack_generation_gate.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_trade_context_parameter_stack_selection_gate.py"
             ),
         ],
         [
@@ -1552,6 +1562,13 @@ def test_runner_exposes_candidate_parameter_stack_generation_gate_success_marker
     )
 
 
+def test_runner_exposes_trade_context_parameter_stack_selection_gate_success_marker():
+    assert (
+        trade_context_stack_selection_gate.SUCCESS_MARKER
+        == "QTT_TRADE_CONTEXT_PARAMETER_STACK_SELECTION_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2335,6 +2352,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_and_pr87_gates_after
     pr87_index = command_names.index(
         "validate_candidate_parameter_stack_generation_gate.py"
     )
+    pr88_index = command_names.index(
+        "validate_trade_context_parameter_stack_selection_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2358,6 +2378,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_and_pr87_gates_after
         < pr85_index
         < pr86_index
         < pr87_index
+        < pr88_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2401,6 +2422,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_and_pr87_gates_after
     assert commands[pr87_index] == [
         python_executable,
         str(Path("tools") / "validate_candidate_parameter_stack_generation_gate.py"),
+    ]
+    assert commands[pr88_index] == [
+        python_executable,
+        str(Path("tools") / "validate_trade_context_parameter_stack_selection_gate.py"),
     ]
 
 
@@ -3012,6 +3037,40 @@ def test_runner_pr87_candidate_generation_gate_has_no_runtime_source_connector_o
     assert "optimizer-execution" not in pr87_text
     assert "atomicrows.bundle.jsonl" not in pr87_text
     assert "atomicrows.bundle.sha256" not in pr87_text
+
+
+def test_runner_pr88_trade_context_stack_selection_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr88_command = commands[
+        command_names.index("validate_trade_context_parameter_stack_selection_gate.py")
+    ]
+
+    assert pr88_command == [
+        python_executable,
+        str(Path("tools") / "validate_trade_context_parameter_stack_selection_gate.py"),
+    ]
+    pr88_text = " ".join(pr88_command).lower()
+    assert "source-retrieval" not in pr88_text
+    assert "source-acceptance" not in pr88_text
+    assert "connector-binding" not in pr88_text
+    assert "runtime-live" not in pr88_text
+    assert "live-use" not in pr88_text
+    assert "order-authority" not in pr88_text
+    assert "profit-evidence" not in pr88_text
+    assert "replay-execution" not in pr88_text
+    assert "paper-execution" not in pr88_text
+    assert "selected-stack-handoff" not in pr88_text
+    assert "quantum-backend" not in pr88_text
+    assert "quantum-simulator" not in pr88_text
+    assert "optimizer-execution" not in pr88_text
+    assert "atomicrows.bundle.jsonl" not in pr88_text
+    assert "atomicrows.bundle.sha256" not in pr88_text
 
 
 def test_pr81_static_contract_preserves_route_only_boundaries():
