@@ -1,0 +1,153 @@
+{
+  "execution": "DISABLED",
+  "expected_no_authority_flags": {
+    "bundle_builder_created_flag": false,
+    "bundle_builder_executed_flag": false,
+    "bundle_jsonl_created_flag": false,
+    "bundle_sha_created_flag": false,
+    "connector_semantic_created_flag": false,
+    "external_source_retrieval_created_flag": false,
+    "final_bundle_created_flag": false,
+    "final_readiness_created_flag": false,
+    "freeze_authority_created_flag": false,
+    "hash_created_flag": false,
+    "quantum_backend_execution_created_flag": false,
+    "runtime_live_authority_created_flag": false,
+    "sha_authority_created_flag": false,
+    "source_acceptance_created_flag": false
+  },
+  "expected_source_file_count": 15,
+  "expected_source_file_mode": "SOURCE_REQUIRED",
+  "fixture_cases": [
+    {
+      "case_id": "PASS_PR98_STATIC_SOURCE_FILES_VALID",
+      "expected_block_reason": "STATIC_PR98_SOURCE_FILES_VALID_NOT_BUNDLE_NOT_HASH_NOT_FINAL_READY",
+      "expected_schema_valid": true,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_MISSING_REQUIRED_SOURCE_FILE",
+      "expected_block_reason": "MISSING_REQUIRED_SOURCE_FILE",
+      "expected_schema_valid": false,
+      "remove_source_file_index": 0,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNKNOWN_ROW_FAMILY",
+      "expected_block_reason": "UNKNOWN_ROW_FAMILY",
+      "expected_schema_valid": false,
+      "source_file_overrides": {
+        "row_family_id": "AR_FAMILY_UNKNOWN"
+      },
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_SOURCE_FILE_ID",
+      "duplicate_source_file_id_from_index": 0,
+      "expected_block_reason": "DUPLICATE_SOURCE_FILE_ID",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_ROW_FAMILY_OWNERSHIP",
+      "duplicate_row_family_ownership_from_index": 0,
+      "expected_block_reason": "DUPLICATE_ROW_FAMILY_OWNERSHIP",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_BLUEPRINT_ID",
+      "duplicate_blueprint_id_from_index": 0,
+      "expected_block_reason": "DUPLICATE_BLUEPRINT_ID",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNSTABLE_SOURCE_FILE_ORDER",
+      "swap_manifest_order": true,
+      "expected_block_reason": "SOURCE_FILE_ORDER_NOT_DETERMINISTIC",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNSTABLE_BLUEPRINT_ORDER",
+      "set_blueprint_canonical_order": 99,
+      "expected_block_reason": "BLUEPRINT_ORDER_NOT_DETERMINISTIC",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_FABRICATED_EXACT_COUNT",
+      "source_file_overrides": {
+        "declared_source_record_count": 1,
+        "exact_row_count_created_by_pr98_flag": true
+      },
+      "expected_block_reason": "EXACT_ROW_COUNT_FABRICATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_JSONL_PRESENT",
+      "create_forbidden_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+      "expected_block_reason": "BUNDLE_JSONL_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_SHA256_PRESENT",
+      "create_forbidden_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+      "expected_block_reason": "BUNDLE_SHA256_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_BUILDER_PRESENT",
+      "create_forbidden_path": "tools/build_atomicrows_bundle.py",
+      "expected_block_reason": "BUNDLE_BUILDER_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_SHA_FREEZE_AUTHORITY_PRESENT",
+      "create_forbidden_path": "docs/master_plan/atomic_rows/AtomicRowsBundleFreezeAuthority.yaml",
+      "expected_block_reason": "SHA_FREEZE_AUTHORITY_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_FINAL_READINESS_PRESENT",
+      "create_forbidden_path": "docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json",
+      "expected_block_reason": "FINAL_READINESS_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_EFFECT",
+      "source_file_overrides": {
+        "external_source_retrieval_created_flag": true,
+        "runtime_live_authority_flag": true,
+        "source_acceptance_created_flag": true
+      },
+      "expected_block_reason": "RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_EFFECT_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_QUANTUM_EXECUTION_METADATA",
+      "blueprint_overrides": {
+        "quantum_backend_execution_created_flag": true
+      },
+      "expected_block_reason": "QUANTUM_EXECUTION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    }
+  ],
+  "fixture_id": "SYNTHETIC_ATOMICROWS_BUNDLE_ROW_FAMILY_SOURCE_FILES_FIXTURE",
+  "fixture_version": "v1",
+  "mode": "SOURCE_REQUIRED",
+  "positive_source_file_set_ref": "docs/master_plan/atomicrows/AtomicRowsBundleRowFamilySourceFiles.yaml",
+  "pr97_plan_ref": "docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml",
+  "schema_ref": "schemas/atomicrows/atomicrows_bundle_row_family_source_files.schema.json",
+  "semantic_task_id": "ROADMAP-ATOMICROWS-ROW-FAMILY-SOURCES",
+  "source_required_boundary_note": "SOURCE_REQUIRED is the repository fixture/source-family convention only and does not retrieve or accept external sources."
+}

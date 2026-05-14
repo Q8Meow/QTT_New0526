@@ -1,0 +1,435 @@
+source_file_set_id: ATOMICROWS_BUNDLE_ROW_FAMILY_SOURCE_FILE_SET
+source_file_set_version: v1
+semantic_task_id: ROADMAP-ATOMICROWS-ROW-FAMILY-SOURCES
+roadmap_pr_label: PR_98
+roadmap_delivery_label: PR #98
+authority_class: STATIC_ATOMICROWS_ROW_FAMILY_SOURCE_FILES_ONLY_NOT_BUNDLE_NOT_HASH_NOT_FREEZE_NOT_RUNTIME_AUTHORITY
+static_only_flag: true
+repository_source_files_only_flag: true
+external_source_retrieval_flag: false
+source_acceptance_flag: false
+consumes_pr97_expansion_plan_flag: true
+pr97_plan_path: docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml
+pr97_plan_report_path: docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json
+target_total_row_count: 4183
+target_total_row_count_authority: MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER
+target_total_row_count_planning_authority_only_flag: true
+source_files_created_flag: true
+final_bundle_created_flag: false
+bundle_jsonl_created_flag: false
+bundle_sha_created_flag: false
+hash_created_flag: false
+sha_authority_created_flag: false
+freeze_authority_created_flag: false
+bundle_builder_created_flag: false
+bundle_builder_executed_flag: false
+final_readiness_created_flag: false
+external_source_retrieval_created_flag: false
+source_acceptance_created_flag: false
+connector_semantic_created_flag: false
+runtime_live_authority_created_flag: false
+quantum_backend_execution_created_flag: false
+required_source_file_concepts:
+  - ATOMICROWS_BUNDLE_ROW_FAMILY_SOURCE_FILE_SET
+  - ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST
+  - ATOMICROWS_ROW_FAMILY_SOURCE_FILE
+  - ATOMICROWS_ROW_SOURCE_RECORD_OR_BLUEPRINT
+  - ATOMICROWS_ROW_FAMILY_SOURCE_VALIDATION_MATRIX
+  - ATOMICROWS_ROW_FAMILY_SOURCE_OWNER_APPROVAL_BOUNDARY
+  - ATOMICROWS_ROW_FAMILY_QUANTUM_METADATA_SOURCE_PLAN
+row_family_source_manifest:
+  manifest_id: ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST
+  manifest_version: v1
+  purpose: Map every PR97 AtomicRows row-family split-plan entry to the PR98 static source file created at the planned downstream path.
+  stable_ordering_policy: CANONICAL_ORDER_ASCENDING
+  row_family_source_files:
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_001_SIGNAL_FEATURES
+      row_family_id: AR_FAMILY_001_SIGNAL_FEATURES
+      row_family_class: SIGNAL_FEATURE_FAMILY
+      canonical_order: 1
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_001_SIGNAL_FEATURES
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_FINAL_ROWS_CREATED_BY_PR98
+        - NO_BUNDLE_BUILD_READY_STATE
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_002_SCORING_RANKING
+      row_family_id: AR_FAMILY_002_SCORING_RANKING
+      row_family_class: SCORING_RANKING_FAMILY
+      canonical_order: 2
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_002_SCORING_RANKING
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_FINAL_ROWS_CREATED_BY_PR98
+        - NO_SCORE_OUTPUT_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_003_NORMALIZATION_CALIBRATION
+      row_family_id: AR_FAMILY_003_NORMALIZATION_CALIBRATION
+      row_family_class: NORMALIZATION_CALIBRATION_FAMILY
+      canonical_order: 3
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_003_NORMALIZATION_CALIBRATION
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_FINAL_ROWS_CREATED_BY_PR98
+        - NO_CALIBRATION_VALUE_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_004_RISK_CONTROL
+      row_family_id: AR_FAMILY_004_RISK_CONTROL
+      row_family_class: RISK_CONTROL_FAMILY
+      canonical_order: 4
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_004_RISK_CONTROL
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_FINAL_ROWS_CREATED_BY_PR98
+        - NO_LIVE_RISK_GATE_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_005_EXECUTION_CONNECTOR_BOUNDARY
+      row_family_id: AR_FAMILY_005_EXECUTION_CONNECTOR_BOUNDARY
+      row_family_class: EXECUTION_CONNECTOR_BOUNDARY_FAMILY
+      canonical_order: 5
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_005_EXECUTION_CONNECTOR_BOUNDARY
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_CONNECTOR_SEMANTIC_CREATED_BY_PR98
+        - NO_ORDER_AUTHORITY_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_006_CAPITAL_SIZING_CASH
+      row_family_id: AR_FAMILY_006_CAPITAL_SIZING_CASH
+      row_family_class: CAPITAL_SIZING_CASH_FAMILY
+      canonical_order: 6
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_006_CAPITAL_SIZING_CASH
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_RUNTIME_CASH_RECEIPT_CREATED_BY_PR98
+        - NO_CAPITAL_ALLOCATION_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_007_LATENCY_ROUTING
+      row_family_id: AR_FAMILY_007_LATENCY_ROUTING
+      row_family_class: LATENCY_ROUTING_FAMILY
+      canonical_order: 7
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_007_LATENCY_ROUTING
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_LATENCY_EVIDENCE_CREATED_BY_PR98
+        - NO_LIVE_ROUTING_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_008_ERROR_GUARD_FAIL_CLOSED
+      row_family_id: AR_FAMILY_008_ERROR_GUARD_FAIL_CLOSED
+      row_family_class: ERROR_GUARD_FAIL_CLOSED_FAMILY
+      canonical_order: 8
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_008_ERROR_GUARD_FAIL_CLOSED
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_FAIL_OPEN_ROUTE_CREATED_BY_PR98
+        - NO_RUNTIME_EFFECT_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_009_LIFECYCLE_AGENT_BINDING
+      row_family_id: AR_FAMILY_009_LIFECYCLE_AGENT_BINDING
+      row_family_class: LIFECYCLE_AGENT_BINDING_FAMILY
+      canonical_order: 9
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_009_LIFECYCLE_AGENT_BINDING
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_LIFECYCLE_MUTATION_CREATED_BY_PR98
+        - NO_AGENT_ASSIGNMENT_MUTATION_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+      row_family_id: AR_FAMILY_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+      row_family_class: SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_FAMILY
+      canonical_order: 10
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_SOURCE_RETRIEVAL_CREATED_BY_PR98
+        - NO_ACCEPTED_SOURCE_PACKET_CREATED_BY_PR98
+        - NO_CONNECTOR_SEMANTIC_BINDING_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_011_REPLAY_PAPER_VALIDATION
+      row_family_id: AR_FAMILY_011_REPLAY_PAPER_VALIDATION
+      row_family_class: REPLAY_PAPER_VALIDATION_FAMILY
+      canonical_order: 11
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_011_REPLAY_PAPER_VALIDATION
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_REPLAY_EXECUTION_CREATED_BY_PR98
+        - NO_PAPER_EXECUTION_CREATED_BY_PR98
+        - NO_REPLAY_PAPER_RESULT_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_012_QUANTUM_ADVISORY_OPTIMIZATION
+      row_family_id: AR_FAMILY_012_QUANTUM_ADVISORY_OPTIMIZATION
+      row_family_class: QUANTUM_ADVISORY_OPTIMIZATION_FAMILY
+      canonical_order: 12
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_012_QUANTUM_ADVISORY_OPTIMIZATION
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_OPTIMIZER_EXECUTION_CREATED_BY_PR98
+        - NO_QUANTUM_BACKEND_EXECUTION_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_013_QUANTUM_QUBO_ISING_METADATA
+      row_family_id: AR_FAMILY_013_QUANTUM_QUBO_ISING_METADATA
+      row_family_class: QUANTUM_QUBO_ISING_METADATA_FAMILY
+      canonical_order: 13
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_013_QUANTUM_QUBO_ISING_METADATA
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_QUBO_SOLVING_CREATED_BY_PR98
+        - NO_ISING_SOLVING_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA
+      row_family_id: AR_FAMILY_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA
+      row_family_class: QUANTUM_QAOA_VQE_ANNEALING_METADATA_FAMILY
+      canonical_order: 14
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_QAOA_EXECUTION_CREATED_BY_PR98
+        - NO_VQE_EXECUTION_CREATED_BY_PR98
+        - NO_ANNEALING_EXECUTION_CREATED_BY_PR98
+    - manifest_entry_id: PR98_MANIFEST_ENTRY_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+      row_family_id: AR_FAMILY_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+      row_family_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_FAMILY
+      canonical_order: 15
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl
+      actual_created_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl
+      source_file_id: AR_PR98_SOURCE_FILE_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+      source_file_exists_flag: true
+      family_source_status: SOURCE_BLUEPRINTS_CREATED_OWNER_REVIEW_REQUIRED
+      row_count_policy: OWNER_REVIEW_REQUIRED
+      exact_row_count_authority: EXACT_PER_FAMILY_COUNTS_NOT_AUTHORIZED_BY_PR97
+      owner_approval_state: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUILDER
+      downstream_builder_readiness_state: NOT_READY_FOR_BUNDLE_BUILD
+      blocked_effects:
+        - NO_QUANTUM_PORTFOLIO_EXECUTION_CREATED_BY_PR98
+        - NO_CLASSICAL_OR_QUANTUM_COMPARATOR_RESULT_CREATED_BY_PR98
+validation_matrix:
+  matrix_id: ATOMICROWS_ROW_FAMILY_SOURCE_VALIDATION_MATRIX
+  matrix_version: v1
+  stable_ordering_policy: CANONICAL_ORDER_ASCENDING
+  validations:
+    - validation_id: PR98_VAL_001_SCHEMA_COMPLIANCE
+      validation_class: SOURCE_FILE_SCHEMA_COMPLIANCE
+      canonical_order: 1
+      fail_closed_reason_code: ATOMICROWS_PR98_SCHEMA_COMPLIANCE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_002_PR97_FAMILY_COVERAGE
+      validation_class: PR97_ROW_FAMILY_COVERAGE
+      canonical_order: 2
+      fail_closed_reason_code: ATOMICROWS_PR98_PR97_FAMILY_COVERAGE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_003_PATH_ALIGNMENT
+      validation_class: PR97_SOURCE_FILE_PATH_ALIGNMENT
+      canonical_order: 3
+      fail_closed_reason_code: ATOMICROWS_PR98_PATH_ALIGNMENT_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_004_SOURCE_FILE_ID_UNIQUENESS
+      validation_class: SOURCE_FILE_ID_UNIQUENESS
+      canonical_order: 4
+      fail_closed_reason_code: ATOMICROWS_PR98_DUPLICATE_SOURCE_FILE_ID_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_005_ROW_FAMILY_OWNERSHIP_UNIQUENESS
+      validation_class: ROW_FAMILY_OWNERSHIP_UNIQUENESS
+      canonical_order: 5
+      fail_closed_reason_code: ATOMICROWS_PR98_DUPLICATE_ROW_FAMILY_OWNERSHIP_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_006_BLUEPRINT_ID_UNIQUENESS
+      validation_class: ROW_SOURCE_BLUEPRINT_ID_UNIQUENESS
+      canonical_order: 6
+      fail_closed_reason_code: ATOMICROWS_PR98_DUPLICATE_BLUEPRINT_ID_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_007_STABLE_ORDERING
+      validation_class: STABLE_ORDERING
+      canonical_order: 7
+      fail_closed_reason_code: ATOMICROWS_PR98_ORDERING_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_008_NO_FABRICATED_COUNTS
+      validation_class: NO_FABRICATED_EXACT_COUNTS
+      canonical_order: 8
+      fail_closed_reason_code: ATOMICROWS_PR98_EXACT_COUNT_FABRICATION_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_009_BUNDLE_HASH_ABSENCE
+      validation_class: BUNDLE_AND_HASH_ABSENCE
+      canonical_order: 9
+      fail_closed_reason_code: ATOMICROWS_PR98_BUNDLE_HASH_ABSENCE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_010_BUILDER_FREEZE_FINAL_ABSENCE
+      validation_class: BUILDER_FREEZE_FINAL_READINESS_ABSENCE
+      canonical_order: 10
+      fail_closed_reason_code: ATOMICROWS_PR98_DOWNSTREAM_ARTIFACT_ABSENCE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_011_NO_RUNTIME_LIVE_SOURCE_CONNECTOR_PROFIT
+      validation_class: NO_RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_AUTHORITY
+      canonical_order: 11
+      fail_closed_reason_code: ATOMICROWS_PR98_RUNTIME_LIVE_SOURCE_CONNECTOR_PROFIT_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+    - validation_id: PR98_VAL_012_QUANTUM_NON_EXECUTABLE
+      validation_class: QUANTUM_METADATA_NON_EXECUTABLE
+      canonical_order: 12
+      fail_closed_reason_code: ATOMICROWS_PR98_QUANTUM_EXECUTION_BOUNDARY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+owner_approval_boundary:
+  boundary_id: ATOMICROWS_ROW_FAMILY_SOURCE_OWNER_APPROVAL_BOUNDARY
+  owner_approval_required_before_builder_execution: true
+  owner_approval_required_before_hash_freeze: true
+  owner_approval_required_before_final_readiness: true
+  owner_override_satisfies_internal_workflow_only_flag: true
+  owner_override_cannot_fabricate:
+    - SOURCE_FACTS
+    - ACCEPTED_SOURCE_PACKETS
+    - CONNECTOR_SEMANTICS
+    - RUNTIME_CASH_RECEIPTS
+    - ORDER_OR_FILL_RECEIPTS
+    - REPLAY_OR_PAPER_RESULTS
+    - FINAL_ATOMICROWS_ROWS
+    - BUNDLE_FILE
+    - BUNDLE_HASH
+    - PROFIT_EVIDENCE
+    - LATENCY_EVIDENCE
+    - QUANTUM_ADVANTAGE_EVIDENCE
+quantum_metadata_source_plan:
+  plan_id: ATOMICROWS_ROW_FAMILY_QUANTUM_METADATA_SOURCE_PLAN
+  metadata_only_flag: true
+  quantum_backend_execution_created_flag: false
+  quantum_advantage_evidence_created_flag: false
+  allowed_static_metadata_refs:
+    - QUANTUM_ADVISORY_ROW_FAMILIES
+    - QUANTUM_APPLICABILITY_METADATA
+    - QUBO_COMPATIBLE_METADATA
+    - ISING_COMPATIBLE_METADATA
+    - QAOA_COMPATIBLE_METADATA
+    - VQE_COMPATIBLE_METADATA
+    - ANNEALING_COMPATIBLE_METADATA
+    - QUANTUM_PORTFOLIO_OPTIMIZATION_METADATA
+    - HYBRID_CLASSICAL_QUANTUM_COMPARISON_METADATA
+    - OWNER_QUANTUM_PRIORITY_POLICY_REFERENCE
+  forbidden_quantum_execution_effects:
+    - QAOA_EXECUTION
+    - VQE_EXECUTION
+    - ANNEALING_EXECUTION
+    - QUBO_SOLVING
+    - ISING_SOLVING
+    - QUANTUM_INSPIRED_OPTIMIZER_EXECUTION
+    - TRUE_QUANTUM_BACKEND_EXECUTION
+    - QUANTUM_SIMULATOR_EXECUTION
+    - QUANTUM_PROVIDER_CALL
+    - QUANTUM_ADVANTAGE_VALIDATION
+    - QUANTUM_DIRECT_ORDER_AUTHORITY
+blocked_effects:
+  - ATOMICROWS_BUNDLE_JSONL_CREATION
+  - ATOMICROWS_BUNDLE_SHA256_CREATION
+  - SHA_OR_FREEZE_AUTHORITY_CREATION
+  - BUNDLE_BUILDER_CREATION_OR_EXECUTION
+  - FINAL_READINESS_CREATION
+  - SOURCE_RETRIEVAL_OR_ACCEPTANCE
+  - CONNECTOR_SEMANTIC_BINDING
+  - RUNTIME_LIVE_ORDER_OR_PROFIT_EFFECT
+  - QUANTUM_BACKEND_OR_SIMULATOR_EXECUTION
+future_consumer_notes: PR98 creates static row-family source files and source-row blueprints only. PR99 must still create any bundle builder, PR100 must still create any SHA/freeze authority, and PR101 must still create any final readiness gate under future owner-approved scope.
