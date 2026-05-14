@@ -1,0 +1,825 @@
+plan_id: ATOMICROWS_FULL_BUNDLE_EXPANSION_PLAN
+plan_version: v1
+semantic_task_id: ROADMAP-ATOMICROWS-BUNDLE-PLAN
+roadmap_pr_label: PR #97
+authority_class: STATIC_ATOMICROWS_FULL_BUNDLE_ROW_EXPANSION_PLAN_ONLY_NOT_BUNDLE_NOT_HASH_NOT_FREEZE_NOT_RUNTIME_AUTHORITY
+static_only_flag: true
+planning_only_flag: true
+handoff_only_flag: true
+target_total_row_count: 4183
+target_total_row_count_authority: MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER
+target_total_row_count_created_by_pr97_flag: false
+canonical_future_bundle_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+canonical_future_bundle_sha_path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+bundle_file_created_flag: false
+bundle_sha_created_flag: false
+sha_authority_created_flag: false
+freeze_authority_created_flag: false
+row_family_source_files_created_flag: false
+row_records_created_flag: false
+bundle_builder_created_flag: false
+bundle_builder_executed_flag: false
+final_readiness_created_flag: false
+consumes_existing_atomicrows_schema_flag: true
+consumes_existing_lifecycle_gate_flag: true
+consumes_existing_agent_binding_gate_flag: true
+consumes_existing_parameter_stack_taxonomy_flag: true
+consumes_existing_selection_universe_gate_flag: true
+consumes_existing_quantum_applicability_registry_flag: true
+creates_runtime_live_authority_flag: false
+creates_order_authority_flag: false
+creates_source_fact_flag: false
+creates_connector_semantic_flag: false
+creates_runtime_cash_receipt_flag: false
+creates_replay_paper_result_flag: false
+creates_optimizer_execution_flag: false
+creates_quantum_backend_execution_flag: false
+creates_profit_evidence_flag: false
+creates_latency_evidence_flag: false
+creates_quantum_advantage_evidence_flag: false
+required_plan_concepts:
+  - ATOMICROWS_FULL_BUNDLE_EXPANSION_PLAN
+  - ATOMICROWS_ROW_FAMILY_SPLIT_PLAN
+  - ATOMICROWS_GENERATION_SEQUENCE_PLAN
+  - ATOMICROWS_VALIDATION_MATRIX_PLAN
+  - ATOMICROWS_OWNER_APPROVAL_SEQUENCE_PLAN
+  - ATOMICROWS_QUANTUM_FORWARD_ROW_FAMILY_PLAN
+  - ATOMICROWS_FORBIDDEN_ARTIFACT_BOUNDARY_PLAN
+blocked_effects:
+  - ATOMICROWS_BUNDLE_JSONL_CREATION
+  - ATOMICROWS_BUNDLE_SHA256_CREATION
+  - SHA_OR_FREEZE_AUTHORITY_CREATION
+  - ROW_FAMILY_SOURCE_FILE_CREATION
+  - ROW_RECORD_CREATION
+  - BUNDLE_BUILDER_CREATION_OR_EXECUTION
+  - FINAL_READINESS_CREATION
+  - RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_OR_QUANTUM_BACKEND_EFFECT
+row_family_split_plan:
+  plan_id: ATOMICROWS_ROW_FAMILY_SPLIT_PLAN
+  stable_ordering_policy: CANONICAL_ORDER_ASCENDING
+  row_families:
+    - row_family_id: AR_FAMILY_001_SIGNAL_FEATURES
+      row_family_class: SIGNAL_FEATURE_FAMILY
+      display_label: Signal Feature Rows
+      canonical_order: 1
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - schemas/atomicrows/atomic_parameter_row.schema.json
+        - schemas/atomicrows/atomic_row_bundle.schema.json
+      required_validators:
+        - tools/validate_atomicrows_canonical_row_specification_static.py
+        - tools/validate_atomicrows_bundle_schema_checker_static.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_SOURCE_FILE_CREATED_BY_PR97
+        - NO_ROW_RECORDS_CREATED_BY_PR97
+      future_consumer_notes: PR98 may define source rows only after owner review.
+    - row_family_id: AR_FAMILY_002_SCORING_RANKING
+      row_family_class: SCORING_RANKING_FAMILY
+      display_label: Scoring And Ranking Rows
+      canonical_order: 2
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/atomicrows/AtomicRowsParameterSelectionUniverseRegistry.yaml
+        - docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json
+      required_validators:
+        - tools/validate_parameter_algorithm_scoring_policy_registry.py
+        - tools/validate_parameter_stack_scoring_and_ranking_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_SCORE_OUTPUT_CREATED_BY_PR97
+        - NO_RANKING_CREATED_BY_PR97
+      future_consumer_notes: Scoring rows remain static inventory until future gates validate source and replay paper evidence.
+    - row_family_id: AR_FAMILY_003_NORMALIZATION_CALIBRATION
+      row_family_class: NORMALIZATION_CALIBRATION_FAMILY
+      display_label: Normalization And Calibration Rows
+      canonical_order: 3
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json
+      required_validators:
+        - tools/validate_atomicrows_parameter_stack_completeness_gate.py
+        - tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_CALIBRATION_VALUE_CREATED_BY_PR97
+        - NO_REPLAY_PAPER_RESULT_CREATED_BY_PR97
+      future_consumer_notes: Exact calibration values require future evidence and replay paper receipts.
+    - row_family_id: AR_FAMILY_004_RISK_CONTROL
+      row_family_class: RISK_CONTROL_FAMILY
+      display_label: Risk Control Rows
+      canonical_order: 4
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json
+      required_validators:
+        - tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+        - tools/validate_trade_context_parameter_stack_selection_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_RISK_LIMIT_CREATED_BY_PR97
+        - NO_LIVE_RISK_GATE_CREATED_BY_PR97
+      future_consumer_notes: Risk rows remain blocked from live use until source cash risk and owner gates validate.
+    - row_family_id: AR_FAMILY_005_EXECUTION_CONNECTOR_BOUNDARY
+      row_family_class: EXECUTION_CONNECTOR_BOUNDARY_FAMILY
+      display_label: Execution And Connector Boundary Rows
+      canonical_order: 5
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/Stage1ConnectorSemanticBindingLedgerCheck.report.json
+      required_validators:
+        - tools/stage1_connector_semantic_binding_ledger_check.py
+        - tools/validate_atomicrows_parameter_stack_compatibility_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_CONNECTOR_SEMANTIC_CREATED_BY_PR97
+        - NO_ORDER_AUTHORITY_CREATED_BY_PR97
+      future_consumer_notes: Connector and execution rows require accepted source packets before semantic use.
+    - row_family_id: AR_FAMILY_006_CAPITAL_SIZING_CASH
+      row_family_class: CAPITAL_SIZING_CASH_FAMILY
+      display_label: Capital Sizing And Cash Rows
+      canonical_order: 6
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json
+      required_validators:
+        - tools/validate_atomicrows_parameter_selection_universe_consumer_gate.py
+        - tools/validate_trade_context_parameter_stack_selection_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_RUNTIME_CASH_RECEIPT_CREATED_BY_PR97
+        - NO_CAPITAL_ALLOCATION_CREATED_BY_PR97
+      future_consumer_notes: Capital rows require runtime cash receipts before live order use.
+    - row_family_id: AR_FAMILY_007_LATENCY_ROUTING
+      row_family_class: LATENCY_ROUTING_FAMILY
+      display_label: Latency And Routing Rows
+      canonical_order: 7
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/Stage1RuntimeResolverSnapshotContractCheck.report.json
+      required_validators:
+        - tools/stage1_runtime_resolver_snapshot_contract_check.py
+        - tools/validate_trade_context_selection_universe_routing_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_LATENCY_EVIDENCE_CREATED_BY_PR97
+        - NO_LIVE_ROUTING_CREATED_BY_PR97
+      future_consumer_notes: Latency rows may plan future low latency constraints but create no measured latency evidence.
+    - row_family_id: AR_FAMILY_008_ERROR_GUARD_FAIL_CLOSED
+      row_family_class: ERROR_GUARD_FAIL_CLOSED_FAMILY
+      display_label: Error Guard Fail Closed Rows
+      canonical_order: 8
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/QTTTestGate.report.json
+      required_validators:
+        - tools/qtt_test_gate.py
+        - tools/validate_no_runtime_artifacts.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_FAIL_OPEN_ROUTE_CREATED_BY_PR97
+        - NO_RUNTIME_EFFECT_CREATED_BY_PR97
+      future_consumer_notes: Error guard rows preserve fail closed behavior and create no runtime callbacks.
+    - row_family_id: AR_FAMILY_009_LIFECYCLE_AGENT_BINDING
+      row_family_class: LIFECYCLE_AGENT_BINDING_FAMILY
+      display_label: Lifecycle And Agent Binding Rows
+      canonical_order: 9
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/atomic_rows/AtomicRowsParameterLifecycleRegistry.yaml
+        - docs/master_plan/atomic_rows/AtomicRowsParameterAgentBindingRegistry.yaml
+      required_validators:
+        - tools/validate_atomicrows_parameter_lifecycle.py
+        - tools/validate_atomicrows_parameter_agent_binding_registry.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: NOT_REQUIRED_FOR_PR97_STATIC_PLAN
+      connector_semantic_requirement_class: NOT_REQUIRED_FOR_PR97_STATIC_PLAN
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_LIFECYCLE_MUTATION_CREATED_BY_PR97
+        - NO_AGENT_ASSIGNMENT_MUTATION_CREATED_BY_PR97
+      future_consumer_notes: Lifecycle and binding rows must remain compatible with existing cumulative readiness gates.
+    - row_family_id: AR_FAMILY_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+      row_family_class: SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_FAMILY
+      display_label: Source Evidence And Connector Semantic Rows
+      canonical_order: 10
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json
+      required_validators:
+        - tools/validate_atomicrows_research_source_to_candidate_family_gate.py
+        - tools/source_evidence_acceptance_consumer_contract_check.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_SOURCE_RETRIEVAL_CREATED_BY_PR97
+        - NO_ACCEPTED_SOURCE_PACKET_CREATED_BY_PR97
+        - NO_CONNECTOR_SEMANTIC_BINDING_CREATED_BY_PR97
+      future_consumer_notes: Source and connector rows are boundary plans only until accepted target field evidence exists.
+    - row_family_id: AR_FAMILY_011_REPLAY_PAPER_VALIDATION
+      row_family_class: REPLAY_PAPER_VALIDATION_FAMILY
+      display_label: Replay Paper And Validation Rows
+      canonical_order: 11
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/Stage1ConcurrentReplayPaperContractCheck.report.json
+      required_validators:
+        - tools/stage1_concurrent_replay_paper_contract_check.py
+        - tools/validate_replay_paper_candidate_stack_competition_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_REPLAY_EXECUTION_CREATED_BY_PR97
+        - NO_PAPER_EXECUTION_CREATED_BY_PR97
+        - NO_REPLAY_PAPER_RESULT_CREATED_BY_PR97
+      future_consumer_notes: Replay paper rows define future evidence expectations only.
+    - row_family_id: AR_FAMILY_012_QUANTUM_ADVISORY_OPTIMIZATION
+      row_family_class: QUANTUM_ADVISORY_OPTIMIZATION_FAMILY
+      display_label: Quantum Advisory Optimization Rows
+      canonical_order: 12
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json
+      required_validators:
+        - tools/validate_quantum_applicability_classification_registry.py
+        - tools/validate_quantum_classical_optimizer_arbitration_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: QUANTUM_ADVISORY_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_OPTIMIZER_EXECUTION_CREATED_BY_PR97
+        - NO_QUANTUM_BACKEND_EXECUTION_CREATED_BY_PR97
+      future_consumer_notes: Quantum advisory rows may inform future static selection but cannot execute optimizers.
+    - row_family_id: AR_FAMILY_013_QUANTUM_QUBO_ISING_METADATA
+      row_family_class: QUANTUM_QUBO_ISING_METADATA_FAMILY
+      display_label: Quantum QUBO And Ising Metadata Rows
+      canonical_order: 13
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json
+      required_validators:
+        - tools/validate_quantum_classical_optimizer_arbitration_gate.py
+        - tools/validate_atomicrows_parameter_selection_universe_registry.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: QUBO_ISING_COMPATIBLE_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_QUBO_SOLVING_CREATED_BY_PR97
+        - NO_ISING_SOLVING_CREATED_BY_PR97
+      future_consumer_notes: QUBO and Ising rows are metadata planning only until future builder and evidence gates exist.
+    - row_family_id: AR_FAMILY_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA
+      row_family_class: QUANTUM_QAOA_VQE_ANNEALING_METADATA_FAMILY
+      display_label: Quantum QAOA VQE And Annealing Metadata Rows
+      canonical_order: 14
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json
+      required_validators:
+        - tools/validate_quantum_applicability_classification_registry.py
+        - tools/validate_quantum_classical_optimizer_arbitration_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: QAOA_VQE_ANNEALING_COMPATIBLE_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_QAOA_EXECUTION_CREATED_BY_PR97
+        - NO_VQE_EXECUTION_CREATED_BY_PR97
+        - NO_ANNEALING_EXECUTION_CREATED_BY_PR97
+      future_consumer_notes: QAOA VQE and annealing rows are future metadata only and cannot call simulators or providers.
+    - row_family_id: AR_FAMILY_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+      row_family_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_FAMILY
+      display_label: Quantum Portfolio Hybrid Comparator Rows
+      canonical_order: 15
+      planned_downstream_source_file_path: docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl
+      source_file_created_by_pr97_flag: false
+      row_records_created_by_pr97_flag: false
+      exact_row_count_created_by_pr97_flag: false
+      planned_count_policy: OWNER_REVIEW_REQUIRED
+      planned_count_authority: FUTURE_PR98_OR_OWNER_APPROVED_SOURCE
+      upstream_authority_inputs:
+        - docs/master_plan/QTT_MasterPlan_Current.md
+        - docs/master_plan/atomicrows/AtomicRowsParameterSelectionUniverseRegistry.yaml
+      required_validators:
+        - tools/validate_atomicrows_parameter_selection_universe_registry.py
+        - tools/validate_quantum_classical_optimizer_arbitration_gate.py
+      required_owner_approval_stage: PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION
+      quantum_relevance_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_STATIC_METADATA
+      source_evidence_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      connector_semantic_requirement_class: REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION
+      replay_paper_requirement_class: REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE
+      live_order_requirement_class: REQUIRED_BEFORE_LIVE_OR_ORDER_USE
+      blocked_effects:
+        - NO_QUANTUM_PORTFOLIO_EXECUTION_CREATED_BY_PR97
+        - NO_CLASSICAL_OR_QUANTUM_COMPARATOR_RESULT_CREATED_BY_PR97
+      future_consumer_notes: Portfolio and hybrid comparator rows are static planning only and create no advantage evidence.
+generation_sequence_plan:
+  plan_id: ATOMICROWS_GENERATION_SEQUENCE_PLAN
+  sequence_created_by_pr97_flag: true
+  downstream_stages:
+    - stage_order: 1
+      roadmap_pr_label: PR #98
+      downstream_pr_stage: PR98_ROW_FAMILY_SOURCE_FILES
+      stage_purpose: Create owner approved row family source files.
+      creates_artifact_by_pr97_flag: false
+      owner_approval_required_before_stage_flag: true
+      forbidden_now:
+        - ROW_FAMILY_SOURCE_FILES
+        - PRODUCTION_ROW_RECORDS
+    - stage_order: 2
+      roadmap_pr_label: PR #99
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      stage_purpose: Create deterministic bundle builder flow under owner approved scope.
+      creates_artifact_by_pr97_flag: false
+      owner_approval_required_before_stage_flag: true
+      forbidden_now:
+        - BUNDLE_BUILDER_TOOL
+        - BUILDER_EXECUTION
+    - stage_order: 3
+      roadmap_pr_label: PR #100
+      downstream_pr_stage: PR100_SHA_FREEZE_AUTHORITY
+      stage_purpose: Create SHA and freeze authority only after approved bundle exists.
+      creates_artifact_by_pr97_flag: false
+      owner_approval_required_before_stage_flag: true
+      forbidden_now:
+        - ATOMICROWS_BUNDLE_SHA256
+        - SHA_FREEZE_AUTHORITY
+    - stage_order: 4
+      roadmap_pr_label: PR #101
+      downstream_pr_stage: PR101_FINAL_READINESS
+      stage_purpose: Validate final readiness only after source files builder bundle and SHA authority exist.
+      creates_artifact_by_pr97_flag: false
+      owner_approval_required_before_stage_flag: true
+      forbidden_now:
+        - FINAL_READINESS_GATE
+        - FULL_BUNDLE_READY_CLAIM
+validation_matrix_plan:
+  plan_id: ATOMICROWS_VALIDATION_MATRIX_PLAN
+  stable_ordering_policy: CANONICAL_ORDER_ASCENDING
+  validations:
+    - validation_id: VAL_001_SCHEMA_COMPLIANCE
+      validation_class: SCHEMA_COMPLIANCE
+      canonical_order: 1
+      planned_validator_owner: PR97_STATIC_PLAN_VALIDATOR
+      upstream_required_artifacts:
+        - schemas/atomicrows/atomicrows_full_bundle_row_expansion_plan.schema.json
+      downstream_pr_stage: PR97_STATIC_PLAN
+      fail_closed_reason_code: ATOMICROWS_PR97_SCHEMA_COMPLIANCE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - BUNDLE_BUILD
+        - HASH_FREEZE
+        - LIVE_RUNTIME_USE
+    - validation_id: VAL_002_ROW_FAMILY_COMPLETENESS
+      validation_class: ROW_FAMILY_COMPLETENESS
+      canonical_order: 2
+      planned_validator_owner: PR98_SOURCE_FILE_GATE
+      upstream_required_artifacts:
+        - docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml
+      downstream_pr_stage: PR98_ROW_FAMILY_SOURCE_FILES
+      fail_closed_reason_code: ATOMICROWS_ROW_FAMILY_COMPLETENESS_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - ROW_FAMILY_SOURCE_CREATION
+        - BUNDLE_BUILD
+    - validation_id: VAL_003_ROW_ID_UNIQUENESS
+      validation_class: ROW_ID_UNIQUENESS
+      canonical_order: 3
+      planned_validator_owner: PR99_BUNDLE_BUILDER_GATE
+      upstream_required_artifacts:
+        - FUTURE_PR98_ROW_FAMILY_SOURCE_FILES
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_ROW_ID_UNIQUENESS_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - BUNDLE_BUILD
+        - HASH_FREEZE
+    - validation_id: VAL_004_NO_DUPLICATE_ROW_IDS
+      validation_class: NO_DUPLICATE_ROW_IDS
+      canonical_order: 4
+      planned_validator_owner: PR99_BUNDLE_BUILDER_GATE
+      upstream_required_artifacts:
+        - FUTURE_PR98_ROW_FAMILY_SOURCE_FILES
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_DUPLICATE_ROW_ID_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - BUNDLE_BUILD
+        - HASH_FREEZE
+    - validation_id: VAL_005_FAMILY_MEMBERSHIP_VALIDITY
+      validation_class: FAMILY_MEMBERSHIP_VALIDITY
+      canonical_order: 5
+      planned_validator_owner: PR99_BUNDLE_BUILDER_GATE
+      upstream_required_artifacts:
+        - FUTURE_PR98_ROW_FAMILY_SOURCE_FILES
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_FAMILY_MEMBERSHIP_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - BUNDLE_BUILD
+    - validation_id: VAL_006_AGENT_BINDING_COMPATIBILITY
+      validation_class: AGENT_BINDING_COMPATIBILITY
+      canonical_order: 6
+      planned_validator_owner: EXISTING_AGENT_BINDING_GATE
+      upstream_required_artifacts:
+        - docs/master_plan/generated/AtomicRowsParameterAgentBindingReport.json
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_AGENT_BINDING_COMPATIBILITY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - AGENT_BINDING_CONSUMPTION
+    - validation_id: VAL_007_LIFECYCLE_STATE_VALIDITY
+      validation_class: LIFECYCLE_STATE_VALIDITY
+      canonical_order: 7
+      planned_validator_owner: EXISTING_LIFECYCLE_GATE
+      upstream_required_artifacts:
+        - docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_LIFECYCLE_STATE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - LIFECYCLE_CONSUMPTION
+    - validation_id: VAL_008_PARAMETER_STACK_ROLE_COVERAGE
+      validation_class: PARAMETER_STACK_ROLE_COVERAGE
+      canonical_order: 8
+      planned_validator_owner: EXISTING_PARAMETER_STACK_GATE
+      upstream_required_artifacts:
+        - docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_PARAMETER_STACK_ROLE_COVERAGE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - STACK_SELECTION
+    - validation_id: VAL_009_SELECTION_UNIVERSE_COVERAGE
+      validation_class: SELECTION_UNIVERSE_COVERAGE
+      canonical_order: 9
+      planned_validator_owner: EXISTING_SELECTION_UNIVERSE_GATE
+      upstream_required_artifacts:
+        - docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_SELECTION_UNIVERSE_COVERAGE_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - SELECTION_UNIVERSE_CONSUMPTION
+    - validation_id: VAL_010_SCORING_RANKING_COMPATIBILITY
+      validation_class: SCORING_RANKING_COMPATIBILITY
+      canonical_order: 10
+      planned_validator_owner: FUTURE_SCORING_RANKING_GATE
+      upstream_required_artifacts:
+        - FUTURE_ROW_FAMILY_SOURCE_FILES
+      downstream_pr_stage: PR99_BUNDLE_BUILDER
+      fail_closed_reason_code: ATOMICROWS_SCORING_RANKING_COMPATIBILITY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - SCORING_RANKING_CONSUMPTION
+    - validation_id: VAL_011_REPLAY_PAPER_READINESS_GATING
+      validation_class: REPLAY_PAPER_READINESS_GATING
+      canonical_order: 11
+      planned_validator_owner: FUTURE_REPLAY_PAPER_GATE
+      upstream_required_artifacts:
+        - FUTURE_BUNDLE_BUILD_REPORT
+      downstream_pr_stage: PR101_FINAL_READINESS
+      fail_closed_reason_code: ATOMICROWS_REPLAY_PAPER_READINESS_GATING_FAILED
+      blocks_bundle_build_flag: false
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - REPLAY_PAPER_READINESS
+        - LIVE_RUNTIME_USE
+    - validation_id: VAL_012_OWNER_OVERRIDE_OWNER_APPROVAL_GATING
+      validation_class: OWNER_OVERRIDE_OWNER_APPROVAL_GATING
+      canonical_order: 12
+      planned_validator_owner: FUTURE_OWNER_APPROVAL_GATE
+      upstream_required_artifacts:
+        - FUTURE_OWNER_APPROVAL_RECEIPT_BOUNDARY
+      downstream_pr_stage: PR101_FINAL_READINESS
+      fail_closed_reason_code: ATOMICROWS_OWNER_APPROVAL_GATING_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - OWNER_APPROVAL_BYPASS
+    - validation_id: VAL_013_SOURCE_EVIDENCE_BOUNDARY_GATING
+      validation_class: SOURCE_EVIDENCE_BOUNDARY_GATING
+      canonical_order: 13
+      planned_validator_owner: FUTURE_SOURCE_EVIDENCE_GATE
+      upstream_required_artifacts:
+        - ACCEPTED_SOURCE_PACKETS_WHEN_REQUIRED
+      downstream_pr_stage: PR101_FINAL_READINESS
+      fail_closed_reason_code: ATOMICROWS_SOURCE_EVIDENCE_BOUNDARY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - SOURCE_FACT_FABRICATION
+    - validation_id: VAL_014_CONNECTOR_SEMANTIC_BOUNDARY_GATING
+      validation_class: CONNECTOR_SEMANTIC_BOUNDARY_GATING
+      canonical_order: 14
+      planned_validator_owner: FUTURE_CONNECTOR_SEMANTIC_GATE
+      upstream_required_artifacts:
+        - ACCEPTED_TARGET_FIELD_PACKETS_WHEN_REQUIRED
+      downstream_pr_stage: PR101_FINAL_READINESS
+      fail_closed_reason_code: ATOMICROWS_CONNECTOR_SEMANTIC_BOUNDARY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - CONNECTOR_SEMANTIC_FABRICATION
+    - validation_id: VAL_015_RUNTIME_LIVE_ORDER_BOUNDARY_GATING
+      validation_class: RUNTIME_LIVE_ORDER_BOUNDARY_GATING
+      canonical_order: 15
+      planned_validator_owner: FUTURE_RUNTIME_LIVE_GATE
+      upstream_required_artifacts:
+        - FUTURE_FINAL_READINESS_PACKET
+      downstream_pr_stage: RUNTIME_LIVE_NEVER_IN_PR97
+      fail_closed_reason_code: ATOMICROWS_RUNTIME_LIVE_ORDER_BOUNDARY_FAILED
+      blocks_bundle_build_flag: false
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - RUNTIME_LIVE_ORDER_USE
+    - validation_id: VAL_016_QUANTUM_METADATA_BOUNDARY_GATING
+      validation_class: QUANTUM_METADATA_BOUNDARY_GATING
+      canonical_order: 16
+      planned_validator_owner: FUTURE_QUANTUM_METADATA_GATE
+      upstream_required_artifacts:
+        - FUTURE_QUANTUM_APPLICABILITY_AND_PRIORITY_POLICIES
+      downstream_pr_stage: PR101_FINAL_READINESS
+      fail_closed_reason_code: ATOMICROWS_QUANTUM_METADATA_BOUNDARY_FAILED
+      blocks_bundle_build_flag: true
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - QUANTUM_BACKEND_EXECUTION
+        - QUANTUM_ADVANTAGE_CLAIM
+    - validation_id: VAL_017_BUNDLE_HASH_FREEZE_BOUNDARY_GATING
+      validation_class: BUNDLE_HASH_FREEZE_BOUNDARY_GATING
+      canonical_order: 17
+      planned_validator_owner: FUTURE_SHA_FREEZE_GATE
+      upstream_required_artifacts:
+        - FUTURE_ATOMICROWS_BUNDLE_JSONL
+        - FUTURE_ATOMICROWS_BUNDLE_SHA256
+      downstream_pr_stage: PR100_SHA_FREEZE_AUTHORITY
+      fail_closed_reason_code: ATOMICROWS_BUNDLE_HASH_FREEZE_BOUNDARY_FAILED
+      blocks_bundle_build_flag: false
+      blocks_hash_or_freeze_flag: true
+      blocks_live_or_runtime_use_flag: true
+      blocked_effects:
+        - HASH_FREEZE_AUTHORITY
+owner_approval_sequence_plan:
+  plan_id: ATOMICROWS_OWNER_APPROVAL_SEQUENCE_PLAN
+  owner_final_authority_flag: true
+  owner_review_required_before_pr98_source_creation: true
+  owner_review_required_before_pr99_builder_execution: true
+  owner_review_required_before_pr100_sha_freeze: true
+  owner_review_required_before_pr101_final_readiness_claim: true
+  owner_override_satisfies_internal_workflow_only_flag: true
+  owner_override_cannot_fabricate:
+    - ROW_RECORDS
+    - SOURCE_FACTS
+    - ACCEPTED_SOURCE_PACKETS
+    - CONNECTOR_SEMANTICS
+    - RUNTIME_CASH_RECEIPTS
+    - ORDER_OR_FILL_RECEIPTS
+    - REPLAY_OR_PAPER_RESULTS
+    - BUNDLE_HASH
+    - PROFIT_EVIDENCE
+    - LATENCY_EVIDENCE
+    - QUANTUM_ADVANTAGE_EVIDENCE
+quantum_forward_row_family_plan:
+  plan_id: ATOMICROWS_QUANTUM_FORWARD_ROW_FAMILY_PLAN
+  metadata_only_flag: true
+  quantum_execution_created_flag: false
+  quantum_advantage_evidence_created_flag: false
+  quantum_metadata_planning_entries:
+    - QUANTUM_ADVISORY_ROW_FAMILIES
+    - QUANTUM_APPLICABILITY_METADATA
+    - QUBO_COMPATIBLE_METADATA
+    - ISING_COMPATIBLE_METADATA
+    - QAOA_COMPATIBLE_METADATA
+    - VQE_COMPATIBLE_METADATA
+    - ANNEALING_COMPATIBLE_METADATA
+    - QUANTUM_PORTFOLIO_OPTIMIZATION_METADATA
+    - HYBRID_CLASSICAL_QUANTUM_COMPARISON_METADATA
+    - OWNER_QUANTUM_PRIORITY_POLICY_REFERENCE
+  forbidden_quantum_execution_effects:
+    - QAOA_EXECUTION
+    - VQE_EXECUTION
+    - ANNEALING_EXECUTION
+    - QUBO_SOLVING
+    - ISING_SOLVING
+    - QUANTUM_INSPIRED_OPTIMIZER_EXECUTION
+    - TRUE_QUANTUM_BACKEND_EXECUTION
+    - QUANTUM_SIMULATOR_EXECUTION
+    - QUANTUM_PROVIDER_CALL
+    - QUANTUM_ADVANTAGE_VALIDATION
+    - QUANTUM_DIRECT_ORDER_AUTHORITY
+  quantum_output_never_overrides_gates:
+    - SOURCE_EVIDENCE_GATE
+    - CONNECTOR_SEMANTIC_GATE
+    - RUNTIME_CASH_GATE
+    - REPLAY_PAPER_GATE
+    - RISK_GATE
+    - OWNER_APPROVAL_GATE
+    - ATOMICROWS_BUNDLE_HASH_GATE
+    - EXECUTION_ROUTER_GATE
+forbidden_artifact_boundary_plan:
+  plan_id: ATOMICROWS_FORBIDDEN_ARTIFACT_BOUNDARY_PLAN
+  blocked_artifacts:
+    - docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+    - docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+    - PR98_ROW_FAMILY_SOURCE_FILES
+    - PR99_BUNDLE_BUILDER
+    - PR100_SHA_FREEZE_AUTHORITY
+    - PR101_FINAL_READINESS_GATE
+  blocked_runtime_effects:
+    - RUNTIME_DASHBOARD_SERVICE
+    - DASHBOARD_RUNTIME_UI
+    - TELEGRAM_RUNTIME
+    - SOURCE_RETRIEVAL
+    - SOURCE_ACCEPTANCE
+    - ACCEPTED_SOURCE_PACKETS
+    - CONNECTOR_SEMANTIC_BINDING
+    - PRIVATE_STATE_FETCH
+    - RUNTIME_CASH_RECEIPT
+    - REPLAY_EXECUTION
+    - PAPER_EXECUTION
+    - OPTIMIZER_EXECUTION
+    - QUANTUM_BACKEND_OR_SIMULATOR_EXECUTION
+    - LIVE_ROUTING
+    - ORDER_SUBMISSION_CANCELLATION_REDUCTION_OR_CLOSE
+  blocked_claims:
+    - BUNDLE_READINESS
+    - FINAL_READINESS
+    - LIVE_READINESS
+    - PROFIT_IMPROVEMENT
+    - LATENCY_IMPROVEMENT
+    - EXECUTION_SUPERIORITY
+    - QUANTUM_ADVANTAGE
+  all_blocked_effects_active_in_pr97_flag: true
+downstream_pr_handoff_plan:
+  pr98_handoff_intent_only: true
+  pr99_handoff_intent_only: true
+  pr100_handoff_intent_only: true
+  pr101_handoff_intent_only: true
+  runtime_live_handoff_created_flag: false
+future_consumer_notes: PR97 is a deterministic static plan only. Downstream consumers must treat all planned paths as intent until owner approved later PRs create source files bundle builder SHA freeze and final readiness artifacts.

@@ -1,0 +1,164 @@
+{
+  "execution": "DISABLED",
+  "fixture_cases": [
+    {
+      "case_id": "FULL_BUNDLE_EXPANSION_PLAN_VALID_STATIC_ONLY",
+      "expected_block_reason": "STATIC_PR97_PLAN_VALID_NOT_BUNDLE_NOT_HASH_NOT_FINAL_READY",
+      "expected_schema_valid": true,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_MISSING_REQUIRED_PLAN_CONCEPT",
+      "expected_block_reason": "MISSING_REQUIRED_PLAN_CONCEPT",
+      "remove_required_plan_concept": "ATOMICROWS_QUANTUM_FORWARD_ROW_FAMILY_PLAN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_ROW_FAMILY_ID",
+      "duplicate_row_family_id": "AR_FAMILY_001_SIGNAL_FEATURES",
+      "expected_block_reason": "DUPLICATE_ROW_FAMILY_ID",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_VALIDATION_ID",
+      "duplicate_validation_id": "VAL_001_SCHEMA_COMPLIANCE",
+      "expected_block_reason": "DUPLICATE_VALIDATION_ID",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNSTABLE_ROW_FAMILY_ORDER",
+      "swap_row_family_order": true,
+      "expected_block_reason": "ROW_FAMILY_ORDER_NOT_DETERMINISTIC",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNSTABLE_VALIDATION_ORDER",
+      "swap_validation_order": true,
+      "expected_block_reason": "VALIDATION_ORDER_NOT_DETERMINISTIC",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_FABRICATED_EXACT_FAMILY_COUNT",
+      "inject_exact_row_count": 100,
+      "expected_block_reason": "EXACT_ROW_COUNT_FABRICATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_JSONL_CREATION_FLAG",
+      "plan_overrides": {
+        "bundle_file_created_flag": true
+      },
+      "expected_block_reason": "BUNDLE_FILE_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_SHA_CREATION_FLAG",
+      "plan_overrides": {
+        "bundle_sha_created_flag": true
+      },
+      "expected_block_reason": "BUNDLE_SHA_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_ROW_FAMILY_SOURCE_FILE_CREATION_FLAG",
+      "plan_overrides": {
+        "row_family_source_files_created_flag": true
+      },
+      "expected_block_reason": "ROW_FAMILY_SOURCE_FILE_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BUNDLE_BUILDER_CREATION_FLAG",
+      "plan_overrides": {
+        "bundle_builder_created_flag": true
+      },
+      "expected_block_reason": "BUNDLE_BUILDER_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_SHA_FREEZE_AUTHORITY_FLAG",
+      "plan_overrides": {
+        "sha_authority_created_flag": true,
+        "freeze_authority_created_flag": true
+      },
+      "expected_block_reason": "SHA_FREEZE_AUTHORITY_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_FINAL_READINESS_CLAIM",
+      "plan_overrides": {
+        "final_readiness_created_flag": true
+      },
+      "expected_block_reason": "FINAL_READINESS_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_EFFECTS",
+      "plan_overrides": {
+        "creates_runtime_live_authority_flag": true,
+        "creates_order_authority_flag": true,
+        "creates_source_fact_flag": true,
+        "creates_connector_semantic_flag": true,
+        "creates_runtime_cash_receipt_flag": true,
+        "creates_profit_evidence_flag": true,
+        "creates_latency_evidence_flag": true
+      },
+      "expected_block_reason": "RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_EFFECT_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_QUANTUM_EXECUTION_OR_ADVANTAGE_CLAIM",
+      "plan_overrides": {
+        "creates_optimizer_execution_flag": true,
+        "creates_quantum_backend_execution_flag": true,
+        "creates_quantum_advantage_evidence_flag": true
+      },
+      "expected_block_reason": "QUANTUM_EXECUTION_OR_ADVANTAGE_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    }
+  ],
+  "fixture_id": "SYNTHETIC_ATOMICROWS_FULL_BUNDLE_ROW_EXPANSION_PLAN_FIXTURE",
+  "fixture_version": "v1",
+  "mode": "SOURCE_REQUIRED",
+  "positive_plan_ref": "docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml",
+  "positive_plan_static_only_flags": {
+    "bundle_builder_created_flag": false,
+    "bundle_builder_executed_flag": false,
+    "bundle_file_created_flag": false,
+    "bundle_sha_created_flag": false,
+    "creates_connector_semantic_flag": false,
+    "creates_latency_evidence_flag": false,
+    "creates_order_authority_flag": false,
+    "creates_profit_evidence_flag": false,
+    "creates_quantum_advantage_evidence_flag": false,
+    "creates_quantum_backend_execution_flag": false,
+    "creates_runtime_cash_receipt_flag": false,
+    "creates_runtime_live_authority_flag": false,
+    "creates_source_fact_flag": false,
+    "final_readiness_created_flag": false,
+    "freeze_authority_created_flag": false,
+    "row_family_source_files_created_flag": false,
+    "row_records_created_flag": false,
+    "sha_authority_created_flag": false
+  },
+  "future_pr_handoff_notes": {
+    "pr98": "source file paths are intent only and files are absent in PR97",
+    "pr99": "bundle builder handoff is intent only and no builder is created or executed in PR97",
+    "pr100": "SHA freeze handoff is intent only and no hash or freeze authority is created in PR97",
+    "pr101": "final readiness handoff is intent only and no final readiness is claimed in PR97"
+  }
+}

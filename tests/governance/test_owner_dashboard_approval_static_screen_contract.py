@@ -6,14 +6,50 @@ from tools import validate_owner_dashboard_approval_static_screen_contract as ga
 
 
 REPO_ROOT = Path(".")
+PR97_BRANCH = "pr97-atomicrows-full-bundle-row-expansion-plan"
 _REPORT_CACHE: dict | None = None
+
+
+def _clear_branch_context_env(monkeypatch) -> None:
+    for env_name in ("GITHUB_ACTIONS", *gate.BRANCH_CONTEXT_ENV_CANDIDATES):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_branch(monkeypatch, branch: str, *, detached: bool = False) -> None:
+    original_git_stdout = gate._git_stdout
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "" if detached else branch, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD" if detached else branch, ""
+        return original_git_stdout(repo_root, args)
+
+    monkeypatch.setattr(gate, "_git_stdout", fake_git_stdout)
+
+
+def _write_file(root: Path, relative_path: Path) -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("static artifact\n", encoding="utf-8")
+
+
+def _pr96_forbidden_failure(relative_path: Path) -> str:
+    return f"PR96 must not create PR97 or AtomicRows bundle artifact: {relative_path.as_posix()}"
+
+
+def _runtime_forbidden_failure(relative_path: Path) -> str:
+    return f"PR96 must not create runtime artifact: {relative_path.as_posix()}"
 
 
 def _report() -> dict:
     global _REPORT_CACHE
     if _REPORT_CACHE is None:
-        assert gate.main([]) == 0
-        _REPORT_CACHE = json.loads((REPO_ROOT / gate.DEFAULT_REPORT).read_text(encoding="utf-8"))
+        result = gate.validate(repo_root=REPO_ROOT)
+        assert result.ok is True
+        assert result.report is not None
+        _REPORT_CACHE = result.report
     return _REPORT_CACHE
 
 
@@ -209,23 +245,88 @@ def test_apply_globally_display_does_not_create_global_mutation():
 def test_atomicrows_pr97_bundle_hash_and_runtime_artifacts_are_absent():
     report = _report()
 
-    forbidden_paths = [
+    branch_context = gate._current_branch_context(REPO_ROOT)
+    downstream_pr97_or_later = gate._downstream_validation_branch_allowed(branch_context.branch)
+    always_forbidden_paths = [
         gate.CANONICAL_BUNDLE_JSONL.as_posix(),
         gate.CANONICAL_BUNDLE_SHA256.as_posix(),
-        "docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json",
-        "tools/validate_atomicrows_full_bundle_row_expansion_plan.py",
-        "tests/atomicrows/test_atomicrows_full_bundle_row_expansion_plan.py",
         "src/qtt/dashboard_runtime",
         "src/qtt/telegram_runtime",
         "src/qtt/owner_dashboard_runtime",
         "src/qtt/dashboard_service",
         "src/qtt/web_server",
     ]
-    for path in forbidden_paths:
+    for path in always_forbidden_paths:
         assert not (REPO_ROOT / path).exists(), path
+    if not downstream_pr97_or_later:
+        for path in gate.PR97_STATIC_PLAN_PATHS:
+            assert not (REPO_ROOT / path).exists(), path
     assert report["atomicrows_bundle_jsonl_exists"] is False
     assert report["atomicrows_bundle_sha256_exists"] is False
-    assert report["pr97_atomicrows_full_bundle_row_expansion_plan_exists"] is False
+    assert report["pr97_static_plan_files_allowed_by_downstream_branch"] is downstream_pr97_or_later
+
+
+def test_pr97_static_plan_files_allowed_on_local_pr97_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR97_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr97_static_plan_files_allowed_in_github_actions_detached_head_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR97_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "97/merge")
+    _mock_git_branch(monkeypatch, PR97_BRANCH, detached=True)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr97_static_plan_files_blocked_on_non_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, gate.TARGET_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        assert _pr96_forbidden_failure(path) in failures
+
+
+def test_atomicrows_bundle_hash_builder_and_runtime_remain_blocked_on_pr97_branch(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR97_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        assert _pr96_forbidden_failure(path) not in failures
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        assert _pr96_forbidden_failure(path) in failures
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        assert _runtime_forbidden_failure(path) in failures
 
 
 def test_missing_required_screen_fails_closed(tmp_path):
