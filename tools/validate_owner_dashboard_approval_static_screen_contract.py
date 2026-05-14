@@ -72,6 +72,12 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr95_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr95_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
+BRANCH_CONTEXT_ENV_CANDIDATES = (
+    "GITHUB_HEAD_REF",
+    "GITHUB_REF_NAME",
+    "BRANCH_NAME",
+    "CI_COMMIT_REF_NAME",
+)
 
 CANONICAL_OPTION_ORDER = pr95_gate.CANONICAL_OPTION_ORDER
 REQUIRED_PROMPT_CONCEPT_ORDER = pr95_gate.REQUIRED_PROMPT_CONCEPT_ORDER
@@ -444,15 +450,19 @@ FORBIDDEN_TEXT_PATTERNS = (
     "creates backend readiness",
     "order submission enabled",
 )
-PR97_FORBIDDEN_PATHS = (
-    pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"),
-    pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"),
+PR97_STATIC_PLAN_PATHS = (
     pathlib.Path("schemas/atomicrows/atomicrows_full_bundle_row_expansion_plan.schema.json"),
-    pathlib.Path("schemas/governance/atomicrows_full_bundle_row_expansion_plan.schema.json"),
-    pathlib.Path("docs/master_plan/atomic_rows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
+    pathlib.Path("docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
+    pathlib.Path("tests/fixtures/atomicrows/synthetic_atomicrows_full_bundle_row_expansion_plan.v1.fixture.json"),
     pathlib.Path("docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json"),
     pathlib.Path("tools/validate_atomicrows_full_bundle_row_expansion_plan.py"),
     pathlib.Path("tests/atomicrows/test_atomicrows_full_bundle_row_expansion_plan.py"),
+)
+PR97_ALWAYS_FORBIDDEN_PATHS = (
+    pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"),
+    pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"),
+    pathlib.Path("schemas/governance/atomicrows_full_bundle_row_expansion_plan.schema.json"),
+    pathlib.Path("docs/master_plan/atomic_rows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
     pathlib.Path("tools/build_atomicrows_bundle.py"),
 )
 FORBIDDEN_RUNTIME_PATHS = (
@@ -462,6 +472,13 @@ FORBIDDEN_RUNTIME_PATHS = (
     pathlib.Path("src/qtt/dashboard_service"),
     pathlib.Path("src/qtt/web_server"),
 )
+
+
+@dataclass(frozen=True)
+class BranchContext:
+    branch: str
+    source: str
+    git_error: str = ""
 
 
 @dataclass(frozen=True)
@@ -552,6 +569,35 @@ def _github_actions_active() -> bool:
     return os.getenv("GITHUB_ACTIONS") == "true"
 
 
+def _normalize_branch_context(value: str) -> str:
+    branch = value.strip()
+    if not branch or branch == "HEAD":
+        return ""
+    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
+        if branch.startswith(prefix):
+            return branch[len(prefix) :]
+    return branch
+
+
+def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
+    for env_name in BRANCH_CONTEXT_ENV_CANDIDATES:
+        branch = _normalize_branch_context(os.getenv(env_name, ""))
+        if branch:
+            return BranchContext(branch=branch, source=env_name)
+
+    git_errors: list[str] = []
+    for args in (["branch", "--show-current"], ["rev-parse", "--abbrev-ref", "HEAD"]):
+        branch_rc, branch_stdout, branch_err = _git_stdout(repo_root, args)
+        if branch_rc != 0:
+            git_errors.append(branch_err or f"git {' '.join(args)} failed")
+            continue
+        branch = _normalize_branch_context(branch_stdout)
+        if branch:
+            return BranchContext(branch=branch, source=f"git {' '.join(args)}")
+
+    return BranchContext(branch="", source="", git_error="; ".join(git_errors))
+
+
 def _downstream_validation_branch_allowed(branch: str) -> bool:
     match = re.match(r"pr(?P<number>[0-9]+)-", branch)
     if not match:
@@ -605,15 +651,19 @@ def validate_pr96_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
         if actual != expected:
             failures.append(f"{label} must be {expected}, got {actual}")
 
-    branch_rc, branch, branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
-    if branch_rc != 0:
+    branch_context = _current_branch_context(repo_root)
+    branch = branch_context.branch
+    if not branch:
         if github_actions:
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
         else:
+            branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
         if github_actions:
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
+            if _downstream_validation_branch_allowed(branch):
+                info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
         elif _downstream_validation_branch_allowed(branch):
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
         else:
@@ -643,6 +693,7 @@ def validate_pr96_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
         "roadmap_pr_label": ROADMAP_PR_LABEL,
         "github_pr_number_policy": GITHUB_PR_NUMBER_POLICY,
         "branch": branch,
+        "branch_context_source": branch_context.source,
         "base_head": head,
         "expected_baseline_ancestor": EXPECTED_BASELINE_ANCESTOR,
         "semantic_task_id": SEMANTIC_TASK_ID,
@@ -1085,9 +1136,15 @@ def validate_upstream_reports(repo_root: pathlib.Path) -> tuple[list[str], dict[
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    for path in PR97_FORBIDDEN_PATHS:
+    branch_context = _current_branch_context(repo_root)
+    downstream_pr97_or_later = _downstream_validation_branch_allowed(branch_context.branch)
+    for path in PR97_ALWAYS_FORBIDDEN_PATHS:
         if _resolve(repo_root, path).exists():
             failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
+    if not downstream_pr97_or_later:
+        for path in PR97_STATIC_PLAN_PATHS:
+            if _resolve(repo_root, path).exists():
+                failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
     for path in FORBIDDEN_RUNTIME_PATHS:
         if _resolve(repo_root, path).exists():
             failures.append(f"PR96 must not create runtime artifact: {path.as_posix()}")
@@ -1123,7 +1180,13 @@ def build_report(
     case_packets: list[dict[str, Any]],
     upstream: dict[str, Any],
     metadata: dict[str, Any],
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
+    branch = str(metadata.get("branch") or "")
+    downstream_pr97_or_later = _downstream_validation_branch_allowed(branch)
+    pr97_static_plan_files_present = any(
+        _resolve(repo_root, path).exists() for path in PR97_STATIC_PLAN_PATHS
+    )
     report: dict[str, Any] = {
         "report_id": REPORT_ID,
         "report_version": POLICY_VERSION,
@@ -1162,7 +1225,8 @@ def build_report(
         "fixture_validated": True,
         "atomicrows_bundle_jsonl_exists": False,
         "atomicrows_bundle_sha256_exists": False,
-        "pr97_atomicrows_full_bundle_row_expansion_plan_exists": False,
+        "pr97_atomicrows_full_bundle_row_expansion_plan_exists": pr97_static_plan_files_present,
+        "pr97_static_plan_files_allowed_by_downstream_branch": downstream_pr97_or_later,
         "master_plan_diff_empty": True,
         "master_plan_principles_consumed": copy.deepcopy(
             registry.get("master_plan_principles_consumed")
@@ -1250,7 +1314,15 @@ def validate(
         )
     )
 
-    report = build_report(registry, fixture, packet, case_packets, upstream, metadata)
+    report = build_report(
+        registry,
+        fixture,
+        packet,
+        case_packets,
+        upstream,
+        metadata,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

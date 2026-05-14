@@ -1,0 +1,443 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-atomicrows-full-bundle-row-expansion-plan",
+  "title": "AtomicRows Full Bundle Row Expansion Plan",
+  "description": "Static deterministic PR #97 plan for future AtomicRows full-bundle expansion. This schema validates planning and handoff metadata only; it does not create AtomicRows.bundle.jsonl, AtomicRows.bundle.sha256, row-family source files, a bundle builder, SHA/freeze authority, final readiness, runtime/live/order/source/connector/profit evidence, optimizer execution, or quantum backend execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plan_id",
+    "plan_version",
+    "semantic_task_id",
+    "roadmap_pr_label",
+    "authority_class",
+    "static_only_flag",
+    "planning_only_flag",
+    "handoff_only_flag",
+    "target_total_row_count",
+    "target_total_row_count_authority",
+    "target_total_row_count_created_by_pr97_flag",
+    "canonical_future_bundle_path",
+    "canonical_future_bundle_sha_path",
+    "bundle_file_created_flag",
+    "bundle_sha_created_flag",
+    "sha_authority_created_flag",
+    "freeze_authority_created_flag",
+    "row_family_source_files_created_flag",
+    "row_records_created_flag",
+    "bundle_builder_created_flag",
+    "bundle_builder_executed_flag",
+    "final_readiness_created_flag",
+    "consumes_existing_atomicrows_schema_flag",
+    "consumes_existing_lifecycle_gate_flag",
+    "consumes_existing_agent_binding_gate_flag",
+    "consumes_existing_parameter_stack_taxonomy_flag",
+    "consumes_existing_selection_universe_gate_flag",
+    "consumes_existing_quantum_applicability_registry_flag",
+    "creates_runtime_live_authority_flag",
+    "creates_order_authority_flag",
+    "creates_source_fact_flag",
+    "creates_connector_semantic_flag",
+    "creates_runtime_cash_receipt_flag",
+    "creates_replay_paper_result_flag",
+    "creates_optimizer_execution_flag",
+    "creates_quantum_backend_execution_flag",
+    "creates_profit_evidence_flag",
+    "creates_latency_evidence_flag",
+    "creates_quantum_advantage_evidence_flag",
+    "required_plan_concepts",
+    "blocked_effects",
+    "row_family_split_plan",
+    "generation_sequence_plan",
+    "validation_matrix_plan",
+    "owner_approval_sequence_plan",
+    "quantum_forward_row_family_plan",
+    "forbidden_artifact_boundary_plan",
+    "downstream_pr_handoff_plan",
+    "future_consumer_notes"
+  ],
+  "properties": {
+    "plan_id": { "const": "ATOMICROWS_FULL_BUNDLE_EXPANSION_PLAN" },
+    "plan_version": { "const": "v1" },
+    "semantic_task_id": { "const": "ROADMAP-ATOMICROWS-BUNDLE-PLAN" },
+    "roadmap_pr_label": { "const": "PR #97" },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_FULL_BUNDLE_ROW_EXPANSION_PLAN_ONLY_NOT_BUNDLE_NOT_HASH_NOT_FREEZE_NOT_RUNTIME_AUTHORITY"
+    },
+    "static_only_flag": { "const": true },
+    "planning_only_flag": { "const": true },
+    "handoff_only_flag": { "const": true },
+    "target_total_row_count": { "const": 4183 },
+    "target_total_row_count_authority": {
+      "const": "MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER"
+    },
+    "target_total_row_count_created_by_pr97_flag": { "const": false },
+    "canonical_future_bundle_path": {
+      "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+    },
+    "canonical_future_bundle_sha_path": {
+      "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+    },
+    "bundle_file_created_flag": { "const": false },
+    "bundle_sha_created_flag": { "const": false },
+    "sha_authority_created_flag": { "const": false },
+    "freeze_authority_created_flag": { "const": false },
+    "row_family_source_files_created_flag": { "const": false },
+    "row_records_created_flag": { "const": false },
+    "bundle_builder_created_flag": { "const": false },
+    "bundle_builder_executed_flag": { "const": false },
+    "final_readiness_created_flag": { "const": false },
+    "consumes_existing_atomicrows_schema_flag": { "const": true },
+    "consumes_existing_lifecycle_gate_flag": { "const": true },
+    "consumes_existing_agent_binding_gate_flag": { "const": true },
+    "consumes_existing_parameter_stack_taxonomy_flag": { "const": true },
+    "consumes_existing_selection_universe_gate_flag": { "const": true },
+    "consumes_existing_quantum_applicability_registry_flag": { "const": true },
+    "creates_runtime_live_authority_flag": { "const": false },
+    "creates_order_authority_flag": { "const": false },
+    "creates_source_fact_flag": { "const": false },
+    "creates_connector_semantic_flag": { "const": false },
+    "creates_runtime_cash_receipt_flag": { "const": false },
+    "creates_replay_paper_result_flag": { "const": false },
+    "creates_optimizer_execution_flag": { "const": false },
+    "creates_quantum_backend_execution_flag": { "const": false },
+    "creates_profit_evidence_flag": { "const": false },
+    "creates_latency_evidence_flag": { "const": false },
+    "creates_quantum_advantage_evidence_flag": { "const": false },
+    "required_plan_concepts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/plan_concept_id" },
+      "minItems": 7
+    },
+    "blocked_effects": { "$ref": "#/$defs/string_array" },
+    "row_family_split_plan": { "$ref": "#/$defs/row_family_split_plan" },
+    "generation_sequence_plan": { "$ref": "#/$defs/generation_sequence_plan" },
+    "validation_matrix_plan": { "$ref": "#/$defs/validation_matrix_plan" },
+    "owner_approval_sequence_plan": { "$ref": "#/$defs/owner_approval_sequence_plan" },
+    "quantum_forward_row_family_plan": { "$ref": "#/$defs/quantum_forward_row_family_plan" },
+    "forbidden_artifact_boundary_plan": { "$ref": "#/$defs/forbidden_artifact_boundary_plan" },
+    "downstream_pr_handoff_plan": { "$ref": "#/$defs/downstream_pr_handoff_plan" },
+    "future_consumer_notes": { "type": "string" }
+  },
+  "$defs": {
+    "string_array": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "plan_concept_id": {
+      "enum": [
+        "ATOMICROWS_FULL_BUNDLE_EXPANSION_PLAN",
+        "ATOMICROWS_ROW_FAMILY_SPLIT_PLAN",
+        "ATOMICROWS_GENERATION_SEQUENCE_PLAN",
+        "ATOMICROWS_VALIDATION_MATRIX_PLAN",
+        "ATOMICROWS_OWNER_APPROVAL_SEQUENCE_PLAN",
+        "ATOMICROWS_QUANTUM_FORWARD_ROW_FAMILY_PLAN",
+        "ATOMICROWS_FORBIDDEN_ARTIFACT_BOUNDARY_PLAN"
+      ]
+    },
+    "row_family_class": {
+      "enum": [
+        "SIGNAL_FEATURE_FAMILY",
+        "SCORING_RANKING_FAMILY",
+        "NORMALIZATION_CALIBRATION_FAMILY",
+        "RISK_CONTROL_FAMILY",
+        "EXECUTION_CONNECTOR_BOUNDARY_FAMILY",
+        "CAPITAL_SIZING_CASH_FAMILY",
+        "LATENCY_ROUTING_FAMILY",
+        "ERROR_GUARD_FAIL_CLOSED_FAMILY",
+        "LIFECYCLE_AGENT_BINDING_FAMILY",
+        "SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_FAMILY",
+        "REPLAY_PAPER_VALIDATION_FAMILY",
+        "QUANTUM_ADVISORY_OPTIMIZATION_FAMILY",
+        "QUANTUM_QUBO_ISING_METADATA_FAMILY",
+        "QUANTUM_QAOA_VQE_ANNEALING_METADATA_FAMILY",
+        "QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_FAMILY"
+      ]
+    },
+    "quantum_relevance_class": {
+      "enum": [
+        "NOT_QUANTUM_SPECIFIC_STATIC_METADATA",
+        "QUANTUM_ADVISORY_STATIC_METADATA",
+        "QUBO_ISING_COMPATIBLE_STATIC_METADATA",
+        "QAOA_VQE_ANNEALING_COMPATIBLE_STATIC_METADATA",
+        "QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_STATIC_METADATA"
+      ]
+    },
+    "requirement_class": {
+      "enum": [
+        "NOT_REQUIRED_FOR_PR97_STATIC_PLAN",
+        "REQUIRED_BEFORE_SOURCE_OR_CONNECTOR_CONSUMPTION",
+        "REQUIRED_BEFORE_REPLAY_PAPER_OR_RUNTIME_USE",
+        "REQUIRED_BEFORE_LIVE_OR_ORDER_USE",
+        "OWNER_APPROVAL_REQUIRED_BEFORE_DOWNSTREAM_CREATION"
+      ]
+    },
+    "downstream_pr_stage": {
+      "enum": [
+        "PR97_STATIC_PLAN",
+        "PR98_ROW_FAMILY_SOURCE_FILES",
+        "PR99_BUNDLE_BUILDER",
+        "PR100_SHA_FREEZE_AUTHORITY",
+        "PR101_FINAL_READINESS",
+        "RUNTIME_LIVE_NEVER_IN_PR97"
+      ]
+    },
+    "validation_class": {
+      "enum": [
+        "SCHEMA_COMPLIANCE",
+        "ROW_FAMILY_COMPLETENESS",
+        "ROW_ID_UNIQUENESS",
+        "NO_DUPLICATE_ROW_IDS",
+        "FAMILY_MEMBERSHIP_VALIDITY",
+        "AGENT_BINDING_COMPATIBILITY",
+        "LIFECYCLE_STATE_VALIDITY",
+        "PARAMETER_STACK_ROLE_COVERAGE",
+        "SELECTION_UNIVERSE_COVERAGE",
+        "SCORING_RANKING_COMPATIBILITY",
+        "REPLAY_PAPER_READINESS_GATING",
+        "OWNER_OVERRIDE_OWNER_APPROVAL_GATING",
+        "SOURCE_EVIDENCE_BOUNDARY_GATING",
+        "CONNECTOR_SEMANTIC_BOUNDARY_GATING",
+        "RUNTIME_LIVE_ORDER_BOUNDARY_GATING",
+        "QUANTUM_METADATA_BOUNDARY_GATING",
+        "BUNDLE_HASH_FREEZE_BOUNDARY_GATING"
+      ]
+    },
+    "row_family_split_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "stable_ordering_policy",
+        "row_families"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_ROW_FAMILY_SPLIT_PLAN" },
+        "stable_ordering_policy": { "const": "CANONICAL_ORDER_ASCENDING" },
+        "row_families": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/row_family_entry" },
+          "minItems": 1
+        }
+      }
+    },
+    "row_family_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_family_id",
+        "row_family_class",
+        "display_label",
+        "canonical_order",
+        "planned_downstream_source_file_path",
+        "source_file_created_by_pr97_flag",
+        "row_records_created_by_pr97_flag",
+        "exact_row_count_created_by_pr97_flag",
+        "planned_count_policy",
+        "planned_count_authority",
+        "upstream_authority_inputs",
+        "required_validators",
+        "required_owner_approval_stage",
+        "quantum_relevance_class",
+        "source_evidence_requirement_class",
+        "connector_semantic_requirement_class",
+        "replay_paper_requirement_class",
+        "live_order_requirement_class",
+        "blocked_effects",
+        "future_consumer_notes"
+      ],
+      "properties": {
+        "row_family_id": { "type": "string" },
+        "row_family_class": { "$ref": "#/$defs/row_family_class" },
+        "display_label": { "type": "string" },
+        "canonical_order": { "type": "integer" },
+        "planned_downstream_source_file_path": { "type": "string" },
+        "source_file_created_by_pr97_flag": { "const": false },
+        "row_records_created_by_pr97_flag": { "const": false },
+        "exact_row_count_created_by_pr97_flag": { "const": false },
+        "planned_count_policy": { "const": "OWNER_REVIEW_REQUIRED" },
+        "planned_count_authority": { "const": "FUTURE_PR98_OR_OWNER_APPROVED_SOURCE" },
+        "upstream_authority_inputs": { "$ref": "#/$defs/string_array" },
+        "required_validators": { "$ref": "#/$defs/string_array" },
+        "required_owner_approval_stage": { "const": "PR98_OWNER_APPROVAL_BEFORE_SOURCE_CREATION" },
+        "quantum_relevance_class": { "$ref": "#/$defs/quantum_relevance_class" },
+        "source_evidence_requirement_class": { "$ref": "#/$defs/requirement_class" },
+        "connector_semantic_requirement_class": { "$ref": "#/$defs/requirement_class" },
+        "replay_paper_requirement_class": { "$ref": "#/$defs/requirement_class" },
+        "live_order_requirement_class": { "$ref": "#/$defs/requirement_class" },
+        "blocked_effects": { "$ref": "#/$defs/string_array" },
+        "future_consumer_notes": { "type": "string" }
+      }
+    },
+    "generation_sequence_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "sequence_created_by_pr97_flag",
+        "downstream_stages"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_GENERATION_SEQUENCE_PLAN" },
+        "sequence_created_by_pr97_flag": { "const": true },
+        "downstream_stages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/downstream_stage_entry" },
+          "minItems": 4
+        }
+      }
+    },
+    "downstream_stage_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_order",
+        "roadmap_pr_label",
+        "downstream_pr_stage",
+        "stage_purpose",
+        "creates_artifact_by_pr97_flag",
+        "owner_approval_required_before_stage_flag",
+        "forbidden_now"
+      ],
+      "properties": {
+        "stage_order": { "type": "integer" },
+        "roadmap_pr_label": { "type": "string" },
+        "downstream_pr_stage": { "$ref": "#/$defs/downstream_pr_stage" },
+        "stage_purpose": { "type": "string" },
+        "creates_artifact_by_pr97_flag": { "const": false },
+        "owner_approval_required_before_stage_flag": { "const": true },
+        "forbidden_now": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "validation_matrix_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "stable_ordering_policy",
+        "validations"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_VALIDATION_MATRIX_PLAN" },
+        "stable_ordering_policy": { "const": "CANONICAL_ORDER_ASCENDING" },
+        "validations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/validation_matrix_entry" },
+          "minItems": 17
+        }
+      }
+    },
+    "validation_matrix_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_id",
+        "validation_class",
+        "canonical_order",
+        "planned_validator_owner",
+        "upstream_required_artifacts",
+        "downstream_pr_stage",
+        "fail_closed_reason_code",
+        "blocks_bundle_build_flag",
+        "blocks_hash_or_freeze_flag",
+        "blocks_live_or_runtime_use_flag",
+        "blocked_effects"
+      ],
+      "properties": {
+        "validation_id": { "type": "string" },
+        "validation_class": { "$ref": "#/$defs/validation_class" },
+        "canonical_order": { "type": "integer" },
+        "planned_validator_owner": { "type": "string" },
+        "upstream_required_artifacts": { "$ref": "#/$defs/string_array" },
+        "downstream_pr_stage": { "$ref": "#/$defs/downstream_pr_stage" },
+        "fail_closed_reason_code": { "type": "string" },
+        "blocks_bundle_build_flag": { "type": "boolean" },
+        "blocks_hash_or_freeze_flag": { "type": "boolean" },
+        "blocks_live_or_runtime_use_flag": { "const": true },
+        "blocked_effects": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "owner_approval_sequence_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "owner_final_authority_flag",
+        "owner_review_required_before_pr98_source_creation",
+        "owner_review_required_before_pr99_builder_execution",
+        "owner_review_required_before_pr100_sha_freeze",
+        "owner_review_required_before_pr101_final_readiness_claim",
+        "owner_override_satisfies_internal_workflow_only_flag",
+        "owner_override_cannot_fabricate"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_OWNER_APPROVAL_SEQUENCE_PLAN" },
+        "owner_final_authority_flag": { "const": true },
+        "owner_review_required_before_pr98_source_creation": { "const": true },
+        "owner_review_required_before_pr99_builder_execution": { "const": true },
+        "owner_review_required_before_pr100_sha_freeze": { "const": true },
+        "owner_review_required_before_pr101_final_readiness_claim": { "const": true },
+        "owner_override_satisfies_internal_workflow_only_flag": { "const": true },
+        "owner_override_cannot_fabricate": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "quantum_forward_row_family_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "metadata_only_flag",
+        "quantum_execution_created_flag",
+        "quantum_advantage_evidence_created_flag",
+        "quantum_metadata_planning_entries",
+        "forbidden_quantum_execution_effects",
+        "quantum_output_never_overrides_gates"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_QUANTUM_FORWARD_ROW_FAMILY_PLAN" },
+        "metadata_only_flag": { "const": true },
+        "quantum_execution_created_flag": { "const": false },
+        "quantum_advantage_evidence_created_flag": { "const": false },
+        "quantum_metadata_planning_entries": { "$ref": "#/$defs/string_array" },
+        "forbidden_quantum_execution_effects": { "$ref": "#/$defs/string_array" },
+        "quantum_output_never_overrides_gates": { "$ref": "#/$defs/string_array" }
+      }
+    },
+    "forbidden_artifact_boundary_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "blocked_artifacts",
+        "blocked_runtime_effects",
+        "blocked_claims",
+        "all_blocked_effects_active_in_pr97_flag"
+      ],
+      "properties": {
+        "plan_id": { "const": "ATOMICROWS_FORBIDDEN_ARTIFACT_BOUNDARY_PLAN" },
+        "blocked_artifacts": { "$ref": "#/$defs/string_array" },
+        "blocked_runtime_effects": { "$ref": "#/$defs/string_array" },
+        "blocked_claims": { "$ref": "#/$defs/string_array" },
+        "all_blocked_effects_active_in_pr97_flag": { "const": true }
+      }
+    },
+    "downstream_pr_handoff_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr98_handoff_intent_only",
+        "pr99_handoff_intent_only",
+        "pr100_handoff_intent_only",
+        "pr101_handoff_intent_only",
+        "runtime_live_handoff_created_flag"
+      ],
+      "properties": {
+        "pr98_handoff_intent_only": { "const": true },
+        "pr99_handoff_intent_only": { "const": true },
+        "pr100_handoff_intent_only": { "const": true },
+        "pr101_handoff_intent_only": { "const": true },
+        "runtime_live_handoff_created_flag": { "const": false }
+      }
+    }
+  }
+}
