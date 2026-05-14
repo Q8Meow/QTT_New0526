@@ -655,6 +655,13 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_dual_result_review_for_parameter_stacks.py",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",
