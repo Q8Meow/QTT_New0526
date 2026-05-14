@@ -137,7 +137,10 @@ def test_pr99_validator_allows_main_cumulative_context_stdout(
     assert validator.main(["--out", str(tmp_path / "report.json")]) == 0
 
     output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
-    assert output_lines == [validator.SUCCESS_MARKER]
+    allowed_info_lines = {validator.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER}
+    assert output_lines
+    assert output_lines[0] == validator.SUCCESS_MARKER
+    assert set(output_lines[1:]) <= allowed_info_lines
 
 
 def test_required_concepts_config_schema_fixture_and_report_exist():

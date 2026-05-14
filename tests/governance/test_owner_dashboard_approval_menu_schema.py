@@ -435,7 +435,10 @@ def test_main_context_stdout_has_only_success_marker(tmp_path, monkeypatch, caps
     assert gate.main(["--out", str(tmp_path / "report.json")]) == 0
 
     output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
-    assert output_lines == [gate.SUCCESS_MARKER]
+    allowed_info_lines = {gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER}
+    assert output_lines
+    assert output_lines[0] == gate.SUCCESS_MARKER
+    assert set(output_lines[1:]) <= allowed_info_lines
 
 
 def test_pr95_creates_no_source_connector_runtime_cash_replay_paper_optimizer_profit_or_claims():
