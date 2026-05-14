@@ -1,0 +1,274 @@
+{
+  "replay_paper_candidate_stack_competition_packet_id": "PR90_STATIC_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_PACKET_SYNTHETIC_V1",
+  "schema_version": "v1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "semantic_task_id": "ROADMAP-REPLAY-PAPER-CANDIDATE-STACK-COMPETITION-GATE",
+  "roadmap_pr_label": "PR #90",
+  "github_pr_number_policy": "may differ",
+  "gate_scope": "STATIC_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_GATE_ONLY",
+  "competition_scope": "STATIC_ONLY",
+  "competition_authority_class": "STATIC_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_NOT_REPLAY_EXECUTION_NOT_PAPER_EXECUTION_NOT_RESULTS_NOT_LIVE_AUTHORITY",
+  "static_only_flag": true,
+  "metadata_only_flag": true,
+  "synthetic_fixture_only_flag": true,
+  "competition_contract_only_flag": true,
+  "source_dependency_state": "STATIC_SOURCE_DEPENDENCY_LABELS_ONLY",
+  "upstream_selected_stack_handoff_packet_ref": "PR89_STATIC_SELECTED_PARAMETER_STACK_HANDOFF_PACKET_SYNTHETIC_V1",
+  "upstream_selected_stack_handoff_packet_digest_or_static_ref": "docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json#selected_parameter_stack_handoff_packet",
+  "upstream_trade_context_selection_packet_ref": "PR88_STATIC_TRADE_CONTEXT_PARAMETER_STACK_SELECTION_PACKET_SYNTHETIC_V1",
+  "upstream_candidate_generation_packet_ref": "PR87_STATIC_CANDIDATE_GENERATION_PACKET_SYNTHETIC_V1",
+  "upstream_trade_context_ref": "TRADE_CONTEXT_KALSHI_BINARY_SHORT_HORIZON_STATIC_ROUTE",
+  "upstream_routed_selection_universe_ref": "KALSHI_BINARY_SHORT_HORIZON",
+  "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "expected_selected_candidate_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "expected_selected_candidate_generation_key": "OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "competition_manifest_id": "PR90_STATIC_REPLAY_PAPER_COMPETITION_MANIFEST_SYNTHETIC_V1",
+  "expected_selected_handoff_item_count": 1,
+  "expected_eligible_competition_entry_count": 1,
+  "expected_rejected_competition_entry_count": 0,
+  "expected_blocked_competition_entry_count": 0,
+  "expected_replay_lane_descriptor_count": 1,
+  "expected_paper_lane_descriptor_count": 1,
+  "expected_replay_execution_count": 0,
+  "expected_paper_execution_count": 0,
+  "expected_replay_result_packet_count": 0,
+  "expected_paper_result_packet_count": 0,
+  "expected_dual_result_review_packet_count": 0,
+  "expected_order_authoritative_item_count": 0,
+  "order_intent_surface_present_flag": true,
+  "order_intent_surface_authority": "NON_AUTHORITATIVE_STATIC_PREVIEW_ONLY",
+  "order_submission_allowed_flag": false,
+  "live_routing_allowed_flag": false,
+  "connector_binding_allowed_flag": false,
+  "no_order_authority_flag": true,
+  "no_runtime_execution_flag": true,
+  "no_replay_execution_flag": true,
+  "no_paper_execution_flag": true,
+  "no_result_packet_flag": true,
+  "no_quantum_backend_execution_flag": true,
+  "no_profit_evidence_flag": true,
+  "no_live_trade_authority_flag": true,
+  "final_ready": false,
+  "order_intent_authority_created": false,
+  "source_retrieval_created_flag": false,
+  "source_acceptance_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "runtime_cash_receipt_created_flag": false,
+  "replay_execution_created_flag": false,
+  "paper_execution_created_flag": false,
+  "replay_result_packet_created_flag": false,
+  "paper_result_packet_created_flag": false,
+  "dual_result_review_created_flag": false,
+  "owner_live_promotion_review_created_flag": false,
+  "classical_optimizer_execution_created_flag": false,
+  "quantum_optimizer_execution_created_flag": false,
+  "optimizer_execution_created_flag": false,
+  "quantum_backend_execution_created_flag": false,
+  "quantum_simulator_execution_created_flag": false,
+  "owner_approval_created_flag": false,
+  "live_trade_authority_created_flag": false,
+  "live_promotion_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "quantum_advantage_claim_created_flag": false,
+  "latency_superiority_claim_created_flag": false,
+  "execution_superiority_claim_created_flag": false,
+  "random_identity_used": false,
+  "wall_clock_identity_used": false,
+  "atomicrows_bundle_jsonl_created": false,
+  "atomicrows_bundle_sha256_created": false,
+  "fixture_cases": [
+    {
+      "case_id": "PASS_PR90_METADATA_VERIFIED",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_STATIC_FIXTURE_ONLY",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_VALID_REPLAY_PAPER_COMPETITION_MANIFEST_FROM_PR89_HANDOFF",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_PR89_HANDOFF_PACKET",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_REPLAY_AND_PAPER_LANE_DESCRIPTORS_FROM_SHARED_INPUT_LOCK",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_SEPARATE_REPLAY_AND_PAPER_LANES",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_SELECTED_STACK_LINEAGE_TO_PR89_PR88_PR87",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_PR87_CANDIDATE_PACKET",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_QUANTUM_PREFERRED_WITH_CLASSICAL_COMPARATOR",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_CLASSICAL_COMPARATOR_OR_FALLBACK",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_CLASSICAL_COMPARATOR_AND_QUANTUM_STATIC_PAIR",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_QUANTUM_POLICY_LINEAGE",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_OWNER_OVERRIDE_INTERNAL_BASIS",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_OWNER_OVERRIDE_INTERNAL_BASIS_ONLY",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "PASS_ORDER_INTENT_PREVIEW_NON_AUTHORITATIVE",
+      "synthetic_case_only": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_ORDER_INTENT_PREVIEW_NON_AUTHORITATIVE",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    },
+    {
+      "case_id": "BLOCK_MISSING_PR89_HANDOFF_PACKET",
+      "synthetic_case_only": true,
+      "handoff_packet_available": false,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_MISSING_PR89_HANDOFF_PACKET",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_MISSING_SELECTED_STACK_ID",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": null,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_MISSING_SELECTED_STACK_ID",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_SELECTED_STACK_NOT_FORWARDABLE",
+      "synthetic_case_only": true,
+      "pr90_forwardable_flag_override": false,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_SELECTED_STACK_NOT_FORWARDABLE_TO_PR90",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_UNTRACEABLE_SELECTED_STACK_LINEAGE",
+      "synthetic_case_only": true,
+      "remove_lineage_trace": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_SELECTED_STACK_NOT_TRACEABLE_TO_PR89_PR88_PR87",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_BLOCKED_SELECTED_STACK",
+      "synthetic_case_only": true,
+      "blocker_state_override": "BLOCKED_ROWS_PRESENT",
+      "blocked_row_ids_and_reasons_override": [{"row_id":"SYNTHETIC_BLOCKED_ROW","reason":"STATIC_BLOCKED_DIAGNOSTIC_ONLY"}],
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_BLOCKED_ROW_PRESENT",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_INCOMPATIBLE_SELECTED_STACK",
+      "synthetic_case_only": true,
+      "compatibility_state_override": "INCOMPATIBLE_ROLE_TUPLE",
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_INCOMPATIBLE_SELECTED_STACK",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_MISSING_ROLE_SELECTED_STACK",
+      "synthetic_case_only": true,
+      "required_role_completion_state_override": "MISSING_SIGNAL_ROLE",
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_MISSING_REQUIRED_ROLE",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_REPLAY_LANE_MISSING",
+      "synthetic_case_only": true,
+      "replay_lane_descriptor_present": false,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_REPLAY_LANE_MISSING",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_PAPER_LANE_MISSING",
+      "synthetic_case_only": true,
+      "paper_lane_descriptor_present": false,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_PAPER_LANE_MISSING",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_REPLAY_PAPER_INPUT_IDENTITY_MISMATCH",
+      "synthetic_case_only": true,
+      "input_identity_mismatch": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_AMBIGUOUS_REPLAY_PAPER_INPUT_IDENTITY",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_REPLAY_RESULT_PACKET_PRESENT",
+      "synthetic_case_only": true,
+      "replay_result_packet_created_flag_override": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_REPLAY_PAPER_RESULT_CREATED_IN_STATIC_COMPETITION_SCOPE",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_PAPER_RESULT_PACKET_PRESENT",
+      "synthetic_case_only": true,
+      "paper_result_packet_created_flag_override": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_REPLAY_PAPER_RESULT_CREATED_IN_STATIC_COMPETITION_SCOPE",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_EXECUTABLE_ORDER_INTENT_PRESENT",
+      "synthetic_case_only": true,
+      "executable_order_intent_created_override": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_EXECUTABLE_ORDER_INTENT_FORBIDDEN",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "BLOCK_NO_COMPETITION_ENTRIES",
+      "synthetic_case_only": true,
+      "force_no_competition_entries": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_BLOCKED_NO_COMPETITION_ENTRIES",
+      "expected_selected_stack_id": null,
+      "expected_eligible_competition_entry_count": 0
+    },
+    {
+      "case_id": "PASS_PR91_BOUNDARY_FUTURE_RESULTS_REQUIRED_NO_REVIEW_CREATED",
+      "synthetic_case_only": true,
+      "future_results_required_for_pr91_forwardability": true,
+      "expected_reason_code": "REPLAY_PAPER_COMPETITION_ALLOWED_PR91_PR92_BOUNDARY_NO_REVIEW_CREATED",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_eligible_competition_entry_count": 1
+    }
+  ],
+  "pr91_boundary_fixture": {
+    "competition_packet_forwardable_to_pr91_only_after_future_replay_and_paper_results_exist": true,
+    "replay_result_required_later_flag": true,
+    "paper_result_required_later_flag": true,
+    "pr91_dual_result_review_required_flag": true,
+    "pr91_dual_result_review_created_flag": false,
+    "replay_result_packet_created_in_pr90": false,
+    "paper_result_packet_created_in_pr90": false
+  },
+  "pr92_boundary_fixture": {
+    "owner_live_promotion_review_required_later_flag": true,
+    "pr92_owner_live_promotion_review_created_flag": false,
+    "owner_approval_created_flag": false,
+    "live_promotion_created_flag": false
+  }
+}
