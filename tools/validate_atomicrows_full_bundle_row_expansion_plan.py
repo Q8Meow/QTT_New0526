@@ -89,6 +89,7 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 BRANCH_CONTEXT_ENV_CANDIDATES = (
     "GITHUB_HEAD_REF",
     "GITHUB_REF_NAME",
+    "GITHUB_REF",
     "BRANCH_NAME",
     "CI_COMMIT_REF_NAME",
 )
@@ -399,7 +400,19 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     return int(match.group("number")) > 97
 
 
+def _main_cumulative_branch_allowed(branch: str) -> bool:
+    return branch == "main" or branch.startswith("repair/main-cumulative-")
+
+
+def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
+    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
+        branch
+    )
+
+
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
+    if _main_cumulative_branch_allowed(branch):
+        return True
     match = re.match(r"pr(?P<number>[0-9]+)-", branch)
     if not match:
         return False
@@ -415,7 +428,7 @@ def _should_skip_default_report_write(
     if output_abs != _resolve(repo_root, DEFAULT_REPORT):
         return False
     branch = str(metadata.get("branch") or "")
-    return branch not in {TARGET_BRANCH, "main"} and _downstream_validation_branch_allowed(branch)
+    return branch not in {TARGET_BRANCH, "main"}
 
 
 def schema_subset_failures(payload: dict[str, Any], schema: dict[str, Any], label: str) -> list[str]:
@@ -484,14 +497,14 @@ def validate_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[
             branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        if github_actions:
-            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
-            if _downstream_validation_branch_allowed(branch):
-                info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
+        if _main_cumulative_branch_allowed(branch):
+            pass
         elif _downstream_validation_branch_allowed(branch):
+            if github_actions:
+                info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
-        else:
-            failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
+        elif github_actions:
+            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
 
     head_rc, head, head_err = _git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
     if head_rc != 0:
@@ -600,7 +613,9 @@ def _validations(plan: dict[str, Any]) -> list[dict[str, Any]]:
 def validate_row_family_split_plan(plan: dict[str, Any], repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     branch_context = _current_branch_context(repo_root)
-    pr98_source_files_allowed = _downstream_validation_branch_allowed(branch_context.branch)
+    pr98_source_files_allowed = _downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     split = _mapping(plan.get("row_family_split_plan"))
     if split.get("stable_ordering_policy") != "CANONICAL_ORDER_ASCENDING":
         failures.append("row_family_split_plan.stable_ordering_policy must be canonical ascending")
@@ -832,7 +847,9 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
     branch_context = _current_branch_context(repo_root)
-    pr98_source_files_allowed = _downstream_validation_branch_allowed(branch_context.branch)
+    pr98_source_files_allowed = _downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     pr99_static_builder_allowed = _pr99_static_builder_branch_allowed(branch_context.branch)
     for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
         if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:

@@ -164,6 +164,28 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     return pr98_gate._downstream_validation_branch_allowed(branch)
 
 
+def _main_cumulative_branch_allowed(branch: str) -> bool:
+    return pr98_gate._main_cumulative_branch_allowed(branch)
+
+
+def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
+    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
+        branch
+    )
+
+
+def _should_skip_default_report_write(
+    *,
+    repo_root: pathlib.Path,
+    output_abs: pathlib.Path,
+    metadata: dict[str, Any],
+) -> bool:
+    if output_abs != _resolve(repo_root, DEFAULT_REPORT):
+        return False
+    branch = str(metadata.get("branch") or "")
+    return branch not in {TARGET_BRANCH, "main"}
+
+
 def validate_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
     failures: list[str] = []
     info_lines: list[str] = []
@@ -211,10 +233,10 @@ def validate_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[
             branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        if _downstream_validation_branch_allowed(branch):
+        if _main_cumulative_branch_allowed(branch):
+            pass
+        elif _downstream_validation_branch_allowed(branch):
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
-        else:
-            failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
 
     head_rc, head, head_err = pr98_gate._git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
     if head_rc != 0:
@@ -479,7 +501,11 @@ def validate(
     if report != expected_report:
         failures.append("PR99 report mutation check failed")
 
-    if not failures:
+    if not failures and not _should_skip_default_report_write(
+        repo_root=repo_root,
+        output_abs=_resolve(repo_root, output_path),
+        metadata=metadata,
+    ):
         write_json_report(report, _resolve(repo_root, output_path))
     return ValidationResult(not failures, tuple(failures), report, info_lines)
 

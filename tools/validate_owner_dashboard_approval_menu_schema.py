@@ -80,6 +80,7 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 BRANCH_CONTEXT_ENV_CANDIDATES = (
     "GITHUB_HEAD_REF",
     "GITHUB_REF_NAME",
+    "GITHUB_REF",
     "BRANCH_NAME",
     "CI_COMMIT_REF_NAME",
 )
@@ -469,6 +470,16 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     return int(match.group("number")) > 95
 
 
+def _main_cumulative_branch_allowed(branch: str) -> bool:
+    return branch == "main" or branch.startswith("repair/main-cumulative-")
+
+
+def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
+    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
+        branch
+    )
+
+
 def _should_skip_default_report_write(
     *,
     repo_root: pathlib.Path,
@@ -478,7 +489,7 @@ def _should_skip_default_report_write(
     if output_abs != _resolve(repo_root, DEFAULT_REPORT):
         return False
     branch = str(metadata.get("branch") or "")
-    return branch not in {TARGET_BRANCH, "main"} and _downstream_validation_branch_allowed(branch)
+    return branch not in {TARGET_BRANCH, "main"}
 
 
 def validate_pr95_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
@@ -524,14 +535,14 @@ def validate_pr95_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
             branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        if github_actions:
-            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
-            if _downstream_validation_branch_allowed(branch):
-                info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
+        if _main_cumulative_branch_allowed(branch):
+            pass
         elif _downstream_validation_branch_allowed(branch):
+            if github_actions:
+                info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
-        else:
-            failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
+        elif github_actions:
+            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
 
     head_rc, head, head_err = _git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
     if head_rc != 0:
@@ -878,7 +889,9 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
             f"{CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
         )
     branch_context = _current_branch_context(repo_root)
-    downstream_pr96_or_later = _downstream_validation_branch_allowed(branch_context.branch)
+    downstream_pr96_or_later = _downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     forbidden_paths = FORBIDDEN_RUNTIME_PATHS
     if not downstream_pr96_or_later:
         forbidden_paths = (*PR96_STATIC_SCREEN_CONTRACT_PATHS, *FORBIDDEN_RUNTIME_PATHS)

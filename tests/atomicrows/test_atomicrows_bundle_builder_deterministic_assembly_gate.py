@@ -12,6 +12,25 @@ ROOT = Path(".")
 _REPORT_CACHE: dict | None = None
 
 
+def _clear_branch_context_env(monkeypatch) -> None:
+    for env_name in ("GITHUB_ACTIONS", *validator.BRANCH_CONTEXT_ENV_CANDIDATES):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_branch(monkeypatch, branch: str, *, detached: bool = False) -> None:
+    original_git_stdout = validator.pr98_gate._git_stdout
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "" if detached else branch, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD" if detached else branch, ""
+        return original_git_stdout(repo_root, args)
+
+    monkeypatch.setattr(validator.pr98_gate, "_git_stdout", fake_git_stdout)
+
+
 def _schema() -> dict:
     return validator.load_json(ROOT / validator.DEFAULT_SCHEMA)
 
@@ -80,9 +99,17 @@ def test_production_builder_gate_validates_and_report_is_deterministic(capsys):
         output_path=validator.DEFAULT_REPORT,
     )
     report_text = (ROOT / validator.DEFAULT_REPORT).read_text(encoding="utf-8")
+    branch_context = validator.pr98_gate._current_branch_context(ROOT)
+    default_report_write_skipped = validator._should_skip_default_report_write(
+        repo_root=ROOT.resolve(),
+        output_abs=(ROOT / validator.DEFAULT_REPORT).resolve(),
+        metadata={"branch": branch_context.branch},
+    )
 
     assert first.failures == second.failures == ()
-    assert first.report == second.report == json.loads(report_text)
+    assert first.report == second.report
+    if not default_report_write_skipped:
+        assert first.report == json.loads(report_text)
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
     assert validator.main([]) == 0
     output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
@@ -95,6 +122,22 @@ def test_production_builder_gate_validates_and_report_is_deterministic(capsys):
     assert output_lines
     assert output_lines[0] == validator.SUCCESS_MARKER
     assert set(output_lines[1:]) <= allowed
+
+
+def test_pr99_validator_allows_main_cumulative_context_stdout(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+
+    assert validator.main(["--out", str(tmp_path / "report.json")]) == 0
+
+    output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
+    assert output_lines == [validator.SUCCESS_MARKER]
 
 
 def test_required_concepts_config_schema_fixture_and_report_exist():

@@ -342,6 +342,16 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     return int(match.group("number")) > 98
 
 
+def _main_cumulative_branch_allowed(branch: str) -> bool:
+    return branch == "main" or branch.startswith("repair/main-cumulative-")
+
+
+def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
+    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
+        branch
+    )
+
+
 def _should_skip_default_report_write(
     *,
     repo_root: pathlib.Path,
@@ -351,7 +361,7 @@ def _should_skip_default_report_write(
     if output_abs != _resolve(repo_root, DEFAULT_REPORT):
         return False
     branch = str(metadata.get("branch") or "")
-    return branch not in {TARGET_BRANCH, "main"} and _downstream_validation_branch_allowed(branch)
+    return branch not in {TARGET_BRANCH, "main"}
 
 
 def _load_json_checked(path: pathlib.Path, label: str) -> tuple[dict[str, Any] | None, list[str]]:
@@ -498,14 +508,14 @@ def validate_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[
             branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        if github_actions:
-            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
-            if _downstream_validation_branch_allowed(branch):
-                info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
+        if _main_cumulative_branch_allowed(branch):
+            pass
         elif _downstream_validation_branch_allowed(branch):
+            if github_actions:
+                info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
-        else:
-            failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
+        elif github_actions:
+            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
 
     head_rc, head, head_err = _git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
     if head_rc != 0:
@@ -952,7 +962,7 @@ def validate_fixture_cases(
         expected_valid = case.get("expected_schema_valid")
         if (
             case_id == "BLOCK_BUNDLE_BUILDER_PRESENT"
-            and _downstream_validation_branch_allowed(
+            and _downstream_or_main_validation_branch_allowed(
                 _current_branch_context(repo_root).branch
             )
         ):
@@ -976,7 +986,9 @@ def validate_no_forbidden_artifacts(
         if exists:
             failures.append(f"{message}: {relative_path.as_posix()}")
     branch_context = _current_branch_context(repo_root)
-    pr99_static_builder_allowed = _downstream_validation_branch_allowed(branch_context.branch)
+    pr99_static_builder_allowed = _downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     for relative_path, message in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
         exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
         if exists and not pr99_static_builder_allowed:

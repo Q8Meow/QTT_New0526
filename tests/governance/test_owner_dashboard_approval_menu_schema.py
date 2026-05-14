@@ -7,6 +7,7 @@ from tools import validate_owner_dashboard_approval_menu_schema as gate
 
 REPO_ROOT = Path(".")
 PR96_BRANCH = "pr96-owner-dashboard-approval-static-screen-contract"
+FEATURE_BRANCH = "feature/non-downstream-validation"
 _REPORT_CACHE: dict | None = None
 
 
@@ -234,7 +235,9 @@ def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authori
     report = _report()
 
     branch_context = gate._current_branch_context(REPO_ROOT)
-    downstream_pr96_or_later = gate._downstream_validation_branch_allowed(branch_context.branch)
+    downstream_pr96_or_later = gate._downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     runtime_or_forbidden_paths = [
         *gate.FORBIDDEN_RUNTIME_PATHS,
         gate.CANONICAL_BUNDLE_JSONL,
@@ -268,6 +271,49 @@ def test_pr96_static_files_allowed_on_local_pr96_downstream_branch(tmp_path, mon
     assert failures == []
 
 
+def test_pr96_static_files_allowed_on_main_cumulative_context(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr96_static_files_allowed_in_github_push_main_ref_name_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr96_static_files_allowed_in_github_push_main_ref_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
 def test_pr96_static_files_allowed_in_github_actions_detached_head_context(tmp_path, monkeypatch):
     _clear_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
@@ -284,6 +330,18 @@ def test_pr96_static_files_allowed_in_github_actions_detached_head_context(tmp_p
 
 def test_pr96_static_files_blocked_on_non_downstream_branch(tmp_path, monkeypatch):
     _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, FEATURE_BRANCH)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        assert _forbidden_artifact_failure(path) in failures
+
+
+def test_pr96_static_files_blocked_on_pr95_same_pr_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
     _mock_git_branch(monkeypatch, gate.TARGET_BRANCH)
     for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
         _write_file(tmp_path, path)
@@ -297,6 +355,22 @@ def test_pr96_static_files_blocked_on_non_downstream_branch(tmp_path, monkeypatc
 def test_runtime_paths_remain_blocked_on_pr96_downstream_branch(tmp_path, monkeypatch):
     _clear_branch_context_env(monkeypatch)
     _mock_git_branch(monkeypatch, PR96_BRANCH)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        assert _forbidden_artifact_failure(path) in failures
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        assert _forbidden_artifact_failure(path) not in failures
+
+
+def test_runtime_paths_remain_blocked_on_main_cumulative_context(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
     for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
         _write_file(tmp_path, path)
     for path in gate.FORBIDDEN_RUNTIME_PATHS:
@@ -329,6 +403,39 @@ def test_atomicrows_bundle_and_hash_remain_blocked_on_pr96_downstream_branch(
         "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
         f"{gate.CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
     ) in failures
+
+
+def test_atomicrows_bundle_and_hash_remain_blocked_on_main_cumulative_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    _write_file(tmp_path, gate.CANONICAL_BUNDLE_JSONL)
+    _write_file(tmp_path, gate.CANONICAL_BUNDLE_SHA256)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert (
+        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE: "
+        f"{gate.CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
+    ) in failures
+    assert (
+        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
+        f"{gate.CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
+    ) in failures
+
+
+def test_main_context_stdout_has_only_success_marker(tmp_path, monkeypatch, capsys):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+
+    assert gate.main(["--out", str(tmp_path / "report.json")]) == 0
+
+    output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
+    assert output_lines == [gate.SUCCESS_MARKER]
 
 
 def test_pr95_creates_no_source_connector_runtime_cash_replay_paper_optimizer_profit_or_claims():
