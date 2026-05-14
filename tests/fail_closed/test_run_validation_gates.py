@@ -66,6 +66,9 @@ from tools import (
 from tools import (
     validate_owner_approval_request_queue_registry as owner_approval_request_queue_gate,
 )
+from tools import (
+    validate_owner_override_receipt_authoring_gate as owner_override_receipt_authoring_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -707,6 +710,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_owner_approval_request_queue_registry.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_owner_override_receipt_authoring_gate.py"
             ),
         ],
         [
@@ -1654,6 +1664,13 @@ def test_runner_exposes_owner_approval_request_queue_registry_success_marker():
     )
 
 
+def test_runner_exposes_owner_override_receipt_authoring_gate_success_marker():
+    assert (
+        owner_override_receipt_authoring_gate.SUCCESS_MARKER
+        == "QTT_OWNER_OVERRIDE_RECEIPT_AUTHORING_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2455,6 +2472,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     pr93_index = command_names.index(
         "validate_owner_approval_request_queue_registry.py"
     )
+    pr94_index = command_names.index(
+        "validate_owner_override_receipt_authoring_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2484,6 +2504,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < pr91_index
         < pr92_index
         < pr93_index
+        < pr94_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2554,6 +2575,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     assert commands[pr93_index] == [
         python_executable,
         str(Path("tools") / "validate_owner_approval_request_queue_registry.py"),
+    ]
+    assert commands[pr94_index] == [
+        python_executable,
+        str(Path("tools") / "validate_owner_override_receipt_authoring_gate.py"),
     ]
 
 
@@ -3014,6 +3039,49 @@ def test_runner_does_not_emit_success_marker_if_owner_approval_request_queue_gat
 
     assert exit_code == 67
     assert seen == commands[:15]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_owner_override_receipt_authoring_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "validate_quantum_applicability_classification_registry.py"],
+        ["python", "validate_owner_quantum_priority_policy_registry.py"],
+        ["python", "validate_parameter_algorithm_scoring_policy_registry.py"],
+        ["python", "validate_parameter_stack_scoring_and_ranking_gate.py"],
+        ["python", "validate_quantum_classical_optimizer_arbitration_gate.py"],
+        ["python", "validate_candidate_parameter_stack_generation_gate.py"],
+        ["python", "validate_trade_context_parameter_stack_selection_gate.py"],
+        ["python", "validate_selected_parameter_stack_handoff_packet.py"],
+        ["python", "validate_replay_paper_candidate_stack_competition_gate.py"],
+        ["python", "validate_dual_result_review_for_parameter_stacks.py"],
+        ["python", "validate_owner_live_promotion_review_for_parameter_stacks.py"],
+        ["python", "validate_owner_approval_request_queue_registry.py"],
+        ["python", "validate_owner_override_receipt_authoring_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 68, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 68
+    assert seen == commands[:16]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
