@@ -57,7 +57,13 @@ def test_production_plan_validates_and_report_is_deterministic(capsys):
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
     assert json.loads(report_text)["validation_marker"] == validator.SUCCESS_MARKER
     assert validator.main([]) == 0
-    assert capsys.readouterr().out.strip() == validator.SUCCESS_MARKER
+    output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
+    allowed_info_lines = {
+        validator.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER,
+    }
+    assert output_lines
+    assert output_lines[0] == validator.SUCCESS_MARKER
+    assert set(output_lines[1:]) <= allowed_info_lines
 
 
 def test_required_plan_concepts_and_target_total_are_traceable_static_only():
