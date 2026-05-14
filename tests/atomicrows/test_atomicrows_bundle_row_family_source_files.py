@@ -12,6 +12,7 @@ from tools import validate_atomicrows_bundle_row_family_source_files as validato
 ROOT = Path(".")
 PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
 PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
+FEATURE_BRANCH = "feature/non-downstream-validation"
 _REPORT_CACHE: dict | None = None
 
 
@@ -100,13 +101,15 @@ def test_production_source_file_set_validates_and_report_is_deterministic(capsys
     )
     report_text = (ROOT / validator.DEFAULT_REPORT).read_text(encoding="utf-8")
     branch_context = validator._current_branch_context(ROOT)
-    downstream_pr99_or_later = validator._downstream_validation_branch_allowed(
-        branch_context.branch
+    default_report_write_skipped = validator._should_skip_default_report_write(
+        repo_root=ROOT.resolve(),
+        output_abs=(ROOT / validator.DEFAULT_REPORT).resolve(),
+        metadata={"branch": branch_context.branch},
     )
 
     assert first.failures == second.failures == ()
     assert first.report == second.report
-    if not downstream_pr99_or_later:
+    if not default_report_write_skipped:
         assert first.report == json.loads(report_text)
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
     assert json.loads(report_text)["validation_marker"] == validator.SUCCESS_MARKER
@@ -445,6 +448,33 @@ def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(monkeyp
         )
         == []
     )
+
+
+def test_pr99_static_bundle_builder_allowed_on_main_cumulative_context(monkeypatch):
+    builder_path = Path("tools") / "build_atomicrows_bundle.py"
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+
+    assert (
+        validator.validate_no_forbidden_artifacts(
+            ROOT,
+            extra_existing_paths=(builder_path,),
+        )
+        == []
+    )
+
+
+def test_pr99_static_bundle_builder_blocked_on_non_downstream_branch(monkeypatch):
+    builder_path = Path("tools") / "build_atomicrows_bundle.py"
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, FEATURE_BRANCH)
+
+    failures = validator.validate_no_forbidden_artifacts(
+        ROOT,
+        extra_existing_paths=(builder_path,),
+    )
+
+    _assert_failure_contains(failures, "forbidden bundle builder artifact exists")
 
 
 def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_context(

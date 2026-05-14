@@ -8,6 +8,7 @@ from tools import validate_owner_dashboard_approval_static_screen_contract as ga
 REPO_ROOT = Path(".")
 PR97_BRANCH = "pr97-atomicrows-full-bundle-row-expansion-plan"
 PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
+FEATURE_BRANCH = "feature/non-downstream-validation"
 _REPORT_CACHE: dict | None = None
 
 
@@ -247,7 +248,9 @@ def test_atomicrows_pr97_bundle_hash_and_runtime_artifacts_are_absent():
     report = _report()
 
     branch_context = gate._current_branch_context(REPO_ROOT)
-    downstream_pr97_or_later = gate._downstream_validation_branch_allowed(branch_context.branch)
+    downstream_pr97_or_later = gate._downstream_or_main_validation_branch_allowed(
+        branch_context.branch
+    )
     always_forbidden_paths = [
         gate.CANONICAL_BUNDLE_JSONL.as_posix(),
         gate.CANONICAL_BUNDLE_SHA256.as_posix(),
@@ -278,6 +281,33 @@ def test_pr97_static_plan_files_allowed_on_local_pr97_downstream_branch(tmp_path
     assert failures == []
 
 
+def test_pr97_static_plan_files_allowed_on_main_cumulative_context(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr97_static_plan_files_allowed_in_github_push_main_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
 def test_pr97_static_plan_files_allowed_in_github_actions_detached_head_context(
     tmp_path,
     monkeypatch,
@@ -296,6 +326,18 @@ def test_pr97_static_plan_files_allowed_in_github_actions_detached_head_context(
 
 
 def test_pr97_static_plan_files_blocked_on_non_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, FEATURE_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        assert _pr96_forbidden_failure(path) in failures
+
+
+def test_pr97_static_plan_files_blocked_on_pr96_same_pr_branch(tmp_path, monkeypatch):
     _clear_branch_context_env(monkeypatch)
     _mock_git_branch(monkeypatch, gate.TARGET_BRANCH)
     for path in gate.PR97_STATIC_PLAN_PATHS:
@@ -330,6 +372,29 @@ def test_atomicrows_bundle_hash_builder_and_runtime_remain_blocked_on_pr97_branc
         assert _runtime_forbidden_failure(path) in failures
 
 
+def test_atomicrows_bundle_hash_and_runtime_remain_blocked_on_main_context(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        assert _pr96_forbidden_failure(path) not in failures
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        assert _pr96_forbidden_failure(path) in failures
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        assert _runtime_forbidden_failure(path) in failures
+
+
 def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
     tmp_path,
     monkeypatch,
@@ -345,6 +410,18 @@ def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
 
     _clear_branch_context_env(monkeypatch)
     _mock_git_branch(monkeypatch, PR99_BRANCH)
+
+    assert gate.validate_filesystem_boundaries(tmp_path) == []
+
+
+def test_pr99_static_bundle_builder_allowed_on_main_cumulative_context(
+    tmp_path,
+    monkeypatch,
+):
+    builder_path = gate.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    _write_file(tmp_path, builder_path)
 
     assert gate.validate_filesystem_boundaries(tmp_path) == []
 

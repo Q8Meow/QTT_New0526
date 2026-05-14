@@ -10,6 +10,7 @@ from tools import validate_atomicrows_full_bundle_row_expansion_plan as validato
 ROOT = Path(".")
 PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
 PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
+FEATURE_BRANCH = "feature/non-downstream-validation"
 _REPORT_CACHE: dict | None = None
 
 
@@ -80,13 +81,15 @@ def test_production_plan_validates_and_report_is_deterministic(capsys):
     report_text = (ROOT / validator.DEFAULT_REPORT).read_text(encoding="utf-8")
     report_json = json.loads(report_text)
     branch_context = validator._current_branch_context(ROOT)
-    downstream_pr98_or_later = validator._downstream_validation_branch_allowed(
-        branch_context.branch
+    default_report_write_skipped = validator._should_skip_default_report_write(
+        repo_root=ROOT.resolve(),
+        output_abs=(ROOT / validator.DEFAULT_REPORT).resolve(),
+        metadata={"branch": branch_context.branch},
     )
 
     assert first.failures == second.failures == ()
     assert first.report == second.report
-    if not downstream_pr98_or_later:
+    if not default_report_write_skipped:
         assert first.report == report_json
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
     assert report_json["validation_marker"] == validator.SUCCESS_MARKER
@@ -120,7 +123,7 @@ def test_row_family_split_plan_is_deterministic_intent_only_and_has_no_exact_cou
     plan = _plan()
     families = validator._row_families(plan)
     branch_context = validator._current_branch_context(ROOT)
-    downstream_pr98_or_later = validator._downstream_validation_branch_allowed(
+    downstream_pr98_or_later = validator._downstream_or_main_validation_branch_allowed(
         branch_context.branch
     )
 
@@ -434,6 +437,34 @@ def test_pr98_row_family_source_files_allowed_on_local_pr98_downstream_branch(
     assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
 
 
+def test_pr98_row_family_source_files_allowed_on_main_cumulative_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr98_row_family_source_files_allowed_in_github_push_main_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    _mock_git_branch(monkeypatch, "ignored", detached=True)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
 def test_pr98_row_family_source_files_allowed_in_github_actions_detached_head_context(
     tmp_path,
     monkeypatch,
@@ -451,6 +482,25 @@ def test_pr98_row_family_source_files_allowed_in_github_actions_detached_head_co
 
 
 def test_pr98_row_family_source_files_blocked_on_non_downstream_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, FEATURE_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    for path in validator.planned_pr98_source_paths(plan):
+        _assert_failure_contains(
+            failures,
+            f"PR98 row-family source file exists during PR97: {path.as_posix()}",
+        )
+
+
+def test_pr98_row_family_source_files_blocked_on_pr97_same_pr_branch(
     tmp_path,
     monkeypatch,
 ):
@@ -492,6 +542,29 @@ def test_bundle_hash_builder_freeze_and_final_readiness_remain_blocked_on_pr98_b
         assert not any(path.as_posix() in failure for failure in failures)
 
 
+def test_bundle_hash_freeze_final_readiness_remain_blocked_on_main_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        _assert_failure_contains(
+            failures,
+            f"forbidden downstream artifact exists: {path.as_posix()}",
+        )
+    for path in validator.planned_pr98_source_paths(plan):
+        assert not any(path.as_posix() in failure for failure in failures)
+
+
 def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
     tmp_path,
     monkeypatch,
@@ -511,6 +584,19 @@ def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
 
     _clear_branch_context_env(monkeypatch)
     _mock_git_branch(monkeypatch, PR99_BRANCH)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr99_static_bundle_builder_allowed_on_main_cumulative_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    builder_path = validator.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, "main")
+    _write_file(tmp_path, builder_path)
 
     assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
 
