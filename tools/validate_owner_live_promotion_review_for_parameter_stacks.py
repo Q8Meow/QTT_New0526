@@ -1587,7 +1587,6 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
             f"{CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
         )
     forbidden_paths = (
-        pathlib.Path("docs/master_plan/generated/OwnerOverrideReceiptAuthoringGate.report.json"),
         pathlib.Path("docs/master_plan/generated/OwnerDashboardApprovalMenu.report.json"),
         pathlib.Path("docs/master_plan/generated/OwnerDashboardApprovalStaticScreen.report.json"),
     )
