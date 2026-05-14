@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/governance/qtt_owner_approval_request_queue_registry.schema.json",
+  "title": "QTT Owner Approval Request Queue Registry",
+  "description": "Static deterministic PR #93 owner approval request queue registry contract. This schema permits typed agent request intake, deterministic queue ordering, dependency recording, and PR #94-#96 forwardability metadata only. It does not create owner decisions, owner approval receipts, owner override receipts, dashboard approval artifacts, live promotion, canary eligibility, live/order authority, source retrieval or acceptance, connector binding, runtime cash receipts, replay/paper execution, optimizer execution, quantum backend/simulator execution, profit evidence, advantage claims, or AtomicRows bundle/hash authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "owner_approval_request_queue_registry_id",
+    "owner_approval_request_queue_packet_contract_id",
+    "schema_version",
+    "policy_version",
+    "semantic_task_id",
+    "roadmap_pr_label",
+    "github_pr_number_policy",
+    "queue_scope",
+    "queue_authority_class",
+    "queue_registry_status",
+    "static_only_flag",
+    "metadata_only_flag",
+    "synthetic_fixture_only_flag",
+    "queue_determinism_policy",
+    "queue_ordering_policy",
+    "queue_idempotency_policy",
+    "request_deduplication_policy",
+    "request_type_taxonomy",
+    "request_status_taxonomy",
+    "request_priority_taxonomy",
+    "owner_decision_option_set",
+    "owner_decision_required_flag",
+    "owner_decision_created_flag",
+    "owner_approval_receipt_created_flag",
+    "owner_override_receipt_created_flag",
+    "live_promotion_created_flag",
+    "canary_eligibility_created_flag",
+    "dashboard_runtime_created_flag",
+    "queue_inputs",
+    "queue_outputs",
+    "upstream_owner_live_promotion_review_packet_ref",
+    "owner_approval_receipt_boundary_ref",
+    "owner_override_receipt_boundary_ref",
+    "source_connector_runtime_order_boundary_refs",
+    "upstream_dependencies",
+    "future_consumers",
+    "master_plan_principles_consumed",
+    "reason_codes",
+    "required_no_authority_flags",
+    "final_ready"
+  ],
+  "properties": {
+    "owner_approval_request_queue_registry_id": {
+      "const": "QTT_OWNER_APPROVAL_REQUEST_QUEUE_REGISTRY"
+    },
+    "owner_approval_request_queue_packet_contract_id": {
+      "const": "QTT_OWNER_APPROVAL_REQUEST_QUEUE_REGISTRY_V1"
+    },
+    "schema_version": { "const": "v1" },
+    "policy_version": { "const": "v1" },
+    "semantic_task_id": {
+      "const": "ROADMAP-OWNER-APPROVAL-REQUEST-QUEUE-REGISTRY"
+    },
+    "roadmap_pr_label": { "const": "PR #93" },
+    "github_pr_number_policy": { "const": "may differ" },
+    "queue_scope": { "const": "STATIC_ONLY" },
+    "queue_authority_class": {
+      "const": "STATIC_OWNER_APPROVAL_REQUEST_QUEUE_NOT_OWNER_DECISION_NOT_APPROVAL_RECEIPT_NOT_OVERRIDE_RECEIPT_NOT_LIVE_AUTHORITY"
+    },
+    "queue_registry_status": {
+      "const": "STATIC_QUEUE_REGISTRY_ACTIVE_FOR_REQUEST_INTAKE_ONLY"
+    },
+    "static_only_flag": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "synthetic_fixture_only_flag": { "const": true },
+    "queue_determinism_policy": { "$ref": "#/$defs/determinism_policy" },
+    "queue_ordering_policy": { "$ref": "#/$defs/ordering_policy" },
+    "queue_idempotency_policy": { "$ref": "#/$defs/idempotency_policy" },
+    "request_deduplication_policy": { "$ref": "#/$defs/deduplication_policy" },
+    "request_type_taxonomy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 4
+    },
+    "request_status_taxonomy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 4
+    },
+    "request_priority_taxonomy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 4
+    },
+    "owner_decision_option_set": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 8
+    },
+    "owner_decision_required_flag": { "const": true },
+    "owner_decision_created_flag": { "const": false },
+    "owner_approval_receipt_created_flag": { "const": false },
+    "owner_override_receipt_created_flag": { "const": false },
+    "live_promotion_created_flag": { "const": false },
+    "canary_eligibility_created_flag": { "const": false },
+    "dashboard_runtime_created_flag": { "const": false },
+    "queue_inputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 8
+    },
+    "queue_outputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 8
+    },
+    "upstream_owner_live_promotion_review_packet_ref": { "$ref": "#/$defs/source_ref" },
+    "owner_approval_receipt_boundary_ref": { "$ref": "#/$defs/source_ref" },
+    "owner_override_receipt_boundary_ref": { "$ref": "#/$defs/source_ref" },
+    "source_connector_runtime_order_boundary_refs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source_ref" },
+      "minItems": 4
+    },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" },
+      "minItems": 16
+    },
+    "future_consumers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_consumer" },
+      "minItems": 3
+    },
+    "master_plan_principles_consumed": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/master_plan_principle" },
+      "minItems": 20
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 20
+    },
+    "required_no_authority_flags": { "$ref": "#/$defs/no_authority_flags" },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "determinism_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "stable_sort_required",
+        "random_identity_allowed",
+        "wall_clock_identity_allowed",
+        "environment_dependent_ordering_allowed",
+        "queue_entry_ids_lexical_static",
+        "request_ids_static_fixture_only"
+      ],
+      "properties": {
+        "policy_id": { "const": "OWNER_APPROVAL_REQUEST_QUEUE_DETERMINISM_POLICY_V1" },
+        "stable_sort_required": { "const": true },
+        "random_identity_allowed": { "const": false },
+        "wall_clock_identity_allowed": { "const": false },
+        "environment_dependent_ordering_allowed": { "const": false },
+        "queue_entry_ids_lexical_static": { "const": true },
+        "request_ids_static_fixture_only": { "const": true }
+      }
+    },
+    "ordering_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "ordering_scope",
+        "ordering_is_owner_decision",
+        "ordering_key_fields"
+      ],
+      "properties": {
+        "policy_id": { "const": "OWNER_APPROVAL_REQUEST_QUEUE_ORDERING_POLICY_V1" },
+        "ordering_scope": { "const": "STATIC_QUEUE_ORDER_ONLY" },
+        "ordering_is_owner_decision": { "const": false },
+        "ordering_key_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 8
+        }
+      }
+    },
+    "idempotency_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "dedupe_identity_required",
+        "ambiguous_identity_blocks_request",
+        "random_suffix_allowed",
+        "wall_clock_suffix_allowed"
+      ],
+      "properties": {
+        "policy_id": { "const": "OWNER_APPROVAL_REQUEST_QUEUE_IDEMPOTENCY_POLICY_V1" },
+        "dedupe_identity_required": { "const": true },
+        "ambiguous_identity_blocks_request": { "const": true },
+        "random_suffix_allowed": { "const": false },
+        "wall_clock_suffix_allowed": { "const": false }
+      }
+    },
+    "deduplication_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "duplicate_request_identity_blocks_later_duplicate",
+        "duplicate_block_status",
+        "duplicate_reason_code"
+      ],
+      "properties": {
+        "policy_id": { "const": "OWNER_APPROVAL_REQUEST_QUEUE_DEDUPLICATION_POLICY_V1" },
+        "duplicate_request_identity_blocks_later_duplicate": { "const": true },
+        "duplicate_block_status": { "const": "BLOCKED_DUPLICATE_REQUEST" },
+        "duplicate_reason_code": { "const": "OWNER_APPROVAL_REQUEST_QUEUE_BLOCKED_DUPLICATE_REQUEST_COLLISION" }
+      }
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "artifact_id",
+        "schema_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "schema_path": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" },
+        "contract_id": { "type": "string" },
+        "packet_schema_id": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "artifact_id",
+        "delivery_label",
+        "title",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "schema_path": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "future_consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_id",
+        "delivery_label",
+        "title",
+        "consumer_scope",
+        "pr93_creates_consumer_execution"
+      ],
+      "properties": {
+        "consumer_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "consumer_scope": { "type": "string" },
+        "pr93_creates_consumer_execution": { "const": false }
+      }
+    },
+    "master_plan_principle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "principle_id",
+        "master_plan_locator",
+        "principle_text"
+      ],
+      "properties": {
+        "principle_id": { "type": "string" },
+        "master_plan_locator": { "type": "string" },
+        "principle_text": { "type": "string" }
+      }
+    },
+    "no_authority_flags": {
+      "type": "object",
+      "additionalProperties": { "const": false }
+    }
+  }
+}
