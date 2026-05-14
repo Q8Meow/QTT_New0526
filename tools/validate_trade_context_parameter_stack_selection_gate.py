@@ -421,6 +421,15 @@ def _github_actions_active() -> bool:
     return os.getenv("GITHUB_ACTIONS") == "true"
 
 
+def _downstream_validation_branch_allowed(branch: str) -> bool:
+    if branch == "main":
+        return True
+    match = re.match(r"^pr(?P<number>[0-9]+)-", branch)
+    if match is None:
+        return False
+    return int(match.group("number")) > 88
+
+
 def validate_pr88_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
     failures: list[str] = []
     info_lines: list[str] = []
@@ -465,6 +474,8 @@ def validate_pr88_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
     elif branch != TARGET_BRANCH:
         if github_actions:
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
+        elif _downstream_validation_branch_allowed(branch):
+            info_lines.append("DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_ACTIVE")
         else:
             failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")
     head_rc, head, head_err = _git_stdout(repo_root, ["rev-parse", "--short", "HEAD"])
@@ -501,6 +512,26 @@ def validate_pr88_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
         "roadmap_index_entry_verified": not failures,
         "blueprint_index_entry_verified": not failures,
     }
+
+
+def _should_skip_default_report_write(
+    *,
+    repo_root: pathlib.Path,
+    output_abs: pathlib.Path,
+    metadata: dict[str, Any],
+) -> bool:
+    default_abs = _resolve(repo_root, DEFAULT_REPORT)
+    if output_abs != default_abs:
+        return False
+    if metadata.get("branch") == TARGET_BRANCH:
+        return False
+    if not output_abs.exists():
+        return False
+    try:
+        existing = load_json(output_abs)
+    except Exception:
+        return False
+    return existing.get("validation_marker") == SUCCESS_MARKER
 
 
 def validate_dependencies(payload: dict[str, Any], repo_root: pathlib.Path) -> list[str]:
@@ -1738,7 +1769,12 @@ def validate(
     if failures:
         return ValidationResult(False, tuple(failures), report, info_lines)
 
-    write_json_report(report, output_abs)
+    if not _should_skip_default_report_write(
+        repo_root=repo_root,
+        output_abs=output_abs,
+        metadata=metadata,
+    ):
+        write_json_report(report, output_abs)
     return ValidationResult(True, tuple(), report, info_lines)
 
 

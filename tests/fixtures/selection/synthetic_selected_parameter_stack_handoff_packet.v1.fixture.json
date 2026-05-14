@@ -1,0 +1,203 @@
+{
+  "selected_parameter_stack_handoff_packet_id": "PR89_STATIC_SELECTED_PARAMETER_STACK_HANDOFF_PACKET_SYNTHETIC_V1",
+  "schema_version": "v1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "semantic_task_id": "ROADMAP-SELECTED-PARAMETER-STACK-HANDOFF-PACKET",
+  "roadmap_pr_label": "PR #89",
+  "github_pr_number_policy": "may differ",
+  "gate_scope": "STATIC_SELECTED_PARAMETER_STACK_HANDOFF_PACKET_ONLY",
+  "handoff_scope": "STATIC_ONLY",
+  "handoff_authority_class": "STATIC_SELECTED_PARAMETER_STACK_HANDOFF_NOT_ORDER_INTENT_NOT_EXECUTION",
+  "static_only_flag": true,
+  "metadata_only_flag": true,
+  "synthetic_fixture_only_flag": true,
+  "handoff_contract_only_flag": true,
+  "source_dependency_state": "STATIC_SOURCE_DEPENDENCY_LABELS_ONLY",
+  "upstream_trade_context_selection_packet_ref": "PR88_STATIC_TRADE_CONTEXT_PARAMETER_STACK_SELECTION_PACKET_SYNTHETIC_V1",
+  "upstream_trade_context_selection_packet_digest_or_static_ref": "docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json#trade_context_parameter_stack_selection_packet",
+  "upstream_candidate_generation_packet_ref": "PR87_STATIC_CANDIDATE_GENERATION_PACKET_SYNTHETIC_V1",
+  "upstream_candidate_generation_packet_digest_or_static_ref": "docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json#candidate_generation_packet",
+  "upstream_trade_context_ref": "TRADE_CONTEXT_KALSHI_BINARY_SHORT_HORIZON_STATIC_ROUTE",
+  "upstream_routed_selection_universe_ref": "KALSHI_BINARY_SHORT_HORIZON",
+  "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "expected_selected_candidate_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "expected_selected_candidate_generation_key": "OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+  "expected_selected_handoff_item_count": 1,
+  "expected_rejected_handoff_item_count": 0,
+  "expected_blocked_handoff_item_count": 0,
+  "expected_replay_paper_forwardable_item_count": 1,
+  "expected_order_authoritative_item_count": 0,
+  "order_intent_surface_present_flag": true,
+  "order_intent_surface_authority": "NON_AUTHORITATIVE_STATIC_PREVIEW_ONLY",
+  "order_submission_allowed_flag": false,
+  "live_routing_allowed_flag": false,
+  "connector_binding_allowed_flag": false,
+  "no_order_authority_flag": true,
+  "no_runtime_execution_flag": true,
+  "no_quantum_backend_execution_flag": true,
+  "no_profit_evidence_flag": true,
+  "no_live_trade_authority_flag": true,
+  "final_ready": false,
+  "order_intent_authority_created": false,
+  "source_retrieval_created_flag": false,
+  "source_acceptance_created_flag": false,
+  "connector_semantic_binding_created_flag": false,
+  "runtime_cash_receipt_created_flag": false,
+  "replay_execution_created_flag": false,
+  "paper_execution_created_flag": false,
+  "replay_result_packet_created_flag": false,
+  "paper_result_packet_created_flag": false,
+  "classical_optimizer_execution_created_flag": false,
+  "quantum_optimizer_execution_created_flag": false,
+  "optimizer_execution_created_flag": false,
+  "quantum_backend_execution_created_flag": false,
+  "quantum_simulator_execution_created_flag": false,
+  "owner_approval_created_flag": false,
+  "live_trade_authority_created_flag": false,
+  "live_promotion_created_flag": false,
+  "profit_evidence_created_flag": false,
+  "quantum_advantage_claim_created_flag": false,
+  "latency_superiority_claim_created_flag": false,
+  "execution_superiority_claim_created_flag": false,
+  "random_identity_used": false,
+  "wall_clock_identity_used": false,
+  "atomicrows_bundle_jsonl_created": false,
+  "atomicrows_bundle_sha256_created": false,
+  "fixture_cases": [
+    {
+      "case_id": "PASS_PR89_METADATA_VERIFIED",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_STATIC_FIXTURE_ONLY",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_VALID_SELECTED_STACK_HANDOFF_FROM_PR88_SELECTION",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_PR88_SELECTION_PACKET",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_SELECTED_STACK_LINEAGE_TO_PR87_AND_PR88",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_PR87_CANDIDATE_PACKET",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_QUANTUM_PREFERRED_WITH_CLASSICAL_COMPARATOR",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_CLASSICAL_COMPARATOR_OR_FALLBACK",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_OWNER_OVERRIDE_INTERNAL_BASIS",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_OWNER_OVERRIDE_INTERNAL_BASIS_ONLY",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_ORDER_INTENT_PREVIEW_NON_AUTHORITATIVE",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_ORDER_INTENT_PREVIEW_NON_AUTHORITATIVE",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "PASS_REPLAY_PAPER_FORWARDABLE_NO_EXECUTION",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_PR90_FORWARDABLE_NOT_EXECUTED",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    },
+    {
+      "case_id": "BLOCK_MISSING_PR88_SELECTION_PACKET",
+      "synthetic_case_only": true,
+      "selection_packet_available": false,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_MISSING_PR88_SELECTION_PACKET",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_MISSING_SELECTED_STACK_ID",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": null,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_MISSING_SELECTED_STACK_ID",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_UNTRACEABLE_SELECTED_STACK_ID",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": "PR87_CANDIDATE_STACK__UNTRACEABLE_STATIC_FIXTURE",
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_SELECTED_STACK_ID_NOT_IN_PR88_SELECTION",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_SELECTED_CANDIDATE_NOT_TRACEABLE_TO_PR87",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": "PR88_SELECTED_STACK__NOT_IN_PR87_PACKET",
+      "inject_pr88_selected_descriptor_without_pr87_trace": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_SELECTED_CANDIDATE_NOT_TRACEABLE_TO_PR87",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_BLOCKED_CANDIDATE",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": "PR87_CANDIDATE_STACK__BLOCKED_INCOMPATIBLE_ROLE_TUPLE_FIXTURE",
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_SELECTED_CANDIDATE_STATUS",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_INCOMPATIBLE_CANDIDATE",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": "PR87_CANDIDATE_STACK__BLOCKED_INCOMPATIBLE_ROLE_TUPLE_FIXTURE",
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_INCOMPATIBLE_CANDIDATE",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_MISSING_ROLE_CANDIDATE",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": "PR87_CANDIDATE_STACK__BLOCKED_MISSING_SIGNAL_ROLE_FIXTURE",
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_MISSING_REQUIRED_ROLE",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "BLOCK_NO_ELIGIBLE_HANDOFF_ITEM",
+      "synthetic_case_only": true,
+      "selected_stack_id_override": null,
+      "no_eligible_handoff_item_case": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_BLOCKED_NO_ELIGIBLE_HANDOFF_ITEM",
+      "expected_selected_stack_id": null,
+      "expected_selected_handoff_item_count": 0
+    },
+    {
+      "case_id": "PASS_PR90_BOUNDARY_FORWARDABLE_NOT_EXECUTED",
+      "synthetic_case_only": true,
+      "expected_reason_code": "SELECTED_STACK_HANDOFF_ALLOWED_PR90_FORWARDABLE_NOT_EXECUTED",
+      "expected_selected_stack_id": "PR87_CANDIDATE_STACK__OWNER_OVERRIDE_QUANTUM_PRIORITY_STACK_FIXTURE",
+      "expected_selected_handoff_item_count": 1
+    }
+  ],
+  "pr90_boundary_fixture": {
+    "static_selected_stack_handoff_is_forwardable_to_pr90_competition_gate": true,
+    "replay_lane_contract_required_flag": true,
+    "paper_lane_contract_required_flag": true,
+    "replay_execution_created": false,
+    "paper_execution_created": false,
+    "replay_result_packet_created": false,
+    "paper_result_packet_created": false,
+    "order_authority_created": false,
+    "live_authority_created": false,
+    "pr90_execution_created": false
+  }
+}
