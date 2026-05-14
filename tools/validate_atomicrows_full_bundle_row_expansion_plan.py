@@ -236,7 +236,6 @@ FORBIDDEN_EXACT_COUNT_FIELDS = (
 ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
     CANONICAL_BUNDLE_JSONL,
     CANONICAL_BUNDLE_SHA256,
-    pathlib.Path("tools") / "build_atomicrows_bundle.py",
     pathlib.Path("tools") / "build_atomicrows_full_bundle.py",
     pathlib.Path("tools") / "validate_atomicrows_full_bundle_final_readiness_gate.py",
     (
@@ -251,6 +250,9 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "atomic_rows"
         / "AtomicRowsBundleFreezeAuthority.yaml"
     ),
+)
+PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
+    pathlib.Path("tools") / "build_atomicrows_bundle.py",
 )
 MASTER_PLAN_TARGET_COUNT_ANCHORS = (
     "current_launch_baseline_atomic_row_count = 4183",
@@ -395,6 +397,13 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     if not match:
         return False
     return int(match.group("number")) > 97
+
+
+def _pr99_static_builder_branch_allowed(branch: str) -> bool:
+    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    if not match:
+        return False
+    return int(match.group("number")) >= 99
 
 
 def _should_skip_default_report_write(
@@ -824,6 +833,10 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any
             failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
     branch_context = _current_branch_context(repo_root)
     pr98_source_files_allowed = _downstream_validation_branch_allowed(branch_context.branch)
+    pr99_static_builder_allowed = _pr99_static_builder_branch_allowed(branch_context.branch)
+    for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
+        if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:
+            failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
     for path in planned_pr98_source_paths(plan):
         if _resolve(repo_root, path).exists():
             if pr98_source_files_allowed:

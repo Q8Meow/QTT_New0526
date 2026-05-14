@@ -9,6 +9,7 @@ from tools import validate_atomicrows_full_bundle_row_expansion_plan as validato
 
 ROOT = Path(".")
 PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
+PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
 _REPORT_CACHE: dict | None = None
 
 
@@ -388,7 +389,7 @@ def test_planned_source_files_bundle_sha_builder_and_final_readiness_files_absen
     plan = _plan()
 
     _clear_branch_context_env(monkeypatch)
-    _mock_git_branch(monkeypatch, PR98_BRANCH)
+    _mock_git_branch(monkeypatch, PR99_BRANCH)
     assert validator.validate_no_forbidden_artifacts(ROOT, plan) == []
     bundle_path = tmp_path / validator.CANONICAL_BUNDLE_JSONL
     bundle_path.parent.mkdir(parents=True)
@@ -489,6 +490,45 @@ def test_bundle_hash_builder_freeze_and_final_readiness_remain_blocked_on_pr98_b
         )
     for path in validator.planned_pr98_source_paths(plan):
         assert not any(path.as_posix() in failure for failure in failures)
+
+
+def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    builder_path = validator.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR98_BRANCH)
+    _write_file(tmp_path, builder_path)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    _assert_failure_contains(
+        failures,
+        f"forbidden downstream artifact exists: {builder_path.as_posix()}",
+    )
+
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR99_BRANCH)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    builder_path = validator.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR99_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "99/merge")
+    _mock_git_branch(monkeypatch, PR99_BRANCH, detached=True)
+    _write_file(tmp_path, builder_path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
 
 
 def test_report_does_not_claim_bundle_live_profit_latency_or_quantum_advantage_readiness():

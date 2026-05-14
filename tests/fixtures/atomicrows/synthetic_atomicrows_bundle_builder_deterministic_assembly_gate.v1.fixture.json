@@ -1,0 +1,87 @@
+{
+  "execution": "DISABLED",
+  "expected_no_authority_flags": {
+    "bundle_file_created_flag": false,
+    "bundle_materialization_allowed_flag": false,
+    "bundle_sha_created_flag": false,
+    "final_readiness_created_flag": false,
+    "freeze_authority_created_flag": false,
+    "sha_authority_created_flag": false
+  },
+  "expected_source_blueprint_count": 15,
+  "expected_source_file_count": 15,
+  "fixture_cases": [
+    {
+      "case_id": "PASS_PR99_STATIC_BUILDER_DRY_RUN_BLOCKED_VALID",
+      "expected_block_reason": "STATIC_PR99_BUILDER_FRAMEWORK_VALID_BLOCKED_ASSEMBLY_GATE",
+      "expected_schema_valid": true,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_BLUEPRINT_ONLY_BUNDLE_CREATION",
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",
+      "expected_schema_valid": false,
+      "materialize_from_blueprints": true,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_SOURCE_FILE_ID",
+      "duplicate_source_file_id_from_index": 0,
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_DUPLICATE_SOURCE_FILE_IDS",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_ROW_FAMILY_OWNERSHIP",
+      "duplicate_row_family_ownership_from_index": 0,
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_DUPLICATE_ROW_FAMILY_OWNERSHIP",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_ROW_ID_IF_EXACT_ROWS_EXIST",
+      "duplicate_exact_row_id": true,
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_DUPLICATE_ROW_IDS",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_UNKNOWN_ROW_FAMILY_SOURCE_FILE",
+      "create_unknown_source_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/999_unknown.source.jsonl",
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_UNKNOWN_SOURCE_FILES",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_NONDETERMINISTIC_SOURCE_ORDER",
+      "set_source_file_canonical_order": 99,
+      "expected_block_reason": "ATOMICROWS_BUNDLE_BUILD_BLOCKED_NONDETERMINISTIC_ORDERING",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_ATOMICROWS_BUNDLE_SHA256",
+      "create_forbidden_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+      "expected_block_reason": "BUNDLE_SHA256_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_PR101_FINAL_READINESS",
+      "create_forbidden_path": "docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json",
+      "expected_block_reason": "FINAL_READINESS_CREATION_FORBIDDEN",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    },
+    {
+      "case_id": "BLOCK_RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_QUANTUM_EFFECT",
+      "force_forbidden_runtime_effect": true,
+      "expected_block_reason": "FORBIDDEN_RUNTIME_LIVE_ORDER_SOURCE_CONNECTOR_PROFIT_QUANTUM_EFFECT",
+      "expected_schema_valid": false,
+      "synthetic_case_only": true
+    }
+  ],
+  "fixture_id": "SYNTHETIC_ATOMICROWS_BUNDLE_BUILDER_DETERMINISTIC_ASSEMBLY_GATE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "source_required_interpretation": "repository fixture/source-file convention only, not external source retrieval or accepted source evidence"
+}

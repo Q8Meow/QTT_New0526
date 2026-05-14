@@ -1,0 +1,179 @@
+builder_id: ATOMICROWS_DETERMINISTIC_BUNDLE_BUILDER_CONFIG
+builder_version: v1
+semantic_task_id: ROADMAP-ATOMICROWS-BUNDLE-BUILDER
+roadmap_pr_label: PR_99
+roadmap_delivery_label: PR #99
+authority_class: STATIC_ATOMICROWS_BUNDLE_BUILDER_FRAMEWORK_ONLY_NOT_BUNDLE_NOT_HASH_NOT_FREEZE_NOT_FINAL_READINESS_NOT_RUNTIME_AUTHORITY
+static_tooling_only_flag: true
+deterministic_builder_framework_created_flag: true
+bundle_materialization_attempted_flag: false
+bundle_materialization_allowed_flag: false
+bundle_file_created_flag: false
+bundle_jsonl_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+bundle_sha_created_flag: false
+bundle_sha_path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+sha_authority_created_flag: false
+freeze_authority_created_flag: false
+final_readiness_created_flag: false
+consumes_pr97_expansion_plan_flag: true
+consumes_pr98_source_files_flag: true
+consumes_pr97_expansion_plan_path: docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml
+consumes_pr97_expansion_plan_report_path: docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json
+consumes_pr98_source_file_set_path: docs/master_plan/atomicrows/AtomicRowsBundleRowFamilySourceFiles.yaml
+consumes_pr98_source_file_report_path: docs/master_plan/generated/AtomicRowsBundleRowFamilySourceFiles.report.json
+deterministic_ordering_required_flag: true
+exact_source_rows_required_flag: true
+source_blueprints_do_not_materialize_final_rows_flag: true
+source_file_count_expected: 15
+source_file_count_found: 15
+exact_source_rows_found_count: 0
+source_blueprints_found_count: 15
+blueprint_materialization_allowed_flag: false
+target_total_row_count: 4183
+target_total_row_count_authority: MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER
+target_total_row_count_planning_authority_only_flag: true
+owner_approval_required_before_bundle_materialization_flag: true
+owner_approval_status: OWNER_REVIEW_REQUIRED_BEFORE_ROW_MATERIALIZATION_AND_BUNDLE_BUILD
+build_path_decision: PATH_B_BUILDER_FRAMEWORK_AND_BLOCKED_ASSEMBLY_GATE
+blocked_reason_codes:
+  - ATOMICROWS_BUNDLE_BUILD_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED
+  - ATOMICROWS_BUNDLE_BUILD_BLOCKED_SOURCE_BLUEPRINTS_ONLY
+  - ATOMICROWS_BUNDLE_BUILD_BLOCKED_OWNER_APPROVAL_REQUIRED
+  - ATOMICROWS_BUNDLE_BUILD_BLOCKED_TARGET_TOTAL_ROW_COUNT_NOT_FEASIBLE
+required_builder_concepts:
+  - ATOMICROWS_DETERMINISTIC_BUNDLE_BUILDER_CONFIG
+  - ATOMICROWS_ROW_FAMILY_SOURCE_FILE_CONSUMER_CONTRACT
+  - ATOMICROWS_BUNDLE_ASSEMBLY_GATE
+  - ATOMICROWS_BUNDLE_BUILDER_DRY_RUN_REPORT
+  - ATOMICROWS_BUNDLE_JSONL_OUTPUT_CONTRACT
+  - ATOMICROWS_BUNDLE_BUILDER_FORBIDDEN_ARTIFACT_BOUNDARY
+  - ATOMICROWS_BUNDLE_BUILDER_QUANTUM_METADATA_VALIDATION
+source_file_consumer_contract:
+  contract_id: ATOMICROWS_ROW_FAMILY_SOURCE_FILE_CONSUMER_CONTRACT
+  contract_version: v1
+  expected_pr98_source_file_count: 15
+  all_expected_pr98_source_files_present_flag: true
+  unknown_row_family_source_files_allowed_flag: false
+  duplicate_source_file_ids_allowed_flag: false
+  duplicate_row_family_ownership_allowed_flag: false
+  unstable_ordering_allowed_flag: false
+  source_required_is_repository_source_convention_only_flag: true
+  source_blueprints_remain_blueprints_flag: true
+  exact_source_rows_required_for_actual_bundle_output_flag: true
+assembly_gate:
+  gate_id: ATOMICROWS_BUNDLE_ASSEMBLY_GATE
+  gate_version: v1
+  canonical_order: SOURCE_FILE_CANONICAL_ORDER_THEN_ROW_CANONICAL_ORDER
+  build_allowed_flag: false
+  build_blocked_flag: true
+  build_block_reason_codes:
+    - ATOMICROWS_BUNDLE_BUILD_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED
+    - ATOMICROWS_BUNDLE_BUILD_BLOCKED_SOURCE_BLUEPRINTS_ONLY
+    - ATOMICROWS_BUNDLE_BUILD_BLOCKED_OWNER_APPROVAL_REQUIRED
+    - ATOMICROWS_BUNDLE_BUILD_BLOCKED_TARGET_TOTAL_ROW_COUNT_NOT_FEASIBLE
+  exact_source_rows_available_flag: false
+  blueprint_only_sources_detected_flag: true
+  source_file_coverage_complete_flag: true
+  duplicate_source_file_ids_found_flag: false
+  duplicate_row_family_ownership_found_flag: false
+  duplicate_row_ids_found_flag: false
+  deterministic_ordering_verified_flag: true
+  no_fabrication_verified_flag: true
+  no_bundle_sha_created_flag: true
+  no_freeze_authority_created_flag: true
+  no_final_readiness_created_flag: true
+  no_runtime_live_order_authority_created_flag: true
+  no_source_acceptance_created_flag: true
+  no_connector_semantic_created_flag: true
+  no_profit_or_latency_evidence_created_flag: true
+  no_quantum_backend_execution_created_flag: true
+dry_run_report_contract:
+  report_id: ATOMICROWS_BUNDLE_BUILDER_DRY_RUN_REPORT
+  report_version: v1
+  build_allowed_flag: false
+  bundle_file_created_flag: false
+  bundle_sha_created_flag: false
+  exact_source_rows_available_flag: false
+  blueprint_only_source_files_detected_flag: true
+  source_file_count: 15
+  source_blueprint_count: 15
+  exact_source_row_count: 0
+  target_total_row_count: 4183
+  deterministic_order_hash_or_digest_authority: NOT_USED_NO_HASH_NO_SHA_FREEZE_AUTHORITY
+  future_pr100_sha_freeze_required_flag: true
+  future_pr101_final_readiness_required_flag: true
+output_contract:
+  contract_id: ATOMICROWS_BUNDLE_JSONL_OUTPUT_CONTRACT
+  canonical_output_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  output_creation_allowed_only_if_assembly_gate_passes_flag: true
+  current_output_creation_allowed_flag: false
+  jsonl_line_ordering: SOURCE_FILE_CANONICAL_ORDER_THEN_ROW_CANONICAL_ORDER
+  row_id_ordering: DETERMINISTIC_ASCENDING_WITHIN_SOURCE_FILE
+  per_row_schema_validation_required_flag: true
+  duplicate_id_blocking_flag: true
+  source_row_blueprint_materialization_allowed_flag: false
+  bundle_sha_creation_allowed_flag: false
+  final_readiness_claim_allowed_flag: false
+forbidden_artifact_boundary:
+  boundary_id: ATOMICROWS_BUNDLE_BUILDER_FORBIDDEN_ARTIFACT_BOUNDARY
+  block_atomicrows_bundle_jsonl_unless_path_a_authorized_and_gate_passes_flag: true
+  block_atomicrows_bundle_sha256_flag: true
+  block_hash_files_flag: true
+  block_sha_authority_flag: true
+  block_freeze_authority_flag: true
+  block_pr100_sha_freeze_artifacts_flag: true
+  block_pr101_final_readiness_artifacts_flag: true
+  block_runtime_live_order_source_connector_profit_quantum_backend_artifacts_flag: true
+quantum_metadata_validation:
+  validation_id: ATOMICROWS_BUNDLE_BUILDER_QUANTUM_METADATA_VALIDATION
+  static_metadata_only_flag: true
+  quantum_advisory_metadata_validation_flag: true
+  qubo_ising_metadata_remains_metadata_flag: true
+  qaoa_vqe_annealing_metadata_remains_metadata_flag: true
+  quantum_portfolio_hybrid_metadata_remains_metadata_flag: true
+  no_quantum_execution_fields_true_flag: true
+  no_quantum_advantage_claim_flag: true
+  forbidden_quantum_execution_effects:
+    - QAOA_EXECUTION
+    - VQE_EXECUTION
+    - ANNEALING_EXECUTION
+    - QUBO_SOLVING
+    - ISING_SOLVING
+    - QUANTUM_INSPIRED_OPTIMIZER_EXECUTION
+    - TRUE_QUANTUM_BACKEND_EXECUTION
+    - QUANTUM_SIMULATOR_EXECUTION
+    - QUANTUM_PROVIDER_CALL
+    - QUANTUM_ADVANTAGE_VALIDATION
+    - QUANTUM_DIRECT_ORDER_AUTHORITY
+future_pr100_sha_freeze_required_flag: true
+future_pr101_final_readiness_required_flag: true
+blocked_effects:
+  - ATOMICROWS_BUNDLE_SHA256
+  - SHA_AUTHORITY
+  - FREEZE_AUTHORITY
+  - PR100_SHA_FREEZE_AUTHORITY
+  - PR101_FINAL_READINESS_GATE
+  - RUNTIME_DASHBOARD_SERVICE
+  - DASHBOARD_RUNTIME_UI
+  - TELEGRAM_RUNTIME
+  - OWNER_APPROVAL_DECISION_EXECUTION
+  - OWNER_APPROVAL_RECEIPT
+  - OWNER_OVERRIDE_RECEIPT
+  - LIVE_PROMOTION
+  - CANARY_ELIGIBILITY
+  - ORDER_AUTHORITY
+  - ORDER_SUBMISSION_CANCELLATION_REDUCTION_OR_CLOSE
+  - LIVE_ROUTING
+  - EXTERNAL_SOURCE_RETRIEVAL
+  - SOURCE_ACCEPTANCE
+  - ACCEPTED_SOURCE_PACKETS
+  - CONNECTOR_SEMANTIC_BINDING
+  - PRIVATE_STATE_FETCH
+  - RUNTIME_CASH_RECEIPT
+  - REPLAY_PAPER_EXECUTION
+  - OPTIMIZER_EXECUTION
+  - QUANTUM_BACKEND_OR_SIMULATOR_EXECUTION
+  - PROFIT_EVIDENCE
+  - LATENCY_EVIDENCE
+  - QUANTUM_ADVANTAGE_EVIDENCE
+future_consumer_notes: PR99 creates only the deterministic builder framework and blocked assembly gate because PR98 contains owner-review-required blueprints and zero exact source rows. Bundle JSONL, SHA/freeze, final readiness, runtime, live trading, profit, latency, and quantum advantage authority remain absent.

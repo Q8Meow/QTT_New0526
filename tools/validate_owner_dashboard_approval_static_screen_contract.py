@@ -463,6 +463,8 @@ PR97_ALWAYS_FORBIDDEN_PATHS = (
     pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"),
     pathlib.Path("schemas/governance/atomicrows_full_bundle_row_expansion_plan.schema.json"),
     pathlib.Path("docs/master_plan/atomic_rows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
+)
+PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
     pathlib.Path("tools/build_atomicrows_bundle.py"),
 )
 FORBIDDEN_RUNTIME_PATHS = (
@@ -603,6 +605,13 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     if not match:
         return False
     return int(match.group("number")) > 96
+
+
+def _pr99_static_builder_branch_allowed(branch: str) -> bool:
+    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    if not match:
+        return False
+    return int(match.group("number")) >= 99
 
 
 def _should_skip_default_report_write(
@@ -1138,8 +1147,12 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     branch_context = _current_branch_context(repo_root)
     downstream_pr97_or_later = _downstream_validation_branch_allowed(branch_context.branch)
+    pr99_static_builder_allowed = _pr99_static_builder_branch_allowed(branch_context.branch)
     for path in PR97_ALWAYS_FORBIDDEN_PATHS:
         if _resolve(repo_root, path).exists():
+            failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
+    for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
+        if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:
             failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
     if not downstream_pr97_or_later:
         for path in PR97_STATIC_PLAN_PATHS:

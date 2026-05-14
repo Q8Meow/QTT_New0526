@@ -10,7 +10,28 @@ from tools import validate_atomicrows_bundle_row_family_source_files as validato
 
 
 ROOT = Path(".")
+PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
+PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
 _REPORT_CACHE: dict | None = None
+
+
+def _clear_branch_context_env(monkeypatch) -> None:
+    for env_name in ("GITHUB_ACTIONS", *validator.BRANCH_CONTEXT_ENV_CANDIDATES):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_branch(monkeypatch, branch: str, *, detached: bool = False) -> None:
+    original_git_stdout = validator._git_stdout
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "" if detached else branch, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD" if detached else branch, ""
+        return original_git_stdout(repo_root, args)
+
+    monkeypatch.setattr(validator, "_git_stdout", fake_git_stdout)
 
 
 def _schema() -> dict:
@@ -78,9 +99,15 @@ def test_production_source_file_set_validates_and_report_is_deterministic(capsys
         output_path=validator.DEFAULT_REPORT,
     )
     report_text = (ROOT / validator.DEFAULT_REPORT).read_text(encoding="utf-8")
+    branch_context = validator._current_branch_context(ROOT)
+    downstream_pr99_or_later = validator._downstream_validation_branch_allowed(
+        branch_context.branch
+    )
 
     assert first.failures == second.failures == ()
-    assert first.report == second.report == json.loads(report_text)
+    assert first.report == second.report
+    if not downstream_pr99_or_later:
+        assert first.report == json.loads(report_text)
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
     assert json.loads(report_text)["validation_marker"] == validator.SUCCESS_MARKER
     assert validator.main([]) == 0
@@ -368,7 +395,6 @@ def test_fabricated_exact_counts_fail_closed():
     [
         (validator.CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
         (validator.CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
-        (Path("tools") / "build_atomicrows_bundle.py", "forbidden bundle builder artifact exists"),
         (
             Path("docs")
             / "master_plan"
@@ -395,6 +421,49 @@ def test_forbidden_bundle_hash_builder_freeze_and_final_readiness_artifacts_fail
     )
 
     _assert_failure_contains(failures, fragment)
+
+
+def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(monkeypatch):
+    builder_path = Path("tools") / "build_atomicrows_bundle.py"
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR98_BRANCH)
+
+    failures = validator.validate_no_forbidden_artifacts(
+        ROOT,
+        extra_existing_paths=(builder_path,),
+    )
+
+    _assert_failure_contains(failures, "forbidden bundle builder artifact exists")
+
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR99_BRANCH)
+
+    assert (
+        validator.validate_no_forbidden_artifacts(
+            ROOT,
+            extra_existing_paths=(builder_path,),
+        )
+        == []
+    )
+
+
+def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_context(
+    monkeypatch,
+):
+    builder_path = Path("tools") / "build_atomicrows_bundle.py"
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR99_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "99/merge")
+    _mock_git_branch(monkeypatch, PR99_BRANCH, detached=True)
+
+    assert (
+        validator.validate_no_forbidden_artifacts(
+            ROOT,
+            extra_existing_paths=(builder_path,),
+        )
+        == []
+    )
 
 
 def test_runtime_live_order_source_connector_profit_effects_fail_closed():
