@@ -6,7 +6,37 @@ from tools import validate_owner_dashboard_approval_menu_schema as gate
 
 
 REPO_ROOT = Path(".")
+PR96_BRANCH = "pr96-owner-dashboard-approval-static-screen-contract"
 _REPORT_CACHE: dict | None = None
+
+
+def _clear_branch_context_env(monkeypatch) -> None:
+    for env_name in ("GITHUB_ACTIONS", *gate.BRANCH_CONTEXT_ENV_CANDIDATES):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_branch(monkeypatch, branch: str, *, detached: bool = False) -> None:
+    original_git_stdout = gate._git_stdout
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "" if detached else branch, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD" if detached else branch, ""
+        return original_git_stdout(repo_root, args)
+
+    monkeypatch.setattr(gate, "_git_stdout", fake_git_stdout)
+
+
+def _write_file(root: Path, relative_path: Path) -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("static artifact\n", encoding="utf-8")
+
+
+def _forbidden_artifact_failure(relative_path: Path) -> str:
+    return f"PR95 must not create forbidden later/runtime artifact: {relative_path.as_posix()}"
 
 
 def _report() -> dict:
@@ -203,27 +233,17 @@ def test_scope_options_have_explicit_allowed_target_scope_classes_and_no_mutatio
 def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authority():
     report = _report()
 
-    branch_rc, branch, _ = gate._git_stdout(REPO_ROOT, ["branch", "--show-current"])
-    downstream_pr96_or_later = (
-        branch_rc == 0 and gate._downstream_validation_branch_allowed(branch)
-    )
-    pr96_static_paths = [
-        "schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json",
-        "docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml",
-        "docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json",
-        "tools/validate_owner_dashboard_approval_static_screen_contract.py",
-    ]
+    branch_context = gate._current_branch_context(REPO_ROOT)
+    downstream_pr96_or_later = gate._downstream_validation_branch_allowed(branch_context.branch)
     runtime_or_forbidden_paths = [
-        "src/qtt/dashboard_runtime",
-        "src/qtt/telegram_runtime",
-        "src/qtt/owner_dashboard_runtime",
-        gate.CANONICAL_BUNDLE_JSONL.as_posix(),
-        gate.CANONICAL_BUNDLE_SHA256.as_posix(),
+        *gate.FORBIDDEN_RUNTIME_PATHS,
+        gate.CANONICAL_BUNDLE_JSONL,
+        gate.CANONICAL_BUNDLE_SHA256,
     ]
     for path in runtime_or_forbidden_paths:
         assert not (REPO_ROOT / path).exists(), path
     if not downstream_pr96_or_later:
-        for path in pr96_static_paths:
+        for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
             assert not (REPO_ROOT / path).exists(), path
 
     assert report["creates_pr96_static_screen_contract"] is False
@@ -235,6 +255,80 @@ def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authori
     assert report["creates_owner_override_receipt"] is False
     assert report["atomicrows_bundle_jsonl_exists"] is False
     assert report["atomicrows_bundle_sha256_exists"] is False
+
+
+def test_pr96_static_files_allowed_on_local_pr96_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR96_BRANCH)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr96_static_files_allowed_in_github_actions_detached_head_context(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR96_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "97/merge")
+    _mock_git_branch(monkeypatch, PR96_BRANCH, detached=True)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr96_static_files_blocked_on_non_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, gate.TARGET_BRANCH)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        assert _forbidden_artifact_failure(path) in failures
+
+
+def test_runtime_paths_remain_blocked_on_pr96_downstream_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR96_BRANCH)
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        assert _forbidden_artifact_failure(path) in failures
+    for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
+        assert _forbidden_artifact_failure(path) not in failures
+
+
+def test_atomicrows_bundle_and_hash_remain_blocked_on_pr96_downstream_branch(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR96_BRANCH)
+    _write_file(tmp_path, gate.CANONICAL_BUNDLE_JSONL)
+    _write_file(tmp_path, gate.CANONICAL_BUNDLE_SHA256)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert (
+        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE: "
+        f"{gate.CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
+    ) in failures
+    assert (
+        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
+        f"{gate.CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
+    ) in failures
 
 
 def test_pr95_creates_no_source_connector_runtime_cash_replay_paper_optimizer_profit_or_claims():
