@@ -7,6 +7,7 @@ from tools import validate_owner_dashboard_approval_static_screen_contract as ga
 
 REPO_ROOT = Path(".")
 PR97_BRANCH = "pr97-atomicrows-full-bundle-row-expansion-plan"
+PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
 _REPORT_CACHE: dict | None = None
 
 
@@ -327,6 +328,40 @@ def test_atomicrows_bundle_hash_builder_and_runtime_remain_blocked_on_pr97_branc
         assert _pr96_forbidden_failure(path) in failures
     for path in gate.FORBIDDEN_RUNTIME_PATHS:
         assert _runtime_forbidden_failure(path) in failures
+
+
+def test_pr99_static_bundle_builder_allowed_only_on_pr99_or_later_branch(
+    tmp_path,
+    monkeypatch,
+):
+    builder_path = gate.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR97_BRANCH)
+    _write_file(tmp_path, builder_path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert _pr96_forbidden_failure(builder_path) in failures
+
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR99_BRANCH)
+
+    assert gate.validate_filesystem_boundaries(tmp_path) == []
+
+
+def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_context(
+    tmp_path,
+    monkeypatch,
+):
+    builder_path = gate.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR99_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "99/merge")
+    _mock_git_branch(monkeypatch, PR99_BRANCH, detached=True)
+    _write_file(tmp_path, builder_path)
+
+    assert gate.validate_filesystem_boundaries(tmp_path) == []
 
 
 def test_missing_required_screen_fails_closed(tmp_path):

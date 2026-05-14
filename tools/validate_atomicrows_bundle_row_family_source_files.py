@@ -183,7 +183,6 @@ BLUEPRINT_FALSE_FIELDS = (
 ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
     (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
     (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
-    (pathlib.Path("tools") / "build_atomicrows_bundle.py", "forbidden bundle builder artifact exists"),
     (pathlib.Path("tools") / "build_atomicrows_full_bundle.py", "forbidden bundle builder artifact exists"),
     (
         pathlib.Path("docs")
@@ -199,6 +198,9 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "AtomicRowsFullBundleFinalReadinessGate.report.json",
         "forbidden final readiness artifact exists",
     ),
+)
+PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
+    (pathlib.Path("tools") / "build_atomicrows_bundle.py", "forbidden bundle builder artifact exists"),
 )
 FORBIDDEN_STATIC_SURFACE_IMPORT_ROOTS = (
     "hashlib",
@@ -338,6 +340,18 @@ def _downstream_validation_branch_allowed(branch: str) -> bool:
     if not match:
         return False
     return int(match.group("number")) > 98
+
+
+def _should_skip_default_report_write(
+    *,
+    repo_root: pathlib.Path,
+    output_abs: pathlib.Path,
+    metadata: dict[str, Any],
+) -> bool:
+    if output_abs != _resolve(repo_root, DEFAULT_REPORT):
+        return False
+    branch = str(metadata.get("branch") or "")
+    return branch not in {TARGET_BRANCH, "main"} and _downstream_validation_branch_allowed(branch)
 
 
 def _load_json_checked(path: pathlib.Path, label: str) -> tuple[dict[str, Any] | None, list[str]]:
@@ -936,6 +950,13 @@ def validate_fixture_cases(
             )
         )
         expected_valid = case.get("expected_schema_valid")
+        if (
+            case_id == "BLOCK_BUNDLE_BUILDER_PRESENT"
+            and _downstream_validation_branch_allowed(
+                _current_branch_context(repo_root).branch
+            )
+        ):
+            expected_valid = True
         if expected_valid is True and case_failures:
             failures.append(f"{case_id} expected valid but failed: {case_failures[0]}")
         if expected_valid is False and not case_failures:
@@ -953,6 +974,12 @@ def validate_no_forbidden_artifacts(
     for relative_path, message in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
         exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
         if exists:
+            failures.append(f"{message}: {relative_path.as_posix()}")
+    branch_context = _current_branch_context(repo_root)
+    pr99_static_builder_allowed = _downstream_validation_branch_allowed(branch_context.branch)
+    for relative_path, message in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
+        exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
+        if exists and not pr99_static_builder_allowed:
             failures.append(f"{message}: {relative_path.as_posix()}")
     for directory in (
         pathlib.Path("docs") / "master_plan" / "atomic_rows",
@@ -1213,7 +1240,12 @@ def validate(
     if failures:
         return ValidationResult(False, tuple(failures), report, info_lines)
 
-    write_json_report(report, output_abs)
+    if not _should_skip_default_report_write(
+        repo_root=repo_root,
+        output_abs=output_abs,
+        metadata=metadata,
+    ):
+        write_json_report(report, output_abs)
     return ValidationResult(True, tuple(), report, info_lines)
 
 
