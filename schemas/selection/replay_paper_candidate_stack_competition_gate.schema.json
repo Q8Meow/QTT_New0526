@@ -1,0 +1,330 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-replay-paper-candidate-stack-competition-gate",
+  "title": "QTT Replay/Paper Candidate Stack Competition Gate",
+  "description": "Static deterministic PR #90 replay/paper candidate stack competition packet contract. This schema permits fixture-only competition preparation from the PR #89 selected parameter-stack handoff packet and Stage-1 replay/paper lane contracts. It forbids replay execution, paper execution, replay/paper result packets, dual-result review, owner live-promotion review, executable order intent, order authority, live routing, connector binding, source retrieval or acceptance, runtime cash/private-state receipts, optimizer execution, quantum backend/simulator execution, owner approval, live promotion, profit evidence, advantage claims, and AtomicRows bundle/hash creation.",
+  "type": "object",
+  "required": [
+    "competition_gate_registry_id",
+    "replay_paper_candidate_stack_competition_packet_contract_id",
+    "semantic_task_id",
+    "roadmap_pr_label",
+    "github_pr_number_policy",
+    "gate_scope",
+    "policy_version",
+    "static_only_flag",
+    "metadata_only_flag",
+    "synthetic_fixture_only_flag",
+    "competition_contract_only_flag",
+    "competition_scope",
+    "competition_authority_class",
+    "upstream_selected_stack_handoff_packet_ref",
+    "stage1_runtime_resolver_to_replay_paper_handoff_ref",
+    "stage1_concurrent_replay_paper_contract_ref",
+    "stage1_dual_result_review_contract_ref",
+    "upstream_dependencies",
+    "future_consumers",
+    "required_stack_roles",
+    "competition_inputs",
+    "competition_outputs",
+    "competition_policy",
+    "blocked_competition_policy",
+    "master_plan_principles_consumed",
+    "reason_codes",
+    "required_no_authority_flags",
+    "stage1_prediction_market_contexts",
+    "final_ready"
+  ],
+  "properties": {
+    "competition_gate_registry_id": {
+      "const": "QTT_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_GATE"
+    },
+    "replay_paper_candidate_stack_competition_packet_contract_id": {
+      "const": "QTT_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_GATE_V1"
+    },
+    "semantic_task_id": {
+      "const": "ROADMAP-REPLAY-PAPER-CANDIDATE-STACK-COMPETITION-GATE"
+    },
+    "roadmap_pr_label": { "const": "PR #90" },
+    "github_pr_number_policy": { "const": "may differ" },
+    "gate_scope": {
+      "const": "STATIC_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_GATE_ONLY"
+    },
+    "policy_version": { "const": "v1" },
+    "static_only_flag": { "const": true },
+    "metadata_only_flag": { "const": true },
+    "synthetic_fixture_only_flag": { "const": true },
+    "competition_contract_only_flag": { "const": true },
+    "competition_scope": { "const": "STATIC_ONLY" },
+    "competition_authority_class": {
+      "const": "STATIC_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_NOT_REPLAY_EXECUTION_NOT_PAPER_EXECUTION_NOT_RESULTS_NOT_LIVE_AUTHORITY"
+    },
+    "upstream_selected_stack_handoff_packet_ref": { "$ref": "#/$defs/source_ref" },
+    "stage1_runtime_resolver_to_replay_paper_handoff_ref": { "$ref": "#/$defs/source_ref" },
+    "stage1_concurrent_replay_paper_contract_ref": { "$ref": "#/$defs/source_ref" },
+    "stage1_dual_result_review_contract_ref": { "$ref": "#/$defs/source_ref" },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "future_consumers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_consumer" }
+    },
+    "required_stack_roles": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "SIGNAL",
+          "SCORING",
+          "NORMALIZATION",
+          "RISK",
+          "EXECUTION",
+          "CAPITAL",
+          "LATENCY",
+          "ERROR_GUARD",
+          "QUANTUM_ADVISORY"
+        ]
+      }
+    },
+    "competition_inputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "competition_outputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "competition_policy": {
+      "type": "object",
+      "required": [
+        "competition_policy_id",
+        "competition_contract_version",
+        "stable_sort_required",
+        "random_identity_allowed",
+        "wall_clock_identity_allowed",
+        "selected_handoff_item_count_for_valid_fixture",
+        "eligible_competition_entry_count_for_valid_fixture",
+        "replay_lane_required_for_eligible_entry",
+        "paper_lane_required_for_eligible_entry",
+        "shared_input_lock_identity_required",
+        "replay_and_paper_lanes_must_be_separate",
+        "result_boundary_refs_only",
+        "pr91_dual_result_review_required",
+        "pr91_dual_result_review_created",
+        "pr92_owner_live_promotion_review_required",
+        "pr92_owner_live_promotion_review_created",
+        "order_intent_surface_authority",
+        "order_submission_allowed",
+        "live_routing_allowed",
+        "connector_binding_allowed",
+        "quantum_candidates_require_classical_comparator_or_fallback",
+        "deterministic_competition_chain"
+      ],
+      "properties": {
+        "competition_policy_id": {
+          "const": "REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_POLICY_V1"
+        },
+        "competition_contract_version": { "const": "v1" },
+        "stable_sort_required": { "const": true },
+        "random_identity_allowed": { "const": false },
+        "wall_clock_identity_allowed": { "const": false },
+        "selected_handoff_item_count_for_valid_fixture": { "const": 1 },
+        "eligible_competition_entry_count_for_valid_fixture": { "const": 1 },
+        "replay_lane_required_for_eligible_entry": { "const": true },
+        "paper_lane_required_for_eligible_entry": { "const": true },
+        "shared_input_lock_identity_required": { "const": true },
+        "replay_and_paper_lanes_must_be_separate": { "const": true },
+        "result_boundary_refs_only": { "const": true },
+        "pr91_dual_result_review_required": { "const": true },
+        "pr91_dual_result_review_created": { "const": false },
+        "pr92_owner_live_promotion_review_required": { "const": true },
+        "pr92_owner_live_promotion_review_created": { "const": false },
+        "order_intent_surface_authority": {
+          "const": "NON_AUTHORITATIVE_STATIC_PREVIEW_ONLY"
+        },
+        "order_submission_allowed": { "const": false },
+        "live_routing_allowed": { "const": false },
+        "connector_binding_allowed": { "const": false },
+        "quantum_candidates_require_classical_comparator_or_fallback": {
+          "const": true
+        },
+        "deterministic_competition_chain": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "blocked_competition_policy": {
+      "type": "object",
+      "required": [
+        "blocked_competition_policy_id",
+        "blocked_or_rejected_entries_remain_traceable",
+        "blocked_entries_enter_active_competition_status",
+        "blocked_entries_retain_reason_codes",
+        "blocked_reason_code_order"
+      ],
+      "properties": {
+        "blocked_competition_policy_id": {
+          "const": "REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_BLOCKED_POLICY_V1"
+        },
+        "blocked_or_rejected_entries_remain_traceable": { "const": true },
+        "blocked_entries_enter_active_competition_status": { "const": false },
+        "blocked_entries_retain_reason_codes": { "const": true },
+        "blocked_reason_code_order": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "master_plan_principles_consumed": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/master_plan_principle" }
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "required_no_authority_flags": { "$ref": "#/$defs/no_authority_flags" },
+    "stage1_prediction_market_contexts": {
+      "type": "array",
+      "items": { "enum": ["KALSHI", "POLYMARKET", "FORECASTEX_IBKR"] }
+    },
+    "final_ready": { "const": false }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "required": [
+        "artifact_id",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "schema_path": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" },
+        "packet_schema_id": { "type": "string" },
+        "contract_id": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "required": [
+        "artifact_id",
+        "delivery_label",
+        "title",
+        "registry_path",
+        "report_path",
+        "validator_path",
+        "validation_marker"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "registry_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "validator_path": { "type": "string" },
+        "validation_marker": { "type": "string" }
+      }
+    },
+    "future_consumer": {
+      "type": "object",
+      "required": [
+        "consumer_id",
+        "delivery_label",
+        "title",
+        "consumer_scope",
+        "pr90_creates_consumer_execution"
+      ],
+      "properties": {
+        "consumer_id": { "type": "string" },
+        "delivery_label": { "type": "string" },
+        "title": { "type": "string" },
+        "consumer_scope": { "type": "string" },
+        "pr90_creates_consumer_execution": { "const": false }
+      }
+    },
+    "master_plan_principle": {
+      "type": "object",
+      "required": ["principle_id", "master_plan_locator", "principle_text"],
+      "properties": {
+        "principle_id": { "type": "string" },
+        "master_plan_locator": { "type": "string" },
+        "principle_text": { "type": "string" }
+      }
+    },
+    "no_authority_flags": {
+      "type": "object",
+      "required": [
+        "order_intent_authority_created",
+        "order_submission_allowed_flag",
+        "live_routing_allowed_flag",
+        "connector_binding_allowed_flag",
+        "source_retrieval_created_flag",
+        "source_acceptance_created_flag",
+        "connector_semantic_binding_created_flag",
+        "runtime_cash_receipt_created_flag",
+        "replay_execution_created_flag",
+        "paper_execution_created_flag",
+        "replay_result_packet_created_flag",
+        "paper_result_packet_created_flag",
+        "dual_result_review_created_flag",
+        "owner_live_promotion_review_created_flag",
+        "classical_optimizer_execution_created_flag",
+        "quantum_optimizer_execution_created_flag",
+        "optimizer_execution_created_flag",
+        "quantum_backend_execution_created_flag",
+        "quantum_simulator_execution_created_flag",
+        "owner_approval_created_flag",
+        "live_trade_authority_created_flag",
+        "live_promotion_created_flag",
+        "profit_evidence_created_flag",
+        "quantum_advantage_claim_created_flag",
+        "latency_superiority_claim_created_flag",
+        "execution_superiority_claim_created_flag",
+        "random_identity_used",
+        "wall_clock_identity_used",
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created"
+      ],
+      "properties": {
+        "order_intent_authority_created": { "const": false },
+        "order_submission_allowed_flag": { "const": false },
+        "live_routing_allowed_flag": { "const": false },
+        "connector_binding_allowed_flag": { "const": false },
+        "source_retrieval_created_flag": { "const": false },
+        "source_acceptance_created_flag": { "const": false },
+        "connector_semantic_binding_created_flag": { "const": false },
+        "runtime_cash_receipt_created_flag": { "const": false },
+        "replay_execution_created_flag": { "const": false },
+        "paper_execution_created_flag": { "const": false },
+        "replay_result_packet_created_flag": { "const": false },
+        "paper_result_packet_created_flag": { "const": false },
+        "dual_result_review_created_flag": { "const": false },
+        "owner_live_promotion_review_created_flag": { "const": false },
+        "classical_optimizer_execution_created_flag": { "const": false },
+        "quantum_optimizer_execution_created_flag": { "const": false },
+        "optimizer_execution_created_flag": { "const": false },
+        "quantum_backend_execution_created_flag": { "const": false },
+        "quantum_simulator_execution_created_flag": { "const": false },
+        "owner_approval_created_flag": { "const": false },
+        "live_trade_authority_created_flag": { "const": false },
+        "live_promotion_created_flag": { "const": false },
+        "profit_evidence_created_flag": { "const": false },
+        "quantum_advantage_claim_created_flag": { "const": false },
+        "latency_superiority_claim_created_flag": { "const": false },
+        "execution_superiority_claim_created_flag": { "const": false },
+        "random_identity_used": { "const": false },
+        "wall_clock_identity_used": { "const": false },
+        "atomicrows_bundle_jsonl_created": { "const": false },
+        "atomicrows_bundle_sha256_created": { "const": false }
+      }
+    }
+  }
+}

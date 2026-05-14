@@ -54,6 +54,9 @@ from tools import (
 from tools import (
     validate_selected_parameter_stack_handoff_packet as selected_stack_handoff_gate,
 )
+from tools import (
+    validate_replay_paper_candidate_stack_competition_gate as replay_paper_competition_gate,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -667,6 +670,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_selected_parameter_stack_handoff_packet.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_replay_paper_candidate_stack_competition_gate.py"
             ),
         ],
         [
@@ -1586,6 +1596,13 @@ def test_runner_exposes_selected_parameter_stack_handoff_packet_success_marker()
     )
 
 
+def test_runner_exposes_replay_paper_candidate_stack_competition_gate_success_marker():
+    assert (
+        replay_paper_competition_gate.SUCCESS_MARKER
+        == "QTT_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION_GATE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2315,7 +2332,7 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_and_pr89_gates_after_pr79(
+def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_and_pr90_gates_after_pr79(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -2375,6 +2392,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_and_pr89_g
     pr89_index = command_names.index(
         "validate_selected_parameter_stack_handoff_packet.py"
     )
+    pr90_index = command_names.index(
+        "validate_replay_paper_candidate_stack_competition_gate.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2400,6 +2420,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_and_pr89_g
         < pr87_index
         < pr88_index
         < pr89_index
+        < pr90_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2451,6 +2472,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_and_pr89_g
     assert commands[pr89_index] == [
         python_executable,
         str(Path("tools") / "validate_selected_parameter_stack_handoff_packet.py"),
+    ]
+    assert commands[pr90_index] == [
+        python_executable,
+        str(Path("tools") / "validate_replay_paper_candidate_stack_competition_gate.py"),
     ]
 
 
@@ -2749,6 +2774,45 @@ def test_runner_does_not_emit_success_marker_if_selected_stack_handoff_gate_fail
 
     assert exit_code == 63
     assert seen == commands[:11]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_does_not_emit_success_marker_if_replay_paper_competition_gate_fails(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_atomicrows_parameter_selection_universe_registry.py"],
+        ["python", "validate_atomicrows_parameter_selection_universe_consumer_gate.py"],
+        ["python", "validate_trade_context_selection_universe_routing_gate.py"],
+        ["python", "validate_quantum_applicability_classification_registry.py"],
+        ["python", "validate_owner_quantum_priority_policy_registry.py"],
+        ["python", "validate_parameter_algorithm_scoring_policy_registry.py"],
+        ["python", "validate_parameter_stack_scoring_and_ranking_gate.py"],
+        ["python", "validate_quantum_classical_optimizer_arbitration_gate.py"],
+        ["python", "validate_candidate_parameter_stack_generation_gate.py"],
+        ["python", "validate_trade_context_parameter_stack_selection_gate.py"],
+        ["python", "validate_selected_parameter_stack_handoff_packet.py"],
+        ["python", "validate_replay_paper_candidate_stack_competition_gate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 64
+    assert seen == commands[:12]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
@@ -3167,6 +3231,39 @@ def test_runner_pr89_selected_stack_handoff_packet_has_no_runtime_source_connect
     assert "optimizer-execution" not in pr89_text
     assert "atomicrows.bundle.jsonl" not in pr89_text
     assert "atomicrows.bundle.sha256" not in pr89_text
+
+
+def test_runner_pr90_replay_paper_competition_gate_has_no_runtime_source_connector_or_live_args(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr90_command = commands[
+        command_names.index("validate_replay_paper_candidate_stack_competition_gate.py")
+    ]
+
+    assert pr90_command == [
+        python_executable,
+        str(Path("tools") / "validate_replay_paper_candidate_stack_competition_gate.py"),
+    ]
+    pr90_text = " ".join(pr90_command).lower()
+    assert "source-retrieval" not in pr90_text
+    assert "source-acceptance" not in pr90_text
+    assert "connector-binding" not in pr90_text
+    assert "runtime-live" not in pr90_text
+    assert "live-use" not in pr90_text
+    assert "order-authority" not in pr90_text
+    assert "profit-evidence" not in pr90_text
+    assert "replay-execution" not in pr90_text
+    assert "paper-execution" not in pr90_text
+    assert "quantum-backend" not in pr90_text
+    assert "quantum-simulator" not in pr90_text
+    assert "optimizer-execution" not in pr90_text
+    assert "atomicrows.bundle.jsonl" not in pr90_text
+    assert "atomicrows.bundle.sha256" not in pr90_text
 
 
 def test_pr81_static_contract_preserves_route_only_boundaries():
