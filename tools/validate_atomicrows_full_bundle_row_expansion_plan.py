@@ -590,6 +590,8 @@ def _validations(plan: dict[str, Any]) -> list[dict[str, Any]]:
 
 def validate_row_family_split_plan(plan: dict[str, Any], repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
+    branch_context = _current_branch_context(repo_root)
+    pr98_source_files_allowed = _downstream_validation_branch_allowed(branch_context.branch)
     split = _mapping(plan.get("row_family_split_plan"))
     if split.get("stable_ordering_policy") != "CANONICAL_ORDER_ASCENDING":
         failures.append("row_family_split_plan.stable_ordering_policy must be canonical ascending")
@@ -625,7 +627,7 @@ def validate_row_family_split_plan(plan: dict[str, Any], repo_root: pathlib.Path
         planned_text = planned_path.as_posix()
         if not planned_text.startswith("docs/master_plan/atomic_rows/pr98_row_family_sources/"):
             failures.append(f"{label}.planned_downstream_source_file_path must stay in PR98 path intent directory")
-        if _resolve(repo_root, planned_path).exists():
+        if _resolve(repo_root, planned_path).exists() and not pr98_source_files_allowed:
             failures.append(f"{label}.planned_downstream_source_file_path exists but PR97 must not create it")
         if not _list_of_mappings([{"v": v} for v in family.get("required_validators", [])]):
             failures.append(f"{label}.required_validators must be non-empty")
@@ -820,8 +822,12 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any
     for path in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
+    branch_context = _current_branch_context(repo_root)
+    pr98_source_files_allowed = _downstream_validation_branch_allowed(branch_context.branch)
     for path in planned_pr98_source_paths(plan):
         if _resolve(repo_root, path).exists():
+            if pr98_source_files_allowed:
+                continue
             failures.append(f"PR98 row-family source file exists during PR97: {path.as_posix()}")
     return failures
 

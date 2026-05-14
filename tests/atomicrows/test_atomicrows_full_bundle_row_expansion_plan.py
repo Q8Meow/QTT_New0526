@@ -8,7 +8,33 @@ from tools import validate_atomicrows_full_bundle_row_expansion_plan as validato
 
 
 ROOT = Path(".")
+PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
 _REPORT_CACHE: dict | None = None
+
+
+def _clear_branch_context_env(monkeypatch) -> None:
+    for env_name in ("GITHUB_ACTIONS", *validator.BRANCH_CONTEXT_ENV_CANDIDATES):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_branch(monkeypatch, branch: str, *, detached: bool = False) -> None:
+    original_git_stdout = validator._git_stdout
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "" if detached else branch, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD" if detached else branch, ""
+        return original_git_stdout(repo_root, args)
+
+    monkeypatch.setattr(validator, "_git_stdout", fake_git_stdout)
+
+
+def _write_file(root: Path, relative_path: Path, content: str = "{}\n") -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
 
 
 def _schema() -> dict:
@@ -51,15 +77,24 @@ def test_production_plan_validates_and_report_is_deterministic(capsys):
         output_path=validator.DEFAULT_REPORT,
     )
     report_text = (ROOT / validator.DEFAULT_REPORT).read_text(encoding="utf-8")
+    report_json = json.loads(report_text)
+    branch_context = validator._current_branch_context(ROOT)
+    downstream_pr98_or_later = validator._downstream_validation_branch_allowed(
+        branch_context.branch
+    )
 
     assert first.failures == second.failures == ()
-    assert first.report == second.report == json.loads(report_text)
+    assert first.report == second.report
+    if not downstream_pr98_or_later:
+        assert first.report == report_json
     assert report_text == json.dumps(json.loads(report_text), indent=2, sort_keys=True) + "\n"
-    assert json.loads(report_text)["validation_marker"] == validator.SUCCESS_MARKER
+    assert report_json["validation_marker"] == validator.SUCCESS_MARKER
     assert validator.main([]) == 0
     output_lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
     allowed_info_lines = {
+        validator.CI_DETACHED_HEAD_MODE_MARKER,
         validator.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER,
+        validator.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER,
     }
     assert output_lines
     assert output_lines[0] == validator.SUCCESS_MARKER
@@ -83,6 +118,10 @@ def test_required_plan_concepts_and_target_total_are_traceable_static_only():
 def test_row_family_split_plan_is_deterministic_intent_only_and_has_no_exact_counts():
     plan = _plan()
     families = validator._row_families(plan)
+    branch_context = validator._current_branch_context(ROOT)
+    downstream_pr98_or_later = validator._downstream_validation_branch_allowed(
+        branch_context.branch
+    )
 
     assert [family["row_family_id"] for family in families] == list(validator.ROW_FAMILY_IDS)
     assert [family["row_family_class"] for family in families] == list(validator.ROW_FAMILY_CLASSES)
@@ -98,7 +137,8 @@ def test_row_family_split_plan_is_deterministic_intent_only_and_has_no_exact_cou
         assert family["planned_downstream_source_file_path"].startswith(
             "docs/master_plan/atomic_rows/pr98_row_family_sources/"
         )
-        assert not (ROOT / family["planned_downstream_source_file_path"]).exists()
+        if not downstream_pr98_or_later:
+            assert not (ROOT / family["planned_downstream_source_file_path"]).exists()
 
 
 def test_generation_sequence_separates_pr98_pr99_pr100_and_pr101():
@@ -341,9 +381,14 @@ def test_runtime_live_order_source_connector_profit_latency_and_quantum_flags_fa
         )
 
 
-def test_planned_source_files_bundle_sha_builder_and_final_readiness_files_absent(tmp_path):
+def test_planned_source_files_bundle_sha_builder_and_final_readiness_files_absent(
+    tmp_path,
+    monkeypatch,
+):
     plan = _plan()
 
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR98_BRANCH)
     assert validator.validate_no_forbidden_artifacts(ROOT, plan) == []
     bundle_path = tmp_path / validator.CANONICAL_BUNDLE_JSONL
     bundle_path.parent.mkdir(parents=True)
@@ -362,15 +407,88 @@ def test_planned_source_files_bundle_sha_builder_and_final_readiness_files_absen
     )
 
     sha_path.unlink()
-    planned_source = tmp_path / plan["row_family_split_plan"]["row_families"][0][
-        "planned_downstream_source_file_path"
-    ]
-    planned_source.parent.mkdir(parents=True, exist_ok=True)
-    planned_source.write_text("{}\n", encoding="utf-8")
+    _mock_git_branch(monkeypatch, validator.TARGET_BRANCH)
+    planned_source = Path(
+        plan["row_family_split_plan"]["row_families"][0][
+            "planned_downstream_source_file_path"
+        ]
+    )
+    _write_file(tmp_path, planned_source)
     _assert_failure_contains(
         validator.validate_no_forbidden_artifacts(tmp_path, plan),
         "PR98 row-family source file exists during PR97",
     )
+
+
+def test_pr98_row_family_source_files_allowed_on_local_pr98_downstream_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR98_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr98_row_family_source_files_allowed_in_github_actions_detached_head_context(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR98_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "98/merge")
+    _mock_git_branch(monkeypatch, PR98_BRANCH, detached=True)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr98_row_family_source_files_blocked_on_non_downstream_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, validator.TARGET_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    for path in validator.planned_pr98_source_paths(plan):
+        _assert_failure_contains(
+            failures,
+            f"PR98 row-family source file exists during PR97: {path.as_posix()}",
+        )
+
+
+def test_bundle_hash_builder_freeze_and_final_readiness_remain_blocked_on_pr98_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, PR98_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        _assert_failure_contains(
+            failures,
+            f"forbidden downstream artifact exists: {path.as_posix()}",
+        )
+    for path in validator.planned_pr98_source_paths(plan):
+        assert not any(path.as_posix() in failure for failure in failures)
 
 
 def test_report_does_not_claim_bundle_live_profit_latency_or_quantum_advantage_readiness():
