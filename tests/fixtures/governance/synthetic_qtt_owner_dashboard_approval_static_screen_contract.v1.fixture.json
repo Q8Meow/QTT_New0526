@@ -1,0 +1,228 @@
+{
+  "fixture_id": "SYNTHETIC_PR96_QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_FIXTURE",
+  "fixture_version": "PR96_QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "authority_class": "STATIC_FIXTURE_ONLY_NO_RUNTIME_NO_OWNER_DECISION_NO_RECEIPT_NO_LIVE_ORDER_OR_QUANTUM_AUTHORITY",
+  "registry_ref": "docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml",
+  "schema_ref": "schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json",
+  "deterministic_output": true,
+  "required_screen_concepts": [
+    "OWNER_APPROVAL_QUEUE_OVERVIEW_SCREEN",
+    "OWNER_APPROVAL_REQUEST_DETAIL_SCREEN",
+    "OWNER_APPROVAL_MENU_PANEL",
+    "OWNER_TARGET_SCOPE_SELECTOR_PANEL",
+    "OWNER_RATIONALE_AND_VALUE_PANEL",
+    "OWNER_DECISION_CONFIRMATION_STATIC_SUMMARY",
+    "OWNER_LIVE_RUNTIME_QUANTUM_BOUNDARY_BANNER"
+  ],
+  "canonical_option_ids": [
+    "APPROVE",
+    "APPROVE_WITH_OVERRIDE",
+    "REJECT",
+    "REQUEST_MORE_INFO",
+    "WAIVE_REQUIREMENT",
+    "SET_OWNER_APPROVED_VALUE",
+    "APPROVE_RESEARCH_ONLY",
+    "APPROVE_REPLAY_PAPER",
+    "APPROVE_OPTIMIZER",
+    "APPROVE_RUNTIME",
+    "APPROVE_LIVE_USE",
+    "APPROVE_QUANTUM_BACKEND",
+    "APPLY_TO_ONE_ROW",
+    "APPLY_TO_PARAMETER_FAMILY",
+    "APPLY_TO_AGENT",
+    "APPLY_GLOBALLY"
+  ],
+  "canonical_scope_token_mapping": [
+    {
+      "prompt_concept_id": "APPLY_TO_ROW",
+      "option_id": "APPLY_TO_ONE_ROW",
+      "mapping_policy": "EXPLICIT_EXISTING_CANONICAL_ENUM_STRONGER_NAME"
+    },
+    {
+      "prompt_concept_id": "APPLY_TO_FAMILY",
+      "option_id": "APPLY_TO_PARAMETER_FAMILY",
+      "mapping_policy": "EXPLICIT_EXISTING_CANONICAL_ENUM_STRONGER_NAME"
+    }
+  ],
+  "relationship_refs": [
+    {
+      "relationship_id": "PR93_QUEUE_DISPLAY_ONLY",
+      "source_ref": "docs/master_plan/governance/QTTOwnerApprovalRequestQueueRegistry.yaml",
+      "allowed_static_relationship": "display_queue_fields_without_fetch_dequeue_approve_reject_reorder_or_mutation"
+    },
+    {
+      "relationship_id": "PR94_OVERRIDE_GATE_REFERENCE_ONLY",
+      "source_ref": "docs/master_plan/governance/QTTOwnerOverrideReceiptAuthoringGate.yaml",
+      "allowed_static_relationship": "display_owner_override_receipt_authoring_gate_requirement_without_authoring_receipts_or_satisfying_external_facts"
+    },
+    {
+      "relationship_id": "PR95_MENU_SCHEMA_CANONICAL_OPTIONS",
+      "source_ref": "docs/master_plan/governance/QTTOwnerDashboardApprovalMenuSchema.yaml",
+      "allowed_static_relationship": "reference_canonical_menu_option_ids_without_redefining_menu_semantics_or_silent_aliasing"
+    }
+  ],
+  "no_claim_flags": {
+    "creates_runtime_dashboard_service": false,
+    "creates_dashboard_runtime_ui": false,
+    "creates_web_server": false,
+    "creates_api_endpoint": false,
+    "creates_executable_route": false,
+    "creates_route_handler": false,
+    "creates_event_callback": false,
+    "creates_frontend_app": false,
+    "creates_telegram_runtime": false,
+    "executes_owner_decision": false,
+    "creates_owner_approval_receipt": false,
+    "creates_owner_override_receipt": false,
+    "creates_live_promotion": false,
+    "creates_canary_eligibility": false,
+    "creates_order_authority": false,
+    "submits_order": false,
+    "cancels_order": false,
+    "reduces_order": false,
+    "closes_order": false,
+    "creates_live_routing": false,
+    "retrieves_source": false,
+    "accepts_source": false,
+    "creates_accepted_source_packet": false,
+    "creates_source_fact": false,
+    "creates_connector_semantic_binding": false,
+    "fetches_private_state": false,
+    "creates_runtime_cash_receipt": false,
+    "executes_replay": false,
+    "executes_paper": false,
+    "creates_replay_paper_result": false,
+    "executes_optimizer": false,
+    "executes_classical_optimizer": false,
+    "executes_quantum_optimizer": false,
+    "executes_quantum_backend": false,
+    "executes_quantum_simulator": false,
+    "calls_quantum_provider": false,
+    "creates_profit_evidence": false,
+    "creates_latency_evidence": false,
+    "creates_quantum_advantage_evidence": false,
+    "claims_latency_superiority": false,
+    "claims_execution_superiority": false,
+    "creates_atomicrows_bundle_jsonl": false,
+    "creates_atomicrows_bundle_sha256": false,
+    "creates_pr97_atomicrows_full_bundle_row_expansion_plan": false,
+    "creates_atomicrows_row_family_source_files": false,
+    "creates_atomicrows_bundle_builder": false,
+    "creates_sha_freeze_authority": false,
+    "creates_global_mutation": false
+  },
+  "fixture_cases": [
+    {
+      "case_id": "PASS_PR96_METADATA_VERIFIED",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "PR96_STATIC_SCREEN_CONTRACT_METADATA_VERIFIED"
+    },
+    {
+      "case_id": "PASS_REQUIRED_SCREEN_CONCEPTS_PRESENT",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "REQUIRED_SCREEN_CONCEPTS_PRESENT"
+    },
+    {
+      "case_id": "PASS_REQUIRED_COMPONENTS_PRESENT",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "REQUIRED_COMPONENTS_PRESENT"
+    },
+    {
+      "case_id": "PASS_PR95_MENU_REFERENCES_KNOWN",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "PR95_MENU_REFERENCES_KNOWN"
+    },
+    {
+      "case_id": "PASS_CANONICAL_SCOPE_TOKEN_MAPPING_EXPLICIT",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "CANONICAL_SCOPE_TOKEN_MAPPING_EXPLICIT"
+    },
+    {
+      "case_id": "PASS_STATIC_NO_EFFECT_FLAGS",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "STATIC_NO_EFFECT_FLAGS"
+    },
+    {
+      "case_id": "PASS_LIVE_RUNTIME_QUANTUM_BOUNDARY_METADATA_ONLY",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "LIVE_RUNTIME_QUANTUM_BOUNDARY_METADATA_ONLY"
+    },
+    {
+      "case_id": "PASS_PR93_PR94_PR95_RELATIONSHIPS_STATIC_ONLY",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "PR93_PR94_PR95_RELATIONSHIPS_STATIC_ONLY"
+    },
+    {
+      "case_id": "PASS_PR97_ATOMICROWS_ARTIFACTS_ABSENT",
+      "expected_valid_screen_count": 7,
+      "expected_reason_code": "PR97_ATOMICROWS_ARTIFACTS_ABSENT"
+    },
+    {
+      "case_id": "BLOCK_MISSING_REQUIRED_SCREEN",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "MISSING_REQUIRED_SCREEN"
+    },
+    {
+      "case_id": "BLOCK_MISSING_REQUIRED_COMPONENT",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "MISSING_REQUIRED_COMPONENT"
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_SCREEN_ID",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "DUPLICATE_SCREEN_ID"
+    },
+    {
+      "case_id": "BLOCK_DUPLICATE_COMPONENT_ID",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "DUPLICATE_COMPONENT_ID"
+    },
+    {
+      "case_id": "BLOCK_UNKNOWN_PR95_MENU_OPTION",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "UNKNOWN_PR95_MENU_OPTION"
+    },
+    {
+      "case_id": "BLOCK_SILENT_MENU_ALIAS",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "SILENT_MENU_ALIAS"
+    },
+    {
+      "case_id": "BLOCK_EXECUTABLE_ROUTE_OR_ENDPOINT",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "EXECUTABLE_ROUTE_OR_ENDPOINT"
+    },
+    {
+      "case_id": "BLOCK_DASHBOARD_RUNTIME_UI_OR_SERVICE_ARTIFACT",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "DASHBOARD_RUNTIME_UI_OR_SERVICE_ARTIFACT"
+    },
+    {
+      "case_id": "BLOCK_RECEIPT_CREATION_CLAIM",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "RECEIPT_CREATION_CLAIM"
+    },
+    {
+      "case_id": "BLOCK_SOURCE_CONNECTOR_RUNTIME_LIVE_ORDER_PROFIT_EFFECT",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "SOURCE_CONNECTOR_RUNTIME_LIVE_ORDER_PROFIT_EFFECT"
+    },
+    {
+      "case_id": "BLOCK_QUANTUM_BACKEND_EXECUTION_CLAIM",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "QUANTUM_BACKEND_EXECUTION_CLAIM"
+    },
+    {
+      "case_id": "BLOCK_ATOMICROWS_BUNDLE_HASH_CLAIM",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "ATOMICROWS_BUNDLE_HASH_CLAIM"
+    },
+    {
+      "case_id": "BLOCK_PR97_FULL_BUNDLE_ROW_EXPANSION_PLAN_CLAIM",
+      "expected_valid_screen_count": 0,
+      "expected_reason_code": "PR97_FULL_BUNDLE_ROW_EXPANSION_PLAN_CLAIM"
+    }
+  ]
+}

@@ -77,6 +77,27 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr94_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr94_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
+BRANCH_CONTEXT_ENV_CANDIDATES = (
+    "GITHUB_HEAD_REF",
+    "GITHUB_REF_NAME",
+    "BRANCH_NAME",
+    "CI_COMMIT_REF_NAME",
+)
+PR96_STATIC_SCREEN_CONTRACT_PATHS = (
+    pathlib.Path("schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json"),
+    pathlib.Path("schemas/owner/owner_dashboard_approval_static_screen_contract.schema.json"),
+    pathlib.Path("docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml"),
+    pathlib.Path("docs/master_plan/owner/OwnerDashboardApprovalStaticScreenContract.yaml"),
+    pathlib.Path("docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json"),
+    pathlib.Path("tools/validate_owner_dashboard_approval_static_screen_contract.py"),
+    pathlib.Path("tests/governance/test_owner_dashboard_approval_static_screen_contract.py"),
+    pathlib.Path("tests/owner/test_owner_dashboard_approval_static_screen_contract.py"),
+)
+FORBIDDEN_RUNTIME_PATHS = (
+    pathlib.Path("src/qtt/dashboard_runtime"),
+    pathlib.Path("src/qtt/telegram_runtime"),
+    pathlib.Path("src/qtt/owner_dashboard_runtime"),
+)
 
 CANONICAL_OPTION_ORDER = (
     "APPROVE",
@@ -329,6 +350,13 @@ class ValidationResult:
     info_lines: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class BranchContext:
+    branch: str
+    source: str
+    git_error: str = ""
+
+
 def _resolve(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
     return path if path.is_absolute() else root / path
 
@@ -405,6 +433,35 @@ def _github_actions_active() -> bool:
     return os.getenv("GITHUB_ACTIONS") == "true"
 
 
+def _normalize_branch_context(value: str) -> str:
+    branch = value.strip()
+    if not branch or branch == "HEAD":
+        return ""
+    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
+        if branch.startswith(prefix):
+            return branch[len(prefix) :]
+    return branch
+
+
+def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
+    for env_name in BRANCH_CONTEXT_ENV_CANDIDATES:
+        branch = _normalize_branch_context(os.getenv(env_name, ""))
+        if branch:
+            return BranchContext(branch=branch, source=env_name)
+
+    git_errors: list[str] = []
+    for args in (["branch", "--show-current"], ["rev-parse", "--abbrev-ref", "HEAD"]):
+        branch_rc, branch_stdout, branch_err = _git_stdout(repo_root, args)
+        if branch_rc != 0:
+            git_errors.append(branch_err or f"git {' '.join(args)} failed")
+            continue
+        branch = _normalize_branch_context(branch_stdout)
+        if branch:
+            return BranchContext(branch=branch, source=f"git {' '.join(args)}")
+
+    return BranchContext(branch="", source="", git_error="; ".join(git_errors))
+
+
 def _downstream_validation_branch_allowed(branch: str) -> bool:
     match = re.match(r"pr(?P<number>[0-9]+)-", branch)
     if not match:
@@ -458,15 +515,19 @@ def validate_pr95_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
         if actual != expected:
             failures.append(f"{label} must be {expected}, got {actual}")
 
-    branch_rc, branch, branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
-    if branch_rc != 0:
+    branch_context = _current_branch_context(repo_root)
+    branch = branch_context.branch
+    if not branch:
         if github_actions:
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
         else:
+            branch_err = branch_context.git_error or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
         if github_actions:
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
+            if _downstream_validation_branch_allowed(branch):
+                info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
         elif _downstream_validation_branch_allowed(branch):
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
         else:
@@ -816,19 +877,11 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
             "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
             f"{CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
         )
-    forbidden_paths = (
-        pathlib.Path("schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json"),
-        pathlib.Path("schemas/owner/owner_dashboard_approval_static_screen_contract.schema.json"),
-        pathlib.Path("docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml"),
-        pathlib.Path("docs/master_plan/owner/OwnerDashboardApprovalStaticScreenContract.yaml"),
-        pathlib.Path("docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json"),
-        pathlib.Path("tools/validate_owner_dashboard_approval_static_screen_contract.py"),
-        pathlib.Path("tests/governance/test_owner_dashboard_approval_static_screen_contract.py"),
-        pathlib.Path("tests/owner/test_owner_dashboard_approval_static_screen_contract.py"),
-        pathlib.Path("src/qtt/dashboard_runtime"),
-        pathlib.Path("src/qtt/telegram_runtime"),
-        pathlib.Path("src/qtt/owner_dashboard_runtime"),
-    )
+    branch_context = _current_branch_context(repo_root)
+    downstream_pr96_or_later = _downstream_validation_branch_allowed(branch_context.branch)
+    forbidden_paths = FORBIDDEN_RUNTIME_PATHS
+    if not downstream_pr96_or_later:
+        forbidden_paths = (*PR96_STATIC_SCREEN_CONTRACT_PATHS, *FORBIDDEN_RUNTIME_PATHS)
     for path in forbidden_paths:
         if _resolve(repo_root, path).exists():
             failures.append(f"PR95 must not create forbidden later/runtime artifact: {path.as_posix()}")
