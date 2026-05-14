@@ -816,7 +816,9 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
             "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
             f"{CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
         )
-    forbidden_paths = (
+    branch_rc, branch, _ = _git_stdout(repo_root, ["branch", "--show-current"])
+    downstream_pr96_or_later = branch_rc == 0 and _downstream_validation_branch_allowed(branch)
+    pr96_static_paths = (
         pathlib.Path("schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json"),
         pathlib.Path("schemas/owner/owner_dashboard_approval_static_screen_contract.schema.json"),
         pathlib.Path("docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml"),
@@ -825,10 +827,15 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
         pathlib.Path("tools/validate_owner_dashboard_approval_static_screen_contract.py"),
         pathlib.Path("tests/governance/test_owner_dashboard_approval_static_screen_contract.py"),
         pathlib.Path("tests/owner/test_owner_dashboard_approval_static_screen_contract.py"),
+    )
+    forbidden_runtime_paths = (
         pathlib.Path("src/qtt/dashboard_runtime"),
         pathlib.Path("src/qtt/telegram_runtime"),
         pathlib.Path("src/qtt/owner_dashboard_runtime"),
     )
+    forbidden_paths = forbidden_runtime_paths
+    if not downstream_pr96_or_later:
+        forbidden_paths = (*pr96_static_paths, *forbidden_runtime_paths)
     for path in forbidden_paths:
         if _resolve(repo_root, path).exists():
             failures.append(f"PR95 must not create forbidden later/runtime artifact: {path.as_posix()}")

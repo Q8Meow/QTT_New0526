@@ -203,19 +203,28 @@ def test_scope_options_have_explicit_allowed_target_scope_classes_and_no_mutatio
 def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authority():
     report = _report()
 
-    forbidden_paths = [
+    branch_rc, branch, _ = gate._git_stdout(REPO_ROOT, ["branch", "--show-current"])
+    downstream_pr96_or_later = (
+        branch_rc == 0 and gate._downstream_validation_branch_allowed(branch)
+    )
+    pr96_static_paths = [
         "schemas/governance/qtt_owner_dashboard_approval_static_screen_contract.schema.json",
         "docs/master_plan/governance/QTTOwnerDashboardApprovalStaticScreenContract.yaml",
         "docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json",
         "tools/validate_owner_dashboard_approval_static_screen_contract.py",
+    ]
+    runtime_or_forbidden_paths = [
         "src/qtt/dashboard_runtime",
         "src/qtt/telegram_runtime",
         "src/qtt/owner_dashboard_runtime",
         gate.CANONICAL_BUNDLE_JSONL.as_posix(),
         gate.CANONICAL_BUNDLE_SHA256.as_posix(),
     ]
-    for path in forbidden_paths:
+    for path in runtime_or_forbidden_paths:
         assert not (REPO_ROOT / path).exists(), path
+    if not downstream_pr96_or_later:
+        for path in pr96_static_paths:
+            assert not (REPO_ROOT / path).exists(), path
 
     assert report["creates_pr96_static_screen_contract"] is False
     assert report["creates_runtime_dashboard_service"] is False
