@@ -644,13 +644,24 @@ def ensure_required_inputs(repo_root: pathlib.Path) -> None:
         raise RuntimeError("AtomicRows.bundle.sha256 exists; Repair PR D must not create a bundle SHA")
 
 
-def write_family_file(repo_root: pathlib.Path, plan: FamilyPlan) -> None:
-    path = repo_root / pathlib.Path(plan.exact_rows_file_path)
+def render_family_file_bytes(plan: FamilyPlan) -> bytes:
     rows = (
         json.dumps(build_row_record(plan, family_row_ordinal), sort_keys=True, separators=(",", ":"))
         for family_row_ordinal in range(1, plan.row_count + 1)
     )
-    path.write_text("\n".join(rows) + "\n", encoding="utf-8", newline="\n")
+    return ("\n".join(rows) + "\n").encode("utf-8")
+
+
+def _normalize_jsonl_newlines(raw: bytes) -> bytes:
+    return raw.replace(b"\r\n", b"\n")
+
+
+def write_family_file(repo_root: pathlib.Path, plan: FamilyPlan) -> None:
+    path = repo_root / pathlib.Path(plan.exact_rows_file_path)
+    desired = render_family_file_bytes(plan)
+    if path.exists() and _normalize_jsonl_newlines(path.read_bytes()) == desired:
+        return
+    path.write_bytes(desired)
 
 
 def generate_exact_row_sources(repo_root: pathlib.Path = REPO_ROOT) -> tuple[FamilyPlan, ...]:

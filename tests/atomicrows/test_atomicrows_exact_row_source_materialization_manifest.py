@@ -253,6 +253,37 @@ def test_d_generator_is_deterministic():
     assert before == after
 
 
+def test_d_generator_preserves_existing_crlf_bytes_when_rows_match(tmp_path):
+    plan = generator.build_family_plans()[2]
+    path = tmp_path / Path(plan.exact_rows_file_path)
+    path.parent.mkdir(parents=True)
+    canonical = generator.render_family_file_bytes(plan)
+    crlf = canonical.replace(b"\n", b"\r\n")
+    path.write_bytes(crlf)
+
+    generator.write_family_file(tmp_path, plan)
+
+    assert path.read_bytes() == crlf
+
+
+def test_d_generator_rewrites_existing_crlf_file_when_content_changes(tmp_path):
+    plan = generator.build_family_plans()[2]
+    path = tmp_path / Path(plan.exact_rows_file_path)
+    path.parent.mkdir(parents=True)
+    canonical = generator.render_family_file_bytes(plan)
+    tampered = canonical.replace(b"\n", b"\r\n").replace(
+        b'"family_row_ordinal":1',
+        b'"family_row_ordinal":999',
+        1,
+    )
+    assert tampered != canonical
+    path.write_bytes(tampered)
+
+    generator.write_family_file(tmp_path, plan)
+
+    assert path.read_bytes() == canonical
+
+
 def test_d_generator_is_rerunnable_without_extra_files():
     names_before = [path.name for path in _family_files()]
     assert generator.main([]) == 0
