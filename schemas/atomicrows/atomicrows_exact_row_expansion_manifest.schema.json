@@ -1,0 +1,383 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-atomicrows-exact-row-expansion-manifest",
+  "title": "AtomicRows Exact Row Expansion Manifest",
+  "description": "Static Repair PR B manifest contract for future AtomicRows exact-row expansion. This schema validates family identity, owner process boundaries, no-guess count authority, future exact-row file names, subfamily doctrine, agent governance, quantum metadata boundaries, and absence of exact rows, bundle, SHA, freeze, final readiness, runtime authority, optimizer output, or quantum backend output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "artifact_version",
+    "repair_scope",
+    "authority_class",
+    "gate_mode",
+    "manifest_state",
+    "validation_result",
+    "target_total_row_count",
+    "target_total_row_count_status",
+    "family_count_total",
+    "exact_distribution_ready",
+    "owner_distribution_required",
+    "exact_rows_created_by_this_pr",
+    "exact_row_source_directory_created_by_this_pr",
+    "bundle_created_by_this_pr",
+    "sha_created_by_this_pr",
+    "freeze_created_by_this_pr",
+    "final_readiness_created_by_this_pr",
+    "families_are_top_level_buckets_not_parameters",
+    "subfamily_row_class_doctrine_required",
+    "owner_process_approval",
+    "upstream_dependencies",
+    "distribution_authority",
+    "count_derivation",
+    "allowed_subfamily_classes",
+    "future_exact_row_required_fields",
+    "families",
+    "forbidden_current_outputs",
+    "no_authority_created",
+    "upstream_state_expectations",
+    "next_required_repair_pr"
+  ],
+  "properties": {
+    "artifact_id": { "const": "ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST" },
+    "artifact_version": { "const": "v1" },
+    "repair_scope": { "const": "ATOMICROWS_4183_EXACT_ROW_EXPANSION_MANIFEST" },
+    "authority_class": { "const": "STATIC_REPAIR_MANIFEST_NOT_EXACT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE" },
+    "gate_mode": {
+      "enum": [
+        "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
+        "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION"
+      ]
+    },
+    "manifest_state": {
+      "enum": [
+        "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
+        "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION"
+      ]
+    },
+    "validation_result": {
+      "enum": ["PASS_EXACT_DISTRIBUTION_READY", "PASS_BLOCKED_EXPECTED"]
+    },
+    "target_total_row_count": { "const": 4183 },
+    "target_total_row_count_status": { "const": "PLANNING_TARGET_PENDING_EXACT_ROW_GENERATION" },
+    "family_count_total": { "const": 15 },
+    "exact_distribution_ready": { "type": "boolean" },
+    "owner_distribution_required": { "type": "boolean" },
+    "exact_rows_created_by_this_pr": { "const": false },
+    "exact_row_source_directory_created_by_this_pr": { "const": false },
+    "bundle_created_by_this_pr": { "const": false },
+    "sha_created_by_this_pr": { "const": false },
+    "freeze_created_by_this_pr": { "const": false },
+    "final_readiness_created_by_this_pr": { "const": false },
+    "families_are_top_level_buckets_not_parameters": { "const": true },
+    "subfamily_row_class_doctrine_required": { "const": true },
+    "owner_process_approval": { "$ref": "#/$defs/owner_process_approval" },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 5,
+      "uniqueItems": true
+    },
+    "distribution_authority": { "$ref": "#/$defs/distribution_authority" },
+    "count_derivation": { "$ref": "#/$defs/count_derivation" },
+    "allowed_subfamily_classes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/subfamily_class" },
+      "minItems": 17,
+      "uniqueItems": true
+    },
+    "future_exact_row_required_fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/future_required_field" },
+      "minItems": 8,
+      "uniqueItems": true
+    },
+    "families": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/family_entry" },
+      "minItems": 15,
+      "uniqueItems": true
+    },
+    "forbidden_current_outputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "no_authority_created": { "$ref": "#/$defs/no_authority_created" },
+    "upstream_state_expectations": { "$ref": "#/$defs/upstream_state_expectations" },
+    "next_required_repair_pr": { "const": "ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN" }
+  },
+  "$defs": {
+    "owner_process_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repair_pr_b_process_approved",
+        "owner_approves_exact_counts_now",
+        "codex_may_use_pr97_explicit_counts_only",
+        "codex_may_invent_counts",
+        "codex_may_estimate_counts",
+        "codex_may_balance_counts",
+        "codex_may_optimize_counts",
+        "codex_may_infer_counts_from_family_names",
+        "if_pr97_counts_absent_block_for_owner_decision",
+        "required_owner_decision_if_absent"
+      ],
+      "properties": {
+        "repair_pr_b_process_approved": { "const": true },
+        "owner_approves_exact_counts_now": { "const": false },
+        "codex_may_use_pr97_explicit_counts_only": { "const": true },
+        "codex_may_invent_counts": { "const": false },
+        "codex_may_estimate_counts": { "const": false },
+        "codex_may_balance_counts": { "const": false },
+        "codex_may_optimize_counts": { "const": false },
+        "codex_may_infer_counts_from_family_names": { "const": false },
+        "if_pr97_counts_absent_block_for_owner_decision": { "const": true },
+        "required_owner_decision_if_absent": { "const": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION" }
+      }
+    },
+    "distribution_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "source_pointer",
+        "owner_required_decision",
+        "no_guesswork",
+        "codex_may_invent_counts",
+        "codex_may_estimate_counts",
+        "codex_may_balance_counts",
+        "codex_may_optimize_counts",
+        "codex_may_infer_counts_from_family_names"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "DERIVED_FROM_PR97_EXPLICIT_DISTRIBUTION",
+            "OWNER_APPROVAL_REQUIRED"
+          ]
+        },
+        "source_pointer": { "type": ["string", "null"] },
+        "owner_required_decision": {
+          "enum": ["EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION", null]
+        },
+        "no_guesswork": { "const": true },
+        "codex_may_invent_counts": { "const": false },
+        "codex_may_estimate_counts": { "const": false },
+        "codex_may_balance_counts": { "const": false },
+        "codex_may_optimize_counts": { "const": false },
+        "codex_may_infer_counts_from_family_names": { "const": false }
+      }
+    },
+    "count_derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr97_explicit_distribution_checked",
+        "pr97_explicit_distribution_found",
+        "pr97_absence_reason",
+        "accepted_source_pointer",
+        "owner_required_decision"
+      ],
+      "properties": {
+        "pr97_explicit_distribution_checked": { "const": true },
+        "pr97_explicit_distribution_found": { "type": "boolean" },
+        "pr97_absence_reason": { "type": ["string", "null"] },
+        "accepted_source_pointer": { "type": ["string", "null"] },
+        "owner_required_decision": {
+          "enum": ["EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION", null]
+        }
+      }
+    },
+    "subfamily_class": {
+      "enum": [
+        "PARAMETER_DEFINITION",
+        "ALGORITHM_DEFINITION",
+        "AGENT_ACCESS_POLICY",
+        "FAMILY_ACCESS_POLICY",
+        "SCORING_INPUT",
+        "RANKING_INPUT",
+        "OPTIMIZER_INPUT",
+        "RISK_CONTROL",
+        "EXECUTION_BOUNDARY",
+        "CAPITAL_CONTROL",
+        "LATENCY_CONTROL",
+        "ERROR_GUARD",
+        "SOURCE_EVIDENCE_REQUIREMENT",
+        "REPLAY_PAPER_REQUIREMENT",
+        "QUANTUM_METADATA",
+        "QUANTUM_BACKEND_REQUIREMENT",
+        "OWNER_APPROVAL_REQUIREMENT"
+      ]
+    },
+    "future_required_field": {
+      "enum": [
+        "family_slug",
+        "subfamily_class",
+        "row_class",
+        "row_kind",
+        "parameter_or_algorithm_scope",
+        "agent_access_scope",
+        "authority_class",
+        "activation_state"
+      ]
+    },
+    "family_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_number",
+        "family_slug",
+        "family_id",
+        "future_exact_row_source_file",
+        "future_source_blueprint_file",
+        "family_role",
+        "subfamily_classes",
+        "required_future_row_classes",
+        "quantum_relevance_class",
+        "agent_governance_relevance_class",
+        "source_dependency_class",
+        "target_row_count",
+        "row_index_start",
+        "row_index_end",
+        "count_authority",
+        "distribution_state",
+        "owner_review_state",
+        "activation_state",
+        "may_create_exact_rows_now",
+        "may_create_bundle_now",
+        "may_create_sha_now",
+        "may_create_freeze_now",
+        "may_create_final_readiness_now",
+        "agent_eligibility_governance_required_for_future_rows",
+        "deny_by_default_agent_access_required",
+        "may_execute_quantum_backend_now",
+        "may_execute_qubo_solving_now",
+        "may_execute_ising_solving_now",
+        "may_execute_qaoa_now",
+        "may_execute_vqe_now",
+        "may_execute_annealing_now",
+        "may_execute_quantum_portfolio_optimization_now",
+        "may_claim_quantum_advantage_now"
+      ],
+      "properties": {
+        "family_number": { "type": "integer" },
+        "family_slug": { "type": "string" },
+        "family_id": { "type": "string" },
+        "future_exact_row_source_file": { "type": "string" },
+        "future_source_blueprint_file": { "type": "string" },
+        "family_role": { "type": "string" },
+        "subfamily_classes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/subfamily_class" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "required_future_row_classes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/subfamily_class" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "quantum_relevance_class": { "type": "string" },
+        "agent_governance_relevance_class": { "type": "string" },
+        "source_dependency_class": { "type": "string" },
+        "target_row_count": { "type": ["integer", "null"] },
+        "row_index_start": { "type": ["integer", "null"] },
+        "row_index_end": { "type": ["integer", "null"] },
+        "count_authority": {
+          "enum": [
+            "DERIVED_FROM_PR97_EXPLICIT_DISTRIBUTION",
+            "OWNER_APPROVAL_REQUIRED"
+          ]
+        },
+        "distribution_state": {
+          "enum": [
+            "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
+            "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION"
+          ]
+        },
+        "owner_review_state": { "type": "string" },
+        "activation_state": { "type": "string" },
+        "may_create_exact_rows_now": { "const": false },
+        "may_create_bundle_now": { "const": false },
+        "may_create_sha_now": { "const": false },
+        "may_create_freeze_now": { "const": false },
+        "may_create_final_readiness_now": { "const": false },
+        "agent_eligibility_governance_required_for_future_rows": { "const": true },
+        "deny_by_default_agent_access_required": { "const": true },
+        "future_policy_row_kinds_allowed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 6,
+          "uniqueItems": true
+        },
+        "may_grant_agent_access_now": { "const": false },
+        "access_decision_default": { "const": "DENY" },
+        "row_existence_grants_access": { "const": false },
+        "family_membership_grants_access": { "const": false },
+        "quantum_applicability_grants_access": { "const": false },
+        "owner_quantum_priority_grants_access": { "const": false },
+        "replay_paper_eligibility_grants_live_access": { "const": false },
+        "static_selection_eligibility_grants_order_authority": { "const": false },
+        "direct_order_authority_allowed_default": { "const": false },
+        "direct_quantum_order_authority_allowed_default": { "const": false },
+        "may_execute_quantum_backend_now": { "const": false },
+        "may_execute_qubo_solving_now": { "const": false },
+        "may_execute_ising_solving_now": { "const": false },
+        "may_execute_qaoa_now": { "const": false },
+        "may_execute_vqe_now": { "const": false },
+        "may_execute_annealing_now": { "const": false },
+        "may_execute_quantum_portfolio_optimization_now": { "const": false },
+        "may_claim_quantum_advantage_now": { "const": false }
+      }
+    },
+    "no_authority_created": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_live_order_authority_created",
+        "source_fact_authority_created",
+        "connector_semantic_authority_created",
+        "profit_evidence_created",
+        "latency_evidence_created",
+        "execution_superiority_evidence_created",
+        "optimizer_execution_created",
+        "quantum_backend_authority_created",
+        "quantum_advantage_evidence_created"
+      ],
+      "properties": {
+        "runtime_live_order_authority_created": { "const": false },
+        "source_fact_authority_created": { "const": false },
+        "connector_semantic_authority_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_evidence_created": { "const": false },
+        "execution_superiority_evidence_created": { "const": false },
+        "optimizer_execution_created": { "const": false },
+        "quantum_backend_authority_created": { "const": false },
+        "quantum_advantage_evidence_created": { "const": false }
+      }
+    },
+    "upstream_state_expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr97_expansion_plan_present",
+        "pr98_blueprints_are_not_exact_rows",
+        "pr99_path_b_remains_current_blocked_state",
+        "pr100_sha_freeze_gate_remains_blocked",
+        "repair_pr_a_bridge_present",
+        "repair_pr_a_bridge_preserved"
+      ],
+      "properties": {
+        "pr97_expansion_plan_present": { "const": true },
+        "pr98_blueprints_are_not_exact_rows": { "const": true },
+        "pr99_path_b_remains_current_blocked_state": { "const": true },
+        "pr100_sha_freeze_gate_remains_blocked": { "const": true },
+        "repair_pr_a_bridge_present": { "const": true },
+        "repair_pr_a_bridge_preserved": { "const": true }
+      }
+    }
+  }
+}
