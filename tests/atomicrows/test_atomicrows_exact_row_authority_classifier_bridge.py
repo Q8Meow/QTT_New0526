@@ -150,7 +150,7 @@ def test_row_doctrine_architecture_future_files_row_id_law_and_recovery_sequence
     assert strategy["bundle_output"] == "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
     assert strategy["sha_output"] == "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
     assert strategy["future_only_no_files_created_by_this_pr"] is True
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
     for field in gate.FUTURE_VALIDATOR_TRUE_FIELDS:
@@ -265,11 +265,12 @@ def test_forbidden_artifacts_absent_master_plan_unchanged_and_no_runtime_authori
         "AtomicRows.bundle.sha256": True,
         "exact_row_sources": True,
     }
-    assert report["exact_row_source_directory_exists"] is False
-    assert report["exact_row_source_files_found"] == []
+    assert report["exact_row_source_directory_exists"] is True
+    assert len(report["exact_row_source_files_found"]) == 15
+    assert report["current_exact_row_sources_presence_allowed_by_repair_pr_d"] is True
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
-    assert not (REPO_ROOT / gate.EXACT_ROW_SOURCES_DIR).exists()
+    assert (REPO_ROOT / gate.EXACT_ROW_SOURCES_DIR).is_dir()
     assert gate.validate_master_plan_not_modified(REPO_ROOT) == []
     assert gate.validate_static_surface(REPO_ROOT / "tools" / f"{Path(gate.__file__).stem}.py") == []
 

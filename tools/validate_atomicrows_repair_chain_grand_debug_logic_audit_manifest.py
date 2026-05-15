@@ -18,6 +18,7 @@ from tools import validate_atomicrows_exact_row_authority_classifier_bridge as b
 from tools import validate_atomicrows_exact_row_expansion_manifest as expansion_gate  # noqa: E402
 from tools import validate_atomicrows_exact_row_generator_dry_run_manifest as dry_run_gate  # noqa: E402
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as c0_gate  # noqa: E402
+from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -283,6 +284,7 @@ class ForbiddenArtifactState:
     bundle_exists: bool
     bundle_sha_exists: bool
     exact_row_files: tuple[str, ...]
+    exact_row_sources_allowed_by_repair_pr_d: bool = False
 
 
 @dataclass(frozen=True)
@@ -576,13 +578,19 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
         if exact_row_root.exists()
         else tuple()
     )
+    post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
+    exact_row_sources_allowed_by_d = (
+        (repo_root / FORBIDDEN_EXACT_ROW_SOURCES_DIRECTORY).exists() or bool(exact_row_files)
+    ) and post_d_state.allowed
     state = ForbiddenArtifactState(
         exact_row_sources_directory_exists=(
             repo_root / FORBIDDEN_EXACT_ROW_SOURCES_DIRECTORY
-        ).exists(),
+        ).exists()
+        and not exact_row_sources_allowed_by_d,
         bundle_exists=(repo_root / FORBIDDEN_BUNDLE_PATH).exists(),
         bundle_sha_exists=(repo_root / FORBIDDEN_BUNDLE_SHA_PATH).exists(),
         exact_row_files=exact_row_files,
+        exact_row_sources_allowed_by_repair_pr_d=exact_row_sources_allowed_by_d,
     )
     failures: list[str] = []
     if state.exact_row_sources_directory_exists:
@@ -591,7 +599,7 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
         failures.append("forbidden AtomicRows.bundle.jsonl exists")
     if state.bundle_sha_exists:
         failures.append("forbidden AtomicRows.bundle.sha256 exists")
-    if state.exact_row_files:
+    if state.exact_row_files and not state.exact_row_sources_allowed_by_repair_pr_d:
         failures.append("forbidden *.exact_rows.jsonl files exist")
     return failures, state
 
@@ -1051,7 +1059,10 @@ def build_report(
     fail_closed_tests_cover_c1_gate: bool,
     master_plan_unchanged: bool,
 ) -> dict[str, Any]:
-    exact_row_files_absent = not forbidden_state.exact_row_files
+    exact_row_files_absent = (
+        not forbidden_state.exact_row_files
+        and not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+    )
     return {
         "report_type": REPORT_TYPE,
         "report_version": REPORT_VERSION,
@@ -1152,7 +1163,8 @@ def build_report(
         },
         "forbidden_artifact_absence": {
             "exact_row_sources_directory_absent": (
-                not forbidden_state.exact_row_sources_directory_exists
+                not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+                and not forbidden_state.exact_row_sources_directory_exists
             ),
             "atomicrows_bundle_absent": not forbidden_state.bundle_exists,
             "atomicrows_bundle_sha_absent": not forbidden_state.bundle_sha_exists,
@@ -1190,11 +1202,28 @@ def build_report(
         },
         "pr_d_readiness_without_materialization": {
             "repair_pr_d_precondition_audit_passed": True,
-            "repair_pr_d_still_required_to_generate_exact_rows": True,
+            "repair_pr_d_still_required_to_generate_exact_rows": (
+                not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+            ),
             "repair_pr_d_not_executed_by_c1": True,
             "exact_rows_still_absent": exact_row_files_absent,
             "bundle_still_absent": not forbidden_state.bundle_exists,
             "sha_still_absent": not forbidden_state.bundle_sha_exists,
+            "freeze_still_absent": True,
+            "final_readiness_still_absent": True,
+        },
+        "post_d_transition_audit": {
+            "post_repair_pr_d_materialization_state": (
+                "EXACT_ROW_SOURCE_FILES_CREATED_BY_REPAIR_PR_D"
+                if forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+                else "PRE_REPAIR_PR_D_EXACT_ROW_SOURCES_ABSENT_REQUIRED"
+            ),
+            "repair_pr_c1_did_not_write_exact_rows": True,
+            "current_exact_row_sources_presence_allowed_by_repair_pr_d": (
+                forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+            ),
+            "bundle_still_absent": not forbidden_state.bundle_exists,
+            "bundle_sha_still_absent": not forbidden_state.bundle_sha_exists,
             "freeze_still_absent": True,
             "final_readiness_still_absent": True,
         },
@@ -1295,17 +1324,32 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         != TARGET_TOTAL_ROWS
     ):
         failures.append("report dry_run_would_generate_total_rows must be 4183")
+    post_d_transition = report.get("post_d_transition_audit", {})
+    if not isinstance(post_d_transition, dict):
+        post_d_transition = {}
+    post_d_allowed = post_d_transition.get(
+        "current_exact_row_sources_presence_allowed_by_repair_pr_d"
+    ) is True
+    forbidden_artifact_absence = report.get("forbidden_artifact_absence", {})
     _require_true_fields(
         failures,
-        report.get("forbidden_artifact_absence", {}),
+        forbidden_artifact_absence,
         (
-            "exact_row_sources_directory_absent",
             "atomicrows_bundle_absent",
             "atomicrows_bundle_sha_absent",
-            "exact_row_files_absent",
         ),
         prefix="report.forbidden_artifact_absence",
     )
+    if not post_d_allowed:
+        _require_true_fields(
+            failures,
+            forbidden_artifact_absence,
+            (
+                "exact_row_sources_directory_absent",
+                "exact_row_files_absent",
+            ),
+            prefix="report.forbidden_artifact_absence",
+        )
     _require_true_fields(
         failures,
         report.get("authority_boundary_audit", {}),
@@ -1373,14 +1417,13 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         ),
         prefix="report.agent_eligibility_audit",
     )
+    pr_d_readiness = report.get("pr_d_readiness_without_materialization", {})
     _require_true_fields(
         failures,
-        report.get("pr_d_readiness_without_materialization", {}),
+        pr_d_readiness,
         (
             "repair_pr_d_precondition_audit_passed",
-            "repair_pr_d_still_required_to_generate_exact_rows",
             "repair_pr_d_not_executed_by_c1",
-            "exact_rows_still_absent",
             "bundle_still_absent",
             "sha_still_absent",
             "freeze_still_absent",
@@ -1388,6 +1431,32 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         ),
         prefix="report.pr_d_readiness_without_materialization",
     )
+    if pr_d_readiness.get("repair_pr_d_still_required_to_generate_exact_rows") is not (
+        not post_d_allowed
+    ):
+        failures.append(
+            "report.pr_d_readiness_without_materialization.repair_pr_d_still_required_to_generate_exact_rows "
+            "must reflect post-D materialization state"
+        )
+    if pr_d_readiness.get("exact_rows_still_absent") is not (not post_d_allowed):
+        failures.append(
+            "report.pr_d_readiness_without_materialization.exact_rows_still_absent "
+            "must reflect post-D materialization state"
+        )
+    if post_d_allowed:
+        _require_true_fields(
+            failures,
+            post_d_transition,
+            (
+                "repair_pr_c1_did_not_write_exact_rows",
+                "current_exact_row_sources_presence_allowed_by_repair_pr_d",
+                "bundle_still_absent",
+                "bundle_sha_still_absent",
+                "freeze_still_absent",
+                "final_readiness_still_absent",
+            ),
+            prefix="report.post_d_transition_audit",
+        )
     if report.get("expected_family_plan") != expected_family_plan():
         failures.append("report.expected_family_plan must match expected 15-family plan")
     if tuple(report.get("dependency_order", ())) != DEPENDENCY_ORDER:

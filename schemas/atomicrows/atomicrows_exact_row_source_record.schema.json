@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "agent_eligibility": {
+      "type": "object"
+    },
+    "authority_class": {
+      "const": "EXACT_ROW_SOURCE_RECORD_INTERNAL_QTT_ARCHITECTURE_NOT_BUNDLE_NOT_RUNTIME_AUTHORITY"
+    },
+    "authority_field_policy": {
+      "type": "object"
+    },
+    "block_code_policy": {
+      "type": "object"
+    },
+    "block_codes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "bundle_state": {
+      "const": "NOT_BUNDLED_REPAIR_PR_E_REQUIRED"
+    },
+    "execution_boundary": {
+      "type": "object"
+    },
+    "external_fact_boundary": {
+      "type": "object"
+    },
+    "family_end_row_index": {
+      "type": "integer"
+    },
+    "family_id": {
+      "type": "string"
+    },
+    "family_label": {
+      "type": "string"
+    },
+    "family_row_count": {
+      "type": "integer"
+    },
+    "family_row_ordinal": {
+      "type": "integer"
+    },
+    "family_start_row_index": {
+      "type": "integer"
+    },
+    "final_readiness_state": {
+      "const": "NOT_FINAL_READY_ROADMAP_PR_101_REQUIRED"
+    },
+    "future_extension_policy": {
+      "type": "object"
+    },
+    "future_work": {
+      "type": "object"
+    },
+    "latency_boundary": {
+      "type": "object"
+    },
+    "materialization_state": {
+      "const": "EXACT_ROW_SOURCE_MATERIALIZED_BY_REPAIR_PR_D"
+    },
+    "quantum_metadata": {
+      "type": "object"
+    },
+    "record_type": {
+      "const": "ATOMICROWS_EXACT_ROW_SOURCE_RECORD"
+    },
+    "record_version": {
+      "const": "v1"
+    },
+    "risk_boundary": {
+      "type": "object"
+    },
+    "row_class": {
+      "type": "string"
+    },
+    "row_id": {
+      "pattern": "^AR_EXACT_[0-9]{3}_[A-Z0-9_]+_[0-9]{6}$",
+      "type": "string"
+    },
+    "row_index": {
+      "maximum": 4183,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "row_index_padded": {
+      "pattern": "^[0-9]{4}$",
+      "type": "string"
+    },
+    "row_purpose": {
+      "type": "string"
+    },
+    "row_semantic_class": {
+      "type": "string"
+    },
+    "row_title": {
+      "type": "string"
+    },
+    "selection_and_scoring_boundary": {
+      "type": "object"
+    },
+    "sha_freeze_state": {
+      "const": "NOT_SHA_FROZEN_REPAIR_PR_F_REQUIRED"
+    },
+    "source_file_family_id": {
+      "type": "string"
+    },
+    "source_file_path": {
+      "type": "string"
+    },
+    "source_pointer_policy": {
+      "type": "object"
+    },
+    "subfamily_id": {
+      "type": "string"
+    },
+    "subfamily_label": {
+      "type": "string"
+    },
+    "subfamily_ordinal": {
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "record_type",
+    "record_version",
+    "row_id",
+    "row_index",
+    "row_index_padded",
+    "family_id",
+    "family_label",
+    "family_row_ordinal",
+    "family_row_count",
+    "family_start_row_index",
+    "family_end_row_index",
+    "source_file_path",
+    "source_file_family_id",
+    "authority_class",
+    "materialization_state",
+    "bundle_state",
+    "sha_freeze_state",
+    "final_readiness_state",
+    "row_semantic_class",
+    "row_class",
+    "subfamily_id",
+    "subfamily_label",
+    "subfamily_ordinal",
+    "row_title",
+    "row_purpose",
+    "authority_field_policy",
+    "source_pointer_policy",
+    "block_code_policy",
+    "block_codes",
+    "agent_eligibility",
+    "quantum_metadata",
+    "execution_boundary",
+    "external_fact_boundary",
+    "selection_and_scoring_boundary",
+    "latency_boundary",
+    "risk_boundary",
+    "future_extension_policy",
+    "future_work"
+  ],
+  "type": "object"
+}

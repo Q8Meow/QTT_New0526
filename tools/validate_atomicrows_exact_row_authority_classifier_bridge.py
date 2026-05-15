@@ -20,6 +20,7 @@ from tools import validate_atomicrows_bundle_builder_deterministic_assembly_gate
 from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gate  # noqa: E402
 from tools import validate_atomicrows_bundle_sha_freeze_authority_gate as pr100_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
+from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -931,6 +932,7 @@ def validate_upstream_state(repo_root: pathlib.Path) -> tuple[list[str], dict[st
 
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
     failures: list[str] = []
+    post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
     for path in FORBIDDEN_ARTIFACT_PATHS:
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden artifact exists: {path.as_posix()}")
@@ -942,7 +944,8 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str],
             path.relative_to(repo_root).as_posix()
             for path in atomic_rows_dir.rglob("*.exact_rows.jsonl")
         )
-    if exact_row_files:
+    exact_row_sources_allowed_by_d = bool(exact_row_files) and post_d_state.allowed
+    if exact_row_files and not exact_row_sources_allowed_by_d:
         failures.append("forbidden exact row source files exist: " + ", ".join(exact_row_files))
 
     exact_source_dir_abs = _resolve(repo_root, EXACT_ROW_SOURCES_DIR)
@@ -953,9 +956,16 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str],
     return failures, {
         "AtomicRows.bundle.jsonl": not _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "AtomicRows.bundle.sha256": not _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists(),
-        "exact_row_sources": len(exact_row_files) == 0,
+        "exact_row_sources": len(exact_row_files) == 0 or exact_row_sources_allowed_by_d,
         "exact_row_source_directory_exists": exact_source_dir_exists,
         "exact_row_source_files_found": exact_row_files,
+        "post_repair_pr_d_materialization_state": (
+            "EXACT_ROW_SOURCE_FILES_CREATED_BY_REPAIR_PR_D"
+            if exact_row_sources_allowed_by_d
+            else "PRE_REPAIR_PR_D_EXACT_ROW_SOURCES_ABSENT_REQUIRED"
+        ),
+        "current_exact_row_sources_presence_allowed_by_repair_pr_d": exact_row_sources_allowed_by_d,
+        "rows_created_by_repair_pr_d_only": exact_row_sources_allowed_by_d,
     }
 
 
@@ -1081,6 +1091,17 @@ def build_report(
         ),
         "exact_row_source_files_found": forbidden_artifacts_absent.get(
             "exact_row_source_files_found"
+        ),
+        "post_repair_pr_d_materialization_state": forbidden_artifacts_absent.get(
+            "post_repair_pr_d_materialization_state"
+        ),
+        "current_exact_row_sources_presence_allowed_by_repair_pr_d": (
+            forbidden_artifacts_absent.get(
+                "current_exact_row_sources_presence_allowed_by_repair_pr_d"
+            )
+        ),
+        "rows_created_by_repair_pr_d_only": forbidden_artifacts_absent.get(
+            "rows_created_by_repair_pr_d_only"
         ),
         "master_plan_unchanged": True,
         "authority_classes": list(REQUIRED_AUTHORITY_CLASSES),

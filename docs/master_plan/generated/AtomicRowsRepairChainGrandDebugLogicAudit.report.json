@@ -213,23 +213,48 @@
   "forbidden_artifact_absence": {
     "atomicrows_bundle_absent": true,
     "atomicrows_bundle_sha_absent": true,
-    "exact_row_files_absent": true,
-    "exact_row_files_found": [],
-    "exact_row_sources_directory_absent": true
+    "exact_row_files_absent": false,
+    "exact_row_files_found": [
+      "docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/006_capital_sizing_cash.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl",
+      "docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl"
+    ],
+    "exact_row_sources_directory_absent": false
   },
   "freeze_created": false,
   "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
   "manifest_type": "ATOMICROWS_REPAIR_CHAIN_GRAND_DEBUG_LOGIC_AUDIT_MANIFEST",
   "manifest_version": "v1",
   "master_plan_edited": false,
+  "post_d_transition_audit": {
+    "bundle_sha_still_absent": true,
+    "bundle_still_absent": true,
+    "current_exact_row_sources_presence_allowed_by_repair_pr_d": true,
+    "final_readiness_still_absent": true,
+    "freeze_still_absent": true,
+    "post_repair_pr_d_materialization_state": "EXACT_ROW_SOURCE_FILES_CREATED_BY_REPAIR_PR_D",
+    "repair_pr_c1_did_not_write_exact_rows": true
+  },
   "pr_d_readiness_without_materialization": {
     "bundle_still_absent": true,
-    "exact_rows_still_absent": true,
+    "exact_rows_still_absent": false,
     "final_readiness_still_absent": true,
     "freeze_still_absent": true,
     "repair_pr_d_not_executed_by_c1": true,
     "repair_pr_d_precondition_audit_passed": true,
-    "repair_pr_d_still_required_to_generate_exact_rows": true,
+    "repair_pr_d_still_required_to_generate_exact_rows": false,
     "sha_still_absent": true
   },
   "quantum_forward_audit": {

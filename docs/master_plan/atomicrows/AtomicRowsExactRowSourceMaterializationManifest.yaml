@@ -1,0 +1,278 @@
+manifest_type: ATOMICROWS_EXACT_ROW_SOURCE_MATERIALIZATION_MANIFEST
+manifest_version: v1
+repair_pr: REPAIR_PR_D_ATOMICROWS_EXACT_ROW_SOURCE_MATERIALIZATION
+authority_class: EXACT_ROW_SOURCE_MATERIALIZATION_ONLY_NOT_BUNDLE_NOT_RUNTIME_AUTHORITY
+materialization_mode: EXACT_ROW_SOURCE_FILES_ONLY
+exact_row_source_files_created: true
+exact_row_source_record_count: 4183
+bundle_written: false
+bundle_sha_written: false
+freeze_created: false
+final_readiness_created: false
+runtime_authority_created: false
+live_authority_created: false
+order_authority_created: false
+source_fact_acceptance_created: false
+connector_semantic_binding_created: false
+profit_evidence_created: false
+latency_evidence_created: false
+execution_superiority_evidence_created: false
+quantum_advantage_evidence_created: false
+master_plan_edited: false
+
+repair_pr_a_authority_classifier_bridge_manifest_path: docs/master_plan/atomicrows/AtomicRowsExactRowAuthorityClassifierBridge.yaml
+repair_pr_a_authority_classifier_bridge_report_path: docs/master_plan/generated/AtomicRowsExactRowAuthorityClassifierBridge.report.json
+repair_pr_b_expansion_manifest_path: docs/master_plan/atomicrows/AtomicRowsExactRowExpansionManifest.yaml
+repair_pr_b_expansion_report_path: docs/master_plan/generated/AtomicRowsExactRowExpansionManifest.report.json
+repair_pr_c0_distribution_manifest_path: docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml
+repair_pr_c0_distribution_report_path: docs/master_plan/generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json
+repair_pr_c_dry_run_manifest_path: docs/master_plan/atomicrows/AtomicRowsExactRowGeneratorDryRunManifest.yaml
+repair_pr_c_dry_run_report_path: docs/master_plan/generated/AtomicRowsExactRowGeneratorDryRun.report.json
+repair_pr_c1_grand_audit_manifest_path: docs/master_plan/atomicrows/AtomicRowsRepairChainGrandDebugLogicAuditManifest.yaml
+repair_pr_c1_grand_audit_report_path: docs/master_plan/generated/AtomicRowsRepairChainGrandDebugLogicAudit.report.json
+
+exact_row_sources_directory: docs/master_plan/atomic_rows/exact_row_sources/
+future_bundle_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+future_bundle_sha_path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+future_bundle_path_forbidden_to_create_in_repair_pr_d: true
+future_bundle_sha_path_forbidden_to_create_in_repair_pr_d: true
+
+exact_row_source_record_schema_path: schemas/atomicrows/atomicrows_exact_row_source_record.schema.json
+materialization_manifest_schema_path: schemas/atomicrows/atomicrows_exact_row_source_materialization_manifest.schema.json
+generator_path: tools/generate_atomicrows_exact_row_source_files.py
+validator_path: tools/validate_atomicrows_exact_row_source_materialization_manifest.py
+
+expected_total_rows: 4183
+expected_first_row_index: 1
+expected_final_row_index: 4183
+expected_family_count: 15
+expected_quantum_forward_total_rows: 1103
+expected_agent_governance_family_id: 009_lifecycle_agent_binding
+expected_agent_governance_family_rows: 270
+
+post_repair_pr_d_materialization_state: EXACT_ROW_SOURCE_FILES_CREATED_BY_REPAIR_PR_D
+repair_pr_c_did_not_write_exact_rows: true
+repair_pr_c1_did_not_write_exact_rows: true
+current_exact_row_sources_presence_allowed_by_repair_pr_d: true
+bundle_still_absent: true
+bundle_sha_still_absent: true
+freeze_still_absent: true
+final_readiness_still_absent: true
+rows_created_by_repair_pr_d_only: true
+
+family_outputs:
+  - family_id: 001_signal_features
+    family_label: SIGNAL_FEATURES
+    row_count: 390
+    start_row_index: 1
+    end_row_index: 390
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_001_SIGNAL_FEATURES_000001
+    last_row_id: AR_EXACT_001_SIGNAL_FEATURES_000390
+    expected_line_count: 390
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 002_scoring_ranking
+    family_label: SCORING_RANKING
+    row_count: 330
+    start_row_index: 391
+    end_row_index: 720
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_002_SCORING_RANKING_000001
+    last_row_id: AR_EXACT_002_SCORING_RANKING_000330
+    expected_line_count: 330
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 003_normalization_calibration
+    family_label: NORMALIZATION_CALIBRATION
+    row_count: 220
+    start_row_index: 721
+    end_row_index: 940
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_003_NORMALIZATION_CALIBRATION_000001
+    last_row_id: AR_EXACT_003_NORMALIZATION_CALIBRATION_000220
+    expected_line_count: 220
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 004_risk_control
+    family_label: RISK_CONTROL
+    row_count: 315
+    start_row_index: 941
+    end_row_index: 1255
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_004_RISK_CONTROL_000001
+    last_row_id: AR_EXACT_004_RISK_CONTROL_000315
+    expected_line_count: 315
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 005_execution_connector_boundary
+    family_label: EXECUTION_CONNECTOR_BOUNDARY
+    row_count: 280
+    start_row_index: 1256
+    end_row_index: 1535
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_005_EXECUTION_CONNECTOR_BOUNDARY_000001
+    last_row_id: AR_EXACT_005_EXECUTION_CONNECTOR_BOUNDARY_000280
+    expected_line_count: 280
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 006_capital_sizing_cash
+    family_label: CAPITAL_SIZING_CASH
+    row_count: 220
+    start_row_index: 1536
+    end_row_index: 1755
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/006_capital_sizing_cash.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_006_CAPITAL_SIZING_CASH_000001
+    last_row_id: AR_EXACT_006_CAPITAL_SIZING_CASH_000220
+    expected_line_count: 220
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 007_latency_routing
+    family_label: LATENCY_ROUTING
+    row_count: 250
+    start_row_index: 1756
+    end_row_index: 2005
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_007_LATENCY_ROUTING_000001
+    last_row_id: AR_EXACT_007_LATENCY_ROUTING_000250
+    expected_line_count: 250
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 008_error_guard_fail_closed
+    family_label: ERROR_GUARD_FAIL_CLOSED
+    row_count: 220
+    start_row_index: 2006
+    end_row_index: 2225
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000001
+    last_row_id: AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000220
+    expected_line_count: 220
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 009_lifecycle_agent_binding
+    family_label: LIFECYCLE_AGENT_BINDING
+    row_count: 270
+    start_row_index: 2226
+    end_row_index: 2495
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: true
+    first_row_id: AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000001
+    last_row_id: AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000270
+    expected_line_count: 270
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 010_source_evidence_connector_semantic
+    family_label: SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+    row_count: 315
+    start_row_index: 2496
+    end_row_index: 2810
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000001
+    last_row_id: AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000315
+    expected_line_count: 315
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 011_replay_paper_validation
+    family_label: REPLAY_PAPER_VALIDATION
+    row_count: 270
+    start_row_index: 2811
+    end_row_index: 3080
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_011_REPLAY_PAPER_VALIDATION_000001
+    last_row_id: AR_EXACT_011_REPLAY_PAPER_VALIDATION_000270
+    expected_line_count: 270
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 012_quantum_advisory_optimization
+    family_label: QUANTUM_ADVISORY_OPTIMIZATION
+    row_count: 290
+    start_row_index: 3081
+    end_row_index: 3370
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_012_QUANTUM_ADVISORY_OPTIMIZATION_000001
+    last_row_id: AR_EXACT_012_QUANTUM_ADVISORY_OPTIMIZATION_000290
+    expected_line_count: 290
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 013_quantum_qubo_ising_metadata
+    family_label: QUANTUM_QUBO_ISING_METADATA
+    row_count: 265
+    start_row_index: 3371
+    end_row_index: 3635
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000001
+    last_row_id: AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000265
+    expected_line_count: 265
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 014_quantum_qaoa_vqe_annealing_metadata
+    family_label: QUANTUM_QAOA_VQE_ANNEALING_METADATA
+    row_count: 265
+    start_row_index: 3636
+    end_row_index: 3900
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA_000001
+    last_row_id: AR_EXACT_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA_000265
+    expected_line_count: 265
+    schema_required: true
+    future_extension_supported: true
+  - family_id: 015_quantum_portfolio_hybrid_comparator
+    family_label: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+    row_count: 283
+    start_row_index: 3901
+    end_row_index: 4183
+    exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    first_row_id: AR_EXACT_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_000001
+    last_row_id: AR_EXACT_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_000283
+    expected_line_count: 283
+    schema_required: true
+    future_extension_supported: true
+
+future_sequencing:
+  repair_pr_d2_e0_agent_family_eligibility_matrix_required: true
+  repair_pr_e_bundle_materialization_required: true
+  repair_pr_f_sha_freeze_required: true
+  roadmap_pr_101_final_readiness_delayed_until_rows_bundle_sha_freeze_exist: true
+
+future_extension_policy:
+  future_parameter_addition_supported: true
+  future_algorithm_addition_supported: true
+  future_quantum_parameter_addition_supported: true
+  future_research_agent_findings_supported: true
+  future_owner_findings_supported: true
+  extension_requires_versioned_pr: true
+  extension_requires_schema_or_manifest_update: true
+  extension_requires_validation_gate_update: true
+  extension_may_not_create_live_authority_by_default: true
+  extension_may_not_create_external_fact_by_default: true
+  extension_may_not_create_quantum_backend_claim_by_default: true
+  extension_may_not_create_profit_claim_by_default: true
