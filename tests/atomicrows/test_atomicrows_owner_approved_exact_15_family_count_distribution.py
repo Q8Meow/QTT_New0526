@@ -189,7 +189,7 @@ def test_schema_rejects_bad_authority_claims_through_validator():
     assert any("quantum_advantage_claim_created" in failure for failure in failures)
 
 
-def test_run_validation_gates_includes_c0_between_repair_a_and_repair_b(monkeypatch):
+def test_run_validation_gates_includes_c0_after_repair_b_and_before_dry_run(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
@@ -204,11 +204,14 @@ def test_run_validation_gates_includes_c0_between_repair_a_and_repair_b(monkeypa
     manifest_index = command_names.index(
         "validate_atomicrows_exact_row_expansion_manifest.py"
     )
+    dry_run_index = command_names.index(
+        "validate_atomicrows_exact_row_generator_dry_run_manifest.py"
+    )
     generated_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
 
-    assert bridge_index < c0_index < manifest_index < generated_index
+    assert bridge_index < manifest_index < c0_index < dry_run_index < generated_index
     assert commands[c0_index] == [
         python_executable,
         str(

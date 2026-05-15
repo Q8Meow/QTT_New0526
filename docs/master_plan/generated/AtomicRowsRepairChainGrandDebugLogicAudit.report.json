@@ -1,0 +1,289 @@
+{
+  "agent_eligibility_audit": {
+    "agent_eligibility_required": true,
+    "agent_eligibility_required_for_future_rows": true,
+    "deny_by_default_pending_d2_e0": true,
+    "live_order_agent_authority_created": false,
+    "no_specific_agent_family_assignments_created": true,
+    "no_specific_agent_row_assignments_created": true,
+    "quantum_backend_agent_authority_created": false
+  },
+  "audit_mode": "PRE_MATERIALIZATION_AUDIT_ONLY",
+  "audit_only": true,
+  "authority_boundary_audit": {
+    "no_bundle_created": true,
+    "no_connector_semantic_binding_created": true,
+    "no_exact_rows_created": true,
+    "no_execution_superiority_evidence_created": true,
+    "no_final_readiness_created": true,
+    "no_freeze_created": true,
+    "no_latency_evidence_created": true,
+    "no_live_authority_created": true,
+    "no_optimizer_execution_created": true,
+    "no_order_authority_created": true,
+    "no_profit_evidence_created": true,
+    "no_quantum_advantage_evidence_created": true,
+    "no_quantum_backend_execution_created": true,
+    "no_replay_paper_execution_created": true,
+    "no_runtime_authority_created": true,
+    "no_sha_created": true,
+    "no_source_fact_acceptance_created": true,
+    "no_specific_agent_assignments_created": true,
+    "no_specific_agent_family_assignments_created": true,
+    "no_specific_agent_row_assignments_created": true
+  },
+  "authority_class": "INTERNAL_QTT_ARCHITECTURE_AUDIT_ONLY_NOT_ROW_AUTHORITY",
+  "blocked_future_work": {
+    "repair_pr_d2_e0_agent_family_eligibility_matrix_required": true,
+    "repair_pr_d_generate_exact_row_source_files_required": true,
+    "repair_pr_e_bundle_materialization_required": true,
+    "repair_pr_f_sha_freeze_required": true,
+    "roadmap_pr_101_final_readiness_delayed": true
+  },
+  "bundle_sha_written": false,
+  "bundle_written": false,
+  "config_path": "docs/master_plan/atomicrows/AtomicRowsRepairChainGrandDebugLogicAuditManifest.yaml",
+  "cross_artifact_consistency": {
+    "agent_governance_family_rows_match": true,
+    "c0_distribution_matches_dry_run": true,
+    "dry_run_would_generate_total_rows": 4183,
+    "family_count_matches": true,
+    "final_row_index_matches": true,
+    "quantum_forward_total_rows_match": true,
+    "row_ranges_contiguous": true,
+    "row_ranges_no_gaps": true,
+    "row_ranges_non_overlapping": true,
+    "total_rows_match": true
+  },
+  "dependency_order": [
+    "validate_atomicrows_exact_row_authority_classifier_bridge.py",
+    "validate_atomicrows_exact_row_expansion_manifest.py",
+    "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py",
+    "validate_atomicrows_exact_row_generator_dry_run_manifest.py",
+    "validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest.py"
+  ],
+  "dry_run_non_materialization_audit": {
+    "dry_run_report_does_not_serialize_exact_rows": true,
+    "dry_run_report_exact_row_record_count": 0,
+    "dry_run_report_full_row_id_list_present": false,
+    "dry_run_report_is_not_bundle": true,
+    "dry_run_report_present": true,
+    "max_preview_row_ids_per_family": 2
+  },
+  "exact_row_sources_directory_created": false,
+  "exact_rows_written": false,
+  "expected_family_plan": [
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 390,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 390,
+      "expected_start_row_index": 1,
+      "family_id": "001_signal_features",
+      "family_label": "SIGNAL_FEATURES"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 720,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 330,
+      "expected_start_row_index": 391,
+      "family_id": "002_scoring_ranking",
+      "family_label": "SCORING_RANKING"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 940,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 220,
+      "expected_start_row_index": 721,
+      "family_id": "003_normalization_calibration",
+      "family_label": "NORMALIZATION_CALIBRATION"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 1255,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 315,
+      "expected_start_row_index": 941,
+      "family_id": "004_risk_control",
+      "family_label": "RISK_CONTROL"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 1535,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 280,
+      "expected_start_row_index": 1256,
+      "family_id": "005_execution_connector_boundary",
+      "family_label": "EXECUTION_CONNECTOR_BOUNDARY"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 1755,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 220,
+      "expected_start_row_index": 1536,
+      "family_id": "006_capital_sizing_cash",
+      "family_label": "CAPITAL_SIZING_CASH"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 2005,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 250,
+      "expected_start_row_index": 1756,
+      "family_id": "007_latency_routing",
+      "family_label": "LATENCY_ROUTING"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 2225,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 220,
+      "expected_start_row_index": 2006,
+      "family_id": "008_error_guard_fail_closed",
+      "family_label": "ERROR_GUARD_FAIL_CLOSED"
+    },
+    {
+      "expected_agent_governance_family_flag": true,
+      "expected_end_row_index": 2495,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 270,
+      "expected_start_row_index": 2226,
+      "family_id": "009_lifecycle_agent_binding",
+      "family_label": "LIFECYCLE_AGENT_BINDING"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 2810,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 315,
+      "expected_start_row_index": 2496,
+      "family_id": "010_source_evidence_connector_semantic",
+      "family_label": "SOURCE_EVIDENCE_CONNECTOR_SEMANTIC"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 3080,
+      "expected_quantum_forward_family_flag": false,
+      "expected_row_count": 270,
+      "expected_start_row_index": 2811,
+      "family_id": "011_replay_paper_validation",
+      "family_label": "REPLAY_PAPER_VALIDATION"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 3370,
+      "expected_quantum_forward_family_flag": true,
+      "expected_row_count": 290,
+      "expected_start_row_index": 3081,
+      "family_id": "012_quantum_advisory_optimization",
+      "family_label": "QUANTUM_ADVISORY_OPTIMIZATION"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 3635,
+      "expected_quantum_forward_family_flag": true,
+      "expected_row_count": 265,
+      "expected_start_row_index": 3371,
+      "family_id": "013_quantum_qubo_ising_metadata",
+      "family_label": "QUANTUM_QUBO_ISING_METADATA"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 3900,
+      "expected_quantum_forward_family_flag": true,
+      "expected_row_count": 265,
+      "expected_start_row_index": 3636,
+      "family_id": "014_quantum_qaoa_vqe_annealing_metadata",
+      "family_label": "QUANTUM_QAOA_VQE_ANNEALING_METADATA"
+    },
+    {
+      "expected_agent_governance_family_flag": false,
+      "expected_end_row_index": 4183,
+      "expected_quantum_forward_family_flag": true,
+      "expected_row_count": 283,
+      "expected_start_row_index": 3901,
+      "family_id": "015_quantum_portfolio_hybrid_comparator",
+      "family_label": "QUANTUM_PORTFOLIO_HYBRID_COMPARATOR"
+    }
+  ],
+  "final_readiness_created": false,
+  "forbidden_artifact_absence": {
+    "atomicrows_bundle_absent": true,
+    "atomicrows_bundle_sha_absent": true,
+    "exact_row_files_absent": true,
+    "exact_row_files_found": [],
+    "exact_row_sources_directory_absent": true
+  },
+  "freeze_created": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "manifest_type": "ATOMICROWS_REPAIR_CHAIN_GRAND_DEBUG_LOGIC_AUDIT_MANIFEST",
+  "manifest_version": "v1",
+  "master_plan_edited": false,
+  "pr_d_readiness_without_materialization": {
+    "bundle_still_absent": true,
+    "exact_rows_still_absent": true,
+    "final_readiness_still_absent": true,
+    "freeze_still_absent": true,
+    "repair_pr_d_not_executed_by_c1": true,
+    "repair_pr_d_precondition_audit_passed": true,
+    "repair_pr_d_still_required_to_generate_exact_rows": true,
+    "sha_still_absent": true
+  },
+  "quantum_forward_audit": {
+    "annealing_execution_created": false,
+    "ising_solver_execution_created": false,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_quantum_profit_evidence": true,
+    "qaoa_execution_created": false,
+    "quantum_forward_families_present": true,
+    "quantum_forward_family_ids": [
+      "012_quantum_advisory_optimization",
+      "013_quantum_qubo_ising_metadata",
+      "014_quantum_qaoa_vqe_annealing_metadata",
+      "015_quantum_portfolio_hybrid_comparator"
+    ],
+    "quantum_forward_total_rows": 1103,
+    "quantum_metadata_only": true,
+    "qubo_solver_execution_created": false,
+    "vqe_execution_created": false
+  },
+  "repair_pr": "REPAIR_PR_C1_ATOMICROWS_REPAIR_CHAIN_GRAND_DEBUG_LOGIC_AUDIT",
+  "report_path": "docs/master_plan/generated/AtomicRowsRepairChainGrandDebugLogicAudit.report.json",
+  "report_type": "ATOMICROWS_REPAIR_CHAIN_GRAND_DEBUG_LOGIC_AUDIT_REPORT",
+  "report_version": "v1",
+  "row_write_mode": "NO_ROW_WRITES_ALLOWED",
+  "schema_audit": {
+    "all_required_schemas_present": true,
+    "no_schema_drift_detected": true,
+    "schema_drift_detected": false,
+    "shared_constants_match": true
+  },
+  "schema_path": "schemas/atomicrows/atomicrows_repair_chain_grand_debug_logic_audit_manifest.schema.json",
+  "source_input_audit": {
+    "repair_pr_a_files_present": true,
+    "repair_pr_a_present_and_validated": true,
+    "repair_pr_b_files_present": true,
+    "repair_pr_b_present_and_validated": true,
+    "repair_pr_c0_files_present": true,
+    "repair_pr_c0_present_and_validated": true,
+    "repair_pr_c_files_present": true,
+    "repair_pr_c_present_and_validated": true
+  },
+  "test_audit": {
+    "all_required_direct_tests_present": true,
+    "fail_closed_tests_cover_c1_gate": true,
+    "no_row_no_bundle_no_sha_no_freeze_boundary_tests_present": true
+  },
+  "validation_result": "PASS_PRE_MATERIALIZATION_AUDIT_ONLY",
+  "validator_audit": {
+    "all_required_validators_present": true,
+    "run_validation_gates_includes_c1": true,
+    "validation_gate_order_matches_dependency_chain": true,
+    "validators_run_successfully": true
+  },
+  "validator_stdout_marker": "QTT_ATOMICROWS_REPAIR_CHAIN_GRAND_DEBUG_LOGIC_AUDIT_OK"
+}

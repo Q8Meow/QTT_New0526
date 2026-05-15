@@ -258,7 +258,7 @@ def test_no_authority_or_evidence_is_created_and_master_plan_is_unchanged():
     assert report["master_plan_unchanged"] is True
 
 
-def test_run_validation_gates_includes_manifest_after_c0_and_before_generated_gate(
+def test_run_validation_gates_includes_manifest_after_bridge_and_before_c0(
     monkeypatch,
 ):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -275,11 +275,11 @@ def test_run_validation_gates_includes_manifest_after_c0_and_before_generated_ga
     manifest_index = command_names.index(
         "validate_atomicrows_exact_row_expansion_manifest.py"
     )
-    generated_index = command_names.index(
-        "validate_generated_derivative_bootstrap_gate_static.py"
+    dry_run_index = command_names.index(
+        "validate_atomicrows_exact_row_generator_dry_run_manifest.py"
     )
 
-    assert bridge_index < c0_index < manifest_index < generated_index
+    assert bridge_index < manifest_index < c0_index < dry_run_index
     assert commands[c0_index] == [
         python_executable,
         str(
