@@ -56,7 +56,11 @@
       ]
     },
     "validation_result": {
-      "enum": ["PASS_EXACT_DISTRIBUTION_READY", "PASS_BLOCKED_EXPECTED"]
+      "enum": [
+        "PASS_EXACT_DISTRIBUTION_READY",
+        "PASS_OWNER_APPROVED_DISTRIBUTION_READY",
+        "PASS_BLOCKED_EXPECTED"
+      ]
     },
     "target_total_row_count": { "const": 4183 },
     "target_total_row_count_status": { "const": "PLANNING_TARGET_PENDING_EXACT_ROW_GENERATION" },
@@ -116,25 +120,33 @@
         "repair_pr_b_process_approved",
         "owner_approves_exact_counts_now",
         "codex_may_use_pr97_explicit_counts_only",
+        "codex_may_use_owner_approved_c0_distribution",
         "codex_may_invent_counts",
         "codex_may_estimate_counts",
         "codex_may_balance_counts",
         "codex_may_optimize_counts",
         "codex_may_infer_counts_from_family_names",
         "if_pr97_counts_absent_block_for_owner_decision",
+        "historical_owner_distribution_required_before_c0",
+        "c0_owner_distribution_approval_applied",
         "required_owner_decision_if_absent"
       ],
       "properties": {
         "repair_pr_b_process_approved": { "const": true },
-        "owner_approves_exact_counts_now": { "const": false },
-        "codex_may_use_pr97_explicit_counts_only": { "const": true },
+        "owner_approves_exact_counts_now": { "type": "boolean" },
+        "codex_may_use_pr97_explicit_counts_only": { "type": "boolean" },
+        "codex_may_use_owner_approved_c0_distribution": { "type": "boolean" },
         "codex_may_invent_counts": { "const": false },
         "codex_may_estimate_counts": { "const": false },
         "codex_may_balance_counts": { "const": false },
         "codex_may_optimize_counts": { "const": false },
         "codex_may_infer_counts_from_family_names": { "const": false },
-        "if_pr97_counts_absent_block_for_owner_decision": { "const": true },
-        "required_owner_decision_if_absent": { "const": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION" }
+        "if_pr97_counts_absent_block_for_owner_decision": { "type": "boolean" },
+        "historical_owner_distribution_required_before_c0": { "const": true },
+        "c0_owner_distribution_approval_applied": { "type": "boolean" },
+        "required_owner_decision_if_absent": {
+          "enum": ["EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION", null]
+        }
       }
     },
     "distribution_authority": {
@@ -155,6 +167,7 @@
         "source": {
           "enum": [
             "DERIVED_FROM_PR97_EXPLICIT_DISTRIBUTION",
+            "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
             "OWNER_APPROVAL_REQUIRED"
           ]
         },
@@ -178,7 +191,11 @@
         "pr97_explicit_distribution_found",
         "pr97_absence_reason",
         "accepted_source_pointer",
-        "owner_required_decision"
+        "owner_required_decision",
+        "historical_owner_distribution_required_before_c0",
+        "historical_owner_required_decision_before_c0",
+        "c0_owner_distribution_supplied",
+        "c0_distribution_source_pointer"
       ],
       "properties": {
         "pr97_explicit_distribution_checked": { "const": true },
@@ -187,7 +204,13 @@
         "accepted_source_pointer": { "type": ["string", "null"] },
         "owner_required_decision": {
           "enum": ["EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION", null]
-        }
+        },
+        "historical_owner_distribution_required_before_c0": { "const": true },
+        "historical_owner_required_decision_before_c0": {
+          "const": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION"
+        },
+        "c0_owner_distribution_supplied": { "type": "boolean" },
+        "c0_distribution_source_pointer": { "type": ["string", "null"] }
       }
     },
     "subfamily_class": {
@@ -289,6 +312,7 @@
         "count_authority": {
           "enum": [
             "DERIVED_FROM_PR97_EXPLICIT_DISTRIBUTION",
+            "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
             "OWNER_APPROVAL_REQUIRED"
           ]
         },
@@ -345,7 +369,9 @@
         "execution_superiority_evidence_created",
         "optimizer_execution_created",
         "quantum_backend_authority_created",
-        "quantum_advantage_evidence_created"
+        "quantum_advantage_evidence_created",
+        "specific_agent_family_assignments_created",
+        "specific_agent_row_assignments_created"
       ],
       "properties": {
         "runtime_live_order_authority_created": { "const": false },
@@ -356,7 +382,9 @@
         "execution_superiority_evidence_created": { "const": false },
         "optimizer_execution_created": { "const": false },
         "quantum_backend_authority_created": { "const": false },
-        "quantum_advantage_evidence_created": { "const": false }
+        "quantum_advantage_evidence_created": { "const": false },
+        "specific_agent_family_assignments_created": { "const": false },
+        "specific_agent_row_assignments_created": { "const": false }
       }
     },
     "upstream_state_expectations": {

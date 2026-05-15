@@ -1,0 +1,143 @@
+artifact_id: ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+artifact_version: v1
+repair_scope: OWNER_APPROVED_ATOMICROWS_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+authority_class: OWNER_INTERNAL_ARCHITECTURE_DECISION_NOT_EXTERNAL_FACT_NOT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE
+approval_state: OWNER_APPROVED
+owner_approval_scope: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION_ONLY
+target_total_row_count: 4183
+family_count_total: 15
+counts_sum_must_equal_target: true
+counts_sum: 4183
+owner_distribution_approval_created_by_this_pr: true
+distribution_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+distribution_rationale_class: OWNER_INTERNAL_ARCHITECTURE_DECISION_NOT_EXTERNAL_FACT
+external_source_evidence_required_for_distribution: false
+count_rationale:
+  signal_rich_for_prediction_market_microstructure_and_edge_detection: true
+  scoring_ranking_rich_for_deterministic_stack_selection: true
+  risk_execution_source_latency_governance_rich_for_fail_closed_controls: true
+  quantum_forward_metadata_preserved: true
+  avoids_single_family_overfit: true
+  non_executable_and_non_live: true
+  rationale_text: Owner-approved internal QTT architecture allocation only; it creates no rows, bundle, SHA, freeze, runtime, live, source, connector, profit, latency, execution-superiority, quantum-advantage, or agent trading authority.
+not_authorized_by_this_approval:
+  exact_rows_created: false
+  exact_row_source_directory_created: false
+  bundle_created: false
+  sha_created: false
+  sha_computed: false
+  freeze_authority_created: false
+  final_readiness_created: false
+  runtime_created: false
+  live_authority_created: false
+  order_authority_created: false
+  source_acceptance_created: false
+  connector_semantics_created: false
+  optimizer_executed: false
+  quantum_backend_executed: false
+  profit_evidence_created: false
+  latency_evidence_created: false
+  execution_superiority_evidence_created: false
+  quantum_advantage_evidence_created: false
+  specific_agent_family_assignments_created: false
+  specific_agent_row_assignments_created: false
+  agent_trading_authority_created: false
+  agent_live_order_authority_created: false
+  agent_quantum_backend_authority_created: false
+distribution:
+  - family_number: 1
+    family_slug: 001_signal_features
+    target_row_count: 390
+  - family_number: 2
+    family_slug: 002_scoring_ranking
+    target_row_count: 330
+  - family_number: 3
+    family_slug: 003_normalization_calibration
+    target_row_count: 220
+  - family_number: 4
+    family_slug: 004_risk_control
+    target_row_count: 315
+  - family_number: 5
+    family_slug: 005_execution_connector_boundary
+    target_row_count: 280
+  - family_number: 6
+    family_slug: 006_capital_sizing_cash
+    target_row_count: 220
+  - family_number: 7
+    family_slug: 007_latency_routing
+    target_row_count: 250
+  - family_number: 8
+    family_slug: 008_error_guard_fail_closed
+    target_row_count: 220
+  - family_number: 9
+    family_slug: 009_lifecycle_agent_binding
+    target_row_count: 270
+  - family_number: 10
+    family_slug: 010_source_evidence_connector_semantic
+    target_row_count: 315
+  - family_number: 11
+    family_slug: 011_replay_paper_validation
+    target_row_count: 270
+  - family_number: 12
+    family_slug: 012_quantum_advisory_optimization
+    target_row_count: 290
+  - family_number: 13
+    family_slug: 013_quantum_qubo_ising_metadata
+    target_row_count: 265
+  - family_number: 14
+    family_slug: 014_quantum_qaoa_vqe_annealing_metadata
+    target_row_count: 265
+  - family_number: 15
+    family_slug: 015_quantum_portfolio_hybrid_comparator
+    target_row_count: 283
+quantum_forward_distribution:
+  quantum_family_slugs:
+    - 012_quantum_advisory_optimization
+    - 013_quantum_qubo_ising_metadata
+    - 014_quantum_qaoa_vqe_annealing_metadata
+    - 015_quantum_portfolio_hybrid_comparator
+  quantum_family_total_rows: 1103
+  quantum_family_total_is_internal_architecture_allocation_only: true
+  quantum_execution_created: false
+  quantum_backend_executed: false
+  quantum_simulator_executed: false
+  quantum_provider_called: false
+  qubo_solving_executed: false
+  ising_solving_executed: false
+  qaoa_executed: false
+  vqe_executed: false
+  annealing_executed: false
+  quantum_portfolio_optimization_executed: false
+  quantum_metadata_future_scope_only: true
+  quantum_advantage_claim_created: false
+agent_governance_distribution:
+  primary_agent_governance_family: 009_lifecycle_agent_binding
+  primary_agent_governance_family_rows: 270
+  deny_by_default_agent_access_preserved: true
+  future_agent_governance_row_kinds_preserved: true
+  row_existence_grants_access: false
+  family_membership_grants_access: false
+  quantum_applicability_grants_access: false
+  owner_quantum_priority_grants_access: false
+  replay_paper_eligibility_grants_live_access: false
+  static_selection_eligibility_grants_order_authority: false
+  agent_access_granted_by_distribution: false
+  specific_agent_family_assignments_created: false
+  specific_agent_row_assignments_created: false
+  agent_family_assignment_matrix_future_required: true
+  future_agent_family_eligibility_matrix_artifact_concept: AtomicRowsExactRowAgentFamilyEligibilityMatrix
+  distribution_counts_grant_agent_access: false
+  distribution_counts_grant_trading_authority: false
+  distribution_counts_grant_live_authority: false
+  distribution_counts_grant_order_authority: false
+  distribution_counts_grant_quantum_backend_authority: false
+future_row_range_policy:
+  row_index_start_first_family: 1
+  row_index_end_last_family: 4183
+  ranges_must_be_contiguous: true
+  ranges_are_future_planning_ranges_not_created_rows: true
+forbidden_current_outputs:
+  - docs/master_plan/atomic_rows/exact_row_sources/
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+next_required_repair_pr: ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN

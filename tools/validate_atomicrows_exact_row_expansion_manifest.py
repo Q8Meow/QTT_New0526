@@ -56,9 +56,11 @@ FAILURE_MARKER = "QTT_ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST_FAILED"
 EXACT_DISTRIBUTION_READY_STATE = "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED"
 BLOCKED_STATE = "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION"
 PASS_EXACT_DISTRIBUTION_READY = "PASS_EXACT_DISTRIBUTION_READY"
+PASS_OWNER_APPROVED_DISTRIBUTION_READY = "PASS_OWNER_APPROVED_DISTRIBUTION_READY"
 PASS_BLOCKED_EXPECTED = "PASS_BLOCKED_EXPECTED"
 DERIVED_COUNT_AUTHORITY = "DERIVED_FROM_PR97_EXPLICIT_DISTRIBUTION"
-OWNER_COUNT_AUTHORITY = "OWNER_APPROVAL_REQUIRED"
+OWNER_APPROVED_COUNT_AUTHORITY = "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION"
+OWNER_APPROVAL_REQUIRED_AUTHORITY = "OWNER_APPROVAL_REQUIRED"
 OWNER_DISTRIBUTION_DECISION = "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION"
 NEXT_REQUIRED_REPAIR_PR = "ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN"
 
@@ -73,6 +75,12 @@ PR100_CONFIG = pr100_gate.DEFAULT_CONFIG
 PR100_REPORT = pr100_gate.DEFAULT_REPORT
 BRIDGE_CONFIG = bridge_gate.DEFAULT_CONFIG
 BRIDGE_REPORT = bridge_gate.DEFAULT_REPORT
+OWNER_APPROVED_DISTRIBUTION_CONFIG = (
+    pathlib.Path("docs")
+    / "master_plan"
+    / "atomicrows"
+    / "AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml"
+)
 
 MASTER_PLAN_CURRENT = pr97_gate.MASTER_PLAN_CURRENT
 CANONICAL_BUNDLE_JSONL = pr97_gate.CANONICAL_BUNDLE_JSONL
@@ -187,6 +195,8 @@ NO_AUTHORITY_FALSE_FIELDS = (
     "optimizer_execution_created",
     "quantum_backend_authority_created",
     "quantum_advantage_evidence_created",
+    "specific_agent_family_assignments_created",
+    "specific_agent_row_assignments_created",
 )
 PR97_EXPLICIT_COUNT_KEYS = (
     "target_row_count",
@@ -429,6 +439,8 @@ def _validate_count_candidate(
     *,
     counts: dict[str, int],
     source_pointer: str,
+    source: str = DERIVED_COUNT_AUTHORITY,
+    validation_result: str = PASS_EXACT_DISTRIBUTION_READY,
 ) -> DistributionDerivation:
     failures: list[str] = []
     if tuple(counts) != REQUIRED_FAMILY_SLUGS:
@@ -462,7 +474,7 @@ def _validate_count_candidate(
         return DistributionDerivation(
             state="FAIL",
             validation_result="FAIL",
-            source=DERIVED_COUNT_AUTHORITY,
+            source=source,
             source_pointer=source_pointer,
             owner_required_decision=None,
             counts=counts,
@@ -476,8 +488,8 @@ def _validate_count_candidate(
 
     return DistributionDerivation(
         state=EXACT_DISTRIBUTION_READY_STATE,
-        validation_result=PASS_EXACT_DISTRIBUTION_READY,
-        source=DERIVED_COUNT_AUTHORITY,
+        validation_result=validation_result,
+        source=source,
         source_pointer=source_pointer,
         owner_required_decision=None,
         counts=counts,
@@ -604,7 +616,7 @@ def derive_pr97_explicit_distribution(
     return DistributionDerivation(
         state=BLOCKED_STATE,
         validation_result=PASS_BLOCKED_EXPECTED,
-        source=OWNER_COUNT_AUTHORITY,
+        source=OWNER_APPROVAL_REQUIRED_AUTHORITY,
         source_pointer=None,
         owner_required_decision=OWNER_DISTRIBUTION_DECISION,
         counts=None,
@@ -614,6 +626,165 @@ def derive_pr97_explicit_distribution(
         final_row_index=None,
         explicit_distribution_found=False,
     )
+
+
+def derive_owner_approved_distribution(repo_root: pathlib.Path) -> DistributionDerivation:
+    config_path = repo_root / OWNER_APPROVED_DISTRIBUTION_CONFIG
+    config, config_failures = _load_yaml_checked(
+        config_path, "Owner-approved exact 15-family count distribution"
+    )
+    source_pointer = _as_posix(OWNER_APPROVED_DISTRIBUTION_CONFIG)
+    if config is None:
+        return DistributionDerivation(
+            state=BLOCKED_STATE,
+            validation_result=PASS_BLOCKED_EXPECTED,
+            source=OWNER_APPROVAL_REQUIRED_AUTHORITY,
+            source_pointer=None,
+            owner_required_decision=OWNER_DISTRIBUTION_DECISION,
+            counts=None,
+            ranges=None,
+            family_counts_sum=None,
+            row_ranges_contiguous=None,
+            final_row_index=None,
+            explicit_distribution_found=False,
+            failures=tuple(config_failures),
+        )
+
+    failures: list[str] = []
+    if config.get("artifact_id") != "ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION":
+        failures.append("owner distribution artifact_id is wrong")
+    if config.get("approval_state") != "OWNER_APPROVED":
+        failures.append("owner distribution approval_state must be OWNER_APPROVED")
+    if config.get("owner_approval_scope") != "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION_ONLY":
+        failures.append("owner distribution approval scope is wrong")
+    if config.get("target_total_row_count") != TARGET_TOTAL_ROW_COUNT:
+        failures.append("owner distribution target_total_row_count must be 4183")
+    if config.get("family_count_total") != FAMILY_COUNT_TOTAL:
+        failures.append("owner distribution family_count_total must be 15")
+    if config.get("owner_distribution_approval_created_by_this_pr") is not True:
+        failures.append("owner distribution must record C0 owner approval")
+
+    no_authority = config.get("not_authorized_by_this_approval")
+    if not isinstance(no_authority, dict):
+        failures.append("owner distribution not_authorized_by_this_approval must be an object")
+        no_authority = {}
+    for field in (
+        "exact_rows_created",
+        "exact_row_source_directory_created",
+        "bundle_created",
+        "sha_created",
+        "sha_computed",
+        "freeze_authority_created",
+        "final_readiness_created",
+        "runtime_created",
+        "live_authority_created",
+        "order_authority_created",
+        "source_acceptance_created",
+        "connector_semantics_created",
+        "optimizer_executed",
+        "quantum_backend_executed",
+        "profit_evidence_created",
+        "latency_evidence_created",
+        "execution_superiority_evidence_created",
+        "quantum_advantage_evidence_created",
+        "specific_agent_family_assignments_created",
+        "specific_agent_row_assignments_created",
+        "agent_trading_authority_created",
+        "agent_live_order_authority_created",
+        "agent_quantum_backend_authority_created",
+    ):
+        if no_authority.get(field) is not False:
+            failures.append(f"owner distribution {field} must be false")
+
+    distribution = config.get("distribution")
+    counts: dict[str, int] = {}
+    if not isinstance(distribution, list):
+        failures.append("owner distribution must include a distribution list")
+    else:
+        if len(distribution) != FAMILY_COUNT_TOTAL:
+            failures.append("owner distribution must contain 15 entries")
+        slugs: list[str] = []
+        for index, entry in enumerate(distribution):
+            if not isinstance(entry, dict):
+                failures.append(f"owner distribution[{index}] must be an object")
+                continue
+            slug = entry.get("family_slug")
+            count = entry.get("target_row_count")
+            number = entry.get("family_number")
+            expected_slug = REQUIRED_FAMILY_SLUGS[index] if index < FAMILY_COUNT_TOTAL else None
+            if slug != expected_slug:
+                failures.append(f"owner distribution[{index}] must use canonical slug order")
+            if number != index + 1:
+                failures.append(f"owner distribution[{index}].family_number must be {index + 1}")
+            if isinstance(slug, str):
+                slugs.append(slug)
+            if isinstance(slug, str) and isinstance(count, int) and not isinstance(count, bool):
+                counts[slug] = count
+        if len(slugs) != len(set(slugs)):
+            failures.append("owner distribution must not contain duplicate family slugs")
+    if failures:
+        return DistributionDerivation(
+            state="FAIL",
+            validation_result="FAIL",
+            source=OWNER_APPROVED_COUNT_AUTHORITY,
+            source_pointer=source_pointer,
+            owner_required_decision=None,
+            counts=counts or None,
+            ranges=None,
+            family_counts_sum=sum(counts.values()) if counts else None,
+            row_ranges_contiguous=False,
+            final_row_index=None,
+            explicit_distribution_found=True,
+            failures=tuple(failures),
+        )
+
+    candidate = _validate_count_candidate(
+        counts=counts,
+        source_pointer=source_pointer,
+        source=OWNER_APPROVED_COUNT_AUTHORITY,
+        validation_result=PASS_OWNER_APPROVED_DISTRIBUTION_READY,
+    )
+    if candidate.failures:
+        return candidate
+
+    if config.get("counts_sum") != candidate.family_counts_sum:
+        failures.append("owner distribution counts_sum must match computed sum")
+    quantum = config.get("quantum_forward_distribution")
+    if not isinstance(quantum, dict) or quantum.get("quantum_family_total_rows") != 1103:
+        failures.append("owner distribution quantum family total must be 1103")
+    agent = config.get("agent_governance_distribution")
+    if not isinstance(agent, dict) or agent.get("primary_agent_governance_family_rows") != 270:
+        failures.append("owner distribution family 009 count must be 270")
+    if failures:
+        return DistributionDerivation(
+            state="FAIL",
+            validation_result="FAIL",
+            source=OWNER_APPROVED_COUNT_AUTHORITY,
+            source_pointer=source_pointer,
+            owner_required_decision=None,
+            counts=candidate.counts,
+            ranges=candidate.ranges,
+            family_counts_sum=candidate.family_counts_sum,
+            row_ranges_contiguous=False,
+            final_row_index=candidate.final_row_index,
+            explicit_distribution_found=True,
+            failures=tuple(failures),
+        )
+    return candidate
+
+
+def derive_current_distribution(
+    repo_root: pathlib.Path,
+    pr97_plan: dict[str, Any],
+    pr97_report: dict[str, Any],
+    pr97_schema: dict[str, Any] | None = None,
+) -> DistributionDerivation:
+    pr97_derivation = derive_pr97_explicit_distribution(
+        pr97_plan, pr97_report, pr97_schema
+    )
+    if pr97_derivation.failures or pr97_derivation.explicit_distribution_found:
+        return pr97_derivation
+    return derive_owner_approved_distribution(repo_root)
 
 
 def _require_exact_list(
@@ -682,8 +853,19 @@ def validate_config_payload(
     if not isinstance(owner_process, dict):
         failures.append("owner_process_approval must be an object")
         owner_process = {}
-    if owner_process.get("owner_approves_exact_counts_now") is not False:
-        failures.append("owner_process_approval.owner_approves_exact_counts_now must be false")
+    current_source = derivation.source if derivation is not None else None
+    owner_approved_ready = current_source == OWNER_APPROVED_COUNT_AUTHORITY
+    pr97_ready = current_source == DERIVED_COUNT_AUTHORITY
+    blocked_for_owner = current_source == OWNER_APPROVAL_REQUIRED_AUTHORITY
+
+    if owner_process.get("owner_approves_exact_counts_now") is not owner_approved_ready:
+        failures.append(
+            "owner_process_approval.owner_approves_exact_counts_now must match current owner-approved distribution state"
+        )
+    if owner_process.get("codex_may_use_owner_approved_c0_distribution") is not owner_approved_ready:
+        failures.append(
+            "owner_process_approval.codex_may_use_owner_approved_c0_distribution must match current owner-approved distribution state"
+        )
     for field in (
         "codex_may_invent_counts",
         "codex_may_estimate_counts",
@@ -693,9 +875,28 @@ def validate_config_payload(
     ):
         if owner_process.get(field) is not False:
             failures.append(f"owner_process_approval.{field} must be false")
-    if owner_process.get("codex_may_use_pr97_explicit_counts_only") is not True:
+    if owner_process.get("codex_may_use_pr97_explicit_counts_only") is not pr97_ready:
         failures.append(
-            "owner_process_approval.codex_may_use_pr97_explicit_counts_only must be true"
+            "owner_process_approval.codex_may_use_pr97_explicit_counts_only must match PR97-derived distribution state"
+        )
+    if owner_process.get("historical_owner_distribution_required_before_c0") is not True:
+        failures.append(
+            "owner_process_approval.historical_owner_distribution_required_before_c0 must be true"
+        )
+    if owner_process.get("c0_owner_distribution_approval_applied") is not owner_approved_ready:
+        failures.append(
+            "owner_process_approval.c0_owner_distribution_approval_applied must match owner-approved distribution state"
+        )
+    if owner_process.get("if_pr97_counts_absent_block_for_owner_decision") is not blocked_for_owner:
+        failures.append(
+            "owner_process_approval.if_pr97_counts_absent_block_for_owner_decision must be true only while blocked"
+        )
+    expected_required_if_absent = (
+        OWNER_DISTRIBUTION_DECISION if blocked_for_owner else None
+    )
+    if owner_process.get("required_owner_decision_if_absent") != expected_required_if_absent:
+        failures.append(
+            "owner_process_approval.required_owner_decision_if_absent must reflect current distribution state"
         )
 
     distribution = config.get("distribution_authority")
@@ -713,6 +914,26 @@ def validate_config_payload(
     ):
         if distribution.get(field) is not False:
             failures.append(f"distribution_authority.{field} must be false")
+
+    count_derivation = config.get("count_derivation")
+    if not isinstance(count_derivation, dict):
+        failures.append("count_derivation must be an object")
+        count_derivation = {}
+    if count_derivation.get("pr97_explicit_distribution_checked") is not True:
+        failures.append("count_derivation.pr97_explicit_distribution_checked must be true")
+    if count_derivation.get("pr97_explicit_distribution_found") is not False:
+        failures.append("count_derivation must preserve PR97 missing exact-count finding")
+    if count_derivation.get("historical_owner_distribution_required_before_c0") is not True:
+        failures.append("count_derivation must preserve historical owner-distribution requirement")
+    if count_derivation.get("historical_owner_required_decision_before_c0") != OWNER_DISTRIBUTION_DECISION:
+        failures.append("count_derivation must preserve historical owner-required decision")
+    if count_derivation.get("c0_owner_distribution_supplied") is not owner_approved_ready:
+        failures.append("count_derivation.c0_owner_distribution_supplied must match current state")
+    expected_c0_pointer = (
+        _as_posix(OWNER_APPROVED_DISTRIBUTION_CONFIG) if owner_approved_ready else None
+    )
+    if count_derivation.get("c0_distribution_source_pointer") != expected_c0_pointer:
+        failures.append("count_derivation.c0_distribution_source_pointer must match current state")
 
     no_authority = config.get("no_authority_created")
     if isinstance(no_authority, dict):
@@ -838,15 +1059,22 @@ def validate_config_payload(
     if derivation.explicit_distribution_found:
         expected_state = EXACT_DISTRIBUTION_READY_STATE
         if config.get("exact_distribution_ready") is not True:
-            failures.append("exact_distribution_ready must be true when PR97 distribution exists")
+            failures.append("exact_distribution_ready must be true when exact distribution exists")
         if config.get("owner_distribution_required") is not False:
-            failures.append("owner_distribution_required must be false when PR97 distribution exists")
+            failures.append("owner_distribution_required must be false when exact distribution exists")
         if config.get("gate_mode") != expected_state or config.get("manifest_state") != expected_state:
             failures.append("gate_mode and manifest_state must be exact-ready")
-        if config.get("validation_result") != PASS_EXACT_DISTRIBUTION_READY:
-            failures.append("validation_result must be PASS_EXACT_DISTRIBUTION_READY")
-        if distribution.get("source") != DERIVED_COUNT_AUTHORITY:
-            failures.append("distribution_authority.source must be PR97-derived")
+        expected_validation_result = (
+            PASS_OWNER_APPROVED_DISTRIBUTION_READY
+            if derivation.source == OWNER_APPROVED_COUNT_AUTHORITY
+            else PASS_EXACT_DISTRIBUTION_READY
+        )
+        if config.get("validation_result") != expected_validation_result:
+            failures.append(f"validation_result must be {expected_validation_result}")
+        if distribution.get("source") != derivation.source:
+            failures.append("distribution_authority.source must match current exact distribution source")
+        if distribution.get("source_pointer") != derivation.source_pointer:
+            failures.append("distribution_authority.source_pointer must match current distribution source")
         if distribution.get("owner_required_decision") is not None:
             failures.append("owner_required_decision must be null when exact counts exist")
         for family in families:
@@ -858,8 +1086,8 @@ def validate_config_payload(
                 failures.append(f"{slug}.target_row_count must match PR97 distribution")
             if family.get("row_index_start") != start or family.get("row_index_end") != end:
                 failures.append(f"{slug}.row_index range must be deterministic and contiguous")
-            if family.get("count_authority") != DERIVED_COUNT_AUTHORITY:
-                failures.append(f"{slug}.count_authority must be PR97-derived")
+            if family.get("count_authority") != derivation.source:
+                failures.append(f"{slug}.count_authority must match current distribution authority")
             if family.get("distribution_state") != EXACT_DISTRIBUTION_READY_STATE:
                 failures.append(f"{slug}.distribution_state must be exact-ready")
     else:
@@ -871,7 +1099,7 @@ def validate_config_payload(
             failures.append("gate_mode and manifest_state must be blocked pending owner distribution")
         if config.get("validation_result") != PASS_BLOCKED_EXPECTED:
             failures.append("validation_result must be PASS_BLOCKED_EXPECTED")
-        if distribution.get("source") != OWNER_COUNT_AUTHORITY:
+        if distribution.get("source") != OWNER_APPROVAL_REQUIRED_AUTHORITY:
             failures.append("distribution_authority.source must be OWNER_APPROVAL_REQUIRED")
         if distribution.get("source_pointer") is not None:
             failures.append("distribution_authority.source_pointer must be null while blocked")
@@ -883,7 +1111,7 @@ def validate_config_payload(
                 failures.append(f"{slug}.target_row_count must be null while blocked")
             if family.get("row_index_start") is not None or family.get("row_index_end") is not None:
                 failures.append(f"{slug}.row ranges must be null while blocked")
-            if family.get("count_authority") != OWNER_COUNT_AUTHORITY:
+            if family.get("count_authority") != OWNER_APPROVAL_REQUIRED_AUTHORITY:
                 failures.append(f"{slug}.count_authority must be OWNER_APPROVAL_REQUIRED")
             if family.get("distribution_state") != BLOCKED_STATE:
                 failures.append(f"{slug}.distribution_state must be blocked")
@@ -1213,13 +1441,28 @@ def build_report(
         "exact_distribution_ready": derivation.explicit_distribution_found,
         "owner_distribution_required": not derivation.explicit_distribution_found,
         "owner_process_approval_preserved": True,
-        "owner_approves_exact_counts_now": False,
-        "codex_may_use_pr97_explicit_counts_only": True,
+        "owner_approves_exact_counts_now": derivation.source == OWNER_APPROVED_COUNT_AUTHORITY,
+        "codex_may_use_pr97_explicit_counts_only": derivation.source == DERIVED_COUNT_AUTHORITY,
+        "codex_may_use_owner_approved_c0_distribution": (
+            derivation.source == OWNER_APPROVED_COUNT_AUTHORITY
+        ),
         "codex_may_invent_counts": False,
         "codex_may_estimate_counts": False,
         "codex_may_balance_counts": False,
         "codex_may_optimize_counts": False,
         "codex_may_infer_counts_from_family_names": False,
+        "pr97_explicit_distribution_found": (
+            config.get("count_derivation", {}).get("pr97_explicit_distribution_found")
+        ),
+        "pr97_missing_count_finding_preserved": (
+            config.get("count_derivation", {}).get("pr97_explicit_distribution_found") is False
+        ),
+        "historical_owner_distribution_required_before_c0": (
+            config.get("count_derivation", {}).get("historical_owner_distribution_required_before_c0")
+        ),
+        "c0_owner_distribution_supplied": (
+            config.get("count_derivation", {}).get("c0_owner_distribution_supplied")
+        ),
         "target_total_row_count": TARGET_TOTAL_ROW_COUNT,
         "family_count_total": FAMILY_COUNT_TOTAL,
         "families_are_top_level_buckets_not_parameters": True,
@@ -1246,6 +1489,14 @@ def build_report(
         "optimizer_execution_created": False,
         "quantum_backend_authority_created": False,
         "quantum_advantage_evidence_created": False,
+        "specific_agent_family_assignments_created": False,
+        "specific_agent_row_assignments_created": False,
+        "agent_family_assignment_matrix_future_required": True,
+        "distribution_counts_grant_agent_access": False,
+        "distribution_counts_grant_trading_authority": False,
+        "distribution_counts_grant_live_authority": False,
+        "distribution_counts_grant_order_authority": False,
+        "distribution_counts_grant_quantum_backend_authority": False,
         "pr97_expansion_plan_present": upstream.pr97_expansion_plan_present,
         "pr98_blueprints_are_not_exact_rows": upstream.pr98_blueprints_are_not_exact_rows,
         "pr99_path_b_remains_current_blocked_state": (
@@ -1297,21 +1548,37 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         "latency_evidence_created",
         "execution_superiority_evidence_created",
         "quantum_advantage_evidence_created",
+        "specific_agent_family_assignments_created",
+        "specific_agent_row_assignments_created",
+        "distribution_counts_grant_agent_access",
+        "distribution_counts_grant_trading_authority",
+        "distribution_counts_grant_live_authority",
+        "distribution_counts_grant_order_authority",
+        "distribution_counts_grant_quantum_backend_authority",
     ):
         if report.get(field) is not False:
             failures.append(f"report {field} must be false")
     if report.get("distribution_authority") not in (
         DERIVED_COUNT_AUTHORITY,
-        OWNER_COUNT_AUTHORITY,
+        OWNER_APPROVED_COUNT_AUTHORITY,
+        OWNER_APPROVAL_REQUIRED_AUTHORITY,
     ):
         failures.append("report distribution_authority is invalid")
-    if report.get("distribution_authority") == DERIVED_COUNT_AUTHORITY:
+    if report.get("distribution_authority") in (
+        DERIVED_COUNT_AUTHORITY,
+        OWNER_APPROVED_COUNT_AUTHORITY,
+    ):
         if report.get("family_counts_sum") != TARGET_TOTAL_ROW_COUNT:
             failures.append("report family_counts_sum must be 4183 when exact-ready")
         if report.get("row_ranges_contiguous") is not True:
             failures.append("report row ranges must be contiguous when exact-ready")
         if report.get("final_row_index") != TARGET_TOTAL_ROW_COUNT:
             failures.append("report final_row_index must be 4183 when exact-ready")
+        if report.get("owner_required_decision") is not None:
+            failures.append("exact-ready report owner_required_decision must be null")
+        if report.get("distribution_authority") == OWNER_APPROVED_COUNT_AUTHORITY:
+            if report.get("validation_result") != PASS_OWNER_APPROVED_DISTRIBUTION_READY:
+                failures.append("owner-approved report validation_result is wrong")
     else:
         if report.get("owner_required_decision") != OWNER_DISTRIBUTION_DECISION:
             failures.append("blocked report must record owner_required_decision")
@@ -1351,7 +1618,7 @@ def validate(
     if schema is None or config is None or pr97_plan is None or pr97_report is None:
         return ValidationResult(False, tuple(failures), None)
 
-    derivation = derive_pr97_explicit_distribution(pr97_plan, pr97_report, pr97_schema)
+    derivation = derive_current_distribution(repo_root, pr97_plan, pr97_report, pr97_schema)
     upstream_failures, upstream = validate_upstream_state(repo_root)
     failures.extend(upstream_failures)
     failures.extend(validate_static_surface(repo_root / "tools" / pathlib.Path(__file__).name))

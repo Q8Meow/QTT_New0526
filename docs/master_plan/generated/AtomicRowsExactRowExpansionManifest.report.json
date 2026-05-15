@@ -1,4 +1,5 @@
 {
+  "agent_family_assignment_matrix_future_required": true,
   "agent_governance_family_preserved": true,
   "allowed_subfamily_classes": [
     "PARAMETER_DEFINITION",
@@ -24,50 +25,57 @@
   "atomicrows_bundle_jsonl_created": false,
   "atomicrows_bundle_sha256_created": false,
   "authority_class": "STATIC_REPAIR_MANIFEST_NOT_EXACT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE",
+  "c0_owner_distribution_supplied": true,
   "codex_may_balance_counts": false,
   "codex_may_estimate_counts": false,
   "codex_may_infer_counts_from_family_names": false,
   "codex_may_invent_counts": false,
   "codex_may_optimize_counts": false,
-  "codex_may_use_pr97_explicit_counts_only": true,
+  "codex_may_use_owner_approved_c0_distribution": true,
+  "codex_may_use_pr97_explicit_counts_only": false,
   "config_path": "docs/master_plan/atomicrows/AtomicRowsExactRowExpansionManifest.yaml",
   "connector_semantic_authority_created": false,
   "deny_by_default_agent_access_preserved": true,
-  "distribution_authority": "OWNER_APPROVAL_REQUIRED",
-  "distribution_source_pointer": null,
-  "exact_distribution_ready": false,
+  "distribution_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+  "distribution_counts_grant_agent_access": false,
+  "distribution_counts_grant_live_authority": false,
+  "distribution_counts_grant_order_authority": false,
+  "distribution_counts_grant_quantum_backend_authority": false,
+  "distribution_counts_grant_trading_authority": false,
+  "distribution_source_pointer": "docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml",
+  "exact_distribution_ready": true,
   "exact_row_source_directory_created": false,
   "exact_rows_created": false,
   "execution_superiority_evidence_created": false,
   "families": [
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_001_SIGNAL_FEATURES",
       "family_number": 1,
       "family_slug": "001_signal_features",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 390,
+      "row_index_start": 1,
       "subfamily_classes": [
         "PARAMETER_DEFINITION",
         "ALGORITHM_DEFINITION",
         "SOURCE_EVIDENCE_REQUIREMENT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 390
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_002_SCORING_RANKING",
       "family_number": 2,
       "family_slug": "002_scoring_ranking",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 720,
+      "row_index_start": 391,
       "subfamily_classes": [
         "SCORING_INPUT",
         "RANKING_INPUT",
@@ -76,177 +84,177 @@
         "ALGORITHM_DEFINITION",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 330
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_003_NORMALIZATION_CALIBRATION",
       "family_number": 3,
       "family_slug": "003_normalization_calibration",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 940,
+      "row_index_start": 721,
       "subfamily_classes": [
         "PARAMETER_DEFINITION",
         "ALGORITHM_DEFINITION",
         "SCORING_INPUT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 220
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_004_RISK_CONTROL",
       "family_number": 4,
       "family_slug": "004_risk_control",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 1255,
+      "row_index_start": 941,
       "subfamily_classes": [
         "RISK_CONTROL",
         "PARAMETER_DEFINITION",
         "SOURCE_EVIDENCE_REQUIREMENT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 315
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_005_EXECUTION_CONNECTOR_BOUNDARY",
       "family_number": 5,
       "family_slug": "005_execution_connector_boundary",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 1535,
+      "row_index_start": 1256,
       "subfamily_classes": [
         "EXECUTION_BOUNDARY",
         "SOURCE_EVIDENCE_REQUIREMENT",
         "PARAMETER_DEFINITION",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 280
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_006_CAPITAL_SIZING_CASH",
       "family_number": 6,
       "family_slug": "006_capital_sizing_cash",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/006_capital_sizing_cash.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 1755,
+      "row_index_start": 1536,
       "subfamily_classes": [
         "CAPITAL_CONTROL",
         "RISK_CONTROL",
         "SOURCE_EVIDENCE_REQUIREMENT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 220
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_007_LATENCY_ROUTING",
       "family_number": 7,
       "family_slug": "007_latency_routing",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 2005,
+      "row_index_start": 1756,
       "subfamily_classes": [
         "LATENCY_CONTROL",
         "EXECUTION_BOUNDARY",
         "SOURCE_EVIDENCE_REQUIREMENT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 250
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_008_ERROR_GUARD_FAIL_CLOSED",
       "family_number": 8,
       "family_slug": "008_error_guard_fail_closed",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 2225,
+      "row_index_start": 2006,
       "subfamily_classes": [
         "ERROR_GUARD",
         "RISK_CONTROL",
         "EXECUTION_BOUNDARY",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 220
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_009_LIFECYCLE_AGENT_BINDING",
       "family_number": 9,
       "family_slug": "009_lifecycle_agent_binding",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 2495,
+      "row_index_start": 2226,
       "subfamily_classes": [
         "AGENT_ACCESS_POLICY",
         "FAMILY_ACCESS_POLICY",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 270
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC",
       "family_number": 10,
       "family_slug": "010_source_evidence_connector_semantic",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 2810,
+      "row_index_start": 2496,
       "subfamily_classes": [
         "SOURCE_EVIDENCE_REQUIREMENT",
         "EXECUTION_BOUNDARY",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 315
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_011_REPLAY_PAPER_VALIDATION",
       "family_number": 11,
       "family_slug": "011_replay_paper_validation",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 3080,
+      "row_index_start": 2811,
       "subfamily_classes": [
         "REPLAY_PAPER_REQUIREMENT",
         "SCORING_INPUT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 270
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_012_QUANTUM_ADVISORY_OPTIMIZATION",
       "family_number": 12,
       "family_slug": "012_quantum_advisory_optimization",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 3370,
+      "row_index_start": 3081,
       "subfamily_classes": [
         "QUANTUM_METADATA",
         "OPTIMIZER_INPUT",
@@ -254,18 +262,18 @@
         "RANKING_INPUT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 290
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_013_QUANTUM_QUBO_ISING_METADATA",
       "family_number": 13,
       "family_slug": "013_quantum_qubo_ising_metadata",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 3635,
+      "row_index_start": 3371,
       "subfamily_classes": [
         "QUANTUM_METADATA",
         "QUANTUM_BACKEND_REQUIREMENT",
@@ -274,18 +282,18 @@
         "RANKING_INPUT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 265
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA",
       "family_number": 14,
       "family_slug": "014_quantum_qaoa_vqe_annealing_metadata",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 3900,
+      "row_index_start": 3636,
       "subfamily_classes": [
         "QUANTUM_METADATA",
         "QUANTUM_BACKEND_REQUIREMENT",
@@ -294,18 +302,18 @@
         "RANKING_INPUT",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 265
     },
     {
-      "count_authority": "OWNER_APPROVAL_REQUIRED",
-      "distribution_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+      "count_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+      "distribution_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
       "family_id": "AR_FAMILY_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR",
       "family_number": 15,
       "family_slug": "015_quantum_portfolio_hybrid_comparator",
       "future_exact_row_source_file": "docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl",
       "future_source_blueprint_file": "docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl",
-      "row_index_end": null,
-      "row_index_start": null,
+      "row_index_end": 4183,
+      "row_index_start": 3901,
       "subfamily_classes": [
         "QUANTUM_METADATA",
         "QUANTUM_BACKEND_REQUIREMENT",
@@ -315,14 +323,14 @@
         "CAPITAL_CONTROL",
         "OWNER_APPROVAL_REQUIREMENT"
       ],
-      "target_row_count": null
+      "target_row_count": 283
     }
   ],
   "families_are_top_level_buckets_not_parameters": true,
   "family_count_total": 15,
-  "family_counts_sum": null,
+  "family_counts_sum": 4183,
   "final_readiness_created": false,
-  "final_row_index": null,
+  "final_row_index": 4183,
   "forbidden_artifacts_absent": {
     "AtomicRows.bundle.jsonl": true,
     "AtomicRows.bundle.sha256": true,
@@ -340,18 +348,21 @@
     "activation_state"
   ],
   "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "historical_owner_distribution_required_before_c0": true,
   "latency_evidence_created": false,
   "manifest_created": true,
-  "manifest_state": "BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION",
+  "manifest_state": "EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED",
   "master_plan_unchanged": true,
   "next_required_repair_pr": "ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN",
   "optimizer_execution_created": false,
-  "owner_approves_exact_counts_now": false,
-  "owner_distribution_required": true,
+  "owner_approves_exact_counts_now": true,
+  "owner_distribution_required": false,
   "owner_process_approval_preserved": true,
-  "owner_required_decision": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION",
+  "owner_required_decision": null,
   "pr100_sha_freeze_gate_remains_blocked": true,
   "pr97_expansion_plan_present": true,
+  "pr97_explicit_distribution_found": false,
+  "pr97_missing_count_finding_preserved": true,
   "pr98_blueprints_are_not_exact_rows": true,
   "pr99_path_b_remains_current_blocked_state": true,
   "profit_evidence_created": false,
@@ -365,13 +376,15 @@
   "repair_scope": "ATOMICROWS_4183_EXACT_ROW_EXPANSION_MANIFEST",
   "report_path": "docs/master_plan/generated/AtomicRowsExactRowExpansionManifest.report.json",
   "report_type": "ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST_REPORT",
-  "row_ranges_contiguous": null,
+  "row_ranges_contiguous": true,
   "runtime_live_order_authority_created": false,
   "schema_path": "schemas/atomicrows/atomicrows_exact_row_expansion_manifest.schema.json",
   "sha_computed": false,
   "source_fact_authority_created": false,
+  "specific_agent_family_assignments_created": false,
+  "specific_agent_row_assignments_created": false,
   "subfamily_row_class_doctrine_required": true,
   "target_total_row_count": 4183,
-  "validation_result": "PASS_BLOCKED_EXPECTED",
+  "validation_result": "PASS_OWNER_APPROVED_DISTRIBUTION_READY",
   "validator_stdout_marker": "QTT_ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST_OK"
 }
