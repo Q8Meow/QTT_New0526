@@ -92,6 +92,10 @@ from tools import (
     validate_atomicrows_bundle_sha_freeze_authority_gate
     as atomicrows_bundle_sha_freeze_authority_gate,
 )
+from tools import (
+    validate_atomicrows_exact_row_authority_classifier_bridge
+    as atomicrows_exact_row_authority_classifier_bridge,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -776,6 +780,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_exact_row_authority_classifier_bridge.py"
             ),
         ],
         [
@@ -1772,6 +1783,13 @@ def test_runner_exposes_atomicrows_bundle_sha_freeze_authority_gate_success_mark
     )
 
 
+def test_runner_exposes_atomicrows_exact_row_authority_classifier_bridge_success_marker():
+    assert (
+        atomicrows_exact_row_authority_classifier_bridge.SUCCESS_MARKER
+        == "QTT_ATOMICROWS_EXACT_ROW_AUTHORITY_CLASSIFIER_BRIDGE_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2594,6 +2612,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
+    repair_bridge_index = command_names.index(
+        "validate_atomicrows_exact_row_authority_classifier_bridge.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2630,6 +2651,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < pr98_index
         < pr99_index
         < pr100_index
+        < repair_bridge_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2734,6 +2756,13 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     assert commands[pr100_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_sha_freeze_authority_gate.py"),
+    ]
+    assert commands[repair_bridge_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_exact_row_authority_classifier_bridge.py"
+        ),
     ]
 
 
@@ -4159,7 +4188,9 @@ def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries():
     assert not (Path(".") / optimizer_arbitration_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_pr87_static_contract_preserves_candidate_generation_boundaries():
+def test_pr87_static_contract_preserves_candidate_generation_boundaries(monkeypatch):
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+
     assert candidate_generation_gate.main([]) == 0
     production = candidate_generation_gate.load_yaml(
         candidate_generation_gate.DEFAULT_PRODUCTION_REGISTRY
