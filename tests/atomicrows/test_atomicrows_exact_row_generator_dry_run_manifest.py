@@ -265,7 +265,7 @@ def test_run_validation_gates_includes_dry_run_gate(monkeypatch):
     generated_index = command_names.index("validate_generated_derivative_bootstrap_gate_static.py")
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
-    assert bridge_index < c0_index < manifest_index < dry_run_index < generated_index
+    assert bridge_index < manifest_index < c0_index < dry_run_index < generated_index
     assert dry_run_index < no_runtime_index
     assert commands[dry_run_index] == [
         python_executable,

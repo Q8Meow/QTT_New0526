@@ -734,13 +734,6 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
-                "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py",
-            ),
-        ],
-        [
-            sys.executable,
-            _path(
-                "tools",
                 "validate_atomicrows_exact_row_expansion_manifest.py",
             ),
         ],
@@ -748,7 +741,21 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_atomicrows_exact_row_generator_dry_run_manifest.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest.py",
             ),
         ],
         [
