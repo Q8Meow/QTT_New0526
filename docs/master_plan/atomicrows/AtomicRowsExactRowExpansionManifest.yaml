@@ -1,0 +1,749 @@
+artifact_id: ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST
+artifact_version: v1
+repair_scope: ATOMICROWS_4183_EXACT_ROW_EXPANSION_MANIFEST
+authority_class: STATIC_REPAIR_MANIFEST_NOT_EXACT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE
+gate_mode: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+manifest_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+validation_result: PASS_BLOCKED_EXPECTED
+target_total_row_count: 4183
+target_total_row_count_status: PLANNING_TARGET_PENDING_EXACT_ROW_GENERATION
+family_count_total: 15
+exact_distribution_ready: false
+owner_distribution_required: true
+exact_rows_created_by_this_pr: false
+exact_row_source_directory_created_by_this_pr: false
+bundle_created_by_this_pr: false
+sha_created_by_this_pr: false
+freeze_created_by_this_pr: false
+final_readiness_created_by_this_pr: false
+families_are_top_level_buckets_not_parameters: true
+subfamily_row_class_doctrine_required: true
+owner_process_approval:
+  repair_pr_b_process_approved: true
+  owner_approves_exact_counts_now: false
+  codex_may_use_pr97_explicit_counts_only: true
+  codex_may_invent_counts: false
+  codex_may_estimate_counts: false
+  codex_may_balance_counts: false
+  codex_may_optimize_counts: false
+  codex_may_infer_counts_from_family_names: false
+  if_pr97_counts_absent_block_for_owner_decision: true
+  required_owner_decision_if_absent: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+upstream_dependencies:
+  - AtomicRowsFullBundleRowExpansionPlan
+  - AtomicRowsBundleRowFamilySourceFiles
+  - AtomicRowsBundleBuilderDeterministicAssemblyGate
+  - AtomicRowsBundleShaFreezeAuthorityGate
+  - AtomicRowsExactRowAuthorityClassifierBridge
+distribution_authority:
+  source: OWNER_APPROVAL_REQUIRED
+  source_pointer: null
+  owner_required_decision: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+  no_guesswork: true
+  codex_may_invent_counts: false
+  codex_may_estimate_counts: false
+  codex_may_balance_counts: false
+  codex_may_optimize_counts: false
+  codex_may_infer_counts_from_family_names: false
+count_derivation:
+  pr97_explicit_distribution_checked: true
+  pr97_explicit_distribution_found: false
+  pr97_absence_reason: PR97_DECLARES_OWNER_REVIEW_REQUIRED_AND_NO_EXACT_PER_FAMILY_COUNTS
+  accepted_source_pointer: null
+  owner_required_decision: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+allowed_subfamily_classes:
+  - PARAMETER_DEFINITION
+  - ALGORITHM_DEFINITION
+  - AGENT_ACCESS_POLICY
+  - FAMILY_ACCESS_POLICY
+  - SCORING_INPUT
+  - RANKING_INPUT
+  - OPTIMIZER_INPUT
+  - RISK_CONTROL
+  - EXECUTION_BOUNDARY
+  - CAPITAL_CONTROL
+  - LATENCY_CONTROL
+  - ERROR_GUARD
+  - SOURCE_EVIDENCE_REQUIREMENT
+  - REPLAY_PAPER_REQUIREMENT
+  - QUANTUM_METADATA
+  - QUANTUM_BACKEND_REQUIREMENT
+  - OWNER_APPROVAL_REQUIREMENT
+future_exact_row_required_fields:
+  - family_slug
+  - subfamily_class
+  - row_class
+  - row_kind
+  - parameter_or_algorithm_scope
+  - agent_access_scope
+  - authority_class
+  - activation_state
+families:
+  - family_number: 1
+    family_slug: 001_signal_features
+    family_id: AR_FAMILY_001_SIGNAL_FEATURES
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl
+    family_role: SIGNAL_FEATURE_PARAMETER_AND_FEATURE_INVENTORY
+    subfamily_classes:
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: SOURCE_EVIDENCE_REQUIRED_BEFORE_CONNECTOR_OR_RUNTIME_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 2
+    family_slug: 002_scoring_ranking
+    family_id: AR_FAMILY_002_SCORING_RANKING
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl
+    family_role: SCORING_RANKING_INPUT_AND_POLICY_INVENTORY
+    subfamily_classes:
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OPTIMIZER_INPUT
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OPTIMIZER_INPUT
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: SOURCE_EVIDENCE_AND_SCORING_POLICY_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 3
+    family_slug: 003_normalization_calibration
+    family_id: AR_FAMILY_003_NORMALIZATION_CALIBRATION
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl
+    family_role: NORMALIZATION_CALIBRATION_POLICY_INVENTORY
+    subfamily_classes:
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - SCORING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - PARAMETER_DEFINITION
+      - ALGORITHM_DEFINITION
+      - SCORING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: SOURCE_EVIDENCE_AND_REPLAY_PAPER_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 4
+    family_slug: 004_risk_control
+    family_id: AR_FAMILY_004_RISK_CONTROL
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl
+    family_role: RISK_CONTROL_POLICY_INVENTORY
+    subfamily_classes:
+      - RISK_CONTROL
+      - PARAMETER_DEFINITION
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - RISK_CONTROL
+      - PARAMETER_DEFINITION
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: SOURCE_EVIDENCE_AND_RUNTIME_RECEIPT_REQUIRED_BEFORE_LIVE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 5
+    family_slug: 005_execution_connector_boundary
+    family_id: AR_FAMILY_005_EXECUTION_CONNECTOR_BOUNDARY
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl
+    family_role: EXECUTION_CONNECTOR_BOUNDARY_POLICY_INVENTORY
+    subfamily_classes:
+      - EXECUTION_BOUNDARY
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - PARAMETER_DEFINITION
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - EXECUTION_BOUNDARY
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - PARAMETER_DEFINITION
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: SOURCE_EVIDENCE_AND_CONNECTOR_SEMANTIC_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 6
+    family_slug: 006_capital_sizing_cash
+    family_id: AR_FAMILY_006_CAPITAL_SIZING_CASH
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/006_capital_sizing_cash.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl
+    family_role: CAPITAL_SIZING_CASH_CONTROL_INVENTORY
+    subfamily_classes:
+      - CAPITAL_CONTROL
+      - RISK_CONTROL
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - CAPITAL_CONTROL
+      - RISK_CONTROL
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: RUNTIME_CASH_RECEIPT_REQUIRED_BEFORE_LIVE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 7
+    family_slug: 007_latency_routing
+    family_id: AR_FAMILY_007_LATENCY_ROUTING
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl
+    family_role: LATENCY_ROUTING_CONTROL_INVENTORY
+    subfamily_classes:
+      - LATENCY_CONTROL
+      - EXECUTION_BOUNDARY
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - LATENCY_CONTROL
+      - EXECUTION_BOUNDARY
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: LATENCY_EVIDENCE_REQUIRED_BEFORE_ROUTING_OR_LIVE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 8
+    family_slug: 008_error_guard_fail_closed
+    family_id: AR_FAMILY_008_ERROR_GUARD_FAIL_CLOSED
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl
+    family_role: ERROR_GUARD_FAIL_CLOSED_INVENTORY
+    subfamily_classes:
+      - ERROR_GUARD
+      - RISK_CONTROL
+      - EXECUTION_BOUNDARY
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - ERROR_GUARD
+      - RISK_CONTROL
+      - EXECUTION_BOUNDARY
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: FAIL_CLOSED_EVIDENCE_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 9
+    family_slug: 009_lifecycle_agent_binding
+    family_id: AR_FAMILY_009_LIFECYCLE_AGENT_BINDING
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl
+    family_role: LIFECYCLE_AGENT_BINDING_GOVERNANCE_INVENTORY
+    subfamily_classes:
+      - AGENT_ACCESS_POLICY
+      - FAMILY_ACCESS_POLICY
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - AGENT_ACCESS_POLICY
+      - FAMILY_ACCESS_POLICY
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: PRIMARY_AGENT_ROW_ACCESS_GOVERNANCE_FAMILY
+    source_dependency_class: AGENT_BINDING_COMMAND_MATRIX_AND_OWNER_POLICY_REQUIRED_BEFORE_ACCESS
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    future_policy_row_kinds_allowed:
+      - AGENT_ROW_ACCESS_POLICY
+      - AGENT_FAMILY_ACCESS_POLICY
+      - AGENT_PARAMETER_ACCESS_POLICY
+      - AGENT_ALGORITHM_ACCESS_POLICY
+      - AGENT_QUANTUM_ROW_ACCESS_POLICY
+      - AGENT_LIVE_MODE_ACCESS_POLICY
+    may_grant_agent_access_now: false
+    access_decision_default: DENY
+    row_existence_grants_access: false
+    family_membership_grants_access: false
+    quantum_applicability_grants_access: false
+    owner_quantum_priority_grants_access: false
+    replay_paper_eligibility_grants_live_access: false
+    static_selection_eligibility_grants_order_authority: false
+    direct_order_authority_allowed_default: false
+    direct_quantum_order_authority_allowed_default: false
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 10
+    family_slug: 010_source_evidence_connector_semantic
+    family_id: AR_FAMILY_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl
+    family_role: SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_REQUIREMENT_INVENTORY
+    subfamily_classes:
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - EXECUTION_BOUNDARY
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - SOURCE_EVIDENCE_REQUIREMENT
+      - EXECUTION_BOUNDARY
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: ACCEPTED_SOURCE_PACKET_AND_CONNECTOR_SEMANTIC_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 11
+    family_slug: 011_replay_paper_validation
+    family_id: AR_FAMILY_011_REPLAY_PAPER_VALIDATION
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl
+    family_role: REPLAY_PAPER_VALIDATION_REQUIREMENT_INVENTORY
+    subfamily_classes:
+      - REPLAY_PAPER_REQUIREMENT
+      - SCORING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - REPLAY_PAPER_REQUIREMENT
+      - SCORING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: REPLAY_PAPER_RESULT_REQUIRED_BEFORE_RUNTIME_OR_LIVE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 12
+    family_slug: 012_quantum_advisory_optimization
+    family_id: AR_FAMILY_012_QUANTUM_ADVISORY_OPTIMIZATION
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl
+    family_role: QUANTUM_ADVISORY_OPTIMIZATION_METADATA_INVENTORY
+    subfamily_classes:
+      - QUANTUM_METADATA
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - QUANTUM_METADATA
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: QUANTUM_ADVISORY_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 13
+    family_slug: 013_quantum_qubo_ising_metadata
+    family_id: AR_FAMILY_013_QUANTUM_QUBO_ISING_METADATA
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl
+    family_role: QUANTUM_QUBO_ISING_METADATA_INVENTORY
+    subfamily_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: QUBO_ISING_COMPATIBLE_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 14
+    family_slug: 014_quantum_qaoa_vqe_annealing_metadata
+    family_id: AR_FAMILY_014_QUANTUM_QAOA_VQE_ANNEALING_METADATA
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl
+    family_role: QUANTUM_QAOA_VQE_ANNEALING_METADATA_INVENTORY
+    subfamily_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: QAOA_VQE_ANNEALING_COMPATIBLE_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+  - family_number: 15
+    family_slug: 015_quantum_portfolio_hybrid_comparator
+    family_id: AR_FAMILY_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+    future_exact_row_source_file: docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl
+    future_source_blueprint_file: docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl
+    family_role: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_METADATA_INVENTORY
+    subfamily_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - CAPITAL_CONTROL
+      - OWNER_APPROVAL_REQUIREMENT
+    required_future_row_classes:
+      - QUANTUM_METADATA
+      - QUANTUM_BACKEND_REQUIREMENT
+      - OPTIMIZER_INPUT
+      - SCORING_INPUT
+      - RANKING_INPUT
+      - CAPITAL_CONTROL
+      - OWNER_APPROVAL_REQUIREMENT
+    quantum_relevance_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_STATIC_METADATA
+    agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
+    source_dependency_class: STATIC_QUANTUM_PORTFOLIO_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
+    target_row_count: null
+    row_index_start: null
+    row_index_end: null
+    count_authority: OWNER_APPROVAL_REQUIRED
+    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    activation_state: INACTIVE_MANIFEST_ONLY
+    may_create_exact_rows_now: false
+    may_create_bundle_now: false
+    may_create_sha_now: false
+    may_create_freeze_now: false
+    may_create_final_readiness_now: false
+    agent_eligibility_governance_required_for_future_rows: true
+    deny_by_default_agent_access_required: true
+    may_execute_quantum_backend_now: false
+    may_execute_qubo_solving_now: false
+    may_execute_ising_solving_now: false
+    may_execute_qaoa_now: false
+    may_execute_vqe_now: false
+    may_execute_annealing_now: false
+    may_execute_quantum_portfolio_optimization_now: false
+    may_claim_quantum_advantage_now: false
+forbidden_current_outputs:
+  - docs/master_plan/atomic_rows/exact_row_sources/
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+no_authority_created:
+  runtime_live_order_authority_created: false
+  source_fact_authority_created: false
+  connector_semantic_authority_created: false
+  profit_evidence_created: false
+  latency_evidence_created: false
+  execution_superiority_evidence_created: false
+  optimizer_execution_created: false
+  quantum_backend_authority_created: false
+  quantum_advantage_evidence_created: false
+upstream_state_expectations:
+  pr97_expansion_plan_present: true
+  pr98_blueprints_are_not_exact_rows: true
+  pr99_path_b_remains_current_blocked_state: true
+  pr100_sha_freeze_gate_remains_blocked: true
+  repair_pr_a_bridge_present: true
+  repair_pr_a_bridge_preserved: true
+next_required_repair_pr: ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN
