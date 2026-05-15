@@ -1,0 +1,399 @@
+manifest_type: ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN_MANIFEST
+manifest_version: v1
+repair_pr: REPAIR_PR_C_ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN
+authority_class: INTERNAL_QTT_ARCHITECTURE_DRY_RUN_ONLY_NOT_ROW_AUTHORITY
+row_write_mode: DRY_RUN_ONLY
+dry_run_only: true
+exact_rows_written: false
+exact_row_sources_directory_created: false
+bundle_written: false
+bundle_sha_written: false
+freeze_created: false
+final_readiness_created: false
+source_inputs:
+  authority_classifier_bridge_path: docs/master_plan/atomicrows/AtomicRowsExactRowAuthorityClassifierBridge.yaml
+  authority_classifier_bridge_report_path: docs/master_plan/generated/AtomicRowsExactRowAuthorityClassifierBridge.report.json
+  expansion_manifest_path: docs/master_plan/atomicrows/AtomicRowsExactRowExpansionManifest.yaml
+  expansion_manifest_report_path: docs/master_plan/generated/AtomicRowsExactRowExpansionManifest.report.json
+  owner_approved_distribution_path: docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml
+  owner_approved_distribution_report_path: docs/master_plan/generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json
+future_planned_outputs:
+  future_exact_row_sources_directory: docs/master_plan/atomic_rows/exact_row_sources/
+  future_exact_row_sources_directory_forbidden_to_create_in_repair_pr_c: true
+  future_bundle_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  future_bundle_path_forbidden_to_create_in_repair_pr_c: true
+  future_bundle_sha_path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+  future_bundle_sha_path_forbidden_to_create_in_repair_pr_c: true
+expected:
+  expected_total_rows: 4183
+  expected_first_row_index: 1
+  expected_final_row_index: 4183
+  expected_family_count: 15
+  expected_quantum_forward_total_rows: 1103
+  expected_agent_governance_family_id: 009_lifecycle_agent_binding
+  expected_agent_governance_family_rows: 270
+row_index_generation_policy:
+  row_index_base: ONE_BASED
+  first_row_index: 1
+  final_row_index: 4183
+  row_ranges_must_be_contiguous: true
+  row_ranges_must_not_overlap: true
+  row_ranges_must_not_have_gaps: true
+  family_order_source: REPAIR_PR_C0_OWNER_APPROVED_DISTRIBUTION
+  family_order_must_follow_c0_exactly: true
+  no_randomization: true
+  no_timestamp_in_row_id: true
+  no_environment_dependent_value_in_row_id: true
+  no_filesystem_order_dependency: true
+row_id_generation_policy:
+  row_id_law_source: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+  row_id_preview_template: AR_EXACT_<family_number>_<family_slug_upper>_<six_digit_family_index>
+  row_id_preview_is_exact_row_materialization: false
+  row_ids_encode_family_number_family_slug_and_family_local_index: true
+  row_order: FAMILY_ORDER_THEN_ROW_INDEX_WITHIN_FAMILY
+  global_row_index_rule: CUMULATIVE_PRIOR_FAMILY_ROW_COUNT_PLUS_ROW_INDEX_WITHIN_FAMILY
+  deterministic: true
+  no_randomization: true
+  no_timestamp_in_row_id: true
+  no_environment_dependent_value_in_row_id: true
+  no_filesystem_order_dependency: true
+authority_field_policy:
+  policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+  every_future_row_requires_authority_class: true
+  every_future_row_requires_source_pointer_policy: true
+  every_future_row_requires_block_code_policy: true
+  unknown_authority_allowed: false
+  non_null_external_fact_without_accepted_source_evidence_allowed: false
+source_pointer_policy:
+  policy_ref: REPAIR_PR_A_FIELD_AUTHORITY_HANDLING
+  source_facts_retrieved_by_this_pr: false
+  source_facts_accepted_by_this_pr: false
+  connector_semantics_populated_by_this_pr: false
+  external_fact_authority_created_by_this_pr: false
+  source_required_policy_for_missing_external_facts: SOURCE_EVIDENCE_REQUIRED
+block_code_policy:
+  policy_ref: REPAIR_PR_A_FIELD_FILL_RULES_AND_DRY_RUN_BLOCKING
+  every_future_row_has_planned_block_code_policy: true
+  dry_run_blocking_basis:
+    - DRY_RUN_ONLY_NOT_MATERIALIZED
+    - EXACT_ROW_SOURCE_FILE_NOT_CREATED
+    - BUNDLE_NOT_CREATED
+    - SHA_FREEZE_NOT_CREATED
+    - AGENT_ELIGIBILITY_MATRIX_PENDING
+    - SOURCE_FACT_ACCEPTANCE_PENDING_WHEN_APPLICABLE
+    - REPLAY_PAPER_VALIDATION_PENDING_WHEN_APPLICABLE
+    - QUANTUM_BACKEND_EVIDENCE_PENDING_WHEN_APPLICABLE
+agent_eligibility_policy:
+  policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+  agent_eligibility_required: true
+  default_agent_eligibility_state: DENY_BY_DEFAULT_PENDING_REPAIR_PR_D2_E0_ELIGIBILITY_MATRIX
+  specific_agent_family_assignments_created: false
+  specific_agent_row_assignments_created: false
+  live_order_agent_authority_created: false
+  quantum_backend_agent_authority_created: false
+  future_eligibility_matrix_required: true
+subfamily_row_class_policy:
+  policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+  subfamily_row_class_doctrine_required: true
+  subfamily_classification_state: PLANNED_REQUIRED_PENDING_REPAIR_PR_D_EXACT_ROW_CONTENT
+  row_classification_state: PLANNED_REQUIRED_PENDING_REPAIR_PR_D_EXACT_ROW_CONTENT
+  placeholder_policy_is_fail_closed_for_live_runtime_authority: true
+quantum_forward_metadata_policy:
+  quantum_forward_family_ids:
+    - 012_quantum_advisory_optimization
+    - 013_quantum_qubo_ising_metadata
+    - 014_quantum_qaoa_vqe_annealing_metadata
+    - 015_quantum_portfolio_hybrid_comparator
+  quantum_metadata_authority: METADATA_ONLY_NOT_BACKEND_OUTPUT
+  quantum_backend_execution_created: false
+  quantum_simulator_execution_created: false
+  quantum_provider_execution_created: false
+  quantum_advantage_claim_created: false
+  quantum_latency_superiority_claim_created: false
+  quantum_execution_superiority_claim_created: false
+  quantum_profit_evidence_created: false
+no_authority_created:
+  exact_rows_created: false
+  exact_row_source_directory_created: false
+  bundle_created: false
+  bundle_sha_created: false
+  sha_computed: false
+  freeze_authority_created: false
+  final_readiness_created: false
+  source_fact_acceptance_created: false
+  connector_semantic_binding_created: false
+  runtime_authority_created: false
+  live_authority_created: false
+  order_authority_created: false
+  optimizer_execution_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  quantum_backend_execution_created: false
+  quantum_simulator_execution_created: false
+  quantum_provider_execution_created: false
+  profit_evidence_created: false
+  latency_evidence_created: false
+  execution_superiority_evidence_created: false
+  quantum_advantage_evidence_created: false
+  specific_agent_family_assignments_created: false
+  specific_agent_row_assignments_created: false
+blocked_future_work:
+  repair_pr_d_generate_exact_row_source_files_required: true
+  repair_pr_d2_e0_agent_family_eligibility_matrix_required: true
+  repair_pr_e_bundle_materialization_required: true
+  repair_pr_f_sha_freeze_required: true
+  roadmap_pr_101_final_readiness_delayed: true
+family_generation_plan:
+  - family_id: 001_signal_features
+    family_label: SIGNAL_FEATURES
+    row_count: 390
+    start_row_index: 1
+    end_row_index: 390
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/001_signal_features.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 002_scoring_ranking
+    family_label: SCORING_RANKING
+    row_count: 330
+    start_row_index: 391
+    end_row_index: 720
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/002_scoring_ranking.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 003_normalization_calibration
+    family_label: NORMALIZATION_CALIBRATION
+    row_count: 220
+    start_row_index: 721
+    end_row_index: 940
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/003_normalization_calibration.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 004_risk_control
+    family_label: RISK_CONTROL
+    row_count: 315
+    start_row_index: 941
+    end_row_index: 1255
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/004_risk_control.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 005_execution_connector_boundary
+    family_label: EXECUTION_CONNECTOR_BOUNDARY
+    row_count: 280
+    start_row_index: 1256
+    end_row_index: 1535
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/005_execution_connector_boundary.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 006_capital_sizing_cash
+    family_label: CAPITAL_SIZING_CASH
+    row_count: 220
+    start_row_index: 1536
+    end_row_index: 1755
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/006_capital_sizing_cash.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 007_latency_routing
+    family_label: LATENCY_ROUTING
+    row_count: 250
+    start_row_index: 1756
+    end_row_index: 2005
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 008_error_guard_fail_closed
+    family_label: ERROR_GUARD_FAIL_CLOSED
+    row_count: 220
+    start_row_index: 2006
+    end_row_index: 2225
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/008_error_guard_fail_closed.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 009_lifecycle_agent_binding
+    family_label: LIFECYCLE_AGENT_BINDING
+    row_count: 270
+    start_row_index: 2226
+    end_row_index: 2495
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: true
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/009_lifecycle_agent_binding.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 010_source_evidence_connector_semantic
+    family_label: SOURCE_EVIDENCE_CONNECTOR_SEMANTIC
+    row_count: 315
+    start_row_index: 2496
+    end_row_index: 2810
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/010_source_evidence_connector_semantic.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 011_replay_paper_validation
+    family_label: REPLAY_PAPER_VALIDATION
+    row_count: 270
+    start_row_index: 2811
+    end_row_index: 3080
+    quantum_forward_family_flag: false
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/011_replay_paper_validation.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: NOT_QUANTUM_FORWARD_FAMILY
+    quantum_metadata_class: NOT_QUANTUM_FORWARD_FAMILY
+    dry_run_only_no_write_flag: true
+  - family_id: 012_quantum_advisory_optimization
+    family_label: QUANTUM_ADVISORY_OPTIMIZATION
+    row_count: 290
+    start_row_index: 3081
+    end_row_index: 3370
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/012_quantum_advisory_optimization.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: METADATA_ONLY_NOT_BACKEND_OUTPUT
+    quantum_metadata_class: QUANTUM_ADVISORY_OPTIMIZATION_METADATA_ONLY
+    quantum_backend_execution_created: false
+    quantum_simulator_execution_created: false
+    quantum_provider_execution_created: false
+    quantum_advantage_claim_created: false
+    quantum_latency_superiority_claim_created: false
+    quantum_execution_superiority_claim_created: false
+    quantum_profit_evidence_created: false
+    dry_run_only_no_write_flag: true
+  - family_id: 013_quantum_qubo_ising_metadata
+    family_label: QUANTUM_QUBO_ISING_METADATA
+    row_count: 265
+    start_row_index: 3371
+    end_row_index: 3635
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/013_quantum_qubo_ising_metadata.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: METADATA_ONLY_NOT_BACKEND_OUTPUT
+    quantum_metadata_class: QUBO_ISING_METADATA_ONLY
+    quantum_backend_execution_created: false
+    quantum_simulator_execution_created: false
+    quantum_provider_execution_created: false
+    quantum_advantage_claim_created: false
+    quantum_latency_superiority_claim_created: false
+    quantum_execution_superiority_claim_created: false
+    quantum_profit_evidence_created: false
+    dry_run_only_no_write_flag: true
+  - family_id: 014_quantum_qaoa_vqe_annealing_metadata
+    family_label: QUANTUM_QAOA_VQE_ANNEALING_METADATA
+    row_count: 265
+    start_row_index: 3636
+    end_row_index: 3900
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/014_quantum_qaoa_vqe_annealing_metadata.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: METADATA_ONLY_NOT_BACKEND_OUTPUT
+    quantum_metadata_class: QAOA_VQE_ANNEALING_METADATA_ONLY
+    quantum_backend_execution_created: false
+    quantum_simulator_execution_created: false
+    quantum_provider_execution_created: false
+    quantum_advantage_claim_created: false
+    quantum_latency_superiority_claim_created: false
+    quantum_execution_superiority_claim_created: false
+    quantum_profit_evidence_created: false
+    dry_run_only_no_write_flag: true
+  - family_id: 015_quantum_portfolio_hybrid_comparator
+    family_label: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR
+    row_count: 283
+    start_row_index: 3901
+    end_row_index: 4183
+    quantum_forward_family_flag: true
+    agent_governance_family_flag: false
+    future_exact_rows_file_path: docs/master_plan/atomic_rows/exact_row_sources/015_quantum_portfolio_hybrid_comparator.exact_rows.jsonl
+    row_id_generation_policy_ref: REPAIR_PR_A_FUTURE_ROW_ID_LAW
+    authority_field_policy_ref: REPAIR_PR_A_AUTHORITY_CLASSIFIER_BRIDGE
+    agent_eligibility_policy_ref: REPAIR_PR_A_AGENT_ELIGIBILITY_GOVERNANCE
+    subfamily_row_class_policy_ref: REPAIR_PR_B_SUBFAMILY_ROW_CLASS_DOCTRINE
+    quantum_metadata_authority: METADATA_ONLY_NOT_BACKEND_OUTPUT
+    quantum_metadata_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_METADATA_ONLY
+    quantum_backend_execution_created: false
+    quantum_simulator_execution_created: false
+    quantum_provider_execution_created: false
+    quantum_advantage_claim_created: false
+    quantum_latency_superiority_claim_created: false
+    quantum_execution_superiority_claim_created: false
+    quantum_profit_evidence_created: false
+    dry_run_only_no_write_flag: true
