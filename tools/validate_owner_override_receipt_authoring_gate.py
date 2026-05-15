@@ -362,6 +362,41 @@ def _github_actions_active() -> bool:
     return os.getenv("GITHUB_ACTIONS") == "true"
 
 
+def _normalize_branch_context(value: str) -> str:
+    branch = value.strip()
+    if not branch or branch == "HEAD":
+        return ""
+    if branch.startswith("refs/pull/"):
+        return ""
+    if re.match(r"^[0-9]+/(head|merge)$", branch):
+        return ""
+    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
+        if branch.startswith(prefix):
+            return branch[len(prefix) :]
+    return branch
+
+
+def _github_actions_branch_context() -> str:
+    for env_name in ("GITHUB_HEAD_REF", "GITHUB_REF_NAME", "GITHUB_REF"):
+        branch = _normalize_branch_context(os.getenv(env_name, ""))
+        if branch:
+            return branch
+    return ""
+
+
+def _github_actions_pull_request_detached_context_active() -> bool:
+    if not _github_actions_active():
+        return False
+    event_name = os.getenv("GITHUB_EVENT_NAME", "")
+    github_ref = os.getenv("GITHUB_REF", "")
+    github_ref_name = os.getenv("GITHUB_REF_NAME", "")
+    return (
+        event_name in {"pull_request", "pull_request_target"}
+        or github_ref.startswith("refs/pull/")
+        or re.match(r"^[0-9]+/(head|merge)$", github_ref_name) is not None
+    )
+
+
 def _downstream_validation_branch_allowed(branch: str) -> bool:
     if branch == "main" or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX):
         return True
@@ -419,15 +454,19 @@ def validate_pr94_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], 
             failures.append(f"{label} must be {expected}, got {actual}")
 
     branch_rc, branch, branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
-    if branch_rc != 0:
-        if github_actions:
+    if github_actions and (branch_rc != 0 or not branch):
+        branch = _github_actions_branch_context()
+        if branch:
+            branch_rc = 0
+
+    if branch_rc != 0 or not branch:
+        if _github_actions_pull_request_detached_context_active():
             info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
         else:
+            branch_err = branch_err or "unable to determine current branch"
             failures.append(f"git branch check failed: {branch_err}")
     elif branch != TARGET_BRANCH:
-        if github_actions:
-            info_lines.append(CI_DETACHED_HEAD_MODE_MARKER)
-        elif _downstream_validation_branch_allowed(branch):
+        if _downstream_validation_branch_allowed(branch):
             info_lines.append(DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER)
         else:
             failures.append(f"current branch must be {TARGET_BRANCH}, got {branch}")

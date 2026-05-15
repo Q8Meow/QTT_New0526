@@ -8,6 +8,17 @@ REPO_ROOT = Path(".")
 _REPORT_CACHE: dict | None = None
 
 
+def _clear_ci_env(monkeypatch) -> None:
+    for env_name in (
+        "GITHUB_ACTIONS",
+        "GITHUB_EVENT_NAME",
+        "GITHUB_HEAD_REF",
+        "GITHUB_REF",
+        "GITHUB_REF_NAME",
+    ):
+        monkeypatch.delenv(env_name, raising=False)
+
+
 def _report() -> dict:
     global _REPORT_CACHE
     if _REPORT_CACHE is None:
@@ -454,6 +465,7 @@ def test_master_plan_not_edited():
 
 
 def test_main_branch_allowed_for_cumulative_validation(monkeypatch):
+    _clear_ci_env(monkeypatch)
     _mock_git_stdout(monkeypatch, _git_metadata_responses(branch="main"))
 
     failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
@@ -464,6 +476,7 @@ def test_main_branch_allowed_for_cumulative_validation(monkeypatch):
 
 
 def test_non_downstream_branch_still_fails_branch_strict_validation(monkeypatch):
+    _clear_ci_env(monkeypatch)
     branch = "feature/non-downstream-validation"
     _mock_git_stdout(monkeypatch, _git_metadata_responses(branch=branch))
 
@@ -471,6 +484,21 @@ def test_non_downstream_branch_still_fails_branch_strict_validation(monkeypatch)
 
     assert f"current branch must be {gate.TARGET_BRANCH}, got {branch}" in failures
     assert metadata["branch"] == branch
+
+
+def test_github_actions_named_non_downstream_branch_still_fails_strict_validation(
+    monkeypatch,
+):
+    _clear_ci_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    branch = "feature/non-downstream-validation"
+    _mock_git_stdout(monkeypatch, _git_metadata_responses(branch=branch))
+
+    failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
+
+    assert f"current branch must be {gate.TARGET_BRANCH}, got {branch}" in failures
+    assert metadata["branch"] == branch
+    assert gate.CI_DETACHED_HEAD_MODE_MARKER not in metadata["ci_info_lines"]
 
 
 def test_pr95_pr96_boundaries_preserved():
@@ -482,7 +510,11 @@ def test_pr95_pr96_boundaries_preserved():
 
 
 def test_ci_detached_head_mode_if_validator_checks_branch_or_baseline(monkeypatch):
+    _clear_ci_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/109/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "109/merge")
     _mock_git_stdout(
         monkeypatch,
         _git_metadata_responses(
@@ -497,5 +529,57 @@ def test_ci_detached_head_mode_if_validator_checks_branch_or_baseline(monkeypatc
     failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
 
     assert failures == []
+    assert gate.CI_DETACHED_HEAD_MODE_MARKER in metadata["ci_info_lines"]
+    assert gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER in metadata["ci_info_lines"]
+
+
+def test_ci_detached_head_with_non_downstream_head_ref_still_fails_strict_validation(
+    monkeypatch,
+):
+    _clear_ci_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_HEAD_REF", "feature/non-downstream-validation")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/109/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "109/merge")
+    _mock_git_stdout(
+        monkeypatch,
+        _git_metadata_responses(
+            branch="",
+            baseline_rc=1,
+            baseline_err="shallow fetch",
+        ),
+    )
+
+    failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
+
+    expected_failure = (
+        f"current branch must be {gate.TARGET_BRANCH}, "
+        "got feature/non-downstream-validation"
+    )
+    assert expected_failure in failures
+    assert metadata["branch"] == "feature/non-downstream-validation"
+    assert gate.CI_DETACHED_HEAD_MODE_MARKER not in metadata["ci_info_lines"]
+
+
+def test_ci_detached_head_mode_allows_empty_branch_context(monkeypatch):
+    _clear_ci_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/109/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "109/merge")
+    _mock_git_stdout(
+        monkeypatch,
+        _git_metadata_responses(
+            branch="",
+            baseline_rc=1,
+            baseline_err="shallow fetch",
+        ),
+    )
+
+    failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
+
+    assert failures == []
+    assert metadata["branch"] == ""
     assert gate.CI_DETACHED_HEAD_MODE_MARKER in metadata["ci_info_lines"]
     assert gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER in metadata["ci_info_lines"]
