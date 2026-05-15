@@ -1,0 +1,112 @@
+artifact_id: ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_GATE
+artifact_version: v1
+roadmap_pr: PR_100
+roadmap_delivery_label: PR #100
+semantic_task_id: ROADMAP_ATOMICROWS_BUNDLE_SHA_FREEZE
+authority_class: STATIC_FAIL_CLOSED_SHA_FREEZE_GATE_NOT_SHA_AUTHORITY
+gate_mode: BLOCKED
+expected_current_state:
+  atomicrows_bundle_jsonl_exists: false
+  atomicrows_bundle_sha256_exists: false
+  exact_source_rows_authorized: false
+  pr99_assembly_path: PATH_B_BLOCKED
+  pr98_source_files_are_blueprints_only: true
+  sha_materialization_allowed: false
+  freeze_authority_created: false
+  final_readiness_created: false
+canonical_paths:
+  atomicrows_bundle_path: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  atomicrows_bundle_sha256_path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+actual_sha256_value: null
+digest_value: null
+outputs_created_by_this_pr: []
+planning_target:
+  target_total_row_count: 4183
+  target_total_row_count_authority: MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER
+  target_total_row_count_planning_authority_only: true
+  materialized_row_count_claimed: false
+blocked_reason_codes:
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SOURCE_BLUEPRINTS_ONLY
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_OWNER_FREEZE_AUTHORITY_NOT_PRESENT
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED
+upstream_artifact_dependencies:
+  - AtomicRowsFullBundleRowExpansionPlan
+  - AtomicRowsBundleRowFamilySourceFiles
+  - AtomicRowsBundleBuilderDeterministicAssemblyGate
+downstream_blocked_until:
+  - ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS
+no_claims:
+  bundle_created: false
+  bundle_sha256_created: false
+  sha_computed: false
+  freeze_authority_created: false
+  final_readiness_created: false
+  runtime_created: false
+  live_authority_created: false
+  order_authority_created: false
+  source_acceptance_created: false
+  connector_semantics_created: false
+  replay_or_paper_executed: false
+  optimizer_executed: false
+  quantum_backend_executed: false
+  profit_evidence_created: false
+  latency_evidence_created: false
+  quantum_advantage_claimed: false
+  external_facts_retrieved: false
+  accepted_source_packets_created: false
+  runtime_cash_receipts_created: false
+  account_order_fill_receipts_created: false
+  backend_outputs_created: false
+  execution_superiority_evidence_created: false
+  quantum_simulator_executed: false
+  quantum_provider_called: false
+quantum_forward_static_metadata:
+  preserves_quantum_advisory_rows: true
+  preserves_qubo_ising_metadata_rows: true
+  preserves_qaoa_vqe_annealing_metadata_rows: true
+  preserves_quantum_portfolio_hybrid_comparator_rows: true
+  quantum_execution_allowed: false
+  quantum_advantage_claim_allowed: false
+  qubo_solving_allowed: false
+  ising_solving_allowed: false
+  qaoa_execution_allowed: false
+  vqe_execution_allowed: false
+  annealing_execution_allowed: false
+  quantum_simulator_allowed: false
+  quantum_provider_call_allowed: false
+  optimizer_execution_allowed: false
+owner_authority_boundary:
+  owner_global_internal_workflow_authority_preserved: true
+  owner_approval_may_approve_future_internal_workflow_movement: true
+  owner_approval_does_not_create_sha_freeze_truth: true
+  owner_approval_cannot_fabricate:
+    - EXTERNAL_FACTS
+    - ACCEPTED_SOURCE_PACKETS
+    - RUNTIME_CASH_RECEIPTS
+    - ACCOUNT_ORDER_FILL_RECEIPTS
+    - REPLAY_RESULTS
+    - PAPER_RESULTS
+    - BUNDLE_ROWS
+    - SHA_FREEZE_AUTHORITY
+    - BACKEND_OUTPUTS
+    - PROFIT_EVIDENCE
+    - LATENCY_EVIDENCE
+    - EXECUTION_SUPERIORITY_EVIDENCE
+    - QUANTUM_ADVANTAGE_EVIDENCE
+forbidden_execution_effects:
+  - QAOA_EXECUTION
+  - VQE_EXECUTION
+  - ANNEALING_EXECUTION
+  - QUBO_SOLVING
+  - ISING_SOLVING
+  - QUANTUM_INSPIRED_OPTIMIZER_EXECUTION
+  - TRUE_QUANTUM_BACKEND_EXECUTION
+  - QUANTUM_SIMULATOR_EXECUTION
+  - QUANTUM_PROVIDER_CALL
+  - QUANTUM_ADVANTAGE_VALIDATION
+  - QUANTUM_DIRECT_ORDER_AUTHORITY
+future_consumer_notes: PR100 creates a blocked static SHA/freeze authority gate only. Because AtomicRows.bundle.jsonl and AtomicRows.bundle.sha256 are absent, PR99 Path B remains controlling, PR98 source files remain owner-review-required blueprints, SHA materialization is not allowed, freeze authority is not created, and Roadmap PR101 final readiness remains blocked until a valid bundle and valid SHA/freeze authority exist.

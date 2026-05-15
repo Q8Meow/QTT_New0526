@@ -1,0 +1,336 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-atomicrows-bundle-sha-freeze-authority-gate",
+  "title": "AtomicRows Bundle SHA Freeze Authority Gate",
+  "description": "Static PR #100 fail-closed contract for the AtomicRows bundle SHA/freeze authority gate. In the current repository state this validates a blocked SHA/freeze gate only; it does not create AtomicRows.bundle.jsonl, AtomicRows.bundle.sha256, a SHA digest, freeze authority, final readiness, runtime/live/order/source-acceptance/connector/profit evidence, optimizer execution, or quantum backend execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "artifact_version",
+    "roadmap_pr",
+    "roadmap_delivery_label",
+    "semantic_task_id",
+    "authority_class",
+    "gate_mode",
+    "expected_current_state",
+    "canonical_paths",
+    "actual_sha256_value",
+    "digest_value",
+    "outputs_created_by_this_pr",
+    "planning_target",
+    "blocked_reason_codes",
+    "upstream_artifact_dependencies",
+    "downstream_blocked_until",
+    "no_claims",
+    "quantum_forward_static_metadata",
+    "owner_authority_boundary",
+    "forbidden_execution_effects",
+    "future_consumer_notes"
+  ],
+  "properties": {
+    "artifact_id": { "const": "ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_GATE" },
+    "artifact_version": { "const": "v1" },
+    "roadmap_pr": { "const": "PR_100" },
+    "roadmap_delivery_label": { "const": "PR #100" },
+    "semantic_task_id": { "const": "ROADMAP_ATOMICROWS_BUNDLE_SHA_FREEZE" },
+    "authority_class": {
+      "const": "STATIC_FAIL_CLOSED_SHA_FREEZE_GATE_NOT_SHA_AUTHORITY"
+    },
+    "gate_mode": { "const": "BLOCKED" },
+    "expected_current_state": { "$ref": "#/$defs/expected_current_state" },
+    "canonical_paths": { "$ref": "#/$defs/canonical_paths" },
+    "actual_sha256_value": { "type": "null" },
+    "digest_value": { "type": "null" },
+    "outputs_created_by_this_pr": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "not": { "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256" }
+      },
+      "maxItems": 0
+    },
+    "planning_target": { "$ref": "#/$defs/planning_target" },
+    "blocked_reason_codes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/blocked_reason_code" },
+      "minItems": 7,
+      "uniqueItems": true
+    },
+    "upstream_artifact_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/upstream_artifact_dependency" },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "downstream_blocked_until": {
+      "type": "array",
+      "items": { "const": "ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "no_claims": { "$ref": "#/$defs/no_claims" },
+    "quantum_forward_static_metadata": {
+      "$ref": "#/$defs/quantum_forward_static_metadata"
+    },
+    "owner_authority_boundary": { "$ref": "#/$defs/owner_authority_boundary" },
+    "forbidden_execution_effects": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 11,
+      "uniqueItems": true
+    },
+    "future_consumer_notes": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "expected_current_state": {
+            "properties": {
+              "atomicrows_bundle_jsonl_exists": { "const": false }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expected_current_state": {
+            "properties": {
+              "sha_materialization_allowed": { "const": false }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expected_current_state": {
+            "properties": {
+              "exact_source_rows_authorized": { "const": false }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expected_current_state": {
+            "properties": {
+              "sha_materialization_allowed": { "const": false }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expected_current_state": {
+            "properties": {
+              "pr99_assembly_path": { "const": "PATH_B_BLOCKED" }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "gate_mode": { "const": "BLOCKED" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "expected_current_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atomicrows_bundle_jsonl_exists",
+        "atomicrows_bundle_sha256_exists",
+        "exact_source_rows_authorized",
+        "pr99_assembly_path",
+        "pr98_source_files_are_blueprints_only",
+        "sha_materialization_allowed",
+        "freeze_authority_created",
+        "final_readiness_created"
+      ],
+      "properties": {
+        "atomicrows_bundle_jsonl_exists": { "const": false },
+        "atomicrows_bundle_sha256_exists": { "const": false },
+        "exact_source_rows_authorized": { "const": false },
+        "pr99_assembly_path": { "const": "PATH_B_BLOCKED" },
+        "pr98_source_files_are_blueprints_only": { "const": true },
+        "sha_materialization_allowed": { "const": false },
+        "freeze_authority_created": { "const": false },
+        "final_readiness_created": { "const": false }
+      }
+    },
+    "canonical_paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atomicrows_bundle_path",
+        "atomicrows_bundle_sha256_path"
+      ],
+      "properties": {
+        "atomicrows_bundle_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "atomicrows_bundle_sha256_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        }
+      }
+    },
+    "planning_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_total_row_count",
+        "target_total_row_count_authority",
+        "target_total_row_count_planning_authority_only",
+        "materialized_row_count_claimed"
+      ],
+      "properties": {
+        "target_total_row_count": { "const": 4183 },
+        "target_total_row_count_authority": {
+          "const": "MASTER_PLAN_0X_5F_LAUNCH_BASELINE_AND_COVERAGE_LEDGER"
+        },
+        "target_total_row_count_planning_authority_only": { "const": true },
+        "materialized_row_count_claimed": { "const": false }
+      }
+    },
+    "blocked_reason_code": {
+      "enum": [
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SOURCE_BLUEPRINTS_ONLY",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_OWNER_FREEZE_AUTHORITY_NOT_PRESENT",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED"
+      ]
+    },
+    "upstream_artifact_dependency": {
+      "enum": [
+        "AtomicRowsFullBundleRowExpansionPlan",
+        "AtomicRowsBundleRowFamilySourceFiles",
+        "AtomicRowsBundleBuilderDeterministicAssemblyGate"
+      ]
+    },
+    "no_claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_created",
+        "bundle_sha256_created",
+        "sha_computed",
+        "freeze_authority_created",
+        "final_readiness_created",
+        "runtime_created",
+        "live_authority_created",
+        "order_authority_created",
+        "source_acceptance_created",
+        "connector_semantics_created",
+        "replay_or_paper_executed",
+        "optimizer_executed",
+        "quantum_backend_executed",
+        "profit_evidence_created",
+        "latency_evidence_created",
+        "quantum_advantage_claimed",
+        "external_facts_retrieved",
+        "accepted_source_packets_created",
+        "runtime_cash_receipts_created",
+        "account_order_fill_receipts_created",
+        "backend_outputs_created",
+        "execution_superiority_evidence_created",
+        "quantum_simulator_executed",
+        "quantum_provider_called"
+      ],
+      "properties": {
+        "bundle_created": { "const": false },
+        "bundle_sha256_created": { "const": false },
+        "sha_computed": { "const": false },
+        "freeze_authority_created": { "const": false },
+        "final_readiness_created": { "const": false },
+        "runtime_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "source_acceptance_created": { "const": false },
+        "connector_semantics_created": { "const": false },
+        "replay_or_paper_executed": { "const": false },
+        "optimizer_executed": { "const": false },
+        "quantum_backend_executed": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_evidence_created": { "const": false },
+        "quantum_advantage_claimed": { "const": false },
+        "external_facts_retrieved": { "const": false },
+        "accepted_source_packets_created": { "const": false },
+        "runtime_cash_receipts_created": { "const": false },
+        "account_order_fill_receipts_created": { "const": false },
+        "backend_outputs_created": { "const": false },
+        "execution_superiority_evidence_created": { "const": false },
+        "quantum_simulator_executed": { "const": false },
+        "quantum_provider_called": { "const": false }
+      }
+    },
+    "quantum_forward_static_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preserves_quantum_advisory_rows",
+        "preserves_qubo_ising_metadata_rows",
+        "preserves_qaoa_vqe_annealing_metadata_rows",
+        "preserves_quantum_portfolio_hybrid_comparator_rows",
+        "quantum_execution_allowed",
+        "quantum_advantage_claim_allowed",
+        "qubo_solving_allowed",
+        "ising_solving_allowed",
+        "qaoa_execution_allowed",
+        "vqe_execution_allowed",
+        "annealing_execution_allowed",
+        "quantum_simulator_allowed",
+        "quantum_provider_call_allowed",
+        "optimizer_execution_allowed"
+      ],
+      "properties": {
+        "preserves_quantum_advisory_rows": { "const": true },
+        "preserves_qubo_ising_metadata_rows": { "const": true },
+        "preserves_qaoa_vqe_annealing_metadata_rows": { "const": true },
+        "preserves_quantum_portfolio_hybrid_comparator_rows": { "const": true },
+        "quantum_execution_allowed": { "const": false },
+        "quantum_advantage_claim_allowed": { "const": false },
+        "qubo_solving_allowed": { "const": false },
+        "ising_solving_allowed": { "const": false },
+        "qaoa_execution_allowed": { "const": false },
+        "vqe_execution_allowed": { "const": false },
+        "annealing_execution_allowed": { "const": false },
+        "quantum_simulator_allowed": { "const": false },
+        "quantum_provider_call_allowed": { "const": false },
+        "optimizer_execution_allowed": { "const": false }
+      }
+    },
+    "owner_authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_global_internal_workflow_authority_preserved",
+        "owner_approval_may_approve_future_internal_workflow_movement",
+        "owner_approval_does_not_create_sha_freeze_truth",
+        "owner_approval_cannot_fabricate"
+      ],
+      "properties": {
+        "owner_global_internal_workflow_authority_preserved": { "const": true },
+        "owner_approval_may_approve_future_internal_workflow_movement": {
+          "const": true
+        },
+        "owner_approval_does_not_create_sha_freeze_truth": { "const": true },
+        "owner_approval_cannot_fabricate": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 10,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}
