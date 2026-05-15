@@ -20,6 +20,7 @@ from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gat
 from tools import validate_atomicrows_bundle_sha_freeze_authority_gate as pr100_gate  # noqa: E402
 from tools import validate_atomicrows_exact_row_authority_classifier_bridge as bridge_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
+from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -1192,8 +1193,11 @@ def validate_pr98_sources(repo_root: pathlib.Path) -> tuple[bool, list[str]]:
 
 
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, bool]]:
+    post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
+    exact_dir_present = (repo_root / EXACT_ROW_SOURCES_DIR).exists()
+    exact_row_sources_allowed_by_d = exact_dir_present and post_d_state.allowed
     checks = {
-        "exact_row_sources": not (repo_root / EXACT_ROW_SOURCES_DIR).exists(),
+        "exact_row_sources": (not exact_dir_present) or exact_row_sources_allowed_by_d,
         "AtomicRows.bundle.jsonl": not (repo_root / CANONICAL_BUNDLE_JSONL).exists(),
         "AtomicRows.bundle.sha256": not (repo_root / CANONICAL_BUNDLE_SHA256).exists(),
     }

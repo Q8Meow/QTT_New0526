@@ -16,6 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
 from tools import validate_atomicrows_exact_row_authority_classifier_bridge as bridge_gate  # noqa: E402
 from tools import validate_atomicrows_exact_row_expansion_manifest as expansion_gate  # noqa: E402
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as c0_gate  # noqa: E402
+from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -190,6 +191,7 @@ class ForbiddenArtifactState:
     bundle_written: bool
     bundle_sha_written: bool
     exact_row_files: tuple[str, ...]
+    exact_row_sources_allowed_by_repair_pr_d: bool = False
 
 
 @dataclass(frozen=True)
@@ -497,6 +499,7 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
     exact_source_abs = _resolve(repo_root, FUTURE_EXACT_ROW_SOURCES_DIRECTORY)
     bundle_abs = _resolve(repo_root, FUTURE_BUNDLE_PATH)
     bundle_sha_abs = _resolve(repo_root, FUTURE_BUNDLE_SHA_PATH)
+    post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
     exact_row_files: list[str] = []
     atomic_rows_root = repo_root / pathlib.Path("docs/master_plan/atomic_rows")
     if atomic_rows_root.exists():
@@ -504,19 +507,21 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
             path.relative_to(repo_root).as_posix()
             for path in atomic_rows_root.rglob("*.exact_rows.jsonl")
         )
-    if exact_source_abs.exists():
+    exact_row_sources_allowed_by_d = (exact_source_abs.exists() or bool(exact_row_files)) and post_d_state.allowed
+    if exact_source_abs.exists() and not exact_row_sources_allowed_by_d:
         failures.append(f"forbidden exact row source directory exists: {FUTURE_EXACT_ROW_SOURCES_DIRECTORY_TEXT}")
     if bundle_abs.exists():
         failures.append(f"forbidden bundle exists: {FUTURE_BUNDLE_PATH.as_posix()}")
     if bundle_sha_abs.exists():
         failures.append(f"forbidden bundle SHA exists: {FUTURE_BUNDLE_SHA_PATH.as_posix()}")
-    if exact_row_files:
+    if exact_row_files and not exact_row_sources_allowed_by_d:
         failures.append("forbidden exact row source files exist: " + ", ".join(exact_row_files))
     return failures, ForbiddenArtifactState(
-        exact_row_sources_directory_created=exact_source_abs.exists(),
+        exact_row_sources_directory_created=exact_source_abs.exists() and not exact_row_sources_allowed_by_d,
         bundle_written=bundle_abs.exists(),
         bundle_sha_written=bundle_sha_abs.exists(),
         exact_row_files=tuple(exact_row_files),
+        exact_row_sources_allowed_by_repair_pr_d=exact_row_sources_allowed_by_d,
     )
 
 
@@ -840,7 +845,7 @@ def validate_manifest_payload(
         failures.append("validator saw forbidden AtomicRows.bundle.jsonl before report build")
     if forbidden_state.bundle_sha_written:
         failures.append("validator saw forbidden AtomicRows.bundle.sha256 before report build")
-    if forbidden_state.exact_row_files:
+    if forbidden_state.exact_row_files and not forbidden_state.exact_row_sources_allowed_by_repair_pr_d:
         failures.append("validator saw forbidden exact row files before report build")
     return failures
 
@@ -1001,10 +1006,28 @@ def build_report(
         },
         "family_generation_plan": build_family_generation_plan_summary(ranges),
         "forbidden_artifact_absence": {
-            "exact_row_sources_directory_absent": not forbidden_state.exact_row_sources_directory_created,
+            "exact_row_sources_directory_absent": (
+                not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+                and not forbidden_state.exact_row_sources_directory_created
+            ),
             "AtomicRows.bundle.jsonl_absent": not forbidden_state.bundle_written,
             "AtomicRows.bundle.sha256_absent": not forbidden_state.bundle_sha_written,
             "exact_row_files_found": list(forbidden_state.exact_row_files),
+        },
+        "post_d_transition_audit": {
+            "post_repair_pr_d_materialization_state": (
+                "EXACT_ROW_SOURCE_FILES_CREATED_BY_REPAIR_PR_D"
+                if forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+                else "PRE_REPAIR_PR_D_EXACT_ROW_SOURCES_ABSENT_REQUIRED"
+            ),
+            "repair_pr_c_did_not_write_exact_rows": True,
+            "current_exact_row_sources_presence_allowed_by_repair_pr_d": (
+                forbidden_state.exact_row_sources_allowed_by_repair_pr_d
+            ),
+            "bundle_still_absent": not forbidden_state.bundle_written,
+            "bundle_sha_still_absent": not forbidden_state.bundle_sha_written,
+            "freeze_still_absent": True,
+            "final_readiness_still_absent": True,
         },
         "no_authority_created": no_authority,
         "blocked_future_work": copy.deepcopy(config["blocked_future_work"]),

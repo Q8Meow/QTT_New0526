@@ -166,7 +166,7 @@ def test_upstream_repair_chain_is_preserved_and_forbidden_artifacts_remain_absen
         "AtomicRows.bundle.sha256": True,
         "exact_row_sources": True,
     }
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 

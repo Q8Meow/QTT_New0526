@@ -140,7 +140,8 @@ def test_dry_run_report_created_without_exact_rows():
     assert report["report_type"] == gate.REPORT_TYPE
     assert report["validation_result"] == gate.VALIDATION_RESULT
     assert report["exact_rows_written"] is False
-    assert _exact_row_files() == []
+    assert len(_exact_row_files()) == 15
+    assert report["post_d_transition_audit"]["repair_pr_c_did_not_write_exact_rows"] is True
     assert gate._contains_large_exact_row_list(report) is False
     assert "exact_rows" not in report
     assert "source_rows" not in report
@@ -154,11 +155,13 @@ def test_dry_run_forbidden_artifacts_remain_absent():
     assert forbidden_state.exact_row_sources_directory_created is False
     assert forbidden_state.bundle_written is False
     assert forbidden_state.bundle_sha_written is False
-    assert forbidden_state.exact_row_files == ()
-    assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is True
+    assert len(forbidden_state.exact_row_files) == 15
+    assert forbidden_state.exact_row_sources_allowed_by_repair_pr_d is True
+    assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is False
+    assert report["post_d_transition_audit"]["current_exact_row_sources_presence_allowed_by_repair_pr_d"] is True
     assert report["forbidden_artifact_absence"]["AtomicRows.bundle.jsonl_absent"] is True
     assert report["forbidden_artifact_absence"]["AtomicRows.bundle.sha256_absent"] is True
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
@@ -265,13 +268,14 @@ def test_run_validation_gates_includes_dry_run_gate(monkeypatch):
     generated_index = command_names.index("validate_generated_derivative_bootstrap_gate_static.py")
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
-    assert bridge_index < manifest_index < c0_index < dry_run_index < generated_index
+    d_index = command_names.index("validate_atomicrows_exact_row_source_materialization_manifest.py")
+    assert bridge_index < manifest_index < c0_index < dry_run_index < d_index < generated_index
     assert dry_run_index < no_runtime_index
     assert commands[dry_run_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_exact_row_generator_dry_run_manifest.py"),
     ]
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
@@ -285,8 +289,9 @@ def test_master_plan_not_modified_by_repair_pr_c():
 
 def test_no_exact_row_sources_directory_created_by_validator():
     assert gate.main(["--repo-root", str(REPO_ROOT)]) == 0
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
-    assert _exact_row_files() == []
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
+    assert len(_exact_row_files()) == 15
+    assert _validated_report()["post_d_transition_audit"]["repair_pr_c_did_not_write_exact_rows"] is True
 
 
 def test_no_bundle_or_sha_created_by_validator():

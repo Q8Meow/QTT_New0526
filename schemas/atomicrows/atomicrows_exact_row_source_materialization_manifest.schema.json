@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "EXACT_ROW_SOURCE_MATERIALIZATION_ONLY_NOT_BUNDLE_NOT_RUNTIME_AUTHORITY"
+    },
+    "exact_row_source_record_count": {
+      "const": 4183
+    },
+    "final_readiness_created": {
+      "const": false
+    },
+    "manifest_type": {
+      "const": "ATOMICROWS_EXACT_ROW_SOURCE_MATERIALIZATION_MANIFEST"
+    },
+    "manifest_version": {
+      "const": "v1"
+    },
+    "materialization_mode": {
+      "const": "EXACT_ROW_SOURCE_FILES_ONLY"
+    },
+    "repair_pr": {
+      "const": "REPAIR_PR_D_ATOMICROWS_EXACT_ROW_SOURCE_MATERIALIZATION"
+    }
+  },
+  "required": [
+    "manifest_type",
+    "manifest_version",
+    "repair_pr",
+    "authority_class",
+    "materialization_mode",
+    "exact_row_source_files_created",
+    "exact_row_source_record_count",
+    "bundle_written",
+    "bundle_sha_written",
+    "freeze_created",
+    "final_readiness_created",
+    "runtime_authority_created",
+    "live_authority_created",
+    "order_authority_created",
+    "source_fact_acceptance_created",
+    "connector_semantic_binding_created",
+    "profit_evidence_created",
+    "latency_evidence_created",
+    "execution_superiority_evidence_created",
+    "quantum_advantage_evidence_created",
+    "master_plan_edited",
+    "repair_pr_a_authority_classifier_bridge_manifest_path",
+    "repair_pr_a_authority_classifier_bridge_report_path",
+    "repair_pr_b_expansion_manifest_path",
+    "repair_pr_b_expansion_report_path",
+    "repair_pr_c0_distribution_manifest_path",
+    "repair_pr_c0_distribution_report_path",
+    "repair_pr_c_dry_run_manifest_path",
+    "repair_pr_c_dry_run_report_path",
+    "repair_pr_c1_grand_audit_manifest_path",
+    "repair_pr_c1_grand_audit_report_path",
+    "exact_row_sources_directory",
+    "future_bundle_path",
+    "future_bundle_sha_path",
+    "exact_row_source_record_schema_path",
+    "materialization_manifest_schema_path",
+    "generator_path",
+    "validator_path",
+    "expected_total_rows",
+    "expected_first_row_index",
+    "expected_final_row_index",
+    "expected_family_count",
+    "expected_quantum_forward_total_rows",
+    "expected_agent_governance_family_id",
+    "expected_agent_governance_family_rows",
+    "family_outputs"
+  ],
+  "type": "object"
+}

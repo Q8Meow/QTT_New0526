@@ -153,16 +153,19 @@ def test_c1_forbidden_artifacts_remain_absent():
 
     assert failures == []
     assert state.exact_row_sources_directory_exists is False
+    assert state.exact_row_sources_allowed_by_repair_pr_d is True
     assert state.bundle_exists is False
     assert state.bundle_sha_exists is False
-    assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is True
+    assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is False
     assert report["forbidden_artifact_absence"]["atomicrows_bundle_absent"] is True
     assert report["forbidden_artifact_absence"]["atomicrows_bundle_sha_absent"] is True
 
 
-def test_c1_no_exact_row_source_jsonl_files_exist():
-    assert _exact_row_files() == []
-    assert _validated_report()["forbidden_artifact_absence"]["exact_row_files_absent"] is True
+def test_c1_accepts_post_d_exact_row_source_jsonl_files_without_creating_them():
+    assert len(_exact_row_files()) == 15
+    report = _validated_report()
+    assert report["forbidden_artifact_absence"]["exact_row_files_absent"] is False
+    assert report["post_d_transition_audit"]["repair_pr_c1_did_not_write_exact_rows"] is True
 
 
 def test_c1_no_sha_freeze_final_readiness():
@@ -250,9 +253,10 @@ def test_c1_pr_d_preconditions_reported_but_not_executed():
     pr_d = report["pr_d_readiness_without_materialization"]
 
     assert pr_d["repair_pr_d_precondition_audit_passed"] is True
-    assert pr_d["repair_pr_d_still_required_to_generate_exact_rows"] is True
+    assert pr_d["repair_pr_d_still_required_to_generate_exact_rows"] is False
     assert pr_d["repair_pr_d_not_executed_by_c1"] is True
-    assert pr_d["exact_rows_still_absent"] is True
+    assert pr_d["exact_rows_still_absent"] is False
+    assert report["post_d_transition_audit"]["current_exact_row_sources_presence_allowed_by_repair_pr_d"] is True
 
 
 def test_c1_master_plan_not_modified():
@@ -281,7 +285,7 @@ def test_c1_validator_writes_only_c1_report():
     }
     assert after == before
     assert (REPO_ROOT / gate.DEFAULT_REPORT).exists()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 

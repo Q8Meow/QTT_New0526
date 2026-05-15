@@ -154,7 +154,7 @@ def test_no_forbidden_outputs_or_authority_are_created_and_master_plan_is_unchan
     assert forbidden["AtomicRows.bundle.sha256"] is True
     assert forbidden["specific_agent_family_assignment_artifact"] is True
     assert forbidden["specific_agent_row_assignment_artifact"] is True
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
     assert report["master_plan_unchanged"] is True

@@ -15,6 +15,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from tools import validate_atomicrows_exact_row_authority_classifier_bridge as bridge_gate  # noqa: E402
 from tools import validate_atomicrows_exact_row_expansion_manifest as manifest_gate  # noqa: E402
+from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -453,6 +454,7 @@ def validate_distribution_payload(config: dict[str, Any], schema: dict[str, Any]
 
 def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, bool]]:
     failures, absent = manifest_gate.validate_no_forbidden_artifacts(repo_root)
+    post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
     atomic_rows_dir = repo_root / pathlib.Path("docs/master_plan/atomic_rows")
     exact_row_files: list[str] = []
     if atomic_rows_dir.exists():
@@ -460,7 +462,8 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], di
             path.relative_to(repo_root).as_posix()
             for path in atomic_rows_dir.rglob("*.exact_rows.jsonl")
         )
-    if exact_row_files:
+    exact_row_sources_allowed_by_d = bool(exact_row_files) and post_d_state.allowed
+    if exact_row_files and not exact_row_sources_allowed_by_d:
         failures.append("forbidden exact row files exist: " + ", ".join(exact_row_files))
     future_matrix_absent = True
     for path in FUTURE_MATRIX_FORBIDDEN_PATHS:
@@ -468,6 +471,7 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], di
             future_matrix_absent = False
             failures.append(f"future agent-family eligibility matrix artifact must remain absent: {path.as_posix()}")
     absent = dict(absent)
+    absent["exact_row_sources"] = absent.get("exact_row_sources") is True or exact_row_sources_allowed_by_d
     absent["specific_agent_family_assignment_artifact"] = future_matrix_absent
     absent["specific_agent_row_assignment_artifact"] = future_matrix_absent
     return failures, absent
