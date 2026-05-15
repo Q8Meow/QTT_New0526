@@ -1,0 +1,254 @@
+{
+  "agent_family_assignment_matrix_future_required": true,
+  "agent_governance_family_rows": 270,
+  "artifact_id": "ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+  "artifact_version": "v1",
+  "atomicrows_bundle_jsonl_created": false,
+  "atomicrows_bundle_sha256_created": false,
+  "authority_class": "OWNER_INTERNAL_ARCHITECTURE_DECISION_NOT_EXTERNAL_FACT_NOT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE",
+  "computed_row_ranges": [
+    {
+      "family_number": 1,
+      "family_slug": "001_signal_features",
+      "row_index_end": 390,
+      "row_index_start": 1,
+      "target_row_count": 390
+    },
+    {
+      "family_number": 2,
+      "family_slug": "002_scoring_ranking",
+      "row_index_end": 720,
+      "row_index_start": 391,
+      "target_row_count": 330
+    },
+    {
+      "family_number": 3,
+      "family_slug": "003_normalization_calibration",
+      "row_index_end": 940,
+      "row_index_start": 721,
+      "target_row_count": 220
+    },
+    {
+      "family_number": 4,
+      "family_slug": "004_risk_control",
+      "row_index_end": 1255,
+      "row_index_start": 941,
+      "target_row_count": 315
+    },
+    {
+      "family_number": 5,
+      "family_slug": "005_execution_connector_boundary",
+      "row_index_end": 1535,
+      "row_index_start": 1256,
+      "target_row_count": 280
+    },
+    {
+      "family_number": 6,
+      "family_slug": "006_capital_sizing_cash",
+      "row_index_end": 1755,
+      "row_index_start": 1536,
+      "target_row_count": 220
+    },
+    {
+      "family_number": 7,
+      "family_slug": "007_latency_routing",
+      "row_index_end": 2005,
+      "row_index_start": 1756,
+      "target_row_count": 250
+    },
+    {
+      "family_number": 8,
+      "family_slug": "008_error_guard_fail_closed",
+      "row_index_end": 2225,
+      "row_index_start": 2006,
+      "target_row_count": 220
+    },
+    {
+      "family_number": 9,
+      "family_slug": "009_lifecycle_agent_binding",
+      "row_index_end": 2495,
+      "row_index_start": 2226,
+      "target_row_count": 270
+    },
+    {
+      "family_number": 10,
+      "family_slug": "010_source_evidence_connector_semantic",
+      "row_index_end": 2810,
+      "row_index_start": 2496,
+      "target_row_count": 315
+    },
+    {
+      "family_number": 11,
+      "family_slug": "011_replay_paper_validation",
+      "row_index_end": 3080,
+      "row_index_start": 2811,
+      "target_row_count": 270
+    },
+    {
+      "family_number": 12,
+      "family_slug": "012_quantum_advisory_optimization",
+      "row_index_end": 3370,
+      "row_index_start": 3081,
+      "target_row_count": 290
+    },
+    {
+      "family_number": 13,
+      "family_slug": "013_quantum_qubo_ising_metadata",
+      "row_index_end": 3635,
+      "row_index_start": 3371,
+      "target_row_count": 265
+    },
+    {
+      "family_number": 14,
+      "family_slug": "014_quantum_qaoa_vqe_annealing_metadata",
+      "row_index_end": 3900,
+      "row_index_start": 3636,
+      "target_row_count": 265
+    },
+    {
+      "family_number": 15,
+      "family_slug": "015_quantum_portfolio_hybrid_comparator",
+      "row_index_end": 4183,
+      "row_index_start": 3901,
+      "target_row_count": 283
+    }
+  ],
+  "config_path": "docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml",
+  "connector_semantics_created": false,
+  "counts_sum": 4183,
+  "deny_by_default_agent_governance_preserved": true,
+  "distribution": [
+    {
+      "family_number": 1,
+      "family_slug": "001_signal_features",
+      "target_row_count": 390
+    },
+    {
+      "family_number": 2,
+      "family_slug": "002_scoring_ranking",
+      "target_row_count": 330
+    },
+    {
+      "family_number": 3,
+      "family_slug": "003_normalization_calibration",
+      "target_row_count": 220
+    },
+    {
+      "family_number": 4,
+      "family_slug": "004_risk_control",
+      "target_row_count": 315
+    },
+    {
+      "family_number": 5,
+      "family_slug": "005_execution_connector_boundary",
+      "target_row_count": 280
+    },
+    {
+      "family_number": 6,
+      "family_slug": "006_capital_sizing_cash",
+      "target_row_count": 220
+    },
+    {
+      "family_number": 7,
+      "family_slug": "007_latency_routing",
+      "target_row_count": 250
+    },
+    {
+      "family_number": 8,
+      "family_slug": "008_error_guard_fail_closed",
+      "target_row_count": 220
+    },
+    {
+      "family_number": 9,
+      "family_slug": "009_lifecycle_agent_binding",
+      "target_row_count": 270
+    },
+    {
+      "family_number": 10,
+      "family_slug": "010_source_evidence_connector_semantic",
+      "target_row_count": 315
+    },
+    {
+      "family_number": 11,
+      "family_slug": "011_replay_paper_validation",
+      "target_row_count": 270
+    },
+    {
+      "family_number": 12,
+      "family_slug": "012_quantum_advisory_optimization",
+      "target_row_count": 290
+    },
+    {
+      "family_number": 13,
+      "family_slug": "013_quantum_qubo_ising_metadata",
+      "target_row_count": 265
+    },
+    {
+      "family_number": 14,
+      "family_slug": "014_quantum_qaoa_vqe_annealing_metadata",
+      "target_row_count": 265
+    },
+    {
+      "family_number": 15,
+      "family_slug": "015_quantum_portfolio_hybrid_comparator",
+      "target_row_count": 283
+    }
+  ],
+  "distribution_authority": "OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+  "distribution_authority_class": "OWNER_INTERNAL_ARCHITECTURE_DECISION_NOT_EXTERNAL_FACT",
+  "distribution_counts_grant_agent_access": false,
+  "distribution_counts_grant_live_authority": false,
+  "distribution_counts_grant_order_authority": false,
+  "distribution_counts_grant_quantum_backend_authority": false,
+  "distribution_counts_grant_trading_authority": false,
+  "exact_row_source_directory_created": false,
+  "exact_rows_created": false,
+  "execution_superiority_evidence_created": false,
+  "family_count_total": 15,
+  "final_readiness_created": false,
+  "final_row_index": 4183,
+  "forbidden_artifacts_absent": {
+    "AtomicRows.bundle.jsonl": true,
+    "AtomicRows.bundle.sha256": true,
+    "exact_row_sources": true,
+    "specific_agent_family_assignment_artifact": true,
+    "specific_agent_row_assignment_artifact": true
+  },
+  "freeze_authority_created": false,
+  "future_agent_family_eligibility_matrix_artifact_concept": "AtomicRowsExactRowAgentFamilyEligibilityMatrix",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "latency_evidence_created": false,
+  "live_authority_created": false,
+  "master_plan_unchanged": true,
+  "next_required_repair_pr": "ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN",
+  "optimizer_executed": false,
+  "order_authority_created": false,
+  "owner_approval_scope": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION_ONLY",
+  "owner_distribution_approval_created": true,
+  "pr100_sha_freeze_gate_remains_blocked_until_bundle_exists": true,
+  "pr98_blueprints_remain_not_exact_rows": true,
+  "pr99_path_b_remains_historical_until_exact_rows_generated": true,
+  "profit_evidence_created": false,
+  "quantum_advantage_claim_created": false,
+  "quantum_advantage_evidence_created": false,
+  "quantum_backend_executed": false,
+  "quantum_execution_created": false,
+  "quantum_family_total_rows": 1103,
+  "quantum_forward_family_metadata_preserved": true,
+  "quantum_metadata_future_requirement_scope_only": true,
+  "repair_pr_a_bridge_preserved": true,
+  "repair_pr_b_manifest_currentized": true,
+  "repair_scope": "OWNER_APPROVED_ATOMICROWS_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
+  "report_path": "docs/master_plan/generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json",
+  "report_type": "ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION_REPORT",
+  "row_ranges_contiguous": true,
+  "runtime_created": false,
+  "schema_path": "schemas/atomicrows/atomicrows_owner_approved_exact_15_family_count_distribution.schema.json",
+  "sha_computed": false,
+  "source_acceptance_created": false,
+  "specific_agent_family_assignments_created": false,
+  "specific_agent_row_assignments_created": false,
+  "target_total_row_count": 4183,
+  "validation_result": "PASS_OWNER_APPROVED_DISTRIBUTION_READY",
+  "validator_stdout_marker": "QTT_ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION_OK"
+}

@@ -97,6 +97,10 @@ from tools import (
     as atomicrows_exact_row_authority_classifier_bridge,
 )
 from tools import (
+    validate_atomicrows_owner_approved_exact_15_family_count_distribution
+    as atomicrows_owner_approved_exact_15_family_count_distribution,
+)
+from tools import (
     validate_atomicrows_exact_row_expansion_manifest
     as atomicrows_exact_row_expansion_manifest,
 )
@@ -791,6 +795,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_exact_row_authority_classifier_bridge.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py"
             ),
         ],
         [
@@ -2630,6 +2641,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     repair_bridge_index = command_names.index(
         "validate_atomicrows_exact_row_authority_classifier_bridge.py"
     )
+    repair_c0_index = command_names.index(
+        "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py"
+    )
     repair_manifest_index = command_names.index(
         "validate_atomicrows_exact_row_expansion_manifest.py"
     )
@@ -2670,6 +2684,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < pr99_index
         < pr100_index
         < repair_bridge_index
+        < repair_c0_index
         < repair_manifest_index
         < generated_gate_index
         < no_runtime_index
@@ -2781,6 +2796,13 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         str(
             Path("tools")
             / "validate_atomicrows_exact_row_authority_classifier_bridge.py"
+        ),
+    ]
+    assert commands[repair_c0_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py"
         ),
     ]
     assert commands[repair_manifest_index] == [

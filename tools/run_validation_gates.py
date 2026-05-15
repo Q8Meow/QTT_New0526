@@ -734,6 +734,13 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_atomicrows_exact_row_expansion_manifest.py",
             ),
         ],

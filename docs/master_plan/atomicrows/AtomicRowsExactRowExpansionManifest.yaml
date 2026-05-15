@@ -2,14 +2,14 @@ artifact_id: ATOMICROWS_EXACT_ROW_EXPANSION_MANIFEST
 artifact_version: v1
 repair_scope: ATOMICROWS_4183_EXACT_ROW_EXPANSION_MANIFEST
 authority_class: STATIC_REPAIR_MANIFEST_NOT_EXACT_ROWS_NOT_BUNDLE_NOT_SHA_NOT_FREEZE
-gate_mode: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-manifest_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-validation_result: PASS_BLOCKED_EXPECTED
+gate_mode: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+manifest_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+validation_result: PASS_OWNER_APPROVED_DISTRIBUTION_READY
 target_total_row_count: 4183
 target_total_row_count_status: PLANNING_TARGET_PENDING_EXACT_ROW_GENERATION
 family_count_total: 15
-exact_distribution_ready: false
-owner_distribution_required: true
+exact_distribution_ready: true
+owner_distribution_required: false
 exact_rows_created_by_this_pr: false
 exact_row_source_directory_created_by_this_pr: false
 bundle_created_by_this_pr: false
@@ -20,15 +20,18 @@ families_are_top_level_buckets_not_parameters: true
 subfamily_row_class_doctrine_required: true
 owner_process_approval:
   repair_pr_b_process_approved: true
-  owner_approves_exact_counts_now: false
-  codex_may_use_pr97_explicit_counts_only: true
+  owner_approves_exact_counts_now: true
+  codex_may_use_pr97_explicit_counts_only: false
+  codex_may_use_owner_approved_c0_distribution: true
   codex_may_invent_counts: false
   codex_may_estimate_counts: false
   codex_may_balance_counts: false
   codex_may_optimize_counts: false
   codex_may_infer_counts_from_family_names: false
-  if_pr97_counts_absent_block_for_owner_decision: true
-  required_owner_decision_if_absent: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+  if_pr97_counts_absent_block_for_owner_decision: false
+  historical_owner_distribution_required_before_c0: true
+  c0_owner_distribution_approval_applied: true
+  required_owner_decision_if_absent: null
 upstream_dependencies:
   - AtomicRowsFullBundleRowExpansionPlan
   - AtomicRowsBundleRowFamilySourceFiles
@@ -36,9 +39,9 @@ upstream_dependencies:
   - AtomicRowsBundleShaFreezeAuthorityGate
   - AtomicRowsExactRowAuthorityClassifierBridge
 distribution_authority:
-  source: OWNER_APPROVAL_REQUIRED
-  source_pointer: null
-  owner_required_decision: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+  source: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+  source_pointer: docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml
+  owner_required_decision: null
   no_guesswork: true
   codex_may_invent_counts: false
   codex_may_estimate_counts: false
@@ -50,7 +53,11 @@ count_derivation:
   pr97_explicit_distribution_found: false
   pr97_absence_reason: PR97_DECLARES_OWNER_REVIEW_REQUIRED_AND_NO_EXACT_PER_FAMILY_COUNTS
   accepted_source_pointer: null
-  owner_required_decision: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+  owner_required_decision: null
+  historical_owner_distribution_required_before_c0: true
+  historical_owner_required_decision_before_c0: EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION
+  c0_owner_distribution_supplied: true
+  c0_distribution_source_pointer: docs/master_plan/atomicrows/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.yaml
 allowed_subfamily_classes:
   - PARAMETER_DEFINITION
   - ALGORITHM_DEFINITION
@@ -98,12 +105,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: SOURCE_EVIDENCE_REQUIRED_BEFORE_CONNECTOR_OR_RUNTIME_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 390
+    row_index_start: 1
+    row_index_end: 390
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -143,12 +150,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: SOURCE_EVIDENCE_AND_SCORING_POLICY_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 330
+    row_index_start: 391
+    row_index_end: 720
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -184,12 +191,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: SOURCE_EVIDENCE_AND_REPLAY_PAPER_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 220
+    row_index_start: 721
+    row_index_end: 940
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -225,12 +232,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: SOURCE_EVIDENCE_AND_RUNTIME_RECEIPT_REQUIRED_BEFORE_LIVE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 315
+    row_index_start: 941
+    row_index_end: 1255
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -266,12 +273,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: SOURCE_EVIDENCE_AND_CONNECTOR_SEMANTIC_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 280
+    row_index_start: 1256
+    row_index_end: 1535
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -307,12 +314,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: RUNTIME_CASH_RECEIPT_REQUIRED_BEFORE_LIVE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 220
+    row_index_start: 1536
+    row_index_end: 1755
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -348,12 +355,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: LATENCY_EVIDENCE_REQUIRED_BEFORE_ROUTING_OR_LIVE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 250
+    row_index_start: 1756
+    row_index_end: 2005
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -389,12 +396,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: FAIL_CLOSED_EVIDENCE_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 220
+    row_index_start: 2006
+    row_index_end: 2225
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -428,12 +435,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: PRIMARY_AGENT_ROW_ACCESS_GOVERNANCE_FAMILY
     source_dependency_class: AGENT_BINDING_COMMAND_MATRIX_AND_OWNER_POLICY_REQUIRED_BEFORE_ACCESS
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 270
+    row_index_start: 2226
+    row_index_end: 2495
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -484,12 +491,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: ACCEPTED_SOURCE_PACKET_AND_CONNECTOR_SEMANTIC_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 315
+    row_index_start: 2496
+    row_index_end: 2810
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -523,12 +530,12 @@ families:
     quantum_relevance_class: NOT_QUANTUM_SPECIFIC_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: REPLAY_PAPER_RESULT_REQUIRED_BEFORE_RUNTIME_OR_LIVE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 270
+    row_index_start: 2811
+    row_index_end: 3080
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -566,12 +573,12 @@ families:
     quantum_relevance_class: QUANTUM_ADVISORY_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 290
+    row_index_start: 3081
+    row_index_end: 3370
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -611,12 +618,12 @@ families:
     quantum_relevance_class: QUBO_ISING_COMPATIBLE_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 265
+    row_index_start: 3371
+    row_index_end: 3635
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -656,12 +663,12 @@ families:
     quantum_relevance_class: QAOA_VQE_ANNEALING_COMPATIBLE_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: STATIC_QUANTUM_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 265
+    row_index_start: 3636
+    row_index_end: 3900
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -703,12 +710,12 @@ families:
     quantum_relevance_class: QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_STATIC_METADATA
     agent_governance_relevance_class: AGENT_ELIGIBILITY_REQUIRED_FOR_FUTURE_ROWS
     source_dependency_class: STATIC_QUANTUM_PORTFOLIO_METADATA_OWNER_REVIEW_REQUIRED_BEFORE_BACKEND_USE
-    target_row_count: null
-    row_index_start: null
-    row_index_end: null
-    count_authority: OWNER_APPROVAL_REQUIRED
-    distribution_state: BLOCKED_PENDING_OWNER_EXACT_DISTRIBUTION
-    owner_review_state: OWNER_EXACT_DISTRIBUTION_REQUIRED
+    target_row_count: 283
+    row_index_start: 3901
+    row_index_end: 4183
+    count_authority: OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION
+    distribution_state: EXACT_DISTRIBUTION_READY_NO_ROWS_CREATED
+    owner_review_state: OWNER_EXACT_DISTRIBUTION_APPROVED_NO_ROWS_CREATED
     activation_state: INACTIVE_MANIFEST_ONLY
     may_create_exact_rows_now: false
     may_create_bundle_now: false
@@ -739,6 +746,8 @@ no_authority_created:
   optimizer_execution_created: false
   quantum_backend_authority_created: false
   quantum_advantage_evidence_created: false
+  specific_agent_family_assignments_created: false
+  specific_agent_row_assignments_created: false
 upstream_state_expectations:
   pr97_expansion_plan_present: true
   pr98_blueprints_are_not_exact_rows: true
