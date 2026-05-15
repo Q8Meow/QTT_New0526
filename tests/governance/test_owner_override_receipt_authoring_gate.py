@@ -453,6 +453,26 @@ def test_master_plan_not_edited():
     assert gate.validate_master_plan_diff(REPO_ROOT) == []
 
 
+def test_main_branch_allowed_for_cumulative_validation(monkeypatch):
+    _mock_git_stdout(monkeypatch, _git_metadata_responses(branch="main"))
+
+    failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
+
+    assert failures == []
+    assert metadata["branch"] == "main"
+    assert gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER in metadata["ci_info_lines"]
+
+
+def test_non_downstream_branch_still_fails_branch_strict_validation(monkeypatch):
+    branch = "feature/non-downstream-validation"
+    _mock_git_stdout(monkeypatch, _git_metadata_responses(branch=branch))
+
+    failures, metadata = gate.validate_pr94_roadmap_metadata(REPO_ROOT)
+
+    assert f"current branch must be {gate.TARGET_BRANCH}, got {branch}" in failures
+    assert metadata["branch"] == branch
+
+
 def test_pr95_pr96_boundaries_preserved():
     report = _report()
     assert report["pr95_dashboard_menu_forwardability_metadata_created"] is True

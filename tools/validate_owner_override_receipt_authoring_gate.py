@@ -81,6 +81,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr93_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr93_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
+MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
 
 REQUIRED_MASTER_PLAN_PRINCIPLES = {
     "OWNER_FINAL_INTERNAL_WORKFLOW_AUTHORITY",
@@ -362,6 +363,8 @@ def _github_actions_active() -> bool:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
+    if branch == "main" or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX):
+        return True
     match = re.match(r"pr(?P<number>[0-9]+)-", branch)
     if not match:
         return False
