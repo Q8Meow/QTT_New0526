@@ -1158,6 +1158,20 @@ def render_manifest(manifest: dict[str, Any]) -> str:
     return json.dumps(manifest, indent=2, sort_keys=False) + "\n"
 
 
+def _normalize_generated_newlines(raw: bytes) -> bytes:
+    return raw.replace(b"\r\n", b"\n")
+
+
+def _existing_newline(raw: bytes) -> bytes:
+    return b"\r\n" if b"\r\n" in raw else b"\n"
+
+
+def _apply_newline_style(raw_lf: bytes, newline: bytes) -> bytes:
+    if newline == b"\n":
+        return raw_lf
+    return raw_lf.replace(b"\n", newline)
+
+
 def write_manifest(
     repo_root: pathlib.Path = REPO_ROOT,
     manifest_path: pathlib.Path = DEFAULT_MANIFEST,
@@ -1166,7 +1180,14 @@ def write_manifest(
     manifest = build_manifest(repo_root)
     path = repo_root / manifest_path
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_manifest(manifest), encoding="utf-8", newline="\n")
+    desired_lf = render_manifest(manifest).encode("utf-8")
+    newline = b"\n"
+    if path.exists():
+        current = path.read_bytes()
+        if _normalize_generated_newlines(current) == desired_lf:
+            return path
+        newline = _existing_newline(current)
+    path.write_bytes(_apply_newline_style(desired_lf, newline))
     return path
 
 
