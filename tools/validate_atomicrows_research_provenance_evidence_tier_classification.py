@@ -19,6 +19,9 @@ from tools.build_master_plan_section_coverage_report import (  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 DEFAULT_SCHEMA = (
     pathlib.Path("schemas")
@@ -1118,10 +1121,12 @@ def validate(
     failures.extend(_validate_report_schema(report, schema))
     failures.extend(_report_safety_failures(report))
 
-    if (root / CANONICAL_BUNDLE).exists():
-        failures.append("AtomicRows.bundle.jsonl must not exist")
-    if (root / CANONICAL_BUNDLE_SHA).exists():
-        failures.append("AtomicRows.bundle.sha256 must not exist")
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="AtomicRows research provenance evidence-tier classification",
+        )
+    )
 
     if mode == "final" and report.get("final_ready") is not True:
         failures.append(

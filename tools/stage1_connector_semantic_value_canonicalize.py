@@ -4,7 +4,16 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import sys
 from typing import Any, Iterable, Sequence
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 SUCCESS_MARKER = "STAGE1_CONNECTOR_SEMANTIC_VALUE_CANONICALIZATION_CHECK_OK"
 FAILURE_MARKER = "STAGE1_CONNECTOR_SEMANTIC_VALUE_CANONICALIZATION_CHECK_FAILED"
@@ -231,21 +240,7 @@ def validate_no_forbidden_claims(value: Any, label: str) -> list[str]:
 
 
 def canonical_atomicrows_absence_failures(repo_root: pathlib.Path, label: str) -> list[str]:
-    root = repo_root.resolve()
-    bundle = root / pathlib.Path(*CANONICAL_ATOMICROWS_BUNDLE.parts)
-    bundle_sha = root / pathlib.Path(*CANONICAL_ATOMICROWS_BUNDLE_SHA.parts)
-    failures: list[str] = []
-    if bundle.exists():
-        failures.append(
-            f"{label}: canonical AtomicRows bundle must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE}"
-        )
-    if bundle_sha.exists():
-        failures.append(
-            f"{label}: canonical AtomicRows bundle hash must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE_SHA}"
-        )
-    return failures
+    return validate_current_atomicrows_bundle_state(repo_root, label=label)
 
 
 def _validate_scope(record: dict[str, Any], label: str) -> list[str]:

@@ -19,6 +19,10 @@ from tools import build_atomicrows_bundle as builder  # noqa: E402
 from tools import validate_atomicrows_bundle_builder_deterministic_assembly_gate as pr99_gate  # noqa: E402
 from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -159,9 +163,7 @@ OWNER_APPROVAL_CANNOT_FABRICATE = (
     "EXECUTION_SUPERIORITY_EVIDENCE",
     "QUANTUM_ADVANTAGE_EVIDENCE",
 )
-ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
-    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
-    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
+ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS = (
     (
         pathlib.Path("tools") / "build_atomicrows_full_bundle.py",
         "forbidden full bundle materializer exists",
@@ -184,6 +186,10 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "AtomicRowsFullBundleFinalReadinessGate.report.json",
         "forbidden final readiness artifact exists",
     ),
+)
+SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS = (
+    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
+    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
 )
 FORBIDDEN_STATIC_SURFACE_IMPORT_ROOTS = (
     "hashlib",
@@ -271,7 +277,7 @@ def schema_subset_failures(payload: dict[str, Any], schema: dict[str, Any], labe
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) > 100
@@ -616,9 +622,15 @@ def validate_no_forbidden_artifacts(
     *,
     extra_existing_paths: Sequence[pathlib.Path] = (),
 ) -> list[str]:
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="AtomicRows bundle SHA/freeze authority gate",
+    )
     extra_set = {path.as_posix() for path in extra_existing_paths}
-    for relative_path, message in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+    for relative_path, message in SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS:
+        if relative_path.as_posix() in extra_set:
+            failures.append(f"{message}: {relative_path.as_posix()}")
+    for relative_path, message in ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS:
         exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
         if exists:
             failures.append(f"{message}: {relative_path.as_posix()}")
@@ -630,6 +642,8 @@ def validate_no_forbidden_artifacts(
         if directory_abs.exists():
             for path in directory_abs.rglob("*.sha256"):
                 rel = path.relative_to(repo_root).as_posix()
+                if rel == CANONICAL_BUNDLE_SHA256.as_posix():
+                    continue
                 failures.append(f"forbidden AtomicRows hash file exists: {rel}")
     return failures
 
@@ -680,8 +694,9 @@ def build_report(
     config_path: pathlib.Path,
     report_path: pathlib.Path,
 ) -> dict[str, Any]:
-    bundle_exists = _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists()
-    sha_exists = _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists()
+    presence = canonical_atomicrows_bundle_presence(repo_root)
+    bundle_exists = presence.bundle_jsonl_exists
+    sha_exists = presence.bundle_sha256_exists
     no_claims = copy.deepcopy(_mapping(config.get("no_claims")))
     quantum = copy.deepcopy(_mapping(config.get("quantum_forward_static_metadata")))
     return {

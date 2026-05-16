@@ -19,6 +19,9 @@ from tools import validate_qtt_owner_global_override_authority as owner_authorit
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 DEFAULT_SCHEMA = (
     pathlib.Path("schemas")
@@ -1988,10 +1991,12 @@ def validate(
     )
     if not metrics["agent_algorithm_command_matrix_created"]:
         failures.append("agent-algorithm command matrix must be created")
-    if metrics["bundle_file_present"]:
-        failures.append("AtomicRows.bundle.jsonl must be absent")
-    if metrics["bundle_sha_present"]:
-        failures.append("AtomicRows.bundle.sha256 must be absent")
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="QTT agent algorithm cumulative readiness gate",
+        )
+    )
     failures.extend(binding_gate._master_plan_has_no_diff(root))
 
     report = build_report(

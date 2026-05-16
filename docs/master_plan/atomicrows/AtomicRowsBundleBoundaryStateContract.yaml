@@ -1,0 +1,101 @@
+contract_id: ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT
+contract_version: v1
+authority_class: STATIC_ATOMICROWS_BUNDLE_STATE_BOUNDARY_ONLY_NOT_BUNDLE_MATERIALIZATION_NOT_SHA_FREEZE_NOT_FINAL_READINESS
+current_expected_state: PRE_MATERIALIZATION
+allowed_states:
+  - PRE_MATERIALIZATION
+  - POST_MATERIALIZATION_PRE_SHA
+  - POST_SHA_FREEZE
+state_definitions:
+  PRE_MATERIALIZATION:
+    bundle_jsonl_required: false
+    bundle_jsonl_allowed: false
+    bundle_sha_required: false
+    bundle_sha_allowed: false
+    sha_freeze_authority_allowed: false
+    final_readiness_allowed: false
+  POST_MATERIALIZATION_PRE_SHA:
+    bundle_jsonl_required: true
+    bundle_jsonl_allowed: true
+    bundle_sha_required: false
+    bundle_sha_allowed: false
+    sha_freeze_authority_allowed: false
+    final_readiness_allowed: false
+  POST_SHA_FREEZE:
+    bundle_jsonl_required: true
+    bundle_jsonl_allowed: true
+    bundle_sha_required: true
+    bundle_sha_allowed: true
+    sha_freeze_authority_allowed: true
+    final_readiness_allowed: false
+canonical_paths:
+  bundle_jsonl: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  bundle_sha256: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+transition_rules:
+  - from_state: PRE_MATERIALIZATION
+    to_state: POST_MATERIALIZATION_PRE_SHA
+    allowed_only_in: EXPLICIT_FUTURE_BUNDLE_MATERIALIZATION_PR
+    requires:
+      - bundle JSONL creation
+      - 4,183 row validation
+      - D2/E0 eligibility/scoring readiness coverage preservation
+    must_not_create:
+      - SHA
+      - freeze authority
+      - final readiness
+  - from_state: POST_MATERIALIZATION_PRE_SHA
+    to_state: POST_SHA_FREEZE
+    allowed_only_in: EXPLICIT_FUTURE_SHA_FREEZE_PR
+    requires:
+      - existing valid bundle JSONL
+      - deterministic SHA computation
+      - owner-approved SHA/freeze authority
+    must_not_create:
+      - final readiness unless separately approved
+  - from_state: POST_SHA_FREEZE
+    to_state: FINAL_READINESS
+    allowed_only_in: EXPLICIT_FUTURE_FINAL_READINESS_PR
+    requires:
+      - bundle
+      - SHA/freeze
+      - lifecycle
+      - agent binding
+      - selection
+      - scoring
+      - owner override
+      - command matrices
+      - other required gates
+    must_not_create:
+      - live trading by itself
+forbidden_current_artifacts:
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+forbidden_authority_claims:
+  - SHA/freeze authority
+  - final readiness
+  - runtime/live/order/source/connector/runtime-cash/profit authority
+  - replay/paper execution
+  - optimizer execution
+  - quantum backend/simulator/provider execution
+  - computed scores/ranks/selections
+  - selected stack
+  - selected order intent
+  - profit/latency/execution/quantum-advantage evidence
+future_handoff:
+  current_pr_state_transition_allowed: false
+  next_allowed_transition: PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA
+  future_bundle_materialization_handoff_state: BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_sha_freeze_handoff_state: SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_final_readiness_handoff_state: FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+validator_contract:
+  validator_name: validate_atomicrows_bundle_boundary_state_contract.py
+  success_marker: QTT_ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT_OK
+  expected_current_state: PRE_MATERIALIZATION
+  fail_closed_on_unexpected_bundle_jsonl: true
+  fail_closed_on_unexpected_bundle_sha256: true
+  creates_bundle_jsonl: false
+  creates_bundle_sha256: false
+  creates_sha_freeze_authority: false
+  creates_final_readiness: false
+  creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority: false
+generated_report_path: docs/master_plan/generated/AtomicRowsBundleBoundaryStateContract.report.json

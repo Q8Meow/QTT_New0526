@@ -21,6 +21,10 @@ from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gat
 from tools import validate_atomicrows_bundle_sha_freeze_authority_gate as pr100_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
 from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -931,9 +935,14 @@ def validate_upstream_state(repo_root: pathlib.Path) -> tuple[list[str], dict[st
 
 
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="exact-row authority classifier bridge",
+    )
     post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
     for path in FORBIDDEN_ARTIFACT_PATHS:
+        if path in {CANONICAL_BUNDLE_JSONL, CANONICAL_BUNDLE_SHA256}:
+            continue
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden artifact exists: {path.as_posix()}")
 
@@ -953,9 +962,10 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str],
     if exact_source_dir_exists and not exact_source_dir_abs.is_dir():
         failures.append(f"exact row source path is not a directory: {EXACT_ROW_SOURCES_DIR.as_posix()}")
 
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     return failures, {
-        "AtomicRows.bundle.jsonl": not _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
-        "AtomicRows.bundle.sha256": not _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists(),
+        "AtomicRows.bundle.jsonl": not presence.bundle_jsonl_exists,
+        "AtomicRows.bundle.sha256": not presence.bundle_sha256_exists,
         "exact_row_sources": len(exact_row_files) == 0 or exact_row_sources_allowed_by_d,
         "exact_row_source_directory_exists": exact_source_dir_exists,
         "exact_row_source_files_found": exact_row_files,

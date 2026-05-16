@@ -18,6 +18,10 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -180,9 +184,7 @@ BLUEPRINT_FALSE_FIELDS = (
     "profit_evidence_created_flag",
     "quantum_backend_execution_created_flag",
 )
-ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
-    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
-    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
+ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS = (
     (pathlib.Path("tools") / "build_atomicrows_full_bundle.py", "forbidden bundle builder artifact exists"),
     (
         pathlib.Path("docs")
@@ -198,6 +200,10 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "AtomicRowsFullBundleFinalReadinessGate.report.json",
         "forbidden final readiness artifact exists",
     ),
+)
+SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS = (
+    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
+    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
 )
 PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
     (pathlib.Path("tools") / "build_atomicrows_bundle.py", "forbidden bundle builder artifact exists"),
@@ -336,7 +342,7 @@ def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) > 98
@@ -979,9 +985,15 @@ def validate_no_forbidden_artifacts(
     *,
     extra_existing_paths: Sequence[pathlib.Path] = (),
 ) -> list[str]:
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="AtomicRows bundle row-family source files",
+    )
     extra_set = {path.as_posix() for path in extra_existing_paths}
-    for relative_path, message in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+    for relative_path, message in SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS:
+        if relative_path.as_posix() in extra_set:
+            failures.append(f"{message}: {relative_path.as_posix()}")
+    for relative_path, message in ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS:
         exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
         if exists:
             failures.append(f"{message}: {relative_path.as_posix()}")
@@ -1001,6 +1013,8 @@ def validate_no_forbidden_artifacts(
         if directory_abs.exists():
             for path in directory_abs.rglob("*.sha256"):
                 rel = path.relative_to(repo_root).as_posix() if path.is_absolute() else path.as_posix()
+                if rel == CANONICAL_BUNDLE_SHA256.as_posix():
+                    continue
                 failures.append(f"forbidden AtomicRows hash file exists: {rel}")
     return failures
 
@@ -1057,6 +1071,7 @@ def build_report(
 ) -> dict[str, Any]:
     families = _row_families(pr97_plan)
     manifest_entries = _manifest_entries(source_file_set)
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     source_file_list = [
         {
             "row_family_id": family.get("row_family_id"),
@@ -1120,8 +1135,8 @@ def build_report(
         "quantum_metadata_only_flag": True,
         "quantum_backend_execution_created_flag": False,
         "quantum_advantage_evidence_created_flag": False,
-        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
-        "atomicrows_bundle_sha256_exists": _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists(),
+        "atomicrows_bundle_jsonl_exists": presence.bundle_jsonl_exists,
+        "atomicrows_bundle_sha256_exists": presence.bundle_sha256_exists,
         "pr99_bundle_builder_created": False,
         "pr100_sha_freeze_authority_created": False,
         "pr101_final_readiness_created": False,

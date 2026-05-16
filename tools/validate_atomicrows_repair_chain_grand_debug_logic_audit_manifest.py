@@ -19,6 +19,10 @@ from tools import validate_atomicrows_exact_row_expansion_manifest as expansion_
 from tools import validate_atomicrows_exact_row_generator_dry_run_manifest as dry_run_gate  # noqa: E402
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as c0_gate  # noqa: E402
 from tools import atomicrows_repair_pr_d_materialization_sentinel as post_d_sentinel  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -582,23 +586,23 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
     exact_row_sources_allowed_by_d = (
         (repo_root / FORBIDDEN_EXACT_ROW_SOURCES_DIRECTORY).exists() or bool(exact_row_files)
     ) and post_d_state.allowed
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     state = ForbiddenArtifactState(
         exact_row_sources_directory_exists=(
             repo_root / FORBIDDEN_EXACT_ROW_SOURCES_DIRECTORY
         ).exists()
         and not exact_row_sources_allowed_by_d,
-        bundle_exists=(repo_root / FORBIDDEN_BUNDLE_PATH).exists(),
-        bundle_sha_exists=(repo_root / FORBIDDEN_BUNDLE_SHA_PATH).exists(),
+        bundle_exists=presence.bundle_jsonl_exists,
+        bundle_sha_exists=presence.bundle_sha256_exists,
         exact_row_files=exact_row_files,
         exact_row_sources_allowed_by_repair_pr_d=exact_row_sources_allowed_by_d,
     )
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="AtomicRows repair chain grand debug logic audit manifest",
+    )
     if state.exact_row_sources_directory_exists:
         failures.append("forbidden exact_row_sources directory exists")
-    if state.bundle_exists:
-        failures.append("forbidden AtomicRows.bundle.jsonl exists")
-    if state.bundle_sha_exists:
-        failures.append("forbidden AtomicRows.bundle.sha256 exists")
     if state.exact_row_files and not state.exact_row_sources_allowed_by_repair_pr_d:
         failures.append("forbidden *.exact_rows.jsonl files exist")
     return failures, state

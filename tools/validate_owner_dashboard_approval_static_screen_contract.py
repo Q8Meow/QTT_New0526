@@ -602,7 +602,7 @@ def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) > 96
@@ -621,7 +621,7 @@ def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
     if _main_cumulative_branch_allowed(branch):
         return True
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) >= 99

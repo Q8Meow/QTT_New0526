@@ -4,7 +4,16 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import sys
 from typing import Any
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 SUCCESS_MARKER = "STAGE1_PACKET_SCHEMA_GATE_STATIC_VALIDATION_OK"
 FAILURE_MARKER = "STAGE1_PACKET_SCHEMA_GATE_STATIC_VALIDATION_FAILED"
@@ -712,16 +721,12 @@ def _validate_atomicrows_state(
             "atomicrows_authority_state.canonical_bundle_sha_present must match "
             f"filesystem presence {sha_present}"
         )
-    if bundle_present:
-        failures.append(
-            "canonical AtomicRows bundle must remain absent during Stage-1 packet "
-            f"schema validation: {CANONICAL_BUNDLE_RELATIVE_PATH}"
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            repo_root,
+            label="Stage-1 packet schema validation",
         )
-    if sha_present:
-        failures.append(
-            "canonical AtomicRows bundle hash must remain absent during Stage-1 packet "
-            f"schema validation: {CANONICAL_BUNDLE_SHA_RELATIVE_PATH}"
-        )
+    )
     return failures
 
 

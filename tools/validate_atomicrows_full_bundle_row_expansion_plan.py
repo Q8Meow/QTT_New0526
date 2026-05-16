@@ -20,6 +20,10 @@ from tools.build_master_plan_section_coverage_report import (  # noqa: E402
     RegistryParseError,
     load_yaml_subset,
 )
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -394,7 +398,7 @@ def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) > 97
@@ -413,7 +417,7 @@ def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
     if _main_cumulative_branch_allowed(branch):
         return True
-    match = re.match(r"pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
     return int(match.group("number")) >= 99
@@ -842,8 +846,13 @@ def planned_pr98_source_paths(plan: dict[str, Any]) -> tuple[pathlib.Path, ...]:
 
 
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any]) -> list[str]:
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="AtomicRows full bundle row expansion plan",
+    )
     for path in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        if path in {CANONICAL_BUNDLE_JSONL, CANONICAL_BUNDLE_SHA256}:
+            continue
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
     branch_context = _current_branch_context(repo_root)
@@ -980,10 +989,12 @@ def build_report(
     schema_path: pathlib.Path,
     production_plan_path: pathlib.Path,
     fixture_path: pathlib.Path,
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     families = _row_families(plan)
     validations = _validations(plan)
     blocked_boundary = _mapping(plan.get("forbidden_artifact_boundary_plan"))
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     report: dict[str, Any] = {
         "report_id": REPORT_ID,
         "report_version": REPORT_VERSION,
@@ -1053,8 +1064,8 @@ def build_report(
         "blocked_artifacts": list(blocked_boundary.get("blocked_artifacts") or []),
         "blocked_runtime_effects": list(blocked_boundary.get("blocked_runtime_effects") or []),
         "blocked_claims": list(blocked_boundary.get("blocked_claims") or []),
-        "atomicrows_bundle_jsonl_exists": CANONICAL_BUNDLE_JSONL.exists(),
-        "atomicrows_bundle_sha256_exists": CANONICAL_BUNDLE_SHA256.exists(),
+        "atomicrows_bundle_jsonl_exists": presence.bundle_jsonl_exists,
+        "atomicrows_bundle_sha256_exists": presence.bundle_sha256_exists,
         "pr98_row_family_source_files_created": False,
         "pr99_bundle_builder_created": False,
         "pr100_sha_freeze_authority_created": False,
@@ -1161,6 +1172,7 @@ def validate(
         schema_path=schema_path,
         production_plan_path=production_plan_path,
         fixture_path=fixture_path,
+        repo_root=repo_root,
     )
     second_report = build_report(
         plan=copy.deepcopy(plan),
@@ -1168,6 +1180,7 @@ def validate(
         schema_path=schema_path,
         production_plan_path=production_plan_path,
         fixture_path=fixture_path,
+        repo_root=repo_root,
     )
     if report != second_report:
         failures.append("generated report is not deterministic across builds")

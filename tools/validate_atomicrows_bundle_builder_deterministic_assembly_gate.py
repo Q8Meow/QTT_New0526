@@ -17,6 +17,9 @@ if str(_REPO_ROOT) not in sys.path:
 from tools import build_atomicrows_bundle as builder  # noqa: E402
 from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -81,9 +84,7 @@ BLOCKED_REASON_CODES = (
     builder.BUILD_BLOCKED_REASON_OWNER_APPROVAL,
     builder.BUILD_BLOCKED_REASON_TARGET_NOT_FEASIBLE,
 )
-ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
-    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
-    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
+ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS = (
     (
         pathlib.Path("tools") / "build_atomicrows_full_bundle.py",
         "forbidden full bundle builder artifact exists",
@@ -106,6 +107,10 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "AtomicRowsFullBundleFinalReadinessGate.report.json",
         "forbidden final readiness artifact exists",
     ),
+)
+SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS = (
+    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
+    (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
 )
 FORBIDDEN_STATIC_SURFACE_IMPORT_ROOTS = (
     "hashlib",
@@ -393,9 +398,15 @@ def validate_no_forbidden_artifacts(
     *,
     extra_existing_paths: Sequence[pathlib.Path] = (),
 ) -> list[str]:
-    failures: list[str] = []
+    failures: list[str] = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="AtomicRows bundle builder deterministic assembly gate",
+    )
     extra_set = {path.as_posix() for path in extra_existing_paths}
-    for relative_path, message in ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+    for relative_path, message in SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS:
+        if relative_path.as_posix() in extra_set:
+            failures.append(f"{message}: {relative_path.as_posix()}")
+    for relative_path, message in ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS:
         exists = _resolve(repo_root, relative_path).exists() or relative_path.as_posix() in extra_set
         if exists:
             failures.append(f"{message}: {relative_path.as_posix()}")
@@ -407,6 +418,8 @@ def validate_no_forbidden_artifacts(
         if directory_abs.exists():
             for path in directory_abs.rglob("*.sha256"):
                 rel = path.relative_to(repo_root).as_posix()
+                if rel == CANONICAL_BUNDLE_SHA256.as_posix():
+                    continue
                 failures.append(f"forbidden AtomicRows hash file exists: {rel}")
     return failures
 

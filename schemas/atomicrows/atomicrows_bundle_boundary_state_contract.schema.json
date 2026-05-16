@@ -1,0 +1,205 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-atomicrows-bundle-boundary-state-contract",
+  "title": "AtomicRows Bundle Boundary State Contract",
+  "description": "Static bundle/SHA boundary-state contract. This schema defines the current PRE_MATERIALIZATION state and future handoff states only; it does not create AtomicRows.bundle.jsonl, AtomicRows.bundle.sha256, SHA/freeze authority, final readiness, runtime/live/order/source/connector/runtime-cash/profit authority, replay/paper/optimizer/quantum execution, computed scores, selected stacks, selected order intent, or evidence claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_id",
+    "contract_version",
+    "authority_class",
+    "current_expected_state",
+    "allowed_states",
+    "state_definitions",
+    "canonical_paths",
+    "transition_rules",
+    "forbidden_current_artifacts",
+    "forbidden_authority_claims",
+    "future_handoff",
+    "validator_contract",
+    "generated_report_path"
+  ],
+  "properties": {
+    "contract_id": { "const": "ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT" },
+    "contract_version": { "const": "v1" },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_BUNDLE_STATE_BOUNDARY_ONLY_NOT_BUNDLE_MATERIALIZATION_NOT_SHA_FREEZE_NOT_FINAL_READINESS"
+    },
+    "current_expected_state": { "const": "PRE_MATERIALIZATION" },
+    "allowed_states": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PRE_MATERIALIZATION",
+          "POST_MATERIALIZATION_PRE_SHA",
+          "POST_SHA_FREEZE"
+        ]
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "state_definitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "PRE_MATERIALIZATION",
+        "POST_MATERIALIZATION_PRE_SHA",
+        "POST_SHA_FREEZE"
+      ],
+      "properties": {
+        "PRE_MATERIALIZATION": { "$ref": "#/$defs/state_definition" },
+        "POST_MATERIALIZATION_PRE_SHA": { "$ref": "#/$defs/state_definition" },
+        "POST_SHA_FREEZE": { "$ref": "#/$defs/state_definition" }
+      }
+    },
+    "canonical_paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_jsonl", "bundle_sha256"],
+      "properties": {
+        "bundle_jsonl": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "bundle_sha256": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        }
+      }
+    },
+    "transition_rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transition_rule" },
+      "minItems": 3
+    },
+    "forbidden_current_artifacts": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+          "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        ]
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "forbidden_authority_claims": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 10,
+      "uniqueItems": true
+    },
+    "future_handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_pr_state_transition_allowed",
+        "next_allowed_transition",
+        "future_bundle_materialization_handoff_state",
+        "future_sha_freeze_handoff_state",
+        "future_final_readiness_handoff_state"
+      ],
+      "properties": {
+        "current_pr_state_transition_allowed": { "const": false },
+        "next_allowed_transition": {
+          "const": "PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA"
+        },
+        "future_bundle_materialization_handoff_state": {
+          "const": "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_sha_freeze_handoff_state": {
+          "const": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_final_readiness_handoff_state": {
+          "const": "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        }
+      }
+    },
+    "validator_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_name",
+        "success_marker",
+        "expected_current_state",
+        "fail_closed_on_unexpected_bundle_jsonl",
+        "fail_closed_on_unexpected_bundle_sha256",
+        "creates_bundle_jsonl",
+        "creates_bundle_sha256",
+        "creates_sha_freeze_authority",
+        "creates_final_readiness",
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority"
+      ],
+      "properties": {
+        "validator_name": {
+          "const": "validate_atomicrows_bundle_boundary_state_contract.py"
+        },
+        "success_marker": {
+          "const": "QTT_ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT_OK"
+        },
+        "expected_current_state": { "const": "PRE_MATERIALIZATION" },
+        "fail_closed_on_unexpected_bundle_jsonl": { "const": true },
+        "fail_closed_on_unexpected_bundle_sha256": { "const": true },
+        "creates_bundle_jsonl": { "const": false },
+        "creates_bundle_sha256": { "const": false },
+        "creates_sha_freeze_authority": { "const": false },
+        "creates_final_readiness": { "const": false },
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority": {
+          "const": false
+        }
+      }
+    },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/AtomicRowsBundleBoundaryStateContract.report.json"
+    }
+  },
+  "$defs": {
+    "state_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_jsonl_required",
+        "bundle_jsonl_allowed",
+        "bundle_sha_required",
+        "bundle_sha_allowed",
+        "sha_freeze_authority_allowed",
+        "final_readiness_allowed"
+      ],
+      "properties": {
+        "bundle_jsonl_required": { "type": "boolean" },
+        "bundle_jsonl_allowed": { "type": "boolean" },
+        "bundle_sha_required": { "type": "boolean" },
+        "bundle_sha_allowed": { "type": "boolean" },
+        "sha_freeze_authority_allowed": { "type": "boolean" },
+        "final_readiness_allowed": { "type": "boolean" }
+      }
+    },
+    "transition_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_state",
+        "to_state",
+        "allowed_only_in",
+        "requires",
+        "must_not_create"
+      ],
+      "properties": {
+        "from_state": { "type": "string" },
+        "to_state": { "type": "string" },
+        "allowed_only_in": { "type": "string" },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "must_not_create": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}
