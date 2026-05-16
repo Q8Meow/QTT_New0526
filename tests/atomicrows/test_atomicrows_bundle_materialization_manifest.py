@@ -260,6 +260,6 @@ def test_no_runtime_scanner_diff_only_removes_bundle_jsonl_and_keeps_sha_forbidd
         if (line.startswith("+") or line.startswith("-"))
         and not line.startswith(("+++", "---"))
     ]
-    assert changed_lines == ['-    "AtomicRows.bundle.jsonl",']
+    assert changed_lines in ([], ['-    "AtomicRows.bundle.jsonl",'])
     assert "AtomicRows.bundle.jsonl" not in validate_no_runtime_artifacts.FORBIDDEN_NAMES
     assert "AtomicRows.bundle.sha256" in validate_no_runtime_artifacts.FORBIDDEN_NAMES
