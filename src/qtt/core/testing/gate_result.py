@@ -5,6 +5,18 @@ import os
 import pathlib
 from typing import Any, Iterable
 
+from .atomicrows_bundle_state import (
+    CANONICAL_ATOMICROWS_BUNDLE,
+    CANONICAL_ATOMICROWS_BUNDLE_SHA,
+    AtomicRowsBundleState,
+    atomicrows_bundle_state_report,
+    canonical_atomicrows_bundle_paths,
+    canonical_atomicrows_bundle_presence,
+    expected_atomicrows_bundle_state_from_contract,
+    validate_atomicrows_bundle_state,
+    validate_current_atomicrows_bundle_state,
+)
+
 DETERMINISTIC_GENERATED_AT_UTC = "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
 STATIC_REPORT_AUTHORITY_CLASS = "STATIC_REPORT_ONLY_NOT_TRADING_AUTHORITY"
 
@@ -19,13 +31,6 @@ STATIC_AUTHORITY_FLAGS = {
     "reduces_blockers": False,
     "creates_profit_evidence": False,
 }
-
-CANONICAL_ATOMICROWS_BUNDLE = pathlib.PurePosixPath(
-    "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
-)
-CANONICAL_ATOMICROWS_BUNDLE_SHA = pathlib.PurePosixPath(
-    "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
-)
 
 SKIP_DIR_PARTS = {
     ".git",
@@ -52,30 +57,30 @@ def canonical_path(root: pathlib.Path, rel_path: pathlib.PurePosixPath) -> pathl
 
 
 def canonical_atomicrows_presence(repo_root: pathlib.Path) -> tuple[bool, bool]:
-    return (
-        canonical_path(repo_root, CANONICAL_ATOMICROWS_BUNDLE).exists(),
-        canonical_path(repo_root, CANONICAL_ATOMICROWS_BUNDLE_SHA).exists(),
-    )
+    presence = canonical_atomicrows_bundle_presence(repo_root)
+    return presence.bundle_jsonl_exists, presence.bundle_sha256_exists
 
 
 def canonical_atomicrows_absence_failures(
     repo_root: pathlib.Path,
-    *,
     label: str,
 ) -> list[str]:
-    bundle_present, sha_present = canonical_atomicrows_presence(repo_root)
-    failures: list[str] = []
-    if bundle_present:
-        failures.append(
-            f"{label}: canonical AtomicRows bundle must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE}"
-        )
-    if sha_present:
-        failures.append(
-            f"{label}: canonical AtomicRows bundle hash must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE_SHA}"
-        )
-    return failures
+    return validate_atomicrows_bundle_state(
+        repo_root,
+        AtomicRowsBundleState.PRE_MATERIALIZATION,
+        label,
+    )
+
+
+def canonical_atomicrows_post_pr_e_boundary_failures(
+    repo_root: pathlib.Path,
+    label: str,
+) -> list[str]:
+    return validate_atomicrows_bundle_state(
+        repo_root,
+        AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA,
+        label,
+    )
 
 
 def load_json_object(path: pathlib.Path) -> tuple[dict[str, Any] | None, list[str]]:

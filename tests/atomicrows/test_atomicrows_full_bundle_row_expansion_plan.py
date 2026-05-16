@@ -534,10 +534,14 @@ def test_bundle_hash_builder_freeze_and_final_readiness_remain_blocked_on_pr98_b
     failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
 
     for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
-        _assert_failure_contains(
-            failures,
-            f"forbidden downstream artifact exists: {path.as_posix()}",
-        )
+        if path in {validator.CANONICAL_BUNDLE_JSONL, validator.CANONICAL_BUNDLE_SHA256}:
+            _assert_failure_contains(failures, "expected_state=PRE_MATERIALIZATION")
+            _assert_failure_contains(failures, path.as_posix())
+        else:
+            _assert_failure_contains(
+                failures,
+                f"forbidden downstream artifact exists: {path.as_posix()}",
+            )
     for path in validator.planned_pr98_source_paths(plan):
         assert not any(path.as_posix() in failure for failure in failures)
 
@@ -557,10 +561,14 @@ def test_bundle_hash_freeze_final_readiness_remain_blocked_on_main_context(
     failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
 
     for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
-        _assert_failure_contains(
-            failures,
-            f"forbidden downstream artifact exists: {path.as_posix()}",
-        )
+        if path in {validator.CANONICAL_BUNDLE_JSONL, validator.CANONICAL_BUNDLE_SHA256}:
+            _assert_failure_contains(failures, "expected_state=PRE_MATERIALIZATION")
+            _assert_failure_contains(failures, path.as_posix())
+        else:
+            _assert_failure_contains(
+                failures,
+                f"forbidden downstream artifact exists: {path.as_posix()}",
+            )
     for path in validator.planned_pr98_source_paths(plan):
         assert not any(path.as_posix() in failure for failure in failures)
 

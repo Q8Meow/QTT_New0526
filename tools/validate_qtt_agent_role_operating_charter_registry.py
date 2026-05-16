@@ -21,6 +21,9 @@ from tools.build_master_plan_section_coverage_report import (  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 DEFAULT_SCHEMA = (
     pathlib.Path("schemas")
@@ -2447,10 +2450,12 @@ def validate(
         failures.extend(_validate_top_level(fixture, label="fixture", schema=schema))
         failures.extend(_validate_charters(fixture, label="fixture"))
 
-    if (root / CANONICAL_BUNDLE).exists():
-        failures.append("AtomicRows.bundle.jsonl must be absent")
-    if (root / CANONICAL_BUNDLE_SHA).exists():
-        failures.append("AtomicRows.bundle.sha256 must be absent")
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="QTT agent role operating charter registry",
+        )
+    )
     failures.extend(_master_plan_has_no_diff(root))
 
     report = build_report(registry or {})

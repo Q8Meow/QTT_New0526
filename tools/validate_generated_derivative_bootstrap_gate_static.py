@@ -4,7 +4,16 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import sys
 from typing import Any
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 SUCCESS_MARKER = "GENERATED_DERIVATIVE_BOOTSTRAP_GATE_STATIC_VALIDATION_OK"
 FAILURE_MARKER = "GENERATED_DERIVATIVE_BOOTSTRAP_GATE_STATIC_VALIDATION_FAILED"
@@ -448,16 +457,12 @@ def _validate_canonical_absence(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     bundle_path = _canonical_path(root, CANONICAL_BUNDLE_RELATIVE_PATH)
     sha_path = _canonical_path(root, CANONICAL_BUNDLE_SHA_RELATIVE_PATH)
-    if bundle_path.exists():
-        failures.append(
-            "canonical AtomicRows bundle must remain absent during generated-derivative "
-            f"bootstrap validation: {CANONICAL_BUNDLE_RELATIVE_PATH}"
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="generated-derivative bootstrap validation",
         )
-    if sha_path.exists():
-        failures.append(
-            "canonical AtomicRows bundle hash must remain absent during generated-derivative "
-            f"bootstrap validation: {CANONICAL_BUNDLE_SHA_RELATIVE_PATH}"
-        )
+    )
     return failures
 
 

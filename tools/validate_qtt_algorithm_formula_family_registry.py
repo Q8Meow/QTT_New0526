@@ -21,6 +21,9 @@ from tools.build_master_plan_section_coverage_report import (  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 DEFAULT_SCHEMA = (
     pathlib.Path("schemas")
@@ -2039,10 +2042,12 @@ def validate(
         if _uses_pr_number_as_authority_values(fixture):
             failures.append("fixture must not use a delivery label as authority")
 
-    if (root / CANONICAL_BUNDLE).exists():
-        failures.append("AtomicRows.bundle.jsonl must be absent")
-    if (root / CANONICAL_BUNDLE_SHA).exists():
-        failures.append("AtomicRows.bundle.sha256 must be absent")
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="QTT algorithm formula family registry",
+        )
+    )
     failures.extend(_master_plan_has_no_diff(root))
 
     report = build_report(registry or {}, agent_roles=agent_roles, repo_root=root)

@@ -22,6 +22,10 @@ from tools import validate_atomicrows_exact_row_expansion_manifest as expansion_
 from tools import validate_atomicrows_exact_row_generator_dry_run_manifest as dry_run_gate
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as c0_gate
 from tools import validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest as c1_gate
+from src.qtt.core.testing.atomicrows_bundle_state import (
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 
 
 REPO_ROOT = _REPO_ROOT
@@ -497,9 +501,10 @@ def validate_master_plan_not_modified(repo_root: pathlib.Path) -> list[str]:
 
 
 def forbidden_artifact_absence(repo_root: pathlib.Path) -> dict[str, bool]:
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     return {
-        "atomicrows_bundle_absent": not (repo_root / generator.FUTURE_BUNDLE_PATH).exists(),
-        "atomicrows_bundle_sha_absent": not (repo_root / generator.FUTURE_BUNDLE_SHA_PATH).exists(),
+        "atomicrows_bundle_absent": not presence.bundle_jsonl_exists,
+        "atomicrows_bundle_sha_absent": not presence.bundle_sha256_exists,
         "freeze_absent": True,
         "final_readiness_absent": True,
     }
@@ -740,6 +745,12 @@ def validate(
     failures.extend(source_failures)
 
     forbidden_absence = forbidden_artifact_absence(repo_root)
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            repo_root,
+            label="exact-row source materialization manifest",
+        )
+    )
     for name, absent in forbidden_absence.items():
         if absent is not True:
             failures.append(f"forbidden artifact absence failed: {name}")

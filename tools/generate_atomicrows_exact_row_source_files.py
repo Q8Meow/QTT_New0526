@@ -21,6 +21,9 @@ if str(_REPO_ROOT) not in sys.path:
 from tools import validate_atomicrows_exact_row_generator_dry_run_manifest as dry_run_gate
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as c0_gate
 from tools import validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest as c1_gate
+from src.qtt.core.testing.atomicrows_bundle_state import (
+    validate_current_atomicrows_bundle_state,
+)
 
 
 REPO_ROOT = _REPO_ROOT
@@ -638,10 +641,12 @@ def ensure_required_inputs(repo_root: pathlib.Path) -> None:
     if dry_run_report.get("actual_dry_run", {}).get("final_row_index") != EXPECTED_TOTAL_ROWS:
         raise RuntimeError("Repair PR C dry-run final row index mismatch")
 
-    if (repo_root / FUTURE_BUNDLE_PATH).exists():
-        raise RuntimeError("AtomicRows.bundle.jsonl exists; Repair PR D must not create a bundle")
-    if (repo_root / FUTURE_BUNDLE_SHA_PATH).exists():
-        raise RuntimeError("AtomicRows.bundle.sha256 exists; Repair PR D must not create a bundle SHA")
+    boundary_failures = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="exact-row source file generator",
+    )
+    if boundary_failures:
+        raise RuntimeError("; ".join(boundary_failures))
 
 
 def render_family_file_bytes(plan: FamilyPlan) -> bytes:

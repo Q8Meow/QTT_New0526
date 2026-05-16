@@ -774,6 +774,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_atomicrows_bundle_boundary_state_contract.py"),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_generated_derivative_bootstrap_gate_static.py"),
             "--repo-root",
             ".",

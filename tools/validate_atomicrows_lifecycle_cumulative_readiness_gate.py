@@ -16,6 +16,9 @@ from tools import build_atomicrows_parameter_lifecycle_report as lifecycle_build
 from tools import validate_atomicrows_lifecycle_consumer_gate as consumer_gate  # noqa: E402
 from tools import validate_atomicrows_lifecycle_promotion_receipt_gate as promotion_gate  # noqa: E402
 from tools import validate_atomicrows_lifecycle_registry_mutation_guard as mutation_guard  # noqa: E402
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -628,9 +631,9 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         if report.get(field) != 0:
             failures.append(f"report.{field} must be 0")
     if report.get("bundle_file_present") is not False:
-        failures.append("AtomicRows.bundle.jsonl must not exist for this gate")
+        failures.append("report.bundle_file_present must remain false under PRE_MATERIALIZATION")
     if report.get("bundle_sha_present") is not False:
-        failures.append("AtomicRows.bundle.sha256 must not exist for this gate")
+        failures.append("report.bundle_sha_present must remain false under PRE_MATERIALIZATION")
     if (
         report.get("upstream_reports_final_ready_false_count")
         != report.get("upstream_report_count")
@@ -690,6 +693,12 @@ def validate(
     )
     failures.extend(_validate_report_schema(report, schema))
     failures.extend(_report_safety_failures(report))
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            root,
+            label="AtomicRows lifecycle cumulative readiness gate",
+        )
+    )
 
     if mode == "final" and report.get("final_ready") is not True:
         failures.append(

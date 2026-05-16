@@ -6,7 +6,16 @@ import hashlib
 import json
 import pathlib
 import re
+import sys
 from typing import Any, Iterable, Sequence
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 SUCCESS_MARKER = "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_VALIDATION_OK"
 FAILURE_MARKER = "SOURCE_EVIDENCE_ACCEPTANCE_CONSUMER_CONTRACT_STATIC_VALIDATION_FAILED"
@@ -349,18 +358,7 @@ def _canonical_path(root: pathlib.Path, rel_path: pathlib.PurePosixPath) -> path
 
 
 def _atomicrows_absence_failures(repo_root: pathlib.Path, label: str) -> list[str]:
-    failures: list[str] = []
-    if _canonical_path(repo_root, CANONICAL_ATOMICROWS_BUNDLE).exists():
-        failures.append(
-            f"{label}: canonical AtomicRows bundle must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE}"
-        )
-    if _canonical_path(repo_root, CANONICAL_ATOMICROWS_BUNDLE_SHA).exists():
-        failures.append(
-            f"{label}: canonical AtomicRows bundle hash must remain absent: "
-            f"{CANONICAL_ATOMICROWS_BUNDLE_SHA}"
-        )
-    return failures
+    return validate_current_atomicrows_bundle_state(repo_root, label=label)
 
 
 def _validate_no_forbidden_claims(value: Any, label: str) -> list[str]:

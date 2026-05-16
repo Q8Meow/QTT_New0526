@@ -516,7 +516,7 @@ def _github_actions_active() -> bool:
 def _downstream_validation_branch_allowed(branch: str) -> bool:
     if branch == "main":
         return True
-    match = re.match(r"^pr(?P<number>[0-9]+)-", branch)
+    match = re.match(r"^pr(?P<number>[0-9]+)[a-z]*-", branch)
     if match is None:
         return False
     return int(match.group("number")) > 92

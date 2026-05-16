@@ -10,7 +10,16 @@ from __future__ import annotations
 
 import json
 import pathlib
+import sys
 from dataclasses import dataclass
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
+    validate_current_atomicrows_bundle_state,
+)
 
 
 D_MANIFEST_PATH = pathlib.Path(
@@ -88,10 +97,12 @@ def check_post_d_materialization_state(repo_root: pathlib.Path) -> PostDMaterial
         failures.append("exact-row source files do not match the 15 D family files")
     if record_count != EXPECTED_TOTAL_ROWS:
         failures.append("exact-row source record count is not 4183")
-    if not bundle_absent:
-        failures.append("AtomicRows.bundle.jsonl must remain absent")
-    if not bundle_sha_absent:
-        failures.append("AtomicRows.bundle.sha256 must remain absent")
+    failures.extend(
+        validate_current_atomicrows_bundle_state(
+            repo_root,
+            label="Repair PR D materialization sentinel",
+        )
+    )
 
     if report_present:
         try:

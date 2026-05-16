@@ -20,6 +20,10 @@ if str(_REPO_ROOT) not in sys.path:
 from tools import generate_atomicrows_exact_row_agent_family_eligibility_matrix as matrix_generator
 from tools import generate_atomicrows_exact_row_source_files as source_generator
 from tools import validate_atomicrows_exact_row_source_materialization_manifest as source_gate
+from src.qtt.core.testing.atomicrows_bundle_state import (
+    canonical_atomicrows_bundle_presence,
+    validate_current_atomicrows_bundle_state,
+)
 
 
 REPO_ROOT = _REPO_ROOT
@@ -555,15 +559,15 @@ def validate_registry_refs(repo_root: pathlib.Path, manifest: dict[str, Any]) ->
 
 
 def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, bool]]:
+    presence = canonical_atomicrows_bundle_presence(repo_root)
     checks = {
-        "AtomicRows.bundle.jsonl": not (repo_root / source_generator.FUTURE_BUNDLE_PATH).exists(),
-        "AtomicRows.bundle.sha256": not (repo_root / source_generator.FUTURE_BUNDLE_SHA_PATH).exists(),
+        "AtomicRows.bundle.jsonl": not presence.bundle_jsonl_exists,
+        "AtomicRows.bundle.sha256": not presence.bundle_sha256_exists,
     }
-    failures = [
-        f"forbidden artifact exists: {name}"
-        for name, absent in checks.items()
-        if absent is not True
-    ]
+    failures = validate_current_atomicrows_bundle_state(
+        repo_root,
+        label="D2/E0 exact-row agent-family eligibility matrix",
+    )
     return failures, checks
 
 

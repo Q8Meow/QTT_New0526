@@ -1,0 +1,54 @@
+{
+  "bundle_jsonl_exists": false,
+  "bundle_jsonl_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+  "bundle_sha256_exists": false,
+  "bundle_sha256_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+  "bundle_state_valid": true,
+  "contract_id": "ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT",
+  "current_expected_state": "PRE_MATERIALIZATION",
+  "exact_row_source_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "docs/master_plan/atomic_rows/exact_row_sources",
+    "unchanged": true
+  },
+  "expected_bundle_jsonl_exists": false,
+  "expected_bundle_sha256_exists": false,
+  "final_readiness_created": false,
+  "forbidden_artifact_checks": {
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl": {
+      "exists": false,
+      "expected_exists": false,
+      "valid": true
+    },
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256": {
+      "exists": false,
+      "expected_exists": false,
+      "valid": true
+    }
+  },
+  "future_bundle_materialization_handoff_state": "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_final_readiness_handoff_state": "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_sha_freeze_handoff_state": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "master_plan_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "docs/master_plan/QTT_MasterPlan_Current.md",
+    "unchanged": true
+  },
+  "next_allowed_transition": "PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA",
+  "order_authority_created": false,
+  "profit_evidence_created": false,
+  "quantum_backend_authority_created": false,
+  "report_id": "ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT_REPORT",
+  "result_marker": "QTT_ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT_OK",
+  "runtime_live_authority_created": false,
+  "sha_freeze_authority_created": false,
+  "sha_state_valid": true,
+  "source_connector_authority_created": false,
+  "state_transition_allowed_in_this_pr": false,
+  "validation_errors": [],
+  "validation_status": "PASS",
+  "validation_warnings": [],
+  "validator_name": "validate_atomicrows_bundle_boundary_state_contract.py"
+}
