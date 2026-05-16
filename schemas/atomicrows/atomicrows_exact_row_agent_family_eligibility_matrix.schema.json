@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "manifest_id": {
+      "const": "ATOMICROWS_EXACT_ROW_AGENT_FAMILY_ELIGIBILITY_MATRIX"
+    },
+    "manifest_version": {
+      "const": "v1"
+    },
+    "repair_pr_id": {
+      "const": "REPAIR_PR_D2_E0_ATOMICROWS_EXACT_ROW_AGENT_FAMILY_ELIGIBILITY_MATRIX"
+    },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_EXACT_ROW_AGENT_FAMILY_ELIGIBILITY_AND_SCORING_RANKING_READINESS_ONLY"
+    },
+    "created_for": {
+      "type": "string"
+    },
+    "source_materialization_manifest_ref": {
+      "const": "docs/master_plan/atomicrows/AtomicRowsExactRowSourceMaterializationManifest.yaml"
+    },
+    "source_exact_row_directory": {
+      "const": "docs/master_plan/atomic_rows/exact_row_sources/"
+    },
+    "expected_source_family_file_count": {
+      "const": 15
+    },
+    "expected_exact_row_record_count": {
+      "const": 4183
+    },
+    "expected_family_distribution": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 15,
+      "type": "array"
+    },
+    "policy_summary": {
+      "type": "object"
+    },
+    "eligibility_class_definitions": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 16,
+      "type": "array"
+    },
+    "forbidden_authority_classes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 21,
+      "type": "array"
+    },
+    "scoring_ranking_readiness_overlay": {
+      "type": "object"
+    },
+    "agent_family_registry_refs": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "agent_algorithm_registry_refs": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "atomicrows_parameter_agent_binding_refs": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "owner_governance_refs": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "family_policies": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 15,
+      "type": "array"
+    },
+    "row_coverage_strategy": {
+      "type": "object"
+    },
+    "row_coverage_records": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 4183,
+      "type": "array"
+    },
+    "extension_slots": {
+      "type": "object"
+    },
+    "validation_contract": {
+      "type": "object"
+    },
+    "no_claim_boundary": {
+      "type": "object"
+    },
+    "future_pr_handoff": {
+      "type": "object"
+    },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/AtomicRowsExactRowAgentFamilyEligibilityMatrix.report.json"
+    }
+  },
+  "required": [
+    "manifest_id",
+    "manifest_version",
+    "repair_pr_id",
+    "authority_class",
+    "created_for",
+    "source_materialization_manifest_ref",
+    "source_exact_row_directory",
+    "expected_source_family_file_count",
+    "expected_exact_row_record_count",
+    "expected_family_distribution",
+    "policy_summary",
+    "eligibility_class_definitions",
+    "forbidden_authority_classes",
+    "scoring_ranking_readiness_overlay",
+    "agent_family_registry_refs",
+    "agent_algorithm_registry_refs",
+    "atomicrows_parameter_agent_binding_refs",
+    "owner_governance_refs",
+    "family_policies",
+    "row_coverage_strategy",
+    "row_coverage_records",
+    "extension_slots",
+    "validation_contract",
+    "no_claim_boundary",
+    "future_pr_handoff",
+    "generated_report_path"
+  ],
+  "type": "object"
+}
