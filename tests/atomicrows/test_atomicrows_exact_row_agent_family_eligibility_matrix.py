@@ -15,6 +15,25 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _assert_write_manifest_is_byte_stable_with_newline(tmp_path, monkeypatch, newline: bytes) -> None:
+    payload = {
+        "manifest_id": "TEST_D2_E0_NEWLINE_STABILITY",
+        "row_coverage_records": [
+            {"exact_row_id": "ROW_001", "scoring_readiness_decision": "STATIC_ONLY"}
+        ],
+    }
+    manifest_path = Path("generated") / "manifest.json"
+    output_path = tmp_path / manifest_path
+    output_path.parent.mkdir(parents=True)
+    existing = generator.render_manifest(payload).encode("utf-8").replace(b"\n", newline)
+    output_path.write_bytes(existing)
+
+    monkeypatch.setattr(generator, "build_manifest", lambda repo_root=generator.REPO_ROOT: payload)
+
+    assert generator.write_manifest(tmp_path, manifest_path) == output_path
+    assert output_path.read_bytes() == existing
+
+
 @functools.lru_cache(maxsize=1)
 def _manifest() -> dict:
     return gate.load_manifest(REPO_ROOT / gate.DEFAULT_MANIFEST)
@@ -279,9 +298,25 @@ def test_d2_e0_run_validation_gates_includes_validator_in_correct_order():
     ) < command_names.index("validate_generated_derivative_bootstrap_gate_static.py")
 
 
+def test_d2_e0_generator_write_manifest_is_byte_stable_with_crlf_existing_file(tmp_path, monkeypatch):
+    _assert_write_manifest_is_byte_stable_with_newline(tmp_path, monkeypatch, b"\r\n")
+
+
+def test_d2_e0_generator_write_manifest_is_byte_stable_with_lf_existing_file(tmp_path, monkeypatch):
+    _assert_write_manifest_is_byte_stable_with_newline(tmp_path, monkeypatch, b"\n")
+
+
 def test_d2_e0_generator_is_deterministic():
-    before = (REPO_ROOT / generator.DEFAULT_MANIFEST).read_bytes()
+    manifest_path = REPO_ROOT / generator.DEFAULT_MANIFEST
+    report_path = REPO_ROOT / gate.DEFAULT_REPORT
+    before = {
+        manifest_path: manifest_path.read_bytes(),
+        report_path: report_path.read_bytes(),
+    }
     assert generator.main([]) == 0
-    after = (REPO_ROOT / generator.DEFAULT_MANIFEST).read_bytes()
+    after = {
+        manifest_path: manifest_path.read_bytes(),
+        report_path: report_path.read_bytes(),
+    }
 
     assert before == after
