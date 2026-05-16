@@ -3,10 +3,19 @@ import json
 from pathlib import Path
 
 from tools import run_validation_gates as runner
+from tools import validate_atomicrows_exact_row_agent_family_eligibility_matrix as matrix_gate
 from tools import validate_atomicrows_owner_approved_exact_15_family_count_distribution as gate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+EXACT_DIR = REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources"
+D2_E0_MATRIX_ARTIFACTS = (
+    REPO_ROOT / matrix_gate.DEFAULT_MANIFEST,
+    REPO_ROOT / matrix_gate.DEFAULT_REPORT,
+    REPO_ROOT / matrix_gate.DEFAULT_SCHEMA,
+    REPO_ROOT / matrix_gate.DEFAULT_RECORD_SCHEMA,
+    REPO_ROOT / "tools/validate_atomicrows_exact_row_agent_family_eligibility_matrix.py",
+)
 
 
 def _load_config() -> dict:
@@ -55,6 +64,9 @@ def test_report_is_deterministic_and_records_owner_distribution_authority():
     assert report["target_total_row_count"] == 4183
     assert report["family_count_total"] == 15
     assert report["counts_sum"] == 4183
+    assert report["post_repair_pr_d_exact_row_sources_allowed"] is True
+    assert report["exact_row_source_file_count"] == 15
+    assert report["exact_row_source_record_count"] == 4183
     assert report["row_ranges_contiguous"] is True
     assert report["final_row_index"] == 4183
 
@@ -63,9 +75,11 @@ def test_distribution_order_counts_sum_and_row_ranges_are_computed():
     config = _load_config()
     _, row_ranges = gate.validate_distribution_payload(config, _load_schema())
 
-    assert [(item["family_number"], item["family_slug"], item["target_row_count"]) for item in config["distribution"]] == list(
-        gate.FAMILY_DISTRIBUTION
-    )
+    observed_distribution = [
+        (item["family_number"], item["family_slug"], item["target_row_count"])
+        for item in config["distribution"]
+    ]
+    assert observed_distribution == list(gate.FAMILY_DISTRIBUTION)
     assert sum(item["target_row_count"] for item in config["distribution"]) == 4183
     assert row_ranges == gate.compute_row_ranges()
     assert row_ranges[0] == {
@@ -140,6 +154,76 @@ def test_agent_governance_distribution_grants_no_access_or_assignments():
     assert report["distribution_counts_grant_quantum_backend_authority"] is False
 
 
+def test_d2_e0_matrix_artifacts_are_allowed_after_d2_e0():
+    assert all(path.exists() for path in D2_E0_MATRIX_ARTIFACTS)
+
+    failures, forbidden_state = gate.validate_forbidden_artifacts(REPO_ROOT)
+    report = _validated_report()
+
+    assert failures == []
+    assert forbidden_state["agent_family_eligibility_matrix_allowed_after_d2_e0"] is True
+    assert forbidden_state["agent_family_eligibility_matrix_forbidden_future_state_cleared"] is True
+    assert (
+        forbidden_state["legacy_specific_agent_assignment_absence_check_retired_after_d2_e0"]
+        is True
+    )
+    assert report["agent_family_eligibility_matrix_allowed_after_d2_e0"] is True
+    assert report["agent_family_eligibility_matrix_forbidden_future_state_cleared"] is True
+    assert report["legacy_specific_agent_assignment_absence_check_retired_after_d2_e0"] is True
+    assert "specific_agent_family_assignment_artifact" not in report["forbidden_artifacts_absent"]
+    assert "specific_agent_row_assignment_artifact" not in report["forbidden_artifacts_absent"]
+
+
+def test_exact_row_source_file_and_record_counts_remain_enforced():
+    exact_files = sorted(EXACT_DIR.glob("*.exact_rows.jsonl"))
+    report = _validated_report()
+
+    assert len(exact_files) == 15
+    assert (
+        sum(len(path.read_text(encoding="utf-8").splitlines()) for path in exact_files)
+        == 4183
+    )
+    assert report["exact_row_source_file_count"] == 15
+    assert report["exact_row_source_record_count"] == 4183
+
+    mutated = copy.deepcopy(report)
+    mutated["exact_row_source_file_count"] = 14
+    assert any(
+        "exact_row_source_file_count" in failure
+        for failure in gate.validate_report(mutated)
+    )
+
+    mutated = copy.deepcopy(report)
+    mutated["exact_row_source_record_count"] = 4182
+    assert any(
+        "exact_row_source_record_count" in failure
+        for failure in gate.validate_report(mutated)
+    )
+
+
+def test_bundle_sha_freeze_and_final_readiness_remain_forbidden():
+    report = _validated_report()
+
+    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
+    assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.jsonl"] is True
+    assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.sha256"] is True
+    assert report["atomicrows_bundle_jsonl_created"] is False
+    assert report["atomicrows_bundle_sha256_created"] is False
+    assert report["freeze_authority_created"] is False
+    assert report["final_readiness_created"] is False
+
+    for field in (
+        "atomicrows_bundle_jsonl_created",
+        "atomicrows_bundle_sha256_created",
+        "freeze_authority_created",
+        "final_readiness_created",
+    ):
+        mutated = copy.deepcopy(report)
+        mutated[field] = True
+        assert any(field in failure for failure in gate.validate_report(mutated))
+
+
 def test_no_forbidden_outputs_or_authority_are_created_and_master_plan_is_unchanged():
     config = _load_config()
     report = _validated_report()
@@ -152,8 +236,8 @@ def test_no_forbidden_outputs_or_authority_are_created_and_master_plan_is_unchan
     assert forbidden["exact_row_sources"] is True
     assert forbidden["AtomicRows.bundle.jsonl"] is True
     assert forbidden["AtomicRows.bundle.sha256"] is True
-    assert forbidden["specific_agent_family_assignment_artifact"] is True
-    assert forbidden["specific_agent_row_assignment_artifact"] is True
+    assert "specific_agent_family_assignment_artifact" not in forbidden
+    assert "specific_agent_row_assignment_artifact" not in forbidden
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()

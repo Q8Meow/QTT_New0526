@@ -169,14 +169,6 @@ QUANTUM_FALSE_FIELDS = (
     "quantum_portfolio_optimization_executed",
     "quantum_advantage_claim_created",
 )
-FUTURE_MATRIX_FORBIDDEN_PATHS = (
-    pathlib.Path("docs/master_plan/atomicrows/AtomicRowsExactRowAgentFamilyEligibilityMatrix.yaml"),
-    pathlib.Path("docs/master_plan/generated/AtomicRowsExactRowAgentFamilyEligibilityMatrix.report.json"),
-    pathlib.Path("schemas/atomicrows/atomicrows_exact_row_agent_family_eligibility_matrix.schema.json"),
-    pathlib.Path("tools/validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"),
-    pathlib.Path("tests/atomicrows/test_atomicrows_exact_row_agent_family_eligibility_matrix.py"),
-)
-
 
 @dataclass(frozen=True)
 class ValidationResult:
@@ -452,8 +444,8 @@ def validate_distribution_payload(config: dict[str, Any], schema: dict[str, Any]
     return failures, row_ranges
 
 
-def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, bool]]:
-    failures, absent = manifest_gate.validate_no_forbidden_artifacts(repo_root)
+def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:
+    failures, forbidden_state = manifest_gate.validate_no_forbidden_artifacts(repo_root)
     post_d_state = post_d_sentinel.check_post_d_materialization_state(repo_root)
     atomic_rows_dir = repo_root / pathlib.Path("docs/master_plan/atomic_rows")
     exact_row_files: list[str] = []
@@ -465,16 +457,24 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], di
     exact_row_sources_allowed_by_d = bool(exact_row_files) and post_d_state.allowed
     if exact_row_files and not exact_row_sources_allowed_by_d:
         failures.append("forbidden exact row files exist: " + ", ".join(exact_row_files))
-    future_matrix_absent = True
-    for path in FUTURE_MATRIX_FORBIDDEN_PATHS:
-        if (repo_root / path).exists():
-            future_matrix_absent = False
-            failures.append(f"future agent-family eligibility matrix artifact must remain absent: {path.as_posix()}")
-    absent = dict(absent)
-    absent["exact_row_sources"] = absent.get("exact_row_sources") is True or exact_row_sources_allowed_by_d
-    absent["specific_agent_family_assignment_artifact"] = future_matrix_absent
-    absent["specific_agent_row_assignment_artifact"] = future_matrix_absent
-    return failures, absent
+    if forbidden_state.get("exact_row_sources") is not True and post_d_state.failures:
+        failures.extend(
+            f"post-D exact-row source state invalid: {failure}"
+            for failure in post_d_state.failures
+        )
+    forbidden_state = dict(forbidden_state)
+    forbidden_state["exact_row_sources"] = (
+        forbidden_state.get("exact_row_sources") is True or exact_row_sources_allowed_by_d
+    )
+    forbidden_state["post_repair_pr_d_exact_row_sources_allowed"] = exact_row_sources_allowed_by_d
+    forbidden_state["exact_row_source_file_count"] = post_d_state.exact_row_source_file_count
+    forbidden_state["exact_row_source_record_count"] = post_d_state.exact_row_source_record_count
+    forbidden_state["agent_family_eligibility_matrix_allowed_after_d2_e0"] = True
+    forbidden_state["agent_family_eligibility_matrix_forbidden_future_state_cleared"] = True
+    forbidden_state[
+        "legacy_specific_agent_assignment_absence_check_retired_after_d2_e0"
+    ] = True
+    return failures, forbidden_state
 
 
 def validate_repair_pr_a(repo_root: pathlib.Path) -> list[str]:
@@ -604,7 +604,7 @@ def build_report(
     *,
     config: dict[str, Any],
     row_ranges: list[dict[str, int | str]],
-    forbidden_artifacts_absent: dict[str, bool],
+    forbidden_artifacts_absent: dict[str, Any],
     upstream_facts: dict[str, Any],
     schema_path: pathlib.Path,
     config_path: pathlib.Path,
@@ -637,6 +637,15 @@ def build_report(
         "distribution": copy.deepcopy(config.get("distribution")),
         "exact_rows_created": False,
         "exact_row_source_directory_created": False,
+        "post_repair_pr_d_exact_row_sources_allowed": forbidden_artifacts_absent.get(
+            "post_repair_pr_d_exact_row_sources_allowed"
+        ),
+        "exact_row_source_file_count": forbidden_artifacts_absent.get(
+            "exact_row_source_file_count"
+        ),
+        "exact_row_source_record_count": forbidden_artifacts_absent.get(
+            "exact_row_source_record_count"
+        ),
         "atomicrows_bundle_jsonl_created": False,
         "atomicrows_bundle_sha256_created": False,
         "sha_computed": False,
@@ -656,6 +665,19 @@ def build_report(
         "specific_agent_family_assignments_created": False,
         "specific_agent_row_assignments_created": False,
         "agent_family_assignment_matrix_future_required": True,
+        "agent_family_eligibility_matrix_allowed_after_d2_e0": forbidden_artifacts_absent.get(
+            "agent_family_eligibility_matrix_allowed_after_d2_e0"
+        ),
+        "agent_family_eligibility_matrix_forbidden_future_state_cleared": (
+            forbidden_artifacts_absent.get(
+                "agent_family_eligibility_matrix_forbidden_future_state_cleared"
+            )
+        ),
+        "legacy_specific_agent_assignment_absence_check_retired_after_d2_e0": (
+            forbidden_artifacts_absent.get(
+                "legacy_specific_agent_assignment_absence_check_retired_after_d2_e0"
+            )
+        ),
         "distribution_counts_grant_agent_access": False,
         "distribution_counts_grant_trading_authority": False,
         "distribution_counts_grant_live_authority": False,
@@ -677,12 +699,6 @@ def build_report(
             "exact_row_sources": forbidden_artifacts_absent.get("exact_row_sources"),
             "AtomicRows.bundle.jsonl": forbidden_artifacts_absent.get("AtomicRows.bundle.jsonl"),
             "AtomicRows.bundle.sha256": forbidden_artifacts_absent.get("AtomicRows.bundle.sha256"),
-            "specific_agent_family_assignment_artifact": forbidden_artifacts_absent.get(
-                "specific_agent_family_assignment_artifact"
-            ),
-            "specific_agent_row_assignment_artifact": forbidden_artifacts_absent.get(
-                "specific_agent_row_assignment_artifact"
-            ),
         },
         "quantum_forward_family_metadata_preserved": True,
         "quantum_metadata_future_requirement_scope_only": True,
@@ -715,7 +731,13 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         "final_row_index": TARGET_TOTAL_ROW_COUNT,
         "quantum_family_total_rows": QUANTUM_FAMILY_TOTAL_ROWS,
         "agent_governance_family_rows": AGENT_GOVERNANCE_FAMILY_ROWS,
+        "post_repair_pr_d_exact_row_sources_allowed": True,
+        "exact_row_source_file_count": FAMILY_COUNT_TOTAL,
+        "exact_row_source_record_count": TARGET_TOTAL_ROW_COUNT,
         "agent_family_assignment_matrix_future_required": True,
+        "agent_family_eligibility_matrix_allowed_after_d2_e0": True,
+        "agent_family_eligibility_matrix_forbidden_future_state_cleared": True,
+        "legacy_specific_agent_assignment_absence_check_retired_after_d2_e0": True,
         "repair_pr_a_bridge_preserved": True,
         "repair_pr_b_manifest_currentized": True,
         "pr98_blueprints_remain_not_exact_rows": True,
@@ -732,15 +754,17 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     if not isinstance(forbidden, dict):
         failures.append("report.forbidden_artifacts_absent must be an object")
         forbidden = {}
+    for field in ("exact_row_sources", "AtomicRows.bundle.jsonl", "AtomicRows.bundle.sha256"):
+        if forbidden.get(field) is not True:
+            failures.append(f"report.forbidden_artifacts_absent.{field} must be true")
     for field in (
-        "exact_row_sources",
-        "AtomicRows.bundle.jsonl",
-        "AtomicRows.bundle.sha256",
         "specific_agent_family_assignment_artifact",
         "specific_agent_row_assignment_artifact",
     ):
-        if forbidden.get(field) is not True:
-            failures.append(f"report.forbidden_artifacts_absent.{field} must be true")
+        if field in forbidden:
+            failures.append(
+                f"report.forbidden_artifacts_absent.{field} is retired after D2/E0"
+            )
     if report.get("computed_row_ranges") != compute_row_ranges():
         failures.append("report computed row ranges must be deterministic")
     if report != json.loads(serialize_report(report)):

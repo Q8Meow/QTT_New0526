@@ -1,5 +1,7 @@
 {
   "agent_family_assignment_matrix_future_required": true,
+  "agent_family_eligibility_matrix_allowed_after_d2_e0": true,
+  "agent_family_eligibility_matrix_forbidden_future_state_cleared": true,
   "agent_governance_family_rows": 270,
   "artifact_id": "ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION",
   "artifact_version": "v1",
@@ -202,6 +204,8 @@
   "distribution_counts_grant_quantum_backend_authority": false,
   "distribution_counts_grant_trading_authority": false,
   "exact_row_source_directory_created": false,
+  "exact_row_source_file_count": 15,
+  "exact_row_source_record_count": 4183,
   "exact_rows_created": false,
   "execution_superiority_evidence_created": false,
   "family_count_total": 15,
@@ -210,14 +214,13 @@
   "forbidden_artifacts_absent": {
     "AtomicRows.bundle.jsonl": true,
     "AtomicRows.bundle.sha256": true,
-    "exact_row_sources": true,
-    "specific_agent_family_assignment_artifact": true,
-    "specific_agent_row_assignment_artifact": true
+    "exact_row_sources": true
   },
   "freeze_authority_created": false,
   "future_agent_family_eligibility_matrix_artifact_concept": "AtomicRowsExactRowAgentFamilyEligibilityMatrix",
   "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
   "latency_evidence_created": false,
+  "legacy_specific_agent_assignment_absence_check_retired_after_d2_e0": true,
   "live_authority_created": false,
   "master_plan_unchanged": true,
   "next_required_repair_pr": "ATOMICROWS_EXACT_ROW_GENERATOR_DRY_RUN",
@@ -225,6 +228,7 @@
   "order_authority_created": false,
   "owner_approval_scope": "EXACT_15_FAMILY_ROW_COUNT_DISTRIBUTION_ONLY",
   "owner_distribution_approval_created": true,
+  "post_repair_pr_d_exact_row_sources_allowed": true,
   "pr100_sha_freeze_gate_remains_blocked_until_bundle_exists": true,
   "pr98_blueprints_remain_not_exact_rows": true,
   "pr99_path_b_remains_historical_until_exact_rows_generated": true,

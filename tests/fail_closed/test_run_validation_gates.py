@@ -116,6 +116,10 @@ from tools import (
     validate_atomicrows_exact_row_source_materialization_manifest
     as atomicrows_exact_row_source_materialization_manifest,
 )
+from tools import (
+    validate_atomicrows_exact_row_agent_family_eligibility_matrix
+    as atomicrows_exact_row_agent_family_eligibility_matrix,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -839,6 +843,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_exact_row_source_materialization_manifest.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
             ),
         ],
         [
@@ -1870,6 +1881,13 @@ def test_runner_exposes_atomicrows_exact_row_source_materialization_success_mark
     )
 
 
+def test_runner_exposes_atomicrows_exact_row_agent_family_eligibility_matrix_success_marker():
+    assert (
+        atomicrows_exact_row_agent_family_eligibility_matrix.SUCCESS_MARKER
+        == "QTT_ATOMICROWS_EXACT_ROW_AGENT_FAMILY_ELIGIBILITY_MATRIX_OK"
+    )
+
+
 def test_runner_does_not_use_direct_python_m_pytest(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2710,6 +2728,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     repair_d_index = command_names.index(
         "validate_atomicrows_exact_row_source_materialization_manifest.py"
     )
+    repair_d2_e0_index = command_names.index(
+        "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2752,6 +2773,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < repair_dry_run_index
         < repair_c1_index
         < repair_d_index
+        < repair_d2_e0_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2894,6 +2916,13 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         str(
             Path("tools")
             / "validate_atomicrows_exact_row_source_materialization_manifest.py"
+        ),
+    ]
+    assert commands[repair_d2_e0_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
         ),
     ]
 

@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "agent_family_eligibility_decision": {
+      "const": "ALLOW_STATIC_METADATA_ONLY_FAIL_CLOSED"
+    },
+    "agent_family_eligibility_reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "allowed_agent_family_classes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "allowed_static_actions": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "blocked_agent_family_classes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 21,
+      "type": "array"
+    },
+    "blocked_authority_classes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 21,
+      "type": "array"
+    },
+    "blocked_future_score_components": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "blocked_future_stack_roles": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "block_reason_code": {
+            "type": "string"
+          },
+          "role_label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role_label",
+          "block_reason_code"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "bundle_authority_allowed": {
+      "const": false
+    },
+    "candidate_stack_generation_allowed": {
+      "const": false
+    },
+    "candidate_stack_generation_eligible_future_only": {
+      "type": "boolean"
+    },
+    "capital_fit_metadata_only": {
+      "type": "string"
+    },
+    "connector_authority_allowed": {
+      "const": false
+    },
+    "dashboard_reporting_input_eligible_static_only": {
+      "type": "boolean"
+    },
+    "eligible_future_score_components": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "eligible_future_stack_roles": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "exact_row_id": {
+      "pattern": "^AR_EXACT_[0-9]{3}_[A-Z0-9_]+_[0-9]{6}$",
+      "type": "string"
+    },
+    "expected_profit_proof_allowed": {
+      "const": false
+    },
+    "execution_superiority_evidence_allowed": {
+      "const": false
+    },
+    "family_id": {
+      "type": "string"
+    },
+    "family_name": {
+      "type": "string"
+    },
+    "final_order_submission_authority_allowed": {
+      "const": false
+    },
+    "final_readiness_authority_allowed": {
+      "const": false
+    },
+    "future_extension_reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "future_extension_required_flag": {
+      "type": "boolean"
+    },
+    "latency_fit_metadata_only": {
+      "type": "string"
+    },
+    "latency_superiority_evidence_allowed": {
+      "const": false
+    },
+    "live_order_authority_allowed": {
+      "const": false
+    },
+    "live_trade_intent_authority_allowed": {
+      "const": false
+    },
+    "market_type_applicability_metadata_only": {
+      "type": "string"
+    },
+    "optimizer_arbitration_input_eligible_future_only": {
+      "type": "boolean"
+    },
+    "optimizer_execution_allowed": {
+      "const": false
+    },
+    "owner_override_applicability": {
+      "type": "string"
+    },
+    "owner_override_limits": {
+      "type": "object"
+    },
+    "owner_priority_applicability_metadata_only": {
+      "type": "string"
+    },
+    "owner_review_request_input_eligible_static_only": {
+      "type": "boolean"
+    },
+    "paper_execution_allowed": {
+      "const": false
+    },
+    "platform_applicability_metadata_only": {
+      "type": "string"
+    },
+    "profit_evidence_allowed": {
+      "const": false
+    },
+    "quantum_advantage_evidence_allowed": {
+      "const": false
+    },
+    "quantum_applicability_metadata_class": {
+      "type": "string"
+    },
+    "quantum_backend_authority_allowed": {
+      "const": false
+    },
+    "quantum_provider_authority_allowed": {
+      "const": false
+    },
+    "quantum_simulator_authority_allowed": {
+      "const": false
+    },
+    "ranking_contract_input_eligible_future_only": {
+      "type": "boolean"
+    },
+    "ranking_execution_allowed": {
+      "const": false
+    },
+    "replay_execution_allowed": {
+      "const": false
+    },
+    "replay_paper_competition_input_eligible_future_only": {
+      "type": "boolean"
+    },
+    "replay_paper_dependency_class": {
+      "type": "string"
+    },
+    "risk_fit_metadata_only": {
+      "type": "string"
+    },
+    "row_index": {
+      "maximum": 4183,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "runtime_cash_authority_allowed": {
+      "const": false
+    },
+    "runtime_readiness_dependency_class": {
+      "type": "string"
+    },
+    "scoring_execution_allowed": {
+      "const": false
+    },
+    "scoring_readiness_decision": {
+      "enum": [
+        "SCORING_READY_STATIC_METADATA_ONLY",
+        "SCORING_READY_PENDING_SOURCE_EVIDENCE",
+        "SCORING_READY_PENDING_REPLAY_PAPER",
+        "SCORING_READY_PENDING_OWNER_REVIEW",
+        "SCORING_READY_PENDING_BUNDLE_MATERIALIZATION",
+        "SCORING_BLOCKED_BY_ROW_AUTHORITY",
+        "SCORING_BLOCKED_BY_SOURCE_DEPENDENCY",
+        "SCORING_BLOCKED_BY_CONNECTOR_DEPENDENCY",
+        "SCORING_BLOCKED_BY_RUNTIME_DEPENDENCY",
+        "SCORING_BLOCKED_BY_QUANTUM_BACKEND_DEPENDENCY",
+        "SCORING_BLOCKED_BY_LIVE_AUTHORITY_BOUNDARY",
+        "SCORING_BLOCKED_BY_UNKNOWN_OR_UNSUPPORTED_ROW_CLASS"
+      ],
+      "type": "string"
+    },
+    "scoring_readiness_reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "selection_contract_input_eligible_future_only": {
+      "type": "boolean"
+    },
+    "selection_execution_allowed": {
+      "const": false
+    },
+    "sha_freeze_authority_allowed": {
+      "const": false
+    },
+    "source_agent_eligibility_placeholder": {
+      "type": "string"
+    },
+    "source_currentness_dependency_class": {
+      "type": "string"
+    },
+    "source_fact_authority_allowed": {
+      "const": false
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_quantum_metadata_class": {
+      "type": "string"
+    },
+    "source_record_digest": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "source_record_stable_identity": {
+      "type": "string"
+    },
+    "source_row_class": {
+      "type": "string"
+    },
+    "source_subfamily_id": {
+      "type": "string"
+    },
+    "strategy_fit_metadata_only": {
+      "type": "string"
+    },
+    "trade_context_applicability_metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "capital_intensity_class_metadata_only": {
+          "type": "string"
+        },
+        "edge_type_metadata_only": {
+          "type": "string"
+        },
+        "latency_sensitivity_class_metadata_only": {
+          "type": "string"
+        },
+        "liquidity_context_metadata_only": {
+          "type": "string"
+        },
+        "market_type_metadata_only": {
+          "type": "string"
+        },
+        "owner_override_basis_metadata_only": {
+          "type": "string"
+        },
+        "platform_scope_metadata_only": {
+          "type": "string"
+        },
+        "quantum_priority_mode_metadata_only": {
+          "type": "string"
+        },
+        "risk_mode_metadata_only": {
+          "type": "string"
+        },
+        "source_dependency_state_metadata_only": {
+          "type": "string"
+        },
+        "strategy_class_metadata_only": {
+          "type": "string"
+        },
+        "venue_scope_metadata_only": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "platform_scope_metadata_only",
+        "venue_scope_metadata_only",
+        "market_type_metadata_only",
+        "strategy_class_metadata_only",
+        "edge_type_metadata_only",
+        "latency_sensitivity_class_metadata_only",
+        "capital_intensity_class_metadata_only",
+        "risk_mode_metadata_only",
+        "liquidity_context_metadata_only",
+        "source_dependency_state_metadata_only",
+        "quantum_priority_mode_metadata_only",
+        "owner_override_basis_metadata_only"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "exact_row_id",
+    "row_index",
+    "family_id",
+    "family_name",
+    "source_file",
+    "source_record_stable_identity",
+    "source_record_digest",
+    "source_row_class",
+    "source_subfamily_id",
+    "source_agent_eligibility_placeholder",
+    "source_quantum_metadata_class",
+    "agent_family_eligibility_decision",
+    "agent_family_eligibility_reason_codes",
+    "allowed_agent_family_classes",
+    "blocked_agent_family_classes",
+    "allowed_static_actions",
+    "blocked_authority_classes",
+    "owner_override_applicability",
+    "owner_override_limits",
+    "future_extension_required_flag",
+    "future_extension_reason_codes",
+    "scoring_readiness_decision",
+    "scoring_readiness_reason_codes",
+    "eligible_future_score_components",
+    "blocked_future_score_components",
+    "eligible_future_stack_roles",
+    "blocked_future_stack_roles",
+    "trade_context_applicability_metadata",
+    "platform_applicability_metadata_only",
+    "market_type_applicability_metadata_only",
+    "strategy_fit_metadata_only",
+    "latency_fit_metadata_only",
+    "risk_fit_metadata_only",
+    "capital_fit_metadata_only",
+    "source_currentness_dependency_class",
+    "runtime_readiness_dependency_class",
+    "replay_paper_dependency_class",
+    "quantum_applicability_metadata_class",
+    "owner_priority_applicability_metadata_only",
+    "candidate_stack_generation_eligible_future_only",
+    "ranking_contract_input_eligible_future_only",
+    "selection_contract_input_eligible_future_only",
+    "optimizer_arbitration_input_eligible_future_only",
+    "replay_paper_competition_input_eligible_future_only",
+    "dashboard_reporting_input_eligible_static_only",
+    "owner_review_request_input_eligible_static_only",
+    "live_order_authority_allowed",
+    "final_order_submission_authority_allowed",
+    "live_trade_intent_authority_allowed",
+    "scoring_execution_allowed",
+    "ranking_execution_allowed",
+    "selection_execution_allowed",
+    "candidate_stack_generation_allowed",
+    "optimizer_execution_allowed",
+    "replay_execution_allowed",
+    "paper_execution_allowed",
+    "source_fact_authority_allowed",
+    "connector_authority_allowed",
+    "runtime_cash_authority_allowed",
+    "quantum_backend_authority_allowed",
+    "quantum_simulator_authority_allowed",
+    "quantum_provider_authority_allowed",
+    "profit_evidence_allowed",
+    "expected_profit_proof_allowed",
+    "latency_superiority_evidence_allowed",
+    "execution_superiority_evidence_allowed",
+    "quantum_advantage_evidence_allowed",
+    "bundle_authority_allowed",
+    "sha_freeze_authority_allowed",
+    "final_readiness_authority_allowed"
+  ],
+  "type": "object"
+}
