@@ -26,7 +26,7 @@
   "blocked_unauthorized_agent_id_count": 1,
   "blocked_unauthorized_agent_role_count": 1,
   "blocked_unauthorized_consumer_class_count": 1,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "codex_blocks_owner_override_count": 0,
   "connector_binding_artifact_created": false,

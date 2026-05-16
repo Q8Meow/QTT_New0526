@@ -697,7 +697,6 @@ def build_report(
         "master_plan_unchanged": upstream_facts.get("master_plan_unchanged"),
         "forbidden_artifacts_absent": {
             "exact_row_sources": forbidden_artifacts_absent.get("exact_row_sources"),
-            "AtomicRows.bundle.jsonl": forbidden_artifacts_absent.get("AtomicRows.bundle.jsonl"),
             "AtomicRows.bundle.sha256": forbidden_artifacts_absent.get("AtomicRows.bundle.sha256"),
         },
         "quantum_forward_family_metadata_preserved": True,
@@ -754,7 +753,7 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     if not isinstance(forbidden, dict):
         failures.append("report.forbidden_artifacts_absent must be an object")
         forbidden = {}
-    for field in ("exact_row_sources", "AtomicRows.bundle.jsonl", "AtomicRows.bundle.sha256"):
+    for field in ("exact_row_sources", "AtomicRows.bundle.sha256"):
         if forbidden.get(field) is not True:
             failures.append(f"report.forbidden_artifacts_absent.{field} must be true")
     for field in (

@@ -12,11 +12,11 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 from qtt.core.testing.gate_result import (  # noqa: E402
-    canonical_atomicrows_absence_failures,
     load_json_object,
     require_bool_map,
     require_exact_fields,
     true_claim_failures,
+    validate_current_atomicrows_bundle_state,
     write_json,
 )
 
@@ -981,7 +981,7 @@ def validate_fixture(fixture: dict[str, Any], *, repo_root: pathlib.Path) -> lis
     missing_cases = sorted(REQUIRED_FIXTURE_CASES - seen_cases)
     if missing_cases:
         failures.append(f"fixture missing required PR46 cases: {', '.join(missing_cases)}")
-    failures.extend(canonical_atomicrows_absence_failures(repo_root, label="PR46 three-venue canary fixture"))
+    failures.extend(validate_current_atomicrows_bundle_state(repo_root, label="PR46 three-venue canary fixture"))
     return failures
 
 
@@ -1013,7 +1013,7 @@ def validate_static_surface(
     failures.extend(fixture_failures)
     if fixture is not None:
         failures.extend(validate_fixture(fixture, repo_root=repo_root))
-    failures.extend(canonical_atomicrows_absence_failures(repo_root, label="PR46 three-venue canary validator"))
+    failures.extend(validate_current_atomicrows_bundle_state(repo_root, label="PR46 three-venue canary validator"))
     return failures
 
 

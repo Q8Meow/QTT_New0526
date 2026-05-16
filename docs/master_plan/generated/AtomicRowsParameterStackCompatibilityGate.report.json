@@ -2,7 +2,7 @@
   "accepted_source_packets_created": false,
   "all_required_role_interfaces_required_for_normal_compatibility": true,
   "all_role_interface_contracts_present": true,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_VALIDATION_REPORT_NOT_COMPLETENESS_NOT_STACK_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY",
   "candidate_stack_generation_created": false,

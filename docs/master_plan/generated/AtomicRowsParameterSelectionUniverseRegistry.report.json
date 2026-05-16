@@ -2,7 +2,7 @@
   "accepted_source_packets_created": false,
   "agent_algorithm_foundation_dependencies_present": true,
   "atomicrows_bundle_hash_authority_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_rows_created": false,
   "atomicrows_bundle_sha256_exists": false,
   "atomicrows_lifecycle_binding_dependencies_present": true,

@@ -123,11 +123,14 @@ def check_post_d_materialization_state(repo_root: pathlib.Path) -> PostDMaterial
             "exact_row_sources_directory_present_by_repair_pr_d",
             "c_and_c1_did_not_create_rows",
             "rows_created_by_repair_pr_d_only",
-            "bundle_still_absent",
             "sha_still_absent",
         ):
             if transition.get(field) is not True:
                 failures.append(f"D materialization report post_d_transition_audit.{field} must be true")
+        if transition.get("bundle_still_absent") not in {True, False}:
+            failures.append(
+                "D materialization report post_d_transition_audit.bundle_still_absent must be boolean"
+            )
 
     return PostDMaterializationState(
         allowed=not failures,

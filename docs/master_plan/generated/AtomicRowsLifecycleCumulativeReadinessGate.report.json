@@ -1,6 +1,6 @@
 {
   "authority_boundary_all_false": true,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "cumulative_ready": false,
   "deterministic_output": true,

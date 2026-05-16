@@ -201,7 +201,7 @@ def test_path_b_is_selected_for_blueprint_only_sources_and_bundle_is_not_created
     assert report["source_blueprints_found_count"] == 15
     assert report["blueprint_only_source_files_detected_flag"] is True
     assert builder.BUILD_BLOCKED_REASON_EXACT_SOURCE_ROWS in report["blocked_reason_codes"]
-    assert not (ROOT / builder.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / builder.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / builder.CANONICAL_BUNDLE_SHA256).exists()
 
 
@@ -221,7 +221,7 @@ def test_materialize_mode_fails_closed_from_blueprints_without_creating_bundle(t
         == 1
     )
     assert report_path.exists()
-    assert not (ROOT / builder.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / builder.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / builder.CANONICAL_BUNDLE_SHA256).exists()
 
 

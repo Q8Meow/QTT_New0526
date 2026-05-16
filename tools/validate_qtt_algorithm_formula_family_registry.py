@@ -1960,7 +1960,6 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "replay_execution_created",
         "paper_execution_created",
         "quantum_backend_artifact_created",
-        "bundle_file_present",
         "bundle_sha_present",
         "uses_pr_number_as_authority",
         "agent_algorithm_binding_created",

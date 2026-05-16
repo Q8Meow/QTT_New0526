@@ -249,9 +249,9 @@ def test_owner_override_cannot_be_reported_as_blocking():
 def test_no_bundle_hash_or_runtime_live_order_quantum_profit_artifact_is_created():
     report = json.loads(REPORT.read_text(encoding="utf-8"))
 
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
-    assert report["bundle_file_present"] is False
+    assert report["bundle_file_present"] is True
     assert report["bundle_sha_present"] is False
     assert report["real_runtime_artifact_created"] is False
     assert report["real_live_artifact_created"] is False

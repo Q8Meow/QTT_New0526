@@ -356,7 +356,7 @@ ORDER_AUTHORITY_POLICY_EXPECTATIONS = {
 ATOMICROWS_STATE_EXPECTATIONS = {
     "canonical_bundle_path": str(CANONICAL_BUNDLE_RELATIVE_PATH),
     "canonical_bundle_sha_path": str(CANONICAL_BUNDLE_SHA_RELATIVE_PATH),
-    "canonical_bundle_present": False,
+    "canonical_bundle_present": True,
     "canonical_bundle_sha_present": False,
     "atomicrows_bundle_creation_claimed": False,
     "atomicrows_hash_creation_claimed": False,

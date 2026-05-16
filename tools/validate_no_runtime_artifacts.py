@@ -12,7 +12,6 @@ FORBIDDEN_NAMES = {
     ".env",
     ".env.local",
     ".env.production",
-    "AtomicRows.bundle.jsonl",
     "AtomicRows.bundle.sha256",
     "credentials.json",
     "id_rsa",

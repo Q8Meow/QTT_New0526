@@ -274,13 +274,13 @@ def test_d2_e0_future_pr_handoffs_are_ready_without_execution():
     assert report["future_pr90_plus_handoff_ready"] is True
 
 
-def test_d2_e0_repair_pr_e_handoff_does_not_create_bundle_or_sha():
+def test_d2_e0_repair_pr_e_handoff_preserves_sha_absence_after_bundle_materialization():
     report = _validated_report()
 
     assert report["future_repair_pr_e_handoff_state"] == "REPAIR_PR_E_BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
-    assert report["forbidden_artifact_checks"]["AtomicRows.bundle.jsonl"] is True
+    assert report["forbidden_artifact_checks"]["AtomicRows.bundle.jsonl"] is False
     assert report["forbidden_artifact_checks"]["AtomicRows.bundle.sha256"] is True
 
 
@@ -295,7 +295,9 @@ def test_d2_e0_run_validation_gates_includes_validator_in_correct_order():
     assert "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py" in command_names
     assert command_names.index("validate_atomicrows_exact_row_source_materialization_manifest.py") < command_names.index(
         "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
-    ) < command_names.index("validate_generated_derivative_bootstrap_gate_static.py")
+    ) < command_names.index("validate_atomicrows_bundle_materialization_manifest.py") < command_names.index(
+        "validate_generated_derivative_bootstrap_gate_static.py"
+    )
 
 
 def test_d2_e0_generator_write_manifest_is_byte_stable_with_crlf_existing_file(tmp_path, monkeypatch):

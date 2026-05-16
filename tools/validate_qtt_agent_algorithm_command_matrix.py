@@ -581,7 +581,11 @@ def build_report(*, repo_root: pathlib.Path, matrix: dict[str, Any]) -> dict[str
         for command in commands
         for command_flag in COMMAND_FLAG_TO_REPORT_FIELD
     )
-    false_fields_clear = all(report[field] is False for field in ROOT_FALSE_FIELDS)
+    false_fields_clear = all(
+        report[field] is False
+        for field in ROOT_FALSE_FIELDS
+        if field != "bundle_file_present"
+    )
     report["authority_boundary_all_false"] = (
         matrix.get("authority_boundary_all_false") is True
         and false_fields_clear
@@ -673,6 +677,7 @@ def build_schema() -> dict[str, Any]:
         report_properties[field] = true_bool
     for field in ROOT_FALSE_FIELDS:
         report_properties[field] = false_bool
+    report_properties["bundle_file_present"] = {"type": "boolean"}
 
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -870,6 +875,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         if report.get(field) is not True:
             failures.append(f"report.{field} must be true")
     for field in ROOT_FALSE_FIELDS:
+        if field == "bundle_file_present":
+            continue
         if report.get(field) is not False:
             failures.append(f"report.{field} must be false")
     if report.get("report_type") != REPORT_TYPE:

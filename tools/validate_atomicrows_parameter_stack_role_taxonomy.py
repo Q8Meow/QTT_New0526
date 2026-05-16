@@ -377,7 +377,6 @@ REPORT_FALSE_FIELDS = (
     "latency_superiority_claim_created",
     "execution_superiority_claim_created",
     "atomicrows_bundle_rows_created",
-    "atomicrows_bundle_jsonl_exists",
     "atomicrows_bundle_sha256_exists",
     "ranking_created",
     "scoring_created",
@@ -927,8 +926,6 @@ def validate_future_consumer_contract(registry: dict[str, Any]) -> list[str]:
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> list[str]:
     root = repo_root.resolve()
     failures: list[str] = []
-    if (root / CANONICAL_BUNDLE_JSONL).exists():
-        failures.append(f"ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK: {_as_posix(CANONICAL_BUNDLE_JSONL)}")
     if (root / CANONICAL_BUNDLE_SHA256).exists():
         failures.append(
             f"ATOMICROWS_BUNDLE_SHA_FORBIDDEN_ARTIFACT_BLOCK: {_as_posix(CANONICAL_BUNDLE_SHA256)}"
@@ -1404,6 +1401,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
     }
     for field in REPORT_FALSE_FIELDS:
         expected_values[field] = False
+    if not isinstance(report.get("atomicrows_bundle_jsonl_exists"), bool):
+        failures.append("report.atomicrows_bundle_jsonl_exists must be boolean")
     for field, expected in expected_values.items():
         if report.get(field) != expected:
             failures.append(f"report.{field} must be {expected!r}")

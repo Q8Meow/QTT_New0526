@@ -7,7 +7,7 @@
   "alpha_evidence_claim_created": false,
   "architecture_emphasis": "INSTITUTIONAL_ALGORITHM_FORMULA_FAMILY_REGISTRY_NOT_FLAT_ENUM",
   "authority_boundary_all_false": true,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "classical_algorithm_family_count": 6,
   "connector_binding_artifact_created": false,

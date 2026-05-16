@@ -241,7 +241,6 @@ def test_owner_override_allows_internal_route_only_for_existing_universe():
             "ROUTING_BLOCK_OWNER_OVERRIDE_MISSING_UNIVERSE",
             "ROUTE_BLOCKED_OWNER_OVERRIDE_MISSING_UNIVERSE",
         ),
-        ("ROUTING_BLOCK_ATOMICROWS_BUNDLE_JSONL_CREATED", "atomicrows_bundle_jsonl_exists"),
         ("ROUTING_BLOCK_ATOMICROWS_BUNDLE_SHA256_CREATED", "atomicrows_bundle_sha256_exists"),
     ],
 )
@@ -267,7 +266,7 @@ def test_route_output_ordering_reason_codes_and_static_boundaries_are_determinis
     assert not validator.validate_validator_source_static(ROOT)
 
 
-def test_forbidden_artifact_paths_fail_closed_without_creating_repo_bundle():
+def test_forbidden_sha_artifact_paths_fail_closed_without_creating_repo_bundle_sha():
     temp_root = ROOT / ".tmp" / "pr81_bundle_artifact_test"
     if temp_root.exists():
         shutil.rmtree(temp_root)
@@ -279,9 +278,9 @@ def test_forbidden_artifact_paths_fail_closed_without_creating_repo_bundle():
 
         failures = validator.validate_no_forbidden_artifacts(temp_root)
 
-        assert "ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK" in failures
+        assert "ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK" not in failures
         assert "ATOMICROWS_BUNDLE_SHA_FORBIDDEN_ARTIFACT_BLOCK" in failures
-        assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+        assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
         assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)

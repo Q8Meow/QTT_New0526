@@ -2,7 +2,7 @@
   "$schema": "json-schema-draft-2020-12",
   "$id": "qtt-local-schemas-atomicrows-bundle-boundary-state-contract",
   "title": "AtomicRows Bundle Boundary State Contract",
-  "description": "Static bundle/SHA boundary-state contract. This schema defines the current PRE_MATERIALIZATION state and future handoff states only; it does not create AtomicRows.bundle.jsonl, AtomicRows.bundle.sha256, SHA/freeze authority, final readiness, runtime/live/order/source/connector/runtime-cash/profit authority, replay/paper/optimizer/quantum execution, computed scores, selected stacks, selected order intent, or evidence claims.",
+  "description": "Static bundle/SHA boundary-state contract. This schema defines the current POST_MATERIALIZATION_PRE_SHA state and future handoff states only; it does not create AtomicRows.bundle.sha256, SHA/freeze authority, final readiness, runtime/live/order/source/connector/runtime-cash/profit authority, replay/paper/optimizer/quantum execution, computed scores, selected stacks, selected order intent, or evidence claims.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -26,7 +26,7 @@
     "authority_class": {
       "const": "STATIC_ATOMICROWS_BUNDLE_STATE_BOUNDARY_ONLY_NOT_BUNDLE_MATERIALIZATION_NOT_SHA_FREEZE_NOT_FINAL_READINESS"
     },
-    "current_expected_state": { "const": "PRE_MATERIALIZATION" },
+    "current_expected_state": { "const": "POST_MATERIALIZATION_PRE_SHA" },
     "allowed_states": {
       "type": "array",
       "items": {
@@ -76,12 +76,11 @@
       "type": "array",
       "items": {
         "enum": [
-          "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
           "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
         ]
       },
-      "minItems": 2,
-      "maxItems": 2,
+      "minItems": 1,
+      "maxItems": 1,
       "uniqueItems": true
     },
     "forbidden_authority_claims": {
@@ -95,24 +94,50 @@
       "additionalProperties": false,
       "required": [
         "current_pr_state_transition_allowed",
+        "state_transition_executed_by_this_pr",
+        "transition_from_state",
+        "transition_to_state",
         "next_allowed_transition",
         "future_bundle_materialization_handoff_state",
         "future_sha_freeze_handoff_state",
-        "future_final_readiness_handoff_state"
+        "future_final_readiness_handoff_state",
+        "future_sha_freeze_state_centralization_required",
+        "future_final_readiness_state_centralization_required",
+        "future_runtime_live_state_centralization_required",
+        "future_profit_evidence_state_centralization_required",
+        "future_quantum_execution_state_centralization_required"
       ],
       "properties": {
-        "current_pr_state_transition_allowed": { "const": false },
+        "current_pr_state_transition_allowed": { "const": true },
+        "state_transition_executed_by_this_pr": { "const": true },
+        "transition_from_state": { "const": "PRE_MATERIALIZATION" },
+        "transition_to_state": { "const": "POST_MATERIALIZATION_PRE_SHA" },
         "next_allowed_transition": {
-          "const": "PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA"
+          "const": "POST_MATERIALIZATION_PRE_SHA_TO_POST_SHA_FREEZE"
         },
         "future_bundle_materialization_handoff_state": {
-          "const": "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+          "const": "BUNDLE_MATERIALIZED_BY_PR113_NOT_SHA_NOT_FREEZE"
         },
         "future_sha_freeze_handoff_state": {
           "const": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
         },
         "future_final_readiness_handoff_state": {
           "const": "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_sha_freeze_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_final_readiness_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_runtime_live_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_profit_evidence_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_quantum_execution_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
         }
       }
     },
@@ -123,7 +148,7 @@
         "validator_name",
         "success_marker",
         "expected_current_state",
-        "fail_closed_on_unexpected_bundle_jsonl",
+        "fail_closed_on_missing_bundle_jsonl",
         "fail_closed_on_unexpected_bundle_sha256",
         "creates_bundle_jsonl",
         "creates_bundle_sha256",
@@ -138,8 +163,8 @@
         "success_marker": {
           "const": "QTT_ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT_OK"
         },
-        "expected_current_state": { "const": "PRE_MATERIALIZATION" },
-        "fail_closed_on_unexpected_bundle_jsonl": { "const": true },
+        "expected_current_state": { "const": "POST_MATERIALIZATION_PRE_SHA" },
+        "fail_closed_on_missing_bundle_jsonl": { "const": true },
         "fail_closed_on_unexpected_bundle_sha256": { "const": true },
         "creates_bundle_jsonl": { "const": false },
         "creates_bundle_sha256": { "const": false },

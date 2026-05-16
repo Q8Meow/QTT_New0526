@@ -2,7 +2,7 @@
   "accepted_source_packet_created_count": 0,
   "accepts_source": false,
   "atomicrows_bundle_jsonl_created_count": 0,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created_count": 0,
   "atomicrows_bundle_sha256_exists": false,
   "base_head": "65eb507",

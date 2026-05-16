@@ -93,7 +93,7 @@
   "generated_derivative_and_atomicrows_status": {
     "generated_derivative_status": "STATIC_BOOTSTRAP_ABSENT_NO_COMPLETION_AUTHORITY",
     "atomicrows_bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
-    "atomicrows_bundle_present": false,
+    "atomicrows_bundle_present": true,
     "atomicrows_bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
     "atomicrows_bundle_sha_present": false,
     "atomicrows_row_count_status": "NOT_CREATED_UNBOUND",

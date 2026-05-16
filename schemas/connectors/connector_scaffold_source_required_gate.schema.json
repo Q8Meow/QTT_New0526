@@ -1057,7 +1057,7 @@
           "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
         },
         "canonical_bundle_present": {
-          "const": false
+          "const": true
         },
         "canonical_bundle_sha_present": {
           "const": false

@@ -399,11 +399,11 @@ def test_forbidden_artifacts_master_plan_and_repair_pr76_state():
 
     assert completed.returncode == 0
     assert validator.validate_master_plan_not_modified(ROOT) == []
-    assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()
     assert (ROOT / validator.PR76_SHORT_TEST).exists()
     assert not (ROOT / validator.PR76_OLD_LONG_TEST).exists()
     report = _report()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["repair_pr76_long_path_fix_present"] is True

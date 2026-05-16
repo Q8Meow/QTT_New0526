@@ -1085,7 +1085,8 @@ def build_report(
         "audit_only": True,
         "exact_rows_written": False,
         "exact_row_sources_directory_created": forbidden_state.exact_row_sources_directory_exists,
-        "bundle_written": forbidden_state.bundle_exists,
+        "bundle_written": False,
+        "atomicrows_bundle_jsonl_exists": forbidden_state.bundle_exists,
         "bundle_sha_written": forbidden_state.bundle_sha_exists,
         "freeze_created": False,
         "final_readiness_created": False,
@@ -1170,7 +1171,7 @@ def build_report(
                 not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
                 and not forbidden_state.exact_row_sources_directory_exists
             ),
-            "atomicrows_bundle_absent": not forbidden_state.bundle_exists,
+            "atomicrows_bundle_materialized_static": forbidden_state.bundle_exists,
             "atomicrows_bundle_sha_absent": not forbidden_state.bundle_sha_exists,
             "exact_row_files_absent": exact_row_files_absent,
             "exact_row_files_found": list(forbidden_state.exact_row_files),
@@ -1211,7 +1212,7 @@ def build_report(
             ),
             "repair_pr_d_not_executed_by_c1": True,
             "exact_rows_still_absent": exact_row_files_absent,
-            "bundle_still_absent": not forbidden_state.bundle_exists,
+            "bundle_not_written_by_c1": True,
             "sha_still_absent": not forbidden_state.bundle_sha_exists,
             "freeze_still_absent": True,
             "final_readiness_still_absent": True,
@@ -1226,7 +1227,7 @@ def build_report(
             "current_exact_row_sources_presence_allowed_by_repair_pr_d": (
                 forbidden_state.exact_row_sources_allowed_by_repair_pr_d
             ),
-            "bundle_still_absent": not forbidden_state.bundle_exists,
+            "bundle_not_written_by_c1": True,
             "bundle_sha_still_absent": not forbidden_state.bundle_sha_exists,
             "freeze_still_absent": True,
             "final_readiness_still_absent": True,
@@ -1339,7 +1340,7 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         failures,
         forbidden_artifact_absence,
         (
-            "atomicrows_bundle_absent",
+            "atomicrows_bundle_materialized_static",
             "atomicrows_bundle_sha_absent",
         ),
         prefix="report.forbidden_artifact_absence",
@@ -1428,7 +1429,7 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         (
             "repair_pr_d_precondition_audit_passed",
             "repair_pr_d_not_executed_by_c1",
-            "bundle_still_absent",
+            "bundle_not_written_by_c1",
             "sha_still_absent",
             "freeze_still_absent",
             "final_readiness_still_absent",
@@ -1454,7 +1455,7 @@ def validate_report(report: dict[str, Any]) -> list[str]:
             (
                 "repair_pr_c1_did_not_write_exact_rows",
                 "current_exact_row_sources_presence_allowed_by_repair_pr_d",
-                "bundle_still_absent",
+                "bundle_not_written_by_c1",
                 "bundle_sha_still_absent",
                 "freeze_still_absent",
                 "final_readiness_still_absent",

@@ -132,5 +132,5 @@ def test_manifest_rejects_future_snapshot_authority_and_runtime_consumption_flag
 
 
 def test_atomicrows_bundle_and_hash_remain_absent_for_manifest_gate():
-    assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()

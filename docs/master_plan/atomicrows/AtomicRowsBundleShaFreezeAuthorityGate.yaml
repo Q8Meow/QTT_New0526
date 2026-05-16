@@ -6,7 +6,7 @@ semantic_task_id: ROADMAP_ATOMICROWS_BUNDLE_SHA_FREEZE
 authority_class: STATIC_FAIL_CLOSED_SHA_FREEZE_GATE_NOT_SHA_AUTHORITY
 gate_mode: BLOCKED
 expected_current_state:
-  atomicrows_bundle_jsonl_exists: false
+  atomicrows_bundle_jsonl_exists: true
   atomicrows_bundle_sha256_exists: false
   exact_source_rows_authorized: false
   pr99_assembly_path: PATH_B_BLOCKED
@@ -26,7 +26,7 @@ planning_target:
   target_total_row_count_planning_authority_only: true
   materialized_row_count_claimed: false
 blocked_reason_codes:
-  - ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE
   - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED
   - ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B
   - ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED
@@ -109,4 +109,4 @@ forbidden_execution_effects:
   - QUANTUM_PROVIDER_CALL
   - QUANTUM_ADVANTAGE_VALIDATION
   - QUANTUM_DIRECT_ORDER_AUTHORITY
-future_consumer_notes: PR100 creates a blocked static SHA/freeze authority gate only. Because AtomicRows.bundle.jsonl and AtomicRows.bundle.sha256 are absent, PR99 Path B remains controlling, PR98 source files remain owner-review-required blueprints, SHA materialization is not allowed, freeze authority is not created, and Roadmap PR101 final readiness remains blocked until a valid bundle and valid SHA/freeze authority exist.
+future_consumer_notes: PR100 creates a blocked static SHA/freeze authority gate only. Under PR113, AtomicRows.bundle.jsonl is materialized while AtomicRows.bundle.sha256 remains absent, SHA materialization is not allowed, freeze authority is not created, and Roadmap PR101 final readiness remains blocked until a valid SHA/freeze authority exists.

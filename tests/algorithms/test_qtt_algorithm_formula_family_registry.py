@@ -211,7 +211,6 @@ def test_no_runtime_live_order_source_connector_replay_paper_profit_or_backend_a
         "replay_execution_created",
         "paper_execution_created",
         "quantum_backend_artifact_created",
-        "bundle_file_present",
         "bundle_sha_present",
         "uses_pr_number_as_authority",
         "agent_algorithm_binding_created",
@@ -219,8 +218,10 @@ def test_no_runtime_live_order_source_connector_replay_paper_profit_or_backend_a
         "final_ready",
     )
 
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
+    assert registry["bundle_file_present"] is False
+    assert report["bundle_file_present"] is True
     for field in false_fields:
         assert registry[field] is False
         assert report[field] is False

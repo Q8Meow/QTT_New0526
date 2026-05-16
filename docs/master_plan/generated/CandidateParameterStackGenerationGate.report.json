@@ -7,7 +7,7 @@
   ],
   "annealing_execution_created": false,
   "atomicrows_bundle_jsonl_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created": false,
   "atomicrows_bundle_sha256_exists": false,
   "backend_execution_created": false,

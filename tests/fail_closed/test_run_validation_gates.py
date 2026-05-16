@@ -121,6 +121,10 @@ from tools import (
     as atomicrows_exact_row_agent_family_eligibility_matrix,
 )
 from tools import (
+    validate_atomicrows_bundle_materialization_manifest
+    as atomicrows_bundle_materialization_manifest,
+)
+from tools import (
     validate_atomicrows_bundle_boundary_state_contract
     as atomicrows_bundle_boundary_state_contract,
 )
@@ -855,6 +859,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
                 Path("tools")
                 / "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
             ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_atomicrows_bundle_materialization_manifest.py"),
         ],
         [
             python_executable,
@@ -1896,6 +1904,13 @@ def test_runner_exposes_atomicrows_exact_row_agent_family_eligibility_matrix_suc
     )
 
 
+def test_runner_exposes_atomicrows_bundle_materialization_success_marker():
+    assert (
+        atomicrows_bundle_materialization_manifest.SUCCESS_MARKER
+        == "QTT_ATOMICROWS_BUNDLE_MATERIALIZATION_OK"
+    )
+
+
 def test_runner_exposes_atomicrows_bundle_boundary_state_contract_success_marker():
     assert (
         atomicrows_bundle_boundary_state_contract.SUCCESS_MARKER
@@ -2251,7 +2266,7 @@ def test_pr75_static_contract_preserves_no_claim_boundaries():
     assert future["this_gate_routes_trade_context"] is False
     assert future["this_gate_executes_replay_or_paper"] is False
     assert future["this_gate_executes_runtime_or_live"] is False
-    assert not (
+    assert (
         Path(".") / parameter_stack_compatibility_gate.CANONICAL_BUNDLE_JSONL
     ).exists()
     assert not (
@@ -2435,7 +2450,7 @@ def test_pr77_static_contract_preserves_no_claim_boundaries():
     assert static_policy["selected_stack_id_is_static_schema_field_only"] is True
     assert all(flags[field] is False for field in edge_packet_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS)
     assert all(future[field] is False for field in edge_packet_gate.FUTURE_CONSUMER_FALSE_FIELDS)
-    assert not (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / edge_packet_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / edge_packet_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / edge_packet_gate.PR76_OLD_LONG_TEST).exists()
@@ -2512,7 +2527,7 @@ def test_pr78_static_contract_preserves_no_claim_boundaries():
     assert readiness["final_ready"] is False
     assert all(flags[field] is False for field in trade_context_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS)
     assert all(future[field] is False for field in trade_context_gate.FUTURE_CONSUMER_FALSE_FIELDS)
-    assert not (Path(".") / trade_context_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / trade_context_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / trade_context_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / trade_context_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / trade_context_gate.PR76_OLD_LONG_TEST).exists()
@@ -2626,7 +2641,7 @@ def test_pr79_static_contract_preserves_no_claim_boundaries():
         flags[field] is False
         for field in selection_universe_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS
     )
-    assert not (Path(".") / selection_universe_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / selection_universe_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / selection_universe_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / selection_universe_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / selection_universe_gate.PR76_OLD_LONG_TEST).exists()
@@ -2746,6 +2761,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     repair_d2_e0_index = command_names.index(
         "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
     )
+    bundle_materialization_index = command_names.index(
+        "validate_atomicrows_bundle_materialization_manifest.py"
+    )
     bundle_boundary_index = command_names.index(
         "validate_atomicrows_bundle_boundary_state_contract.py"
     )
@@ -2792,6 +2810,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < repair_c1_index
         < repair_d_index
         < repair_d2_e0_index
+        < bundle_materialization_index
         < bundle_boundary_index
         < generated_gate_index
         < no_runtime_index
@@ -2943,6 +2962,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
         ),
+    ]
+    assert commands[bundle_materialization_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_bundle_materialization_manifest.py"),
     ]
     assert commands[bundle_boundary_index] == [
         python_executable,
@@ -3760,7 +3783,7 @@ def test_pr80_static_contract_preserves_consumer_gate_no_claim_boundaries():
         flags[field] is False
         for field in selection_universe_consumer_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS
     )
-    assert not (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / selection_universe_consumer_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / selection_universe_consumer_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / selection_universe_consumer_gate.PR76_OLD_LONG_TEST).exists()
@@ -4141,7 +4164,7 @@ def test_pr81_static_contract_preserves_route_only_boundaries():
         production["explicit_no_claim_flags"][field] is False
         for field in trade_context_routing_gate.EXPLICIT_NO_CLAIM_FALSE_FIELDS
     )
-    assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / trade_context_routing_gate.CANONICAL_BUNDLE_SHA256).exists()
 
 
@@ -4178,7 +4201,7 @@ def test_pr82_static_contract_preserves_metadata_only_boundaries():
     assert report["future_scoring_policy_required"] is True
     assert report["future_optimizer_arbitration_required"] is True
     assert report["missing_canonical_family_ids"] == []
-    assert not (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / quantum_applicability_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / quantum_applicability_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / quantum_applicability_gate.PR76_OLD_LONG_TEST).exists()
@@ -4215,7 +4238,7 @@ def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries():
     assert report["classical_only_label_validated_from_pr82"] is True
     for field in owner_quantum_priority_gate.ROOT_FALSE_FIELDS:
         assert report[field] is False
-    assert not (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / owner_quantum_priority_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / owner_quantum_priority_gate.PR76_OLD_LONG_TEST).exists()
@@ -4261,7 +4284,7 @@ def test_pr84_static_contract_preserves_formula_registry_only_boundaries():
     assert report["source_currentness_penalty_is_source_authority"] is False
     assert report["execution_cost_penalty_is_venue_fact"] is False
     assert report["owner_override_score_can_fabricate_external_facts"] is False
-    assert not (Path(".") / scoring_policy_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / scoring_policy_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / scoring_policy_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / scoring_policy_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / scoring_policy_gate.PR76_OLD_LONG_TEST).exists()
@@ -4310,7 +4333,7 @@ def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries():
     assert report["future_pr88_trade_context_selection_implemented"] is False
     for field in stack_scoring_gate.REPORT_FALSE_FIELDS:
         assert report[field] is False
-    assert not (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / stack_scoring_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / stack_scoring_gate.PR76_OLD_LONG_TEST).exists()
@@ -4366,7 +4389,7 @@ def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries():
     assert report["future_pr90_replay_paper_competition_implemented"] is False
     for field in optimizer_arbitration_gate.REPORT_FALSE_FIELDS:
         assert report[field] is False
-    assert not (Path(".") / optimizer_arbitration_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / optimizer_arbitration_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / optimizer_arbitration_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / optimizer_arbitration_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / optimizer_arbitration_gate.PR76_OLD_LONG_TEST).exists()
@@ -4408,7 +4431,7 @@ def test_pr87_static_contract_preserves_candidate_generation_boundaries(monkeypa
     assert report["future_pr90_replay_paper_competition_implemented"] is False
     for field in candidate_generation_gate.REPORT_FALSE_FIELDS:
         assert report[field] is False
-    assert not (Path(".") / candidate_generation_gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (Path(".") / candidate_generation_gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (Path(".") / candidate_generation_gate.CANONICAL_BUNDLE_SHA256).exists()
 
 

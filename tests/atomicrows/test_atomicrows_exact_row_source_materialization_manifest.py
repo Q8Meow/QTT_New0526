@@ -194,11 +194,11 @@ def test_d_agent_governance_family_009_count_270():
     assert _validated_report()["agent_eligibility_audit"]["deny_by_default_pending_d2_e0"] is True
 
 
-def test_d_no_bundle_no_sha_no_freeze_no_final_readiness():
+def test_d_bundle_materialization_allowed_but_sha_freeze_final_readiness_absent():
     report = _validated_report()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
-    assert report["forbidden_artifact_absence"]["atomicrows_bundle_absent"] is True
+    assert report["forbidden_artifact_absence"]["atomicrows_bundle_absent"] is False
     assert report["forbidden_artifact_absence"]["atomicrows_bundle_sha_absent"] is True
     assert report["forbidden_artifact_absence"]["freeze_absent"] is True
     assert report["forbidden_artifact_absence"]["final_readiness_absent"] is True

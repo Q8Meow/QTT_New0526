@@ -97,7 +97,7 @@
   "final_readiness_created_flag": false,
   "fixture_path": "tests/fixtures/atomicrows/synthetic_atomicrows_bundle_builder_deterministic_assembly_gate.v1.fixture.json",
   "forbidden_artifact_boundary": {
-    "atomicrows_bundle_jsonl_exists": false,
+    "atomicrows_bundle_jsonl_exists": true,
     "atomicrows_bundle_sha256_exists": false,
     "blocked_effects": [
       "ATOMICROWS_BUNDLE_SHA256",

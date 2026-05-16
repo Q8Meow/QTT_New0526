@@ -1203,7 +1203,9 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         if report.get(key) != expected:
             failures.append(f"report.{key} must be {expected!r}")
     forbidden_absent = _mapping(report.get("forbidden_artifacts_absent"))
-    for key in ("AtomicRows.bundle.jsonl", "AtomicRows.bundle.sha256", "exact_row_sources"):
+    if forbidden_absent.get("AtomicRows.bundle.jsonl") not in {True, False}:
+        failures.append("report.forbidden_artifacts_absent.AtomicRows.bundle.jsonl must be boolean")
+    for key in ("AtomicRows.bundle.sha256", "exact_row_sources"):
         if forbidden_absent.get(key) is not True:
             failures.append(f"report.forbidden_artifacts_absent.{key} must be true")
     _require_exact_list(

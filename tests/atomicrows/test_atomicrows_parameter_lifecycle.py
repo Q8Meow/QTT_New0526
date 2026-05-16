@@ -141,7 +141,7 @@ def test_quarantined_and_retired_entries_require_reasons():
 
 
 def test_parameter_lifecycle_validation_does_not_create_atomicrows_bundle_or_hash():
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
 
     result = validator.validate(
@@ -153,5 +153,5 @@ def test_parameter_lifecycle_validation_does_not_create_atomicrows_bundle_or_has
     )
 
     assert result.failures == ()
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()

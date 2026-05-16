@@ -162,12 +162,12 @@ def test_upstream_repair_chain_is_preserved_and_forbidden_artifacts_remain_absen
     assert report["repair_pr_a_authority_classifier_preserved"] is True
     assert report["repair_pr_a_agent_eligibility_governance_preserved"] is True
     assert report["forbidden_artifacts_absent"] == {
-        "AtomicRows.bundle.jsonl": True,
+        "AtomicRows.bundle.jsonl": False,
         "AtomicRows.bundle.sha256": True,
         "exact_row_sources": True,
     }
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
 

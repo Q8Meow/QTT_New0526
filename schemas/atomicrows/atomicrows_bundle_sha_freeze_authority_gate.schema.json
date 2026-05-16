@@ -88,7 +88,7 @@
         "properties": {
           "expected_current_state": {
             "properties": {
-              "atomicrows_bundle_jsonl_exists": { "const": false }
+              "atomicrows_bundle_jsonl_exists": { "const": true }
             }
           }
         }
@@ -155,7 +155,7 @@
         "final_readiness_created"
       ],
       "properties": {
-        "atomicrows_bundle_jsonl_exists": { "const": false },
+        "atomicrows_bundle_jsonl_exists": { "const": true },
         "atomicrows_bundle_sha256_exists": { "const": false },
         "exact_source_rows_authorized": { "const": false },
         "pr99_assembly_path": { "const": "PATH_B_BLOCKED" },
@@ -201,7 +201,7 @@
     },
     "blocked_reason_code": {
       "enum": [
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",

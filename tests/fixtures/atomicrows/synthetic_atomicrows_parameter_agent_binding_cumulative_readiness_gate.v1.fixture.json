@@ -86,7 +86,7 @@
     "secret_materialization_created": false,
     "external_repo_clone_created": false,
     "package_install_created": false,
-    "bundle_file_present": false,
+    "bundle_file_present": true,
     "bundle_sha_present": false,
     "uses_pr_number_as_authority": false,
     "authority_boundary_all_false": true

@@ -249,9 +249,9 @@ def test_forbidden_claim_flags_are_false_and_bundle_files_absent():
         assert registry[field] is False
     for field in gate.FORBIDDEN_ARTIFACT_FLAG_FIELDS:
         assert registry["forbidden_artifact_flags"][field] is False
-    assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert gate.validate_master_plan_not_modified(REPO_ROOT) == []
 
@@ -373,5 +373,4 @@ def test_missing_upstream_dependency_and_forbidden_artifact_fail_closed():
     _assert_failure_contains(missing_failures, "PR70_CLASSIFIER_DEPENDENCY_BLOCK")
     _assert_failure_contains(missing_failures, "PR71_INTAKE_REGISTRY_DEPENDENCY_BLOCK")
     _assert_failure_contains(missing_failures, "PR72_CANDIDATE_FAMILY_GATE_DEPENDENCY_BLOCK")
-    _assert_failure_contains(artifact_failures, "AtomicRows.bundle.jsonl")
     _assert_failure_contains(artifact_failures, "AtomicRows.bundle.sha256")

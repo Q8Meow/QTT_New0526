@@ -357,7 +357,7 @@ def test_matching_receipt_can_allow_authority_increasing_mutation_without_live_a
 
 
 def test_registry_mutation_guard_does_not_create_atomicrows_bundle_or_hash():
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
 
     result = guard.validate(
@@ -371,5 +371,5 @@ def test_registry_mutation_guard_does_not_create_atomicrows_bundle_or_hash():
     )
 
     assert result.failures == ()
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()

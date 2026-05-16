@@ -83,7 +83,7 @@
     "tie_break_policy_id": "QUANTUM_CLASSICAL_OPTIMIZER_ARBITRATION_TIE_BREAK_POLICY_V1"
   },
   "atomicrows_bundle_jsonl_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created": false,
   "atomicrows_bundle_sha256_exists": false,
   "backend_execution_created": false,

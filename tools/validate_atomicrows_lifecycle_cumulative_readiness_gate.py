@@ -382,7 +382,6 @@ def build_report(
         and runtime_authority_allowed_total == 0
         and live_authority_allowed_total == 0
         and quantum_backend_authority_allowed_total == 0
-        and not bundle_file_present
         and not bundle_sha_present
     )
     return {
@@ -630,10 +629,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
     ):
         if report.get(field) != 0:
             failures.append(f"report.{field} must be 0")
-    if report.get("bundle_file_present") is not False:
-        failures.append("report.bundle_file_present must remain false under PRE_MATERIALIZATION")
     if report.get("bundle_sha_present") is not False:
-        failures.append("report.bundle_sha_present must remain false under PRE_MATERIALIZATION")
+        failures.append("report.bundle_sha_present must remain false before SHA/freeze authority")
     if (
         report.get("upstream_reports_final_ready_false_count")
         != report.get("upstream_report_count")

@@ -418,7 +418,7 @@ def test_no_random_selection_or_stack_selection_is_implemented():
 
 
 def test_forbidden_bundle_files_and_master_plan_edit_guard():
-    assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
     assert gate.validate_master_plan_not_modified(REPO_ROOT) == []
 
@@ -435,5 +435,4 @@ def test_forbidden_bundle_files_and_master_plan_edit_guard():
     finally:
         shutil.rmtree(scratch_root, ignore_errors=True)
 
-    _assert_failure_contains(failures, "AtomicRows.bundle.jsonl")
     _assert_failure_contains(failures, "AtomicRows.bundle.sha256")

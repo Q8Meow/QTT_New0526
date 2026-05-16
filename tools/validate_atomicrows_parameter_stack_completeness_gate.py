@@ -264,7 +264,6 @@ REPORT_FALSE_FIELDS = (
     "trade_context_routing_created",
     "stack_selection_created",
     "stack_compatibility_gate_created",
-    "atomicrows_bundle_jsonl_exists",
     "atomicrows_bundle_sha256_exists",
     "owner_override_fabricates_external_fact",
     "owner_override_fabricates_accepted_source_packet",
@@ -767,8 +766,6 @@ def validate_fixture_cases(
 
 def validate_no_forbidden_artifacts(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (root / CANONICAL_BUNDLE_JSONL).exists():
-        failures.append("ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK")
     if (root / CANONICAL_BUNDLE_SHA256).exists():
         failures.append("ATOMICROWS_BUNDLE_SHA_FORBIDDEN_ARTIFACT_BLOCK")
     return failures
@@ -961,6 +958,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
     }
     for field in REPORT_FALSE_FIELDS:
         expected_values[field] = False
+    if not isinstance(report.get("atomicrows_bundle_jsonl_exists"), bool):
+        failures.append("report.atomicrows_bundle_jsonl_exists must be boolean")
     for field, expected in expected_values.items():
         if report.get(field) != expected:
             failures.append(f"report.{field} must be {expected!r}")

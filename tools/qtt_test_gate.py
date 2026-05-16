@@ -14,13 +14,13 @@ from qtt.core.testing.gate_result import (  # noqa: E402
     CANONICAL_ATOMICROWS_BUNDLE,
     CANONICAL_ATOMICROWS_BUNDLE_SHA,
     STATIC_AUTHORITY_FLAGS,
-    canonical_atomicrows_absence_failures,
     canonical_atomicrows_presence,
     hidden_zip_paths,
     require_bool_map,
     require_exact_fields,
     static_metadata,
     true_claim_failures,
+    validate_current_atomicrows_bundle_state,
     write_json,
 )
 
@@ -136,7 +136,6 @@ NO_CLAIM_FLAGS = {
 }
 
 FORBIDDEN_TRUE_FIELDS = set(STATIC_AUTHORITY_FLAGS) | set(NO_CLAIM_FLAGS) | {
-    "canonical_atomicrows_bundle_present",
     "canonical_atomicrows_bundle_sha_present",
     "hidden_zip_authority_present",
     "direct_main_bypass_claim_present",
@@ -647,7 +646,6 @@ def build_report(
             "no_atomicrows_completion_claim": (
                 not no_claim_flags["atomicrows_completion_claim"]
                 and not no_claim_flags["atomicrows_invention_claim"]
-                and not filesystem_checks["canonical_atomicrows_bundle_present"]
                 and not filesystem_checks["canonical_atomicrows_bundle_sha_present"]
             ),
             "no_blocker_reduction_claim": not no_claim_flags[
@@ -803,7 +801,7 @@ def validate_qtt_test_gate_report(
         )
     )
     failures.extend(
-        canonical_atomicrows_absence_failures(
+        validate_current_atomicrows_bundle_state(
             repo_root,
             label="qtt test gate report",
         )

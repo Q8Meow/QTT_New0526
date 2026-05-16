@@ -1,7 +1,7 @@
 {
   "authority_boundary_all_false": true,
   "blocks_qtt_when_owner_override_present": false,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "codex_blocks_owner_override_count": 0,
   "connector_binding_artifact_created": false,

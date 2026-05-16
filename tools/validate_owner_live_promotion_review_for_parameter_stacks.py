@@ -1576,11 +1576,6 @@ def validate_fixture(
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists():
-        failures.append(
-            "OWNER_LIVE_PROMOTION_REVIEW_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists():
         failures.append(
             "OWNER_LIVE_PROMOTION_REVIEW_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -1646,6 +1641,7 @@ def build_report(
     case_packets: list[dict[str, Any]],
     upstream: dict[str, Any],
     metadata: dict[str, Any],
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     items = _list_of_mappings(packet.get("owner_review_items"))
     item = items[0] if items else {}
@@ -1800,7 +1796,7 @@ def build_report(
         "live_order_authority_created": packet.get("order_authority_created_flag"),
         "atomicrows_bundle_jsonl_created": packet.get("atomicrows_bundle_jsonl_created"),
         "atomicrows_bundle_sha256_created": packet.get("atomicrows_bundle_sha256_created"),
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "master_plan_diff_empty": True,
         "master_plan_edited": False,
@@ -1875,7 +1871,15 @@ def validate(
         )
     )
 
-    report = build_report(registry, fixture, packet, case_packets, upstream, metadata)
+    report = build_report(
+        registry,
+        fixture,
+        packet,
+        case_packets,
+        upstream,
+        metadata,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

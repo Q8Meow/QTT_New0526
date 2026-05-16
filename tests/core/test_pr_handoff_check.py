@@ -44,7 +44,7 @@ def test_pr_handoff_packet_represents_generated_derivative_and_atomicrows_absent
     assert status["generated_derivative_status"] == (
         "STATIC_BOOTSTRAP_ABSENT_NO_COMPLETION_AUTHORITY"
     )
-    assert status["atomicrows_bundle_present"] is False
+    assert status["atomicrows_bundle_present"] is True
     assert status["atomicrows_bundle_sha_present"] is False
     assert status["atomicrows_row_count_status"] == "NOT_CREATED_UNBOUND"
     assert status["bootstrap_status_explicit"] is True

@@ -628,7 +628,7 @@ def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_cont
 def test_report_does_not_claim_bundle_live_profit_latency_or_quantum_advantage_readiness():
     report = _report()
 
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["pr98_row_family_source_files_created"] is False
     assert report["pr99_bundle_builder_created"] is False

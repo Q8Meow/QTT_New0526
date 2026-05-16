@@ -59,7 +59,7 @@
   "final_order_submission_authority_count": 0,
   "final_readiness_authority_count": 0,
   "forbidden_artifact_checks": {
-    "AtomicRows.bundle.jsonl": true,
+    "AtomicRows.bundle.jsonl": false,
     "AtomicRows.bundle.sha256": true
   },
   "future_pr84_handoff_ready": true,

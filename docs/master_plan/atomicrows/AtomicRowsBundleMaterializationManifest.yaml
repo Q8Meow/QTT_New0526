@@ -1,0 +1,189 @@
+{
+  "manifest_id": "ATOMICROWS_BUNDLE_MATERIALIZATION_MANIFEST",
+  "manifest_version": "v1",
+  "authority_class": "STATIC_ATOMICROWS_BUNDLE_FILE_MATERIALIZATION_ONLY_NOT_SHA_NOT_FREEZE_NOT_FINAL_READINESS_NOT_RUNTIME_NOT_LIVE_NOT_SCORING_EXECUTION_NOT_SELECTION",
+  "created_for": "PR113_ATOMICROWS_BUNDLE_MATERIALIZATION",
+  "current_expected_boundary_state": "POST_MATERIALIZATION_PRE_SHA",
+  "transition_from_state": "PRE_MATERIALIZATION",
+  "transition_to_state": "POST_MATERIALIZATION_PRE_SHA",
+  "bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+  "bundle_sha_path_expected_absent": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+  "source_exact_row_directory": "docs/master_plan/atomic_rows/exact_row_sources/",
+  "source_materialization_manifest_ref": "docs/master_plan/atomicrows/AtomicRowsExactRowSourceMaterializationManifest.yaml",
+  "d2_e0_eligibility_matrix_ref": "docs/master_plan/atomicrows/AtomicRowsExactRowAgentFamilyEligibilityMatrix.yaml",
+  "bundle_boundary_state_contract_ref": "docs/master_plan/atomicrows/AtomicRowsBundleBoundaryStateContract.yaml",
+  "expected_source_family_file_count": 15,
+  "expected_exact_row_record_count": 4183,
+  "expected_bundle_row_count": 4183,
+  "expected_family_distribution": [
+    {"family_id": "001_signal_features", "family_name": "SIGNAL_FEATURES", "expected_row_count": 390},
+    {"family_id": "002_scoring_ranking", "family_name": "SCORING_RANKING", "expected_row_count": 330},
+    {"family_id": "003_normalization_calibration", "family_name": "NORMALIZATION_CALIBRATION", "expected_row_count": 220},
+    {"family_id": "004_risk_control", "family_name": "RISK_CONTROL", "expected_row_count": 315},
+    {"family_id": "005_execution_connector_boundary", "family_name": "EXECUTION_CONNECTOR_BOUNDARY", "expected_row_count": 280},
+    {"family_id": "006_capital_sizing_cash", "family_name": "CAPITAL_SIZING_CASH", "expected_row_count": 220},
+    {"family_id": "007_latency_routing", "family_name": "LATENCY_ROUTING", "expected_row_count": 250},
+    {"family_id": "008_error_guard_fail_closed", "family_name": "ERROR_GUARD_FAIL_CLOSED", "expected_row_count": 220},
+    {"family_id": "009_lifecycle_agent_binding", "family_name": "LIFECYCLE_AGENT_BINDING", "expected_row_count": 270},
+    {"family_id": "010_source_evidence_connector_semantic", "family_name": "SOURCE_EVIDENCE_CONNECTOR_SEMANTIC", "expected_row_count": 315},
+    {"family_id": "011_replay_paper_validation", "family_name": "REPLAY_PAPER_VALIDATION", "expected_row_count": 270},
+    {"family_id": "012_quantum_advisory_optimization", "family_name": "QUANTUM_ADVISORY_OPTIMIZATION", "expected_row_count": 290},
+    {"family_id": "013_quantum_qubo_ising_metadata", "family_name": "QUANTUM_QUBO_ISING_METADATA", "expected_row_count": 265},
+    {"family_id": "014_quantum_qaoa_vqe_annealing_metadata", "family_name": "QUANTUM_QAOA_VQE_ANNEALING_METADATA", "expected_row_count": 265},
+    {"family_id": "015_quantum_portfolio_hybrid_comparator", "family_name": "QUANTUM_PORTFOLIO_HYBRID_COMPARATOR", "expected_row_count": 283}
+  ],
+  "expected_row_ranges": [
+    {"family_id": "001_signal_features", "row_range_start": 1, "row_range_end": 390},
+    {"family_id": "002_scoring_ranking", "row_range_start": 391, "row_range_end": 720},
+    {"family_id": "003_normalization_calibration", "row_range_start": 721, "row_range_end": 940},
+    {"family_id": "004_risk_control", "row_range_start": 941, "row_range_end": 1255},
+    {"family_id": "005_execution_connector_boundary", "row_range_start": 1256, "row_range_end": 1535},
+    {"family_id": "006_capital_sizing_cash", "row_range_start": 1536, "row_range_end": 1755},
+    {"family_id": "007_latency_routing", "row_range_start": 1756, "row_range_end": 2005},
+    {"family_id": "008_error_guard_fail_closed", "row_range_start": 2006, "row_range_end": 2225},
+    {"family_id": "009_lifecycle_agent_binding", "row_range_start": 2226, "row_range_end": 2495},
+    {"family_id": "010_source_evidence_connector_semantic", "row_range_start": 2496, "row_range_end": 2810},
+    {"family_id": "011_replay_paper_validation", "row_range_start": 2811, "row_range_end": 3080},
+    {"family_id": "012_quantum_advisory_optimization", "row_range_start": 3081, "row_range_end": 3370},
+    {"family_id": "013_quantum_qubo_ising_metadata", "row_range_start": 3371, "row_range_end": 3635},
+    {"family_id": "014_quantum_qaoa_vqe_annealing_metadata", "row_range_start": 3636, "row_range_end": 3900},
+    {"family_id": "015_quantum_portfolio_hybrid_comparator", "row_range_start": 3901, "row_range_end": 4183}
+  ],
+  "bundle_format_contract": {
+    "format": "JSONL",
+    "encoding": "UTF-8",
+    "line_endings": "LF_ONLY",
+    "bom_allowed": false,
+    "expected_non_empty_line_count": 4183,
+    "one_json_object_per_line": true,
+    "wrapper_object_allowed": false,
+    "final_newline_preferred": true,
+    "bundle_sha256_created": false
+  },
+  "deterministic_assembly_contract": {
+    "ordering": "row_index_ASCENDING_1_THROUGH_4183",
+    "source_order": "canonical_exact_row_family_plan_order",
+    "stable_json_serialization": "sort_keys_true_compact_separators_lf",
+    "rerun_rewrites_identical_bytes": false,
+    "platform_default_newline_allowed": false
+  },
+  "source_join_contract": {
+    "join_key": "exact_row_id",
+    "source_record_digest": "SHA256_OF_EXACT_JSONL_LINE_UTF8",
+    "source_record_preserved_under": "source_record",
+    "every_source_row_bundled_exactly_once": true,
+    "nonexistent_rows_allowed": false,
+    "duplicate_rows_allowed": false
+  },
+  "d2_e0_join_contract": {
+    "join_key": "exact_row_id",
+    "eligibility_record_required_for_each_row": true,
+    "scoring_readiness_record_required_for_each_row": true,
+    "d2_e0_metadata_is_future_input_only": true,
+    "computed_scores_allowed": false,
+    "ranking_outputs_allowed": false,
+    "selection_outputs_allowed": false
+  },
+  "scoring_ranking_readiness_preservation_contract": {
+    "preserve_scoring_readiness_decision": true,
+    "preserve_future_score_component_input_labels": true,
+    "preserve_future_stack_role_input_labels": true,
+    "scoring_execution_allowed": false,
+    "ranking_execution_allowed": false,
+    "selection_execution_allowed": false,
+    "computed_score_fields_forbidden": true
+  },
+  "trade_context_readiness_preservation_contract": {
+    "trade_context_metadata_or_explicit_blocker_required_per_row": true,
+    "platform_market_strategy_latency_risk_capital_metadata_preserved": true,
+    "selection_execution_allowed": false,
+    "selected_trade_context_created": false
+  },
+  "role_complete_stack_future_contract": {
+    "future_role_complete_stack_generation_preparation_only": true,
+    "candidate_stack_generation_allowed": false,
+    "selected_stack_created": false,
+    "selected_order_intent_created": false
+  },
+  "quantum_metadata_preservation_contract": {
+    "quantum_forward_families": [
+      "012_quantum_advisory_optimization",
+      "013_quantum_qubo_ising_metadata",
+      "014_quantum_qaoa_vqe_annealing_metadata",
+      "015_quantum_portfolio_hybrid_comparator"
+    ],
+    "expected_quantum_forward_row_count": 1103,
+    "metadata_only": true,
+    "quantum_backend_authority_allowed": false,
+    "quantum_simulator_authority_allowed": false,
+    "quantum_provider_authority_allowed": false,
+    "quantum_advantage_claim_allowed": false,
+    "quantum_live_order_authority_allowed": false
+  },
+  "low_latency_future_lookup_contract": {
+    "control_plane_precomputed_bundle_only": true,
+    "live_hot_path_routing_implemented": false,
+    "live_path_source_retrieval_allowed": false,
+    "live_path_llm_call_allowed": false,
+    "live_path_quantum_backend_call_allowed": false,
+    "live_path_optimizer_execution_allowed": false,
+    "runtime_mutation_allowed": false
+  },
+  "owner_research_extension_contract": {
+    "owner_internal_workflow_policy_authority_preserved": true,
+    "future_research_extension_supported": true,
+    "future_extension_requires_versioned_pr": true,
+    "owner_approval_cannot_fabricate_external_facts_or_receipts": true
+  },
+  "forbidden_authority_contract": {
+    "sha_freeze_authority_created": false,
+    "final_readiness_created": false,
+    "runtime_live_authority_created": false,
+    "source_connector_authority_created": false,
+    "order_authority_created": false,
+    "profit_evidence_created": false,
+    "optimizer_execution_allowed": false,
+    "replay_paper_execution_allowed": false,
+    "quantum_backend_execution_allowed": false
+  },
+  "future_centralized_blocker_handoff_contract": {
+    "future_sha_freeze_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+    "future_final_readiness_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+    "future_runtime_live_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+    "future_profit_evidence_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+    "future_quantum_execution_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+  },
+  "no_claim_boundary": {
+    "trading_ready_claim_allowed": false,
+    "live_ready_claim_allowed": false,
+    "profit_ready_claim_allowed": false,
+    "final_readiness_claim_allowed": false,
+    "sha_freeze_authority_claim_allowed": false,
+    "latency_superiority_claim_allowed": false,
+    "execution_superiority_claim_allowed": false,
+    "quantum_advantage_claim_allowed": false,
+    "profitable_strategy_claim_allowed": false,
+    "selected_live_strategy_claim_allowed": false
+  },
+  "validation_contract": {
+    "materializer_path": "tools/materialize_atomicrows_bundle_from_exact_rows.py",
+    "validator_path": "tools/validate_atomicrows_bundle_materialization_manifest.py",
+    "manifest_schema_path": "schemas/atomicrows/atomicrows_bundle_materialization_manifest.schema.json",
+    "bundle_row_schema_path": "schemas/atomicrows/atomicrows_materialized_bundle_row.schema.json",
+    "success_marker": "QTT_ATOMICROWS_BUNDLE_MATERIALIZATION_OK",
+    "generated_marker": "QTT_ATOMICROWS_BUNDLE_MATERIALIZATION_GENERATED",
+    "forbidden_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+  },
+  "future_handoff": {
+    "future_pr84_scoring_policy_handoff_ready": true,
+    "future_pr85_stack_scoring_ranking_handoff_ready": true,
+    "future_pr86_quantum_classical_arbitration_handoff_ready": true,
+    "future_pr87_candidate_stack_generation_handoff_ready": true,
+    "future_pr88_trade_context_selection_handoff_ready": true,
+    "future_pr89_selected_stack_handoff_ready": true,
+    "future_pr90_replay_paper_competition_handoff_ready": true,
+    "future_sha_freeze_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+    "future_final_readiness_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+  },
+  "generated_report_path": "docs/master_plan/generated/AtomicRowsBundleMaterialization.report.json"
+}

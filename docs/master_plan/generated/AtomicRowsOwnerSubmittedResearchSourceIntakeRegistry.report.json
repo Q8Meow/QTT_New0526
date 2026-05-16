@@ -1,7 +1,7 @@
 {
   "accepted_source_packets_created": false,
   "arbitration_implemented": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_VALIDATION_REPORT_NOT_SOURCE_FACT_NOT_RUNTIME_AUTHORITY",
   "candidate_agent_binding_request_created": false,

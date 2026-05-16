@@ -1096,10 +1096,11 @@ def validate_report(report: dict[str, Any], label: str = "report") -> list[str]:
         "depends_on_pr73_role_taxonomy": True,
         "depends_on_pr74_completeness_gate": True,
         "depends_on_pr75_compatibility_gate": True,
-        "atomicrows_bundle_jsonl_exists": False,
         "atomicrows_bundle_sha256_exists": False,
         "validation_marker": SUCCESS_MARKER,
     }
+    if not isinstance(report.get("atomicrows_bundle_jsonl_exists"), bool):
+        failures.append(f"{label}.atomicrows_bundle_jsonl_exists must be boolean")
     for field, expected in expected_values.items():
         if report.get(field) != expected:
             failures.append(f"{label}.{field} must be {expected!r}")
@@ -1327,8 +1328,6 @@ def validate_no_forbidden_claims(artifact_texts: Iterable[tuple[str, str]]) -> l
 
 def validate_no_forbidden_artifacts(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (root / CANONICAL_BUNDLE_JSONL).exists():
-        failures.append("ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK")
     if (root / CANONICAL_BUNDLE_SHA256).exists():
         failures.append("ATOMICROWS_BUNDLE_SHA_FORBIDDEN_ARTIFACT_BLOCK")
     return failures

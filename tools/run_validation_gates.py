@@ -774,6 +774,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_atomicrows_bundle_materialization_manifest.py"),
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_atomicrows_bundle_boundary_state_contract.py"),
         ],
         [

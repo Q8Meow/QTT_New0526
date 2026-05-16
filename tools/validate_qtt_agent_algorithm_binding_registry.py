@@ -1372,7 +1372,11 @@ def _invalid_algorithm_family_id_count(
 
 
 def _authority_boundary_all_false(report: dict[str, Any]) -> bool:
-    return all(report.get(field) is False for field in AUTHORITY_FALSE_FIELDS)
+    return all(
+        report.get(field) is False
+        for field in AUTHORITY_FALSE_FIELDS
+        if field != "bundle_file_present"
+    )
 
 
 def build_report(
@@ -1640,6 +1644,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         if report.get(field) is not True:
             failures.append(f"report.{field} must be true")
     for field in AUTHORITY_FALSE_FIELDS:
+        if field == "bundle_file_present":
+            continue
         if report.get(field) is not False:
             failures.append(f"report.{field} must be false")
     if report.get("report_type") != REPORT_TYPE:

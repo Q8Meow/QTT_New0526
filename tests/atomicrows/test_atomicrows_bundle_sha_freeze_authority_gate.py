@@ -89,15 +89,18 @@ def test_validator_emits_blocked_success_marker_and_writes_report(tmp_path, caps
     assert report["validator_stdout_marker"] == validator.SUCCESS_MARKER
 
 
-def test_missing_bundle_and_missing_sha_block_sha_freeze_authority():
+def test_materialized_bundle_and_missing_sha_block_sha_freeze_authority():
     report = _report()
 
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
-    assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.jsonl"] is True
+    assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.jsonl"] is False
     assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.sha256"] is True
     assert report["sha_materialization_allowed"] is False
-    assert "ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING" in report["blocked_reason_codes"]
+    assert (
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE"
+        in report["blocked_reason_codes"]
+    )
     assert "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED" in report["blocked_reason_codes"]
 
 
@@ -113,14 +116,14 @@ def test_no_sha_digest_value_or_digest_computation_exists():
     assert report["digest_value"] is None
     assert report["sha_computation_attempted"] is False
     assert report["sha_computed"] is False
-    assert report["missing_bundle_digest_computation_blocked"] is True
+    assert report["missing_bundle_digest_computation_blocked"] is False
 
 
-def test_forbidden_bundle_and_sha_files_remain_absent_after_validator(tmp_path):
+def test_materialized_bundle_remains_and_sha_file_remains_absent_after_validator(tmp_path):
     bundle_path = ROOT / validator.CANONICAL_BUNDLE_JSONL
     sha_path = ROOT / validator.CANONICAL_BUNDLE_SHA256
 
-    assert not bundle_path.exists()
+    assert bundle_path.exists()
     assert not sha_path.exists()
     assert (
         validator.main(
@@ -133,7 +136,7 @@ def test_forbidden_bundle_and_sha_files_remain_absent_after_validator(tmp_path):
         )
         == 0
     )
-    assert not bundle_path.exists()
+    assert bundle_path.exists()
     assert not sha_path.exists()
 
 
@@ -275,5 +278,5 @@ def test_validator_static_surface_does_not_import_runtime_quantum_or_materialize
 def test_master_plan_is_unchanged_and_forbidden_artifacts_are_absent():
     assert validator.validate_master_plan_not_modified(ROOT) == []
     assert validator.validate_no_forbidden_artifacts(ROOT) == []
-    assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()

@@ -387,7 +387,7 @@
   "final_readiness_created": false,
   "final_readiness_gate_future_only": true,
   "forbidden_artifacts_absent": {
-    "AtomicRows.bundle.jsonl": true,
+    "AtomicRows.bundle.jsonl": false,
     "AtomicRows.bundle.sha256": true,
     "exact_row_sources": true
   },

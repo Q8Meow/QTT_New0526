@@ -159,10 +159,10 @@ def test_dry_run_forbidden_artifacts_remain_absent():
     assert forbidden_state.exact_row_sources_allowed_by_repair_pr_d is True
     assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is False
     assert report["post_d_transition_audit"]["current_exact_row_sources_presence_allowed_by_repair_pr_d"] is True
-    assert report["forbidden_artifact_absence"]["AtomicRows.bundle.jsonl_absent"] is True
+    assert report["forbidden_artifact_absence"]["AtomicRows.bundle.jsonl_materialized_static"] is True
     assert report["forbidden_artifact_absence"]["AtomicRows.bundle.sha256_absent"] is True
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
 
@@ -276,7 +276,7 @@ def test_run_validation_gates_includes_dry_run_gate(monkeypatch):
         str(Path("tools") / "validate_atomicrows_exact_row_generator_dry_run_manifest.py"),
     ]
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
 
@@ -296,7 +296,7 @@ def test_no_exact_row_sources_directory_created_by_validator():
 
 def test_no_bundle_or_sha_created_by_validator():
     assert gate.main(["--repo-root", str(REPO_ROOT)]) == 0
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
 

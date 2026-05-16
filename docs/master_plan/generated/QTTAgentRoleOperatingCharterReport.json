@@ -25,7 +25,7 @@
   "agents_with_risk_gate_relationship_count": 25,
   "architecture_emphasis": "INSTITUTIONAL_AGENT_OPERATING_CHARTER_NOT_PROHIBITION_LIST",
   "authority_boundary_all_false": true,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "chatgpt_may_approve_for_owner_count": 0,
   "codex_may_approve_for_owner_count": 0,

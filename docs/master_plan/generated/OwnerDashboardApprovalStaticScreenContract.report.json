@@ -3,7 +3,7 @@
   "accepts_source": false,
   "api_endpoint_created_count": 0,
   "atomicrows_bundle_jsonl_created_count": 0,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created_count": 0,
   "atomicrows_bundle_sha256_exists": false,
   "base_head": "ee9bcc3",

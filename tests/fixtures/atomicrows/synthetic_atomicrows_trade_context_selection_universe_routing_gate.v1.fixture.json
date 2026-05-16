@@ -530,10 +530,9 @@
     },
     {
       "case_id": "ROUTING_BLOCK_ATOMICROWS_BUNDLE_JSONL_CREATED",
-      "expected_block_reason": "ATOMICROWS_BUNDLE_JSONL_CREATED_BLOCKED",
-      "expected_reason_code": "atomicrows_bundle_jsonl_exists",
-      "expected_schema_valid": false,
-      "report_overrides": { "atomicrows_bundle_jsonl_exists": true },
+      "expected_block_reason": "ATOMICROWS_BUNDLE_JSONL_MATERIALIZED_STATIC_OBSERVATION",
+      "expected_reason_code": "ROUTE_ALLOWED_EXPLICIT_MATCH",
+      "expected_schema_valid": true,
       "synthetic_case_only": true
     },
     {

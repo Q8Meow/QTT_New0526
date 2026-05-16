@@ -1119,7 +1119,6 @@ def validate_report_is_deterministic(report: dict[str, Any]) -> list[str]:
         "creates_profit_evidence_flag",
         "creates_latency_evidence_flag",
         "creates_quantum_advantage_evidence_flag",
-        "atomicrows_bundle_jsonl_exists",
         "atomicrows_bundle_sha256_exists",
         "pr98_row_family_source_files_created",
         "pr99_bundle_builder_created",
