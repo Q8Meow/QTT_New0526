@@ -111,10 +111,10 @@
       ],
       "properties": {
         "future_sha_freeze_authority_pr_required": {
-          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+          "const": "OPTIONAL_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_ONLY_NOT_DAY1_REQUIRED_NOT_EXECUTED"
         },
         "future_final_readiness_pr_required": {
-          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+          "const": "FUTURE_FINAL_READINESS_ACTIVE_NON_SHA_GATES_ONLY_NOT_EXECUTED"
         },
         "future_runtime_live_state_centralization_required": {
           "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"

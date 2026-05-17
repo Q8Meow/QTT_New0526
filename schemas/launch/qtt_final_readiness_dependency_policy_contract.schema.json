@@ -1,0 +1,130 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-final-readiness-dependency-policy-contract",
+  "title": "QTT Final Readiness Dependency Policy Contract",
+  "description": "Day-1 final-readiness dependency policy contract. It requires active non-SHA gates only, excludes SHA dormancy from final-readiness participation, and does not create final readiness, launch authority, runtime/live/order/source/connector/runtime-cash/backend/profit authority, replay/paper/optimizer/neural/quantum execution, or profit/latency/execution/quantum-advantage evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_id",
+    "contract_version",
+    "authority_class",
+    "current_final_readiness_dependency_policy_state",
+    "allowed_final_readiness_dependency_policy_states",
+    "sha_required_for_final_readiness",
+    "sha_dormancy_is_final_readiness_blocker",
+    "sha_absence_is_final_readiness_blocker",
+    "sha_presence_is_final_readiness_evidence",
+    "sha_reactivation_required_for_day1_launch",
+    "final_readiness_may_be_authorized_without_sha_if_all_active_non_sha_gates_pass_and_owner_approves",
+    "current_pr_creates_final_readiness",
+    "current_pr_creates_day1_launch_authority",
+    "active_non_sha_final_readiness_dependencies_required",
+    "excluded_non_participating_subsystems",
+    "active_non_sha_final_readiness_dependencies",
+    "current_pr_creates_runtime_live_order_source_connector_runtime_cash_backend_profit_authority",
+    "current_pr_creates_replay_paper_optimizer_neural_quantum_backend_execution",
+    "current_pr_claims_profit_latency_execution_quantum_advantage_evidence",
+    "source_facts_accepted_by_this_pr",
+    "connector_semantics_bound_by_this_pr",
+    "runtime_cash_receipts_created_by_this_pr",
+    "live_trading_authority_created_by_this_pr",
+    "bug_free_status_claimed_by_this_pr",
+    "validator_contract"
+  ],
+  "properties": {
+    "contract_id": { "const": "QTT_FINAL_READINESS_DEPENDENCY_POLICY_CONTRACT" },
+    "contract_version": { "const": "v1" },
+    "authority_class": {
+      "const": "DAY1_FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY_NOT_FINAL_READINESS"
+    },
+    "current_final_readiness_dependency_policy_state": {
+      "const": "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"
+    },
+    "allowed_final_readiness_dependency_policy_states": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
+          "FINAL_READINESS_DEPENDENCY_POLICY_OWNER_SHA_RECONSIDERATION_REQUESTED",
+          "FINAL_READINESS_DEPENDENCY_POLICY_SHA_REACTIVATED_AFTER_OWNER_APPROVAL"
+        ]
+      },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "sha_required_for_final_readiness": { "const": false },
+    "sha_dormancy_is_final_readiness_blocker": { "const": false },
+    "sha_absence_is_final_readiness_blocker": { "const": false },
+    "sha_presence_is_final_readiness_evidence": { "const": false },
+    "sha_reactivation_required_for_day1_launch": { "const": false },
+    "final_readiness_may_be_authorized_without_sha_if_all_active_non_sha_gates_pass_and_owner_approves": {
+      "const": true
+    },
+    "current_pr_creates_final_readiness": { "const": false },
+    "current_pr_creates_day1_launch_authority": { "const": false },
+    "active_non_sha_final_readiness_dependencies_required": { "const": true },
+    "excluded_non_participating_subsystems": {
+      "type": "array",
+      "items": { "const": "SHA_DORMANCY_SYSTEM" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "active_non_sha_final_readiness_dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 18,
+      "uniqueItems": true
+    },
+    "current_pr_creates_runtime_live_order_source_connector_runtime_cash_backend_profit_authority": {
+      "const": false
+    },
+    "current_pr_creates_replay_paper_optimizer_neural_quantum_backend_execution": {
+      "const": false
+    },
+    "current_pr_claims_profit_latency_execution_quantum_advantage_evidence": {
+      "const": false
+    },
+    "source_facts_accepted_by_this_pr": { "const": false },
+    "connector_semantics_bound_by_this_pr": { "const": false },
+    "runtime_cash_receipts_created_by_this_pr": { "const": false },
+    "live_trading_authority_created_by_this_pr": { "const": false },
+    "bug_free_status_claimed_by_this_pr": { "const": false },
+    "validator_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_name",
+        "success_marker",
+        "schema_path",
+        "generated_report_path",
+        "creates_sha",
+        "creates_sha_freeze_authority",
+        "creates_final_readiness",
+        "creates_day1_launch_authority",
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority"
+      ],
+      "properties": {
+        "validator_name": {
+          "const": "validate_qtt_final_readiness_dependency_policy_contract.py"
+        },
+        "success_marker": {
+          "const": "QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK"
+        },
+        "schema_path": {
+          "const": "schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json"
+        },
+        "generated_report_path": {
+          "const": "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
+        },
+        "creates_sha": { "const": false },
+        "creates_sha_freeze_authority": { "const": false },
+        "creates_final_readiness": { "const": false },
+        "creates_day1_launch_authority": { "const": false },
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority": {
+          "const": false
+        }
+      }
+    }
+  }
+}

@@ -89,19 +89,39 @@ def test_validator_emits_blocked_success_marker_and_writes_report(tmp_path, caps
     assert report["validator_stdout_marker"] == validator.SUCCESS_MARKER
 
 
-def test_materialized_bundle_and_missing_sha_block_sha_freeze_authority():
+def test_dormant_sha_system_blocks_sha_freeze_authority_without_absence_inference():
     report = _report()
 
     assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.jsonl"] is False
     assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.sha256"] is True
+    assert (
+        report["sha_system_dormancy_state"]
+        == "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED"
+    )
+    assert report["sha_system_non_participating_for_final_readiness"] is True
+    assert (
+        report["final_readiness_dependency_policy_state"]
+        == "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"
+    )
+    assert report["sha_required_for_final_readiness"] is False
+    assert report["sha_dormancy_is_final_readiness_blocker"] is False
+    assert report["sha_absence_is_final_readiness_blocker"] is False
+    assert report["sha_presence_is_final_readiness_evidence"] is False
     assert report["sha_materialization_allowed"] is False
     assert (
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE"
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED"
         in report["blocked_reason_codes"]
     )
-    assert "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED" in report["blocked_reason_codes"]
+    assert (
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_GENERATION_DISABLED_BY_DORMANCY_POLICY"
+        in report["blocked_reason_codes"]
+    )
+    assert (
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FREEZE_AUTHORITY_DISABLED_BY_DORMANCY_POLICY"
+        in report["blocked_reason_codes"]
+    )
 
 
 def test_no_sha_digest_value_or_digest_computation_exists():
@@ -165,9 +185,11 @@ def test_final_readiness_remains_blocked():
 
     assert report["final_readiness_created"] is False
     assert report["downstream_status"]["roadmap_pr101_final_readiness_gate"] == (
-        "BLOCKED_UNTIL_VALID_BUNDLE_AND_SHA_FREEZE_AUTHORITY_EXIST"
+        "NOT_CREATED_BY_THIS_PR_ACTIVE_NON_SHA_GATES_CONTROL_DAY1_FINAL_READINESS"
     )
-    assert report["downstream_blocked_until"] == ["ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS"]
+    assert report["downstream_blocked_until"] == [
+        "ACTIVE_NON_SHA_DAY1_FINAL_READINESS_GATES"
+    ]
     failures = validator.validate_no_forbidden_artifacts(
         ROOT,
         extra_existing_paths=(

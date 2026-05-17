@@ -22,6 +22,8 @@ from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gat
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     canonical_atomicrows_bundle_presence,
 )
+from src.qtt.core.testing import atomicrows_sha_system_dormancy_state as sha_dormancy  # noqa: E402
+from src.qtt.core.testing import qtt_final_readiness_dependency_policy as readiness_policy  # noqa: E402
 from src.qtt.core.testing.atomicrows_sha_freeze_final_readiness_state import (  # noqa: E402
     validate_current_atomicrows_sha_freeze_final_readiness_state,
 )
@@ -79,20 +81,22 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 BRANCH_CONTEXT_ENV_CANDIDATES = pr97_gate.BRANCH_CONTEXT_ENV_CANDIDATES
 
 BLOCKED_REASON_CODES = (
-    "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE",
-    "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_GENERATION_DISABLED_BY_DORMANCY_POLICY",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FREEZE_AUTHORITY_DISABLED_BY_DORMANCY_POLICY",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_REACTIVATION_REQUIRES_FUTURE_OWNER_APPROVED_PR",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_SOURCE_BLUEPRINTS_ONLY",
-    "ATOMICROWS_SHA_FREEZE_BLOCKED_OWNER_FREEZE_AUTHORITY_NOT_PRESENT",
-    "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED_BY_THIS_PR",
 )
 UPSTREAM_ARTIFACT_DEPENDENCIES = (
     "AtomicRowsFullBundleRowExpansionPlan",
     "AtomicRowsBundleRowFamilySourceFiles",
     "AtomicRowsBundleBuilderDeterministicAssemblyGate",
 )
-DOWNSTREAM_BLOCKED_UNTIL = ("ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS",)
+DOWNSTREAM_BLOCKED_UNTIL = ("ACTIVE_NON_SHA_DAY1_FINAL_READINESS_GATES",)
 NO_CLAIM_FALSE_FIELDS = (
     "bundle_created",
     "bundle_sha256_created",
@@ -475,10 +479,25 @@ def validate_config_payload(config: dict[str, Any], schema: dict[str, Any]) -> l
     expected_checks = (
         ("atomicrows_bundle_jsonl_exists", True),
         ("atomicrows_bundle_sha256_exists", False),
+        (
+            "sha_system_dormancy_state",
+            "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
+        ),
+        ("sha_system_non_participating_for_final_readiness", True),
+        (
+            "final_readiness_dependency_policy_state",
+            "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
+        ),
+        ("sha_required_for_final_readiness", False),
+        ("sha_dormancy_is_final_readiness_blocker", False),
+        ("sha_absence_is_final_readiness_blocker", False),
+        ("sha_presence_is_final_readiness_evidence", False),
         ("exact_source_rows_authorized", False),
         ("pr99_assembly_path", "PATH_B_BLOCKED"),
         ("pr98_source_files_are_blueprints_only", True),
         ("sha_materialization_allowed", False),
+        ("sha_generation_allowed", False),
+        ("sha_freeze_authority_allowed", False),
         ("freeze_authority_created", False),
         ("final_readiness_created", False),
     )
@@ -730,7 +749,24 @@ def build_report(
         "canonical_paths": copy.deepcopy(config.get("canonical_paths")),
         "atomicrows_bundle_jsonl_exists": bundle_exists,
         "atomicrows_bundle_sha256_exists": sha_exists,
+        "sha_system_dormancy_state": sha_dormancy.get_atomicrows_sha_system_dormancy_state(),
+        "sha_system_non_participating_for_final_readiness": (
+            sha_dormancy.is_sha_system_non_participating_for_final_readiness()
+        ),
+        "final_readiness_dependency_policy_state": (
+            readiness_policy.get_qtt_final_readiness_dependency_policy_state()
+        ),
+        "sha_required_for_final_readiness": (
+            readiness_policy.is_sha_required_for_final_readiness()
+        ),
+        "sha_dormancy_is_final_readiness_blocker": (
+            readiness_policy.is_sha_dormancy_a_final_readiness_blocker()
+        ),
+        "sha_absence_is_final_readiness_blocker": False,
+        "sha_presence_is_final_readiness_evidence": False,
         "sha_materialization_allowed": False,
+        "sha_generation_allowed": sha_dormancy.is_sha_generation_allowed(),
+        "sha_freeze_authority_allowed": sha_dormancy.is_sha_freeze_authority_allowed(),
         "sha_file_created": False,
         "sha_computation_attempted": False,
         "sha_computed": False,
@@ -769,7 +805,7 @@ def build_report(
         },
         "downstream_status": {
             "roadmap_pr101_final_readiness_gate": (
-                "BLOCKED_UNTIL_VALID_BUNDLE_AND_SHA_FREEZE_AUTHORITY_EXIST"
+                "NOT_CREATED_BY_THIS_PR_ACTIVE_NON_SHA_GATES_CONTROL_DAY1_FINAL_READINESS"
             )
         },
         "future_consumer_notes": config.get("future_consumer_notes"),
@@ -806,7 +842,48 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         ("semantic_task_id", report.get("semantic_task_id"), SEMANTIC_TASK_ID),
         ("gate_mode", report.get("gate_mode"), GATE_MODE),
         ("validation_result", report.get("validation_result"), "PASS_BLOCKED_EXPECTED"),
+        (
+            "sha_system_dormancy_state",
+            report.get("sha_system_dormancy_state"),
+            "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
+        ),
+        (
+            "sha_system_non_participating_for_final_readiness",
+            report.get("sha_system_non_participating_for_final_readiness"),
+            True,
+        ),
+        (
+            "final_readiness_dependency_policy_state",
+            report.get("final_readiness_dependency_policy_state"),
+            "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
+        ),
+        (
+            "sha_required_for_final_readiness",
+            report.get("sha_required_for_final_readiness"),
+            False,
+        ),
+        (
+            "sha_dormancy_is_final_readiness_blocker",
+            report.get("sha_dormancy_is_final_readiness_blocker"),
+            False,
+        ),
+        (
+            "sha_absence_is_final_readiness_blocker",
+            report.get("sha_absence_is_final_readiness_blocker"),
+            False,
+        ),
+        (
+            "sha_presence_is_final_readiness_evidence",
+            report.get("sha_presence_is_final_readiness_evidence"),
+            False,
+        ),
         ("sha_materialization_allowed", report.get("sha_materialization_allowed"), False),
+        ("sha_generation_allowed", report.get("sha_generation_allowed"), False),
+        (
+            "sha_freeze_authority_allowed",
+            report.get("sha_freeze_authority_allowed"),
+            False,
+        ),
         ("sha_file_created", report.get("sha_file_created"), False),
         ("sha_computation_attempted", report.get("sha_computation_attempted"), False),
         ("sha_computed", report.get("sha_computed"), False),
@@ -853,9 +930,9 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     if upstream.get("source_blueprints_found_count") != 15:
         failures.append("report must preserve 15 PR98 source blueprints")
     if _mapping(report.get("downstream_status")).get("roadmap_pr101_final_readiness_gate") != (
-        "BLOCKED_UNTIL_VALID_BUNDLE_AND_SHA_FREEZE_AUTHORITY_EXIST"
+        "NOT_CREATED_BY_THIS_PR_ACTIVE_NON_SHA_GATES_CONTROL_DAY1_FINAL_READINESS"
     ):
-        failures.append("report must keep Roadmap PR101 final readiness blocked")
+        failures.append("report must defer Day-1 final readiness to active non-SHA gates")
     failures.extend(validate_no_digest_values(report, "REPORT"))
     failures.extend(validate_report_is_deterministic(report))
     return failures
@@ -887,6 +964,18 @@ def validate(
     upstream_failures, upstream = validate_upstream_state(repo_root)
     failures.extend(upstream_failures)
     failures.extend(validate_config_payload(config, schema))
+    if not sha_dormancy.is_sha_system_dormant():
+        failures.append("central SHA system must remain dormant")
+    if not sha_dormancy.is_sha_system_non_participating_for_final_readiness():
+        failures.append("central SHA system must remain non-participating for final readiness")
+    if sha_dormancy.is_sha_generation_allowed():
+        failures.append("central SHA generation must remain disabled")
+    if sha_dormancy.is_sha_freeze_authority_allowed():
+        failures.append("central SHA/freeze authority must remain disabled")
+    if readiness_policy.is_sha_required_for_final_readiness():
+        failures.append("central final-readiness policy must not require SHA")
+    if readiness_policy.is_sha_dormancy_a_final_readiness_blocker():
+        failures.append("central final-readiness policy must not block on SHA dormancy")
     failures.extend(validate_no_forbidden_artifacts(repo_root))
     failures.extend(validate_master_plan_not_modified(repo_root))
     failures.extend(

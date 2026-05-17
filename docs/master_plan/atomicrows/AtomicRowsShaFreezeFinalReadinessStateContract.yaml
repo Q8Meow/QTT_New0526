@@ -54,12 +54,12 @@ state_definitions:
   FINAL_READINESS_AUTHORIZED:
     bundle_jsonl_required: true
     bundle_jsonl_row_count_required: 4183
-    bundle_sha256_required: true
-    bundle_sha256_allowed: true
-    sha_freeze_authority_required: true
-    sha_freeze_authority_allowed: true
-    freeze_receipt_required: true
-    freeze_receipt_allowed: true
+    bundle_sha256_required: false
+    bundle_sha256_allowed: false
+    sha_freeze_authority_required: false
+    sha_freeze_authority_allowed: false
+    freeze_receipt_required: false
+    freeze_receipt_allowed: false
     final_readiness_required: true
     final_readiness_allowed: true
     live_trading_allowed: false
@@ -115,24 +115,27 @@ artifact_authority_paths:
 transition_rules:
   - from_state: BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
     to_state: SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS
-    allowed_only_in: EXPLICIT_FUTURE_SHA_FREEZE_PR
+    allowed_only_in: EXPLICIT_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_PR_ONLY
     requires:
-      - owner approval
+      - future owner-approved SHA reactivation PR
       - existing valid AtomicRows.bundle.jsonl
       - exactly 4,183 bundle rows
+      - central SHA dormancy policy changed away from dormant by owner approval
       - deterministic SHA computation
       - SHA value matches bundle bytes
       - SHA/freeze receipt or authority artifact
     must_not_create:
       - final readiness
       - runtime/live/order/profit/quantum-backend authority
-  - from_state: SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS
+  - from_state: BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
     to_state: FINAL_READINESS_AUTHORIZED
-    allowed_only_in: EXPLICIT_FUTURE_FINAL_READINESS_PR
+    allowed_only_in: EXPLICIT_FUTURE_FINAL_READINESS_PR_ACTIVE_NON_SHA_GATES_ONLY
     requires:
       - existing valid bundle
-      - existing valid SHA
-      - existing valid SHA/freeze authority
+      - current final-readiness dependency policy active non-SHA gates only
+      - SHA not required for Day-1 final readiness
+      - SHA dormancy not a Day-1 final-readiness blocker
+      - owner Day-1 launch approval
       - lifecycle gates
       - agent binding gates
       - selection gates
@@ -175,8 +178,8 @@ existing_blocked_static_gate_artifacts:
   - tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py
   - tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority_gate.py
 future_handoff:
-  future_sha_freeze_authority_pr_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
-  future_final_readiness_pr_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_sha_freeze_authority_pr_required: OPTIONAL_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_ONLY_NOT_DAY1_REQUIRED_NOT_EXECUTED
+  future_final_readiness_pr_required: FUTURE_FINAL_READINESS_ACTIVE_NON_SHA_GATES_ONLY_NOT_EXECUTED
   future_runtime_live_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
   future_profit_evidence_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
   future_quantum_execution_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED

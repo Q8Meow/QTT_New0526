@@ -207,8 +207,9 @@ def test_future_final_readiness_state_is_represented_but_not_current():
     assert expected_atomicrows_sha_freeze_final_readiness_state_from_contract(REPO_ROOT) != (
         AtomicRowsShaFreezeFinalReadinessState.FINAL_READINESS_AUTHORIZED
     )
-    assert definition.bundle_sha256_required is True
-    assert definition.sha_freeze_authority_required is True
+    assert definition.bundle_sha256_required is False
+    assert definition.sha_freeze_authority_required is False
+    assert definition.freeze_receipt_required is False
     assert definition.final_readiness_required is True
     assert definition.live_trading_allowed is False
 
@@ -257,6 +258,9 @@ def test_existing_atomicrows_bundle_sha_freeze_authority_gate_remains_blocked(tm
     assert result.report["validation_result"] == "PASS_BLOCKED_EXPECTED"
     assert result.report["freeze_authority_created"] is False
     assert result.report["final_readiness_created"] is False
+    assert result.report["sha_system_non_participating_for_final_readiness"] is True
+    assert result.report["sha_required_for_final_readiness"] is False
+    assert result.report["sha_dormancy_is_final_readiness_blocker"] is False
 
 
 def test_workflow_still_verifies_bundle_materialized_and_sha_absent():

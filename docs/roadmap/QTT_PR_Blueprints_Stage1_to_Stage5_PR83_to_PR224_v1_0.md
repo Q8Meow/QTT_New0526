@@ -32,6 +32,9 @@ Codex must use three layers for every PR:
 
 - Do not edit docs/master_plan/QTT_MasterPlan_Current.md unless the owner explicitly approves that exact PR scope.
 - Do not create docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl or AtomicRows.bundle.sha256 unless the exact PR explicitly authorizes bundle/hash creation.
+- Treat SHA as dormant, disabled, owner-controlled, and non-participating for Day-1 final-readiness evaluation unless a future owner-approved SHA reactivation PR explicitly changes the central SHA dormancy policy.
+- Do not treat SHA/freeze readiness as permission to generate SHA, do not require SHA reactivation for Day-1 final readiness, and do not treat SHA absence or presence as final-readiness evidence or a final-readiness blocker.
+- Do not block research candidates, future parameter additions, future algorithm additions, or future quantum metadata additions because SHA is dormant.
 - Do not fabricate external facts, source packets, connector semantics, runtime cash, order/fill receipts, replay/paper results, quantum backend output, quantum advantage evidence, latency superiority evidence, execution superiority evidence, alpha evidence, or profit evidence.
 - Do not commit, push, open a GitHub PR, merge, or rewrite history; owner performs those actions manually.
 - Use Python standard library unless the repository already has an approved dependency pattern.
@@ -51,7 +54,7 @@ Codex must use three layers for every PR:
 8. Compileall / short-pycache compileall status.
 9. docs/master_plan/QTT_MasterPlan_Current.md diff status.
 10. AtomicRows.bundle.jsonl absence or scoped bundle status.
-11. AtomicRows.bundle.sha256 absence or scoped SHA status.
+11. AtomicRows.bundle.sha256 absence or scoped SHA status, plus whether SHA is non-participating for final readiness under the central dormancy policy.
 12. Confirmation of no unauthorized runtime/live/order/source/connector/profit/quantum-backend artifacts.
 13. Confirmation of no unauthorized optimizer/scoring/ranking/selection/replay/paper artifacts.
 14. Explicit statement: no commit, no push, no PR opened, no merge performed.
@@ -2006,7 +2009,7 @@ Codex must inspect existing repo conventions first. The following paths are blue
 6. Add a focused validator that emits exactly the roadmap marker on success and precise fail-closed block codes on failure.
 7. Add focused unit tests plus fail_closed validation-gate coverage; integrate only the new validator into cumulative gates.
 8. Treat the explicit 4,183 AtomicRows parameter/algorithm inventory as an inventory and selection substrate, not as trading authority.
-9. Respect owner approval for bundle/hash creation; only PR #100 may open bundle SHA/freeze authority if the owner explicitly scopes it.
+9. Respect owner approval for bundle/hash creation; do not create bundle/hash or SHA/freeze authority in this row-expansion planning PR.
 
 ### Schemas, registries, reports, or receipts to emit
 
@@ -2362,7 +2365,8 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 
 ### Purpose
 
-- Owner-approved bundle SHA/freeze authority surface if owner explicitly opens the bundle PR.
+- Owner global SHA dormancy supersedes the older bundle SHA/freeze authority path for Day-1: SHA remains dormant, disabled, owner-controlled, and non-participating unless a future owner-approved SHA reactivation PR explicitly changes the central policy.
+- Preserve historical SHA/freeze context without creating SHA, SHA/freeze authority, final readiness, Day-1 launch authority, runtime/live/order/source/connector/runtime-cash/backend/profit authority, or execution/evidence claims.
 
 ### Codex layer usage
 
@@ -2382,13 +2386,15 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 - `search: "compatibility gate"`
 - `search: "4183"`
 - `search: "AtomicRows bundle SHA/freeze authority"`
+- `search: "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED"`
+- `search: "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"`
 - `search: "QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK"`
 
 ### Upstream artifacts to consume or verify
 
 - PR #99 completed, merged, and validated on clean main
 - PR #99 bundle builder mechanics
-- explicit owner-approved bundle/hash scope
+- explicit owner-approved future SHA reactivation scope if SHA is ever reactivated; current owner policy keeps SHA dormant and not required for Day-1 final readiness
 - Existing repository conventions from `git ls-files`, including schemas, docs, generated reports, validators, tests, fixtures, and fail-closed validation-gate tests.
 - Current clean `main` after the previous PR has merged and validation gates passed.
 
@@ -2396,6 +2402,16 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 
 Codex must inspect existing repo conventions first. The following paths are blueprint-target families, not permission to scatter or override stronger existing paths:
 
+- `src/qtt/core/testing/atomicrows_sha_system_dormancy_state.py`
+- `src/qtt/core/testing/qtt_final_readiness_dependency_policy.py`
+- `docs/master_plan/atomicrows/AtomicRowsShaSystemDormancyStateContract.yaml`
+- `docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml`
+- `schemas/atomicrows/atomicrows_sha_system_dormancy_state_contract.schema.json`
+- `schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json`
+- `tools/validate_atomicrows_sha_system_dormancy_state_contract.py`
+- `tools/validate_qtt_final_readiness_dependency_policy_contract.py`
+- `tests/atomicrows/test_atomicrows_sha_system_dormancy_state_contract.py`
+- `tests/launch/test_qtt_final_readiness_dependency_policy_contract.py`
 - `schemas/atomicrows/atomicrows_bundle_sha_freeze_authority.schema.json`
 - `docs/master_plan/atomicrows/AtomicRowsBundleSHAFreezeAuthority.yaml or .json using existing repo convention`
 - `tests/fixtures/atomicrows/atomicrows_bundle_sha_freeze_authority.fixture.json`
@@ -2415,14 +2431,20 @@ Codex must inspect existing repo conventions first. The following paths are blue
 6. Add a focused validator that emits exactly the roadmap marker on success and precise fail-closed block codes on failure.
 7. Add focused unit tests plus fail_closed validation-gate coverage; integrate only the new validator into cumulative gates.
 8. Treat the explicit 4,183 AtomicRows parameter/algorithm inventory as an inventory and selection substrate, not as trading authority.
-9. Respect owner approval for bundle/hash creation; only PR #100 may open bundle SHA/freeze authority if the owner explicitly scopes it.
+9. Respect owner approval for bundle/hash creation; PR title or roadmap order alone must never be treated as permission to generate SHA.
+10. Consume the central SHA dormancy controller and final-readiness dependency policy; block SHA/freeze authority because SHA is dormant and non-participating, not because SHA absence is a readiness blocker.
+11. Preserve research-candidate intake, future parameter additions, future algorithm additions, and future quantum metadata additions while preventing quantum execution or advantage claims.
 
 ### Schemas, registries, reports, or receipts to emit
 
-- AtomicRowsBundleSHAFreezeAuthority schema or contract
+- AtomicRowsShaSystemDormancyState contract
+- QttFinalReadinessDependencyPolicy contract
+- AtomicRowsBundleSHAFreezeAuthority blocked-gate integration that consumes the central dormancy and dependency policies
 - AtomicRowsBundleSHAFreezeAuthority deterministic fixture set
 - AtomicRowsBundleSHAFreezeAuthority generated report
-- validate_atomicrows_bundle_sha_freeze_authority.py validator with marker QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK
+- validate_atomicrows_sha_system_dormancy_state_contract.py validator with marker QTT_ATOMICROWS_SHA_SYSTEM_DORMANCY_STATE_CONTRACT_OK
+- validate_qtt_final_readiness_dependency_policy_contract.py validator with marker QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK
+- validate_atomicrows_bundle_sha_freeze_authority_gate.py validator remains blocked unless future owner-approved SHA reactivation explicitly changes central policy
 - cumulative validation gate integration
 
 ### Focused tests to add
@@ -2430,13 +2452,17 @@ Codex must inspect existing repo conventions first. The following paths are blue
 - tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority.py: validates happy path, malformed input, missing upstream artifact, duplicate/non-deterministic output, and exact marker behavior.
 - tests/fail_closed/test_run_validation_gates.py: proves the cumulative gate calls the new validator and fails when the artifact is missing or invalid.
 - Static no-authority test: proves no runtime/live/source/connector/order/replay/paper/profit/quantum-backend artifact was created by this PR.
+- Central dormancy tests: prove SHA generation disabled, SHA/freeze authority disabled, SHA reactivation not performed, and SHA reactivation not required for Day-1 final readiness.
+- Final-readiness dependency tests: prove active non-SHA dependencies only, SHA_DORMANCY_SYSTEM excluded, SHA absence not a blocker, SHA presence not evidence, and current PR creates no final readiness or Day-1 launch authority.
 
 ### Required validation commands
 
 ```powershell
 $Py = ".\.venv\Scripts\python.exe"
-& $Py tools\validate_atomicrows_bundle_sha_freeze_authority.py
-& $Py -m pytest tests\atomicrows\test_atomicrows_bundle_sha_freeze_authority.py tests\fail_closed\test_run_validation_gates.py -q
+& $Py tools\validate_atomicrows_sha_system_dormancy_state_contract.py
+& $Py tools\validate_qtt_final_readiness_dependency_policy_contract.py
+& $Py tools\validate_atomicrows_bundle_sha_freeze_authority_gate.py
+& $Py tools\run_pytest_fresh_basetemp.py tests\atomicrows\test_atomicrows_sha_system_dormancy_state_contract.py tests\launch\test_qtt_final_readiness_dependency_policy_contract.py tests\atomicrows\test_atomicrows_bundle_sha_freeze_authority_gate.py tests\fail_closed\test_run_validation_gates.py -q
 & $Py tools\run_validation_gates.py
 & $Py tools\run_pytest_fresh_basetemp.py -q
 if (Test-Path "src") { & $Py -m compileall tools tests src } else { & $Py -m compileall tools tests }
@@ -2447,26 +2473,27 @@ git status --short
 
 ### Must prove
 
-- Single JSONL bundle and SHA model are controlled and non-runtime.
+- Single JSONL bundle remains present and controlled while SHA generation and SHA/freeze authority are disabled by central owner dormancy policy.
+- SHA reactivation is not required for Day-1 final readiness, and SHA absence or presence is neither final-readiness evidence nor a final-readiness blocker.
 - This PR creates static contracts/metadata only and cannot be mistaken for runtime/live readiness.
 - The validator marker is emitted only when all required artifacts pass.
 
 ### Must not create
 
-- Unapproved freeze, unapproved SHA, source fact acceptance, live/order/profit authority.
+- SHA, unapproved freeze, SHA/freeze authority, final readiness, source fact acceptance, live/order/profit authority.
 - No live order write, cancel, reduce, replace, close, forced-exit, fill receipt, venue write surface, or live reachability.
 - No runtime resolver, source retrieval/acceptance execution, connector semantic binding, runtime cash receipt, replay/paper execution, optimizer execution, quantum backend/simulator execution, dashboard runtime service, or profit/advantage evidence.
 - No fabricated source facts, connector facts, runtime cash, order/fill receipts, replay/paper results, quantum advantage, latency/execution superiority claim, alpha evidence, or profit guarantee.
 
 ### Quantum optimization and latency doctrine for this PR
 
-- Freeze quantum inventory only as parameter/algorithm inventory, not backend evidence.
+- Preserve quantum inventory and future quantum metadata as parameter/algorithm inventory, not backend execution or advantage evidence.
 - Preserve classical baseline and no-trade fallback as valid outcomes whenever risk, source, cash, latency, cost, freshness, uncertainty, or owner scope is not green.
 - Live low-latency path must consume only precomputed and fresh source-change, cash, market, risk, and quantum artifact snapshots; no source retrieval, source acceptance, LLM reasoning, external research, dashboard review, or quantum backend selection may run inside the live order path.
 
 ### Downstream consumers
 
-- PR #101 — AtomicRows full bundle final readiness gate
+- PR #101 — AtomicRows full bundle final readiness gate consumes active non-SHA final-readiness policy and must not require SHA reactivation.
 - PR #105–#151 Stage-1 runtime/live launch closure consumers
 
 ### Stop conditions
@@ -2498,7 +2525,8 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 
 ### Purpose
 
-- Validate AtomicRows bundle readiness before runtime/live phases consume selection inventory.
+- Validate AtomicRows bundle readiness through active non-SHA Day-1 final-readiness dependencies before runtime/live phases consume selection inventory.
+- Consume the central final-readiness dependency policy so SHA dormancy, SHA absence, and SHA presence are not treated as final-readiness evidence or blockers.
 
 ### Codex layer usage
 
@@ -2518,12 +2546,14 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 - `search: "compatibility gate"`
 - `search: "4183"`
 - `search: "AtomicRows full bundle final readiness gate"`
+- `search: "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"`
+- `search: "SHA_DORMANCY_SYSTEM"`
 - `search: "QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK"`
 
 ### Upstream artifacts to consume or verify
 
-- PR #100 completed, merged, and validated on clean main
-- PR #97–#100 AtomicRows plan/source/builder/freeze chain
+- PR #97-#99 AtomicRows plan/source/builder chain plus central SHA dormancy and final-readiness dependency policy contracts
+- PR #100 SHA/freeze completion is not a Day-1 final-readiness prerequisite while SHA dormancy is active
 - Existing repository conventions from `git ls-files`, including schemas, docs, generated reports, validators, tests, fixtures, and fail-closed validation-gate tests.
 - Current clean `main` after the previous PR has merged and validation gates passed.
 
@@ -2532,6 +2562,9 @@ Codex must finish with the standard handoff required in Section 2 of this bluepr
 Codex must inspect existing repo conventions first. The following paths are blueprint-target families, not permission to scatter or override stronger existing paths:
 
 - `schemas/atomicrows/atomicrows_full_bundle_final_readiness_gate.schema.json`
+- `schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json`
+- `docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml`
+- `src/qtt/core/testing/qtt_final_readiness_dependency_policy.py`
 - `docs/master_plan/atomicrows/AtomicRowsFullBundleFinalReadinessGate.yaml or .json using existing repo convention`
 - `tests/fixtures/atomicrows/atomicrows_full_bundle_final_readiness_gate.fixture.json`
 - `docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json`
@@ -2550,11 +2583,14 @@ Codex must inspect existing repo conventions first. The following paths are blue
 6. Add a focused validator that emits exactly the roadmap marker on success and precise fail-closed block codes on failure.
 7. Add focused unit tests plus fail_closed validation-gate coverage; integrate only the new validator into cumulative gates.
 8. Treat the explicit 4,183 AtomicRows parameter/algorithm inventory as an inventory and selection substrate, not as trading authority.
-9. Respect owner approval for bundle/hash creation; only PR #100 may open bundle SHA/freeze authority if the owner explicitly scopes it.
+9. Evaluate final readiness only through active non-SHA dependency families and owner Day-1 launch approval.
+10. Prove SHA reactivation is not required for Day-1 final readiness, SHA dormancy is not a blocker, SHA absence is not a blocker, and SHA presence is not evidence.
+11. Respect owner approval for bundle/hash creation; do not treat PR #100 or any SHA/freeze readiness language as permission to generate SHA.
 
 ### Schemas, registries, reports, or receipts to emit
 
 - AtomicRowsFullBundleFinalReadinessGate schema or contract
+- QttFinalReadinessDependencyPolicy contract consumption
 - AtomicRowsFullBundleFinalReadinessGate deterministic fixture set
 - AtomicRowsFullBundleFinalReadinessGate generated report
 - validate_atomicrows_full_bundle_final_readiness_gate.py validator with marker QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK
@@ -2565,11 +2601,13 @@ Codex must inspect existing repo conventions first. The following paths are blue
 - tests/atomicrows/test_atomicrows_full_bundle_final_readiness_gate.py: validates happy path, malformed input, missing upstream artifact, duplicate/non-deterministic output, and exact marker behavior.
 - tests/fail_closed/test_run_validation_gates.py: proves the cumulative gate calls the new validator and fails when the artifact is missing or invalid.
 - Static no-authority test: proves no runtime/live/source/connector/order/replay/paper/profit/quantum-backend artifact was created by this PR.
+- Active non-SHA dependency test: proves active final-readiness dependencies do not include SHA, SHA_FREEZE, SHA_FILE, SHA_DIGEST, SHA_ABSENCE, SHA_PRESENCE, or SHA_REACTIVATION.
 
 ### Required validation commands
 
 ```powershell
 $Py = ".\.venv\Scripts\python.exe"
+& $Py tools\validate_qtt_final_readiness_dependency_policy_contract.py
 & $Py tools\validate_atomicrows_full_bundle_final_readiness_gate.py
 & $Py -m pytest tests\atomicrows\test_atomicrows_full_bundle_final_readiness_gate.py tests\fail_closed\test_run_validation_gates.py -q
 & $Py tools\run_validation_gates.py
@@ -2582,13 +2620,14 @@ git status --short
 
 ### Must prove
 
-- Bundle readiness is explicit and fail-closed.
+- Bundle readiness is explicit, fail-closed, and controlled by active non-SHA gates plus owner Day-1 launch approval.
+- SHA reactivation is not required for Day-1 final readiness; SHA dormancy, SHA absence, and SHA presence are non-participating.
 - This PR creates static contracts/metadata only and cannot be mistaken for runtime/live readiness.
 - The validator marker is emitted only when all required artifacts pass.
 
 ### Must not create
 
-- Trading readiness, live execution, profit claims, automatic runtime unlock.
+- Trading readiness, live execution, profit claims, automatic runtime unlock, or a SHA-required final-readiness dependency.
 - No live order write, cancel, reduce, replace, close, forced-exit, fill receipt, venue write surface, or live reachability.
 - No runtime resolver, source retrieval/acceptance execution, connector semantic binding, runtime cash receipt, replay/paper execution, optimizer execution, quantum backend/simulator execution, dashboard runtime service, or profit/advantage evidence.
 - No AtomicRows bundle/hash authority unless this exact PR and owner prompt explicitly authorizes it.
@@ -2596,7 +2635,7 @@ git status --short
 
 ### Quantum optimization and latency doctrine for this PR
 
-- Quantum rows pass completeness/compatibility before optimizer/ranking consumers use them.
+- Quantum rows and future quantum metadata pass completeness/compatibility before optimizer/ranking consumers use them, without executing QUBO/Ising/QAOA/VQE/annealing/simulator/provider/backend flows or claiming advantage.
 - Preserve classical baseline and no-trade fallback as valid outcomes whenever risk, source, cash, latency, cost, freshness, uncertainty, or owner scope is not green.
 - Live low-latency path must consume only precomputed and fresh source-change, cash, market, risk, and quantum artifact snapshots; no source retrieval, source acceptance, LLM reasoning, external research, dashboard review, or quantum backend selection may run inside the live order path.
 
