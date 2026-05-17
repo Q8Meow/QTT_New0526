@@ -21,7 +21,9 @@ from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gat
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     canonical_atomicrows_bundle_presence,
-    validate_current_atomicrows_bundle_state,
+)
+from src.qtt.core.testing.atomicrows_sha_freeze_final_readiness_state import (  # noqa: E402
+    validate_current_atomicrows_sha_freeze_final_readiness_state,
 )
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
@@ -621,7 +623,7 @@ def validate_no_forbidden_artifacts(
     *,
     extra_existing_paths: Sequence[pathlib.Path] = (),
 ) -> list[str]:
-    failures: list[str] = validate_current_atomicrows_bundle_state(
+    failures: list[str] = validate_current_atomicrows_sha_freeze_final_readiness_state(
         repo_root,
         label="AtomicRows bundle SHA/freeze authority gate",
     )
