@@ -19,6 +19,11 @@
     "final_readiness_may_be_authorized_without_sha_if_all_active_non_sha_gates_pass_and_owner_approves",
     "current_pr_creates_final_readiness",
     "current_pr_creates_day1_launch_authority",
+    "active_gate_state_registry_contract_path",
+    "active_gate_state_registry_required",
+    "active_gate_state_registry_is_source_of_day1_gate_state",
+    "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently",
+    "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids",
     "active_non_sha_final_readiness_dependencies_required",
     "excluded_non_participating_subsystems",
     "active_non_sha_final_readiness_dependencies",
@@ -63,6 +68,17 @@
     },
     "current_pr_creates_final_readiness": { "const": false },
     "current_pr_creates_day1_launch_authority": { "const": false },
+    "active_gate_state_registry_contract_path": {
+      "const": "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
+    },
+    "active_gate_state_registry_required": { "const": true },
+    "active_gate_state_registry_is_source_of_day1_gate_state": { "const": true },
+    "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently": {
+      "const": true
+    },
+    "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids": {
+      "const": true
+    },
     "active_non_sha_final_readiness_dependencies_required": { "const": true },
     "excluded_non_participating_subsystems": {
       "type": "array",

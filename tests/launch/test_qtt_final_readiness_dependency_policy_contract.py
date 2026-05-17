@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from src.qtt.core.testing import atomicrows_sha_system_dormancy_state as sha_state
+from src.qtt.core.testing import qtt_active_non_sha_day1_gate_state_registry as gate_registry
 from src.qtt.core.testing import qtt_final_readiness_dependency_policy as policy
 from tools import validate_atomicrows_bundle_sha_freeze_authority_gate as sha_freeze_gate
 from tools import validate_qtt_final_readiness_dependency_policy_contract as validator
@@ -80,6 +81,11 @@ def test_active_dependencies_are_declared_exactly_and_exclude_sha_terms():
     dependencies = policy.get_active_non_sha_final_readiness_dependencies()
 
     assert list(dependencies) == contract["active_non_sha_final_readiness_dependencies"]
+    assert dependencies == gate_registry.get_active_non_sha_day1_gate_ids()
+    assert (
+        policy.ACTIVE_NON_SHA_FINAL_READINESS_DEPENDENCIES
+        is gate_registry.QTT_ACTIVE_NON_SHA_DAY1_GATE_IDS
+    )
     assert set(dependencies) >= {
         "OWNER_DAY1_LAUNCH_APPROVAL",
         "ACCEPTED_SOURCE_EVIDENCE_FOR_TARGET_FIELDS",
@@ -102,6 +108,35 @@ def test_active_dependencies_are_declared_exactly_and_exclude_sha_terms():
     }
     assert not any(validator._contains_sha_dependency(item) for item in dependencies)
     assert _report()["active_non_sha_final_readiness_dependencies_include_sha"] is False
+    assert _report()["active_gate_ids_match_gate_state_registry"] is True
+    policy.assert_active_dependencies_consume_gate_registry()
+
+
+def test_dependency_policy_records_central_registry_as_gate_state_source():
+    contract = _contract()
+    report = _report()
+
+    assert (
+        contract["active_gate_state_registry_contract_path"]
+        == "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
+    )
+    assert contract["active_gate_state_registry_required"] is True
+    assert contract["active_gate_state_registry_is_source_of_day1_gate_state"] is True
+    assert (
+        contract[
+            "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently"
+        ]
+        is True
+    )
+    assert (
+        contract[
+            "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids"
+        ]
+        is True
+    )
+    for field in validator.REQUIRED_TRUE_FIELDS:
+        assert contract[field] is True
+        assert report[field] is True
 
 
 def test_excluded_subsystems_include_sha_dormancy_and_readiness_can_ignore_sha():

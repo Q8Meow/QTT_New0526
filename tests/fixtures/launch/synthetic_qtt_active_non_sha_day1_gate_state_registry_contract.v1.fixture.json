@@ -1,0 +1,18 @@
+{
+  "fixture_id": "SYNTHETIC_QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_CONTRACT_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "registry_state": "ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_ESTABLISHED_ALL_POSITIVE_EVIDENCE_GATES_BLOCKED_GUARDS_ACTIVE",
+  "active_gate_count": 18,
+  "sha_dormancy_system_excluded_from_active_gate_ids": true,
+  "sha_required_for_day1_final_readiness": false,
+  "sha_absence_is_day1_gate_blocker": false,
+  "sha_presence_is_final_readiness_evidence": false,
+  "current_pr_flips_any_gate": false,
+  "current_pr_marks_any_gate_satisfied": false,
+  "current_pr_creates_final_readiness": false,
+  "current_pr_creates_day1_launch_authority": false,
+  "current_pr_creates_runtime_live_order_source_connector_runtime_cash_backend_profit_authority": false,
+  "current_pr_creates_replay_paper_optimizer_neural_quantum_backend_execution": false,
+  "current_pr_claims_profit_latency_execution_quantum_advantage_evidence": false
+}

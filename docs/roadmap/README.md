@@ -22,6 +22,14 @@ Do not create `docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl` or `docs/ma
 
 Do not create runtime/live/source/connector/order/profit/quantum-backend authority unless the exact current PR explicitly opens that scope.
 
+## Corrective control-plane overlays
+
+- PR115A merged owner-controlled SHA dormancy non-participation policy.
+- PR116A is a corrective architecture/control-plane PR that centralizes active non-SHA Day-1 gate states before any future unblocking.
+- PR116A does not unblock any Day-1 gate, does not create final readiness, and does not create runtime/live/order/profit/quantum-backend authority.
+- Future PRs must flip only one centralized gate state at a time and materialize or enable only one artifact/capability at a time.
+- PR numbers remain delivery labels only; implementation truth remains canonical files, schemas, validators, reports, authority boundaries, validation evidence, and owner-approved instructions.
+
 ## Stage-1 priority
 
 Stage 1 prediction-market launch-essential scope runs through PR #151.

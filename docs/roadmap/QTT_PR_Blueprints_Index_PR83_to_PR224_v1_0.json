@@ -22,6 +22,20 @@
         "Do not fabricate external facts, source packets, connector semantics, runtime cash, order/fill receipts, replay/paper results, quantum backend output, quantum advantage evidence, latency superiority evidence, execution superiority evidence, alpha evidence, or profit evidence.",
         "Do not commit, push, open a GitHub PR, merge, or rewrite history; owner performs those actions manually."
       ],
+  "corrective_control_plane_overlays": [
+    {
+      "delivery_label": "PR115A",
+      "status": "merged",
+      "summary": "Owner-controlled SHA dormancy non-participation policy is canonical; SHA is dormant, disabled, non-participating, and not required for Day-1 final readiness."
+    },
+    {
+      "delivery_label": "PR116A",
+      "status": "corrective_control_plane",
+      "summary": "Centralizes active non-SHA Day-1 gate states before any future unblocking; does not unblock any gate, create final readiness, or create runtime/live/order/profit/quantum-backend authority.",
+      "future_transition_rule": "Future PRs must flip only one centralized gate state at a time and materialize or enable only one artifact/capability at a time.",
+      "implementation_truth_boundary": "PR numbers remain delivery labels only; implementation truth remains canonical files, schemas, validators, reports, authority boundaries, validation evidence, and owner-approved instructions."
+    }
+  ],
   "entries": [
     {
       "number": 83,

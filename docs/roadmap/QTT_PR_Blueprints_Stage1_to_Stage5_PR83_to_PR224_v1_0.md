@@ -35,6 +35,8 @@ Codex must use three layers for every PR:
 - Treat SHA as dormant, disabled, owner-controlled, and non-participating for Day-1 final-readiness evaluation unless a future owner-approved SHA reactivation PR explicitly changes the central SHA dormancy policy.
 - Do not treat SHA/freeze readiness as permission to generate SHA, do not require SHA reactivation for Day-1 final readiness, and do not treat SHA absence or presence as final-readiness evidence or a final-readiness blocker.
 - Do not block research candidates, future parameter additions, future algorithm additions, or future quantum metadata additions because SHA is dormant.
+- PR115A is merged as the owner-controlled SHA dormancy non-participation policy. PR116A is a corrective architecture/control-plane PR that centralizes active non-SHA Day-1 gate states, does not unblock a gate, does not create final readiness, and does not create runtime/live/order/profit/quantum-backend authority.
+- Future PRs must flip only one centralized gate state at a time and materialize or enable only one artifact/capability at a time. PR numbers remain delivery labels only; implementation truth remains canonical files, schemas, validators, reports, authority boundaries, validation evidence, and owner-approved instructions.
 - Do not fabricate external facts, source packets, connector semantics, runtime cash, order/fill receipts, replay/paper results, quantum backend output, quantum advantage evidence, latency superiority evidence, execution superiority evidence, alpha evidence, or profit evidence.
 - Do not commit, push, open a GitHub PR, merge, or rewrite history; owner performs those actions manually.
 - Use Python standard library unless the repository already has an approved dependency pattern.

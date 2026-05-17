@@ -13,6 +13,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from src.qtt.core.testing import atomicrows_sha_system_dormancy_state as sha_state
+from src.qtt.core.testing import qtt_active_non_sha_day1_gate_state_registry as gate_registry
 from src.qtt.core.testing import qtt_final_readiness_dependency_policy as policy
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
@@ -67,6 +68,14 @@ FORBIDDEN_FALSE_FIELDS = (
     "runtime_cash_receipts_created_by_this_pr",
     "live_trading_authority_created_by_this_pr",
     "bug_free_status_claimed_by_this_pr",
+)
+
+REQUIRED_TRUE_FIELDS = (
+    "active_gate_state_registry_required",
+    "active_gate_state_registry_is_source_of_day1_gate_state",
+    "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently",
+    "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids",
+    "active_non_sha_final_readiness_dependencies_required",
 )
 
 
@@ -133,6 +142,9 @@ def validate_contract_payload(contract: dict[str, Any], schema: dict[str, Any]) 
         "active_non_sha_final_readiness_dependencies": list(
             policy.ACTIVE_NON_SHA_FINAL_READINESS_DEPENDENCIES
         ),
+        "active_gate_state_registry_contract_path": (
+            "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
+        ),
         "excluded_non_participating_subsystems": list(
             policy.EXCLUDED_NON_PARTICIPATING_FINAL_READINESS_SUBSYSTEMS
         ),
@@ -150,8 +162,16 @@ def validate_contract_payload(contract: dict[str, Any], schema: dict[str, Any]) 
         is not True
     ):
         failures.append("contract final-readiness-without-SHA policy must be true")
-    if contract.get("active_non_sha_final_readiness_dependencies_required") is not True:
-        failures.append("contract.active_non_sha_final_readiness_dependencies_required must be true")
+    for field in REQUIRED_TRUE_FIELDS:
+        if contract.get(field) is not True:
+            failures.append(f"contract.{field} must be true")
+    if (
+        tuple(contract.get("active_non_sha_final_readiness_dependencies", []))
+        != gate_registry.get_active_non_sha_day1_gate_ids()
+    ):
+        failures.append(
+            "contract.active_non_sha_final_readiness_dependencies must match the central active gate registry"
+        )
     for dependency in contract.get("active_non_sha_final_readiness_dependencies", []):
         if not isinstance(dependency, str) or _contains_sha_dependency(dependency):
             failures.append(f"active dependency must be non-SHA only: {dependency!r}")
@@ -217,6 +237,27 @@ def build_report(
             "current_pr_creates_day1_launch_authority"
         ),
         "active_non_sha_final_readiness_dependencies": dependencies,
+        "active_gate_state_registry_contract_path": contract.get(
+            "active_gate_state_registry_contract_path"
+        ),
+        "active_gate_state_registry_required": contract.get(
+            "active_gate_state_registry_required"
+        ),
+        "active_gate_state_registry_is_source_of_day1_gate_state": contract.get(
+            "active_gate_state_registry_is_source_of_day1_gate_state"
+        ),
+        "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently": contract.get(
+            "final_readiness_dependency_policy_does_not_hardcode_gate_states_independently"
+        ),
+        "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids": contract.get(
+            "final_readiness_dependency_policy_consumes_or_validates_registry_gate_ids"
+        ),
+        "active_non_sha_final_readiness_dependencies_required": contract.get(
+            "active_non_sha_final_readiness_dependencies_required"
+        ),
+        "active_gate_ids_match_gate_state_registry": (
+            tuple(dependencies) == gate_registry.get_active_non_sha_day1_gate_ids()
+        ),
         "active_non_sha_final_readiness_dependencies_include_sha": any(
             _contains_sha_dependency(item) for item in dependencies
         ),
@@ -266,11 +307,19 @@ def validate(
         for item in policy.get_active_non_sha_final_readiness_dependencies()
     ):
         failures.append("active non-SHA dependencies must not include SHA-related dependencies")
+    if (
+        policy.get_active_non_sha_final_readiness_dependencies()
+        != gate_registry.get_active_non_sha_day1_gate_ids()
+    ):
+        failures.append("active non-SHA dependencies must match central gate registry IDs")
 
     for assertion in (
         policy.assert_final_readiness_policy_active_non_sha_gates_only,
         policy.assert_sha_not_required_for_final_readiness,
         policy.assert_sha_dormancy_not_final_readiness_blocker,
+        policy.assert_sha_absence_not_final_readiness_blocker,
+        policy.assert_sha_presence_not_final_readiness_evidence,
+        policy.assert_active_dependencies_consume_gate_registry,
         policy.assert_day1_final_readiness_must_ignore_sha_dormancy_when_non_sha_gates_pass,
         policy.assert_current_pr_does_not_create_final_readiness,
     ):
