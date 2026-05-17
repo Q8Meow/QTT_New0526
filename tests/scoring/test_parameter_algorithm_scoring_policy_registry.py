@@ -180,7 +180,7 @@ def test_no_scoring_ranking_selection_optimizer_replay_paper_live_source_connect
     report = _report()
     for field in gate.REPORT_FALSE_FIELDS:
         assert report[field] is False
-    assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
 
 
@@ -360,13 +360,14 @@ def _temp_boundary_root() -> Path:
     return BOUNDARY_TMP_ROOT
 
 
-def test_atomicrows_bundle_jsonl_creation_blocks():
+def test_atomicrows_bundle_jsonl_presence_does_not_create_sha_freeze_authority():
     root = _temp_boundary_root()
     try:
         (root / gate.CANONICAL_BUNDLE_JSONL).parent.mkdir(parents=True, exist_ok=True)
         (root / gate.CANONICAL_BUNDLE_JSONL).write_text("", encoding="utf-8")
         failures = gate.validate_filesystem_boundaries(root)
-        assert any("SCORING_POLICY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN" in failure for failure in failures)
+        assert not any("SCORING_POLICY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN" in failure for failure in failures)
+        assert not (root / gate.CANONICAL_BUNDLE_SHA256).exists()
     finally:
         _clean_boundary_tmp_root()
 

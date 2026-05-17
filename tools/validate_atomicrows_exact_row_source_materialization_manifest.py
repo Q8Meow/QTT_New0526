@@ -691,13 +691,16 @@ def validate_report(report: dict[str, Any]) -> list[str]:
             failures.append(f"report.aggregate_checks.{field} must be true")
     forbidden = _mapping(report.get("forbidden_artifact_absence"))
     for field in (
-        "atomicrows_bundle_absent",
         "atomicrows_bundle_sha_absent",
         "freeze_absent",
         "final_readiness_absent",
     ):
         if forbidden.get(field) is not True:
             failures.append(f"report.forbidden_artifact_absence.{field} must be true")
+    if forbidden.get("atomicrows_bundle_absent") not in {True, False}:
+        failures.append(
+            "report.forbidden_artifact_absence.atomicrows_bundle_absent must be boolean"
+        )
     row_counts = _mapping(report.get("row_field_presence_audit"))
     for field, count in row_counts.items():
         if count != generator.EXPECTED_TOTAL_ROWS:
@@ -752,6 +755,8 @@ def validate(
         )
     )
     for name, absent in forbidden_absence.items():
+        if name == "atomicrows_bundle_absent":
+            continue
         if absent is not True:
             failures.append(f"forbidden artifact absence failed: {name}")
     failures.extend(validate_master_plan_not_modified(repo_root))

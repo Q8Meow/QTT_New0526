@@ -228,7 +228,7 @@ def test_forbidden_artifacts_master_plan_and_repair_pr76_state():
     )
 
     assert completed.returncode == 0
-    assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()
     assert (ROOT / validator.PR76_SHORT_TEST).exists()
     assert not (ROOT / validator.PR76_OLD_LONG_TEST).exists()

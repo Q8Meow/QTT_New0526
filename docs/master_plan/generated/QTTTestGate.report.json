@@ -544,7 +544,7 @@
   },
   "filesystem_claim_checks": {
     "canonical_atomicrows_bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
-    "canonical_atomicrows_bundle_present": false,
+    "canonical_atomicrows_bundle_present": true,
     "canonical_atomicrows_bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
     "canonical_atomicrows_bundle_sha_present": false,
     "hidden_zip_authority_present": false,

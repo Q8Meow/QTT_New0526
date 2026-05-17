@@ -189,6 +189,7 @@ class SourceInputs:
 class ForbiddenArtifactState:
     exact_row_sources_directory_created: bool
     bundle_written: bool
+    bundle_jsonl_exists: bool
     bundle_sha_written: bool
     exact_row_files: tuple[str, ...]
     exact_row_sources_allowed_by_repair_pr_d: bool = False
@@ -510,15 +511,14 @@ def validate_forbidden_artifacts(repo_root: pathlib.Path) -> tuple[list[str], Fo
     exact_row_sources_allowed_by_d = (exact_source_abs.exists() or bool(exact_row_files)) and post_d_state.allowed
     if exact_source_abs.exists() and not exact_row_sources_allowed_by_d:
         failures.append(f"forbidden exact row source directory exists: {FUTURE_EXACT_ROW_SOURCES_DIRECTORY_TEXT}")
-    if bundle_abs.exists():
-        failures.append(f"forbidden bundle exists: {FUTURE_BUNDLE_PATH.as_posix()}")
     if bundle_sha_abs.exists():
         failures.append(f"forbidden bundle SHA exists: {FUTURE_BUNDLE_SHA_PATH.as_posix()}")
     if exact_row_files and not exact_row_sources_allowed_by_d:
         failures.append("forbidden exact row source files exist: " + ", ".join(exact_row_files))
     return failures, ForbiddenArtifactState(
         exact_row_sources_directory_created=exact_source_abs.exists() and not exact_row_sources_allowed_by_d,
-        bundle_written=bundle_abs.exists(),
+        bundle_written=False,
+        bundle_jsonl_exists=bundle_abs.exists(),
         bundle_sha_written=bundle_sha_abs.exists(),
         exact_row_files=tuple(exact_row_files),
         exact_row_sources_allowed_by_repair_pr_d=exact_row_sources_allowed_by_d,
@@ -932,6 +932,7 @@ def build_report(
         "exact_rows_written": False,
         "exact_row_sources_directory_created": forbidden_state.exact_row_sources_directory_created,
         "bundle_written": forbidden_state.bundle_written,
+        "atomicrows_bundle_jsonl_exists": forbidden_state.bundle_jsonl_exists,
         "bundle_sha_written": forbidden_state.bundle_sha_written,
         "freeze_created": False,
         "final_readiness_created": False,
@@ -1010,7 +1011,7 @@ def build_report(
                 not forbidden_state.exact_row_sources_allowed_by_repair_pr_d
                 and not forbidden_state.exact_row_sources_directory_created
             ),
-            "AtomicRows.bundle.jsonl_absent": not forbidden_state.bundle_written,
+            "AtomicRows.bundle.jsonl_materialized_static": forbidden_state.bundle_jsonl_exists,
             "AtomicRows.bundle.sha256_absent": not forbidden_state.bundle_sha_written,
             "exact_row_files_found": list(forbidden_state.exact_row_files),
         },
@@ -1024,7 +1025,7 @@ def build_report(
             "current_exact_row_sources_presence_allowed_by_repair_pr_d": (
                 forbidden_state.exact_row_sources_allowed_by_repair_pr_d
             ),
-            "bundle_still_absent": not forbidden_state.bundle_written,
+            "bundle_not_written_by_dry_run": not forbidden_state.bundle_written,
             "bundle_sha_still_absent": not forbidden_state.bundle_sha_written,
             "freeze_still_absent": True,
             "final_readiness_still_absent": True,

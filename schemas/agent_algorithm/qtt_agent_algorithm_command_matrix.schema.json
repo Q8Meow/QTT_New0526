@@ -149,7 +149,7 @@
           "const": true
         },
         "bundle_file_present": {
-          "const": false
+          "type": "boolean"
         },
         "bundle_sha_present": {
           "const": false
@@ -338,7 +338,7 @@
       "const": true
     },
     "bundle_file_present": {
-      "const": false
+      "type": "boolean"
     },
     "bundle_sha_present": {
       "const": false

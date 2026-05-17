@@ -14,11 +14,11 @@ from qtt.core.testing.gate_result import (  # noqa: E402
     CANONICAL_ATOMICROWS_BUNDLE,
     CANONICAL_ATOMICROWS_BUNDLE_SHA,
     STATIC_AUTHORITY_FLAGS,
-    canonical_atomicrows_absence_failures,
     canonical_atomicrows_presence,
     require_exact_fields,
     static_metadata,
     true_claim_failures,
+    validate_current_atomicrows_bundle_state,
     write_json,
 )
 
@@ -138,7 +138,6 @@ FORBIDDEN_TRUE_FIELDS = set(STATIC_AUTHORITY_FLAGS) | set(FORBIDDEN_AUTHORITY_CL
     "pr_handoff_creates_authority",
     "reduced_by_this_packet",
     "authority_created",
-    "atomicrows_bundle_present",
     "atomicrows_bundle_sha_present",
     "creates_completion_authority",
 }
@@ -335,7 +334,7 @@ def validate_packet(packet: dict[str, Any], *, repo_root: pathlib.Path) -> list[
         )
     )
     failures.extend(
-        canonical_atomicrows_absence_failures(
+        validate_current_atomicrows_bundle_state(
             repo_root,
             label="pr handoff packet",
         )

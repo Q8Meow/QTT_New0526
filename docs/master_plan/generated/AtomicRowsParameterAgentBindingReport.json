@@ -7,7 +7,7 @@
   "binding_count": 13,
   "blocked_agent_role_binding_count": 21,
   "blocked_consumer_class_binding_count": 28,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "deterministic_output": true,
   "final_ready": false,

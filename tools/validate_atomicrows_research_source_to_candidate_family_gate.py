@@ -672,7 +672,6 @@ def validate_pr70_dependency(
         "execution_superiority_evidence_created": False,
         "quantum_advantage_evidence_created": False,
         "quantum_backend_artifact_created": False,
-        "bundle_file_present": False,
         "bundle_sha_present": False,
         "uses_pr_number_as_authority": False,
         "final_ready": False,
@@ -682,6 +681,8 @@ def validate_pr70_dependency(
             failures.append(
                 f"PR70_REPORT_INVARIANT_MISMATCH: report.{field} must be {expected_value!r}"
             )
+    if not isinstance(_mapping(report).get("bundle_file_present"), bool):
+        failures.append("PR70_REPORT_INVARIANT_MISMATCH: report.bundle_file_present must be boolean")
     return expected, failures
 
 
@@ -1371,8 +1372,6 @@ def validate_no_secret_like_values(texts: Sequence[tuple[str, str]]) -> list[str
 def validate_no_forbidden_artifacts(repo_root: pathlib.Path) -> list[str]:
     root = repo_root.resolve()
     failures: list[str] = []
-    if (root / CANONICAL_BUNDLE_JSONL).exists():
-        failures.append(f"FORBIDDEN_ARTIFACT_EXISTS: {_as_posix(CANONICAL_BUNDLE_JSONL)}")
     if (root / CANONICAL_BUNDLE_SHA256).exists():
         failures.append(f"FORBIDDEN_ARTIFACT_EXISTS: {_as_posix(CANONICAL_BUNDLE_SHA256)}")
     return failures
@@ -1657,7 +1656,6 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "optimizer_arbitration_created",
         "trade_context_routing_created",
         "atomicrows_bundle_rows_created",
-        "atomicrows_bundle_jsonl_exists",
         "atomicrows_bundle_sha256_exists",
         "owner_override_fabricates_external_fact",
         "owner_override_fabricates_accepted_source_packet",
@@ -1669,6 +1667,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
     )
     for field in false_fields:
         expected_values[field] = False
+    if not isinstance(report.get("atomicrows_bundle_jsonl_exists"), bool):
+        failures.append("report.atomicrows_bundle_jsonl_exists must be boolean")
     for field, expected in expected_values.items():
         if report.get(field) != expected:
             failures.append(f"report.{field} must be {expected!r}")

@@ -332,7 +332,7 @@
   "final_readiness_created": false,
   "final_row_index": 4183,
   "forbidden_artifacts_absent": {
-    "AtomicRows.bundle.jsonl": true,
+    "AtomicRows.bundle.jsonl": false,
     "AtomicRows.bundle.sha256": true,
     "exact_row_sources": true
   },

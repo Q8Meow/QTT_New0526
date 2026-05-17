@@ -18,7 +18,7 @@
   "binding_count_from_binding_registry": 71,
   "blocked_attempt_count": 5,
   "blocked_attempts_with_owner_override_count": 0,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "connector_binding_artifact_created": false,
   "deterministic_output": true,

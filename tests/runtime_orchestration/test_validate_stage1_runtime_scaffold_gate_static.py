@@ -625,11 +625,31 @@ def test_validator_does_not_mutate_files_fixture_or_create_atomicrows_files(tmp_
     fixture_before = FIXTURE_PATH.read_bytes()
     fixture = _fixture()
     frozen = copy.deepcopy(fixture)
+    temp_fixture = tmp_path / "runtime_fixture.json"
+    temp_fixture.write_text(
+        json.dumps(fixture, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    bundle_path = _canonical_bundle_path(tmp_path)
+    contract_path = (
+        tmp_path
+        / "docs"
+        / "master_plan"
+        / "atomicrows"
+        / "AtomicRowsBundleBoundaryStateContract.yaml"
+    )
+    contract_path.parent.mkdir(parents=True, exist_ok=True)
+    contract_path.write_text(
+        "current_expected_state: POST_MATERIALIZATION_PRE_SHA\n",
+        encoding="utf-8",
+    )
+    bundle_path.parent.mkdir(parents=True, exist_ok=True)
+    bundle_path.write_text("{}\n", encoding="utf-8")
 
     assert (
         validate_static_surface(
             schema_path=SCHEMA_PATH,
-            fixture_path=FIXTURE_PATH,
+            fixture_path=temp_fixture,
             repo_root=tmp_path,
         )
         == []
@@ -638,10 +658,10 @@ def test_validator_does_not_mutate_files_fixture_or_create_atomicrows_files(tmp_
     assert SCHEMA_PATH.read_bytes() == schema_before
     assert FIXTURE_PATH.read_bytes() == fixture_before
     assert fixture == frozen
-    assert not _canonical_bundle_path(tmp_path).exists()
+    assert bundle_path.exists()
     assert not _canonical_bundle_sha_path(tmp_path).exists()
 
 
-def test_canonical_atomicrows_bundle_and_hash_are_absent_in_repo():
-    assert not _canonical_bundle_path(Path(".")).exists()
+def test_canonical_atomicrows_bundle_exists_and_hash_is_absent_in_repo():
+    assert _canonical_bundle_path(Path(".")).exists()
     assert not _canonical_bundle_sha_path(Path(".")).exists()

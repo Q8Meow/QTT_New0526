@@ -1100,8 +1100,6 @@ def validate_no_forbidden_claims(artifact_texts: Iterable[tuple[str, str]]) -> l
 
 def validate_no_forbidden_artifacts(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (root / CANONICAL_BUNDLE_JSONL).exists():
-        failures.append("ATOMICROWS_BUNDLE_FORBIDDEN_ARTIFACT_BLOCK")
     if (root / CANONICAL_BUNDLE_SHA256).exists():
         failures.append("ATOMICROWS_BUNDLE_SHA_FORBIDDEN_ARTIFACT_BLOCK")
     return failures
@@ -1512,7 +1510,6 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "replay_results_created": False,
         "paper_results_created": False,
         "profit_evidence_created": False,
-        "atomicrows_bundle_jsonl_exists": False,
         "atomicrows_bundle_sha256_exists": False,
         "atomicrows_bundle_rows_created": False,
         "atomicrows_bundle_hash_authority_created": False,
@@ -1521,6 +1518,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "fixture_path": _as_posix(DEFAULT_FIXTURE),
         "validation_marker": SUCCESS_MARKER,
     }
+    if not isinstance(report.get("atomicrows_bundle_jsonl_exists"), bool):
+        failures.append("report.atomicrows_bundle_jsonl_exists must be boolean")
     for field, expected in expected_values.items():
         if report.get(field) != expected:
             failures.append(f"report.{field} must be {expected!r}")

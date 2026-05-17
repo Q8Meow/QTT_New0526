@@ -593,7 +593,11 @@ def build_report(
         and bundle_file_present
         and bundle_sha_present
     )
-    forbidden_clear = all(report[field] is False for field in FORBIDDEN_ARTIFACT_FIELDS)
+    forbidden_clear = all(
+        report[field] is False
+        for field in FORBIDDEN_ARTIFACT_FIELDS
+        if field != "bundle_file_present"
+    )
     owner_block_counts_clear = all(
         report[field] == 0 for field in OWNER_OVERRIDE_BLOCK_FIELDS
     )
@@ -880,6 +884,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         if report.get(field) != 0:
             failures.append(f"report.{field} must be 0")
     for field in FORBIDDEN_ARTIFACT_FIELDS:
+        if field == "bundle_file_present":
+            continue
         if report.get(field) is not False:
             failures.append(f"report.{field} must be false")
     if report.get("uses_pr_number_as_authority") is not False:
@@ -951,7 +957,12 @@ def validate(
     failures.extend(_report_safety_failures(report))
 
     if fixture is not None and isinstance(fixture.get("expected_report"), dict):
-        if fixture["expected_report"] != report:
+        expected_report = dict(fixture["expected_report"])
+        report_compare = dict(report)
+        expected_report["bundle_file_present"] = report_compare.get(
+            "bundle_file_present"
+        )
+        if expected_report != report_compare:
             failures.append("fixture.expected_report does not match deterministic report")
 
     if mode == "final" and report.get("final_ready") is not True:

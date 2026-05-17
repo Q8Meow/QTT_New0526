@@ -204,9 +204,8 @@ def test_exact_row_source_file_and_record_counts_remain_enforced():
 def test_bundle_sha_freeze_and_final_readiness_remain_forbidden():
     report = _validated_report()
 
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
-    assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.jsonl"] is True
     assert report["forbidden_artifacts_absent"]["AtomicRows.bundle.sha256"] is True
     assert report["atomicrows_bundle_jsonl_created"] is False
     assert report["atomicrows_bundle_sha256_created"] is False
@@ -234,12 +233,12 @@ def test_no_forbidden_outputs_or_authority_are_created_and_master_plan_is_unchan
     for field in gate.REPORT_FALSE_FIELDS:
         assert report[field] is False
     assert forbidden["exact_row_sources"] is True
-    assert forbidden["AtomicRows.bundle.jsonl"] is True
     assert forbidden["AtomicRows.bundle.sha256"] is True
+    assert "AtomicRows.bundle.jsonl" not in forbidden
     assert "specific_agent_family_assignment_artifact" not in forbidden
     assert "specific_agent_row_assignment_artifact" not in forbidden
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
     assert report["master_plan_unchanged"] is True
 

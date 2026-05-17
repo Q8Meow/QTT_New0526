@@ -1,24 +1,24 @@
 {
-  "bundle_jsonl_exists": false,
+  "bundle_jsonl_exists": true,
   "bundle_jsonl_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
   "bundle_sha256_exists": false,
   "bundle_sha256_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
   "bundle_state_valid": true,
   "contract_id": "ATOMICROWS_BUNDLE_BOUNDARY_STATE_CONTRACT",
-  "current_expected_state": "PRE_MATERIALIZATION",
+  "current_expected_state": "POST_MATERIALIZATION_PRE_SHA",
   "exact_row_source_diff_check": {
     "changed_paths": [],
     "git_returncode": 0,
     "pathspec": "docs/master_plan/atomic_rows/exact_row_sources",
     "unchanged": true
   },
-  "expected_bundle_jsonl_exists": false,
+  "expected_bundle_jsonl_exists": true,
   "expected_bundle_sha256_exists": false,
   "final_readiness_created": false,
   "forbidden_artifact_checks": {
     "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl": {
-      "exists": false,
-      "expected_exists": false,
+      "exists": true,
+      "expected_exists": true,
       "valid": true
     },
     "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256": {
@@ -27,16 +27,21 @@
       "valid": true
     }
   },
-  "future_bundle_materialization_handoff_state": "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_bundle_materialization_handoff_state": "BUNDLE_MATERIALIZED_BY_PR113_NOT_SHA_NOT_FREEZE",
   "future_final_readiness_handoff_state": "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_final_readiness_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_profit_evidence_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_quantum_execution_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_runtime_live_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
   "future_sha_freeze_handoff_state": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_sha_freeze_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
   "master_plan_diff_check": {
     "changed_paths": [],
     "git_returncode": 0,
     "pathspec": "docs/master_plan/QTT_MasterPlan_Current.md",
     "unchanged": true
   },
-  "next_allowed_transition": "PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA",
+  "next_allowed_transition": "POST_MATERIALIZATION_PRE_SHA_TO_POST_SHA_FREEZE",
   "order_authority_created": false,
   "profit_evidence_created": false,
   "quantum_backend_authority_created": false,
@@ -46,7 +51,10 @@
   "sha_freeze_authority_created": false,
   "sha_state_valid": true,
   "source_connector_authority_created": false,
-  "state_transition_allowed_in_this_pr": false,
+  "state_transition_allowed_in_this_pr": true,
+  "state_transition_executed_by_this_pr": true,
+  "transition_from_state": "PRE_MATERIALIZATION",
+  "transition_to_state": "POST_MATERIALIZATION_PRE_SHA",
   "validation_errors": [],
   "validation_status": "PASS",
   "validation_warnings": [],

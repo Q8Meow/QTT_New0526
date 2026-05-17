@@ -1,7 +1,7 @@
 {
   "accepted_source_packets_created": false,
   "all_required_trade_context_fields_present": true,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_VALIDATION_REPORT_NOT_ROUTING_NOT_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY",
   "candidate_stack_generation_created": false,

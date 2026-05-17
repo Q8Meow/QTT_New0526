@@ -256,7 +256,6 @@ def test_atomicrows_bundle_and_hash_creation_fails():
     finally:
         shutil.rmtree(scratch_root, ignore_errors=True)
 
-    _assert_failure_contains(failures, "AtomicRows.bundle.jsonl")
     _assert_failure_contains(failures, "AtomicRows.bundle.sha256")
 
 

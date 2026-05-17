@@ -785,11 +785,6 @@ def validate_fixture(fixture: dict[str, Any]) -> list[str]:
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (_resolve(repo_root, CANONICAL_BUNDLE_JSONL)).exists():
-        failures.append(
-            "QUANTUM_APPLICABILITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if (_resolve(repo_root, CANONICAL_BUNDLE_SHA256)).exists():
         failures.append(
             "QUANTUM_APPLICABILITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -837,7 +832,11 @@ def validate_validator_static_surface(validator_path: pathlib.Path) -> list[str]
     return [f"validator contains forbidden nondeterministic or network token {token}" for token in forbidden_tokens if token in text]
 
 
-def build_report(payload: dict[str, Any], canonical_families: dict[str, CanonicalFamily]) -> dict[str, Any]:
+def build_report(
+    payload: dict[str, Any],
+    canonical_families: dict[str, CanonicalFamily],
+    repo_root: pathlib.Path,
+) -> dict[str, Any]:
     classifications = _list_of_mappings(payload.get("family_classifications"))
     blocked = _list_of_mappings(payload.get("blocked_classifications"))
     classified_ids = sorted(str(entry.get("family_id") or "") for entry in classifications)
@@ -902,7 +901,7 @@ def build_report(payload: dict[str, Any], canonical_families: dict[str, Canonica
         "random_classification_used": False,
         "atomicrows_bundle_jsonl_created": False,
         "atomicrows_bundle_sha256_created": False,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "final_ready": False,
     }
@@ -967,7 +966,7 @@ def validate(
     failures.extend(validate_master_plan_diff(repo_root))
     failures.extend(validate_validator_static_surface(repo_root / pathlib.Path(__file__).relative_to(_REPO_ROOT)))
 
-    report = build_report(registry, canonical_families)
+    report = build_report(registry, canonical_families, repo_root)
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

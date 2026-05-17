@@ -378,11 +378,11 @@ def test_forbidden_output_fields_no_claim_flags_artifacts_and_master_plan_state(
         assert field not in production
         assert field not in fixture_gate
         assert field not in _schema()["properties"]
-    assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()
     assert (ROOT / validator.PR76_SHORT_TEST).exists()
     assert not (ROOT / validator.PR76_OLD_LONG_TEST).exists()
     report = _report()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["repair_pr76_long_path_fix_present"] is True

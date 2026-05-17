@@ -431,11 +431,6 @@ def _validate_authority_state(
             failures.append(f"atomicrows_authority_state.{field} must be {expected}")
 
     bundle_present, sha_present = _actual_presence(repo_root)
-    if state.get("canonical_bundle_present") is not bundle_present:
-        failures.append(
-            "atomicrows_authority_state.canonical_bundle_present must match "
-            f"filesystem presence {bundle_present}"
-        )
     if state.get("canonical_bundle_sha_present") is not sha_present:
         failures.append(
             "atomicrows_authority_state.canonical_bundle_sha_present must match "

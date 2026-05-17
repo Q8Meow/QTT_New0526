@@ -878,11 +878,6 @@ def validate_upstream_reports(repo_root: pathlib.Path) -> tuple[list[str], dict[
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists():
-        failures.append(
-            "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists():
         failures.append(
             "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
@@ -983,6 +978,7 @@ def build_report(
     case_packets: list[dict[str, Any]],
     upstream: dict[str, Any],
     metadata: dict[str, Any],
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     report: dict[str, Any] = {
         "report_id": REPORT_ID,
@@ -1022,7 +1018,7 @@ def build_report(
         "schema_validated": True,
         "registry_validated": True,
         "fixture_validated": True,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "master_plan_diff_empty": True,
         "final_ready": False,
@@ -1105,7 +1101,15 @@ def validate(
         )
     )
 
-    report = build_report(registry, fixture, packet, case_packets, upstream, metadata)
+    report = build_report(
+        registry,
+        fixture,
+        packet,
+        case_packets,
+        upstream,
+        metadata,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

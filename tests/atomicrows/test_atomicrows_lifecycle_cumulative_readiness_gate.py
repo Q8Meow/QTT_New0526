@@ -69,7 +69,7 @@ def test_fixture_report_is_deterministic_and_has_expected_counts():
     assert first["runtime_authority_allowed_total"] == 0
     assert first["live_authority_allowed_total"] == 0
     assert first["quantum_backend_authority_allowed_total"] == 0
-    assert first["bundle_file_present"] is False
+    assert first["bundle_file_present"] is True
     assert first["bundle_sha_present"] is False
     assert first["cumulative_ready"] is False
     assert first["final_ready"] is False
@@ -136,7 +136,7 @@ def test_missing_upstream_report_is_a_dev_failure_not_incomplete_success():
 
 
 def test_cumulative_gate_does_not_create_atomicrows_bundle_or_hash():
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
 
     result = gate.validate(
@@ -147,5 +147,5 @@ def test_cumulative_gate_does_not_create_atomicrows_bundle_or_hash():
     )
 
     assert result.failures == ()
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()

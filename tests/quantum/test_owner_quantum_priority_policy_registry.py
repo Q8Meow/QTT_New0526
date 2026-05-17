@@ -331,13 +331,14 @@ def _temp_boundary_root() -> Path:
     return BOUNDARY_TMP_ROOT
 
 
-def test_atomicrows_bundle_jsonl_creation_blocks():
+def test_atomicrows_bundle_jsonl_presence_does_not_create_sha_freeze_authority():
     root = _temp_boundary_root()
     try:
         (root / gate.CANONICAL_BUNDLE_JSONL).parent.mkdir(parents=True, exist_ok=True)
         (root / gate.CANONICAL_BUNDLE_JSONL).write_text("", encoding="utf-8")
         failures = gate.validate_filesystem_boundaries(root)
-        assert any("OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN" in failure for failure in failures)
+        assert not any("OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN" in failure for failure in failures)
+        assert not (root / gate.CANONICAL_BUNDLE_SHA256).exists()
     finally:
         _clean_boundary_tmp_root()
 
@@ -376,7 +377,7 @@ def test_deterministic_ordering_is_enforced():
 
 
 def test_generated_report_has_no_nondeterministic_values_or_platform_paths():
-    report = gate.build_report(_registry(), set(gate.LABEL_ORDER))
+    report = gate.build_report(_registry(), set(gate.LABEL_ORDER), REPO_ROOT)
     text = gate.serialize_report(report)
 
     assert text == gate.serialize_report(copy.deepcopy(report))

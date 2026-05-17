@@ -168,5 +168,5 @@ def test_quantum_fixture_has_no_neural_external_atomicrows_sha_or_profit_authori
     )
     assert surface["sha_freeze_state"] == "NO_SHA_OR_FREEZE_AUTHORITY"
     assert surface["profit_state"] == "NO_PROFIT_CLAIM"
-    assert not CANONICAL_BUNDLE_PATH.exists()
+    assert CANONICAL_BUNDLE_PATH.exists()
     assert not CANONICAL_BUNDLE_SHA_PATH.exists()

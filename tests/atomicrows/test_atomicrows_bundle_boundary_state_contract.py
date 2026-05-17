@@ -54,7 +54,7 @@ def test_contract_schema_validates_and_preserves_required_identity():
     assert validator.validate_contract_payload(contract, schema) == []
     assert contract["contract_id"] == validator.CONTRACT_ID
     assert contract["authority_class"] == validator.AUTHORITY_CLASS
-    assert contract["current_expected_state"] == "PRE_MATERIALIZATION"
+    assert contract["current_expected_state"] == "POST_MATERIALIZATION_PRE_SHA"
 
 
 def test_validator_emits_success_marker_and_writes_report(tmp_path, capsys):
@@ -76,7 +76,7 @@ def test_validator_emits_success_marker_and_writes_report(tmp_path, capsys):
     assert output == [validator.SUCCESS_MARKER]
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["result_marker"] == validator.SUCCESS_MARKER
-    assert report["current_expected_state"] == "PRE_MATERIALIZATION"
+    assert report["current_expected_state"] == "POST_MATERIALIZATION_PRE_SHA"
 
 
 def test_current_pre_materialization_state_passes_when_bundle_and_sha_are_absent(tmp_path):
@@ -122,7 +122,7 @@ def test_current_pre_materialization_state_fails_when_bundle_sha_exists(tmp_path
     _assert_failure_contains(failures, paths.bundle_sha256_relative.as_posix())
 
 
-def test_future_post_materialization_pre_sha_state_passes_with_bundle_and_no_sha(tmp_path):
+def test_post_materialization_pre_sha_state_passes_with_bundle_and_no_sha(tmp_path):
     paths = canonical_atomicrows_bundle_paths(tmp_path)
     _write(paths.bundle_jsonl, "{}\n")
 
@@ -136,7 +136,7 @@ def test_future_post_materialization_pre_sha_state_passes_with_bundle_and_no_sha
     )
 
 
-def test_future_post_materialization_pre_sha_state_fails_when_bundle_missing(tmp_path):
+def test_post_materialization_pre_sha_state_fails_when_bundle_missing(tmp_path):
     failures = validate_atomicrows_bundle_state(
         tmp_path,
         AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA,
@@ -148,7 +148,7 @@ def test_future_post_materialization_pre_sha_state_fails_when_bundle_missing(tmp
     _assert_failure_contains(failures, "canonical AtomicRows bundle is required but missing")
 
 
-def test_future_post_materialization_pre_sha_state_fails_when_sha_exists(tmp_path):
+def test_post_materialization_pre_sha_state_fails_when_sha_exists(tmp_path):
     paths = canonical_atomicrows_bundle_paths(tmp_path)
     _write(paths.bundle_jsonl, "{}\n")
     _write(paths.bundle_sha256, "UNAUTHORIZED_TEST_SHA\n")
@@ -170,7 +170,7 @@ def test_post_sha_freeze_state_is_represented_but_not_current():
     ]
 
     assert expected_atomicrows_bundle_state_from_contract(REPO_ROOT) == (
-        AtomicRowsBundleState.PRE_MATERIALIZATION
+        AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA
     )
     assert definition.bundle_jsonl_required is True
     assert definition.bundle_sha_required is True
@@ -219,10 +219,10 @@ def test_existing_bundle_schema_checker_uses_central_helper_and_rejects_current_
     _assert_failure_contains(failures, "expected_state=PRE_MATERIALIZATION")
 
 
-def test_atomicrows_bundle_jsonl_is_not_created():
+def test_atomicrows_bundle_jsonl_is_materialized():
     paths = canonical_atomicrows_bundle_paths(REPO_ROOT)
 
-    assert not paths.bundle_jsonl.exists()
+    assert paths.bundle_jsonl.exists()
 
 
 def test_atomicrows_bundle_sha256_is_not_created():
@@ -250,8 +250,16 @@ def test_exact_row_sources_are_unchanged():
 
 
 def test_no_runtime_scanner_scope_is_unchanged():
-    assert _git_stdout("diff", "--", "tools/validate_no_runtime_artifacts.py") == ""
-    assert "AtomicRows.bundle.jsonl" in validate_no_runtime_artifacts.FORBIDDEN_NAMES
+    diff = _git_stdout("diff", "--", "tools/validate_no_runtime_artifacts.py")
+    changed_lines = [
+        line
+        for line in diff.splitlines()
+        if (line.startswith("+") or line.startswith("-"))
+        and not line.startswith(("+++", "---"))
+    ]
+    assert changed_lines in ([], ['-    "AtomicRows.bundle.jsonl",'])
+    assert "AtomicRows.bundle.jsonl" not in validate_no_runtime_artifacts.FORBIDDEN_NAMES
+    assert "AtomicRows.bundle.sha256" in validate_no_runtime_artifacts.FORBIDDEN_NAMES
 
 
 def test_atomicrows_bundle_sha256_remains_forbidden_in_no_runtime_scanner():

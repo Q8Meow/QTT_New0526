@@ -640,6 +640,20 @@ def test_validator_does_not_mutate_fixture_or_create_atomicrows_files(tmp_path):
     frozen = copy.deepcopy(fixture)
     bundle_path = _canonical_bundle_path(tmp_path)
     sha_path = _canonical_bundle_sha_path(tmp_path)
+    contract_path = (
+        tmp_path
+        / "docs"
+        / "master_plan"
+        / "atomicrows"
+        / "AtomicRowsBundleBoundaryStateContract.yaml"
+    )
+    contract_path.parent.mkdir(parents=True, exist_ok=True)
+    contract_path.write_text(
+        "current_expected_state: POST_MATERIALIZATION_PRE_SHA\n",
+        encoding="utf-8",
+    )
+    bundle_path.parent.mkdir(parents=True, exist_ok=True)
+    bundle_path.write_text("{}\n", encoding="utf-8")
 
     assert (
         validate_venue_neutral_prediction_adapter_gate_fixture(
@@ -651,10 +665,10 @@ def test_validator_does_not_mutate_fixture_or_create_atomicrows_files(tmp_path):
     )
 
     assert fixture == frozen
-    assert not bundle_path.exists()
+    assert bundle_path.exists()
     assert not sha_path.exists()
 
 
-def test_canonical_atomicrows_bundle_and_hash_are_absent_in_repo():
-    assert not _canonical_bundle_path(Path(".")).exists()
+def test_canonical_atomicrows_bundle_exists_and_hash_is_absent_in_repo():
+    assert _canonical_bundle_path(Path(".")).exists()
     assert not _canonical_bundle_sha_path(Path(".")).exists()

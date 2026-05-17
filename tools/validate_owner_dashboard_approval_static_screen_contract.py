@@ -460,7 +460,6 @@ PR97_STATIC_PLAN_PATHS = (
     pathlib.Path("tests/atomicrows/test_atomicrows_full_bundle_row_expansion_plan.py"),
 )
 PR97_ALWAYS_FORBIDDEN_PATHS = (
-    pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"),
     pathlib.Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"),
     pathlib.Path("schemas/governance/atomicrows_full_bundle_row_expansion_plan.schema.json"),
     pathlib.Path("docs/master_plan/atomic_rows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
@@ -1251,7 +1250,7 @@ def build_report(
         "schema_validated": True,
         "registry_validated": True,
         "fixture_validated": True,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "pr97_atomicrows_full_bundle_row_expansion_plan_exists": pr97_static_plan_files_present,
         "pr97_static_plan_files_allowed_by_downstream_branch": downstream_pr97_or_later,

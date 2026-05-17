@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-local-schemas-atomicrows-bundle-materialization-manifest",
+  "title": "AtomicRows Bundle Materialization Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_id",
+    "manifest_version",
+    "authority_class",
+    "created_for",
+    "current_expected_boundary_state",
+    "transition_from_state",
+    "transition_to_state",
+    "bundle_path",
+    "bundle_sha_path_expected_absent",
+    "source_exact_row_directory",
+    "source_materialization_manifest_ref",
+    "d2_e0_eligibility_matrix_ref",
+    "bundle_boundary_state_contract_ref",
+    "expected_source_family_file_count",
+    "expected_exact_row_record_count",
+    "expected_bundle_row_count",
+    "expected_family_distribution",
+    "expected_row_ranges",
+    "bundle_format_contract",
+    "deterministic_assembly_contract",
+    "source_join_contract",
+    "d2_e0_join_contract",
+    "scoring_ranking_readiness_preservation_contract",
+    "trade_context_readiness_preservation_contract",
+    "role_complete_stack_future_contract",
+    "quantum_metadata_preservation_contract",
+    "low_latency_future_lookup_contract",
+    "owner_research_extension_contract",
+    "forbidden_authority_contract",
+    "future_centralized_blocker_handoff_contract",
+    "no_claim_boundary",
+    "validation_contract",
+    "future_handoff",
+    "generated_report_path"
+  ],
+  "properties": {
+    "manifest_id": { "const": "ATOMICROWS_BUNDLE_MATERIALIZATION_MANIFEST" },
+    "manifest_version": { "const": "v1" },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_BUNDLE_FILE_MATERIALIZATION_ONLY_NOT_SHA_NOT_FREEZE_NOT_FINAL_READINESS_NOT_RUNTIME_NOT_LIVE_NOT_SCORING_EXECUTION_NOT_SELECTION"
+    },
+    "created_for": { "const": "PR113_ATOMICROWS_BUNDLE_MATERIALIZATION" },
+    "current_expected_boundary_state": { "const": "POST_MATERIALIZATION_PRE_SHA" },
+    "transition_from_state": { "const": "PRE_MATERIALIZATION" },
+    "transition_to_state": { "const": "POST_MATERIALIZATION_PRE_SHA" },
+    "bundle_path": { "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl" },
+    "bundle_sha_path_expected_absent": {
+      "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+    },
+    "source_exact_row_directory": {
+      "const": "docs/master_plan/atomic_rows/exact_row_sources/"
+    },
+    "source_materialization_manifest_ref": {
+      "const": "docs/master_plan/atomicrows/AtomicRowsExactRowSourceMaterializationManifest.yaml"
+    },
+    "d2_e0_eligibility_matrix_ref": {
+      "const": "docs/master_plan/atomicrows/AtomicRowsExactRowAgentFamilyEligibilityMatrix.yaml"
+    },
+    "bundle_boundary_state_contract_ref": {
+      "const": "docs/master_plan/atomicrows/AtomicRowsBundleBoundaryStateContract.yaml"
+    },
+    "expected_source_family_file_count": { "const": 15 },
+    "expected_exact_row_record_count": { "const": 4183 },
+    "expected_bundle_row_count": { "const": 4183 },
+    "expected_family_distribution": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "$ref": "#/$defs/family_distribution" }
+    },
+    "expected_row_ranges": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "$ref": "#/$defs/row_range" }
+    },
+    "bundle_format_contract": { "type": "object" },
+    "deterministic_assembly_contract": { "type": "object" },
+    "source_join_contract": { "type": "object" },
+    "d2_e0_join_contract": { "type": "object" },
+    "scoring_ranking_readiness_preservation_contract": { "type": "object" },
+    "trade_context_readiness_preservation_contract": { "type": "object" },
+    "role_complete_stack_future_contract": { "type": "object" },
+    "quantum_metadata_preservation_contract": { "type": "object" },
+    "low_latency_future_lookup_contract": { "type": "object" },
+    "owner_research_extension_contract": { "type": "object" },
+    "forbidden_authority_contract": { "type": "object" },
+    "future_centralized_blocker_handoff_contract": {
+      "type": "object",
+      "required": [
+        "future_sha_freeze_state_centralization_required",
+        "future_final_readiness_state_centralization_required",
+        "future_runtime_live_state_centralization_required",
+        "future_profit_evidence_state_centralization_required",
+        "future_quantum_execution_state_centralization_required"
+      ],
+      "properties": {
+        "future_sha_freeze_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_final_readiness_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_runtime_live_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_profit_evidence_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_quantum_execution_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        }
+      }
+    },
+    "no_claim_boundary": { "type": "object" },
+    "validation_contract": { "type": "object" },
+    "future_handoff": { "type": "object" },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/AtomicRowsBundleMaterialization.report.json"
+    }
+  },
+  "$defs": {
+    "family_distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family_id", "family_name", "expected_row_count"],
+      "properties": {
+        "family_id": { "type": "string" },
+        "family_name": { "type": "string" },
+        "expected_row_count": { "type": "integer" }
+      }
+    },
+    "row_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family_id", "row_range_start", "row_range_end"],
+      "properties": {
+        "family_id": { "type": "string" },
+        "row_range_start": { "type": "integer" },
+        "row_range_end": { "type": "integer" }
+      }
+    }
+  }
+}

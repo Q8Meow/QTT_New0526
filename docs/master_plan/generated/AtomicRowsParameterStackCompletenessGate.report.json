@@ -1,7 +1,7 @@
 {
   "accepted_source_packets_created": false,
   "all_required_roles_case_complete": true,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_VALIDATION_REPORT_NOT_STACK_COMPATIBILITY_NOT_STACK_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY",
   "cash_receipts_created": false,

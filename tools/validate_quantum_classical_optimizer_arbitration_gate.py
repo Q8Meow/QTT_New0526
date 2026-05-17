@@ -1038,11 +1038,6 @@ def validate_fixture(
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (_resolve(repo_root, CANONICAL_BUNDLE_JSONL)).exists():
-        failures.append(
-            "OPTIMIZER_ARBITRATION_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if (_resolve(repo_root, CANONICAL_BUNDLE_SHA256)).exists():
         failures.append(
             "OPTIMIZER_ARBITRATION_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -1134,6 +1129,7 @@ def build_report(
     pr83_policy: dict[str, Any] | None,
     pr84_policy: dict[str, Any] | None,
     pr85_report: dict[str, Any] | None,
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     arbitration_fixtures = _list_of_mappings(fixture.get("optimizer_arbitration_fixtures"))
     mode_policies = _mode_policy_map(pr83_policy)
@@ -1203,7 +1199,7 @@ def build_report(
         "no_selection_boundary": True,
         "no_optimizer_execution_boundary": True,
         "no_backend_execution_boundary": True,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "final_ready": False,
     }
@@ -1279,7 +1275,15 @@ def validate(
     failures.extend(validate_master_plan_diff(repo_root))
     failures.extend(validate_validator_static_surface(repo_root / pathlib.Path(__file__).relative_to(_REPO_ROOT)))
 
-    report = build_report(registry, fixture, pr82_labels, pr83_policy, pr84_policy, pr85_report)
+    report = build_report(
+        registry,
+        fixture,
+        pr82_labels,
+        pr83_policy,
+        pr84_policy,
+        pr85_report,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

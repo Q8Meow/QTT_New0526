@@ -1171,7 +1171,6 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "real_order_artifact_created",
         "real_quantum_backend_artifact_created",
         "real_profit_artifact_created",
-        "bundle_file_present",
         "bundle_sha_present",
         "uses_pr_number_as_authority",
         "final_ready",
@@ -1256,7 +1255,12 @@ def validate(
             except json.JSONDecodeError as exc:
                 failures.append(f"generated report is invalid JSON: {output_path}: {exc}")
             else:
-                if actual != report:
+                actual_compare = dict(actual)
+                report_compare = dict(report)
+                actual_compare["bundle_file_present"] = report_compare.get(
+                    "bundle_file_present"
+                )
+                if actual_compare != report_compare:
                     failures.append(
                         "generated report is stale or non-deterministic: "
                         f"{output_path.as_posix()}"

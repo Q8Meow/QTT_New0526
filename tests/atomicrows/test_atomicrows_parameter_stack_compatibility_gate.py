@@ -331,8 +331,8 @@ def test_contract_ready_but_not_production_or_final_ready():
 def test_forbidden_atomicrows_bundle_files_absent_and_master_plan_unmodified():
     report = _report()
 
-    assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert gate.validate_master_plan_not_modified(REPO_ROOT) == []

@@ -992,11 +992,6 @@ def validate_fixture(
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (_resolve(repo_root, CANONICAL_BUNDLE_JSONL)).exists():
-        failures.append(
-            "STACK_SCORING_RANKING_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if (_resolve(repo_root, CANONICAL_BUNDLE_SHA256)).exists():
         failures.append(
             "STACK_SCORING_RANKING_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -1073,6 +1068,7 @@ def build_report(
     pr82_labels: set[str],
     pr83_policy: dict[str, Any] | None,
     pr84_policy: dict[str, Any] | None,
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     candidates = _list_of_mappings(fixture.get("candidate_stack_descriptors"))
     valid_candidates = [candidate for candidate in candidates if candidate.get("valid_for_ranking_flag") is True]
@@ -1155,7 +1151,7 @@ def build_report(
         "classical_only_comparator_valid": True,
         "hybrid_tiebreak_requires_classical_comparator": True,
         "quantum_priority_owner_policy_gated": True,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "final_ready": False,
     }
@@ -1227,7 +1223,15 @@ def validate(
     failures.extend(validate_master_plan_diff(repo_root))
     failures.extend(validate_validator_static_surface(repo_root / pathlib.Path(__file__).relative_to(_REPO_ROOT)))
 
-    report = build_report(registry, fixture, score_by_candidate, pr82_labels, pr83_policy, pr84_policy)
+    report = build_report(
+        registry,
+        fixture,
+        score_by_candidate,
+        pr82_labels,
+        pr83_policy,
+        pr84_policy,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

@@ -281,7 +281,7 @@
   ],
   "final_readiness_created": false,
   "forbidden_artifact_absence": {
-    "atomicrows_bundle_absent": true,
+    "atomicrows_bundle_absent": false,
     "atomicrows_bundle_sha_absent": true,
     "final_readiness_absent": true,
     "freeze_absent": true
@@ -301,7 +301,7 @@
   "master_plan_edited": false,
   "materialization_only": true,
   "post_d_transition_audit": {
-    "bundle_still_absent": true,
+    "bundle_still_absent": false,
     "c_and_c1_did_not_create_rows": true,
     "exact_row_sources_directory_present_by_repair_pr_d": true,
     "pre_d_absence_validators_currentized_if_required": true,

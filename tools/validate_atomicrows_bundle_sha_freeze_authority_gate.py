@@ -77,7 +77,7 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 BRANCH_CONTEXT_ENV_CANDIDATES = pr97_gate.BRANCH_CONTEXT_ENV_CANDIDATES
 
 BLOCKED_REASON_CODES = (
-    "ATOMICROWS_SHA_FREEZE_BLOCKED_BUNDLE_MISSING",
+    "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B",
     "ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",
@@ -188,7 +188,6 @@ ADDITIONAL_FORBIDDEN_ARTIFACT_PATHS = (
     ),
 )
 SIMULATED_BUNDLE_FORBIDDEN_ARTIFACTS = (
-    (CANONICAL_BUNDLE_JSONL, "forbidden AtomicRows bundle exists"),
     (CANONICAL_BUNDLE_SHA256, "forbidden AtomicRows bundle hash exists"),
 )
 FORBIDDEN_STATIC_SURFACE_IMPORT_ROOTS = (
@@ -472,7 +471,7 @@ def validate_config_payload(config: dict[str, Any], schema: dict[str, Any]) -> l
             failures.append(f"config.{label} must be {expected_value!r}, got {actual!r}")
 
     expected_checks = (
-        ("atomicrows_bundle_jsonl_exists", False),
+        ("atomicrows_bundle_jsonl_exists", True),
         ("atomicrows_bundle_sha256_exists", False),
         ("exact_source_rows_authorized", False),
         ("pr99_assembly_path", "PATH_B_BLOCKED"),
@@ -485,8 +484,8 @@ def validate_config_payload(config: dict[str, Any], schema: dict[str, Any]) -> l
         if expected.get(field) != expected_value:
             failures.append(f"expected_current_state.{field} must be {expected_value!r}")
 
-    if expected.get("atomicrows_bundle_jsonl_exists") is False and expected.get("sha_materialization_allowed") is not False:
-        failures.append("missing bundle must force sha_materialization_allowed=false")
+    if expected.get("atomicrows_bundle_jsonl_exists") is not True:
+        failures.append("PR113 materialized bundle state must be explicit")
     if expected.get("exact_source_rows_authorized") is False and expected.get("sha_materialization_allowed") is not False:
         failures.append("unauthorized exact rows must force sha_materialization_allowed=false")
     if expected.get("pr99_assembly_path") == "PATH_B_BLOCKED" and config.get("gate_mode") != GATE_MODE:
@@ -733,7 +732,7 @@ def build_report(
         "sha_file_created": False,
         "sha_computation_attempted": False,
         "sha_computed": False,
-        "missing_bundle_digest_computation_blocked": True,
+        "missing_bundle_digest_computation_blocked": not bundle_exists,
         "actual_sha256_value": None,
         "digest_value": None,
         "freeze_authority_created": False,
@@ -812,7 +811,7 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         (
             "missing_bundle_digest_computation_blocked",
             report.get("missing_bundle_digest_computation_blocked"),
-            True,
+            False,
         ),
         ("actual_sha256_value", report.get("actual_sha256_value"), None),
         ("digest_value", report.get("digest_value"), None),
@@ -829,8 +828,8 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     if report.get("outputs_created_by_this_pr") != []:
         failures.append("report.outputs_created_by_this_pr must be empty")
     forbidden_absent = _mapping(report.get("forbidden_artifacts_absent"))
-    if forbidden_absent.get("AtomicRows.bundle.jsonl") is not True:
-        failures.append("report must confirm AtomicRows.bundle.jsonl is absent")
+    if forbidden_absent.get("AtomicRows.bundle.jsonl") not in {True, False}:
+        failures.append("report must record AtomicRows.bundle.jsonl presence as boolean")
     if forbidden_absent.get("AtomicRows.bundle.sha256") is not True:
         failures.append("report must confirm AtomicRows.bundle.sha256 is absent")
     no_claims = _mapping(report.get("no_claims_confirmed"))

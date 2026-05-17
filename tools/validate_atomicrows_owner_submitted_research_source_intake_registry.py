@@ -57,7 +57,7 @@ CANONICAL_BUNDLE_JSONL = (
 CANONICAL_BUNDLE_SHA256 = (
     pathlib.Path("docs") / "master_plan" / "atomic_rows" / "AtomicRows.bundle.sha256"
 )
-FORBIDDEN_ARTIFACT_PATHS = (CANONICAL_BUNDLE_JSONL, CANONICAL_BUNDLE_SHA256)
+FORBIDDEN_ARTIFACT_PATHS = (CANONICAL_BUNDLE_SHA256,)
 
 REGISTRY_ID = "ATOMICROWS_OWNER_SUBMITTED_RESEARCH_SOURCE_INTAKE_REGISTRY"
 REGISTRY_VERSION = "v1"
@@ -1069,6 +1069,8 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "validation_marker": SUCCESS_MARKER,
     }
     for field in REPORT_FALSE_FIELDS:
+        if field == "atomicrows_bundle_jsonl_exists":
+            continue
         expected_values[field] = False
     for field, expected in expected_values.items():
         if report.get(field) != expected:

@@ -2,7 +2,7 @@
   "actual_sha256_value": null,
   "artifact_id": "ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_GATE",
   "artifact_version": "v1",
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_FAIL_CLOSED_SHA_FREEZE_GATE_NOT_SHA_AUTHORITY",
   "base_head": "89b89b3",

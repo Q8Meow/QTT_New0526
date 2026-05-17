@@ -16,7 +16,7 @@
   "bindings_with_consumer_gate_required_count": 71,
   "bindings_with_missing_binding_owner_override_supported_count": 71,
   "bindings_with_owner_override_supported_count": 71,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "connector_binding_artifact_created": false,
   "deterministic_output": true,

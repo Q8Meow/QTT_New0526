@@ -313,9 +313,9 @@ def test_static_runtime_live_quantum_and_profit_examples_create_no_real_artifact
 def test_no_atomicrows_bundle_or_hash_is_created():
     report = _report()
 
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
-    assert report["bundle_file_present"] is False
+    assert report["bundle_file_present"] is True
     assert report["bundle_sha_present"] is False
 
 

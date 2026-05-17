@@ -240,11 +240,11 @@ def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authori
     )
     runtime_or_forbidden_paths = [
         *gate.FORBIDDEN_RUNTIME_PATHS,
-        gate.CANONICAL_BUNDLE_JSONL,
         gate.CANONICAL_BUNDLE_SHA256,
     ]
     for path in runtime_or_forbidden_paths:
         assert not (REPO_ROOT / path).exists(), path
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     if not downstream_pr96_or_later:
         for path in gate.PR96_STATIC_SCREEN_CONTRACT_PATHS:
             assert not (REPO_ROOT / path).exists(), path
@@ -256,7 +256,7 @@ def test_pr95_does_not_create_pr96_screen_runtime_receipts_or_atomicrows_authori
     assert report["executes_owner_decision"] is False
     assert report["creates_owner_approval_receipt"] is False
     assert report["creates_owner_override_receipt"] is False
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
 
 
@@ -395,10 +395,7 @@ def test_atomicrows_bundle_and_hash_remain_blocked_on_pr96_downstream_branch(
 
     failures = gate.validate_filesystem_boundaries(tmp_path)
 
-    assert (
-        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE: "
-        f"{gate.CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-    ) in failures
+    assert not any("OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE" in failure for failure in failures)
     assert (
         "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
         f"{gate.CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"
@@ -416,10 +413,7 @@ def test_atomicrows_bundle_and_hash_remain_blocked_on_main_cumulative_context(
 
     failures = gate.validate_filesystem_boundaries(tmp_path)
 
-    assert (
-        "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE: "
-        f"{gate.CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-    ) in failures
+    assert not any("OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_BUNDLE" in failure for failure in failures)
     assert (
         "OWNER_DASHBOARD_APPROVAL_MENU_BLOCKED_ATOMICROWS_SHA: "
         f"{gate.CANONICAL_BUNDLE_SHA256.as_posix()} must be absent"

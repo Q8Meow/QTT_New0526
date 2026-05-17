@@ -154,10 +154,10 @@ def test_c1_forbidden_artifacts_remain_absent():
     assert failures == []
     assert state.exact_row_sources_directory_exists is False
     assert state.exact_row_sources_allowed_by_repair_pr_d is True
-    assert state.bundle_exists is False
+    assert state.bundle_exists is True
     assert state.bundle_sha_exists is False
     assert report["forbidden_artifact_absence"]["exact_row_sources_directory_absent"] is False
-    assert report["forbidden_artifact_absence"]["atomicrows_bundle_absent"] is True
+    assert report["forbidden_artifact_absence"]["atomicrows_bundle_materialized_static"] is True
     assert report["forbidden_artifact_absence"]["atomicrows_bundle_sha_absent"] is True
 
 
@@ -286,7 +286,7 @@ def test_c1_validator_writes_only_c1_report():
     assert after == before
     assert (REPO_ROOT / gate.DEFAULT_REPORT).exists()
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
-    assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
 

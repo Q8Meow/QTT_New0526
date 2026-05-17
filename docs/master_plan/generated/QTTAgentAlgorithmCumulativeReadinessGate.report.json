@@ -14,7 +14,7 @@
   "architecture_emphasis": "INSTITUTIONAL_AGENT_ALGORITHM_CUMULATIVE_READINESS_GATE_NOT_FINAL_READINESS",
   "authority_boundary_all_false": true,
   "binding_count_from_binding_registry": 71,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "component_count": 8,
   "components_present_count": 8,

@@ -212,7 +212,7 @@ def test_no_source_connector_private_secret_repo_or_package_artifacts_are_create
 def test_no_atomicrows_bundle_or_hash_is_created():
     report = _report()
 
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
     assert report["forbidden_bundle_command_count"] == 0
     assert report["forbidden_bundle_sha_command_count"] == 0

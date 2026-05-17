@@ -451,5 +451,5 @@ def test_fixture_has_no_mutating_authority_and_no_actual_rows():
 
 
 def test_canonical_atomicrows_bundle_and_hash_are_absent_in_bootstrap_repo():
-    assert not _canonical_bundle_path(Path(".")).exists()
+    assert _canonical_bundle_path(Path(".")).exists()
     assert not _canonical_bundle_sha_path(Path(".")).exists()

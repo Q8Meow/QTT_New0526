@@ -6,7 +6,7 @@
   "agents_may_approve": false,
   "agents_may_request": true,
   "atomicrows_bundle_jsonl_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created": false,
   "atomicrows_bundle_sha256_exists": false,
   "backend_execution_count": 0,

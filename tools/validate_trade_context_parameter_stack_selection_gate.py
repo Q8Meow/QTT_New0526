@@ -1540,11 +1540,6 @@ def validate_fixture(
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists():
-        failures.append(
-            "TRADE_CONTEXT_SELECTION_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if _resolve(repo_root, CANONICAL_BUNDLE_SHA256).exists():
         failures.append(
             "TRADE_CONTEXT_SELECTION_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -1600,6 +1595,7 @@ def build_report(
     case_packets: list[dict[str, Any]],
     upstream: dict[str, Any],
     metadata: dict[str, Any],
+    repo_root: pathlib.Path,
 ) -> dict[str, Any]:
     selected = packet.get("static_selected_candidate_descriptor")
     selected_score = None if not isinstance(selected, dict) else selected.get("score_metadata", {})
@@ -1685,7 +1681,7 @@ def build_report(
         "pr89_selected_stack_handoff_required_flag": packet.get("pr89_selected_stack_handoff_required_flag"),
         "selected_stack_handoff_created_flag": False,
         "final_ready": False,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "master_plan_diff_empty": True,
         "real_optimizer_execution_count": 0,
@@ -1763,7 +1759,15 @@ def validate(
     failures.extend(validate_master_plan_diff(repo_root))
     failures.extend(validate_validator_static_surface(repo_root / pathlib.Path(__file__).relative_to(_REPO_ROOT)))
 
-    report = build_report(registry, fixture, packet, case_packets, upstream, metadata)
+    report = build_report(
+        registry,
+        fixture,
+        packet,
+        case_packets,
+        upstream,
+        metadata,
+        repo_root,
+    )
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

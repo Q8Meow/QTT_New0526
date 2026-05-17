@@ -1,6 +1,6 @@
 {
   "accepted_source_packets_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_exists": false,
   "authority_class": "STATIC_ROUTE_ELIGIBILITY_REPORT_NOT_SELECTION_NOT_SCORING_NOT_RUNTIME_AUTHORITY",
   "blocked_universes": [

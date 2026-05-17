@@ -85,5 +85,5 @@ def test_atomicrows_schema_requires_source_and_owner_gates_before_enablement():
 
 
 def test_atomicrows_schema_does_not_create_bundle_or_hash_files():
-    assert not CANONICAL_BUNDLE_PATH.exists()
+    assert CANONICAL_BUNDLE_PATH.exists()
     assert not CANONICAL_BUNDLE_SHA_PATH.exists()

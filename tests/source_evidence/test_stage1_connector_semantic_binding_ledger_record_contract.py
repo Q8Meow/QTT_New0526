@@ -164,7 +164,7 @@ def test_ledger_report_remains_static_blocked_and_reports_no_live_violations():
 
 
 def test_atomicrows_bundle_hash_and_master_plan_remain_absent_or_unchanged():
-    assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()
 
     completed = subprocess.run(

@@ -7,7 +7,7 @@
   "account_balance_receipt_created_count": 0,
   "account_balance_receipt_created_flag": false,
   "atomicrows_bundle_jsonl_created": false,
-  "atomicrows_bundle_jsonl_exists": false,
+  "atomicrows_bundle_jsonl_exists": true,
   "atomicrows_bundle_sha256_created": false,
   "atomicrows_bundle_sha256_exists": false,
   "authoring_authority_class": "STATIC_OWNER_OVERRIDE_RECEIPT_AUTHORING_FOR_INTERNAL_WORKFLOW_ONLY_NOT_EXTERNAL_FACT_NOT_CASH_NOT_ORDER_NOT_LIVE_AUTHORITY",

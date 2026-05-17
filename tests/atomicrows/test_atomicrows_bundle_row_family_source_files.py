@@ -244,9 +244,9 @@ def test_bundle_hash_builder_freeze_and_final_readiness_boundaries_are_absent():
     report = _report()
 
     assert validator.validate_no_forbidden_artifacts(ROOT) == []
-    assert not (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
+    assert (ROOT / validator.CANONICAL_BUNDLE_JSONL).exists()
     assert not (ROOT / validator.CANONICAL_BUNDLE_SHA256).exists()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["pr99_bundle_builder_created"] is False
     assert report["pr100_sha_freeze_authority_created"] is False

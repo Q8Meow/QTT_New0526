@@ -835,11 +835,6 @@ def validate_fixture(fixture: dict[str, Any]) -> list[str]:
 
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
-    if (_resolve(repo_root, CANONICAL_BUNDLE_JSONL)).exists():
-        failures.append(
-            "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_BUNDLE_FORBIDDEN: "
-            f"{CANONICAL_BUNDLE_JSONL.as_posix()} must be absent"
-        )
     if (_resolve(repo_root, CANONICAL_BUNDLE_SHA256)).exists():
         failures.append(
             "OWNER_QUANTUM_PRIORITY_BLOCKED_ATOMICROWS_SHA_FORBIDDEN: "
@@ -885,7 +880,11 @@ def validate_validator_static_surface(validator_path: pathlib.Path) -> list[str]
     return [f"validator contains forbidden nondeterministic or network token {token}" for token in forbidden_tokens if token in text]
 
 
-def build_report(payload: dict[str, Any], pr82_labels: set[str]) -> dict[str, Any]:
+def build_report(
+    payload: dict[str, Any],
+    pr82_labels: set[str],
+    repo_root: pathlib.Path,
+) -> dict[str, Any]:
     policies_by_mode = _mode_policy_map(payload)
     mode_policies = [copy.deepcopy(policies_by_mode[mode]) for mode in MODE_ORDER if mode in policies_by_mode]
     blocked_policies = copy.deepcopy(_list_of_mappings(payload.get("blocked_policies")))
@@ -954,7 +953,7 @@ def build_report(payload: dict[str, Any], pr82_labels: set[str]) -> dict[str, An
         "deterministic_policy_ordering": True,
         "atomicrows_bundle_jsonl_created": False,
         "atomicrows_bundle_sha256_created": False,
-        "atomicrows_bundle_jsonl_exists": False,
+        "atomicrows_bundle_jsonl_exists": _resolve(repo_root, CANONICAL_BUNDLE_JSONL).exists(),
         "atomicrows_bundle_sha256_exists": False,
         "final_ready": False,
     }
@@ -1022,7 +1021,7 @@ def validate(
     failures.extend(validate_master_plan_diff(repo_root))
     failures.extend(validate_validator_static_surface(repo_root / pathlib.Path(__file__).relative_to(_REPO_ROOT)))
 
-    report = build_report(registry, pr82_labels)
+    report = build_report(registry, pr82_labels, repo_root)
     failures.extend(validate_report_is_deterministic(report))
 
     if failures:

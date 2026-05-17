@@ -252,7 +252,6 @@ def test_atomicrows_pr97_bundle_hash_and_runtime_artifacts_are_absent():
         branch_context.branch
     )
     always_forbidden_paths = [
-        gate.CANONICAL_BUNDLE_JSONL.as_posix(),
         gate.CANONICAL_BUNDLE_SHA256.as_posix(),
         "src/qtt/dashboard_runtime",
         "src/qtt/telegram_runtime",
@@ -262,10 +261,11 @@ def test_atomicrows_pr97_bundle_hash_and_runtime_artifacts_are_absent():
     ]
     for path in always_forbidden_paths:
         assert not (REPO_ROOT / path).exists(), path
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     if not downstream_pr97_or_later:
         for path in gate.PR97_STATIC_PLAN_PATHS:
             assert not (REPO_ROOT / path).exists(), path
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
     assert report["pr97_static_plan_files_allowed_by_downstream_branch"] is downstream_pr97_or_later
 

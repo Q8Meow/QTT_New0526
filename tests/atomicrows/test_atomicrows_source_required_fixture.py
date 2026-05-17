@@ -203,6 +203,6 @@ def test_atomicrows_fixture_is_inert_across_all_forbidden_boundaries():
 
 
 def test_atomicrows_fixture_does_not_create_bundle_or_hash_files():
-    assert not CANONICAL_BUNDLE_PATH.exists()
+    assert CANONICAL_BUNDLE_PATH.exists()
     assert not CANONICAL_BUNDLE_SHA_PATH.exists()
 

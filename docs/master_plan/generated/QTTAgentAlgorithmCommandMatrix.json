@@ -6,7 +6,7 @@
   "algorithm_formula_command_present": true,
   "alpha_evidence_claim_created": false,
   "authority_boundary_all_false": true,
-  "bundle_file_present": false,
+  "bundle_file_present": true,
   "bundle_sha_present": false,
   "cash_receipt_artifact_created": false,
   "command_count": 8,

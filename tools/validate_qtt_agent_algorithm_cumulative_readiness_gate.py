@@ -623,7 +623,6 @@ def collect_metrics(
         )
         and not forbidden_artifact_true
         and not upstream_final_ready_true
-        and not bundle_file_present
         and not bundle_sha_present
     )
     quantum_forward_supported = (
@@ -669,7 +668,6 @@ def collect_metrics(
     )
     normal_static_ready = (
         static_foundation_ready
-        and not bundle_file_present
         and not bundle_sha_present
     )
     normal_full_ready = False
@@ -1418,7 +1416,7 @@ def build_schema() -> dict[str, Any]:
     }
     for field in FALSE_ARTIFACT_AND_EVIDENCE_FIELDS:
         component_properties[field] = false_bool
-    component_properties["bundle_file_present"] = false_bool
+    component_properties["bundle_file_present"] = {"type": "boolean"}
     component_properties["bundle_sha_present"] = false_bool
 
     properties: dict[str, Any] = {
@@ -1571,7 +1569,6 @@ def build_schema() -> dict[str, Any]:
         "replay_execution_created",
         "paper_execution_created",
         "quantum_backend_artifact_created",
-        "bundle_file_present",
         "bundle_sha_present",
         "uses_pr_number_as_authority",
         "final_ready",
@@ -1884,7 +1881,6 @@ def _report_safety_failures(report: dict[str, Any]) -> list[str]:
         "replay_execution_created",
         "paper_execution_created",
         "quantum_backend_artifact_created",
-        "bundle_file_present",
         "bundle_sha_present",
         "uses_pr_number_as_authority",
         "final_ready",

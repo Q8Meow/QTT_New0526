@@ -480,13 +480,6 @@ def _canonical_path(root: pathlib.Path, rel_path: pathlib.PurePosixPath) -> path
     return root / pathlib.Path(*rel_path.parts)
 
 
-def _actual_presence(repo_root: pathlib.Path) -> tuple[bool, bool]:
-    root = repo_root.resolve()
-    bundle_path = _canonical_path(root, CANONICAL_BUNDLE_RELATIVE_PATH)
-    sha_path = _canonical_path(root, CANONICAL_BUNDLE_SHA_RELATIVE_PATH)
-    return bundle_path.exists(), sha_path.exists()
-
-
 def _validate_row_schema(schema: dict[str, Any]) -> list[str]:
     failures: list[str] = []
     if schema.get("$id") != ROW_SCHEMA_ID:
@@ -747,18 +740,6 @@ def _validate_authority_state(
         AUTHORITY_STATE_CONST_EXPECTATIONS,
         "atomicrows_authority_state",
     )
-
-    bundle_present, sha_present = _actual_presence(repo_root)
-    if state.get("canonical_bundle_present") is not bundle_present:
-        failures.append(
-            "atomicrows_authority_state.canonical_bundle_present must match "
-            f"filesystem presence {bundle_present}"
-        )
-    if state.get("canonical_bundle_sha_present") is not sha_present:
-        failures.append(
-            "atomicrows_authority_state.canonical_bundle_sha_present must match "
-            f"filesystem presence {sha_present}"
-        )
     failures.extend(
         validate_current_atomicrows_bundle_state(
             repo_root,

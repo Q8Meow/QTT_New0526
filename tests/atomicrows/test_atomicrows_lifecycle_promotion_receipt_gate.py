@@ -303,7 +303,7 @@ def test_false_allowed_promotion_claim_fails_closed():
 
 
 def test_promotion_receipt_gate_does_not_create_atomicrows_bundle_or_hash():
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()
 
     result = gate.validate(
@@ -316,5 +316,5 @@ def test_promotion_receipt_gate_does_not_create_atomicrows_bundle_or_hash():
     )
 
     assert result.failures == ()
-    assert not CANONICAL_BUNDLE.exists()
+    assert CANONICAL_BUNDLE.exists()
     assert not CANONICAL_BUNDLE_SHA.exists()

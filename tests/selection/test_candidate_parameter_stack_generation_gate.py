@@ -342,9 +342,9 @@ def test_owner_override_records_basis_without_fabricating_external_facts():
 
 def test_atomicrows_bundle_and_sha_are_not_created():
     report = _report()
-    assert report["atomicrows_bundle_jsonl_exists"] is False
+    assert report["atomicrows_bundle_jsonl_exists"] is True
     assert report["atomicrows_bundle_sha256_exists"] is False
-    assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
+    assert (REPO_ROOT / gate.CANONICAL_BUNDLE_JSONL).exists()
     assert not (REPO_ROOT / gate.CANONICAL_BUNDLE_SHA256).exists()
 
 

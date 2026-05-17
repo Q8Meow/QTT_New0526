@@ -115,5 +115,5 @@ def test_target_field_ledger_cannot_directly_authorize_connector_consumption():
 
 
 def test_atomicrows_bundle_and_hash_remain_absent():
-    assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
+    assert Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()
     assert not Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256").exists()

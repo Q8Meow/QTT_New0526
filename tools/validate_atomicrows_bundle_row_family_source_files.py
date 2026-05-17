@@ -1173,7 +1173,6 @@ def validate_report_is_deterministic(report: dict[str, Any]) -> list[str]:
         *FALSE_AUTHORITY_FIELDS,
         "quantum_backend_execution_created_flag",
         "quantum_advantage_evidence_created_flag",
-        "atomicrows_bundle_jsonl_exists",
         "atomicrows_bundle_sha256_exists",
         "pr99_bundle_builder_created",
         "pr100_sha_freeze_authority_created",

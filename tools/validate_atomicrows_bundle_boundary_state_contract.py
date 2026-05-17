@@ -63,14 +63,32 @@ FORBIDDEN_AUTHORITY_CLAIMS = [
 ]
 
 FUTURE_HANDOFF = {
-    "current_pr_state_transition_allowed": False,
-    "next_allowed_transition": "PRE_MATERIALIZATION_TO_POST_MATERIALIZATION_PRE_SHA",
+    "current_pr_state_transition_allowed": True,
+    "state_transition_executed_by_this_pr": True,
+    "transition_from_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
+    "transition_to_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
+    "next_allowed_transition": "POST_MATERIALIZATION_PRE_SHA_TO_POST_SHA_FREEZE",
     "future_bundle_materialization_handoff_state": (
-        "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        "BUNDLE_MATERIALIZED_BY_PR113_NOT_SHA_NOT_FREEZE"
     ),
     "future_sha_freeze_handoff_state": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
     "future_final_readiness_handoff_state": (
         "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+    ),
+    "future_sha_freeze_state_centralization_required": (
+        "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+    ),
+    "future_final_readiness_state_centralization_required": (
+        "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+    ),
+    "future_runtime_live_state_centralization_required": (
+        "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+    ),
+    "future_profit_evidence_state_centralization_required": (
+        "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+    ),
+    "future_quantum_execution_state_centralization_required": (
+        "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
     ),
 }
 
@@ -165,7 +183,7 @@ def validate_contract_payload(contract: dict[str, Any], schema: dict[str, Any]) 
         "contract_id": CONTRACT_ID,
         "contract_version": CONTRACT_VERSION,
         "authority_class": AUTHORITY_CLASS,
-        "current_expected_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
+        "current_expected_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
         "allowed_states": [state.value for state in AtomicRowsBundleState],
         "state_definitions": _expected_state_definitions(),
         "canonical_paths": {
@@ -173,7 +191,6 @@ def validate_contract_payload(contract: dict[str, Any], schema: dict[str, Any]) 
             "bundle_sha256": CANONICAL_ATOMICROWS_BUNDLE_SHA.as_posix(),
         },
         "forbidden_current_artifacts": [
-            CANONICAL_ATOMICROWS_BUNDLE.as_posix(),
             CANONICAL_ATOMICROWS_BUNDLE_SHA.as_posix(),
         ],
         "forbidden_authority_claims": FORBIDDEN_AUTHORITY_CLAIMS,
@@ -188,8 +205,8 @@ def validate_contract_payload(contract: dict[str, Any], schema: dict[str, Any]) 
     expected_validator_contract = {
         "validator_name": VALIDATOR_NAME,
         "success_marker": SUCCESS_MARKER,
-        "expected_current_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
-        "fail_closed_on_unexpected_bundle_jsonl": True,
+        "expected_current_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
+        "fail_closed_on_missing_bundle_jsonl": True,
         "fail_closed_on_unexpected_bundle_sha256": True,
         "creates_bundle_jsonl": False,
         "creates_bundle_sha256": False,
@@ -271,8 +288,8 @@ def build_report(
     forbidden_artifact_checks = {
         CANONICAL_ATOMICROWS_BUNDLE.as_posix(): {
             "exists": bundle_path.exists(),
-            "expected_exists": False,
-            "valid": not bundle_path.exists(),
+            "expected_exists": True,
+            "valid": bundle_path.exists(),
         },
         CANONICAL_ATOMICROWS_BUNDLE_SHA.as_posix(): {
             "exists": sha_path.exists(),
@@ -302,7 +319,10 @@ def build_report(
         "order_authority_created": False,
         "profit_evidence_created": False,
         "quantum_backend_authority_created": False,
-        "state_transition_allowed_in_this_pr": False,
+        "state_transition_allowed_in_this_pr": True,
+        "state_transition_executed_by_this_pr": True,
+        "transition_from_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
+        "transition_to_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
         "next_allowed_transition": _mapping(contract.get("future_handoff")).get(
             "next_allowed_transition"
         ),
@@ -315,6 +335,21 @@ def build_report(
         "future_final_readiness_handoff_state": _mapping(
             contract.get("future_handoff")
         ).get("future_final_readiness_handoff_state"),
+        "future_sha_freeze_state_centralization_required": _mapping(
+            contract.get("future_handoff")
+        ).get("future_sha_freeze_state_centralization_required"),
+        "future_final_readiness_state_centralization_required": _mapping(
+            contract.get("future_handoff")
+        ).get("future_final_readiness_state_centralization_required"),
+        "future_runtime_live_state_centralization_required": _mapping(
+            contract.get("future_handoff")
+        ).get("future_runtime_live_state_centralization_required"),
+        "future_profit_evidence_state_centralization_required": _mapping(
+            contract.get("future_handoff")
+        ).get("future_profit_evidence_state_centralization_required"),
+        "future_quantum_execution_state_centralization_required": _mapping(
+            contract.get("future_handoff")
+        ).get("future_quantum_execution_state_centralization_required"),
         "forbidden_artifact_checks": forbidden_artifact_checks,
         "master_plan_diff_check": master_plan_diff,
         "exact_row_source_diff_check": exact_row_source_diff,
@@ -328,10 +363,10 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     failures: list[str] = []
     expected = {
         "validation_status": VALIDATION_STATUS,
-        "current_expected_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
-        "bundle_jsonl_exists": False,
+        "current_expected_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
+        "bundle_jsonl_exists": True,
         "bundle_sha256_exists": False,
-        "expected_bundle_jsonl_exists": False,
+        "expected_bundle_jsonl_exists": True,
         "expected_bundle_sha256_exists": False,
         "bundle_state_valid": True,
         "sha_state_valid": True,
@@ -342,13 +377,31 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         "order_authority_created": False,
         "profit_evidence_created": False,
         "quantum_backend_authority_created": False,
-        "state_transition_allowed_in_this_pr": False,
+        "state_transition_allowed_in_this_pr": True,
+        "state_transition_executed_by_this_pr": True,
+        "transition_from_state": AtomicRowsBundleState.PRE_MATERIALIZATION.value,
+        "transition_to_state": AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA.value,
         "future_bundle_materialization_handoff_state": (
-            "BUNDLE_MATERIALIZATION_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+            "BUNDLE_MATERIALIZED_BY_PR113_NOT_SHA_NOT_FREEZE"
         ),
         "future_sha_freeze_handoff_state": "SHA_FREEZE_REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
         "future_final_readiness_handoff_state": (
             "FINAL_READINESS_REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        ),
+        "future_sha_freeze_state_centralization_required": (
+            "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        ),
+        "future_final_readiness_state_centralization_required": (
+            "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        ),
+        "future_runtime_live_state_centralization_required": (
+            "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        ),
+        "future_profit_evidence_state_centralization_required": (
+            "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        ),
+        "future_quantum_execution_state_centralization_required": (
+            "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
         ),
         "result_marker": SUCCESS_MARKER,
     }

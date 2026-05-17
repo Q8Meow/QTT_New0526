@@ -331,14 +331,14 @@ def test_requirement_scope_flags_are_fail_closed():
 
 
 def test_filesystem_presence_mismatch_fails(monkeypatch):
-    monkeypatch.setattr(validator, "_actual_presence", lambda repo_root: (True, False))
+    monkeypatch.setattr(validator, "_actual_presence", lambda repo_root: (True, True))
 
     failures = validate_atomicrows_unblocking_requirements_fixture(
         _fixture(),
         repo_root=Path("."),
     )
 
-    _assert_failure_contains(failures, "canonical_bundle_present")
+    _assert_failure_contains(failures, "canonical_bundle_sha_present")
 
 
 def test_validator_does_not_create_atomicrows_bundle_or_hash_files(tmp_path):
@@ -379,5 +379,5 @@ def test_fixture_has_no_mutating_authority_and_no_requirement_satisfaction():
 
 
 def test_canonical_atomicrows_bundle_and_hash_are_absent_in_bootstrap_repo():
-    assert not _canonical_bundle_path(Path(".")).exists()
+    assert _canonical_bundle_path(Path(".")).exists()
     assert not _canonical_bundle_sha_path(Path(".")).exists()
