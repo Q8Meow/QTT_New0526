@@ -39,7 +39,23 @@ jobs:
       - name: Verify master plan unchanged by validation
         run: git diff --exit-code -- docs/master_plan/QTT_MasterPlan_Current.md
 
-      - name: Verify AtomicRows bundle remains absent
+      - name: Verify AtomicRows bundle materialized and SHA absent
         run: |
-          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
           test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl")
+          data = p.read_bytes()
+          assert data, "AtomicRows bundle is empty"
+          assert not data.startswith(b"\xef\xbb\xbf"), "AtomicRows bundle has a UTF-8 BOM"
+          assert b"\r" not in data, "AtomicRows bundle contains CR or CRLF line endings"
+          assert data.endswith(b"\n"), "AtomicRows bundle must end with LF"
+          lines = data.decode("utf-8").splitlines()
+          assert len(lines) == 4183, f"expected 4183 AtomicRows rows, found {len(lines)}"
+          assert all(line.strip() for line in lines), "AtomicRows bundle contains blank rows"
+          for line_number, line in enumerate(lines, start=1):
+              json.loads(line)
+          PY
