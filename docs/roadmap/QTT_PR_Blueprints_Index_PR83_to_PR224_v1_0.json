@@ -13,12 +13,15 @@
     "master_plan",
     "per_pr_prompt"
   ],
-  "global_must_not": [
-    "Do not edit docs/master_plan/QTT_MasterPlan_Current.md unless the owner explicitly approves that exact PR scope.",
-    "Do not create docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl or AtomicRows.bundle.sha256 unless the exact PR explicitly authorizes bundle/hash creation.",
-    "Do not fabricate external facts, source packets, connector semantics, runtime cash, order/fill receipts, replay/paper results, quantum backend output, quantum advantage evidence, latency superiority evidence, execution superiority evidence, alpha evidence, or profit evidence.",
-    "Do not commit, push, open a GitHub PR, merge, or rewrite history; owner performs those actions manually."
-  ],
+      "global_must_not": [
+        "Do not edit docs/master_plan/QTT_MasterPlan_Current.md unless the owner explicitly approves that exact PR scope.",
+        "Do not create docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl or AtomicRows.bundle.sha256 unless the exact PR explicitly authorizes bundle/hash creation.",
+        "Do not treat SHA/freeze readiness as permission to generate SHA; SHA is dormant, disabled, owner-controlled, and non-participating for Day-1 final-readiness evaluation unless a future owner-approved SHA reactivation PR explicitly changes the central policy.",
+        "Do not require SHA reactivation for Day-1 final readiness, and do not treat SHA absence or SHA presence as final-readiness evidence or a final-readiness blocker.",
+        "Do not block research candidates, future parameter additions, future algorithm additions, or future quantum metadata additions because SHA is dormant.",
+        "Do not fabricate external facts, source packets, connector semantics, runtime cash, order/fill receipts, replay/paper results, quantum backend output, quantum advantage evidence, latency superiority evidence, execution superiority evidence, alpha evidence, or profit evidence.",
+        "Do not commit, push, open a GitHub PR, merge, or rewrite history; owner performs those actions manually."
+      ],
   "entries": [
     {
       "number": 83,
@@ -1120,14 +1123,14 @@
       "phase": "STATIC_FOUNDATION_S1_LAUNCH_ESSENTIAL",
       "domain": "atomicrows",
       "validator_marker": "QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK",
-      "purpose": "Owner-approved bundle SHA/freeze authority surface if owner explicitly opens the bundle PR.",
-      "must_prove": "Single JSONL bundle and SHA model are controlled and non-runtime.",
-      "must_not_create": "Unapproved freeze, unapproved SHA, source fact acceptance, live/order/profit authority.",
-      "quantum_latency_emphasis": "Freeze quantum inventory only as parameter/algorithm inventory, not backend evidence.",
+      "purpose": "Owner global SHA dormancy supersedes the older bundle SHA/freeze authority path for Day-1; SHA remains dormant, disabled, owner-controlled, and non-participating unless a future owner-approved SHA reactivation PR explicitly changes the central policy.",
+      "must_prove": "Single JSONL bundle remains present while SHA generation and SHA/freeze authority remain disabled and non-participating for Day-1 final readiness.",
+      "must_not_create": "SHA, SHA/freeze authority, final readiness, source fact acceptance, live/order/profit authority, or quantum-backend authority.",
+      "quantum_latency_emphasis": "SHA dormancy does not block research candidates, future parameters, future algorithms, or future quantum metadata; it also does not execute or claim QUBO/Ising/QAOA/VQE/annealing/backend advantage.",
       "depends_on": [
         "PR #99 completed, merged, and validated on clean main",
         "PR #99 bundle builder mechanics",
-        "explicit owner-approved bundle/hash scope"
+        "explicit owner-approved future SHA reactivation scope if SHA is ever reactivated; current owner policy keeps SHA dormant and not required for Day-1 final readiness"
       ],
       "downstream_consumers": [
         "PR #101 — AtomicRows full bundle final readiness gate",
@@ -1140,6 +1143,8 @@
         "search: \"AtomicRows bundle\"",
         "search: \"AtomicRows.bundle.jsonl\"",
         "search: \"AtomicRows.bundle.sha256\"",
+        "search: \"SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED\"",
+        "search: \"FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY\"",
         "search: \"parameter stack completeness\"",
         "search: \"compatibility gate\"",
         "search: \"4183\"",
@@ -1147,18 +1152,30 @@
         "search: \"QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK\""
       ],
       "likely_files": [
+        "src/qtt/core/testing/atomicrows_sha_system_dormancy_state.py",
+        "src/qtt/core/testing/qtt_final_readiness_dependency_policy.py",
+        "docs/master_plan/atomicrows/AtomicRowsShaSystemDormancyStateContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml",
+        "schemas/atomicrows/atomicrows_sha_system_dormancy_state_contract.schema.json",
+        "schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json",
+        "tools/validate_atomicrows_sha_system_dormancy_state_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py",
+        "tests/atomicrows/test_atomicrows_sha_system_dormancy_state_contract.py",
+        "tests/launch/test_qtt_final_readiness_dependency_policy_contract.py",
         "schemas/atomicrows/atomicrows_bundle_sha_freeze_authority.schema.json",
         "docs/master_plan/atomicrows/AtomicRowsBundleSHAFreezeAuthority.yaml or .json using existing repo convention",
         "tests/fixtures/atomicrows/atomicrows_bundle_sha_freeze_authority.fixture.json",
         "docs/master_plan/generated/AtomicRowsBundleSHAFreezeAuthority.report.json",
-        "tools/validate_atomicrows_bundle_sha_freeze_authority.py",
-        "tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority.py",
+        "tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py",
+        "tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tools/run_validation_gates.py"
       ],
       "validation_commands": [
-        "& $Py tools\\validate_atomicrows_bundle_sha_freeze_authority.py",
-        "& $Py -m pytest tests\\atomicrows\\test_atomicrows_bundle_sha_freeze_authority.py tests\\fail_closed\\test_run_validation_gates.py -q",
+        "& $Py tools\\validate_atomicrows_sha_system_dormancy_state_contract.py",
+        "& $Py tools\\validate_qtt_final_readiness_dependency_policy_contract.py",
+        "& $Py tools\\validate_atomicrows_bundle_sha_freeze_authority_gate.py",
+        "& $Py tools\\run_pytest_fresh_basetemp.py tests\\atomicrows\\test_atomicrows_sha_system_dormancy_state_contract.py tests\\launch\\test_qtt_final_readiness_dependency_policy_contract.py tests\\atomicrows\\test_atomicrows_bundle_sha_freeze_authority_gate.py tests\\fail_closed\\test_run_validation_gates.py -q",
         "& $Py tools\\run_validation_gates.py",
         "& $Py tools\\run_pytest_fresh_basetemp.py -q",
         "if (Test-Path \"src\") { & $Py -m compileall tools tests src } else { & $Py -m compileall tools tests }",
@@ -1186,13 +1203,13 @@
       "phase": "STATIC_FOUNDATION_S1_LAUNCH_ESSENTIAL",
       "domain": "atomicrows",
       "validator_marker": "QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK",
-      "purpose": "Validate AtomicRows bundle readiness before runtime/live phases consume selection inventory.",
-      "must_prove": "Bundle readiness is explicit and fail-closed.",
-      "must_not_create": "Trading readiness, live execution, profit claims, automatic runtime unlock.",
-      "quantum_latency_emphasis": "Quantum rows pass completeness/compatibility before optimizer/ranking consumers use them.",
+      "purpose": "Validate AtomicRows bundle readiness through active non-SHA Day-1 final-readiness dependencies before runtime/live phases consume selection inventory.",
+      "must_prove": "Bundle readiness is explicit, fail-closed, and controlled only by active non-SHA gates plus owner Day-1 launch approval; SHA reactivation is not required.",
+      "must_not_create": "Trading readiness, live execution, profit claims, automatic runtime unlock, or any SHA-required final-readiness dependency.",
+      "quantum_latency_emphasis": "Quantum rows and future quantum metadata pass completeness/compatibility without executing simulators, providers, QUBO/Ising/QAOA/VQE/annealing, or claiming quantum advantage.",
       "depends_on": [
-        "PR #100 completed, merged, and validated on clean main",
-        "PR #97–#100 AtomicRows plan/source/builder/freeze chain"
+        "PR #97-#99 AtomicRows plan/source/builder chain plus central SHA dormancy and final-readiness dependency policy contracts",
+        "PR #100 SHA/freeze completion is not a Day-1 final-readiness prerequisite while SHA dormancy is active"
       ],
       "downstream_consumers": [
         "PR #102 — Master-plan section coverage triage expansion I",
@@ -1205,6 +1222,8 @@
         "search: \"AtomicRows bundle\"",
         "search: \"AtomicRows.bundle.jsonl\"",
         "search: \"AtomicRows.bundle.sha256\"",
+        "search: \"FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY\"",
+        "search: \"SHA_DORMANCY_SYSTEM\"",
         "search: \"parameter stack completeness\"",
         "search: \"compatibility gate\"",
         "search: \"4183\"",
@@ -1213,6 +1232,9 @@
       ],
       "likely_files": [
         "schemas/atomicrows/atomicrows_full_bundle_final_readiness_gate.schema.json",
+        "schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml",
+        "src/qtt/core/testing/qtt_final_readiness_dependency_policy.py",
         "docs/master_plan/atomicrows/AtomicRowsFullBundleFinalReadinessGate.yaml or .json using existing repo convention",
         "tests/fixtures/atomicrows/atomicrows_full_bundle_final_readiness_gate.fixture.json",
         "docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json",
@@ -1222,6 +1244,7 @@
         "tools/run_validation_gates.py"
       ],
       "validation_commands": [
+        "& $Py tools\\validate_qtt_final_readiness_dependency_policy_contract.py",
         "& $Py tools\\validate_atomicrows_full_bundle_final_readiness_gate.py",
         "& $Py -m pytest tests\\atomicrows\\test_atomicrows_full_bundle_final_readiness_gate.py tests\\fail_closed\\test_run_validation_gates.py -q",
         "& $Py tools\\run_validation_gates.py",

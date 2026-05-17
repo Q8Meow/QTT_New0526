@@ -27,6 +27,7 @@
   "existing_bundle_materialization_valid": true,
   "expected_bundle_row_count": 4183,
   "final_readiness_created": false,
+  "final_readiness_dependency_policy_state": "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
   "forbidden_artifact_checks": {
     "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256": {
       "artifact_kind": "bundle_sha256",
@@ -93,18 +94,18 @@
     }
   },
   "freeze_receipt_created": false,
-  "future_final_readiness_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_final_readiness_handoff_state": "FUTURE_FINAL_READINESS_ACTIVE_NON_SHA_GATES_ONLY_NOT_EXECUTED",
   "future_profit_evidence_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
   "future_quantum_execution_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
   "future_runtime_live_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
-  "future_sha_freeze_authority_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_sha_freeze_authority_handoff_state": "OPTIONAL_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_ONLY_NOT_DAY1_REQUIRED_NOT_EXECUTED",
   "master_plan_diff_check": {
     "changed_paths": [],
     "git_returncode": 0,
     "pathspec": "docs/master_plan/QTT_MasterPlan_Current.md",
     "unchanged": true
   },
-  "next_allowed_transition": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE_TO_SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
+  "next_allowed_transition": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE_TO_FINAL_READINESS_AUTHORIZED_ACTIVE_NON_SHA_GATES_ONLY",
   "no_runtime_scanner_diff_check": {
     "changed_paths": [],
     "git_returncode": 0,
@@ -120,7 +121,14 @@
   "result_marker": "QTT_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT_OK",
   "runtime_live_authority_created": false,
   "scoring_ranking_selection_execution_created": false,
+  "sha_dormancy_is_final_readiness_blocker": false,
+  "sha_freeze_authority_allowed_by_dormancy_policy": false,
   "sha_freeze_authority_created": false,
+  "sha_generation_allowed": false,
+  "sha_required_for_final_readiness": false,
+  "sha_system_dormancy_state": "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
+  "sha_system_dormant": true,
+  "sha_system_non_participating_for_final_readiness": true,
   "source_connector_authority_created": false,
   "state_transition_allowed_in_this_pr": false,
   "validation_errors": [],

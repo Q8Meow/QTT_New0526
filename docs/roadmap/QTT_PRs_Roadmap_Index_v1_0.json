@@ -225,7 +225,7 @@
       "priority": "S1 launch-essential static",
       "branch": "pr100-atomicrows-bundle-sha-freeze-authority",
       "marker": "QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK",
-      "source_details": "Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr100-atomicrows-bundle-sha-freeze-authority | Marker: QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK"
+      "source_details": "Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr100-atomicrows-bundle-sha-freeze-authority | Marker: QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK | SHA dormant disabled owner-controlled non-participating; future owner-approved reactivation only; not required for Day-1 final readiness"
     },
     {
       "delivery_label": "PR #101",
@@ -236,7 +236,7 @@
       "priority": "S1 launch-essential static",
       "branch": "pr101-atomicrows-full-bundle-final-readiness-gate",
       "marker": "QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK",
-      "source_details": "Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr101-atomicrows-full-bundle-final-readiness-gate | Marker: QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK"
+      "source_details": "Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr101-atomicrows-full-bundle-final-readiness-gate | Marker: QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK | Day-1 final readiness controlled by active non-SHA gates and owner approval; SHA absence/presence is not readiness evidence or blocker"
     },
     {
       "delivery_label": "PR #102",

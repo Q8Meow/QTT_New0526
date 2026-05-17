@@ -720,6 +720,20 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_atomicrows_sha_system_dormancy_state_contract.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_qtt_final_readiness_dependency_policy_contract.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_atomicrows_bundle_sha_freeze_authority_gate.py",
             ),
         ],

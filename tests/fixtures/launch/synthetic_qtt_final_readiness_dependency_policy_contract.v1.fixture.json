@@ -1,0 +1,12 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "SYNTHETIC_QTT_FINAL_READINESS_DEPENDENCY_POLICY_CONTRACT_V1",
+  "policy_state": "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
+  "sha_required_for_final_readiness": false,
+  "sha_dormancy_is_final_readiness_blocker": false,
+  "sha_absence_is_final_readiness_blocker": false,
+  "sha_presence_is_final_readiness_evidence": false,
+  "current_pr_creates_final_readiness": false,
+  "current_pr_creates_day1_launch_authority": false
+}

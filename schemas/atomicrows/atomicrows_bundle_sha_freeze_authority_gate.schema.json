@@ -54,7 +54,7 @@
     "blocked_reason_codes": {
       "type": "array",
       "items": { "$ref": "#/$defs/blocked_reason_code" },
-      "minItems": 7,
+      "minItems": 9,
       "uniqueItems": true
     },
     "upstream_artifact_dependencies": {
@@ -65,7 +65,7 @@
     },
     "downstream_blocked_until": {
       "type": "array",
-      "items": { "const": "ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS" },
+      "items": { "const": "ACTIVE_NON_SHA_DAY1_FINAL_READINESS_GATES" },
       "minItems": 1,
       "uniqueItems": true
     },
@@ -147,20 +147,42 @@
       "required": [
         "atomicrows_bundle_jsonl_exists",
         "atomicrows_bundle_sha256_exists",
+        "sha_system_dormancy_state",
+        "sha_system_non_participating_for_final_readiness",
+        "final_readiness_dependency_policy_state",
+        "sha_required_for_final_readiness",
+        "sha_dormancy_is_final_readiness_blocker",
+        "sha_absence_is_final_readiness_blocker",
+        "sha_presence_is_final_readiness_evidence",
         "exact_source_rows_authorized",
         "pr99_assembly_path",
         "pr98_source_files_are_blueprints_only",
         "sha_materialization_allowed",
+        "sha_generation_allowed",
+        "sha_freeze_authority_allowed",
         "freeze_authority_created",
         "final_readiness_created"
       ],
       "properties": {
         "atomicrows_bundle_jsonl_exists": { "const": true },
         "atomicrows_bundle_sha256_exists": { "const": false },
+        "sha_system_dormancy_state": {
+          "const": "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED"
+        },
+        "sha_system_non_participating_for_final_readiness": { "const": true },
+        "final_readiness_dependency_policy_state": {
+          "const": "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"
+        },
+        "sha_required_for_final_readiness": { "const": false },
+        "sha_dormancy_is_final_readiness_blocker": { "const": false },
+        "sha_absence_is_final_readiness_blocker": { "const": false },
+        "sha_presence_is_final_readiness_evidence": { "const": false },
         "exact_source_rows_authorized": { "const": false },
         "pr99_assembly_path": { "const": "PATH_B_BLOCKED" },
         "pr98_source_files_are_blueprints_only": { "const": true },
         "sha_materialization_allowed": { "const": false },
+        "sha_generation_allowed": { "const": false },
+        "sha_freeze_authority_allowed": { "const": false },
         "freeze_authority_created": { "const": false },
         "final_readiness_created": { "const": false }
       }
@@ -201,13 +223,15 @@
     },
     "blocked_reason_code": {
       "enum": [
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE",
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_GENERATION_DISABLED_BY_DORMANCY_POLICY",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FREEZE_AUTHORITY_DISABLED_BY_DORMANCY_POLICY",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_REACTIVATION_REQUIRES_FUTURE_OWNER_APPROVED_PR",
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_POLICY_ACTIVE_NON_SHA_GATES_ONLY",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED",
         "ATOMICROWS_SHA_FREEZE_BLOCKED_SOURCE_BLUEPRINTS_ONLY",
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_OWNER_FREEZE_AUTHORITY_NOT_PRESENT",
-        "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED"
+        "ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED_BY_THIS_PR"
       ]
     },
     "upstream_artifact_dependency": {

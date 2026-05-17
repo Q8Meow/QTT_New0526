@@ -8,10 +8,19 @@ gate_mode: BLOCKED
 expected_current_state:
   atomicrows_bundle_jsonl_exists: true
   atomicrows_bundle_sha256_exists: false
+  sha_system_dormancy_state: SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED
+  sha_system_non_participating_for_final_readiness: true
+  final_readiness_dependency_policy_state: FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY
+  sha_required_for_final_readiness: false
+  sha_dormancy_is_final_readiness_blocker: false
+  sha_absence_is_final_readiness_blocker: false
+  sha_presence_is_final_readiness_evidence: false
   exact_source_rows_authorized: false
   pr99_assembly_path: PATH_B_BLOCKED
   pr98_source_files_are_blueprints_only: true
   sha_materialization_allowed: false
+  sha_generation_allowed: false
+  sha_freeze_authority_allowed: false
   freeze_authority_created: false
   final_readiness_created: false
 canonical_paths:
@@ -26,19 +35,21 @@ planning_target:
   target_total_row_count_planning_authority_only: true
   materialized_row_count_claimed: false
 blocked_reason_codes:
-  - ATOMICROWS_SHA_FREEZE_BLOCKED_POST_MATERIALIZATION_PRE_SHA_STATE
-  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FILE_MUST_NOT_BE_CREATED
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_GENERATION_DISABLED_BY_DORMANCY_POLICY
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_FREEZE_AUTHORITY_DISABLED_BY_DORMANCY_POLICY
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_REACTIVATION_REQUIRES_FUTURE_OWNER_APPROVED_PR
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_POLICY_ACTIVE_NON_SHA_GATES_ONLY
   - ATOMICROWS_SHA_FREEZE_BLOCKED_PR99_PATH_B
   - ATOMICROWS_SHA_FREEZE_BLOCKED_EXACT_SOURCE_ROWS_NOT_AUTHORIZED
   - ATOMICROWS_SHA_FREEZE_BLOCKED_SOURCE_BLUEPRINTS_ONLY
-  - ATOMICROWS_SHA_FREEZE_BLOCKED_OWNER_FREEZE_AUTHORITY_NOT_PRESENT
-  - ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED
+  - ATOMICROWS_SHA_FREEZE_BLOCKED_FINAL_READINESS_NOT_CREATED_BY_THIS_PR
 upstream_artifact_dependencies:
   - AtomicRowsFullBundleRowExpansionPlan
   - AtomicRowsBundleRowFamilySourceFiles
   - AtomicRowsBundleBuilderDeterministicAssemblyGate
 downstream_blocked_until:
-  - ROADMAP_ATOMICROWS_FULL_BUNDLE_READINESS
+  - ACTIVE_NON_SHA_DAY1_FINAL_READINESS_GATES
 no_claims:
   bundle_created: false
   bundle_sha256_created: false
@@ -109,4 +120,4 @@ forbidden_execution_effects:
   - QUANTUM_PROVIDER_CALL
   - QUANTUM_ADVANTAGE_VALIDATION
   - QUANTUM_DIRECT_ORDER_AUTHORITY
-future_consumer_notes: PR100 creates a blocked static SHA/freeze authority gate only. Under PR113, AtomicRows.bundle.jsonl is materialized while AtomicRows.bundle.sha256 remains absent, SHA materialization is not allowed, freeze authority is not created, and Roadmap PR101 final readiness remains blocked until a valid SHA/freeze authority exists.
+future_consumer_notes: PR100 creates a blocked static SHA/freeze authority gate only. Under PR115A owner policy, SHA generation and SHA/freeze authority are disabled by centralized SHA dormancy. AtomicRows.bundle.jsonl is materialized, AtomicRows.bundle.sha256 remains absent because this PR does not create it, SHA absence is not a Day-1 final-readiness blocker, SHA presence is not final-readiness evidence, and Day-1 final readiness is controlled only by active non-SHA gates plus owner approval.

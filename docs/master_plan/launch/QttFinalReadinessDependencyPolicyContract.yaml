@@ -1,0 +1,56 @@
+contract_id: QTT_FINAL_READINESS_DEPENDENCY_POLICY_CONTRACT
+contract_version: v1
+authority_class: DAY1_FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY_NOT_FINAL_READINESS
+current_final_readiness_dependency_policy_state: FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY
+allowed_final_readiness_dependency_policy_states:
+  - FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY
+  - FINAL_READINESS_DEPENDENCY_POLICY_OWNER_SHA_RECONSIDERATION_REQUESTED
+  - FINAL_READINESS_DEPENDENCY_POLICY_SHA_REACTIVATED_AFTER_OWNER_APPROVAL
+sha_required_for_final_readiness: false
+sha_dormancy_is_final_readiness_blocker: false
+sha_absence_is_final_readiness_blocker: false
+sha_presence_is_final_readiness_evidence: false
+sha_reactivation_required_for_day1_launch: false
+final_readiness_may_be_authorized_without_sha_if_all_active_non_sha_gates_pass_and_owner_approves: true
+current_pr_creates_final_readiness: false
+current_pr_creates_day1_launch_authority: false
+active_non_sha_final_readiness_dependencies_required: true
+excluded_non_participating_subsystems:
+  - SHA_DORMANCY_SYSTEM
+active_non_sha_final_readiness_dependencies:
+  - OWNER_DAY1_LAUNCH_APPROVAL
+  - ACCEPTED_SOURCE_EVIDENCE_FOR_TARGET_FIELDS
+  - CONNECTOR_SEMANTIC_BINDINGS_FOR_TARGET_FIELDS
+  - FRESH_SOURCE_REVALIDATION_STATE
+  - RUNTIME_CASH_COMPONENT_FIELD_MAP
+  - RUNTIME_CASH_RECEIPTS_WHEN_REQUIRED
+  - REPLAY_AND_PAPER_RESULTS_WHEN_REQUIRED
+  - DUAL_RESULT_REVIEW_WHEN_REQUIRED
+  - OWNER_LIVE_PROMOTION_REVIEW_WHEN_REQUIRED
+  - RISK_LIMIT_AND_EXPOSURE_GATES
+  - LIVE_PREFLIGHT_MATRIX
+  - ORDER_ROUTER_SAFETY_GATES
+  - KILL_SWITCH_AND_ROLLBACK_GATES
+  - EXECUTION_RECEIPT_BOUNDARY
+  - QUANTUM_BACKEND_AUTHORITY_GATE
+  - QUANTUM_ADVANTAGE_NO_CLAIM_GATE
+  - PROFIT_NO_CLAIM_GATE
+  - LATENCY_AND_EXECUTION_EVIDENCE_NO_FABRICATION_GATE
+current_pr_creates_runtime_live_order_source_connector_runtime_cash_backend_profit_authority: false
+current_pr_creates_replay_paper_optimizer_neural_quantum_backend_execution: false
+current_pr_claims_profit_latency_execution_quantum_advantage_evidence: false
+source_facts_accepted_by_this_pr: false
+connector_semantics_bound_by_this_pr: false
+runtime_cash_receipts_created_by_this_pr: false
+live_trading_authority_created_by_this_pr: false
+bug_free_status_claimed_by_this_pr: false
+validator_contract:
+  validator_name: validate_qtt_final_readiness_dependency_policy_contract.py
+  success_marker: QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK
+  schema_path: schemas/launch/qtt_final_readiness_dependency_policy_contract.schema.json
+  generated_report_path: docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json
+  creates_sha: false
+  creates_sha_freeze_authority: false
+  creates_final_readiness: false
+  creates_day1_launch_authority: false
+  creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority: false

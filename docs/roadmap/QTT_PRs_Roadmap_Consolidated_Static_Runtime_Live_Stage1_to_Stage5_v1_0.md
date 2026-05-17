@@ -35,6 +35,7 @@ This roadmap is guidance for owner/Codex planning. Implementation truth remains 
 - Runtime cash without receipt blocks new or increased exposure. Unknown source, cash, or revalidation state blocks new or increased exposure.
 - Replay and paper remain concurrent separate lanes after shared input lock. Replay/paper results cannot merge into owner approval, live eligibility, or profit proof automatically.
 - Owner review is non-delegable. Limited live canary requires explicit owner command and all gates. Day‑1 launch readiness is not Day‑1 execution.
+- Owner global SHA dormancy policy is canonical for Day-1: SHA is dormant, disabled, owner-controlled, and non-participating for final-readiness evaluation unless a future owner-approved SHA reactivation PR explicitly changes that state. SHA reactivation is not required for Day-1 final readiness, and SHA absence or presence is neither final-readiness evidence nor a final-readiness blocker.
 - Low-latency live path may consume only precomputed source-change, cash, market, and quantum artifact snapshots; it may not call source retrieval, source acceptance, LLM reasoning, external research, dashboard review, or quantum backend selection.
 - Quantum may rank or propose replay/paper candidates and precomputed artifacts, but quantum agents/optimizers may not directly submit orders. Execution router remains final order submission authority.
 - Owner override may satisfy internal QTT workflow policy only. It must not fabricate external facts, accepted source packets, connector facts, runtime cash receipts, order/fill receipts, replay/paper results, backend execution, quantum advantage evidence, latency/execution superiority evidence, alpha evidence, or profit evidence.
@@ -287,21 +288,21 @@ Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-es
 #### PR #100 — AtomicRows bundle SHA/freeze authority
 Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr100-atomicrows-bundle-sha-freeze-authority | Marker: QTT_ATOMICROWS_BUNDLE_SHA_FREEZE_AUTHORITY_OK
 
-| Purpose | Owner-approved bundle SHA/freeze authority surface if owner explicitly opens the bundle PR. |
+| Purpose | Historical bundle SHA/freeze authority surface is superseded for Day-1 by owner global SHA dormancy: SHA remains dormant, disabled, owner-controlled, and non-participating unless a future owner-approved reactivation PR explicitly changes it. |
 | --- | --- |
-| Must prove | Single JSONL bundle and SHA model are controlled and non-runtime. |
-| Must not create | Unapproved freeze, unapproved SHA, source fact acceptance, live/order/profit authority. |
-| Quantum / latency emphasis | Freeze quantum inventory only as parameter/algorithm inventory, not backend evidence. |
+| Must prove | Single JSONL bundle remains present while SHA generation and SHA/freeze authority remain disabled and non-participating for Day-1 final readiness. |
+| Must not create | SHA, SHA/freeze authority, final readiness, source fact acceptance, live/order/profit authority, or quantum-backend authority. |
+| Quantum / latency emphasis | SHA dormancy does not block research candidates, future parameters, future algorithms, or future quantum metadata; it also does not execute or claim QUBO/Ising/QAOA/VQE/annealing/backend advantage. |
 
 
 #### PR #101 — AtomicRows full bundle final readiness gate
 Category: Static | Stage: AtomicRows bundle preparation | Priority: S1 launch-essential static | Branch: pr101-atomicrows-full-bundle-final-readiness-gate | Marker: QTT_ATOMICROWS_FULL_BUNDLE_FINAL_READINESS_GATE_OK
 
-| Purpose | Validate AtomicRows bundle readiness before runtime/live phases consume selection inventory. |
+| Purpose | Validate AtomicRows bundle readiness through active non-SHA Day-1 final-readiness dependencies before runtime/live phases consume selection inventory. |
 | --- | --- |
-| Must prove | Bundle readiness is explicit and fail-closed. |
-| Must not create | Trading readiness, live execution, profit claims, automatic runtime unlock. |
-| Quantum / latency emphasis | Quantum rows pass completeness/compatibility before optimizer/ranking consumers use them. |
+| Must prove | Bundle readiness is explicit, fail-closed, and controlled only by active non-SHA gates plus owner Day-1 launch approval; SHA reactivation is not required. |
+| Must not create | Trading readiness, live execution, profit claims, automatic runtime unlock, or any SHA-required final-readiness dependency. |
+| Quantum / latency emphasis | Quantum rows and future quantum metadata pass completeness/compatibility without executing simulators, providers, QUBO/Ising/QAOA/VQE/annealing, or claiming quantum advantage. |
 
 
 #### PR #102 — Master-plan section coverage triage expansion I

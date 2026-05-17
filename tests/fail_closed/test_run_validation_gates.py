@@ -89,6 +89,14 @@ from tools import (
     as atomicrows_bundle_builder_deterministic_assembly_gate,
 )
 from tools import (
+    validate_atomicrows_sha_system_dormancy_state_contract
+    as atomicrows_sha_system_dormancy_state_contract,
+)
+from tools import (
+    validate_qtt_final_readiness_dependency_policy_contract
+    as qtt_final_readiness_dependency_policy_contract,
+)
+from tools import (
     validate_atomicrows_bundle_sha_freeze_authority_gate
     as atomicrows_bundle_sha_freeze_authority_gate,
 )
@@ -809,6 +817,20 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_sha_system_dormancy_state_contract.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_qtt_final_readiness_dependency_policy_contract.py"
             ),
         ],
         [
@@ -2748,6 +2770,12 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     pr99_index = command_names.index(
         "validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
     )
+    sha_dormancy_index = command_names.index(
+        "validate_atomicrows_sha_system_dormancy_state_contract.py"
+    )
+    final_readiness_dependency_policy_index = command_names.index(
+        "validate_qtt_final_readiness_dependency_policy_contract.py"
+    )
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
@@ -2816,6 +2844,8 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < pr97_index
         < pr98_index
         < pr99_index
+        < sha_dormancy_index
+        < final_readiness_dependency_policy_index
         < pr100_index
         < repair_bridge_index
         < repair_manifest_index
@@ -2926,6 +2956,17 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         str(
             Path("tools")
             / "validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
+        ),
+    ]
+    assert commands[sha_dormancy_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_sha_system_dormancy_state_contract.py"),
+    ]
+    assert commands[final_readiness_dependency_policy_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_qtt_final_readiness_dependency_policy_contract.py"
         ),
     ]
     assert commands[pr100_index] == [

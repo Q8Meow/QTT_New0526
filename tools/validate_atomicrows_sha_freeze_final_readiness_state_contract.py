@@ -18,6 +18,8 @@ from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     AtomicRowsBundleState,
     expected_atomicrows_bundle_state_from_contract,
 )
+from src.qtt.core.testing import atomicrows_sha_system_dormancy_state as sha_dormancy  # noqa: E402
+from src.qtt.core.testing import qtt_final_readiness_dependency_policy as readiness_policy  # noqa: E402
 from src.qtt.core.testing.atomicrows_sha_freeze_final_readiness_state import (  # noqa: E402
     ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_DEFINITIONS,
     BUILTIN_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_AUTHORITY_PATHS,
@@ -65,9 +67,16 @@ CURRENT_EXPECTED_STATE = (
 )
 NEXT_ALLOWED_TRANSITION = (
     "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE_TO_"
-    "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS"
+    "FINAL_READINESS_AUTHORIZED_ACTIVE_NON_SHA_GATES_ONLY"
 )
 FUTURE_ONLY_HANDOFF = "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+SHA_REACTIVATION_HANDOFF = (
+    "OPTIONAL_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_ONLY_NOT_DAY1_REQUIRED_"
+    "NOT_EXECUTED"
+)
+FINAL_READINESS_HANDOFF = (
+    "FUTURE_FINAL_READINESS_ACTIVE_NON_SHA_GATES_ONLY_NOT_EXECUTED"
+)
 
 EXISTING_BLOCKED_STATIC_GATE_ARTIFACTS = [
     "docs/master_plan/atomicrows/AtomicRowsBundleShaFreezeAuthorityGate.yaml",
@@ -90,8 +99,8 @@ FORBIDDEN_CURRENT_AUTHORITY_CLAIMS = [
 ]
 
 FUTURE_HANDOFF = {
-    "future_sha_freeze_authority_pr_required": FUTURE_ONLY_HANDOFF,
-    "future_final_readiness_pr_required": FUTURE_ONLY_HANDOFF,
+    "future_sha_freeze_authority_pr_required": SHA_REACTIVATION_HANDOFF,
+    "future_final_readiness_pr_required": FINAL_READINESS_HANDOFF,
     "future_runtime_live_state_centralization_required": FUTURE_ONLY_HANDOFF,
     "future_profit_evidence_state_centralization_required": FUTURE_ONLY_HANDOFF,
     "future_quantum_execution_state_centralization_required": FUTURE_ONLY_HANDOFF,
@@ -118,11 +127,12 @@ TRANSITION_RULES = [
     {
         "from_state": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE",
         "to_state": "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
-        "allowed_only_in": "EXPLICIT_FUTURE_SHA_FREEZE_PR",
+        "allowed_only_in": "EXPLICIT_FUTURE_OWNER_APPROVED_SHA_REACTIVATION_PR_ONLY",
         "requires": [
-            "owner approval",
+            "future owner-approved SHA reactivation PR",
             "existing valid AtomicRows.bundle.jsonl",
             "exactly 4,183 bundle rows",
+            "central SHA dormancy policy changed away from dormant by owner approval",
             "deterministic SHA computation",
             "SHA value matches bundle bytes",
             "SHA/freeze receipt or authority artifact",
@@ -133,13 +143,15 @@ TRANSITION_RULES = [
         ],
     },
     {
-        "from_state": "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
+        "from_state": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE",
         "to_state": "FINAL_READINESS_AUTHORIZED",
-        "allowed_only_in": "EXPLICIT_FUTURE_FINAL_READINESS_PR",
+        "allowed_only_in": "EXPLICIT_FUTURE_FINAL_READINESS_PR_ACTIVE_NON_SHA_GATES_ONLY",
         "requires": [
             "existing valid bundle",
-            "existing valid SHA",
-            "existing valid SHA/freeze authority",
+            "current final-readiness dependency policy active non-SHA gates only",
+            "SHA not required for Day-1 final readiness",
+            "SHA dormancy not a Day-1 final-readiness blocker",
+            "owner Day-1 launch approval",
             "lifecycle gates",
             "agent binding gates",
             "selection gates",
@@ -409,6 +421,26 @@ def build_report(
         "validator_name": VALIDATOR_NAME,
         "validation_status": VALIDATION_STATUS if result_ok else "FAIL",
         "current_expected_state": state.value,
+        "sha_system_dormancy_state": (
+            sha_dormancy.get_atomicrows_sha_system_dormancy_state()
+        ),
+        "sha_system_dormant": sha_dormancy.is_sha_system_dormant(),
+        "sha_system_non_participating_for_final_readiness": (
+            sha_dormancy.is_sha_system_non_participating_for_final_readiness()
+        ),
+        "sha_generation_allowed": sha_dormancy.is_sha_generation_allowed(),
+        "sha_freeze_authority_allowed_by_dormancy_policy": (
+            sha_dormancy.is_sha_freeze_authority_allowed()
+        ),
+        "final_readiness_dependency_policy_state": (
+            readiness_policy.get_qtt_final_readiness_dependency_policy_state()
+        ),
+        "sha_required_for_final_readiness": (
+            readiness_policy.is_sha_required_for_final_readiness()
+        ),
+        "sha_dormancy_is_final_readiness_blocker": (
+            readiness_policy.is_sha_dormancy_a_final_readiness_blocker()
+        ),
         "bundle_jsonl_path": CANONICAL_ATOMICROWS_BUNDLE.as_posix(),
         "bundle_sha256_path": CANONICAL_ATOMICROWS_BUNDLE_SHA.as_posix(),
         "bundle_jsonl_exists": state_report["bundle_jsonl_exists"],
@@ -472,6 +504,18 @@ def validate_report(report: dict[str, Any]) -> list[str]:
     expected = {
         "validation_status": VALIDATION_STATUS,
         "current_expected_state": CURRENT_EXPECTED_STATE.value,
+        "sha_system_dormancy_state": (
+            "SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED"
+        ),
+        "sha_system_dormant": True,
+        "sha_system_non_participating_for_final_readiness": True,
+        "sha_generation_allowed": False,
+        "sha_freeze_authority_allowed_by_dormancy_policy": False,
+        "final_readiness_dependency_policy_state": (
+            "FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY"
+        ),
+        "sha_required_for_final_readiness": False,
+        "sha_dormancy_is_final_readiness_blocker": False,
         "bundle_jsonl_exists": True,
         "bundle_sha256_exists": False,
         "bundle_row_count": EXPECTED_ATOMICROWS_BUNDLE_ROW_COUNT,
@@ -496,8 +540,8 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         "existing_bundle_boundary_state_valid": True,
         "state_transition_allowed_in_this_pr": False,
         "next_allowed_transition": NEXT_ALLOWED_TRANSITION,
-        "future_sha_freeze_authority_handoff_state": FUTURE_ONLY_HANDOFF,
-        "future_final_readiness_handoff_state": FUTURE_ONLY_HANDOFF,
+        "future_sha_freeze_authority_handoff_state": SHA_REACTIVATION_HANDOFF,
+        "future_final_readiness_handoff_state": FINAL_READINESS_HANDOFF,
         "future_runtime_live_state_centralization_required": FUTURE_ONLY_HANDOFF,
         "future_profit_evidence_state_centralization_required": FUTURE_ONLY_HANDOFF,
         "future_quantum_execution_state_centralization_required": FUTURE_ONLY_HANDOFF,
@@ -553,6 +597,22 @@ def validate(
             label="AtomicRowsShaFreezeFinalReadinessStateContract",
         )
     )
+    if not sha_dormancy.is_sha_system_dormant():
+        failures.append("central SHA system must remain dormant")
+    if not sha_dormancy.is_sha_system_non_participating_for_final_readiness():
+        failures.append(
+            "central SHA system must remain non-participating for final readiness"
+        )
+    if sha_dormancy.is_sha_generation_allowed():
+        failures.append("central SHA generation must remain disabled")
+    if sha_dormancy.is_sha_freeze_authority_allowed():
+        failures.append("central SHA/freeze authority must remain disabled")
+    if readiness_policy.is_sha_required_for_final_readiness():
+        failures.append("central final-readiness policy must not require SHA")
+    if readiness_policy.is_sha_dormancy_a_final_readiness_blocker():
+        failures.append(
+            "central final-readiness policy must not treat SHA dormancy as a blocker"
+        )
 
     presence = canonical_atomicrows_sha_freeze_presence(repo_root)
     if not presence.bundle_jsonl_exists:

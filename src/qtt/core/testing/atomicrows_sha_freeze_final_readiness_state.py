@@ -6,6 +6,9 @@ import json
 import pathlib
 from typing import Any
 
+from . import atomicrows_sha_system_dormancy_state as sha_dormancy
+from . import qtt_final_readiness_dependency_policy as readiness_policy
+
 
 class AtomicRowsShaFreezeFinalReadinessState(str, Enum):
     BUNDLE_MATERIALIZED_PRE_SHA_FREEZE = "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE"
@@ -202,12 +205,12 @@ ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_DEFINITIONS: dict[
         AtomicRowsShaFreezeFinalReadinessStateDefinition(
             bundle_jsonl_required=True,
             bundle_jsonl_row_count_required=EXPECTED_ATOMICROWS_BUNDLE_ROW_COUNT,
-            bundle_sha256_required=True,
-            bundle_sha256_allowed=True,
-            sha_freeze_authority_required=True,
-            sha_freeze_authority_allowed=True,
-            freeze_receipt_required=True,
-            freeze_receipt_allowed=True,
+            bundle_sha256_required=False,
+            bundle_sha256_allowed=False,
+            sha_freeze_authority_required=False,
+            sha_freeze_authority_allowed=False,
+            freeze_receipt_required=False,
+            freeze_receipt_allowed=False,
             final_readiness_required=True,
             final_readiness_allowed=True,
             live_trading_allowed=False,
@@ -578,6 +581,67 @@ def validate_atomicrows_sha_freeze_final_readiness_state(
     presence = canonical_atomicrows_sha_freeze_presence(repo_root)
     failures: list[str] = []
 
+    if not sha_dormancy.is_sha_system_dormant():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central SHA system dormancy state must remain dormant",
+            )
+        )
+    if not sha_dormancy.is_sha_system_non_participating_for_final_readiness():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central SHA system must remain non-participating for final readiness",
+            )
+        )
+    if sha_dormancy.is_sha_generation_allowed():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central SHA generation policy must remain disabled",
+            )
+        )
+    if sha_dormancy.is_sha_freeze_authority_allowed():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central SHA/freeze authority policy must remain disabled",
+            )
+        )
+    if readiness_policy.is_sha_required_for_final_readiness():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central final-readiness policy must not require SHA",
+            )
+        )
+    if readiness_policy.is_sha_dormancy_a_final_readiness_blocker():
+        failures.append(
+            _presence_failure(
+                label=label,
+                expected_state=state,
+                presence=presence,
+                offending_path=SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT,
+                reason="central final-readiness policy must not treat SHA dormancy as a blocker",
+            )
+        )
+
     if definition.bundle_jsonl_required:
         bundle = _bundle_jsonl_validation(
             paths.bundle_jsonl,
@@ -750,6 +814,26 @@ def atomicrows_sha_freeze_final_readiness_state_report(
     }
     return {
         "current_expected_state": state.value,
+        "sha_system_dormancy_state": (
+            sha_dormancy.get_atomicrows_sha_system_dormancy_state()
+        ),
+        "sha_system_dormant": sha_dormancy.is_sha_system_dormant(),
+        "sha_system_non_participating_for_final_readiness": (
+            sha_dormancy.is_sha_system_non_participating_for_final_readiness()
+        ),
+        "sha_generation_allowed": sha_dormancy.is_sha_generation_allowed(),
+        "sha_freeze_authority_allowed_by_dormancy_policy": (
+            sha_dormancy.is_sha_freeze_authority_allowed()
+        ),
+        "final_readiness_dependency_policy_state": (
+            readiness_policy.get_qtt_final_readiness_dependency_policy_state()
+        ),
+        "sha_required_for_final_readiness": (
+            readiness_policy.is_sha_required_for_final_readiness()
+        ),
+        "sha_dormancy_is_final_readiness_blocker": (
+            readiness_policy.is_sha_dormancy_a_final_readiness_blocker()
+        ),
         "bundle_jsonl_path": paths.bundle_jsonl_relative.as_posix(),
         "bundle_sha256_path": paths.bundle_sha256_relative.as_posix(),
         "bundle_jsonl_exists": presence.bundle_jsonl_exists,
