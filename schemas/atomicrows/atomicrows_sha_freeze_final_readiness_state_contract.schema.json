@@ -1,0 +1,279 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-atomicrows-sha-freeze-final-readiness-state-contract",
+  "title": "AtomicRows SHA Freeze Final Readiness State Contract",
+  "description": "Static AtomicRows SHA/freeze/final-readiness state boundary. This schema defines future-only state transitions and current fail-closed absence requirements; it does not create AtomicRows.bundle.sha256, a SHA digest, SHA/freeze authority, a freeze receipt, final readiness, runtime/live/order/source/connector/runtime-cash/backend/profit authority, replay/paper/optimizer/quantum execution, computed scores, selected stacks, selected order intent, or evidence claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_id",
+    "contract_version",
+    "authority_class",
+    "current_expected_state",
+    "allowed_states",
+    "state_definitions",
+    "canonical_paths",
+    "artifact_authority_paths",
+    "transition_rules",
+    "forbidden_current_artifacts",
+    "forbidden_current_authority_claims",
+    "existing_blocked_static_gate_artifacts",
+    "future_handoff",
+    "validator_contract",
+    "generated_report_path"
+  ],
+  "properties": {
+    "contract_id": { "const": "ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT" },
+    "contract_version": { "const": "v1" },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_BOUNDARY_ONLY_NOT_SHA_CREATION_NOT_FREEZE_AUTHORITY_NOT_FINAL_READINESS_NOT_RUNTIME_NOT_LIVE"
+    },
+    "current_expected_state": { "const": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE" },
+    "allowed_states": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE",
+          "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
+          "FINAL_READINESS_AUTHORIZED"
+        ]
+      },
+      "minItems": 3
+    },
+    "state_definitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE",
+        "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
+        "FINAL_READINESS_AUTHORIZED"
+      ],
+      "properties": {
+        "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE": { "$ref": "#/$defs/state_definition" },
+        "SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS": { "$ref": "#/$defs/state_definition" },
+        "FINAL_READINESS_AUTHORIZED": { "$ref": "#/$defs/state_definition" }
+      }
+    },
+    "canonical_paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_jsonl", "bundle_sha256"],
+      "properties": {
+        "bundle_jsonl": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+        },
+        "bundle_sha256": {
+          "const": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+        }
+      }
+    },
+    "artifact_authority_paths": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact_authority_path" },
+      "minItems": 7
+    },
+    "transition_rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transition_rule" },
+      "minItems": 3
+    },
+    "forbidden_current_artifacts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 7
+    },
+    "forbidden_current_authority_claims": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 10
+    },
+    "existing_blocked_static_gate_artifacts": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "docs/master_plan/atomicrows/AtomicRowsBundleShaFreezeAuthorityGate.yaml",
+          "docs/master_plan/generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json",
+          "tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py",
+          "tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority_gate.py"
+        ]
+      },
+      "minItems": 4
+    },
+    "future_handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "future_sha_freeze_authority_pr_required",
+        "future_final_readiness_pr_required",
+        "future_runtime_live_state_centralization_required",
+        "future_profit_evidence_state_centralization_required",
+        "future_quantum_execution_state_centralization_required"
+      ],
+      "properties": {
+        "future_sha_freeze_authority_pr_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_final_readiness_pr_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_runtime_live_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_profit_evidence_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        },
+        "future_quantum_execution_state_centralization_required": {
+          "const": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
+        }
+      }
+    },
+    "validator_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_name",
+        "success_marker",
+        "expected_current_state",
+        "fail_closed_on_missing_bundle_jsonl",
+        "fail_closed_on_invalid_bundle_jsonl",
+        "fail_closed_on_unexpected_bundle_sha256",
+        "fail_closed_on_future_sha_freeze_authority_artifact",
+        "fail_closed_on_future_freeze_receipt",
+        "fail_closed_on_future_final_readiness_artifact",
+        "creates_bundle_sha256",
+        "creates_sha_freeze_authority",
+        "creates_freeze_receipt",
+        "creates_final_readiness",
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority"
+      ],
+      "properties": {
+        "validator_name": {
+          "const": "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+        },
+        "success_marker": {
+          "const": "QTT_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT_OK"
+        },
+        "expected_current_state": { "const": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE" },
+        "fail_closed_on_missing_bundle_jsonl": { "const": true },
+        "fail_closed_on_invalid_bundle_jsonl": { "const": true },
+        "fail_closed_on_unexpected_bundle_sha256": { "const": true },
+        "fail_closed_on_future_sha_freeze_authority_artifact": { "const": true },
+        "fail_closed_on_future_freeze_receipt": { "const": true },
+        "fail_closed_on_future_final_readiness_artifact": { "const": true },
+        "creates_bundle_sha256": { "const": false },
+        "creates_sha_freeze_authority": { "const": false },
+        "creates_freeze_receipt": { "const": false },
+        "creates_final_readiness": { "const": false },
+        "creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority": {
+          "const": false
+        }
+      }
+    },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/AtomicRowsShaFreezeFinalReadinessStateContract.report.json"
+    }
+  },
+  "$defs": {
+    "state_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_jsonl_required",
+        "bundle_jsonl_row_count_required",
+        "bundle_sha256_required",
+        "bundle_sha256_allowed",
+        "sha_freeze_authority_required",
+        "sha_freeze_authority_allowed",
+        "freeze_receipt_required",
+        "freeze_receipt_allowed",
+        "final_readiness_required",
+        "final_readiness_allowed",
+        "live_trading_allowed",
+        "runtime_live_authority_allowed",
+        "order_authority_allowed",
+        "source_connector_authority_allowed",
+        "runtime_cash_authority_allowed",
+        "backend_authority_allowed",
+        "profit_evidence_allowed",
+        "quantum_backend_authority_allowed",
+        "replay_paper_execution_allowed",
+        "optimizer_execution_allowed",
+        "scoring_ranking_selection_execution_allowed"
+      ],
+      "properties": {
+        "bundle_jsonl_required": { "type": "boolean" },
+        "bundle_jsonl_row_count_required": { "type": "integer" },
+        "bundle_sha256_required": { "type": "boolean" },
+        "bundle_sha256_allowed": { "type": "boolean" },
+        "sha_freeze_authority_required": { "type": "boolean" },
+        "sha_freeze_authority_allowed": { "type": "boolean" },
+        "freeze_receipt_required": { "type": "boolean" },
+        "freeze_receipt_allowed": { "type": "boolean" },
+        "final_readiness_required": { "type": "boolean" },
+        "final_readiness_allowed": { "type": "boolean" },
+        "live_trading_allowed": { "type": "boolean" },
+        "runtime_live_authority_allowed": { "type": "boolean" },
+        "order_authority_allowed": { "type": "boolean" },
+        "source_connector_authority_allowed": { "type": "boolean" },
+        "runtime_cash_authority_allowed": { "type": "boolean" },
+        "backend_authority_allowed": { "type": "boolean" },
+        "profit_evidence_allowed": { "type": "boolean" },
+        "quantum_backend_authority_allowed": { "type": "boolean" },
+        "replay_paper_execution_allowed": { "type": "boolean" },
+        "optimizer_execution_allowed": { "type": "boolean" },
+        "scoring_ranking_selection_execution_allowed": { "type": "boolean" }
+      }
+    },
+    "artifact_authority_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "artifact_kind",
+        "future_only",
+        "must_not_exist_in_current_state",
+        "created_by_future_pr_only"
+      ],
+      "properties": {
+        "path": { "type": "string" },
+        "artifact_kind": {
+          "enum": [
+            "bundle_sha256",
+            "sha_freeze_authority",
+            "freeze_receipt",
+            "final_readiness"
+          ]
+        },
+        "future_only": { "const": true },
+        "must_not_exist_in_current_state": { "const": true },
+        "created_by_future_pr_only": { "const": true }
+      }
+    },
+    "transition_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_state",
+        "to_state",
+        "allowed_only_in",
+        "requires",
+        "must_not_create"
+      ],
+      "properties": {
+        "from_state": { "type": "string" },
+        "to_state": { "type": "string" },
+        "allowed_only_in": { "type": "string" },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "must_not_create": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

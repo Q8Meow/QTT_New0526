@@ -1,0 +1,130 @@
+{
+  "bundle_jsonl_byte_preserved": true,
+  "bundle_jsonl_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    "unchanged": true
+  },
+  "bundle_jsonl_exists": true,
+  "bundle_jsonl_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+  "bundle_jsonl_valid": true,
+  "bundle_row_count": 4183,
+  "bundle_sha256_exists": false,
+  "bundle_sha256_expected_absent": true,
+  "bundle_sha256_forbidden_absent": true,
+  "bundle_sha256_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+  "contract_id": "ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT",
+  "current_expected_state": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE",
+  "exact_row_source_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "docs/master_plan/atomic_rows/exact_row_sources",
+    "unchanged": true
+  },
+  "existing_blocked_static_sha_freeze_gate_valid": true,
+  "existing_bundle_boundary_state_valid": true,
+  "existing_bundle_materialization_valid": true,
+  "expected_bundle_row_count": 4183,
+  "final_readiness_created": false,
+  "forbidden_artifact_checks": {
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256": {
+      "artifact_kind": "bundle_sha256",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/atomic_rows/AtomicRowsBundleFreezeAuthority.yaml": {
+      "artifact_kind": "freeze_receipt",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/atomicrows/AtomicRowsBundleFreezeAuthority.yaml": {
+      "artifact_kind": "freeze_receipt",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/atomicrows/AtomicRowsBundleSHAFreezeAuthority.yaml": {
+      "artifact_kind": "sha_freeze_authority",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/atomicrows/AtomicRowsFullBundleFinalReadinessGate.yaml": {
+      "artifact_kind": "final_readiness",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/generated/AtomicRowsBundleSHAFreezeAuthority.report.json": {
+      "artifact_kind": "sha_freeze_authority",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    },
+    "docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json": {
+      "artifact_kind": "final_readiness",
+      "created_by_future_pr_only": true,
+      "exists": false,
+      "expected_exists": false,
+      "future_only": true,
+      "must_not_exist_in_current_state": true,
+      "valid": true
+    }
+  },
+  "freeze_receipt_created": false,
+  "future_final_readiness_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_profit_evidence_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_quantum_execution_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_runtime_live_state_centralization_required": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "future_sha_freeze_authority_handoff_state": "REQUIRED_FUTURE_ONLY_NOT_EXECUTED",
+  "master_plan_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "docs/master_plan/QTT_MasterPlan_Current.md",
+    "unchanged": true
+  },
+  "next_allowed_transition": "BUNDLE_MATERIALIZED_PRE_SHA_FREEZE_TO_SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS",
+  "no_runtime_scanner_diff_check": {
+    "changed_paths": [],
+    "git_returncode": 0,
+    "pathspec": "tools/validate_no_runtime_artifacts.py",
+    "unchanged": true
+  },
+  "optimizer_execution_created": false,
+  "order_authority_created": false,
+  "profit_evidence_created": false,
+  "quantum_backend_authority_created": false,
+  "replay_paper_execution_created": false,
+  "report_id": "ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT_REPORT",
+  "result_marker": "QTT_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT_OK",
+  "runtime_live_authority_created": false,
+  "scoring_ranking_selection_execution_created": false,
+  "sha_freeze_authority_created": false,
+  "source_connector_authority_created": false,
+  "state_transition_allowed_in_this_pr": false,
+  "validation_errors": [],
+  "validation_status": "PASS",
+  "validation_warnings": [],
+  "validator_name": "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+}

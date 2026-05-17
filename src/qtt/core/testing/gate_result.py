@@ -16,6 +16,16 @@ from .atomicrows_bundle_state import (
     validate_atomicrows_bundle_state,
     validate_current_atomicrows_bundle_state,
 )
+from .atomicrows_sha_freeze_final_readiness_state import (
+    AtomicRowsShaFreezeFinalReadinessState,
+    atomicrows_sha_freeze_final_readiness_state_report,
+    canonical_atomicrows_sha_freeze_paths,
+    canonical_atomicrows_sha_freeze_presence,
+    discover_atomicrows_sha_freeze_final_readiness_authority_paths,
+    expected_atomicrows_sha_freeze_final_readiness_state_from_contract,
+    validate_atomicrows_sha_freeze_final_readiness_state,
+    validate_current_atomicrows_sha_freeze_final_readiness_state,
+)
 
 DETERMINISTIC_GENERATED_AT_UTC = "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
 STATIC_REPORT_AUTHORITY_CLASS = "STATIC_REPORT_ONLY_NOT_TRADING_AUTHORITY"
@@ -79,6 +89,27 @@ def canonical_atomicrows_post_pr_e_boundary_failures(
     return validate_atomicrows_bundle_state(
         repo_root,
         AtomicRowsBundleState.POST_MATERIALIZATION_PRE_SHA,
+        label,
+    )
+
+
+def canonical_atomicrows_sha_freeze_final_readiness_failures(
+    repo_root: pathlib.Path,
+    label: str,
+) -> list[str]:
+    return validate_current_atomicrows_sha_freeze_final_readiness_state(
+        repo_root,
+        label,
+    )
+
+
+def canonical_atomicrows_pre_sha_freeze_failures(
+    repo_root: pathlib.Path,
+    label: str,
+) -> list[str]:
+    return validate_atomicrows_sha_freeze_final_readiness_state(
+        repo_root,
+        AtomicRowsShaFreezeFinalReadinessState.BUNDLE_MATERIALIZED_PRE_SHA_FREEZE,
         label,
     )
 

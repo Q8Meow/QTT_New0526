@@ -1,0 +1,3 @@
+# AtomicRows bundle artifacts require LF-stable bytes for future SHA/freeze authority.
+docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl text eol=lf
+docs/master_plan/atomic_rows/AtomicRows.bundle.sha256 text eol=lf

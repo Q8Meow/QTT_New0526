@@ -1,0 +1,198 @@
+contract_id: ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT
+contract_version: v1
+authority_class: STATIC_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_BOUNDARY_ONLY_NOT_SHA_CREATION_NOT_FREEZE_AUTHORITY_NOT_FINAL_READINESS_NOT_RUNTIME_NOT_LIVE
+current_expected_state: BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
+allowed_states:
+  - BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
+  - SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS
+  - FINAL_READINESS_AUTHORIZED
+state_definitions:
+  BUNDLE_MATERIALIZED_PRE_SHA_FREEZE:
+    bundle_jsonl_required: true
+    bundle_jsonl_row_count_required: 4183
+    bundle_sha256_required: false
+    bundle_sha256_allowed: false
+    sha_freeze_authority_required: false
+    sha_freeze_authority_allowed: false
+    freeze_receipt_required: false
+    freeze_receipt_allowed: false
+    final_readiness_required: false
+    final_readiness_allowed: false
+    live_trading_allowed: false
+    runtime_live_authority_allowed: false
+    order_authority_allowed: false
+    source_connector_authority_allowed: false
+    runtime_cash_authority_allowed: false
+    backend_authority_allowed: false
+    profit_evidence_allowed: false
+    quantum_backend_authority_allowed: false
+    replay_paper_execution_allowed: false
+    optimizer_execution_allowed: false
+    scoring_ranking_selection_execution_allowed: false
+  SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS:
+    bundle_jsonl_required: true
+    bundle_jsonl_row_count_required: 4183
+    bundle_sha256_required: true
+    bundle_sha256_allowed: true
+    sha_freeze_authority_required: true
+    sha_freeze_authority_allowed: true
+    freeze_receipt_required: true
+    freeze_receipt_allowed: true
+    final_readiness_required: false
+    final_readiness_allowed: false
+    live_trading_allowed: false
+    runtime_live_authority_allowed: false
+    order_authority_allowed: false
+    source_connector_authority_allowed: false
+    runtime_cash_authority_allowed: false
+    backend_authority_allowed: false
+    profit_evidence_allowed: false
+    quantum_backend_authority_allowed: false
+    replay_paper_execution_allowed: false
+    optimizer_execution_allowed: false
+    scoring_ranking_selection_execution_allowed: false
+  FINAL_READINESS_AUTHORIZED:
+    bundle_jsonl_required: true
+    bundle_jsonl_row_count_required: 4183
+    bundle_sha256_required: true
+    bundle_sha256_allowed: true
+    sha_freeze_authority_required: true
+    sha_freeze_authority_allowed: true
+    freeze_receipt_required: true
+    freeze_receipt_allowed: true
+    final_readiness_required: true
+    final_readiness_allowed: true
+    live_trading_allowed: false
+    runtime_live_authority_allowed: false
+    order_authority_allowed: false
+    source_connector_authority_allowed: false
+    runtime_cash_authority_allowed: false
+    backend_authority_allowed: false
+    profit_evidence_allowed: false
+    quantum_backend_authority_allowed: false
+    replay_paper_execution_allowed: false
+    optimizer_execution_allowed: false
+    scoring_ranking_selection_execution_allowed: false
+canonical_paths:
+  bundle_jsonl: docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+  bundle_sha256: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+artifact_authority_paths:
+  - path: docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+    artifact_kind: bundle_sha256
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/atomicrows/AtomicRowsBundleSHAFreezeAuthority.yaml
+    artifact_kind: sha_freeze_authority
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/generated/AtomicRowsBundleSHAFreezeAuthority.report.json
+    artifact_kind: sha_freeze_authority
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/atomicrows/AtomicRowsBundleFreezeAuthority.yaml
+    artifact_kind: freeze_receipt
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/atomic_rows/AtomicRowsBundleFreezeAuthority.yaml
+    artifact_kind: freeze_receipt
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/atomicrows/AtomicRowsFullBundleFinalReadinessGate.yaml
+    artifact_kind: final_readiness
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+  - path: docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json
+    artifact_kind: final_readiness
+    future_only: true
+    must_not_exist_in_current_state: true
+    created_by_future_pr_only: true
+transition_rules:
+  - from_state: BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
+    to_state: SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS
+    allowed_only_in: EXPLICIT_FUTURE_SHA_FREEZE_PR
+    requires:
+      - owner approval
+      - existing valid AtomicRows.bundle.jsonl
+      - exactly 4,183 bundle rows
+      - deterministic SHA computation
+      - SHA value matches bundle bytes
+      - SHA/freeze receipt or authority artifact
+    must_not_create:
+      - final readiness
+      - runtime/live/order/profit/quantum-backend authority
+  - from_state: SHA_FREEZE_AUTHORIZED_PRE_FINAL_READINESS
+    to_state: FINAL_READINESS_AUTHORIZED
+    allowed_only_in: EXPLICIT_FUTURE_FINAL_READINESS_PR
+    requires:
+      - existing valid bundle
+      - existing valid SHA
+      - existing valid SHA/freeze authority
+      - lifecycle gates
+      - agent binding gates
+      - selection gates
+      - scoring gates
+      - owner override gates
+      - command matrix gates
+      - other required gates
+    must_not_create:
+      - live trading by itself
+  - from_state: FINAL_READINESS_AUTHORIZED
+    to_state: RUNTIME_OR_LIVE_AUTHORITY
+    allowed_only_in: FUTURE_ONLY_SEPARATE_RUNTIME_LIVE_PR
+    requires:
+      - separate runtime/live centralization
+      - owner approval
+    must_not_create:
+      - runtime/live authority in PR114A
+forbidden_current_artifacts:
+  - docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+  - docs/master_plan/atomicrows/AtomicRowsBundleSHAFreezeAuthority.yaml
+  - docs/master_plan/generated/AtomicRowsBundleSHAFreezeAuthority.report.json
+  - docs/master_plan/atomicrows/AtomicRowsBundleFreezeAuthority.yaml
+  - docs/master_plan/atomic_rows/AtomicRowsBundleFreezeAuthority.yaml
+  - docs/master_plan/atomicrows/AtomicRowsFullBundleFinalReadinessGate.yaml
+  - docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json
+forbidden_current_authority_claims:
+  - SHA/freeze authority
+  - final readiness
+  - runtime/live/order/source/connector/runtime-cash/backend/profit authority
+  - replay/paper execution
+  - optimizer execution
+  - quantum backend/simulator/provider execution
+  - computed scores/ranks/selections
+  - selected stack
+  - selected order intent
+  - profit/latency/execution/quantum-advantage evidence
+existing_blocked_static_gate_artifacts:
+  - docs/master_plan/atomicrows/AtomicRowsBundleShaFreezeAuthorityGate.yaml
+  - docs/master_plan/generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json
+  - tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py
+  - tests/atomicrows/test_atomicrows_bundle_sha_freeze_authority_gate.py
+future_handoff:
+  future_sha_freeze_authority_pr_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_final_readiness_pr_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_runtime_live_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_profit_evidence_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+  future_quantum_execution_state_centralization_required: REQUIRED_FUTURE_ONLY_NOT_EXECUTED
+validator_contract:
+  validator_name: validate_atomicrows_sha_freeze_final_readiness_state_contract.py
+  success_marker: QTT_ATOMICROWS_SHA_FREEZE_FINAL_READINESS_STATE_CONTRACT_OK
+  expected_current_state: BUNDLE_MATERIALIZED_PRE_SHA_FREEZE
+  fail_closed_on_missing_bundle_jsonl: true
+  fail_closed_on_invalid_bundle_jsonl: true
+  fail_closed_on_unexpected_bundle_sha256: true
+  fail_closed_on_future_sha_freeze_authority_artifact: true
+  fail_closed_on_future_freeze_receipt: true
+  fail_closed_on_future_final_readiness_artifact: true
+  creates_bundle_sha256: false
+  creates_sha_freeze_authority: false
+  creates_freeze_receipt: false
+  creates_final_readiness: false
+  creates_runtime_live_order_source_connector_cash_backend_profit_quantum_authority: false
+generated_report_path: docs/master_plan/generated/AtomicRowsShaFreezeFinalReadinessStateContract.report.json

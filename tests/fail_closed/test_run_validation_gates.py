@@ -128,6 +128,10 @@ from tools import (
     validate_atomicrows_bundle_boundary_state_contract
     as atomicrows_bundle_boundary_state_contract,
 )
+from tools import (
+    validate_atomicrows_sha_freeze_final_readiness_state_contract
+    as atomicrows_sha_freeze_final_readiness_state_contract,
+)
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
 from tools import run_validation_gates as runner
 
@@ -867,6 +871,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         [
             python_executable,
             str(Path("tools") / "validate_atomicrows_bundle_boundary_state_contract.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+            ),
         ],
         [
             python_executable,
@@ -2767,6 +2778,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     bundle_boundary_index = command_names.index(
         "validate_atomicrows_bundle_boundary_state_contract.py"
     )
+    sha_freeze_final_readiness_state_index = command_names.index(
+        "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+    )
     generated_gate_index = command_names.index(
         "validate_generated_derivative_bootstrap_gate_static.py"
     )
@@ -2812,6 +2826,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < repair_d2_e0_index
         < bundle_materialization_index
         < bundle_boundary_index
+        < sha_freeze_final_readiness_state_index
         < generated_gate_index
         < no_runtime_index
     )
@@ -2970,6 +2985,13 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     assert commands[bundle_boundary_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_boundary_state_contract.py"),
+    ]
+    assert commands[sha_freeze_final_readiness_state_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+        ),
     ]
 
 
