@@ -734,6 +734,13 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_atomicrows_bundle_sha_freeze_authority_gate.py",
             ),
         ],

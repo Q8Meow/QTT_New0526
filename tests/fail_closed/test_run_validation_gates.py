@@ -97,6 +97,10 @@ from tools import (
     as qtt_final_readiness_dependency_policy_contract,
 )
 from tools import (
+    validate_qtt_active_non_sha_day1_gate_state_registry_contract
+    as qtt_active_non_sha_day1_gate_state_registry_contract,
+)
+from tools import (
     validate_atomicrows_bundle_sha_freeze_authority_gate
     as atomicrows_bundle_sha_freeze_authority_gate,
 )
@@ -831,6 +835,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(
                 Path("tools")
                 / "validate_qtt_final_readiness_dependency_policy_contract.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
             ),
         ],
         [
@@ -1888,6 +1899,13 @@ def test_runner_exposes_atomicrows_bundle_builder_success_marker():
     )
 
 
+def test_runner_exposes_active_non_sha_gate_registry_success_marker():
+    assert (
+        qtt_active_non_sha_day1_gate_state_registry_contract.SUCCESS_MARKER
+        == "QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_OK"
+    )
+
+
 def test_runner_exposes_atomicrows_bundle_sha_freeze_authority_gate_success_marker():
     assert (
         atomicrows_bundle_sha_freeze_authority_gate.SUCCESS_MARKER
@@ -2776,6 +2794,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     final_readiness_dependency_policy_index = command_names.index(
         "validate_qtt_final_readiness_dependency_policy_contract.py"
     )
+    active_non_sha_gate_registry_index = command_names.index(
+        "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
+    )
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
@@ -2846,6 +2867,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < pr99_index
         < sha_dormancy_index
         < final_readiness_dependency_policy_index
+        < active_non_sha_gate_registry_index
         < pr100_index
         < repair_bridge_index
         < repair_manifest_index
@@ -2967,6 +2989,13 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         str(
             Path("tools")
             / "validate_qtt_final_readiness_dependency_policy_contract.py"
+        ),
+    ]
+    assert commands[active_non_sha_gate_registry_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
         ),
     ]
     assert commands[pr100_index] == [

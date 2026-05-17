@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from enum import Enum
 
+from . import qtt_active_non_sha_day1_gate_state_registry as gate_registry
+
 
 class QttFinalReadinessDependencyPolicyState(str, Enum):
     FINAL_READINESS_DEPENDENCY_POLICY_ACTIVE_NON_SHA_GATES_ONLY = (
@@ -27,28 +29,11 @@ EXPECTED_CURRENT_QTT_FINAL_READINESS_DEPENDENCY_POLICY_STATE = (
 )
 
 ACTIVE_NON_SHA_FINAL_READINESS_DEPENDENCIES = (
-    "OWNER_DAY1_LAUNCH_APPROVAL",
-    "ACCEPTED_SOURCE_EVIDENCE_FOR_TARGET_FIELDS",
-    "CONNECTOR_SEMANTIC_BINDINGS_FOR_TARGET_FIELDS",
-    "FRESH_SOURCE_REVALIDATION_STATE",
-    "RUNTIME_CASH_COMPONENT_FIELD_MAP",
-    "RUNTIME_CASH_RECEIPTS_WHEN_REQUIRED",
-    "REPLAY_AND_PAPER_RESULTS_WHEN_REQUIRED",
-    "DUAL_RESULT_REVIEW_WHEN_REQUIRED",
-    "OWNER_LIVE_PROMOTION_REVIEW_WHEN_REQUIRED",
-    "RISK_LIMIT_AND_EXPOSURE_GATES",
-    "LIVE_PREFLIGHT_MATRIX",
-    "ORDER_ROUTER_SAFETY_GATES",
-    "KILL_SWITCH_AND_ROLLBACK_GATES",
-    "EXECUTION_RECEIPT_BOUNDARY",
-    "QUANTUM_BACKEND_AUTHORITY_GATE",
-    "QUANTUM_ADVANTAGE_NO_CLAIM_GATE",
-    "PROFIT_NO_CLAIM_GATE",
-    "LATENCY_AND_EXECUTION_EVIDENCE_NO_FABRICATION_GATE",
+    gate_registry.get_active_non_sha_day1_gate_ids()
 )
 
 EXCLUDED_NON_PARTICIPATING_FINAL_READINESS_SUBSYSTEMS = (
-    "SHA_DORMANCY_SYSTEM",
+    gate_registry.get_excluded_non_participating_subsystems()
 )
 
 _SHA_DEPENDENCY_TOKENS = (
@@ -71,6 +56,14 @@ def is_sha_required_for_final_readiness() -> bool:
 
 
 def is_sha_dormancy_a_final_readiness_blocker() -> bool:
+    return False
+
+
+def is_sha_absence_a_final_readiness_blocker() -> bool:
+    return False
+
+
+def is_sha_presence_final_readiness_evidence() -> bool:
     return False
 
 
@@ -106,11 +99,31 @@ def assert_sha_dormancy_not_final_readiness_blocker() -> None:
         raise AssertionError("SHA dormancy must not be a final-readiness blocker")
 
 
+def assert_sha_absence_not_final_readiness_blocker() -> None:
+    if is_sha_absence_a_final_readiness_blocker():
+        raise AssertionError("SHA absence must not be a final-readiness blocker")
+
+
+def assert_sha_presence_not_final_readiness_evidence() -> None:
+    if is_sha_presence_final_readiness_evidence():
+        raise AssertionError("SHA presence must not be final-readiness evidence")
+
+
+def assert_active_dependencies_consume_gate_registry() -> None:
+    gate_registry.assert_gate_ids_match_expected_active_non_sha_dependencies(
+        get_active_non_sha_final_readiness_dependencies()
+    )
+
+
 def assert_day1_final_readiness_must_ignore_sha_dormancy_when_non_sha_gates_pass() -> None:
     assert_final_readiness_policy_active_non_sha_gates_only()
     assert_sha_not_required_for_final_readiness()
     assert_sha_dormancy_not_final_readiness_blocker()
+    assert_sha_absence_not_final_readiness_blocker()
+    assert_sha_presence_not_final_readiness_evidence()
+    assert_active_dependencies_consume_gate_registry()
 
 
 def assert_current_pr_does_not_create_final_readiness() -> None:
     assert_final_readiness_policy_active_non_sha_gates_only()
+    gate_registry.assert_current_pr_creates_no_final_readiness()
