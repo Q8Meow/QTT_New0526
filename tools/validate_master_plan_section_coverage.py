@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from dataclasses import dataclass
 import json
 import pathlib
@@ -78,30 +79,8 @@ PR_TRACKING_KEYS = {
     "pull_" + "request" + "_number",
 }
 ALLOWED_ROUTE_CLASSES = set(builder.ROUTE_CLASSES)
-ALLOWED_ROUTE_CONFIDENCE_CLASSES = {
-    "EXACT_CONTROLLER_REFERENCE",
-    "EXACT_ARTIFACT_REFERENCE",
-    "EXACT_SCHEMA_REFERENCE",
-    "EXACT_VALIDATOR_REFERENCE",
-    "EXACT_TOOL_REFERENCE",
-    "EXACT_MASTER_PLAN_SECTION_REFERENCE",
-    "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
-    "OWNER_POLICY_REFERENCE",
-    "UNRESOLVED_EXPLICITLY",
-}
-ALLOWED_UNRESOLVED_REASON_CODES = {
-    "NO_EXACT_ARTIFACT_OWNER_FOUND",
-    "NO_EXACT_CONTROLLER_REFERENCE_FOUND",
-    "AMBIGUOUS_SECTION_SCOPE",
-    "TITLE_SIMILARITY_ONLY_NOT_ALLOWED",
-    "WOULD_REQUIRE_MASTER_PLAN_MUTATION",
-    "WOULD_REQUIRE_RUNTIME_OR_LIVE_AUTHORITY",
-    "WOULD_REQUIRE_SOURCE_OR_CONNECTOR_AUTHORITY",
-    "WOULD_REQUIRE_REPLAY_OR_PAPER_RESULT",
-    "WOULD_REQUIRE_QUANTUM_BACKEND_OR_OPTIMIZER_EXECUTION",
-    "WOULD_REINTRODUCE_OLD_COVERAGE_LEDGER",
-    "OUT_OF_SCOPE_FOR_PR119",
-}
+ALLOWED_ROUTE_CONFIDENCE_CLASSES = set(builder.ROUTE_CONFIDENCE_CLASSES)
+ALLOWED_UNRESOLVED_REASON_CODES = set(builder.UNRESOLVED_REASON_CODES)
 ALLOWED_QUANTUM_RELEVANCE_CLASSES = {
     "NONE",
     "QUANTUM_APPLICABILITY_METADATA",
@@ -115,6 +94,7 @@ ALLOWED_QUANTUM_RELEVANCE_CLASSES = {
 }
 QUANTUM_RELATED_ROUTE_CLASSES = {
     "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+    "QUANTUM_BACKEND_ROUTE",
     "OPTIMIZER_ARBITRATION_ROUTE",
     "LATENCY_COST_ROUTE",
 }
@@ -479,9 +459,6 @@ def validate_route_map(route_map: Mapping[str, Any], *, repo_root: pathlib.Path)
             if metadata.get(flag) is not True:
                 failures.append(f"{label}.quantum_forward_metadata.{flag} must be true")
 
-    for route_class in ALLOWED_ROUTE_CLASSES:
-        if route_class not in route_classes:
-            failures.append(f"route_map missing required route class: {route_class}")
     return failures
 
 
@@ -563,6 +540,281 @@ def validate_no_removed_ledger_references(
                     f"{rel_path.as_posix()}: removed implementation-ledger reference "
                     f"was reintroduced: {pattern}"
                 )
+    return failures
+
+
+def _central_enum_values(config: Mapping[str, Any], field: str) -> list[str]:
+    values = config.get(field)
+    if not isinstance(values, list):
+        return []
+    if field == "parent_capability_group_enum":
+        return [
+            str(item.get("parent_capability_group_id"))
+            for item in values
+            if isinstance(item, Mapping) and item.get("parent_capability_group_id")
+        ]
+    if field == "market_taxonomy":
+        return [
+            str(item.get("market_id"))
+            for item in values
+            if isinstance(item, Mapping) and item.get("market_id")
+        ]
+    return [str(item) for item in values]
+
+
+def validate_schema_enums_match_registry(
+    *,
+    registry: Mapping[str, Any],
+    schema: Mapping[str, Any],
+) -> list[str]:
+    config = registry.get("central_config", {})
+    if not isinstance(config, Mapping):
+        return ["central_config must be present in the section coverage registry"]
+    defs = schema.get("$defs", {})
+    if not isinstance(defs, Mapping):
+        return ["schema $defs must be an object"]
+    comparisons = (
+        ("route_class_enum", "route_class"),
+        ("route_confidence_class_enum", "route_confidence_class"),
+        ("unresolved_reason_code_enum", "unresolved_reason_code"),
+        ("parent_capability_group_enum", "parent_capability_group_id"),
+        ("market_taxonomy", "market_id"),
+    )
+    failures: list[str] = []
+    for registry_field, schema_def in comparisons:
+        schema_values = defs.get(schema_def, {}).get("enum")
+        registry_values = _central_enum_values(config, registry_field)
+        if schema_values != registry_values:
+            failures.append(
+                f"schema enum {schema_def} must match registry {registry_field}"
+            )
+    return failures
+
+
+def _section_ids_from_report(report: Mapping[str, Any]) -> list[str]:
+    return [
+        str(record.get("owner_section_id"))
+        for record in report.get("section_coverage", [])
+        if isinstance(record, Mapping)
+    ]
+
+
+def _rows(report: Mapping[str, Any]) -> list[dict[str, Any]]:
+    crosswalk = report.get("roadmap_crosswalk", {})
+    if not isinstance(crosswalk, Mapping):
+        return []
+    return [row for row in crosswalk.get("rows", []) if isinstance(row, dict)]
+
+
+def validate_roadmap_crosswalk(
+    *,
+    report: Mapping[str, Any],
+    registry: Mapping[str, Any],
+) -> list[str]:
+    failures: list[str] = []
+    rows = _rows(report)
+    section_ids = _section_ids_from_report(report)
+    row_ids = [str(row.get("section_id")) for row in rows]
+    if len(rows) != len(section_ids):
+        failures.append("crosswalk row count must equal SectionManifest section count")
+    if row_ids != section_ids:
+        failures.append("crosswalk row ordering must match SectionManifest document order")
+    duplicates = [section_id for section_id, count in Counter(row_ids).items() if count > 1]
+    if duplicates:
+        failures.append(f"crosswalk contains duplicate section IDs: {', '.join(sorted(duplicates))}")
+    missing = sorted(set(section_ids) - set(row_ids))
+    if missing:
+        failures.append(f"crosswalk missing section IDs: {', '.join(missing[:20])}")
+
+    config = registry.get("central_config", {})
+    if not isinstance(config, Mapping):
+        failures.append("registry central_config must be an object")
+        config = {}
+    route_classes = set(_central_enum_values(config, "route_class_enum"))
+    confidence_classes = set(_central_enum_values(config, "route_confidence_class_enum"))
+    parent_groups = set(_central_enum_values(config, "parent_capability_group_enum"))
+    unresolved_reasons = set(_central_enum_values(config, "unresolved_reason_code_enum"))
+    market_ids = set(_central_enum_values(config, "market_taxonomy"))
+    required_row_fields = {
+        "document_order_index",
+        "section_id",
+        "normalized_section_title",
+        "section_manifest_reference",
+        "section_position_source",
+        "section_start_line_or_position_if_available",
+        "section_end_line_or_position_if_available",
+        "parent_capability_group_id",
+        "parent_capability_group_title",
+        "current_route_class",
+        "route_confidence_class",
+        "exact_route_source",
+        "roadmap_pr_labels",
+        "blueprint_pr_labels",
+        "semantic_task_ids",
+        "controller_state_references",
+        "downstream_consumer_references",
+        "route_owner_artifacts",
+        "required_validators",
+        "required_reports",
+        "market_relevance",
+        "authority_boundary",
+        "unresolved_reason_code_when_applicable",
+        "owner_review_required_flag",
+        "no_master_plan_text_mutation_flag",
+        "no_old_coverage_ledger_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_market_launch_authority_created_flag",
+    }
+    for index, row in enumerate(rows, start=1):
+        label = f"roadmap_crosswalk.rows[{index}]"
+        missing_fields = sorted(required_row_fields - set(row))
+        if missing_fields:
+            failures.append(f"{label} missing required fields: {', '.join(missing_fields)}")
+            continue
+        if row.get("document_order_index") != index:
+            failures.append(f"{label}.document_order_index must be {index}")
+        if row.get("current_route_class") not in route_classes:
+            failures.append(f"{label} invalid route class {row.get('current_route_class')}")
+        if row.get("route_confidence_class") not in confidence_classes:
+            failures.append(
+                f"{label} invalid route confidence {row.get('route_confidence_class')}"
+            )
+        if row.get("parent_capability_group_id") not in parent_groups:
+            failures.append(
+                f"{label} invalid parent capability group {row.get('parent_capability_group_id')}"
+            )
+        unresolved = row.get("unresolved_reason_code_when_applicable")
+        if row.get("current_route_class") == "UNRESOLVED_DEFAULT_ROUTE":
+            if unresolved not in unresolved_reasons:
+                failures.append(f"{label} unresolved row needs central reason code")
+            if row.get("route_confidence_class") not in {
+                "UNRESOLVED_EXPLICITLY",
+                "EXACT_PR119_ROUTE_ENTRY",
+            }:
+                failures.append(
+                    f"{label} unresolved row needs explicit unresolved or exact PR119 confidence"
+                )
+        elif unresolved is not None and unresolved not in unresolved_reasons:
+            failures.append(f"{label} invalid unresolved reason {unresolved}")
+        for flag in (
+            "no_master_plan_text_mutation_flag",
+            "no_old_coverage_ledger_flag",
+            "no_runtime_live_order_profit_authority_created_flag",
+            "no_source_connector_replay_paper_authority_created_flag",
+            "no_quantum_backend_or_simulator_execution_created_flag",
+            "no_market_launch_authority_created_flag",
+        ):
+            if row.get(flag) is not True:
+                failures.append(f"{label}.{flag} must be true")
+        boundary = row.get("authority_boundary")
+        if not isinstance(boundary, Mapping):
+            failures.append(f"{label}.authority_boundary must be an object")
+        elif any(value is not False for value in boundary.values()):
+            failures.append(f"{label}.authority_boundary must not create authority")
+        if not isinstance(row.get("market_relevance"), list) or not row["market_relevance"]:
+            failures.append(f"{label}.market_relevance must be a non-empty array")
+        else:
+            for relevance in row["market_relevance"]:
+                if not isinstance(relevance, Mapping):
+                    failures.append(f"{label}.market_relevance item must be an object")
+                    continue
+                if relevance.get("market_id") not in market_ids:
+                    failures.append(f"{label} invalid market_id {relevance.get('market_id')}")
+                if relevance.get("no_launch_authority_created_flag") is not True:
+                    failures.append(f"{label} market relevance must not create launch authority")
+        if not row.get("roadmap_pr_labels"):
+            failures.append(f"{label} must include exact roadmap/controller crosswalk label")
+        if row.get("current_route_class") in {
+            "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+            "QUANTUM_BACKEND_ROUTE",
+            "OPTIMIZER_ARBITRATION_ROUTE",
+            "LATENCY_COST_ROUTE",
+        }:
+            if row["authority_boundary"].get("quantum_backend_or_simulator_execution_created") is not False:
+                failures.append(f"{label} quantum/latency row must not create execution")
+            if row["authority_boundary"].get("profit_evidence_created") is not False:
+                failures.append(f"{label} quantum/latency row must not create profit evidence")
+
+    route_entries = registry.get("route_map", {}).get("route_entries", [])
+    exact_rows = {row.get("section_id"): row for row in rows}
+    if len(route_entries) != 13:
+        failures.append("PR119 exact route map must still contain 13 route entries")
+    for entry in route_entries:
+        if not isinstance(entry, Mapping):
+            continue
+        section_id = entry.get("section_id")
+        row = exact_rows.get(section_id)
+        if row is None:
+            failures.append(f"PR119 exact route entry missing from crosswalk: {section_id}")
+            continue
+        if row.get("current_route_class") != entry.get("current_route_class"):
+            failures.append(f"PR119 route class changed for {section_id}")
+        if row.get("route_confidence_class") != "EXACT_PR119_ROUTE_ENTRY":
+            failures.append(f"PR119 route source not marked exact for {section_id}")
+        if entry.get("downstream_consumer_reference") not in row.get(
+            "downstream_consumer_references", []
+        ):
+            failures.append(f"PR119 downstream reference not preserved for {section_id}")
+        controller_reference = entry.get("controller_state_reference")
+        controller_refs = [
+            ref.get("controller_entry_reference")
+            for ref in row.get("controller_state_references", [])
+            if isinstance(ref, Mapping)
+        ]
+        if controller_reference not in controller_refs:
+            failures.append(f"PR119 controller reference not preserved for {section_id}")
+    return failures
+
+
+def validate_market_index(report: Mapping[str, Any]) -> list[str]:
+    failures: list[str] = []
+    rows = _rows(report)
+    order = {str(row.get("section_id")): index for index, row in enumerate(rows)}
+    valid_ids = set(order)
+    market_index = report.get("market_specific_section_index", {})
+    markets = market_index.get("markets", []) if isinstance(market_index, Mapping) else []
+    if not isinstance(markets, list):
+        return ["market_specific_section_index.markets must be an array"]
+    sorted_markets = sorted(
+        markets,
+        key=lambda market: (
+            builder.MARKET_STAGE_CLASSES.index(market.get("market_stage_class"))
+            if market.get("market_stage_class") in builder.MARKET_STAGE_CLASSES
+            else 10**9,
+            str(market.get("market_id")),
+        ),
+    )
+    if markets != sorted_markets:
+        failures.append("market entries must be sorted deterministically")
+    for market in markets:
+        if not isinstance(market, Mapping):
+            failures.append("market entry must be an object")
+            continue
+        label = f"market {market.get('market_id')}"
+        section_ids = [str(section_id) for section_id in market.get("related_section_ids", [])]
+        invalid = sorted(set(section_ids) - valid_ids)
+        if invalid:
+            failures.append(f"{label} references unknown section IDs: {', '.join(invalid[:20])}")
+        if section_ids != sorted(section_ids, key=lambda section_id: order.get(section_id, 10**9)):
+            failures.append(f"{label} section IDs must follow document order")
+        for flag in (
+            "no_market_launch_authority_created_flag",
+            "no_external_market_fact_created_flag",
+            "no_runtime_live_order_profit_authority_created_flag",
+        ):
+            if market.get(flag) is not True:
+                failures.append(f"{label}.{flag} must be true")
+    summary = report.get("market_specific_section_index_summary", {})
+    if isinstance(summary, Mapping):
+        for field in (
+            "market_launch_authority_created",
+            "stage2_launch_authority_created",
+            "next_market_selected",
+        ):
+            if summary.get(field) is not False:
+                failures.append(f"market index summary {field} must be false")
     return failures
 
 
@@ -691,8 +943,14 @@ def validate(
         schema_path=schema_path,
     )
     failures.extend(report_failures)
+    schema, schema_failures = _load_json(root / schema_path)
+    failures.extend(schema_failures)
+    if schema is not None:
+        failures.extend(validate_schema_enums_match_registry(registry=registry, schema=schema))
     if report is not None:
         failures.extend(validate_no_pr_tracking_keys(report))
+        failures.extend(validate_roadmap_crosswalk(report=report, registry=registry))
+        failures.extend(validate_market_index(report))
 
     if mode == "final":
         failures.extend(validate_final_mode(entries, repo_root=root))

@@ -119,6 +119,18 @@ def test_pr118_self_entry_is_currentized_without_implying_roadmap_or_blueprint_1
     assert _mapping("PR #118")["roster_entry_id"] == "ROADMAP_PR_118_PLANNED"
 
 
+def test_pr119_self_entry_is_currentized_without_implying_roadmap_or_blueprint_119():
+    pr119 = _roster_entry("PR119_REPO_CANONICAL_SELF_ENTRY")
+
+    assert pr119["repo_canonical_pr_label"] == "PR119"
+    assert pr119["github_pr_number"] == 119
+    assert pr119["github_audit_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/119"
+    assert pr119["roadmap_pr_label"] is None
+    assert pr119["blueprint_pr_label"] is None
+    assert _mapping("PR #119")["title"] == "Paper trading engine executor"
+    assert _mapping("PR #119")["roster_entry_id"] == "ROADMAP_PR_119_PLANNED"
+
+
 def test_roadmap_blueprint_labels_are_metadata_and_same_number_is_not_identity():
     controller = _controller()
     identity = controller["identity_translation_authority"]

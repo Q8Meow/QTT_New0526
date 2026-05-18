@@ -1,6 +1,443 @@
 schema_version: 1
 registry_name: QTTSectionCoverageRegistry
 coverage_model: SECTION_CAPABILITY_COVERAGE_ROUTING
+roadmap_crosswalk_config:
+  crosswalk_id: QTT_MASTER_PLAN_SECTION_ROADMAP_CROSSWALK_AND_MARKET_INDEX_V1_0
+  repo_canonical_pr_label: PR120
+  roadmap_pr_label: PR #103
+  blueprint_pr_label: PR #103
+  semantic_task_id: ROADMAP-MASTER-PLAN-COVERAGE-PARENT-CAPABILITY-CONSOLIDATION
+  title: Master-plan section coverage parent-capability consolidation
+  authority_class: STATIC_CONTROL_PLANE_CROSSWALK_NOT_RUNTIME_NOT_LIVE_NOT_MARKET_LAUNCH_AUTHORITY
+  materialized_capability: QTT_MASTER_PLAN_SECTION_ROADMAP_CROSSWALK_AND_MARKET_INDEX_V1_0
+  state_transition: MASTER_PLAN_SECTION_PARENT_CAPABILITY_CROSSWALK_ESTABLISHED
+  controller_decision_reference: docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/2
+  section_manifest_reference: docs/master_plan/generated/SectionManifest.json
+  generated_report_path: docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+  route_map_preserved_reference: QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_V1_0
+  artifact_family_decision: EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED
+  market_index_authority_class: STATIC_MARKET_SECTION_INDEX_NOT_MARKET_LAUNCH_AUTHORITY
+  pr119_github_audit_currentization_evidence:
+    github_pr_number: 119
+    github_audit_url: https://github.com/Q8Meow/QTT_New0526/pull/119
+    github_title: PR119 currentize identity roster and add controller-approved coverage triage routes
+    state: MERGED
+    merged: true
+    base_ref_name: main
+    head_ref_name: pr119-identity-roster-currentization-and-coverage-triage-routes
+    merge_commit_oid: caac13c3abcab7177c6d4aeae201385561600f01
+route_class_enum:
+  - CAPABILITY_ROUTE
+  - POLICY_ROUTE
+  - SOURCE_EVIDENCE_ROUTE
+  - CONNECTOR_SEMANTIC_ROUTE
+  - REPLAY_PAPER_ROUTE
+  - RUNTIME_ROUTE
+  - RUNTIME_CASH_ROUTE
+  - OWNER_ROUTE
+  - GOVERNANCE_ROUTE
+  - RISK_ROUTE
+  - DASHBOARD_OWNER_SURFACE_ROUTE
+  - RESEARCH_ROUTE
+  - QUARANTINE_ROUTE
+  - RETIREMENT_ROUTE
+  - CONTROLLER_REFERENCED_ROUTE
+  - QUANTUM_FORWARD_OPTIMIZATION_ROUTE
+  - QUANTUM_BACKEND_ROUTE
+  - OPTIMIZER_ARBITRATION_ROUTE
+  - LATENCY_COST_ROUTE
+  - MARKET_EXPANSION_ROUTE
+  - CROSS_MARKET_ROUTE
+  - UNRESOLVED_DEFAULT_ROUTE
+route_confidence_class_enum:
+  - EXACT_PR119_ROUTE_ENTRY
+  - EXACT_CONTROLLER_REFERENCE
+  - EXACT_ROADMAP_INDEX_REFERENCE
+  - EXACT_BLUEPRINT_INDEX_REFERENCE
+  - EXACT_ROADMAP_BLUEPRINT_REFERENCE
+  - EXACT_ARTIFACT_REFERENCE
+  - EXACT_SCHEMA_REFERENCE
+  - EXACT_VALIDATOR_REFERENCE
+  - EXACT_TOOL_REFERENCE
+  - EXACT_REPORT_REFERENCE
+  - EXACT_MASTER_PLAN_SECTION_REFERENCE
+  - EXACT_MARKET_TOKEN_REFERENCE
+  - EXACT_STAGE_REFERENCE
+  - PARENT_CAPABILITY_RULE_REFERENCE
+  - DEFAULT_RESEARCH_ROUTE
+  - UNRESOLVED_EXPLICITLY
+  - OWNER_POLICY_REFERENCE
+parent_capability_group_enum:
+  - parent_capability_group_id: CODEX_BUILD_DOCTRINE_AND_TRACEABILITY
+    parent_capability_group_title: Codex build doctrine and traceability
+  - parent_capability_group_id: MASTER_PLAN_SECTION_COVERAGE_AND_COMPLETION
+    parent_capability_group_title: Master-plan section coverage and completion
+  - parent_capability_group_id: SOURCE_EVIDENCE_AND_ACCEPTED_FACTS
+    parent_capability_group_title: Source evidence and accepted facts
+  - parent_capability_group_id: CONNECTOR_SEMANTIC_BINDING_AND_VENUE_NORMALIZATION
+    parent_capability_group_title: Connector semantic binding and venue normalization
+  - parent_capability_group_id: RUNTIME_RESOLVER_AND_SNAPSHOT_INPUT_IDENTITY
+    parent_capability_group_title: Runtime resolver and snapshot input identity
+  - parent_capability_group_id: REPLAY_PAPER_DUAL_RESULT_AND_OWNER_REVIEW
+    parent_capability_group_title: Replay paper dual result and owner review
+  - parent_capability_group_id: RUNTIME_CASH_PRIVATE_STATE_AND_EXPOSURE
+    parent_capability_group_title: Runtime cash private state and exposure
+  - parent_capability_group_id: ORDER_INTENT_EXECUTION_ROUTER_AND_PRETRADE_GATES
+    parent_capability_group_title: Order intent execution router and pretrade gates
+  - parent_capability_group_id: ATOMICROWS_PARAMETER_ALGORITHM_AGENT_INVENTORY
+    parent_capability_group_title: AtomicRows parameter algorithm agent inventory
+  - parent_capability_group_id: EDGE_STACK_SCORING_SELECTION_AND_HANDOFF
+    parent_capability_group_title: Edge stack scoring selection and handoff
+  - parent_capability_group_id: QUANTUM_POLICY_APPLICABILITY_OPTIMIZATION_AND_BACKEND
+    parent_capability_group_title: Quantum policy applicability optimization and backend
+  - parent_capability_group_id: LATENCY_COST_SLIPPAGE_AND_EXECUTION_QUALITY
+    parent_capability_group_title: Latency cost slippage and execution quality
+  - parent_capability_group_id: DASHBOARD_OWNER_APPROVAL_AND_GOVERNANCE
+    parent_capability_group_title: Dashboard owner approval and governance
+  - parent_capability_group_id: RESEARCH_INTAKE_EXTERNAL_REPO_AND_NEURAL_SIGNAL
+    parent_capability_group_title: Research intake external repo and neural signal
+  - parent_capability_group_id: MARKET_EXPANSION_AND_CROSS_MARKET_ADAPTATION
+    parent_capability_group_title: Market expansion and cross-market adaptation
+  - parent_capability_group_id: RISK_LIMIT_KILL_SWITCH_AND_POST_TRADE_SAFETY
+    parent_capability_group_title: Risk limit kill switch and post-trade safety
+  - parent_capability_group_id: LAUNCH_RUNBOOK_CANARY_ARBITRAGE_AND_LIVE_PROMOTION
+    parent_capability_group_title: Launch runbook canary arbitrage and live promotion
+  - parent_capability_group_id: QUARANTINE_RETIREMENT_AND_NEGATIVE_EVIDENCE
+    parent_capability_group_title: Quarantine retirement and negative evidence
+  - parent_capability_group_id: UNRESOLVED_RESEARCH_DEFAULT
+    parent_capability_group_title: Unresolved research default
+unresolved_reason_code_enum:
+  - NO_EXACT_ARTIFACT_OWNER_FOUND
+  - NO_EXACT_CONTROLLER_REFERENCE_FOUND
+  - NO_EXACT_ROADMAP_BLUEPRINT_CONTROLLER_OWNER_FOUND
+  - AMBIGUOUS_SECTION_SCOPE
+  - TITLE_SIMILARITY_ONLY_NOT_ALLOWED
+  - MARKET_RELEVANCE_UNRESOLVED
+  - WOULD_REQUIRE_MASTER_PLAN_MUTATION
+  - WOULD_REQUIRE_RUNTIME_OR_LIVE_AUTHORITY
+  - WOULD_REQUIRE_SOURCE_OR_CONNECTOR_AUTHORITY
+  - WOULD_REQUIRE_REPLAY_OR_PAPER_RESULT
+  - WOULD_REQUIRE_QUANTUM_BACKEND_OR_OPTIMIZER_EXECUTION
+  - WOULD_REINTRODUCE_OLD_COVERAGE_LEDGER
+  - OUT_OF_SCOPE_FOR_PR119
+  - OUT_OF_SCOPE_FOR_PR120
+market_taxonomy:
+  - market_id: PREDICTION_MARKETS_GENERAL
+    market_display_name: Prediction markets general
+    market_stage_class: STAGE_1_ACTIVE_SCOPE
+    market_scope_confidence_class: EXACT_MASTER_PLAN_MARKET_REFERENCE
+    evidence_basis: exact master-plan prediction market and stage1_prediction_market tokens
+    match_tokens:
+      - prediction market
+      - prediction-market
+      - stage1_prediction_market
+      - stage1 prediction market
+  - market_id: KALSHI
+    market_display_name: Kalshi
+    market_stage_class: STAGE_1_ACTIVE_SCOPE
+    market_scope_confidence_class: EXACT_VENUE_ID_REFERENCE
+    evidence_basis: exact master-plan KALSHI venue token
+    match_tokens:
+      - KALSHI
+      - Kalshi
+  - market_id: POLYMARKET
+    market_display_name: Polymarket
+    market_stage_class: STAGE_1_ACTIVE_SCOPE
+    market_scope_confidence_class: EXACT_VENUE_ID_REFERENCE
+    evidence_basis: exact master-plan POLYMARKET venue token
+    match_tokens:
+      - POLYMARKET
+      - Polymarket
+  - market_id: FORECASTEX_IBKR
+    market_display_name: FORECASTEX IBKR
+    market_stage_class: STAGE_1_ACTIVE_SCOPE
+    market_scope_confidence_class: EXACT_VENUE_ID_REFERENCE
+    evidence_basis: exact master-plan FORECASTEX_IBKR venue token
+    match_tokens:
+      - FORECASTEX_IBKR
+      - ForecastEx
+      - FORECASTEX
+      - IBKR
+  - market_id: CROSS_MARKET_FOUNDATION
+    market_display_name: Cross-market foundation
+    market_stage_class: CROSS_MARKET_FOUNDATION_SCOPE
+    market_scope_confidence_class: CROSS_MARKET_GENERIC_REFERENCE
+    evidence_basis: exact cross-market and multi-platform master-plan tokens
+    match_tokens:
+      - cross-market
+      - cross market
+      - multi-platform
+      - three-platform
+      - platform scope
+  - market_id: MARKET_EXPANSION_GENERAL
+    market_display_name: Market expansion general
+    market_stage_class: STAGE_2_CANDIDATE_SCOPE
+    market_scope_confidence_class: EXACT_ROADMAP_BLUEPRINT_REFERENCE
+    evidence_basis: roadmap and master-plan market expansion tokens
+    match_tokens:
+      - market expansion
+      - future market
+      - Stage 2
+      - stage2
+      - candidate market
+  - market_id: OWNER_REVIEW_REQUIRED_MARKET_CANDIDATE
+    market_display_name: Owner review required market candidate
+    market_stage_class: OWNER_REVIEW_REQUIRED_SCOPE
+    market_scope_confidence_class: OWNER_REVIEW_REQUIRED
+    evidence_basis: no exact market token or venue identifier found
+    match_tokens: []
+authority_boundary_defaults:
+  runtime_authority_created: false
+  live_authority_created: false
+  source_fact_acceptance_created: false
+  connector_semantic_binding_created: false
+  replay_paper_result_created: false
+  paper_result_created: false
+  order_authority_created: false
+  profit_evidence_created: false
+  latency_superiority_evidence_created: false
+  quantum_backend_or_simulator_execution_created: false
+  optimizer_runtime_execution_created: false
+  market_launch_authority_created: false
+  stage2_launch_authority_created: false
+exact_pr119_route_preservation_rules:
+  expected_route_entry_count: 13
+  preserve_route_class: true
+  preserve_downstream_consumer_references: true
+  preserve_controller_references: true
+  preserve_authority_flags: true
+  preserve_quantum_forward_flags: true
+  preserved_section_ids:
+    - 0X.0AF
+    - 0X.4B.12
+    - 0X.4O
+    - 0X.4T
+    - 0X.4Z
+    - 0X.5H.2D
+    - 0X.5H.2M
+    - 0X.5H.2P
+    - 0X.5S.8
+    - 19.8
+    - 3.13.3B
+    - 8.1C
+    - 8.8
+roadmap_blueprint_controller_mapping_rules:
+  default_roadmap_pr_label: PR #103
+  default_blueprint_pr_label: PR #103
+  default_controller_reference: docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/2
+  default_unresolved_reason_code: NO_EXACT_ARTIFACT_OWNER_FOUND
+  parent_capability_rules:
+    - rule_id: SOURCE_EVIDENCE_RULE
+      route_class: SOURCE_EVIDENCE_ROUTE
+      parent_capability_group_id: SOURCE_EVIDENCE_AND_ACCEPTED_FACTS
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - source-evidence
+        - source evidence
+        - accepted fact
+        - accepted source
+    - rule_id: CONNECTOR_SEMANTIC_RULE
+      route_class: CONNECTOR_SEMANTIC_ROUTE
+      parent_capability_group_id: CONNECTOR_SEMANTIC_BINDING_AND_VENUE_NORMALIZATION
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - connector
+        - venue semantic
+        - binding
+        - venue normalization
+    - rule_id: RUNTIME_CASH_RULE
+      route_class: RUNTIME_CASH_ROUTE
+      parent_capability_group_id: RUNTIME_CASH_PRIVATE_STATE_AND_EXPOSURE
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - runtime cash
+        - private-state
+        - balance
+        - wallet
+        - account
+    - rule_id: RUNTIME_RESOLVER_RULE
+      route_class: RUNTIME_ROUTE
+      parent_capability_group_id: RUNTIME_RESOLVER_AND_SNAPSHOT_INPUT_IDENTITY
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - runtime resolver
+        - runtime snapshot
+        - resolver snapshot
+        - input identity
+    - rule_id: REPLAY_PAPER_RULE
+      route_class: REPLAY_PAPER_ROUTE
+      parent_capability_group_id: REPLAY_PAPER_DUAL_RESULT_AND_OWNER_REVIEW
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - replay
+        - paper
+        - dual-result
+        - walk-forward
+    - rule_id: DASHBOARD_OWNER_RULE
+      route_class: DASHBOARD_OWNER_SURFACE_ROUTE
+      parent_capability_group_id: DASHBOARD_OWNER_APPROVAL_AND_GOVERNANCE
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - dashboard
+        - owner approval
+        - owner review
+        - telegram
+    - rule_id: GOVERNANCE_RULE
+      route_class: GOVERNANCE_ROUTE
+      parent_capability_group_id: DASHBOARD_OWNER_APPROVAL_AND_GOVERNANCE
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - governance
+        - authority
+        - policy authority
+        - control-plane
+    - rule_id: POLICY_RULE
+      route_class: POLICY_ROUTE
+      parent_capability_group_id: CODEX_BUILD_DOCTRINE_AND_TRACEABILITY
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - policy
+        - doctrine
+        - invariant
+    - rule_id: RISK_SAFETY_RULE
+      route_class: RISK_ROUTE
+      parent_capability_group_id: RISK_LIMIT_KILL_SWITCH_AND_POST_TRADE_SAFETY
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - risk
+        - kill-switch
+        - rollback
+        - pretrade
+        - safety
+    - rule_id: LAUNCH_LIVE_RULE
+      route_class: RISK_ROUTE
+      parent_capability_group_id: LAUNCH_RUNBOOK_CANARY_ARBITRAGE_AND_LIVE_PROMOTION
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - launch
+        - canary
+        - live promotion
+        - day-1
+    - rule_id: ATOMICROWS_RULE
+      route_class: CAPABILITY_ROUTE
+      parent_capability_group_id: ATOMICROWS_PARAMETER_ALGORITHM_AGENT_INVENTORY
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - AtomicRows
+        - parameter
+        - algorithm
+        - agent
+    - rule_id: EDGE_STACK_RULE
+      route_class: CAPABILITY_ROUTE
+      parent_capability_group_id: EDGE_STACK_SCORING_SELECTION_AND_HANDOFF
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - edge stack
+        - scoring
+        - ranking
+        - handoff
+    - rule_id: QUANTUM_BACKEND_RULE
+      route_class: QUANTUM_BACKEND_ROUTE
+      parent_capability_group_id: QUANTUM_POLICY_APPLICABILITY_OPTIMIZATION_AND_BACKEND
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - quantum backend
+        - backend authority
+        - quantum provider
+        - simulator
+    - rule_id: QUANTUM_FORWARD_RULE
+      route_class: QUANTUM_FORWARD_OPTIMIZATION_ROUTE
+      parent_capability_group_id: QUANTUM_POLICY_APPLICABILITY_OPTIMIZATION_AND_BACKEND
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - quantum
+        - QUBO
+        - Ising
+        - QAOA
+        - VQE
+        - anneal
+    - rule_id: OPTIMIZER_RULE
+      route_class: OPTIMIZER_ARBITRATION_ROUTE
+      parent_capability_group_id: QUANTUM_POLICY_APPLICABILITY_OPTIMIZATION_AND_BACKEND
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - optimizer
+        - arbitration
+        - optimization
+    - rule_id: LATENCY_COST_RULE
+      route_class: LATENCY_COST_ROUTE
+      parent_capability_group_id: LATENCY_COST_SLIPPAGE_AND_EXECUTION_QUALITY
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - latency
+        - slippage
+        - fee
+        - cost
+        - fill
+        - TCA
+    - rule_id: MARKET_EXPANSION_RULE
+      route_class: MARKET_EXPANSION_ROUTE
+      parent_capability_group_id: MARKET_EXPANSION_AND_CROSS_MARKET_ADAPTATION
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - market expansion
+        - future market
+        - Stage 2
+        - stage2
+    - rule_id: CROSS_MARKET_RULE
+      route_class: CROSS_MARKET_ROUTE
+      parent_capability_group_id: MARKET_EXPANSION_AND_CROSS_MARKET_ADAPTATION
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - cross-market
+        - cross market
+        - multi-platform
+        - three-platform
+    - rule_id: RESEARCH_RULE
+      route_class: RESEARCH_ROUTE
+      parent_capability_group_id: RESEARCH_INTAKE_EXTERNAL_REPO_AND_NEURAL_SIGNAL
+      route_confidence_class: DEFAULT_RESEARCH_ROUTE
+      match_tokens_any:
+        - research
+        - neural
+        - external repo
+        - signal
+    - rule_id: QUARANTINE_RULE
+      route_class: QUARANTINE_ROUTE
+      parent_capability_group_id: QUARANTINE_RETIREMENT_AND_NEGATIVE_EVIDENCE
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - quarantine
+        - unproven
+        - banned
+    - rule_id: RETIREMENT_RULE
+      route_class: RETIREMENT_ROUTE
+      parent_capability_group_id: QUARANTINE_RETIREMENT_AND_NEGATIVE_EVIDENCE
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - retirement
+        - retired
+        - negative evidence
+    - rule_id: SECTION_COVERAGE_RULE
+      route_class: CAPABILITY_ROUTE
+      parent_capability_group_id: MASTER_PLAN_SECTION_COVERAGE_AND_COMPLETION
+      route_confidence_class: PARENT_CAPABILITY_RULE_REFERENCE
+      match_tokens_any:
+        - section coverage
+        - master-plan section
+        - coverage report
+market_relevance_mapping_rules:
+  unresolved_market_id: OWNER_REVIEW_REQUIRED_MARKET_CANDIDATE
+  market_index_authority_class: STATIC_MARKET_SECTION_INDEX_NOT_MARKET_LAUNCH_AUTHORITY
+  no_market_launch_authority_created_flag: true
+  no_external_market_fact_created_flag: true
+  exact_token_matching_required: true
+deterministic_sorting_rules:
+  crosswalk_rows: SectionManifest document_order_index
+  market_entries: market_stage_class then market_id
+  section_ids_inside_market_entries: SectionManifest document_order_index
+  route_class_summaries: central route_class_enum order
+  roadmap_labels: parsed numeric label metadata only
 route_map:
   route_map_id: QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_V1_0
   route_map_version: v1.0

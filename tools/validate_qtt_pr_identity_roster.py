@@ -107,7 +107,7 @@ REQUIRED_NO_CLAIM_BOUNDARY = {
     "profit_latency_execution_quantum_advantage_evidence_created": False,
     "bug_free_status_claimed": False,
 }
-REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 119))
+REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 120))
 REQUIRED_ROADMAP_LABELS = tuple(f"PR #{number}" for number in range(97, 127))
 REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 117))
 ROADMAP_RUNTIME_BLOCK_LABELS = tuple(f"PR #{number}" for number in range(105, 127))
@@ -143,6 +143,13 @@ REQUIRED_PR118_NOTE_PARTS = (
     "repo-canonical PR118",
     "does not imply Roadmap PR #118",
     "Blueprint PR #118",
+    "implementation-truth label",
+)
+REQUIRED_PR119_NOTE_PARTS = (
+    "GitHub #119 is the audit number assigned",
+    "repo-canonical PR119",
+    "does not imply Roadmap PR #119",
+    "Blueprint PR #119",
     "implementation-truth label",
 )
 
@@ -305,7 +312,7 @@ def _validate_seed_scope(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     if not isinstance(scope, dict):
         return ["seed_scope must be an object"]
     if tuple(scope.get("github_pr_numbers_included", [])) != REQUIRED_GITHUB_AUDIT_NUMBERS:
-        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #118")
+        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #119")
     if tuple(scope.get("roadmap_pr_labels_included", [])) != REQUIRED_ROADMAP_LABELS:
         failures.append("seed_scope.roadmap_pr_labels_included must be roadmap PR #97 through #126")
     if tuple(scope.get("corrective_overlays_included", [])) != ("PR115A", "PR116A"):
@@ -456,6 +463,49 @@ def _validate_pr118_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
     return failures
 
 
+def _validate_pr119_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
+    failures: list[str] = []
+    pr119 = _entry_by_id(entries, "PR119_REPO_CANONICAL_SELF_ENTRY")
+    if pr119 is None:
+        return ["missing PR119 repo-canonical self-entry"]
+    expected = {
+        "repo_canonical_pr_label": "PR119",
+        "roadmap_pr_label": None,
+        "blueprint_pr_label": None,
+        "github_pr_number": 119,
+        "repo_title": "Currentize identity roster and add controller-approved coverage triage routes",
+        "roadmap_title": None,
+        "blueprint_title": None,
+        "github_title": "PR119 currentize identity roster and add controller-approved coverage triage routes",
+        "branch_name": "pr119-identity-roster-currentization-and-coverage-triage-routes",
+        "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+        "authority_scope": "CONTROL_PLANE_ONLY",
+        "current_status": "MERGED",
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/119",
+        "identity_relation_class": "REPO_CANONICAL_ONLY",
+        "same_number_mismatch_recorded": True,
+    }
+    for field, expected_value in expected.items():
+        if pr119.get(field) != expected_value:
+            failures.append(f"PR119 self-entry {field} must be {expected_value!r}")
+    if "PR118_REPO_CANONICAL_SELF_ENTRY" not in pr119.get(
+        "depends_on_roster_entries", []
+    ):
+        failures.append("PR119 self-entry must depend on PR118_REPO_CANONICAL_SELF_ENTRY")
+    for marker in (
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_OK",
+    ):
+        if marker not in pr119.get("validator_markers", []):
+            failures.append(f"PR119 self-entry must reference {marker}")
+    if "GITHUB_AUDIT_NUMBER" not in pr119.get("reference_types", []):
+        failures.append("PR119 self-entry reference_types must include GITHUB_AUDIT_NUMBER")
+    missing_notes = _notes_contain(pr119, REQUIRED_PR119_NOTE_PARTS)
+    if missing_notes:
+        failures.append(f"PR119 self-entry notes missing: {', '.join(missing_notes)}")
+    return failures
+
+
 def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]]) -> list[str]:
     failures: list[str] = []
     summary = roster.get("mismatch_summary")
@@ -486,6 +536,8 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
         failures.append("missing same-number mismatch record for GitHub #117")
     if 118 not in mismatch_numbers:
         failures.append("missing same-number mismatch record for GitHub #118")
+    if 119 not in mismatch_numbers:
+        failures.append("missing same-number mismatch record for GitHub #119")
     pr117_self = _entry_by_id(entries, "PR117_REPO_CANONICAL_SELF_ENTRY")
     if pr117_self is not None:
         if pr117_self.get("roadmap_pr_label") is not None:
@@ -650,6 +702,19 @@ def _build_report(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]], 
         "pr118_github_audit_url": (
             _entry_by_id(entries, "PR118_REPO_CANONICAL_SELF_ENTRY") or {}
         ).get("github_audit_url"),
+        "pr119_self_entry_present": _entry_by_id(
+            entries, "PR119_REPO_CANONICAL_SELF_ENTRY"
+        )
+        is not None,
+        "pr119_assumed_github_119": False,
+        "pr119_assumed_roadmap_pr_119": False,
+        "pr119_assumed_blueprint_pr_119": False,
+        "pr119_github_audit_number": (
+            _entry_by_id(entries, "PR119_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_number"),
+        "pr119_github_audit_url": (
+            _entry_by_id(entries, "PR119_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_audit_url"),
         "no_active_non_sha_day1_gate_flipped": not gate_registry.CURRENT_PR_FLIPS_ANY_GATE,
         "final_readiness_created": gate_registry.CURRENT_PR_CREATES_FINAL_READINESS,
         "day1_launch_authority_created": gate_registry.CURRENT_PR_CREATES_DAY1_LAUNCH_AUTHORITY,
@@ -693,6 +758,7 @@ def validate(
     failures.extend(_validate_corrective_overlays(entries))
     failures.extend(_validate_pr117_self_entry(entries))
     failures.extend(_validate_pr118_self_entry(entries))
+    failures.extend(_validate_pr119_self_entry(entries))
     failures.extend(_validate_mismatches(roster, entries))
     failures.extend(_validate_gate_and_authority_boundaries(repo_root, roster))
 
