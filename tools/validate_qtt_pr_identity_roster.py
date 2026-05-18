@@ -107,7 +107,7 @@ REQUIRED_NO_CLAIM_BOUNDARY = {
     "profit_latency_execution_quantum_advantage_evidence_created": False,
     "bug_free_status_claimed": False,
 }
-REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 118))
+REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 119))
 REQUIRED_ROADMAP_LABELS = tuple(f"PR #{number}" for number in range(97, 127))
 REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 117))
 ROADMAP_RUNTIME_BLOCK_LABELS = tuple(f"PR #{number}" for number in range(105, 127))
@@ -139,11 +139,11 @@ REQUIRED_PR117_NOTE_PARTS = (
     "implementation-truth label",
 )
 REQUIRED_PR118_NOTE_PARTS = (
-    "Repo PR118 is a repo-canonical control-plane state-controller PR",
+    "GitHub #118 is the audit number assigned",
+    "repo-canonical PR118",
     "does not imply Roadmap PR #118",
     "Blueprint PR #118",
-    "GitHub PR #118",
-    "github_pr_number remains null",
+    "implementation-truth label",
 )
 
 
@@ -305,7 +305,7 @@ def _validate_seed_scope(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     if not isinstance(scope, dict):
         return ["seed_scope must be an object"]
     if tuple(scope.get("github_pr_numbers_included", [])) != REQUIRED_GITHUB_AUDIT_NUMBERS:
-        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #117")
+        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #118")
     if tuple(scope.get("roadmap_pr_labels_included", [])) != REQUIRED_ROADMAP_LABELS:
         failures.append("seed_scope.roadmap_pr_labels_included must be roadmap PR #97 through #126")
     if tuple(scope.get("corrective_overlays_included", [])) != ("PR115A", "PR116A"):
@@ -426,16 +426,16 @@ def _validate_pr118_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
         "repo_canonical_pr_label": "PR118",
         "roadmap_pr_label": None,
         "blueprint_pr_label": None,
-        "github_pr_number": None,
+            "github_pr_number": 118,
         "repo_title": "Roadmap execution-state controller and audit currentization",
         "roadmap_title": None,
         "blueprint_title": None,
-        "github_title": None,
+            "github_title": "PR118 add roadmap execution-state controller",
         "branch_name": "pr118-roadmap-execution-state-controller-audit-currentization",
         "semantic_role": "CONTROL_PLANE_RECONCILIATION",
         "authority_scope": "CONTROL_PLANE_ONLY",
-        "current_status": "PLANNED",
-        "github_audit_url": None,
+            "current_status": "MERGED",
+            "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/118",
         "identity_relation_class": "REPO_CANONICAL_ONLY",
         "same_number_mismatch_recorded": True,
     }
@@ -484,6 +484,8 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
 
     if 117 not in mismatch_numbers:
         failures.append("missing same-number mismatch record for GitHub #117")
+    if 118 not in mismatch_numbers:
+        failures.append("missing same-number mismatch record for GitHub #118")
     pr117_self = _entry_by_id(entries, "PR117_REPO_CANONICAL_SELF_ENTRY")
     if pr117_self is not None:
         if pr117_self.get("roadmap_pr_label") is not None:
@@ -642,6 +644,12 @@ def _build_report(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]], 
         "pr118_assumed_github_118": False,
         "pr118_assumed_roadmap_pr_118": False,
         "pr118_assumed_blueprint_pr_118": False,
+        "pr118_github_audit_number": (
+            _entry_by_id(entries, "PR118_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_number"),
+        "pr118_github_audit_url": (
+            _entry_by_id(entries, "PR118_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_audit_url"),
         "no_active_non_sha_day1_gate_flipped": not gate_registry.CURRENT_PR_FLIPS_ANY_GATE,
         "final_readiness_created": gate_registry.CURRENT_PR_CREATES_FINAL_READINESS,
         "day1_launch_authority_created": gate_registry.CURRENT_PR_CREATES_DAY1_LAUNCH_AUTHORITY,

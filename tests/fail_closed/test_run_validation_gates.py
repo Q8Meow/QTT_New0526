@@ -1498,6 +1498,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_qtt_master_plan_section_coverage_triage_routes.py"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -5729,10 +5736,14 @@ def test_runner_includes_section_coverage_dev_gate_after_three_venue_and_before_
     )
     build_index = command_names.index("build_master_plan_section_coverage_report.py")
     validate_index = command_names.index("validate_master_plan_section_coverage.py")
+    triage_routes_index = command_names.index(
+        "validate_qtt_master_plan_section_coverage_triage_routes.py"
+    )
     qtt_gate_index = command_names.index("qtt_test_gate.py")
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
-    assert three_venue_index < build_index < validate_index < qtt_gate_index
+    assert three_venue_index < build_index < validate_index < triage_routes_index
+    assert triage_routes_index < qtt_gate_index
     assert qtt_gate_index < no_runtime_index
     assert commands[build_index] == [
         python_executable,
@@ -5745,6 +5756,10 @@ def test_runner_includes_section_coverage_dev_gate_after_three_venue_and_before_
         "dev",
     ]
     assert "final" not in commands[validate_index]
+    assert commands[triage_routes_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_master_plan_section_coverage_triage_routes.py"),
+    ]
 
 
 def test_runner_stops_on_first_failure_and_returns_failing_exit_code(monkeypatch, capsys):

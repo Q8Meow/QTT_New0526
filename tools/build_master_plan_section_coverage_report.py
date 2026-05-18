@@ -73,6 +73,72 @@ REGISTRY_ENTRY_FIELDS = (
     "validation_commands",
 )
 
+ROUTE_CLASSES = (
+    "CAPABILITY_ROUTE",
+    "POLICY_ROUTE",
+    "SOURCE_EVIDENCE_ROUTE",
+    "REPLAY_PAPER_ROUTE",
+    "RUNTIME_ROUTE",
+    "OWNER_ROUTE",
+    "QUARANTINE_ROUTE",
+    "RETIREMENT_ROUTE",
+    "CONTROLLER_REFERENCED_ROUTE",
+    "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+    "OPTIMIZER_ARBITRATION_ROUTE",
+    "LATENCY_COST_ROUTE",
+    "UNRESOLVED_DEFAULT_ROUTE",
+)
+
+ROUTE_MAP_FIELDS = (
+    "route_map_id",
+    "route_map_version",
+    "authority_class",
+    "repo_canonical_pr_label",
+    "roadmap_pr_label",
+    "semantic_task_id",
+    "source_manifest_reference",
+    "route_entries",
+    "generated_report_path",
+    "controller_decision_reference",
+    "existing_artifact_discovery_result",
+    "changed_file_list_by_artifact_family",
+    "no_old_coverage_ledger_reintroduction_flag",
+    "no_runtime_live_order_profit_authority_created_flag",
+    "no_source_connector_replay_paper_authority_created_flag",
+    "no_quantum_backend_or_simulator_execution_created_flag",
+    "no_master_plan_text_mutation_flag",
+)
+
+ROUTE_ENTRY_FIELDS = (
+    "section_id",
+    "normalized_section_title",
+    "current_route_class",
+    "previous_route_class_or_default_state",
+    "route_owner_artifact",
+    "route_owner_reason_code",
+    "controller_state_reference",
+    "downstream_consumer_reference",
+    "traceability_basis",
+    "evidence_basis",
+    "route_confidence_class",
+    "no_authority_created_flag",
+    "no_master_plan_text_mutation_flag",
+    "no_old_coverage_ledger_flag",
+    "unresolved_reason_code_when_applicable",
+    "quantum_forward_metadata",
+)
+
+QUANTUM_FORWARD_METADATA_FIELDS = (
+    "quantum_relevance_class",
+    "future_controller_reference",
+    "future_roadmap_consumer_labels",
+    "no_backend_execution_flag",
+    "no_simulator_execution_flag",
+    "no_optimizer_runtime_execution_flag",
+    "no_quantum_advantage_claim_flag",
+    "no_profit_or_latency_superiority_claim_flag",
+)
+
 
 class RegistryParseError(ValueError):
     pass
@@ -272,6 +338,94 @@ def _entry_with_defaults(entry: dict[str, Any], index: int) -> dict[str, Any]:
     return normalized
 
 
+def _dict_value(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _quantum_metadata_with_defaults(value: Any) -> dict[str, Any]:
+    metadata = _dict_value(value)
+    normalized = {field: metadata.get(field) for field in QUANTUM_FORWARD_METADATA_FIELDS}
+    normalized["quantum_relevance_class"] = str(
+        normalized.get("quantum_relevance_class") or "NONE"
+    )
+    normalized["future_controller_reference"] = str(
+        normalized.get("future_controller_reference") or ""
+    )
+    normalized["future_roadmap_consumer_labels"] = _string_list(
+        normalized.get("future_roadmap_consumer_labels")
+    )
+    for field in (
+        "no_backend_execution_flag",
+        "no_simulator_execution_flag",
+        "no_optimizer_runtime_execution_flag",
+        "no_quantum_advantage_claim_flag",
+        "no_profit_or_latency_superiority_claim_flag",
+    ):
+        normalized[field] = bool(normalized.get(field))
+    return normalized
+
+
+def _route_entry_with_defaults(entry: dict[str, Any]) -> dict[str, Any]:
+    normalized = {field: entry.get(field) for field in ROUTE_ENTRY_FIELDS}
+    for field in ROUTE_ENTRY_FIELDS:
+        if field == "quantum_forward_metadata":
+            continue
+        if field.startswith("no_"):
+            normalized[field] = bool(normalized.get(field))
+        elif normalized.get(field) is None:
+            normalized[field] = None
+        else:
+            normalized[field] = str(normalized[field])
+    normalized["quantum_forward_metadata"] = _quantum_metadata_with_defaults(
+        normalized.get("quantum_forward_metadata")
+    )
+    return normalized
+
+
+def _route_map_with_defaults(value: Any) -> dict[str, Any]:
+    route_map = _dict_value(value)
+    normalized = {field: route_map.get(field) for field in ROUTE_MAP_FIELDS}
+    for field in (
+        "route_map_id",
+        "route_map_version",
+        "authority_class",
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "semantic_task_id",
+        "source_manifest_reference",
+        "generated_report_path",
+        "controller_decision_reference",
+    ):
+        normalized[field] = str(normalized.get(field) or "")
+    for field in (
+        "no_old_coverage_ledger_reintroduction_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_master_plan_text_mutation_flag",
+    ):
+        normalized[field] = bool(normalized.get(field))
+    route_entries = [
+        _route_entry_with_defaults(entry)
+        for entry in _list_value(route_map.get("route_entries"))
+        if isinstance(entry, dict)
+    ]
+    normalized["route_entries"] = sorted(
+        route_entries,
+        key=lambda entry: (
+            str(entry.get("section_id") or ""),
+            str(entry.get("normalized_section_title") or ""),
+        ),
+    )
+    normalized["existing_artifact_discovery_result"] = _dict_value(
+        normalized.get("existing_artifact_discovery_result")
+    )
+    normalized["changed_file_list_by_artifact_family"] = _dict_value(
+        normalized.get("changed_file_list_by_artifact_family")
+    )
+    return normalized
+
+
 def load_registry(path: pathlib.Path) -> dict[str, Any]:
     registry = load_yaml_subset(path)
     entries = registry.get("entries")
@@ -286,6 +440,7 @@ def load_registry(path: pathlib.Path) -> dict[str, Any]:
         "schema_version": registry.get("schema_version"),
         "registry_name": registry.get("registry_name"),
         "coverage_model": registry.get("coverage_model"),
+        "route_map": _route_map_with_defaults(registry.get("route_map")),
         "entries": normalized_entries,
     }
 
@@ -461,6 +616,63 @@ def _coverage_summary(
     }
 
 
+def _count_by(values: Sequence[str], allowed_values: Sequence[str]) -> dict[str, int]:
+    counts = Counter(values)
+    return {value: int(counts.get(value, 0)) for value in allowed_values}
+
+
+def _route_map_summary(route_map: dict[str, Any]) -> dict[str, Any]:
+    entries = route_map.get("route_entries", [])
+    if not isinstance(entries, list):
+        entries = []
+    route_classes = [
+        str(entry.get("current_route_class") or "")
+        for entry in entries
+        if isinstance(entry, dict)
+    ]
+    confidence_classes = [
+        str(entry.get("route_confidence_class") or "")
+        for entry in entries
+        if isinstance(entry, dict)
+    ]
+    return {
+        "repo_canonical_pr_label": route_map.get("repo_canonical_pr_label"),
+        "roadmap_pr_label": route_map.get("roadmap_pr_label"),
+        "semantic_task_id": route_map.get("semantic_task_id"),
+        "controller_decision_reference": route_map.get("controller_decision_reference"),
+        "artifact_family_decision": route_map.get(
+            "existing_artifact_discovery_result", {}
+        ).get("decision"),
+        "changed_file_list_by_artifact_family": route_map.get(
+            "changed_file_list_by_artifact_family", {}
+        ),
+        "route_entry_count": len(entries),
+        "count_by_route_class": _count_by(route_classes, ROUTE_CLASSES),
+        "count_by_route_confidence_class": dict(
+            sorted(Counter(confidence_classes).items())
+        ),
+        "unresolved_default_count": route_classes.count("UNRESOLVED_DEFAULT_ROUTE"),
+        "quantum_forward_route_count": route_classes.count(
+            "QUANTUM_FORWARD_OPTIMIZATION_ROUTE"
+        ),
+        "optimizer_arbitration_route_count": route_classes.count(
+            "OPTIMIZER_ARBITRATION_ROUTE"
+        ),
+        "latency_cost_route_count": route_classes.count("LATENCY_COST_ROUTE"),
+        "old_coverage_ledger_reintroduction_flag": False,
+        "master_plan_mutation_count": 0,
+        "runtime_authority_created": False,
+        "live_authority_created": False,
+        "source_fact_acceptance_created": False,
+        "connector_semantic_binding_created": False,
+        "replay_paper_result_created": False,
+        "order_authority_created": False,
+        "profit_evidence_created": False,
+        "latency_superiority_evidence_created": False,
+        "quantum_backend_simulator_optimizer_execution_created": False,
+    }
+
+
 def build_report(
     *,
     repo_root: pathlib.Path,
@@ -502,6 +714,8 @@ def build_report(
             "coverage_model": registry["coverage_model"],
             "entry_count": len(entries),
         },
+        "route_map": registry["route_map"],
+        "route_map_summary": _route_map_summary(registry["route_map"]),
         "authority_boundary": {
             field: False for field in AUTHORITY_BOUNDARY_FIELDS
         },
