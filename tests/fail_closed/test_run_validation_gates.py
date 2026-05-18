@@ -102,6 +102,10 @@ from tools import (
 )
 from tools import validate_qtt_pr_identity_roster as qtt_pr_identity_roster
 from tools import (
+    validate_qtt_roadmap_execution_state_controller
+    as qtt_roadmap_execution_state_controller,
+)
+from tools import (
     validate_atomicrows_bundle_sha_freeze_authority_gate
     as atomicrows_bundle_sha_freeze_authority_gate,
 )
@@ -851,6 +855,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_qtt_roadmap_execution_state_controller.py"),
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
@@ -1571,14 +1579,21 @@ def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
         "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
     )
     roster_index = command_names.index("validate_qtt_pr_identity_roster.py")
+    controller_index = command_names.index(
+        "validate_qtt_roadmap_execution_state_controller.py"
+    )
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
 
-    assert active_registry_index < roster_index < pr100_index
+    assert active_registry_index < roster_index < controller_index < pr100_index
     assert commands[roster_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+    ]
+    assert commands[controller_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_roadmap_execution_state_controller.py"),
     ]
 
 
@@ -1930,6 +1945,13 @@ def test_runner_exposes_active_non_sha_gate_registry_success_marker():
     assert (
         qtt_active_non_sha_day1_gate_state_registry_contract.SUCCESS_MARKER
         == "QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_OK"
+    )
+
+
+def test_runner_exposes_roadmap_execution_state_controller_success_marker():
+    assert (
+        qtt_roadmap_execution_state_controller.SUCCESS_MARKER
+        == "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_OK"
     )
 
 
@@ -2827,6 +2849,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     pr_identity_roster_index = command_names.index(
         "validate_qtt_pr_identity_roster.py"
     )
+    roadmap_execution_state_controller_index = command_names.index(
+        "validate_qtt_roadmap_execution_state_controller.py"
+    )
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
@@ -2899,6 +2924,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < final_readiness_dependency_policy_index
         < active_non_sha_gate_registry_index
         < pr_identity_roster_index
+        < roadmap_execution_state_controller_index
         < pr100_index
         < repair_bridge_index
         < repair_manifest_index
@@ -3032,6 +3058,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     assert commands[pr_identity_roster_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+    ]
+    assert commands[roadmap_execution_state_controller_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_roadmap_execution_state_controller.py"),
     ]
     assert commands[pr100_index] == [
         python_executable,

@@ -15,6 +15,8 @@ This roadmap is guidance for owner/Codex planning. Implementation truth remains 
 
 PR identity translation is controlled by `docs/roadmap/QTT_PR_Identity_Roster_v1_0.json`. GitHub PR numbers are audit-only; repo-canonical labels and repo artifacts remain implementation truth; roadmap labels remain planning/orchestration labels; blueprint labels remain implementation-scope labels; same-number equality must not be inferred. Future PR prompts must update or reference the roster before functional work proceeds.
 
+Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state is controlled by `docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json`. PR identity is translated by `docs/roadmap/QTT_PR_Identity_Roster_v1_0.json`. Downstream PRs must reference those controller/roster artifacts rather than duplicating state taxonomy, capability-envelope text, or inferring identity from matching PR numbers.
+
 ## 1. Source integration result
 - Integrated the original post-repair roadmap after PR #76, including the delivery-label shift that made EDGE packet schema PR #77 and preserved PR numbers as delivery labels rather than implementation truth.
 - Integrated the post-PR82 safe-architecture roadmap, especially PR #82–#92 ordering and disambiguation: quantum applicability, owner quantum priority, scoring policy, scoring/ranking contract, optimizer-arbitration contract, candidate generation, static selection, handoff, replay/paper static foundations, dual-result review, and owner live-promotion review.

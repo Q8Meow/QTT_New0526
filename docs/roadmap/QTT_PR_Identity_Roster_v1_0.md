@@ -46,9 +46,9 @@ PR116A maps to GitHub #116 and records the active non-SHA Day-1 gate registry. P
 
 Neither overlay flips an active non-SHA Day-1 gate, creates final readiness, creates Day-1 launch authority, or creates runtime/live/order/profit authority.
 
-## 7. GitHub #97-#116 vs roadmap mismatch summary
+## 7. GitHub #97-#117 vs roadmap mismatch summary
 
-The roster seeds GitHub #97 through #116 and roadmap PR #97 through PR #126.
+The roster seeds GitHub #97 through #117 and roadmap PR #97 through PR #126.
 
 Explicit same-number mismatches include:
 
@@ -59,8 +59,21 @@ Explicit same-number mismatches include:
 - GitHub #112 = `Centralize AtomicRows bundle state boundary`; roadmap PR #112 = `Account, wallet, balance, and private-state read receipt gate`.
 - GitHub #107 = `Add AtomicRows repair-chain grand debug logic audit`; roadmap PR #107 = `Source revalidation, supersession, and materiality scheduler`.
 - GitHub #105 = `Add owner-approved AtomicRows family count distribution`; roadmap PR #105 = `Source-evidence retrieval executor`.
+- GitHub #117 = `PR117 add canonical PR identity roster`; roadmap PR #117 = `Historical dataset digest and loader`.
 
 The roster also records the roadmap PR #100 / GitHub #102 SHA/freeze authority mismatch.
+
+## 7A. Repo PR117 audit currentization
+
+`PR117_REPO_CANONICAL_SELF_ENTRY` is currentized with GitHub audit number `117` and audit URL `https://github.com/Q8Meow/QTT_New0526/pull/117`.
+
+This does not imply Roadmap PR #117 or Blueprint PR #117. Repo-canonical PR117 remains the implementation-truth label for the identity roster PR.
+
+## 7B. Repo PR118 self-entry
+
+`PR118_REPO_CANONICAL_SELF_ENTRY` records repo-canonical PR118 as `Roadmap execution-state controller and audit currentization`.
+
+Repo PR118 has `roadmap_pr_label = null`, `blueprint_pr_label = null`, and `github_pr_number = null` until GitHub assigns the pull-request audit number. It does not imply Roadmap PR #118, Blueprint PR #118, or GitHub PR #118.
 
 ## 8. How to update the roster for every future PR
 
@@ -86,7 +99,8 @@ Allowed:
 Forbidden:
 
 - Treat GitHub numbers as implementation truth.
-- Treat PR117 as GitHub #117, roadmap PR #117, or blueprint PR #117 unless owner-approved and roster-recorded.
+- Treat GitHub #117 audit metadata as Roadmap PR #117 or Blueprint PR #117.
+- Treat PR118 as GitHub #118, Roadmap PR #118, or Blueprint PR #118 unless owner-approved and roster-recorded.
 - Flip PR116A active non-SHA Day-1 gates.
 - Create final readiness, Day-1 launch authority, live authority, runtime cash receipts, order authority, source acceptance, connector binding, backend authority, profit evidence, latency superiority evidence, execution superiority evidence, or quantum advantage evidence.
 - Mutate `docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl`.
@@ -123,6 +137,6 @@ The report records validation evidence for identity mapping, overlays, mismatche
 
 ## 13. Owner handoff note
 
-The owner manually commits, pushes, opens PRs, and merges. PR117 remains a repo-canonical local delivery label until a GitHub audit number is assigned and locally verified.
+The owner manually commits, pushes, opens PRs, and merges. PR117 is currentized to GitHub audit #117. PR118 remains a repo-canonical local delivery label until a GitHub audit number is assigned and locally verified.
 
-Expected next GitHub audit number may be #117 if no other GitHub PR is opened first, but github_pr_number remains null until GitHub assigns the pull-request audit number. Once GitHub assigns the actual number, the owner must currentize the roster before merge or in the next roster-currentization PR.
+Expected next GitHub audit number for repo PR118 may be #118 if no other GitHub PR is opened first, but PR118 github_pr_number remains null until GitHub assigns the pull-request audit number. Once GitHub assigns the actual number, the owner may currentize PR118 in the same PR before merge or in a later roster-currentization PR.

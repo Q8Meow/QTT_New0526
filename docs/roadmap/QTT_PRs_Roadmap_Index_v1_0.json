@@ -14,6 +14,11 @@
     "same_number_identity_inference": "Forbidden.",
     "future_pr_prompt_rule": "Future PR prompts must update or reference the roster before functional work proceeds."
   },
+  "roadmap_execution_state_controller": {
+    "path": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "usage": "Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state controller.",
+    "reference_note": "Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state is controlled by docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json. PR identity is translated by docs/roadmap/QTT_PR_Identity_Roster_v1_0.json. Downstream PRs must reference those controller/roster artifacts rather than duplicating state taxonomy, capability-envelope text, or inferring identity from matching PR numbers."
+  },
   "stage1_prediction_market_launch_essential_range": {
     "from": "PR #83",
     "to": "PR #151"
