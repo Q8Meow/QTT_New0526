@@ -739,6 +739,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_qtt_pr_identity_roster.py"),
+        ],
+        [
+            sys.executable,
             _path(
                 "tools",
                 "validate_atomicrows_bundle_sha_freeze_authority_gate.py",

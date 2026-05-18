@@ -100,6 +100,7 @@ from tools import (
     validate_qtt_active_non_sha_day1_gate_state_registry_contract
     as qtt_active_non_sha_day1_gate_state_registry_contract,
 )
+from tools import validate_qtt_pr_identity_roster as qtt_pr_identity_roster
 from tools import (
     validate_atomicrows_bundle_sha_freeze_authority_gate
     as atomicrows_bundle_sha_freeze_authority_gate,
@@ -846,6 +847,10 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
@@ -1553,6 +1558,28 @@ def test_runner_commands_use_sys_executable(monkeypatch):
 
     assert commands
     assert all(command[0] == python_executable for command in commands)
+
+
+def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    active_registry_index = command_names.index(
+        "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
+    )
+    roster_index = command_names.index("validate_qtt_pr_identity_roster.py")
+    pr100_index = command_names.index(
+        "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
+    )
+
+    assert active_registry_index < roster_index < pr100_index
+    assert commands[roster_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+    ]
 
 
 def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
@@ -2797,6 +2824,9 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
     active_non_sha_gate_registry_index = command_names.index(
         "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
     )
+    pr_identity_roster_index = command_names.index(
+        "validate_qtt_pr_identity_roster.py"
+    )
     pr100_index = command_names.index(
         "validate_atomicrows_bundle_sha_freeze_authority_gate.py"
     )
@@ -2868,6 +2898,7 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
         < sha_dormancy_index
         < final_readiness_dependency_policy_index
         < active_non_sha_gate_registry_index
+        < pr_identity_roster_index
         < pr100_index
         < repair_bridge_index
         < repair_manifest_index
@@ -2997,6 +3028,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
         ),
+    ]
+    assert commands[pr_identity_roster_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
     ]
     assert commands[pr100_index] == [
         python_executable,

@@ -7,6 +7,8 @@ This folder contains the owner-approved consolidated roadmap artifacts for Codex
 - `QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md` — Codex-readable roadmap guidance.
 - `QTT_PRs_Roadmap_Index_v1_0.json` — machine-readable PR index for deterministic extraction.
 - `QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.docx` — owner/human archival copy.
+- `QTT_PR_Identity_Roster_v1_0.json` — canonical translator between repo, roadmap, blueprint, and GitHub PR identities.
+- `QTT_PR_Identity_Roster_v1_0.md` — explanatory companion for the PR identity roster.
 
 ## Authority boundary
 
@@ -15,6 +17,8 @@ These files are forward roadmap guidance only.
 Implementation truth remains repository artifacts, schemas, validators, generated reports, authority boundaries, validation evidence, and explicit owner-approved instructions.
 
 Do not treat PR numbers as implementation truth.
+
+Use `QTT_PR_Identity_Roster_v1_0.json` as the canonical translator between repo-canonical labels, roadmap labels, blueprint labels, and GitHub audit numbers. GitHub PR numbers are audit-only; repo-canonical labels and repo artifacts remain implementation truth; roadmap labels remain planning/orchestration labels; blueprint labels remain implementation-scope labels; same-number equality must not be inferred. Future PR prompts must update or reference the roster before functional work proceeds.
 
 Do not edit `docs/master_plan/QTT_MasterPlan_Current.md` unless the owner explicitly approves.
 
