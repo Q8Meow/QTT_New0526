@@ -23,6 +23,11 @@
     "same_number_identity_inference": "Forbidden.",
     "future_pr_prompt_rule": "Future PR prompts must update or reference the roster before functional work proceeds."
   },
+  "roadmap_execution_state_controller": {
+    "path": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "usage": "Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state controller.",
+    "reference_note": "Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state is controlled by docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json. PR identity is translated by docs/roadmap/QTT_PR_Identity_Roster_v1_0.json. Downstream PRs must reference those controller/roster artifacts rather than duplicating state taxonomy, capability-envelope text, or inferring identity from matching PR numbers."
+  },
       "global_must_not": [
         "Do not edit docs/master_plan/QTT_MasterPlan_Current.md unless the owner explicitly approves that exact PR scope.",
         "Do not create docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl or AtomicRows.bundle.sha256 unless the exact PR explicitly authorizes bundle/hash creation.",

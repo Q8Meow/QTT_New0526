@@ -61,7 +61,8 @@
       113,
       114,
       115,
-      116
+      116,
+      117
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1656,14 +1657,46 @@
       "repo_canonical_pr_label": "PR117",
       "roadmap_pr_label": null,
       "blueprint_pr_label": null,
-      "github_pr_number": null,
+      "github_pr_number": 117,
       "repo_title": "Canonical PR identity roster and reconciliation framework",
       "roadmap_title": null,
       "blueprint_title": null,
-      "github_title": null,
+      "github_title": "PR117 add canonical PR identity roster",
       "branch_name": "pr117-canonical-pr-identity-roster-reconciliation-framework",
       "validator_markers": [
         "QTT_PR_IDENTITY_ROSTER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/117",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "notes": "GitHub #117 is the audit number assigned to the merged pull request for repo-canonical PR117. This does not imply Roadmap PR #117 or Blueprint PR #117. Repo-canonical PR117 remains the implementation-truth label for the identity roster PR."
+    },
+    {
+      "roster_entry_id": "PR118_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR118",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": null,
+      "repo_title": "Roadmap execution-state controller and audit currentization",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": null,
+      "branch_name": "pr118-roadmap-execution-state-controller-audit-currentization",
+      "validator_markers": [
+        "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_OK"
       ],
       "reference_types": [
         "REPO_CANONICAL_LABEL",
@@ -1676,11 +1709,13 @@
       "semantic_role": "CONTROL_PLANE_RECONCILIATION",
       "authority_scope": "CONTROL_PLANE_ONLY",
       "superseded_by": null,
-      "depends_on_roster_entries": [],
+      "depends_on_roster_entries": [
+        "PR117_REPO_CANONICAL_SELF_ENTRY"
+      ],
       "github_audit_url": null,
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
-      "notes": "PR117 is a repo-canonical delivery label for this reconciliation PR. PR117 must not be treated as GitHub #117. PR117 must not be treated as roadmap PR #117 unless owner-approved and roster-recorded. PR117 must not be treated as blueprint PR #117 unless owner-approved and roster-recorded. This entry exists to prevent the exact identity drift being repaired. Expected next GitHub audit number may be #117 if no other GitHub PR is opened first, but github_pr_number remains null until GitHub assigns the pull-request audit number. Once GitHub assigns the actual number, the owner must currentize the roster before merge or in the next roster-currentization PR."
+      "notes": "Repo PR118 is a repo-canonical control-plane state-controller PR. It does not imply Roadmap PR #118, Blueprint PR #118, or GitHub PR #118. Expected next GitHub audit number may be #118 if no other GitHub PR is opened first, but github_pr_number remains null until GitHub assigns the pull-request audit number."
     }
   ],
   "mismatch_summary": {
@@ -1754,6 +1789,13 @@
         "roadmap_pr_label": "PR #116",
         "roadmap_title": "Runtime resolver snapshot executor",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 117,
+        "github_title": "PR117 add canonical PR identity roster",
+        "roadmap_pr_label": "PR #117",
+        "roadmap_title": "Historical dataset digest and loader",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -1804,6 +1846,13 @@
         "github_title": "Add owner-approved AtomicRows family count distribution",
         "roadmap_pr_label": "PR #105",
         "roadmap_title": "Source-evidence retrieval executor",
+        "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 117,
+        "github_title": "PR117 add canonical PR identity roster",
+        "roadmap_pr_label": "PR #117",
+        "roadmap_title": "Historical dataset digest and loader",
         "relation": "SAME_NUMBER_MISMATCH"
       }
     ],

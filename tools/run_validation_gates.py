@@ -743,6 +743,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_qtt_roadmap_execution_state_controller.py"),
+        ],
+        [
+            sys.executable,
             _path(
                 "tools",
                 "validate_atomicrows_bundle_sha_freeze_authority_gate.py",

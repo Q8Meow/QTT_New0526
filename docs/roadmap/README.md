@@ -20,6 +20,8 @@ Do not treat PR numbers as implementation truth.
 
 Use `QTT_PR_Identity_Roster_v1_0.json` as the canonical translator between repo-canonical labels, roadmap labels, blueprint labels, and GitHub audit numbers. GitHub PR numbers are audit-only; repo-canonical labels and repo artifacts remain implementation truth; roadmap labels remain planning/orchestration labels; blueprint labels remain implementation-scope labels; same-number equality must not be inferred. Future PR prompts must update or reference the roster before functional work proceeds.
 
+Roadmap execution/readiness/source/connector/replay/paper/quantum/backend/live state is controlled by `docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json`. PR identity is translated by `docs/roadmap/QTT_PR_Identity_Roster_v1_0.json`. Downstream PRs must reference those controller/roster artifacts rather than duplicating state taxonomy, capability-envelope text, or inferring identity from matching PR numbers.
+
 Do not edit `docs/master_plan/QTT_MasterPlan_Current.md` unless the owner explicitly approves.
 
 Do not create `docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl` or `docs/master_plan/atomic_rows/AtomicRows.bundle.sha256` unless the exact owner-approved AtomicRows bundle/hash PR authorizes it.

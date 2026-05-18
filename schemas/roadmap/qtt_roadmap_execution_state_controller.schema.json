@@ -1,0 +1,875 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-roadmap-execution-state-controller-v1-0",
+  "title": "QTT Roadmap Execution-State Controller v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "controller_schema_version",
+    "controller_id",
+    "controller_title",
+    "controller_authority_class",
+    "created_by_repo_delivery_label",
+    "controller_established_state",
+    "upstream_authorities",
+    "identity_translation_authority",
+    "controlled_state_taxonomy",
+    "active_state_bindings",
+    "roadmap_range_currentization",
+    "capability_envelope",
+    "non_materialized_capability_vector",
+    "state_transition_discipline",
+    "controller_invariants",
+    "validation_expectations",
+    "generated_report_path",
+    "notes"
+  ],
+  "properties": {
+    "controller_schema_version": {
+      "const": "v1.0"
+    },
+    "controller_id": {
+      "const": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0"
+    },
+    "controller_title": {
+      "const": "QTT Roadmap Execution-State Controller v1.0"
+    },
+    "controller_authority_class": {
+      "const": "CONTROL_PLANE_EXECUTION_STATE_CONTROLLER_NOT_RUNTIME_NOT_FINAL_READINESS_AUTHORITY"
+    },
+    "created_by_repo_delivery_label": {
+      "const": "PR118 — Roadmap execution-state controller and audit currentization"
+    },
+    "controller_established_state": {
+      "const": "ROADMAP_EXECUTION_STATE_CONTROLLER_ESTABLISHED"
+    },
+    "upstream_authorities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/upstreamAuthority"
+      },
+      "minItems": 3,
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "authority_path": {
+                "const": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json"
+              }
+            }
+          },
+          "minContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "authority_path": {
+                "const": "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
+              }
+            }
+          },
+          "minContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "authority_path": {
+                "const": "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
+              }
+            }
+          },
+          "minContains": 1
+        }
+      ]
+    },
+    "identity_translation_authority": {
+      "$ref": "#/$defs/identityTranslationAuthority"
+    },
+    "controlled_state_taxonomy": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/controllerState"
+      },
+      "minItems": 12,
+      "maxItems": 12,
+      "uniqueItems": true
+    },
+    "active_state_bindings": {
+      "$ref": "#/$defs/activeStateBindings"
+    },
+    "roadmap_range_currentization": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/roadmapRangeEntry"
+      },
+      "minItems": 26,
+      "maxItems": 26,
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #101"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #102"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #103"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #104"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #105"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #106"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #107"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #108"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #109"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #110"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #111"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #112"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #113"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #114"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #115"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #116"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #117"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #118"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #119"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #120"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #121"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #122"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #123"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #124"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #125"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "roadmap_pr_label": {
+                "const": "PR #126"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "capability_envelope": {
+      "$ref": "#/$defs/capabilityEnvelope"
+    },
+    "non_materialized_capability_vector": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonMaterializedCapability"
+      },
+      "minItems": 18,
+      "maxItems": 18,
+      "uniqueItems": true
+    },
+    "state_transition_discipline": {
+      "$ref": "#/$defs/stateTransitionDiscipline"
+    },
+    "controller_invariants": {
+      "$ref": "#/$defs/controllerInvariants"
+    },
+    "validation_expectations": {
+      "$ref": "#/$defs/validationExpectations"
+    },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "controllerState": {
+      "enum": [
+        "ROADMAP_EXECUTION_STATE_CONTROLLER_ESTABLISHED",
+        "STATIC_FOUNDATION_STATE_REFERENCED_BY_CONTROLLER",
+        "CONTROL_PLANE_STATE_REFERENCED_BY_CONTROLLER",
+        "SOURCE_EVIDENCE_STATE_CONTROLLED_BY_ACCEPTED_SOURCE_WORKFLOW",
+        "CONNECTOR_SEMANTIC_STATE_CONTROLLED_BY_BINDING_LEDGER",
+        "RUNTIME_CASH_STATE_CONTROLLED_BY_RUNTIME_CASH_RECEIPTS",
+        "REPLAY_PAPER_STATE_CONTROLLED_BY_RESULT_LEDGER",
+        "OWNER_REVIEW_STATE_CONTROLLED_BY_OWNER_RECEIPTS",
+        "QUANTUM_FORWARD_OPTIMIZATION_STATE_REFERENCED_BY_CONTROLLER",
+        "QUANTUM_BACKEND_STATE_CONTROLLED_BY_ACTIVE_NON_SHA_GATE",
+        "FINAL_READINESS_CONTROLLED_BY_ACTIVE_NON_SHA_GATES",
+        "LIVE_EXECUTION_STATE_CONTROLLED_BY_OWNER_LAUNCH_AND_EXECUTION_RECEIPTS"
+      ]
+    },
+    "nonMaterializedCapability": {
+      "enum": [
+        "FINAL_READINESS",
+        "DAY1_LAUNCH",
+        "SOURCE_ACCEPTANCE",
+        "CONNECTOR_SEMANTIC_BINDING",
+        "RUNTIME_CASH_RECEIPT",
+        "REPLAY_EXECUTION",
+        "PAPER_EXECUTION",
+        "OPTIMIZER_EXECUTION",
+        "NEURAL_EXECUTION",
+        "QUANTUM_BACKEND_EXECUTION",
+        "LIVE_EXECUTION",
+        "ORDER_EXECUTION",
+        "PROFIT_EVIDENCE",
+        "LATENCY_SUPERIORITY_EVIDENCE",
+        "EXECUTION_SUPERIORITY_EVIDENCE",
+        "QUANTUM_ADVANTAGE_EVIDENCE",
+        "ATOMICROWS_BUNDLE_MUTATION",
+        "ATOMICROWS_SHA_CREATION"
+      ]
+    },
+    "upstreamAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_path",
+        "authority_validation_marker",
+        "authority_role",
+        "source_of_truth_for"
+      ],
+      "properties": {
+        "authority_path": {
+          "enum": [
+            "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+            "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+            "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
+          ]
+        },
+        "authority_validation_marker": {
+          "enum": [
+            "QTT_PR_IDENTITY_ROSTER_OK",
+            "QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_OK",
+            "QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK"
+          ]
+        },
+        "authority_role": {
+          "type": "string"
+        },
+        "source_of_truth_for": {
+          "type": "string"
+        }
+      }
+    },
+    "identityTranslationAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "translator_path",
+        "translator_created_by_repo_pr",
+        "translator_success_marker",
+        "repo_canonical_labels_are_implementation_truth",
+        "blueprint_labels_are_implementation_scope_metadata",
+        "roadmap_labels_are_orchestration_metadata",
+        "github_numbers_are_audit_only",
+        "same_number_identity_inference_forbidden",
+        "roster_wins_on_identity_conflict"
+      ],
+      "properties": {
+        "translator_path": {
+          "const": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json"
+        },
+        "translator_created_by_repo_pr": {
+          "const": "PR117"
+        },
+        "translator_success_marker": {
+          "const": "QTT_PR_IDENTITY_ROSTER_OK"
+        },
+        "repo_canonical_labels_are_implementation_truth": {
+          "const": true
+        },
+        "blueprint_labels_are_implementation_scope_metadata": {
+          "const": true
+        },
+        "roadmap_labels_are_orchestration_metadata": {
+          "const": true
+        },
+        "github_numbers_are_audit_only": {
+          "const": true
+        },
+        "same_number_identity_inference_forbidden": {
+          "const": true
+        },
+        "roster_wins_on_identity_conflict": {
+          "const": true
+        }
+      }
+    },
+    "activeStateBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "final_readiness_state",
+        "final_readiness_upstream_registry_path",
+        "final_readiness_dependency_policy_path",
+        "final_readiness_upstream_registry_marker",
+        "final_readiness_dependency_policy_marker",
+        "quantum_forward_optimization_state",
+        "quantum_backend_state",
+        "quantum_backend_upstream_gate_reference",
+        "controller_established_state",
+        "active_gate_registry_remains_source_of_truth",
+        "full_active_non_sha_gate_list_duplicated_here"
+      ],
+      "properties": {
+        "final_readiness_state": {
+          "const": "FINAL_READINESS_CONTROLLED_BY_ACTIVE_NON_SHA_GATES"
+        },
+        "final_readiness_upstream_registry_path": {
+          "const": "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
+        },
+        "final_readiness_dependency_policy_path": {
+          "const": "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
+        },
+        "final_readiness_upstream_registry_marker": {
+          "const": "QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_OK"
+        },
+        "final_readiness_dependency_policy_marker": {
+          "const": "QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK"
+        },
+        "quantum_forward_optimization_state": {
+          "const": "QUANTUM_FORWARD_OPTIMIZATION_STATE_REFERENCED_BY_CONTROLLER"
+        },
+        "quantum_backend_state": {
+          "const": "QUANTUM_BACKEND_STATE_CONTROLLED_BY_ACTIVE_NON_SHA_GATE"
+        },
+        "quantum_backend_upstream_gate_reference": {
+          "const": "QUANTUM_BACKEND_AUTHORITY_GATE"
+        },
+        "controller_established_state": {
+          "const": "ROADMAP_EXECUTION_STATE_CONTROLLER_ESTABLISHED"
+        },
+        "active_gate_registry_remains_source_of_truth": {
+          "const": true
+        },
+        "full_active_non_sha_gate_list_duplicated_here": {
+          "const": false
+        }
+      }
+    },
+    "roadmapRangeEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "title",
+        "controller_state",
+        "roster_entry_id",
+        "repo_delivery_status",
+        "next_allowed_action_class",
+        "state_source",
+        "state_explanation_short",
+        "identity_source"
+      ],
+      "properties": {
+        "roadmap_pr_label": {
+          "type": "string"
+        },
+        "blueprint_pr_label": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "controller_state": {
+          "$ref": "#/$defs/controllerState"
+        },
+        "roster_entry_id": {
+          "type": "string"
+        },
+        "repo_delivery_status": {
+          "const": "ROADMAP_BLUEPRINT_PLANNED_METADATA_ONLY"
+        },
+        "next_allowed_action_class": {
+          "enum": [
+            "CONTROLLER_REFERENCED_STATE_ONLY",
+            "FUTURE_REPO_PR_REQUIRED_BEFORE_MATERIALIZATION"
+          ]
+        },
+        "state_source": {
+          "const": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0"
+        },
+        "state_explanation_short": {
+          "type": "string"
+        },
+        "identity_source": {
+          "const": "QTT_PR_IDENTITY_ROSTER_V1_0"
+        }
+      }
+    },
+    "capabilityEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "materialized_capability_this_pr",
+        "state_transition_this_pr",
+        "metadata_currentization_allowed",
+        "roadmap_blueprint_reference_note_allowed",
+        "downstream_functional_implementation_allowed_this_pr",
+        "runtime_authority_created_this_pr",
+        "live_authority_created_this_pr",
+        "final_readiness_created_this_pr",
+        "quantum_backend_execution_created_this_pr"
+      ],
+      "properties": {
+        "materialized_capability_this_pr": {
+          "const": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0"
+        },
+        "state_transition_this_pr": {
+          "const": "ROADMAP_EXECUTION_STATE_CONTROLLER_ESTABLISHED"
+        },
+        "metadata_currentization_allowed": {
+          "const": true
+        },
+        "roadmap_blueprint_reference_note_allowed": {
+          "const": true
+        },
+        "downstream_functional_implementation_allowed_this_pr": {
+          "const": false
+        },
+        "runtime_authority_created_this_pr": {
+          "const": false
+        },
+        "live_authority_created_this_pr": {
+          "const": false
+        },
+        "final_readiness_created_this_pr": {
+          "const": false
+        },
+        "quantum_backend_execution_created_this_pr": {
+          "const": false
+        }
+      }
+    },
+    "stateTransitionDiscipline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "one_state_flip_per_repo_pr",
+        "one_artifact_or_capability_per_repo_pr",
+        "state_controller_must_exist_before_future_unblocking",
+        "future_state_flip_requires_explicit_repo_pr",
+        "downstream_pr_must_reference_controller",
+        "repo_pr_title_uses_repo_label_only",
+        "roadmap_blueprint_labels_are_metadata_only",
+        "github_numbers_are_audit_only",
+        "same_number_identity_inference_forbidden",
+        "current_pr_state_flip",
+        "current_pr_materialized_capability"
+      ],
+      "properties": {
+        "one_state_flip_per_repo_pr": {
+          "const": true
+        },
+        "one_artifact_or_capability_per_repo_pr": {
+          "const": true
+        },
+        "state_controller_must_exist_before_future_unblocking": {
+          "const": true
+        },
+        "future_state_flip_requires_explicit_repo_pr": {
+          "const": true
+        },
+        "downstream_pr_must_reference_controller": {
+          "const": true
+        },
+        "repo_pr_title_uses_repo_label_only": {
+          "const": true
+        },
+        "roadmap_blueprint_labels_are_metadata_only": {
+          "const": true
+        },
+        "github_numbers_are_audit_only": {
+          "const": true
+        },
+        "same_number_identity_inference_forbidden": {
+          "const": true
+        },
+        "current_pr_state_flip": {
+          "const": "ROADMAP_EXECUTION_STATE_CONTROLLER_ESTABLISHED"
+        },
+        "current_pr_materialized_capability": {
+          "const": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0"
+        }
+      }
+    },
+    "controllerInvariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pr_identity_roster_is_factual_identity_translator",
+        "roster_wins_on_pr_identity_conflict",
+        "same_number_identity_inference_forbidden",
+        "repo_canonical_pr_labels_are_implementation_truth",
+        "roadmap_blueprint_labels_are_metadata_only",
+        "github_numbers_are_audit_only",
+        "active_non_sha_gate_list_source_of_truth_is_pr116a_registry",
+        "final_readiness_derives_from_active_non_sha_gate_registry",
+        "controller_does_not_redefine_active_non_sha_gates",
+        "controller_does_not_duplicate_gate_list_across_downstream_files",
+        "roadmap_blueprint_files_reference_controller_instead_of_scattering_state_text",
+        "quantum_forward_state_is_preserved",
+        "quantum_backend_authority_remains_controller_gated",
+        "future_quantum_optimization_support_must_route_through_controller",
+        "future_qaoa_vqe_qubo_ising_annealing_support_is_controller_referenced",
+        "deterministic_selection_ranking_arbitration_future_compatibility_required",
+        "no_schema_drift_without_validator_update",
+        "no_authority_drift",
+        "no_workflow_contradiction",
+        "no_hidden_runtime_assumption"
+      ],
+      "properties": {
+        "pr_identity_roster_is_factual_identity_translator": {
+          "const": true
+        },
+        "roster_wins_on_pr_identity_conflict": {
+          "const": true
+        },
+        "same_number_identity_inference_forbidden": {
+          "const": true
+        },
+        "repo_canonical_pr_labels_are_implementation_truth": {
+          "const": true
+        },
+        "roadmap_blueprint_labels_are_metadata_only": {
+          "const": true
+        },
+        "github_numbers_are_audit_only": {
+          "const": true
+        },
+        "active_non_sha_gate_list_source_of_truth_is_pr116a_registry": {
+          "const": true
+        },
+        "final_readiness_derives_from_active_non_sha_gate_registry": {
+          "const": true
+        },
+        "controller_does_not_redefine_active_non_sha_gates": {
+          "const": true
+        },
+        "controller_does_not_duplicate_gate_list_across_downstream_files": {
+          "const": true
+        },
+        "roadmap_blueprint_files_reference_controller_instead_of_scattering_state_text": {
+          "const": true
+        },
+        "quantum_forward_state_is_preserved": {
+          "const": true
+        },
+        "quantum_backend_authority_remains_controller_gated": {
+          "const": true
+        },
+        "future_quantum_optimization_support_must_route_through_controller": {
+          "const": true
+        },
+        "future_qaoa_vqe_qubo_ising_annealing_support_is_controller_referenced": {
+          "const": true
+        },
+        "deterministic_selection_ranking_arbitration_future_compatibility_required": {
+          "const": true
+        },
+        "no_schema_drift_without_validator_update": {
+          "const": true
+        },
+        "no_authority_drift": {
+          "const": true
+        },
+        "no_workflow_contradiction": {
+          "const": true
+        },
+        "no_hidden_runtime_assumption": {
+          "const": true
+        }
+      }
+    },
+    "validationExpectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_name",
+        "success_marker",
+        "schema_path",
+        "generated_report_path",
+        "validation_gate_sequence_inclusion_required",
+        "upstream_validation_markers_required"
+      ],
+      "properties": {
+        "validator_name": {
+          "const": "validate_qtt_roadmap_execution_state_controller.py"
+        },
+        "success_marker": {
+          "const": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_OK"
+        },
+        "schema_path": {
+          "const": "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
+        },
+        "generated_report_path": {
+          "const": "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json"
+        },
+        "validation_gate_sequence_inclusion_required": {
+          "const": true
+        },
+        "upstream_validation_markers_required": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "QTT_PR_IDENTITY_ROSTER_OK",
+              "QTT_ACTIVE_NON_SHA_DAY1_GATE_STATE_REGISTRY_OK",
+              "QTT_FINAL_READINESS_DEPENDENCY_POLICY_OK"
+            ]
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

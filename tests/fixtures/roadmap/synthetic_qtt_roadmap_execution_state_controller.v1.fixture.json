@@ -1,0 +1,14 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "SYNTHETIC_QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1",
+  "scope": "ROADMAP_EXECUTION_STATE_CONTROLLER_SCHEMA_FAMILY_PARITY_ONLY",
+  "controller_id": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0",
+  "source_controller_path": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+  "representative_gate_reference": "QUANTUM_BACKEND_AUTHORITY_GATE",
+  "source_of_truth_note": "Representative only; docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml remains the active non-SHA Day-1 gate source of truth.",
+  "duplicates_full_active_non_sha_gate_list": false,
+  "creates_runtime_authority": false,
+  "creates_final_readiness": false,
+  "creates_quantum_backend_execution": false
+}
