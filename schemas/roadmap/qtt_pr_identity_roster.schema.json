@@ -1,0 +1,395 @@
+{
+  "$schema": "json-schema-draft-2020-12",
+  "$id": "qtt-local-schemas-roadmap-pr-identity-roster-v1-0",
+  "title": "QTT PR Identity Roster v1.0",
+  "description": "Canonical control-plane translator between repo-canonical labels, roadmap labels, blueprint labels, and GitHub audit numbers. This schema forbids same-number identity inference and creates no runtime, live, source, connector, order, profit, SHA, or quantum execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "roster_schema_version",
+    "roster_id",
+    "roster_title",
+    "roster_authority_class",
+    "created_by_repo_delivery_label",
+    "generated_report_path",
+    "systems_declared",
+    "canonical_priority_order",
+    "global_invariants",
+    "seed_scope",
+    "entries",
+    "mismatch_summary",
+    "validation_expectations",
+    "no_claim_boundary"
+  ],
+  "properties": {
+    "roster_schema_version": { "const": "v1.0" },
+    "roster_id": { "const": "QTT_PR_IDENTITY_ROSTER_V1_0" },
+    "roster_title": { "const": "QTT PR Identity Roster v1.0" },
+    "roster_authority_class": {
+      "const": "CONTROL_PLANE_IDENTITY_TRANSLATOR_NOT_PR_NUMBER_AUTHORITY_NOT_RUNTIME_AUTHORITY"
+    },
+    "created_by_repo_delivery_label": {
+      "const": "PR117 — Canonical PR identity roster and reconciliation framework"
+    },
+    "generated_report_path": {
+      "const": "docs/master_plan/generated/QttPrIdentityRoster.report.json"
+    },
+    "systems_declared": {
+      "type": "array",
+      "items": { "enum": ["repo", "roadmap", "blueprint", "github"] },
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "canonical_priority_order": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/referenceType" },
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "global_invariants": { "$ref": "#/$defs/globalInvariants" },
+    "seed_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_pr_numbers_included",
+        "roadmap_pr_labels_included",
+        "corrective_overlays_included",
+        "repair_chain_entries_included",
+        "self_entry_required",
+        "unverified_relationship_policy"
+      ],
+      "properties": {
+        "github_pr_numbers_included": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "minItems": 20,
+          "uniqueItems": true
+        },
+        "roadmap_pr_labels_included": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 30,
+          "uniqueItems": true
+        },
+        "corrective_overlays_included": {
+          "type": "array",
+          "items": { "enum": ["PR115A", "PR116A"] },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "repair_chain_entries_included": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "self_entry_required": { "const": "PR117" },
+        "unverified_relationship_policy": {
+          "const": "OWNER_UNSET_PENDING_ROSTER_RECONCILIATION"
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rosterEntry" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "mismatch_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_107_through_116_same_number_mismatches",
+        "explicit_mismatch_examples",
+        "roadmap_pr100_github102_sha_freeze_mismatch_confirmed",
+        "roadmap_pr105_to_pr126_runtime_live_block_confirmed",
+        "pr117_self_entry_does_not_assume_same_number_identity"
+      ],
+      "properties": {
+        "github_107_through_116_same_number_mismatches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mismatchRecord" },
+          "minItems": 10
+        },
+        "explicit_mismatch_examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mismatchRecord" },
+          "minItems": 1
+        },
+        "roadmap_pr100_github102_sha_freeze_mismatch_confirmed": {
+          "const": true
+        },
+        "roadmap_pr105_to_pr126_runtime_live_block_confirmed": {
+          "const": true
+        },
+        "pr117_self_entry_does_not_assume_same_number_identity": {
+          "const": true
+        }
+      }
+    },
+    "validation_expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_name",
+        "success_marker",
+        "validation_gate_sequence_inclusion_required",
+        "atomicrows_bundle_jsonl_required_status",
+        "atomicrows_bundle_sha256_required_absent",
+        "generated_report_path"
+      ],
+      "properties": {
+        "validator_name": {
+          "const": "validate_qtt_pr_identity_roster.py"
+        },
+        "success_marker": { "const": "QTT_PR_IDENTITY_ROSTER_OK" },
+        "validation_gate_sequence_inclusion_required": { "const": true },
+        "atomicrows_bundle_jsonl_required_status": {
+          "const": "UNCHANGED_FROM_BASELINE_STATE"
+        },
+        "atomicrows_bundle_sha256_required_absent": { "const": true },
+        "generated_report_path": {
+          "const": "docs/master_plan/generated/QttPrIdentityRoster.report.json"
+        }
+      }
+    },
+    "no_claim_boundary": { "$ref": "#/$defs/noClaimBoundary" }
+  },
+  "$defs": {
+    "nullableString": { "type": ["string", "null"] },
+    "referenceType": {
+      "enum": [
+        "REPO_CANONICAL_LABEL",
+        "ROADMAP_DELIVERY_LABEL",
+        "BLUEPRINT_DELIVERY_LABEL",
+        "GITHUB_AUDIT_NUMBER",
+        "CORRECTIVE_CONTROL_PLANE_OVERLAY",
+        "REPAIR_CHAIN_LABEL",
+        "HISTORICAL_REFERENCE",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE"
+      ]
+    },
+    "semanticRole": {
+      "enum": [
+        "STATIC_FOUNDATION",
+        "RUNTIME_FOUNDATION",
+        "LIVE_FOUNDATION",
+        "CONTROL_PLANE_RECONCILIATION",
+        "CORRECTIVE_OVERLAY",
+        "REPAIR_CHAIN",
+        "HISTORICAL_AUDIT",
+        "ROADMAP_PLANNED",
+        "BLUEPRINT_PLANNED"
+      ]
+    },
+    "authorityScope": {
+      "enum": [
+        "NO_RUNTIME_NO_LIVE",
+        "STATIC_ONLY",
+        "CONTROL_PLANE_ONLY",
+        "RUNTIME_NON_LIVE",
+        "LIVE_GATED",
+        "QUANTUM_METADATA_ONLY",
+        "QUANTUM_BACKEND_CONDITIONAL",
+        "REPAIR_ONLY",
+        "AUDIT_ONLY"
+      ]
+    },
+    "currentStatus": {
+      "enum": [
+        "MERGED",
+        "PLANNED",
+        "SUPERSEDED",
+        "REPLACED_BY_REPAIR",
+        "CORRECTIVE_OVERLAY_ACTIVE",
+        "HISTORICAL",
+        "BLOCKED",
+        "PENDING_OWNER_DECISION"
+      ]
+    },
+    "identityRelationClass": {
+      "enum": [
+        "EXACT_SAME_SYSTEM_REFERENCE",
+        "SAME_NUMBER_MISMATCH",
+        "CORRECTIVE_OVERLAY_MAPPING",
+        "REPAIR_CHAIN_MAPPING",
+        "ROADMAP_ONLY_PLANNED",
+        "BLUEPRINT_ONLY_PLANNED",
+        "GITHUB_AUDIT_ONLY",
+        "REPO_CANONICAL_ONLY",
+        "PENDING_OWNER_DECISION"
+      ]
+    },
+    "globalInvariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_canonical_references_are_implementation_truth",
+        "github_numbers_are_audit_only",
+        "roadmap_labels_are_planning_orchestration_labels",
+        "blueprint_labels_are_implementation_scope_labels",
+        "same_number_identity_inference_forbidden",
+        "history_rewrite_forbidden",
+        "merged_branch_renaming_forbidden",
+        "master_plan_edit_forbidden_this_pr",
+        "active_non_sha_day1_gate_flip_forbidden",
+        "final_readiness_creation_forbidden",
+        "day1_launch_authority_creation_forbidden",
+        "runtime_live_order_source_connector_runtime_cash_backend_profit_authority_creation_forbidden",
+        "source_acceptance_forbidden",
+        "connector_semantic_binding_forbidden",
+        "replay_paper_optimizer_neural_quantum_backend_execution_forbidden",
+        "qaoa_vqe_qubo_ising_annealing_execution_forbidden",
+        "profit_latency_execution_quantum_advantage_claim_forbidden",
+        "atomicrows_bundle_mutation_forbidden",
+        "atomicrows_bundle_sha_creation_forbidden",
+        "sha_dormancy_weakening_forbidden",
+        "pr116a_gate_registry_weakening_forbidden"
+      ],
+      "properties": {
+        "repo_canonical_references_are_implementation_truth": { "const": true },
+        "github_numbers_are_audit_only": { "const": true },
+        "roadmap_labels_are_planning_orchestration_labels": { "const": true },
+        "blueprint_labels_are_implementation_scope_labels": { "const": true },
+        "same_number_identity_inference_forbidden": { "const": true },
+        "history_rewrite_forbidden": { "const": true },
+        "merged_branch_renaming_forbidden": { "const": true },
+        "master_plan_edit_forbidden_this_pr": { "const": true },
+        "active_non_sha_day1_gate_flip_forbidden": { "const": true },
+        "final_readiness_creation_forbidden": { "const": true },
+        "day1_launch_authority_creation_forbidden": { "const": true },
+        "runtime_live_order_source_connector_runtime_cash_backend_profit_authority_creation_forbidden": { "const": true },
+        "source_acceptance_forbidden": { "const": true },
+        "connector_semantic_binding_forbidden": { "const": true },
+        "replay_paper_optimizer_neural_quantum_backend_execution_forbidden": { "const": true },
+        "qaoa_vqe_qubo_ising_annealing_execution_forbidden": { "const": true },
+        "profit_latency_execution_quantum_advantage_claim_forbidden": { "const": true },
+        "atomicrows_bundle_mutation_forbidden": { "const": true },
+        "atomicrows_bundle_sha_creation_forbidden": { "const": true },
+        "sha_dormancy_weakening_forbidden": { "const": true },
+        "pr116a_gate_registry_weakening_forbidden": { "const": true }
+      }
+    },
+    "noClaimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_active_non_sha_day1_gate_flipped",
+        "final_readiness_created",
+        "day1_launch_authority_created",
+        "runtime_live_order_source_connector_runtime_cash_backend_profit_authority_created",
+        "source_facts_accepted",
+        "connector_semantics_bound",
+        "runtime_cash_receipts_created",
+        "replay_paper_optimizer_neural_quantum_backend_execution_created",
+        "qubo_qaoa_vqe_ising_annealing_execution_created",
+        "profit_latency_execution_quantum_advantage_evidence_created",
+        "bug_free_status_claimed"
+      ],
+      "properties": {
+        "no_active_non_sha_day1_gate_flipped": { "const": true },
+        "final_readiness_created": { "const": false },
+        "day1_launch_authority_created": { "const": false },
+        "runtime_live_order_source_connector_runtime_cash_backend_profit_authority_created": { "const": false },
+        "source_facts_accepted": { "const": false },
+        "connector_semantics_bound": { "const": false },
+        "runtime_cash_receipts_created": { "const": false },
+        "replay_paper_optimizer_neural_quantum_backend_execution_created": { "const": false },
+        "qubo_qaoa_vqe_ising_annealing_execution_created": { "const": false },
+        "profit_latency_execution_quantum_advantage_evidence_created": { "const": false },
+        "bug_free_status_claimed": { "const": false }
+      }
+    },
+    "rosterEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roster_entry_id",
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "github_pr_number",
+        "repo_title",
+        "roadmap_title",
+        "blueprint_title",
+        "github_title",
+        "branch_name",
+        "validator_markers",
+        "reference_types",
+        "corrective_overlay",
+        "repair_chain",
+        "current_status",
+        "semantic_role",
+        "authority_scope",
+        "superseded_by",
+        "depends_on_roster_entries",
+        "github_audit_url",
+        "identity_relation_class",
+        "same_number_mismatch_recorded",
+        "notes"
+      ],
+      "properties": {
+        "roster_entry_id": { "type": "string" },
+        "repo_canonical_pr_label": { "$ref": "#/$defs/nullableString" },
+        "roadmap_pr_label": { "$ref": "#/$defs/nullableString" },
+        "blueprint_pr_label": { "$ref": "#/$defs/nullableString" },
+        "github_pr_number": { "type": ["integer", "null"] },
+        "repo_title": { "$ref": "#/$defs/nullableString" },
+        "roadmap_title": { "$ref": "#/$defs/nullableString" },
+        "blueprint_title": { "$ref": "#/$defs/nullableString" },
+        "github_title": { "$ref": "#/$defs/nullableString" },
+        "branch_name": { "$ref": "#/$defs/nullableString" },
+        "validator_markers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "reference_types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/referenceType" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "corrective_overlay": { "type": "boolean" },
+        "repair_chain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "current_status": { "$ref": "#/$defs/currentStatus" },
+        "semantic_role": { "$ref": "#/$defs/semanticRole" },
+        "authority_scope": { "$ref": "#/$defs/authorityScope" },
+        "superseded_by": { "$ref": "#/$defs/nullableString" },
+        "depends_on_roster_entries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "github_audit_url": { "$ref": "#/$defs/nullableString" },
+        "identity_relation_class": { "$ref": "#/$defs/identityRelationClass" },
+        "same_number_mismatch_recorded": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "mismatchRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_pr_number",
+        "github_title",
+        "roadmap_pr_label",
+        "roadmap_title",
+        "relation"
+      ],
+      "properties": {
+        "github_pr_number": { "type": "integer" },
+        "github_title": { "type": "string" },
+        "roadmap_pr_label": { "type": "string" },
+        "roadmap_title": { "type": "string" },
+        "relation": { "const": "SAME_NUMBER_MISMATCH" }
+      }
+    }
+  }
+}

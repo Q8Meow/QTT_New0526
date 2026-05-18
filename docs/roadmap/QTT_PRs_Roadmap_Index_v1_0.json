@@ -4,6 +4,16 @@
   "created": "2026-05-12",
   "source_docx": "QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.docx",
   "canonical_usage_boundary": "Forward roadmap guidance only; implementation truth remains repository artifacts, schemas, validators, generated reports, authority boundaries, validation evidence, and explicit owner-approved instructions.",
+  "canonical_pr_identity_roster": {
+    "path": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "usage": "Canonical translator between repo, roadmap, blueprint, and GitHub identities.",
+    "github_pr_numbers": "Audit-only.",
+    "repo_canonical_labels": "Implementation truth when locally verified in repo artifacts.",
+    "roadmap_labels": "Planning/orchestration labels.",
+    "blueprint_labels": "Implementation-scope labels.",
+    "same_number_identity_inference": "Forbidden.",
+    "future_pr_prompt_rule": "Future PR prompts must update or reference the roster before functional work proceeds."
+  },
   "stage1_prediction_market_launch_essential_range": {
     "from": "PR #83",
     "to": "PR #151"

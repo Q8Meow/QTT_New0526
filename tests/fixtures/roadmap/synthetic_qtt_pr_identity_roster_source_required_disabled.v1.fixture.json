@@ -1,0 +1,12 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "SYNTHETIC_QTT_PR_IDENTITY_ROSTER_SOURCE_REQUIRED_DISABLED_V1",
+  "scope": "PR_IDENTITY_ROSTER_SCHEMA_FAMILY_PARITY_ONLY",
+  "creates_runtime_authority": false,
+  "creates_live_authority": false,
+  "creates_source_acceptance": false,
+  "creates_connector_binding": false,
+  "creates_profit_evidence": false,
+  "creates_quantum_backend_execution": false
+}
