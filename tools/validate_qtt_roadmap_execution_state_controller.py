@@ -290,6 +290,7 @@ def _validate_roster_currentization(roster: Mapping[str, Any]) -> list[str]:
     entries = _entries(roster)
     pr117 = _entry_by_id(entries, "PR117_REPO_CANONICAL_SELF_ENTRY")
     pr118 = _entry_by_id(entries, "PR118_REPO_CANONICAL_SELF_ENTRY")
+    pr119 = _entry_by_id(entries, "PR119_REPO_CANONICAL_SELF_ENTRY")
     if pr117 is None:
         failures.append("PR117_REPO_CANONICAL_SELF_ENTRY must exist")
     else:
@@ -316,6 +317,21 @@ def _validate_roster_currentization(roster: Mapping[str, Any]) -> list[str]:
         for field, expected_value in expected.items():
             if pr118.get(field) != expected_value:
                 failures.append(f"PR118_REPO_CANONICAL_SELF_ENTRY {field} must be {expected_value!r}")
+    if pr119 is None:
+        failures.append("PR119_REPO_CANONICAL_SELF_ENTRY must exist")
+    else:
+        expected = {
+            "repo_canonical_pr_label": "PR119",
+            "roadmap_pr_label": None,
+            "blueprint_pr_label": None,
+            "github_pr_number": 119,
+            "github_title": "PR119 currentize identity roster and add controller-approved coverage triage routes",
+            "current_status": "MERGED",
+            "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/119",
+        }
+        for field, expected_value in expected.items():
+            if pr119.get(field) != expected_value:
+                failures.append(f"PR119_REPO_CANONICAL_SELF_ENTRY {field} must be {expected_value!r}")
     return failures
 
 

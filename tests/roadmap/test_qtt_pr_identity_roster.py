@@ -105,13 +105,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_118_are_recorded():
+def test_same_number_mismatches_for_github_107_through_119_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 119))
+    assert numbers == set(range(107, 120))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -153,6 +153,28 @@ def test_pr118_self_entry_is_currentized_but_not_roadmap_or_blueprint_118():
     assert pr118["same_number_mismatch_recorded"] is True
     assert pr118["depends_on_roster_entries"] == [
         "PR117_REPO_CANONICAL_SELF_ENTRY"
+    ]
+
+
+def test_pr119_self_entry_is_currentized_but_not_roadmap_or_blueprint_119():
+    pr119 = _entry("PR119_REPO_CANONICAL_SELF_ENTRY")
+
+    assert pr119["repo_canonical_pr_label"] == "PR119"
+    assert pr119["github_pr_number"] == 119
+    assert (
+        pr119["github_audit_url"]
+        == "https://github.com/Q8Meow/QTT_New0526/pull/119"
+    )
+    assert (
+        pr119["github_title"]
+        == "PR119 currentize identity roster and add controller-approved coverage triage routes"
+    )
+    assert pr119["roadmap_pr_label"] is None
+    assert pr119["blueprint_pr_label"] is None
+    assert pr119["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr119["same_number_mismatch_recorded"] is True
+    assert pr119["depends_on_roster_entries"] == [
+        "PR118_REPO_CANONICAL_SELF_ENTRY"
     ]
 
 

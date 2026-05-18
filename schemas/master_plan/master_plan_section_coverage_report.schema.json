@@ -14,6 +14,12 @@
     "registry",
     "route_map",
     "route_map_summary",
+    "central_config",
+    "pr120_scope_summary",
+    "roadmap_crosswalk",
+    "roadmap_crosswalk_summary",
+    "market_specific_section_index",
+    "market_specific_section_index_summary",
     "authority_boundary",
     "coverage_summary",
     "coverage_entries",
@@ -68,6 +74,12 @@
     },
     "route_map": { "$ref": "#/$defs/route_map" },
     "route_map_summary": { "$ref": "#/$defs/route_map_summary" },
+    "central_config": { "type": "object" },
+    "pr120_scope_summary": { "$ref": "#/$defs/pr120_scope_summary" },
+    "roadmap_crosswalk": { "$ref": "#/$defs/roadmap_crosswalk" },
+    "roadmap_crosswalk_summary": { "$ref": "#/$defs/roadmap_crosswalk_summary" },
+    "market_specific_section_index": { "$ref": "#/$defs/market_specific_section_index" },
+    "market_specific_section_index_summary": { "$ref": "#/$defs/market_specific_section_index_summary" },
     "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
     "coverage_summary": {
       "type": "object",
@@ -146,44 +158,64 @@
         "CAPABILITY_ROUTE",
         "POLICY_ROUTE",
         "SOURCE_EVIDENCE_ROUTE",
+        "CONNECTOR_SEMANTIC_ROUTE",
         "REPLAY_PAPER_ROUTE",
         "RUNTIME_ROUTE",
+        "RUNTIME_CASH_ROUTE",
         "OWNER_ROUTE",
+        "GOVERNANCE_ROUTE",
+        "RISK_ROUTE",
+        "DASHBOARD_OWNER_SURFACE_ROUTE",
+        "RESEARCH_ROUTE",
         "QUARANTINE_ROUTE",
         "RETIREMENT_ROUTE",
         "CONTROLLER_REFERENCED_ROUTE",
         "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+        "QUANTUM_BACKEND_ROUTE",
         "OPTIMIZER_ARBITRATION_ROUTE",
         "LATENCY_COST_ROUTE",
+        "MARKET_EXPANSION_ROUTE",
+        "CROSS_MARKET_ROUTE",
         "UNRESOLVED_DEFAULT_ROUTE"
       ]
     },
     "route_confidence_class": {
       "enum": [
+        "EXACT_PR119_ROUTE_ENTRY",
         "EXACT_CONTROLLER_REFERENCE",
+        "EXACT_ROADMAP_INDEX_REFERENCE",
+        "EXACT_BLUEPRINT_INDEX_REFERENCE",
+        "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
         "EXACT_ARTIFACT_REFERENCE",
         "EXACT_SCHEMA_REFERENCE",
         "EXACT_VALIDATOR_REFERENCE",
         "EXACT_TOOL_REFERENCE",
+        "EXACT_REPORT_REFERENCE",
         "EXACT_MASTER_PLAN_SECTION_REFERENCE",
-        "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
-        "OWNER_POLICY_REFERENCE",
-        "UNRESOLVED_EXPLICITLY"
+        "EXACT_MARKET_TOKEN_REFERENCE",
+        "EXACT_STAGE_REFERENCE",
+        "PARENT_CAPABILITY_RULE_REFERENCE",
+        "DEFAULT_RESEARCH_ROUTE",
+        "UNRESOLVED_EXPLICITLY",
+        "OWNER_POLICY_REFERENCE"
       ]
     },
     "unresolved_reason_code": {
       "enum": [
         "NO_EXACT_ARTIFACT_OWNER_FOUND",
         "NO_EXACT_CONTROLLER_REFERENCE_FOUND",
+        "NO_EXACT_ROADMAP_BLUEPRINT_CONTROLLER_OWNER_FOUND",
         "AMBIGUOUS_SECTION_SCOPE",
         "TITLE_SIMILARITY_ONLY_NOT_ALLOWED",
+        "MARKET_RELEVANCE_UNRESOLVED",
         "WOULD_REQUIRE_MASTER_PLAN_MUTATION",
         "WOULD_REQUIRE_RUNTIME_OR_LIVE_AUTHORITY",
         "WOULD_REQUIRE_SOURCE_OR_CONNECTOR_AUTHORITY",
         "WOULD_REQUIRE_REPLAY_OR_PAPER_RESULT",
         "WOULD_REQUIRE_QUANTUM_BACKEND_OR_OPTIMIZER_EXECUTION",
         "WOULD_REINTRODUCE_OLD_COVERAGE_LEDGER",
-        "OUT_OF_SCOPE_FOR_PR119"
+        "OUT_OF_SCOPE_FOR_PR119",
+        "OUT_OF_SCOPE_FOR_PR120"
       ]
     },
     "quantum_relevance_class": {
@@ -417,6 +449,469 @@
         "quantum_backend_simulator_optimizer_execution_created": {
           "const": false
         }
+      }
+    },
+    "parent_capability_group_id": {
+      "enum": [
+        "CODEX_BUILD_DOCTRINE_AND_TRACEABILITY",
+        "MASTER_PLAN_SECTION_COVERAGE_AND_COMPLETION",
+        "SOURCE_EVIDENCE_AND_ACCEPTED_FACTS",
+        "CONNECTOR_SEMANTIC_BINDING_AND_VENUE_NORMALIZATION",
+        "RUNTIME_RESOLVER_AND_SNAPSHOT_INPUT_IDENTITY",
+        "REPLAY_PAPER_DUAL_RESULT_AND_OWNER_REVIEW",
+        "RUNTIME_CASH_PRIVATE_STATE_AND_EXPOSURE",
+        "ORDER_INTENT_EXECUTION_ROUTER_AND_PRETRADE_GATES",
+        "ATOMICROWS_PARAMETER_ALGORITHM_AGENT_INVENTORY",
+        "EDGE_STACK_SCORING_SELECTION_AND_HANDOFF",
+        "QUANTUM_POLICY_APPLICABILITY_OPTIMIZATION_AND_BACKEND",
+        "LATENCY_COST_SLIPPAGE_AND_EXECUTION_QUALITY",
+        "DASHBOARD_OWNER_APPROVAL_AND_GOVERNANCE",
+        "RESEARCH_INTAKE_EXTERNAL_REPO_AND_NEURAL_SIGNAL",
+        "MARKET_EXPANSION_AND_CROSS_MARKET_ADAPTATION",
+        "RISK_LIMIT_KILL_SWITCH_AND_POST_TRADE_SAFETY",
+        "LAUNCH_RUNBOOK_CANARY_ARBITRAGE_AND_LIVE_PROMOTION",
+        "QUARANTINE_RETIREMENT_AND_NEGATIVE_EVIDENCE",
+        "UNRESOLVED_RESEARCH_DEFAULT"
+      ]
+    },
+    "market_id": {
+      "enum": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "CROSS_MARKET_FOUNDATION",
+        "MARKET_EXPANSION_GENERAL",
+        "OWNER_REVIEW_REQUIRED_MARKET_CANDIDATE"
+      ]
+    },
+    "market_stage_class": {
+      "enum": [
+        "STAGE_1_ACTIVE_SCOPE",
+        "STAGE_2_CANDIDATE_SCOPE",
+        "LATER_STAGE_CANDIDATE_SCOPE",
+        "CROSS_MARKET_FOUNDATION_SCOPE",
+        "OWNER_REVIEW_REQUIRED_SCOPE"
+      ]
+    },
+    "market_scope_confidence_class": {
+      "enum": [
+        "EXACT_OWNER_POLICY_REFERENCE",
+        "EXACT_MASTER_PLAN_MARKET_REFERENCE",
+        "EXACT_VENUE_ID_REFERENCE",
+        "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
+        "EXACT_ARTIFACT_REFERENCE",
+        "CROSS_MARKET_GENERIC_REFERENCE",
+        "OWNER_REVIEW_REQUIRED"
+      ]
+    },
+    "market_relevance_class": {
+      "enum": [
+        "DIRECT_MARKET_SECTION",
+        "DIRECT_VENUE_SECTION",
+        "CROSS_MARKET_FOUNDATION",
+        "SOURCE_EVIDENCE_FOR_MARKET",
+        "CONNECTOR_OR_RUNTIME_FOR_MARKET",
+        "REPLAY_PAPER_OR_LAUNCH_FOR_MARKET",
+        "QUANTUM_OR_OPTIMIZER_FOR_MARKET",
+        "RISK_OR_LATENCY_FOR_MARKET",
+        "OWNER_DASHBOARD_OR_GOVERNANCE_FOR_MARKET",
+        "RESEARCH_SIGNAL_FOR_MARKET",
+        "MARKET_RELEVANCE_UNRESOLVED"
+      ]
+    },
+    "row_authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_authority_created",
+        "live_authority_created",
+        "source_fact_acceptance_created",
+        "connector_semantic_binding_created",
+        "replay_paper_result_created",
+        "paper_result_created",
+        "order_authority_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "quantum_backend_or_simulator_execution_created",
+        "optimizer_runtime_execution_created",
+        "market_launch_authority_created",
+        "stage2_launch_authority_created"
+      ],
+      "properties": {
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "source_fact_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "replay_paper_result_created": { "const": false },
+        "paper_result_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_superiority_evidence_created": { "const": false },
+        "quantum_backend_or_simulator_execution_created": { "const": false },
+        "optimizer_runtime_execution_created": { "const": false },
+        "market_launch_authority_created": { "const": false },
+        "stage2_launch_authority_created": { "const": false }
+      }
+    },
+    "controller_state_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "title",
+        "controller_state",
+        "next_allowed_action_class",
+        "controller_entry_reference"
+      ],
+      "properties": {
+        "roadmap_pr_label": { "type": ["string", "null"] },
+        "blueprint_pr_label": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "controller_state": { "type": ["string", "null"] },
+        "next_allowed_action_class": { "type": ["string", "null"] },
+        "controller_entry_reference": { "type": "string" }
+      }
+    },
+    "market_relevance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "market_id",
+        "market_relevance_class",
+        "evidence_basis",
+        "confidence_class",
+        "owner_review_required_flag",
+        "no_launch_authority_created_flag"
+      ],
+      "properties": {
+        "market_id": { "$ref": "#/$defs/market_id" },
+        "market_relevance_class": { "$ref": "#/$defs/market_relevance_class" },
+        "evidence_basis": { "type": "string" },
+        "confidence_class": { "$ref": "#/$defs/market_scope_confidence_class" },
+        "owner_review_required_flag": { "type": "boolean" },
+        "no_launch_authority_created_flag": { "const": true }
+      }
+    },
+    "roadmap_crosswalk_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_order_index",
+        "section_id",
+        "normalized_section_title",
+        "section_manifest_reference",
+        "section_position_source",
+        "section_start_line_or_position_if_available",
+        "section_end_line_or_position_if_available",
+        "parent_capability_group_id",
+        "parent_capability_group_title",
+        "current_route_class",
+        "route_confidence_class",
+        "exact_route_source",
+        "roadmap_pr_labels",
+        "blueprint_pr_labels",
+        "semantic_task_ids",
+        "controller_state_references",
+        "downstream_consumer_references",
+        "route_owner_artifacts",
+        "required_validators",
+        "required_reports",
+        "market_relevance",
+        "authority_boundary",
+        "unresolved_reason_code_when_applicable",
+        "owner_review_required_flag",
+        "no_master_plan_text_mutation_flag",
+        "no_old_coverage_ledger_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_market_launch_authority_created_flag"
+      ],
+      "properties": {
+        "document_order_index": { "type": "integer" },
+        "section_id": { "type": "string" },
+        "normalized_section_title": { "type": "string" },
+        "section_manifest_reference": { "type": "string" },
+        "section_position_source": { "type": "string" },
+        "section_start_line_or_position_if_available": { "type": "integer" },
+        "section_end_line_or_position_if_available": { "type": "integer" },
+        "parent_capability_group_id": { "$ref": "#/$defs/parent_capability_group_id" },
+        "parent_capability_group_title": { "type": "string" },
+        "current_route_class": { "$ref": "#/$defs/route_class" },
+        "route_confidence_class": { "$ref": "#/$defs/route_confidence_class" },
+        "exact_route_source": { "type": "string" },
+        "roadmap_pr_labels": { "$ref": "#/$defs/string_list" },
+        "blueprint_pr_labels": { "$ref": "#/$defs/string_list" },
+        "semantic_task_ids": { "$ref": "#/$defs/string_list" },
+        "controller_state_references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/controller_state_reference" }
+        },
+        "downstream_consumer_references": { "$ref": "#/$defs/string_list" },
+        "route_owner_artifacts": { "$ref": "#/$defs/string_list" },
+        "required_validators": { "$ref": "#/$defs/string_list" },
+        "required_reports": { "$ref": "#/$defs/string_list" },
+        "market_relevance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/market_relevance" }
+        },
+        "authority_boundary": { "$ref": "#/$defs/row_authority_boundary" },
+        "unresolved_reason_code_when_applicable": {
+          "type": ["string", "null"]
+        },
+        "owner_review_required_flag": { "type": "boolean" },
+        "no_master_plan_text_mutation_flag": { "const": true },
+        "no_old_coverage_ledger_flag": { "const": true },
+        "no_runtime_live_order_profit_authority_created_flag": { "const": true },
+        "no_source_connector_replay_paper_authority_created_flag": { "const": true },
+        "no_quantum_backend_or_simulator_execution_created_flag": { "const": true },
+        "no_market_launch_authority_created_flag": { "const": true }
+      }
+    },
+    "roadmap_crosswalk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["crosswalk_id", "authority_class", "rows"],
+      "properties": {
+        "crosswalk_id": {
+          "const": "QTT_MASTER_PLAN_SECTION_ROADMAP_CROSSWALK_AND_MARKET_INDEX_V1_0"
+        },
+        "authority_class": {
+          "const": "STATIC_CONTROL_PLANE_CROSSWALK_NOT_RUNTIME_NOT_LIVE_NOT_MARKET_LAUNCH_AUTHORITY"
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/roadmap_crosswalk_row" }
+        }
+      }
+    },
+    "pr120_scope_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "semantic_task_id",
+        "title",
+        "materialized_capability",
+        "state_transition",
+        "pr119_github_audit_currentization_evidence",
+        "controller_decision_reference",
+        "artifact_family_decision",
+        "static_control_plane_only",
+        "roadmap_pr104_command_matrix_implemented",
+        "no_old_coverage_ledger_reintroduction",
+        "no_master_plan_text_mutation",
+        "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority",
+        "no_market_launch_or_stage2_launch_authority",
+        "no_next_market_selection"
+      ],
+      "properties": {
+        "repo_canonical_pr_label": { "const": "PR120" },
+        "roadmap_pr_label": { "const": "PR #103" },
+        "blueprint_pr_label": { "const": "PR #103" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-COVERAGE-PARENT-CAPABILITY-CONSOLIDATION"
+        },
+        "title": {
+          "const": "Master-plan section coverage parent-capability consolidation"
+        },
+        "materialized_capability": {
+          "const": "QTT_MASTER_PLAN_SECTION_ROADMAP_CROSSWALK_AND_MARKET_INDEX_V1_0"
+        },
+        "state_transition": {
+          "const": "MASTER_PLAN_SECTION_PARENT_CAPABILITY_CROSSWALK_ESTABLISHED"
+        },
+        "pr119_github_audit_currentization_evidence": { "type": "object" },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/2"
+        },
+        "artifact_family_decision": {
+          "const": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED"
+        },
+        "static_control_plane_only": { "const": true },
+        "roadmap_pr104_command_matrix_implemented": { "const": false },
+        "no_old_coverage_ledger_reintroduction": { "const": true },
+        "no_master_plan_text_mutation": { "const": true },
+        "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority": { "const": true },
+        "no_market_launch_or_stage2_launch_authority": { "const": true },
+        "no_next_market_selection": { "const": true }
+      }
+    },
+    "roadmap_crosswalk_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "semantic_task_id",
+        "controller_decision_reference",
+        "artifact_family_decision",
+        "section_manifest_parser_visible_section_count",
+        "all_section_crosswalk_row_count",
+        "missing_section_count",
+        "duplicate_section_count",
+        "route_class_counts",
+        "route_confidence_counts",
+        "parent_capability_group_counts",
+        "roadmap_pr_label_coverage_counts",
+        "blueprint_pr_label_coverage_counts",
+        "controller_state_coverage_counts",
+        "unresolved_default_count",
+        "master_plan_mutation_count",
+        "runtime_authority_created",
+        "live_authority_created",
+        "source_fact_acceptance_created",
+        "connector_semantic_binding_created",
+        "replay_paper_result_created",
+        "order_authority_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "quantum_backend_simulator_optimizer_execution_created",
+        "market_launch_authority_created",
+        "deterministic_output"
+      ],
+      "properties": {
+        "repo_canonical_pr_label": { "const": "PR120" },
+        "roadmap_pr_label": { "const": "PR #103" },
+        "blueprint_pr_label": { "const": "PR #103" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-COVERAGE-PARENT-CAPABILITY-CONSOLIDATION"
+        },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/2"
+        },
+        "artifact_family_decision": {
+          "const": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED"
+        },
+        "section_manifest_parser_visible_section_count": { "type": "integer" },
+        "all_section_crosswalk_row_count": { "type": "integer" },
+        "missing_section_count": { "type": "integer" },
+        "duplicate_section_count": { "type": "integer" },
+        "route_class_counts": { "type": "object" },
+        "route_confidence_counts": { "type": "object" },
+        "parent_capability_group_counts": { "type": "object" },
+        "roadmap_pr_label_coverage_counts": { "type": "object" },
+        "blueprint_pr_label_coverage_counts": { "type": "object" },
+        "controller_state_coverage_counts": { "type": "object" },
+        "unresolved_default_count": { "type": "integer" },
+        "master_plan_mutation_count": { "const": 0 },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "source_fact_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "replay_paper_result_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_superiority_evidence_created": { "const": false },
+        "quantum_backend_simulator_optimizer_execution_created": { "const": false },
+        "market_launch_authority_created": { "const": false },
+        "deterministic_output": { "const": true }
+      }
+    },
+    "market_index_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "market_id",
+        "market_display_name",
+        "market_stage_class",
+        "market_scope_confidence_class",
+        "evidence_basis",
+        "related_section_ids",
+        "related_sections_grouped_by_route_class",
+        "related_sections_grouped_by_parent_capability",
+        "related_sections_grouped_by_future_pr_label",
+        "source_evidence_sections",
+        "connector_sections",
+        "runtime_cash_sections",
+        "replay_paper_sections",
+        "live_launch_sections",
+        "risk_sections",
+        "latency_sections",
+        "quantum_sections",
+        "dashboard_owner_sections",
+        "research_sections",
+        "unresolved_sections",
+        "required_future_roadmap_pr_labels",
+        "no_market_launch_authority_created_flag",
+        "no_external_market_fact_created_flag",
+        "no_runtime_live_order_profit_authority_created_flag"
+      ],
+      "properties": {
+        "market_id": { "$ref": "#/$defs/market_id" },
+        "market_display_name": { "type": "string" },
+        "market_stage_class": { "$ref": "#/$defs/market_stage_class" },
+        "market_scope_confidence_class": { "$ref": "#/$defs/market_scope_confidence_class" },
+        "evidence_basis": { "type": "string" },
+        "related_section_ids": { "$ref": "#/$defs/string_list" },
+        "related_sections_grouped_by_route_class": { "type": "object" },
+        "related_sections_grouped_by_parent_capability": { "type": "object" },
+        "related_sections_grouped_by_future_pr_label": { "type": "object" },
+        "source_evidence_sections": { "$ref": "#/$defs/string_list" },
+        "connector_sections": { "$ref": "#/$defs/string_list" },
+        "runtime_cash_sections": { "$ref": "#/$defs/string_list" },
+        "replay_paper_sections": { "$ref": "#/$defs/string_list" },
+        "live_launch_sections": { "$ref": "#/$defs/string_list" },
+        "risk_sections": { "$ref": "#/$defs/string_list" },
+        "latency_sections": { "$ref": "#/$defs/string_list" },
+        "quantum_sections": { "$ref": "#/$defs/string_list" },
+        "dashboard_owner_sections": { "$ref": "#/$defs/string_list" },
+        "research_sections": { "$ref": "#/$defs/string_list" },
+        "unresolved_sections": { "$ref": "#/$defs/string_list" },
+        "required_future_roadmap_pr_labels": { "$ref": "#/$defs/string_list" },
+        "no_market_launch_authority_created_flag": { "const": true },
+        "no_external_market_fact_created_flag": { "const": true },
+        "no_runtime_live_order_profit_authority_created_flag": { "const": true }
+      }
+    },
+    "market_specific_section_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["market_index_id", "authority_class", "markets"],
+      "properties": {
+        "market_index_id": {
+          "const": "QTT_MARKET_SPECIFIC_MASTER_PLAN_SECTION_INDEX_V1_0"
+        },
+        "authority_class": {
+          "const": "STATIC_MARKET_SECTION_INDEX_NOT_MARKET_LAUNCH_AUTHORITY"
+        },
+        "markets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/market_index_entry" }
+        }
+      }
+    },
+    "market_specific_section_index_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "market_specific_index_count",
+        "market_entry_counts_by_market_stage_class",
+        "market_entry_counts_by_route_class",
+        "prediction_market_section_counts",
+        "future_market_candidate_bucket_counts",
+        "owner_review_required_market_candidate_counts",
+        "market_launch_authority_created",
+        "stage2_launch_authority_created",
+        "next_market_selected"
+      ],
+      "properties": {
+        "market_specific_index_count": { "type": "integer" },
+        "market_entry_counts_by_market_stage_class": { "type": "object" },
+        "market_entry_counts_by_route_class": { "type": "object" },
+        "prediction_market_section_counts": { "type": "object" },
+        "future_market_candidate_bucket_counts": { "type": "object" },
+        "owner_review_required_market_candidate_counts": { "type": "object" },
+        "market_launch_authority_created": { "const": false },
+        "stage2_launch_authority_created": { "const": false },
+        "next_market_selected": { "const": false }
       }
     },
     "coverage_entry": {

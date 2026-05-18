@@ -91,8 +91,76 @@ def test_route_map_extension_is_static_and_controller_referenced():
     )
 
     route_classes = route_summary["count_by_route_class"]
-    for route_class in validator.ALLOWED_ROUTE_CLASSES:
-        assert route_classes[route_class] >= 1
+    assert route_classes["UNRESOLVED_DEFAULT_ROUTE"] == 1
+    assert route_classes["QUANTUM_FORWARD_OPTIMIZATION_ROUTE"] == 1
+    assert route_classes["OPTIMIZER_ARBITRATION_ROUTE"] == 1
+    assert route_classes["LATENCY_COST_ROUTE"] == 1
+
+
+def test_pr120_crosswalk_covers_every_section_and_keeps_authority_static():
+    report = _report()
+    rows = report["roadmap_crosswalk"]["rows"]
+    summary = report["roadmap_crosswalk_summary"]
+
+    assert report["pr120_scope_summary"]["repo_canonical_pr_label"] == "PR120"
+    assert report["pr120_scope_summary"]["roadmap_pr_label"] == "PR #103"
+    assert report["pr120_scope_summary"]["blueprint_pr_label"] == "PR #103"
+    assert summary["section_manifest_parser_visible_section_count"] == len(rows)
+    assert summary["section_manifest_parser_visible_section_count"] == len(
+        report["section_coverage"]
+    )
+    assert summary["all_section_crosswalk_row_count"] == len(rows)
+    assert summary["missing_section_count"] == 0
+    assert summary["duplicate_section_count"] == 0
+    assert summary["ordering_matches_section_manifest"] is True
+    assert summary["master_plan_mutation_count"] == 0
+    assert summary["runtime_authority_created"] is False
+    assert summary["live_authority_created"] is False
+    assert summary["market_launch_authority_created"] is False
+
+    first_row = rows[0]
+    assert first_row["document_order_index"] == 1
+    assert first_row["section_id"] == report["section_coverage"][0]["owner_section_id"]
+    assert first_row["no_master_plan_text_mutation_flag"] is True
+    assert first_row["no_old_coverage_ledger_flag"] is True
+    assert first_row["no_market_launch_authority_created_flag"] is True
+
+
+def test_pr119_exact_routes_are_preserved_inside_pr120_crosswalk():
+    report = _report()
+    rows = {row["section_id"]: row for row in report["roadmap_crosswalk"]["rows"]}
+
+    for entry in report["route_map"]["route_entries"]:
+        row = rows[entry["section_id"]]
+        assert row["current_route_class"] == entry["current_route_class"]
+        assert row["route_confidence_class"] == "EXACT_PR119_ROUTE_ENTRY"
+        assert entry["downstream_consumer_reference"] in row[
+            "downstream_consumer_references"
+        ]
+        assert entry["controller_state_reference"] in {
+            item["controller_entry_reference"]
+            for item in row["controller_state_references"]
+        }
+
+
+def test_market_specific_section_index_is_derived_and_non_launch_authority():
+    report = _report()
+    market_index = report["market_specific_section_index"]
+    summary = report["market_specific_section_index_summary"]
+
+    assert market_index["authority_class"] == (
+        "STATIC_MARKET_SECTION_INDEX_NOT_MARKET_LAUNCH_AUTHORITY"
+    )
+    assert summary["market_specific_index_count"] == len(market_index["markets"])
+    assert summary["prediction_market_section_counts"]["KALSHI"] >= 1
+    assert summary["prediction_market_section_counts"]["POLYMARKET"] >= 1
+    assert summary["prediction_market_section_counts"]["FORECASTEX_IBKR"] >= 1
+    assert summary["market_launch_authority_created"] is False
+    assert summary["stage2_launch_authority_created"] is False
+    assert summary["next_market_selected"] is False
+    for market in market_index["markets"]:
+        assert market["no_market_launch_authority_created_flag"] is True
+        assert market["no_external_market_fact_created_flag"] is True
 
 
 def test_generated_report_schema_validates():

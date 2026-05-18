@@ -1390,6 +1390,10 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_qtt_master_plan_section_roadmap_crosswalk.py"),
+        ],
+        [
+            sys.executable,
             _path("tools", "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
