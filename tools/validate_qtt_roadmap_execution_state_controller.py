@@ -308,7 +308,10 @@ def _validate_roster_currentization(roster: Mapping[str, Any]) -> list[str]:
             "repo_canonical_pr_label": "PR118",
             "roadmap_pr_label": None,
             "blueprint_pr_label": None,
-            "github_pr_number": None,
+            "github_pr_number": 118,
+            "github_title": "PR118 add roadmap execution-state controller",
+            "current_status": "MERGED",
+            "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/118",
         }
         for field, expected_value in expected.items():
             if pr118.get(field) != expected_value:

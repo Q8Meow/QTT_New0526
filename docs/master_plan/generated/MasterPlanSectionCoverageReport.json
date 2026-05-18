@@ -162,6 +162,96 @@
         "creates_runtime_cash_receipt": false,
         "reduces_blockers": false
       },
+      "capability_id": "external_bot_repo_supply_chain_quarantine_route",
+      "coverage_class": "QUARANTINE_REQUIRED",
+      "current_status": "QUARANTINED_UNPROVEN",
+      "entry_index": 15,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "0X.0AF"
+      ],
+      "quarantine_reason": "external bot-repo material is not accepted source evidence or production code",
+      "required_files": [
+        "docs/master_plan/QTT_MasterPlan_Current.md"
+      ],
+      "required_receipts": [
+        "future-explicit-source-safety-review-receipt"
+      ],
+      "required_reports": [],
+      "required_schemas": [],
+      "required_tests": [],
+      "required_tools": [
+        "tools/validate_no_runtime_artifacts.py"
+      ],
+      "research_route": "external bot-repo intelligence remains quarantined and static until explicit review",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "External bot-repo intelligence and supply-chain quarantine route",
+      "static_safety_stub": "quarantine route only",
+      "unblock_condition": "future owner-approved source-safety review authorizes exact artifact consumption",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_no_runtime_artifacts.py"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "final_readiness_controller_referenced_route",
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
+      "entry_index": 17,
+      "owner_deferred": false,
+      "owner_section_ids": [
+        "0X.4Z"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
+      ],
+      "required_receipts": [],
+      "required_reports": [
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
+      ],
+      "required_schemas": [
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
+      ],
+      "required_tests": [
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
+      ],
+      "required_tools": [
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
+      ],
+      "research_route": "",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
       "capability_id": "generated_derivative_bootstrap_static_contract",
       "coverage_class": "STATIC_CONTRACT",
       "current_status": "STATIC_CONTRACT_IMPLEMENTED",
@@ -195,6 +285,86 @@
       "validation_commands": [
         ".\\.venv\\Scripts\\python.exe tools\\validate_generated_derivative_bootstrap_gate_static.py --repo-root . --schema schemas\\master_plan\\generated_derivative_bootstrap_gate.schema.json --fixture tests\\fixtures\\master_plan\\synthetic_generated_derivative_bootstrap_gate.v1.fixture.json"
       ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "generic_qubo_quantum_forward_route",
+      "coverage_class": "POLICY_ONLY",
+      "current_status": "RESEARCH_ROUTED",
+      "entry_index": 22,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "19.8"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"
+      ],
+      "required_receipts": [],
+      "required_reports": [
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"
+      ],
+      "required_schemas": [
+        "schemas/quantum/quantum_applicability_classification_registry.schema.json"
+      ],
+      "required_tests": [
+        "tests/quantum/test_quantum_applicability_classification_registry.py"
+      ],
+      "required_tools": [
+        "tools/validate_quantum_applicability_classification_registry.py"
+      ],
+      "research_route": "future quantum-forward formulation metadata only",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Generic QUBO quantum-forward optimization route",
+      "static_safety_stub": "no QUBO solving or backend/simulator execution",
+      "unblock_condition": "future controller-approved quantum problem compiler PR authorizes formulation materialization",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_quantum_applicability_classification_registry.py"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "latency_telemetry_cost_route",
+      "coverage_class": "RUNTIME_RECEIPT_DEPENDENT",
+      "current_status": "BLOCKED_RUNTIME_RECEIPT",
+      "entry_index": 21,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "0X.5S.8"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl"
+      ],
+      "required_receipts": [
+        "future-latency-measurement-receipt"
+      ],
+      "required_reports": [],
+      "required_schemas": [],
+      "required_tests": [],
+      "required_tools": [],
+      "research_route": "latency telemetry route only",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Latency telemetry and bottleneck attribution static route",
+      "static_safety_stub": "no latency superiority evidence",
+      "unblock_condition": "future validated latency measurement receipt exists",
+      "validation_commands": []
     },
     {
       "authority_boundary": {
@@ -300,6 +470,48 @@
         "creates_runtime_cash_receipt": false,
         "reduces_blockers": false
       },
+      "capability_id": "owner_dashboard_value_packet_owner_route",
+      "coverage_class": "OWNER_APPROVAL_DEPENDENT",
+      "current_status": "BLOCKED_OWNER_APPROVAL",
+      "entry_index": 19,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "0X.5H.2M"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+      ],
+      "required_receipts": [
+        "future-owner-review-decision-receipt"
+      ],
+      "required_reports": [
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+      ],
+      "required_schemas": [],
+      "required_tests": [],
+      "required_tools": [
+        "tools/validate_owner_approval_request_queue_registry.py"
+      ],
+      "research_route": "owner decision packet route only",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Owner dashboard value packet and owner review decision route",
+      "static_safety_stub": "owner queue/report only",
+      "unblock_condition": "future owner review decision receipt exists and references exact candidate scope",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_owner_approval_request_queue_registry.py"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
       "capability_id": "owner_live_promotion_review_owner_approval_route",
       "coverage_class": "OWNER_APPROVAL_DEPENDENT",
       "current_status": "BLOCKED_OWNER_APPROVAL",
@@ -342,6 +554,51 @@
       "validation_commands": [
         ".\\.venv\\Scripts\\python.exe tools\\stage1_owner_live_promotion_review_contract_check.py --repo-root .",
         ".\\.venv\\Scripts\\python.exe tools\\stage1_three_venue_canary_eligibility_contract_check.py --repo-root ."
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "owner_quantum_candidate_policy_route",
+      "coverage_class": "POLICY_ONLY",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
+      "entry_index": 23,
+      "owner_deferred": false,
+      "owner_section_ids": [
+        "8.1C"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/quantum/OwnerQuantumPriorityPolicyRegistry.yaml",
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
+      ],
+      "required_receipts": [],
+      "required_reports": [
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
+      ],
+      "required_schemas": [
+        "schemas/quantum/owner_quantum_priority_policy_registry.schema.json"
+      ],
+      "required_tests": [
+        "tests/quantum/test_owner_quantum_priority_policy_registry.py"
+      ],
+      "required_tools": [
+        "tools/validate_owner_quantum_priority_policy_registry.py"
+      ],
+      "research_route": "",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Quantum candidate template and owner-dashboard control policy route",
+      "static_safety_stub": "owner policy metadata only",
+      "unblock_condition": "future owner and controller approved quantum implementation PR",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_owner_quantum_priority_policy_registry.py"
       ]
     },
     {
@@ -399,6 +656,46 @@
         "creates_runtime_cash_receipt": false,
         "reduces_blockers": false
       },
+      "capability_id": "preset_retirement_negative_evidence_route",
+      "coverage_class": "RETIRED_NOT_USEFUL",
+      "current_status": "RETIRED_NOT_USEFUL",
+      "entry_index": 24,
+      "owner_deferred": false,
+      "owner_section_ids": [
+        "8.8"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/QTT_MasterPlan_Current.md"
+      ],
+      "required_receipts": [],
+      "required_reports": [
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ],
+      "required_schemas": [],
+      "required_tests": [],
+      "required_tools": [
+        "tools/validate_master_plan_section_coverage.py"
+      ],
+      "research_route": "",
+      "retirement_allowed": true,
+      "retirement_reason": "exact master-plan retirement section routes preset retirement as policy metadata only",
+      "section_title_or_capability_title": "Preset retirement and negative-evidence route",
+      "static_safety_stub": "retirement route only; no deletion or master-plan rewrite",
+      "unblock_condition": "",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
       "capability_id": "replay_paper_execution_static_boundary",
       "coverage_class": "STATIC_CONTRACT",
       "current_status": "STATIC_CONTRACT_IMPLEMENTED",
@@ -438,6 +735,46 @@
       "validation_commands": [
         ".\\.venv\\Scripts\\python.exe tools\\stage1_concurrent_replay_paper_contract_check.py --repo-root ."
       ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "runtime_cash_field_map_control_route",
+      "coverage_class": "RUNTIME_RECEIPT_DEPENDENT",
+      "current_status": "BLOCKED_RUNTIME_RECEIPT",
+      "entry_index": 16,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "0X.4B.12"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "schemas/runtime_cash/runtime_cash_field_map.schema.json"
+      ],
+      "required_receipts": [
+        "future-runtime-cash-receipt"
+      ],
+      "required_reports": [],
+      "required_schemas": [
+        "schemas/runtime_cash/runtime_cash_field_map.schema.json"
+      ],
+      "required_tests": [
+        "tests/runtime_cash/test_runtime_cash_field_map_schema_surface.py"
+      ],
+      "required_tools": [],
+      "research_route": "runtime cash field-map stays static until runtime cash receipts exist",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Runtime cash component field-map control route",
+      "static_safety_stub": "schema-only cash field-map route",
+      "unblock_condition": "future validated runtime cash receipt and source-evidence-gated usable-cash contract",
+      "validation_commands": []
     },
     {
       "authority_boundary": {
@@ -593,6 +930,51 @@
         "creates_runtime_cash_receipt": false,
         "reduces_blockers": false
       },
+      "capability_id": "source_evidence_zero_accepted_boundary_route",
+      "coverage_class": "SOURCE_EVIDENCE_DEPENDENT",
+      "current_status": "BLOCKED_SOURCE_EVIDENCE",
+      "entry_index": 18,
+      "owner_deferred": true,
+      "owner_section_ids": [
+        "0X.5H.2D"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+        "schemas/source_evidence/source_evidence.schema.json"
+      ],
+      "required_receipts": [
+        "future-accepted-source-evidence-packet-receipt"
+      ],
+      "required_reports": [],
+      "required_schemas": [
+        "schemas/source_evidence/source_evidence.schema.json"
+      ],
+      "required_tests": [
+        "tests/source_evidence/test_source_evidence_static_validator.py"
+      ],
+      "required_tools": [
+        "tools/validate_source_evidence_static.py"
+      ],
+      "research_route": "source-evidence workflow route only",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Source-evidence accepted-fact separation and zero-accepted boundary route",
+      "static_safety_stub": "zero accepted facts remain zero",
+      "unblock_condition": "accepted source-evidence packet exists for exact target fields",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_source_evidence_static.py"
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
       "capability_id": "source_fact_binding_readiness_static_contract",
       "coverage_class": "STATIC_CONTRACT",
       "current_status": "STATIC_CONTRACT_IMPLEMENTED",
@@ -626,6 +1008,51 @@
       "unblock_condition": "accepted source evidence is still required before connector semantic values may be populated",
       "validation_commands": [
         ".\\.venv\\Scripts\\python.exe tools\\validate_source_fact_binding_connector_semantic_readiness_static.py --repo-root ."
+      ]
+    },
+    {
+      "authority_boundary": {
+        "creates_atomicrows_bundle": false,
+        "creates_live_reachability": false,
+        "creates_order_authority": false,
+        "creates_profit_evidence": false,
+        "creates_runtime_cash_receipt": false,
+        "reduces_blockers": false
+      },
+      "capability_id": "true_quantum_advisory_optimizer_arbitration_route",
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
+      "entry_index": 20,
+      "owner_deferred": false,
+      "owner_section_ids": [
+        "0X.5H.2P"
+      ],
+      "quarantine_reason": "",
+      "required_files": [
+        "docs/master_plan/quantum/QuantumClassicalOptimizerArbitrationGate.yaml",
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
+      ],
+      "required_receipts": [],
+      "required_reports": [
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
+      ],
+      "required_schemas": [
+        "schemas/quantum/quantum_classical_optimizer_arbitration_gate.schema.json"
+      ],
+      "required_tests": [
+        "tests/quantum/test_quantum_classical_optimizer_arbitration_gate.py"
+      ],
+      "required_tools": [
+        "tools/validate_quantum_classical_optimizer_arbitration_gate.py"
+      ],
+      "research_route": "",
+      "retirement_allowed": false,
+      "retirement_reason": "",
+      "section_title_or_capability_title": "Owner-selected true-quantum advisory optimization lane route",
+      "static_safety_stub": "arbitration metadata only; no optimizer runtime execution",
+      "unblock_condition": "future controller-approved optimizer execution PR with backend or simulator authority",
+      "validation_commands": [
+        ".\\.venv\\Scripts\\python.exe tools\\validate_quantum_classical_optimizer_arbitration_gate.py"
       ]
     },
     {
@@ -676,23 +1103,28 @@
     "authority_boundary_all_false": true,
     "blocked_or_future_entries_routed": true,
     "coverage_class_counts": {
-      "OWNER_APPROVAL_DEPENDENT": 15,
-      "QUARANTINE_REQUIRED": 18,
-      "RESEARCH_CANDIDATE": 2851,
-      "SOURCE_EVIDENCE_DEPENDENT": 54,
-      "STATIC_CONTRACT": 68
+      "OWNER_APPROVAL_DEPENDENT": 16,
+      "POLICY_ONLY": 2,
+      "QUARANTINE_REQUIRED": 19,
+      "RESEARCH_CANDIDATE": 2818,
+      "RETIRED_NOT_USEFUL": 1,
+      "RUNTIME_RECEIPT_DEPENDENT": 2,
+      "SOURCE_EVIDENCE_DEPENDENT": 55,
+      "STATIC_CONTRACT": 93
     },
     "final_ready": false,
     "parser_visible_section_count": 3006,
-    "registry_entry_count": 14,
-    "sections_using_default_research_route_count": 2851,
-    "sections_with_specific_capability_count": 155,
+    "registry_entry_count": 24,
+    "sections_using_default_research_route_count": 2818,
+    "sections_with_specific_capability_count": 188,
     "status_counts": {
-      "BLOCKED_OWNER_APPROVAL": 15,
-      "BLOCKED_SOURCE_EVIDENCE": 54,
-      "QUARANTINED_UNPROVEN": 18,
-      "RESEARCH_ROUTED": 2851,
-      "STATIC_CONTRACT_IMPLEMENTED": 68
+      "BLOCKED_OWNER_APPROVAL": 16,
+      "BLOCKED_RUNTIME_RECEIPT": 2,
+      "BLOCKED_SOURCE_EVIDENCE": 55,
+      "QUARANTINED_UNPROVEN": 19,
+      "RESEARCH_ROUTED": 2819,
+      "RETIRED_NOT_USEFUL": 1,
+      "STATIC_CONTRACT_IMPLEMENTED": 94
     }
   },
   "deterministic_output": true,
@@ -700,12 +1132,496 @@
   "generated_by": "tools/build_master_plan_section_coverage_report.py",
   "registry": {
     "coverage_model": "SECTION_CAPABILITY_COVERAGE_ROUTING",
-    "entry_count": 14,
+    "entry_count": 24,
     "registry_name": "QTTSectionCoverageRegistry",
     "schema_version": 1
   },
   "report_type": "MASTER_PLAN_SECTION_COVERAGE_REPORT",
   "report_version": "MASTER_PLAN_SECTION_COVERAGE_REPORT_V1",
+  "route_map": {
+    "authority_class": "STATIC_CONTROL_PLANE_ROUTE_MAP_NOT_MASTER_PLAN_AUTHORITY",
+    "changed_file_list_by_artifact_family": {
+      "existing_master_plan_section_coverage_family": [
+        "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml",
+        "schemas/master_plan/master_plan_section_coverage_report.schema.json",
+        "tools/build_master_plan_section_coverage_report.py",
+        "tools/validate_master_plan_section_coverage.py",
+        "tools/validate_qtt_master_plan_section_coverage_triage_routes.py",
+        "tools/run_validation_gates.py",
+        "tests/master_plan/test_master_plan_section_coverage_report.py",
+        "tests/roadmap/test_qtt_master_plan_section_coverage_triage_routes.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ]
+    },
+    "controller_decision_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+    "existing_artifact_discovery_result": {
+      "decision": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED",
+      "existing_registry_path": "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml",
+      "existing_report_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+      "existing_schema_path": "schemas/master_plan/master_plan_section_coverage_report.schema.json",
+      "existing_traceability_inputs": [
+        "docs/master_plan/generated/SectionManifest.json",
+        "docs/master_plan/generated/TraceabilityReport.json"
+      ],
+      "existing_validator_path": "tools/validate_master_plan_section_coverage.py"
+    },
+    "generated_report_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+    "no_master_plan_text_mutation_flag": true,
+    "no_old_coverage_ledger_reintroduction_flag": true,
+    "no_quantum_backend_or_simulator_execution_created_flag": true,
+    "no_runtime_live_order_profit_authority_created_flag": true,
+    "no_source_connector_replay_paper_authority_created_flag": true,
+    "repo_canonical_pr_label": "PR119",
+    "roadmap_pr_label": "PR #102",
+    "route_entries": [
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+        "current_route_class": "QUARANTINE_ROUTE",
+        "downstream_consumer_reference": "PR #103 - Master-plan section coverage parent-capability consolidation",
+        "evidence_basis": "exact master-plan quarantine section; no external bot repo source fact accepted",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.0AF v9.9.769 canonical owner-section audit for external bot-repo intelligence expansion and supply-chain quarantine closure",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_MASTER_PLAN_SECTION_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/generated/SectionManifest.json",
+        "route_owner_reason_code": "EXACT_MASTER_PLAN_QUARANTINE_SECTION",
+        "section_id": "0X.0AF",
+        "traceability_basis": "exact canonical_id 0X.0AF from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/10",
+        "current_route_class": "RUNTIME_ROUTE",
+        "downstream_consumer_reference": "PR #111 - Runtime cash component field-map executor",
+        "evidence_basis": "exact runtime-cash schema path exists; runtime receipts remain future-gated",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.4B.12 v9.9.755 runtime cash component field-map packet and source-evidence-gated usable-cash contract",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #111"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_SCHEMA_REFERENCE",
+        "route_owner_artifact": "schemas/runtime_cash/runtime_cash_field_map.schema.json",
+        "route_owner_reason_code": "EXACT_RUNTIME_CASH_SCHEMA_REFERENCE",
+        "section_id": "0X.4B.12",
+        "traceability_basis": "exact canonical_id 0X.4B.12 from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+        "current_route_class": "CAPABILITY_ROUTE",
+        "downstream_consumer_reference": "PR #103 - Master-plan section coverage parent-capability consolidation",
+        "evidence_basis": "existing master-plan section coverage report family",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.4O QTT cumulative test gate, local gate command matrix, and first-coding PR handoff Codex task packet",
+        "previous_route_class_or_default_state": "STATIC_CONTRACT",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #103"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+        "route_owner_reason_code": "EXISTING_SECTION_COVERAGE_REPORT_OWNER",
+        "section_id": "0X.4O",
+        "traceability_basis": "exact canonical_id 0X.4O from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/17",
+        "current_route_class": "REPLAY_PAPER_ROUTE",
+        "downstream_consumer_reference": "PR #118 - Replay engine executor",
+        "evidence_basis": "exact replay/paper static contract report exists; no replay or paper result is created",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.4T Concurrent replay/paper execution after runtime resolver snapshot Codex task packet",
+        "previous_route_class_or_default_state": "STATIC_CONTRACT",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #118",
+            "PR #119",
+            "PR #120",
+            "PR #121"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/generated/Stage1ConcurrentReplayPaperContractCheck.report.json",
+        "route_owner_reason_code": "EXACT_GENERATED_REPORT_REFERENCE",
+        "section_id": "0X.4T",
+        "traceability_basis": "exact canonical_id 0X.4T from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/final_readiness_state",
+        "current_route_class": "CONTROLLER_REFERENCED_ROUTE",
+        "downstream_consumer_reference": "PR #101 - AtomicRows full bundle final readiness gate",
+        "evidence_basis": "final-readiness state is controlled by active non-SHA gates and controller references",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.4Z Final prefreeze Codex-readiness audit, runtime live-order command boundary, and Day-1 three-platform launch runbook Codex task packet",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #101"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_CONTROLLER_REFERENCE",
+        "route_owner_artifact": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "route_owner_reason_code": "EXACT_CONTROLLER_REFERENCE_FOR_FINAL_READINESS_BOUNDARY",
+        "section_id": "0X.4Z",
+        "traceability_basis": "exact canonical_id 0X.4Z from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/4",
+        "current_route_class": "SOURCE_EVIDENCE_ROUTE",
+        "downstream_consumer_reference": "PR #105 - Source-evidence retrieval executor",
+        "evidence_basis": "exact source-evidence definitions packet exists; zero accepted facts remain zero",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.5H.2D v9.9.674 source-evidence acceptance architecture, accepted-fact separation, and zero-accepted boundary",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #105",
+            "PR #106",
+            "PR #107"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+        "route_owner_reason_code": "EXACT_SOURCE_EVIDENCE_PACKET_REFERENCE",
+        "section_id": "0X.5H.2D",
+        "traceability_basis": "exact canonical_id 0X.5H.2D from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/21",
+        "current_route_class": "OWNER_ROUTE",
+        "downstream_consumer_reference": "PR #122 - Dual-result runtime comparator and promotion blocker",
+        "evidence_basis": "exact owner approval queue report exists; owner receipts remain future-gated",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.5H.2M v9.9.680 owner dashboard value packet, owner review decision packet, and first concurrent replay/paper test run packet architecture",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #122"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json",
+        "route_owner_reason_code": "EXACT_OWNER_QUEUE_REPORT_REFERENCE",
+        "section_id": "0X.5H.2M",
+        "traceability_basis": "exact canonical_id 0X.5H.2M from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+        "current_route_class": "OPTIMIZER_ARBITRATION_ROUTE",
+        "downstream_consumer_reference": "PR #126 - Quantum problem compiler for QUBO, Ising, and portfolio/candidate-set representations",
+        "evidence_basis": "exact optimizer arbitration gate artifact exists; optimizer runtime execution remains disallowed",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.5H.2P v9.9.683 owner-selected candidate scope and true-quantum advisory optimization lane",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+          "future_roadmap_consumer_labels": [
+            "PR #126"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "HYBRID_CLASSICAL_QUANTUM_ARBITRATION"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/quantum/QuantumClassicalOptimizerArbitrationGate.yaml",
+        "route_owner_reason_code": "EXACT_OPTIMIZER_ARBITRATION_GATE_REFERENCE",
+        "section_id": "0X.5H.2P",
+        "traceability_basis": "exact canonical_id 0X.5H.2P from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/19",
+        "current_route_class": "LATENCY_COST_ROUTE",
+        "downstream_consumer_reference": "PR #120 - Fill, cost, slippage, fee, tick, and latency simulator",
+        "evidence_basis": "exact latency row-family source exists; no latency superiority evidence is created",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "0X.5S.8 Latency telemetry surface and bottleneck attribution",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #120"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "LATENCY_AWARE_OPTIMIZATION_ROUTE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl",
+        "route_owner_reason_code": "EXACT_LATENCY_ROW_FAMILY_REFERENCE",
+        "section_id": "0X.5S.8",
+        "traceability_basis": "exact canonical_id 0X.5S.8 from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+        "current_route_class": "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+        "downstream_consumer_reference": "PR #126 - Quantum problem compiler for QUBO, Ising, and portfolio/candidate-set representations",
+        "evidence_basis": "exact quantum applicability report exists; QUBO solving remains future-gated",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "19.8 Generic QUBO",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+          "future_roadmap_consumer_labels": [
+            "PR #126"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "QUBO_ISING_FORMULATION_CANDIDATE"
+        },
+        "route_confidence_class": "EXACT_ARTIFACT_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json",
+        "route_owner_reason_code": "EXACT_QUANTUM_APPLICABILITY_REPORT_REFERENCE",
+        "section_id": "19.8",
+        "traceability_basis": "exact canonical_id 19.8 from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+        "current_route_class": "UNRESOLVED_DEFAULT_ROUTE",
+        "downstream_consumer_reference": "PR #103 - Master-plan section coverage parent-capability consolidation",
+        "evidence_basis": "no exact artifact owner found without title-similarity inference",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "3.13.3B Daily opportunity census, white-space coverage, and cross-market edge archetype law",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #103"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "UNRESOLVED_EXPLICITLY",
+        "route_owner_artifact": "docs/master_plan/generated/SectionManifest.json",
+        "route_owner_reason_code": "DEFAULT_ROUTE_RETAINED_FOR_NO_EXACT_ARTIFACT_OWNER",
+        "section_id": "3.13.3B",
+        "traceability_basis": "exact canonical_id 3.13.3B from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": "NO_EXACT_ARTIFACT_OWNER_FOUND"
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+        "current_route_class": "POLICY_ROUTE",
+        "downstream_consumer_reference": "PR #83 - Owner quantum priority policy registry",
+        "evidence_basis": "exact owner quantum priority policy registry exists; policy only",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "8.1C Quantum candidate template pack, Day-1 parameter completeness, and owner-dashboard control law",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/active_state_bindings/quantum_forward_optimization_state",
+          "future_roadmap_consumer_labels": [
+            "PR #83",
+            "PR #126"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "QUANTUM_APPLICABILITY_METADATA"
+        },
+        "route_confidence_class": "OWNER_POLICY_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/quantum/OwnerQuantumPriorityPolicyRegistry.yaml",
+        "route_owner_reason_code": "EXACT_OWNER_POLICY_REGISTRY_REFERENCE",
+        "section_id": "8.1C",
+        "traceability_basis": "exact canonical_id 8.1C from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      },
+      {
+        "controller_state_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+        "current_route_class": "RETIREMENT_ROUTE",
+        "downstream_consumer_reference": "PR #103 - Master-plan section coverage parent-capability consolidation",
+        "evidence_basis": "exact master-plan retirement section; no deletion or shortening applied",
+        "no_authority_created_flag": true,
+        "no_master_plan_text_mutation_flag": true,
+        "no_old_coverage_ledger_flag": true,
+        "normalized_section_title": "8.8 Preset retirement and negative-evidence law",
+        "previous_route_class_or_default_state": "UNRESOLVED_DEFAULT_ROUTE",
+        "quantum_forward_metadata": {
+          "future_controller_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+          "future_roadmap_consumer_labels": [
+            "PR #103"
+          ],
+          "no_backend_execution_flag": true,
+          "no_optimizer_runtime_execution_flag": true,
+          "no_profit_or_latency_superiority_claim_flag": true,
+          "no_quantum_advantage_claim_flag": true,
+          "no_simulator_execution_flag": true,
+          "quantum_relevance_class": "NONE"
+        },
+        "route_confidence_class": "EXACT_MASTER_PLAN_SECTION_REFERENCE",
+        "route_owner_artifact": "docs/master_plan/QTT_MasterPlan_Current.md",
+        "route_owner_reason_code": "EXACT_MASTER_PLAN_RETIREMENT_SECTION",
+        "section_id": "8.8",
+        "traceability_basis": "exact canonical_id 8.8 from SectionManifest.json",
+        "unresolved_reason_code_when_applicable": null
+      }
+    ],
+    "route_map_id": "QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_V1_0",
+    "route_map_version": "v1.0",
+    "semantic_task_id": "ROADMAP-MASTER-PLAN-COVERAGE-TRIAGE-I",
+    "source_manifest_reference": "docs/master_plan/generated/SectionManifest.json"
+  },
+  "route_map_summary": {
+    "artifact_family_decision": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED",
+    "changed_file_list_by_artifact_family": {
+      "existing_master_plan_section_coverage_family": [
+        "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml",
+        "schemas/master_plan/master_plan_section_coverage_report.schema.json",
+        "tools/build_master_plan_section_coverage_report.py",
+        "tools/validate_master_plan_section_coverage.py",
+        "tools/validate_qtt_master_plan_section_coverage_triage_routes.py",
+        "tools/run_validation_gates.py",
+        "tests/master_plan/test_master_plan_section_coverage_report.py",
+        "tests/roadmap/test_qtt_master_plan_section_coverage_triage_routes.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ]
+    },
+    "connector_semantic_binding_created": false,
+    "controller_decision_reference": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1",
+    "count_by_route_class": {
+      "CAPABILITY_ROUTE": 1,
+      "CONTROLLER_REFERENCED_ROUTE": 1,
+      "LATENCY_COST_ROUTE": 1,
+      "OPTIMIZER_ARBITRATION_ROUTE": 1,
+      "OWNER_ROUTE": 1,
+      "POLICY_ROUTE": 1,
+      "QUANTUM_FORWARD_OPTIMIZATION_ROUTE": 1,
+      "QUARANTINE_ROUTE": 1,
+      "REPLAY_PAPER_ROUTE": 1,
+      "RETIREMENT_ROUTE": 1,
+      "RUNTIME_ROUTE": 1,
+      "SOURCE_EVIDENCE_ROUTE": 1,
+      "UNRESOLVED_DEFAULT_ROUTE": 1
+    },
+    "count_by_route_confidence_class": {
+      "EXACT_ARTIFACT_REFERENCE": 7,
+      "EXACT_CONTROLLER_REFERENCE": 1,
+      "EXACT_MASTER_PLAN_SECTION_REFERENCE": 2,
+      "EXACT_SCHEMA_REFERENCE": 1,
+      "OWNER_POLICY_REFERENCE": 1,
+      "UNRESOLVED_EXPLICITLY": 1
+    },
+    "latency_cost_route_count": 1,
+    "latency_superiority_evidence_created": false,
+    "live_authority_created": false,
+    "master_plan_mutation_count": 0,
+    "old_coverage_ledger_reintroduction_flag": false,
+    "optimizer_arbitration_route_count": 1,
+    "order_authority_created": false,
+    "profit_evidence_created": false,
+    "quantum_backend_simulator_optimizer_execution_created": false,
+    "quantum_forward_route_count": 1,
+    "replay_paper_result_created": false,
+    "repo_canonical_pr_label": "PR119",
+    "roadmap_pr_label": "PR #102",
+    "route_entry_count": 13,
+    "runtime_authority_created": false,
+    "semantic_task_id": "ROADMAP-MASTER-PLAN-COVERAGE-TRIAGE-I",
+    "source_fact_acceptance_created": false,
+    "unresolved_default_count": 1
+  },
   "section_coverage": [
     {
       "authority_boundary": {
@@ -2747,13 +3663,14 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.0AF",
-      "capability_id": "parser_visible_section_research_default",
+      "capability_id": "external_bot_repo_supply_chain_quarantine_route",
       "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "coverage_class": "QUARANTINE_REQUIRED",
+      "current_status": "QUARANTINED_UNPROVEN",
       "level": 4,
       "line": 3255,
       "matching_capability_ids": [
+        "external_bot_repo_supply_chain_quarantine_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
@@ -2761,38 +3678,32 @@
       "owner_section_id": "0X.0AF",
       "parser_visible": true,
       "policy_only": false,
-      "quarantine_reason": "",
+      "quarantine_reason": "external bot-repo material is not accepted source evidence or production code",
       "required_files": [
         "docs/master_plan/QTT_MasterPlan_Current.md"
       ],
-      "required_receipts": [],
-      "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      "required_receipts": [
+        "future-explicit-source-safety-review-receipt"
       ],
-      "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
-      ],
-      "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
-      ],
+      "required_reports": [],
+      "required_schemas": [],
+      "required_tests": [],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_no_runtime_artifacts.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "external bot-repo intelligence remains quarantined and static until explicit review",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 36,
       "section_title": "0X.0AF v9.9.769 canonical owner-section audit for external bot-repo intelligence expansion and supply-chain quarantine closure",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "External bot-repo intelligence and supply-chain quarantine route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "quarantine route only",
+      "unblock_condition": "future owner-approved source-safety review authorizes exact artifact consumption",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_no_runtime_artifacts.py"
       ]
     },
     {
@@ -4779,13 +5690,14 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4B.12",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "runtime_cash_field_map_control_route",
+      "codable": true,
+      "coverage_class": "RUNTIME_RECEIPT_DEPENDENT",
+      "current_status": "BLOCKED_RUNTIME_RECEIPT",
       "level": 4,
       "line": 6298,
       "matching_capability_ids": [
+        "runtime_cash_field_map_control_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
@@ -4795,37 +5707,31 @@
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "schemas/runtime_cash/runtime_cash_field_map.schema.json"
       ],
-      "required_receipts": [],
-      "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      "required_receipts": [
+        "future-runtime-cash-receipt"
       ],
+      "required_reports": [],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/runtime_cash/runtime_cash_field_map.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/runtime_cash/test_runtime_cash_field_map_schema_surface.py"
       ],
-      "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
-      ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "required_tools": [],
+      "research_route": "runtime cash field-map stays static until runtime cash receipts exist",
       "retirement_allowed": false,
       "retirement_reason": "",
-      "runtime_receipt_dependent": false,
+      "runtime_receipt_dependent": true,
       "section_index": 71,
       "section_title": "0X.4B.12 v9.9.755 runtime cash component field-map packet and source-evidence-gated usable-cash contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Runtime cash component field-map control route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
-      "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
-      ]
+      "static_safety_stub": "schema-only cash field-map route",
+      "unblock_condition": "future validated runtime cash receipt and source-evidence-gated usable-cash contract",
+      "validation_commands": []
     },
     {
       "authority_boundary": {
@@ -21370,52 +22276,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 3,
       "line": 22368,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 348,
       "section_title": "0X.4Z Final prefreeze Codex-readiness audit, runtime live-order command boundary, and Day-1 three-platform launch runbook Codex task packet",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21428,52 +22339,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.1",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22380,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.1",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 349,
       "section_title": "0X.4Z.1 Task-packet identity and required phase",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21486,52 +22402,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.2",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22424,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.2",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 350,
       "section_title": "0X.4Z.2 Required files Codex must create",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21544,52 +22465,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.3",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22454,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.3",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 351,
       "section_title": "0X.4Z.3 Final prefreeze Codex-readiness audit contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21602,52 +22528,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.4",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22506,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.4",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 352,
       "section_title": "0X.4Z.4 Runtime live-order command boundary contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21660,52 +22591,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.5",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22576,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.5",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 353,
       "section_title": "0X.4Z.5 Day-1 three-platform launch runbook contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21718,52 +22654,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.6",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22644,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.6",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 354,
       "section_title": "0X.4Z.6 CLI and gate reports",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21776,52 +22717,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.7",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22684,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.7",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 355,
       "section_title": "0X.4Z.7 Tests Codex must create for this task packet",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21892,52 +22838,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.8",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22766,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.8",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 357,
       "section_title": "0X.4Z.8 v9.9.748 runtime live-order command input gate and explicit owner-command contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -21950,52 +22901,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.9",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22815,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.9",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 358,
       "section_title": "0X.4Z.9 v9.9.748 runtime live-order command packet, idempotency, and low-latency live-path contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22008,52 +22964,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.10",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22889,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.10",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 359,
       "section_title": "0X.4Z.10 v9.9.748 runtime live-order command result receipt and no-Day-1-auto-launch contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22066,52 +23027,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.11",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22928,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.11",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 360,
       "section_title": "0X.4Z.11 v9.9.749 Day-1 platform preflight matrix contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22124,52 +23090,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.12",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 22998,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.12",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 361,
       "section_title": "0X.4Z.12 v9.9.749 Day-1 three-platform launch-readiness gate contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22182,52 +23153,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.13",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23081,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.13",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 362,
       "section_title": "0X.4Z.13 v9.9.749 Day-1 launch runbook sequence, pause, rollback, and post-trade contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22240,52 +23216,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.14",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23161,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.14",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 363,
       "section_title": "0X.4Z.14 v9.9.749 Day-1 partial-platform risk-reduction override and no-all-three-claim contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22298,52 +23279,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.15",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23217,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.15",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 364,
       "section_title": "0X.4Z.15 v9.9.750 runtime command, Day-1 readiness, and low-latency live-path ambiguity closure",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22356,52 +23342,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.16",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23261,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.16",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 365,
       "section_title": "0X.4Z.16 v9.9.753 low-latency live-path source-change snapshot and pretrade block contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22414,52 +23405,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.17",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23323,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.17",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 366,
       "section_title": "0X.4Z.17 v9.9.754 low-latency live-pretrade source-change snapshot test matrix",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22472,52 +23468,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.18",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23410,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.18",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 367,
       "section_title": "0X.4Z.18 v9.9.755 live-pretrade runtime cash component snapshot and new-exposure gate contract",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22530,52 +23531,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.19",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23458,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.19",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 368,
       "section_title": "0X.4Z.19 v9.9.762 Day-1 launch-drill operational sequence, required owner reports, and end-of-day gap queue",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22588,52 +23594,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.20",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23498,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.20",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 369,
       "section_title": "0X.4Z.20 v9.9.763 Day-1 arbitrage dry-run sequence, report artifacts, and end-of-day gap queue closure",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22646,52 +23657,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.21",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23533,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.21",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 370,
       "section_title": "0X.4Z.21 v9.9.768 low-latency live-path source-retrieval exclusion and ambiguity sweep",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22704,52 +23720,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.22",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23576,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.22",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 371,
       "section_title": "0X.4Z.22 v9.9.769 live-path exclusion for external bot repositories, install scripts, and chat/MCP control",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -22762,52 +23783,57 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.4Z.23",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "final_readiness_controller_referenced_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 23619,
       "matching_capability_ids": [
+        "final_readiness_controller_referenced_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.4Z.23",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml",
+        "docs/master_plan/launch/QttFinalReadinessDependencyPolicyContract.yaml"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_qtt_roadmap_execution_state_controller.py",
+        "tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py",
+        "tools/validate_qtt_final_readiness_dependency_policy_contract.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 372,
       "section_title": "0X.4Z.23 v9.9.770 low-latency live-path exclusion for neural training, retraining, unapproved inference, and direct order authority",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Final readiness and live-order boundary controller-referenced route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "controller reference only; no launch or order authority",
+      "unblock_condition": "final readiness remains controlled by active non-SHA gates and future owner approval",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_qtt_roadmap_execution_state_controller.py"
       ]
     },
     {
@@ -30708,13 +31734,14 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.5H.2D",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "source_evidence_zero_accepted_boundary_route",
+      "codable": true,
+      "coverage_class": "SOURCE_EVIDENCE_DEPENDENT",
+      "current_status": "BLOCKED_SOURCE_EVIDENCE",
       "level": 4,
       "line": 29129,
       "matching_capability_ids": [
+        "source_evidence_zero_accepted_boundary_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
@@ -30724,36 +31751,35 @@
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+        "schemas/source_evidence/source_evidence.schema.json"
       ],
-      "required_receipts": [],
-      "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      "required_receipts": [
+        "future-accepted-source-evidence-packet-receipt"
       ],
+      "required_reports": [],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/source_evidence/source_evidence.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/source_evidence/test_source_evidence_static_validator.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_source_evidence_static.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "source-evidence workflow route only",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 509,
       "section_title": "0X.5H.2D v9.9.674 source-evidence acceptance architecture, accepted-fact separation, and zero-accepted boundary",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
-      "source_evidence_dependent": false,
+      "section_title_or_capability_title": "Source-evidence accepted-fact separation and zero-accepted boundary route",
+      "source_evidence_dependent": true,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "zero accepted facts remain zero",
+      "unblock_condition": "accepted source-evidence packet exists for exact target fields",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_source_evidence_static.py"
       ]
     },
     {
@@ -30766,52 +31792,49 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.5H.2M",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "owner_dashboard_value_packet_owner_route",
+      "codable": true,
+      "coverage_class": "OWNER_APPROVAL_DEPENDENT",
+      "current_status": "BLOCKED_OWNER_APPROVAL",
       "level": 4,
       "line": 29287,
       "matching_capability_ids": [
+        "owner_dashboard_value_packet_owner_route",
         "parser_visible_section_research_default"
       ],
-      "owner_approval_dependent": false,
+      "owner_approval_dependent": true,
       "owner_deferred": true,
       "owner_section_id": "0X.5H.2M",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
       ],
-      "required_receipts": [],
+      "required_receipts": [
+        "future-owner-review-decision-receipt"
+      ],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
       ],
-      "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
-      ],
-      "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
-      ],
+      "required_schemas": [],
+      "required_tests": [],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_owner_approval_request_queue_registry.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "owner decision packet route only",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 510,
       "section_title": "0X.5H.2M v9.9.680 owner dashboard value packet, owner review decision packet, and first concurrent replay/paper test run packet architecture",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Owner dashboard value packet and owner review decision route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "owner queue/report only",
+      "unblock_condition": "future owner review decision receipt exists and references exact candidate scope",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_owner_approval_request_queue_registry.py"
       ]
     },
     {
@@ -31230,52 +32253,52 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.5H.2P",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "true_quantum_advisory_optimizer_arbitration_route",
+      "codable": true,
+      "coverage_class": "STATIC_CONTRACT",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 4,
       "line": 29707,
       "matching_capability_ids": [
+        "true_quantum_advisory_optimizer_arbitration_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "0X.5H.2P",
       "parser_visible": true,
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/quantum/QuantumClassicalOptimizerArbitrationGate.yaml",
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/quantum/quantum_classical_optimizer_arbitration_gate.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/quantum/test_quantum_classical_optimizer_arbitration_gate.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_quantum_classical_optimizer_arbitration_gate.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 518,
       "section_title": "0X.5H.2P v9.9.683 owner-selected candidate scope and true-quantum advisory optimization lane",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Owner-selected true-quantum advisory optimization lane route",
       "source_evidence_dependent": false,
-      "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_contract_only": true,
+      "static_safety_stub": "arbitration metadata only; no optimizer runtime execution",
+      "unblock_condition": "future controller-approved optimizer execution PR with backend or simulator authority",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_quantum_classical_optimizer_arbitration_gate.py"
       ]
     },
     {
@@ -45324,13 +46347,14 @@
         "reduces_blockers": false
       },
       "canonical_id": "0X.5S.8",
-      "capability_id": "parser_visible_section_research_default",
-      "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "capability_id": "latency_telemetry_cost_route",
+      "codable": true,
+      "coverage_class": "RUNTIME_RECEIPT_DEPENDENT",
+      "current_status": "BLOCKED_RUNTIME_RECEIPT",
       "level": 6,
       "line": 41272,
       "matching_capability_ids": [
+        "latency_telemetry_cost_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
@@ -45340,37 +46364,27 @@
       "policy_only": false,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/atomic_rows/exact_row_sources/007_latency_routing.exact_rows.jsonl"
       ],
-      "required_receipts": [],
-      "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      "required_receipts": [
+        "future-latency-measurement-receipt"
       ],
-      "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
-      ],
-      "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
-      ],
-      "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
-      ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "required_reports": [],
+      "required_schemas": [],
+      "required_tests": [],
+      "required_tools": [],
+      "research_route": "latency telemetry route only",
       "retirement_allowed": false,
       "retirement_reason": "",
-      "runtime_receipt_dependent": false,
+      "runtime_receipt_dependent": true,
       "section_index": 761,
       "section_title": "0X.5S.8 Latency telemetry surface and bottleneck attribution",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Latency telemetry and bottleneck attribution static route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
-      "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
-      ]
+      "static_safety_stub": "no latency superiority evidence",
+      "unblock_condition": "future validated latency measurement receipt exists",
+      "validation_commands": []
     },
     {
       "authority_boundary": {
@@ -95842,52 +96856,52 @@
         "reduces_blockers": false
       },
       "canonical_id": "8.1C",
-      "capability_id": "parser_visible_section_research_default",
+      "capability_id": "owner_quantum_candidate_policy_route",
       "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "coverage_class": "POLICY_ONLY",
+      "current_status": "STATIC_CONTRACT_IMPLEMENTED",
       "level": 3,
       "line": 75494,
       "matching_capability_ids": [
+        "owner_quantum_candidate_policy_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "8.1C",
       "parser_visible": true,
-      "policy_only": false,
+      "policy_only": true,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/quantum/OwnerQuantumPriorityPolicyRegistry.yaml",
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/quantum/owner_quantum_priority_policy_registry.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/quantum/test_owner_quantum_priority_policy_registry.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_owner_quantum_priority_policy_registry.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 1632,
       "section_title": "8.1C Quantum candidate template pack, Day-1 parameter completeness, and owner-dashboard control law",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Quantum candidate template and owner-dashboard control policy route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "owner policy metadata only",
+      "unblock_condition": "future owner and controller approved quantum implementation PR",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_owner_quantum_priority_policy_registry.py"
       ]
     },
     {
@@ -97060,17 +98074,18 @@
         "reduces_blockers": false
       },
       "canonical_id": "8.8",
-      "capability_id": "parser_visible_section_research_default",
+      "capability_id": "preset_retirement_negative_evidence_route",
       "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
-      "current_status": "RESEARCH_ROUTED",
+      "coverage_class": "RETIRED_NOT_USEFUL",
+      "current_status": "RETIRED_NOT_USEFUL",
       "level": 3,
       "line": 76142,
       "matching_capability_ids": [
+        "preset_retirement_negative_evidence_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
-      "owner_deferred": true,
+      "owner_deferred": false,
       "owner_section_id": "8.8",
       "parser_visible": true,
       "policy_only": false,
@@ -97082,28 +98097,22 @@
       "required_reports": [
         "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
       ],
-      "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
-      ],
-      "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
-      ],
+      "required_schemas": [],
+      "required_tests": [],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
         "tools/validate_master_plan_section_coverage.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
-      "retirement_allowed": false,
-      "retirement_reason": "",
+      "research_route": "",
+      "retirement_allowed": true,
+      "retirement_reason": "exact master-plan retirement section routes preset retirement as policy metadata only",
       "runtime_receipt_dependent": false,
       "section_index": 1653,
       "section_title": "8.8 Preset retirement and negative-evidence law",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Preset retirement and negative-evidence route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "retirement route only; no deletion or master-plan rewrite",
+      "unblock_condition": "",
       "validation_commands": [
         ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
       ]
@@ -156220,52 +157229,51 @@
         "reduces_blockers": false
       },
       "canonical_id": "19.8",
-      "capability_id": "parser_visible_section_research_default",
+      "capability_id": "generic_qubo_quantum_forward_route",
       "codable": false,
-      "coverage_class": "RESEARCH_CANDIDATE",
+      "coverage_class": "POLICY_ONLY",
       "current_status": "RESEARCH_ROUTED",
       "level": 3,
       "line": 132321,
       "matching_capability_ids": [
+        "generic_qubo_quantum_forward_route",
         "parser_visible_section_research_default"
       ],
       "owner_approval_dependent": false,
       "owner_deferred": true,
       "owner_section_id": "19.8",
       "parser_visible": true,
-      "policy_only": false,
+      "policy_only": true,
       "quarantine_reason": "",
       "required_files": [
-        "docs/master_plan/QTT_MasterPlan_Current.md"
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"
       ],
       "required_receipts": [],
       "required_reports": [
-        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"
       ],
       "required_schemas": [
-        "schemas/master_plan/master_plan_section_coverage_report.schema.json"
+        "schemas/quantum/quantum_applicability_classification_registry.schema.json"
       ],
       "required_tests": [
-        "tests/master_plan/test_master_plan_section_coverage_report.py"
+        "tests/quantum/test_quantum_applicability_classification_registry.py"
       ],
       "required_tools": [
-        "tools/master_plan_ingest.py",
-        "tools/build_master_plan_section_coverage_report.py",
-        "tools/validate_master_plan_section_coverage.py"
+        "tools/validate_quantum_applicability_classification_registry.py"
       ],
-      "research_route": "section-by-section owner-capability triage before runtime eligibility",
+      "research_route": "future quantum-forward formulation metadata only",
       "retirement_allowed": false,
       "retirement_reason": "",
       "runtime_receipt_dependent": false,
       "section_index": 2673,
       "section_title": "19.8 Generic QUBO",
-      "section_title_or_capability_title": "Parser-visible master-plan section research route",
+      "section_title_or_capability_title": "Generic QUBO quantum-forward optimization route",
       "source_evidence_dependent": false,
       "static_contract_only": false,
-      "static_safety_stub": "default route is non-runtime and cannot become optimizer, live, order, cash, AtomicRows, blocker, or profit eligible",
-      "unblock_condition": "owner selects a section for explicit capability mapping and evidence requirements",
+      "static_safety_stub": "no QUBO solving or backend/simulator execution",
+      "unblock_condition": "future controller-approved quantum problem compiler PR authorizes formulation materialization",
       "validation_commands": [
-        ".\\.venv\\Scripts\\python.exe tools\\validate_master_plan_section_coverage.py --mode dev"
+        ".\\.venv\\Scripts\\python.exe tools\\validate_quantum_applicability_classification_registry.py"
       ]
     },
     {

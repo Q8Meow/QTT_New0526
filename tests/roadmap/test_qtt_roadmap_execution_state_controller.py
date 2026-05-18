@@ -107,11 +107,12 @@ def test_pr117_roster_entry_is_currentized_and_keeps_planning_labels_null():
     assert pr117["blueprint_pr_label"] is None
 
 
-def test_pr118_self_entry_does_not_imply_roadmap_blueprint_or_github_118():
+def test_pr118_self_entry_is_currentized_without_implying_roadmap_or_blueprint_118():
     pr118 = _roster_entry("PR118_REPO_CANONICAL_SELF_ENTRY")
 
     assert pr118["repo_canonical_pr_label"] == "PR118"
-    assert pr118["github_pr_number"] is None
+    assert pr118["github_pr_number"] == 118
+    assert pr118["github_audit_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/118"
     assert pr118["roadmap_pr_label"] is None
     assert pr118["blueprint_pr_label"] is None
     assert _mapping("PR #118")["title"] == "Replay engine executor"

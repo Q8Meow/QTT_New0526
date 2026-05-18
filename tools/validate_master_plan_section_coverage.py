@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import json
 import pathlib
 import sys
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
@@ -77,6 +77,50 @@ PR_TRACKING_KEYS = {
     "pull_" + "request",
     "pull_" + "request" + "_number",
 }
+ALLOWED_ROUTE_CLASSES = set(builder.ROUTE_CLASSES)
+ALLOWED_ROUTE_CONFIDENCE_CLASSES = {
+    "EXACT_CONTROLLER_REFERENCE",
+    "EXACT_ARTIFACT_REFERENCE",
+    "EXACT_SCHEMA_REFERENCE",
+    "EXACT_VALIDATOR_REFERENCE",
+    "EXACT_TOOL_REFERENCE",
+    "EXACT_MASTER_PLAN_SECTION_REFERENCE",
+    "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
+    "OWNER_POLICY_REFERENCE",
+    "UNRESOLVED_EXPLICITLY",
+}
+ALLOWED_UNRESOLVED_REASON_CODES = {
+    "NO_EXACT_ARTIFACT_OWNER_FOUND",
+    "NO_EXACT_CONTROLLER_REFERENCE_FOUND",
+    "AMBIGUOUS_SECTION_SCOPE",
+    "TITLE_SIMILARITY_ONLY_NOT_ALLOWED",
+    "WOULD_REQUIRE_MASTER_PLAN_MUTATION",
+    "WOULD_REQUIRE_RUNTIME_OR_LIVE_AUTHORITY",
+    "WOULD_REQUIRE_SOURCE_OR_CONNECTOR_AUTHORITY",
+    "WOULD_REQUIRE_REPLAY_OR_PAPER_RESULT",
+    "WOULD_REQUIRE_QUANTUM_BACKEND_OR_OPTIMIZER_EXECUTION",
+    "WOULD_REINTRODUCE_OLD_COVERAGE_LEDGER",
+    "OUT_OF_SCOPE_FOR_PR119",
+}
+ALLOWED_QUANTUM_RELEVANCE_CLASSES = {
+    "NONE",
+    "QUANTUM_APPLICABILITY_METADATA",
+    "QUBO_ISING_FORMULATION_CANDIDATE",
+    "QAOA_VQE_ANNEALING_CANDIDATE",
+    "QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE",
+    "TRUE_QUANTUM_BACKEND_RECEIPT_GATED",
+    "HYBRID_CLASSICAL_QUANTUM_ARBITRATION",
+    "PORTFOLIO_CANDIDATE_SET_OPTIMIZATION",
+    "LATENCY_AWARE_OPTIMIZATION_ROUTE",
+}
+QUANTUM_RELATED_ROUTE_CLASSES = {
+    "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+    "OPTIMIZER_ARBITRATION_ROUTE",
+    "LATENCY_COST_ROUTE",
+}
+EXPECTED_ROUTE_MAP_FIELDS = set(builder.ROUTE_MAP_FIELDS)
+EXPECTED_ROUTE_ENTRY_FIELDS = set(builder.ROUTE_ENTRY_FIELDS)
+EXPECTED_QUANTUM_METADATA_FIELDS = set(builder.QUANTUM_FORWARD_METADATA_FIELDS)
 
 
 @dataclass(frozen=True)
@@ -303,6 +347,144 @@ def validate_blocked_future_routing(entries: Sequence[dict[str, Any]]) -> list[s
     return failures
 
 
+def validate_route_map(route_map: Mapping[str, Any], *, repo_root: pathlib.Path) -> list[str]:
+    failures: list[str] = []
+    missing = sorted(EXPECTED_ROUTE_MAP_FIELDS - set(route_map))
+    if missing:
+        return [f"route_map missing required fields: {', '.join(missing)}"]
+    expected = {
+        "route_map_id": "QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_V1_0",
+        "route_map_version": "v1.0",
+        "authority_class": "STATIC_CONTROL_PLANE_ROUTE_MAP_NOT_MASTER_PLAN_AUTHORITY",
+        "repo_canonical_pr_label": "PR119",
+        "roadmap_pr_label": "PR #102",
+        "semantic_task_id": "ROADMAP-MASTER-PLAN-COVERAGE-TRIAGE-I",
+        "source_manifest_reference": "docs/master_plan/generated/SectionManifest.json",
+        "generated_report_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+        "controller_decision_reference": (
+            "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json"
+            "#/roadmap_range_currentization/1"
+        ),
+        "no_old_coverage_ledger_reintroduction_flag": True,
+        "no_runtime_live_order_profit_authority_created_flag": True,
+        "no_source_connector_replay_paper_authority_created_flag": True,
+        "no_quantum_backend_or_simulator_execution_created_flag": True,
+        "no_master_plan_text_mutation_flag": True,
+    }
+    for field, expected_value in expected.items():
+        if route_map.get(field) != expected_value:
+            failures.append(f"route_map.{field} must be {expected_value!r}")
+
+    discovery = route_map.get("existing_artifact_discovery_result")
+    if not isinstance(discovery, Mapping):
+        failures.append("route_map.existing_artifact_discovery_result must be an object")
+    elif discovery.get("decision") != "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED":
+        failures.append("route_map must extend the existing section coverage family")
+
+    entries = route_map.get("route_entries")
+    if not isinstance(entries, list) or not entries:
+        return failures + ["route_map.route_entries must be a non-empty array"]
+    sorted_entries = sorted(
+        entries,
+        key=lambda entry: (
+            str(entry.get("section_id") or ""),
+            str(entry.get("normalized_section_title") or ""),
+        ),
+    )
+    if entries != sorted_entries:
+        failures.append("route_map.route_entries must be sorted by section_id then title")
+
+    manifest_path = repo_root / pathlib.Path(str(route_map.get("source_manifest_reference")))
+    manifest, manifest_failures = _load_json(manifest_path)
+    failures.extend(manifest_failures)
+    manifest_ids: set[str] = set()
+    if manifest is not None:
+        manifest_ids = {
+            str(section.get("canonical_id"))
+            for section in manifest.get("sections", [])
+            if isinstance(section, dict) and section.get("canonical_id")
+        }
+
+    seen: set[str] = set()
+    route_classes: list[str] = []
+    for index, entry in enumerate(entries, start=1):
+        label = f"route_entries[{index}]"
+        if not isinstance(entry, Mapping):
+            failures.append(f"{label} must be an object")
+            continue
+        missing_entry = sorted(EXPECTED_ROUTE_ENTRY_FIELDS - set(entry))
+        if missing_entry:
+            failures.append(f"{label} missing required fields: {', '.join(missing_entry)}")
+            continue
+        section_id = str(entry.get("section_id") or "")
+        if section_id in seen:
+            failures.append(f"{label} duplicate section_id: {section_id}")
+        seen.add(section_id)
+        if manifest_ids and section_id not in manifest_ids:
+            failures.append(f"{label} section_id not found in SectionManifest: {section_id}")
+
+        route_class = str(entry.get("current_route_class") or "")
+        route_classes.append(route_class)
+        if route_class not in ALLOWED_ROUTE_CLASSES:
+            failures.append(f"{label} invalid current_route_class: {route_class}")
+        confidence = str(entry.get("route_confidence_class") or "")
+        if confidence not in ALLOWED_ROUTE_CONFIDENCE_CLASSES:
+            failures.append(f"{label} invalid route_confidence_class: {confidence}")
+
+        for flag in (
+            "no_authority_created_flag",
+            "no_master_plan_text_mutation_flag",
+            "no_old_coverage_ledger_flag",
+        ):
+            if entry.get(flag) is not True:
+                failures.append(f"{label}.{flag} must be true")
+        if not entry.get("route_owner_artifact"):
+            failures.append(f"{label} must include route_owner_artifact")
+        owner_path = repo_root / pathlib.Path(str(entry.get("route_owner_artifact") or ""))
+        if entry.get("route_owner_artifact") and not owner_path.exists():
+            failures.append(
+                f"{label} route_owner_artifact missing: {entry.get('route_owner_artifact')}"
+            )
+
+        unresolved = entry.get("unresolved_reason_code_when_applicable")
+        if route_class == "UNRESOLVED_DEFAULT_ROUTE":
+            if unresolved not in ALLOWED_UNRESOLVED_REASON_CODES:
+                failures.append(f"{label} unresolved route must include an allowed reason code")
+            if confidence != "UNRESOLVED_EXPLICITLY":
+                failures.append(f"{label} unresolved route must use UNRESOLVED_EXPLICITLY")
+        elif unresolved is not None:
+            failures.append(f"{label} resolved route must not include unresolved reason")
+
+        metadata = entry.get("quantum_forward_metadata")
+        if not isinstance(metadata, Mapping):
+            failures.append(f"{label}.quantum_forward_metadata must be an object")
+            continue
+        metadata_missing = sorted(EXPECTED_QUANTUM_METADATA_FIELDS - set(metadata))
+        if metadata_missing:
+            failures.append(
+                f"{label}.quantum_forward_metadata missing fields: {', '.join(metadata_missing)}"
+            )
+        relevance = str(metadata.get("quantum_relevance_class") or "")
+        if relevance not in ALLOWED_QUANTUM_RELEVANCE_CLASSES:
+            failures.append(f"{label} invalid quantum_relevance_class: {relevance}")
+        if route_class in QUANTUM_RELATED_ROUTE_CLASSES and relevance == "NONE":
+            failures.append(f"{label} quantum/optimizer/latency route needs quantum metadata")
+        for flag in (
+            "no_backend_execution_flag",
+            "no_simulator_execution_flag",
+            "no_optimizer_runtime_execution_flag",
+            "no_quantum_advantage_claim_flag",
+            "no_profit_or_latency_superiority_claim_flag",
+        ):
+            if metadata.get(flag) is not True:
+                failures.append(f"{label}.quantum_forward_metadata.{flag} must be true")
+
+    for route_class in ALLOWED_ROUTE_CLASSES:
+        if route_class not in route_classes:
+            failures.append(f"route_map missing required route class: {route_class}")
+    return failures
+
+
 def _path_exists(repo_root: pathlib.Path, value: str) -> bool:
     return (repo_root / pathlib.Path(value)).exists()
 
@@ -488,6 +670,7 @@ def validate(
 
     entries = registry["entries"]
     failures.extend(validate_registry_entries(entries))
+    failures.extend(validate_route_map(registry.get("route_map", {}), repo_root=root))
     failures.extend(validate_blocked_future_routing(entries))
     failures.extend(validate_complete_verified_evidence(entries, repo_root=root))
     failures.extend(validate_no_pr_tracking_keys(registry))

@@ -12,6 +12,8 @@
     "generated_at_utc",
     "source_documents",
     "registry",
+    "route_map",
+    "route_map_summary",
     "authority_boundary",
     "coverage_summary",
     "coverage_entries",
@@ -64,6 +66,8 @@
         "entry_count": { "type": "integer" }
       }
     },
+    "route_map": { "$ref": "#/$defs/route_map" },
+    "route_map_summary": { "$ref": "#/$defs/route_map_summary" },
     "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
     "coverage_summary": {
       "type": "object",
@@ -137,6 +141,64 @@
         "COMPLETE_VERIFIED"
       ]
     },
+    "route_class": {
+      "enum": [
+        "CAPABILITY_ROUTE",
+        "POLICY_ROUTE",
+        "SOURCE_EVIDENCE_ROUTE",
+        "REPLAY_PAPER_ROUTE",
+        "RUNTIME_ROUTE",
+        "OWNER_ROUTE",
+        "QUARANTINE_ROUTE",
+        "RETIREMENT_ROUTE",
+        "CONTROLLER_REFERENCED_ROUTE",
+        "QUANTUM_FORWARD_OPTIMIZATION_ROUTE",
+        "OPTIMIZER_ARBITRATION_ROUTE",
+        "LATENCY_COST_ROUTE",
+        "UNRESOLVED_DEFAULT_ROUTE"
+      ]
+    },
+    "route_confidence_class": {
+      "enum": [
+        "EXACT_CONTROLLER_REFERENCE",
+        "EXACT_ARTIFACT_REFERENCE",
+        "EXACT_SCHEMA_REFERENCE",
+        "EXACT_VALIDATOR_REFERENCE",
+        "EXACT_TOOL_REFERENCE",
+        "EXACT_MASTER_PLAN_SECTION_REFERENCE",
+        "EXACT_ROADMAP_BLUEPRINT_REFERENCE",
+        "OWNER_POLICY_REFERENCE",
+        "UNRESOLVED_EXPLICITLY"
+      ]
+    },
+    "unresolved_reason_code": {
+      "enum": [
+        "NO_EXACT_ARTIFACT_OWNER_FOUND",
+        "NO_EXACT_CONTROLLER_REFERENCE_FOUND",
+        "AMBIGUOUS_SECTION_SCOPE",
+        "TITLE_SIMILARITY_ONLY_NOT_ALLOWED",
+        "WOULD_REQUIRE_MASTER_PLAN_MUTATION",
+        "WOULD_REQUIRE_RUNTIME_OR_LIVE_AUTHORITY",
+        "WOULD_REQUIRE_SOURCE_OR_CONNECTOR_AUTHORITY",
+        "WOULD_REQUIRE_REPLAY_OR_PAPER_RESULT",
+        "WOULD_REQUIRE_QUANTUM_BACKEND_OR_OPTIMIZER_EXECUTION",
+        "WOULD_REINTRODUCE_OLD_COVERAGE_LEDGER",
+        "OUT_OF_SCOPE_FOR_PR119"
+      ]
+    },
+    "quantum_relevance_class": {
+      "enum": [
+        "NONE",
+        "QUANTUM_APPLICABILITY_METADATA",
+        "QUBO_ISING_FORMULATION_CANDIDATE",
+        "QAOA_VQE_ANNEALING_CANDIDATE",
+        "QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE",
+        "TRUE_QUANTUM_BACKEND_RECEIPT_GATED",
+        "HYBRID_CLASSICAL_QUANTUM_ARBITRATION",
+        "PORTFOLIO_CANDIDATE_SET_OPTIMIZATION",
+        "LATENCY_AWARE_OPTIMIZATION_ROUTE"
+      ]
+    },
     "string_list": {
       "type": "array",
       "items": { "type": "string" }
@@ -159,6 +221,202 @@
         "creates_atomicrows_bundle": { "const": false },
         "creates_profit_evidence": { "const": false },
         "reduces_blockers": { "const": false }
+      }
+    },
+    "quantum_forward_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantum_relevance_class",
+        "future_controller_reference",
+        "future_roadmap_consumer_labels",
+        "no_backend_execution_flag",
+        "no_simulator_execution_flag",
+        "no_optimizer_runtime_execution_flag",
+        "no_quantum_advantage_claim_flag",
+        "no_profit_or_latency_superiority_claim_flag"
+      ],
+      "properties": {
+        "quantum_relevance_class": { "$ref": "#/$defs/quantum_relevance_class" },
+        "future_controller_reference": { "type": "string" },
+        "future_roadmap_consumer_labels": { "$ref": "#/$defs/string_list" },
+        "no_backend_execution_flag": { "const": true },
+        "no_simulator_execution_flag": { "const": true },
+        "no_optimizer_runtime_execution_flag": { "const": true },
+        "no_quantum_advantage_claim_flag": { "const": true },
+        "no_profit_or_latency_superiority_claim_flag": { "const": true }
+      }
+    },
+    "route_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_id",
+        "normalized_section_title",
+        "current_route_class",
+        "previous_route_class_or_default_state",
+        "route_owner_artifact",
+        "route_owner_reason_code",
+        "controller_state_reference",
+        "downstream_consumer_reference",
+        "traceability_basis",
+        "evidence_basis",
+        "route_confidence_class",
+        "no_authority_created_flag",
+        "no_master_plan_text_mutation_flag",
+        "no_old_coverage_ledger_flag",
+        "unresolved_reason_code_when_applicable",
+        "quantum_forward_metadata"
+      ],
+      "properties": {
+        "section_id": { "type": "string" },
+        "normalized_section_title": { "type": "string" },
+        "current_route_class": { "$ref": "#/$defs/route_class" },
+        "previous_route_class_or_default_state": { "type": "string" },
+        "route_owner_artifact": { "type": "string" },
+        "route_owner_reason_code": { "type": "string" },
+        "controller_state_reference": { "type": "string" },
+        "downstream_consumer_reference": { "type": "string" },
+        "traceability_basis": { "type": "string" },
+        "evidence_basis": { "type": "string" },
+        "route_confidence_class": { "$ref": "#/$defs/route_confidence_class" },
+        "no_authority_created_flag": { "const": true },
+        "no_master_plan_text_mutation_flag": { "const": true },
+        "no_old_coverage_ledger_flag": { "const": true },
+        "unresolved_reason_code_when_applicable": {
+          "type": ["string", "null"]
+        },
+        "quantum_forward_metadata": {
+          "$ref": "#/$defs/quantum_forward_metadata"
+        }
+      }
+    },
+    "route_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route_map_id",
+        "route_map_version",
+        "authority_class",
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "semantic_task_id",
+        "source_manifest_reference",
+        "route_entries",
+        "generated_report_path",
+        "controller_decision_reference",
+        "existing_artifact_discovery_result",
+        "changed_file_list_by_artifact_family",
+        "no_old_coverage_ledger_reintroduction_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_master_plan_text_mutation_flag"
+      ],
+      "properties": {
+        "route_map_id": {
+          "const": "QTT_MASTER_PLAN_SECTION_COVERAGE_TRIAGE_ROUTES_V1_0"
+        },
+        "route_map_version": { "const": "v1.0" },
+        "authority_class": {
+          "const": "STATIC_CONTROL_PLANE_ROUTE_MAP_NOT_MASTER_PLAN_AUTHORITY"
+        },
+        "repo_canonical_pr_label": { "const": "PR119" },
+        "roadmap_pr_label": { "const": "PR #102" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-COVERAGE-TRIAGE-I"
+        },
+        "source_manifest_reference": {
+          "const": "docs/master_plan/generated/SectionManifest.json"
+        },
+        "route_entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/route_entry" }
+        },
+        "generated_report_path": {
+          "const": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1"
+        },
+        "existing_artifact_discovery_result": { "type": "object" },
+        "changed_file_list_by_artifact_family": { "type": "object" },
+        "no_old_coverage_ledger_reintroduction_flag": { "const": true },
+        "no_runtime_live_order_profit_authority_created_flag": { "const": true },
+        "no_source_connector_replay_paper_authority_created_flag": { "const": true },
+        "no_quantum_backend_or_simulator_execution_created_flag": { "const": true },
+        "no_master_plan_text_mutation_flag": { "const": true }
+      }
+    },
+    "route_map_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "semantic_task_id",
+        "controller_decision_reference",
+        "artifact_family_decision",
+        "changed_file_list_by_artifact_family",
+        "route_entry_count",
+        "count_by_route_class",
+        "count_by_route_confidence_class",
+        "unresolved_default_count",
+        "quantum_forward_route_count",
+        "optimizer_arbitration_route_count",
+        "latency_cost_route_count",
+        "old_coverage_ledger_reintroduction_flag",
+        "master_plan_mutation_count",
+        "runtime_authority_created",
+        "live_authority_created",
+        "source_fact_acceptance_created",
+        "connector_semantic_binding_created",
+        "replay_paper_result_created",
+        "order_authority_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "quantum_backend_simulator_optimizer_execution_created"
+      ],
+      "properties": {
+        "repo_canonical_pr_label": { "const": "PR119" },
+        "roadmap_pr_label": { "const": "PR #102" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-COVERAGE-TRIAGE-I"
+        },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/1"
+        },
+        "artifact_family_decision": {
+          "const": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED"
+        },
+        "changed_file_list_by_artifact_family": { "type": "object" },
+        "route_entry_count": { "type": "integer" },
+        "count_by_route_class": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "count_by_route_confidence_class": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "unresolved_default_count": { "type": "integer" },
+        "quantum_forward_route_count": { "type": "integer" },
+        "optimizer_arbitration_route_count": { "type": "integer" },
+        "latency_cost_route_count": { "type": "integer" },
+        "old_coverage_ledger_reintroduction_flag": { "const": false },
+        "master_plan_mutation_count": { "const": 0 },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "source_fact_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "replay_paper_result_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_superiority_evidence_created": { "const": false },
+        "quantum_backend_simulator_optimizer_execution_created": {
+          "const": false
+        }
       }
     },
     "coverage_entry": {

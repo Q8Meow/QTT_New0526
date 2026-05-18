@@ -46,7 +46,7 @@ The factual identity translator is:
 
 `docs/roadmap/QTT_PR_Identity_Roster_v1_0.json`
 
-Same-number identity inference is forbidden. For this PR, repo-canonical PR118 is not Roadmap PR #118, Blueprint PR #118, or GitHub PR #118.
+Same-number identity inference is forbidden. Repo-canonical PR118 is currentized to GitHub audit #118 only through the roster. It is not Roadmap PR #118 or Blueprint PR #118.
 
 ## 5. Roadmap Range Currentization
 
