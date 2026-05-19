@@ -208,7 +208,11 @@
         "venue_id": {
           "enum": [
             "NOT_VENUE_SPECIFIC",
-            "VENUE_NEUTRAL_STAGE1"
+            "VENUE_NEUTRAL_STAGE1",
+            "KALSHI",
+            "POLYMARKET",
+            "FORECASTEX_IBKR",
+            "PREDICTION_MARKETS_GENERAL"
           ]
         },
         "target_field_path": {

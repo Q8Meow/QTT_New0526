@@ -113,6 +113,9 @@
     "production_connector_semantic_value_population_allowed_flag": {
       "const": false
     },
+    "production_connector_semantic_authority": {
+      "const": false
+    },
     "runtime_resolver_snapshot_creation_allowed_flag": {
       "const": false
     },
@@ -181,6 +184,7 @@
     "consumer_contract_state",
     "binding_packet_creation_allowed_flag",
     "production_connector_semantic_value_population_allowed_flag",
+    "production_connector_semantic_authority",
     "runtime_resolver_snapshot_creation_allowed_flag",
     "replay_paper_consumption_allowed_without_runtime_resolver_snapshot_input_lock_flag",
     "live_client_import_allowed_flag",
@@ -205,7 +209,11 @@
     "venue_id": {
       "enum": [
         "NOT_VENUE_SPECIFIC",
-        "VENUE_NEUTRAL_STAGE1"
+        "VENUE_NEUTRAL_STAGE1",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "PREDICTION_MARKETS_GENERAL"
       ]
     },
     "target_field_path": {

@@ -1,0 +1,40 @@
+{
+  "fixture_id": "PR124_TARGET_FIELD_ACCEPTANCE_LEDGER_FIXTURE",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "production_connector_semantic_authority": false,
+  "target_field_acceptance_ledger_records": [
+    {
+      "target_field_acceptance_ledger_record_id": "PR124_TARGET_FIELD_LEDGER_KALSHI_ORDER_FIELD",
+      "target_field_acceptance_ledger_record_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false,
+      "venue_id": "KALSHI",
+      "platform_scope": "KALSHI",
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "target_semantic_family": "order_entry_endpoint_shape",
+      "target_semantic_value_type": "OBJECT",
+      "bound_value_unit_or_scale": "TEST_FIXTURE_OBJECT_SCALE",
+      "bound_value_scope": {
+        "scope_id": "PR124_SCOPE_KALSHI_ORDER_FIELD",
+        "scope_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+        "venue_id": "KALSHI",
+        "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "accepted_source_evidence_packet_id": "PR123_ACCEPTED_PACKET_1B1209B53C6165BDCC7579DA",
+      "accepted_source_evidence_packet_digest": "9aa8d995b5767ffd20a65f0c3bd04c517c8f9f42265b88db5b1d6e2df3d6cd30",
+      "readiness_state": "READY_FOR_STATIC_FIXTURE_CONSUMPTION",
+      "conflict_check_allows_consumption_flag": true,
+      "revalidation_state_allows_consumption_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "receipt_ids": [
+        "PR124_TARGET_FIELD_LEDGER_FIXTURE_RECEIPT"
+      ]
+    }
+  ]
+}

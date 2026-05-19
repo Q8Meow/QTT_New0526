@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/pr124_connector_semantic_binding/stage1_source_to_connector_field_binding_manifest.schema.json",
+  "title": "Stage-1 Source-to-Connector Field Binding Manifest Schema",
+  "description": "Static PR124 manifest record schema for mapping accepted source-evidence packets to connector semantic target fields. The schema describes required linkage and gate fields only; it does not authorize production connector semantics, live clients, network IO, or order execution.",
+  "type": "object",
+  "properties": {
+    "binding_manifest_record_type": {
+      "const": "STAGE1_SOURCE_TO_CONNECTOR_FIELD_BINDING_MANIFEST_RECORD"
+    },
+    "binding_manifest_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_edition": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "master_plan_sha256": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "task_packet_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "venue_id": {
+      "$ref": "#/$defs/venue_id"
+    },
+    "connector_scaffold_path": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_required_placeholder_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_field_path": {
+      "$ref": "#/$defs/target_field_path"
+    },
+    "target_semantic_family": {
+      "$ref": "#/$defs/surface_id"
+    },
+    "target_semantic_value_type": {
+      "$ref": "#/$defs/semantic_value_type"
+    },
+    "source_dependency_class": {
+      "$ref": "#/$defs/source_dependency_class"
+    },
+    "accepted_source_evidence_packet_id_required_flag": {
+      "const": true
+    },
+    "accepted_source_evidence_packet_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_locator_required_flag": {
+      "const": true
+    },
+    "exact_quote_or_machine_field_locator_required_flag": {
+      "const": true
+    },
+    "source_digest_required_flag": {
+      "const": true
+    },
+    "extracted_fact_required_flag": {
+      "const": true
+    },
+    "applicability_scope_required_flag": {
+      "const": true
+    },
+    "conflict_check_required_flag": {
+      "const": true
+    },
+    "revalidation_trigger_required_flag": {
+      "const": true
+    },
+    "connector_semantic_population_allowed_flag": {
+      "const": true
+    },
+    "readiness_state": {
+      "$ref": "#/$defs/readiness_state"
+    },
+    "validation_hook_ids": {
+      "$ref": "#/$defs/validation_hook_ids"
+    },
+    "receipt_ids": {
+      "$ref": "#/$defs/receipt_ids"
+    }
+  },
+  "required": [
+    "binding_manifest_record_type",
+    "binding_manifest_id",
+    "master_plan_edition",
+    "master_plan_sha256",
+    "task_packet_id",
+    "venue_id",
+    "connector_scaffold_path",
+    "source_required_placeholder_ref",
+    "target_field_path",
+    "target_semantic_family",
+    "target_semantic_value_type",
+    "source_dependency_class",
+    "accepted_source_evidence_packet_id_required_flag",
+    "accepted_source_evidence_packet_id",
+    "source_locator_required_flag",
+    "exact_quote_or_machine_field_locator_required_flag",
+    "source_digest_required_flag",
+    "extracted_fact_required_flag",
+    "applicability_scope_required_flag",
+    "conflict_check_required_flag",
+    "revalidation_trigger_required_flag",
+    "connector_semantic_population_allowed_flag",
+    "readiness_state",
+    "validation_hook_ids",
+    "receipt_ids"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$"
+    },
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "PREDICTION_MARKETS_GENERAL"
+      ]
+    },
+    "surface_id": {
+      "enum": [
+        "authentication_flow",
+        "market_data_endpoint_shape",
+        "order_entry_endpoint_shape",
+        "private_state_endpoint_shape",
+        "fee_schedule",
+        "tick_size",
+        "min_order_constraint",
+        "max_order_constraint",
+        "rate_limit",
+        "throttle_behavior",
+        "order_status_enum",
+        "settlement_semantics",
+        "cancellation_semantics",
+        "partial_fill_semantics",
+        "historical_data_surface",
+        "replay_data_availability",
+        "websocket_or_streaming_semantics",
+        "error_reject_semantics",
+        "healthcheck_or_status_surface",
+        "payout_semantics",
+        "contract_event_identifier_semantics",
+        "market_resolution_semantics"
+      ]
+    },
+    "semantic_value_type": {
+      "enum": [
+        "OBJECT",
+        "STRING",
+        "INTEGER",
+        "DECIMAL",
+        "BOOLEAN",
+        "ENUM",
+        "TIMESTAMP"
+      ]
+    },
+    "source_dependency_class": {
+      "enum": [
+        "ACCEPTED_SOURCE_EVIDENCE_REQUIRED",
+        "ACCEPTED_SOURCE_EVIDENCE_AND_TARGET_FIELD_LEDGER_REQUIRED"
+      ]
+    },
+    "readiness_state": {
+      "enum": [
+        "READY_FOR_STATIC_FIXTURE_CONSUMPTION",
+        "REJECTED_MISSING_ACCEPTED_SOURCE_EVIDENCE",
+        "REJECTED_TARGET_FIELD_MISMATCH",
+        "REJECTED_VENUE_MISMATCH",
+        "REJECTED_STALE_OR_CONFLICTED_ACCEPTED_PACKET",
+        "REJECTED_MISSING_UNIT_SCALE_SCOPE"
+      ]
+    },
+    "validation_hook_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "const": "PR124_ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+      }
+    },
+    "receipt_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    }
+  }
+}

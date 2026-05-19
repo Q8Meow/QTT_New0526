@@ -1,0 +1,122 @@
+{
+  "fixture_id": "PR124_ACCEPTED_SOURCE_EVIDENCE_EXPORTS_FIXTURE",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "production_external_fact_authority": false,
+  "production_connector_semantic_authority": false,
+  "accepted_source_evidence_exports": [
+    {
+      "accepted_source_evidence_export_record_id": "PR124_ACCEPTED_EXPORT_PR106_KALSHI_ORDER_FIELD",
+      "accepted_ledger_record_id": "PR123_ACCEPTED_LEDGER_1B1209B53C6165BDCC7579DA",
+      "accepted_source_evidence_packet_id": "PR123_ACCEPTED_PACKET_1B1209B53C6165BDCC7579DA",
+      "accepted_source_evidence_packet_digest": "9aa8d995b5767ffd20a65f0c3bd04c517c8f9f42265b88db5b1d6e2df3d6cd30",
+      "canonical_text_digest_sha256": "6d26893fdda5cbfc87487ca07a9328e03bd141a2594b893e4754a7183f725441",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_external_fact_authority": false,
+      "production_connector_semantic_authority": false,
+      "venue_id": "KALSHI",
+      "platform_scope": "KALSHI",
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "target_semantic_family": "order_entry_endpoint_shape",
+      "target_semantic_value_type": "OBJECT",
+      "accepted_value_type": "OBJECT",
+      "source_locator": "TEST_FIXTURE_NOT_EXTERNAL_FACT:KALSHI_ORDER_FIELD_SOURCE_LOCATOR_PLACEHOLDER",
+      "source_locator_type": "PLACEHOLDER_NOT_FACTUAL_URL",
+      "source_locator_status": "TEST_FIXTURE_LOCATOR_NOT_EXTERNAL_FACT",
+      "quote_span_locator": {
+        "quote_span_locator_id": "PR123_FIXTURE_QUOTE_LOCATOR_VALID",
+        "canonicalization_policy_id": "PR123_FIXTURE_CANONICAL_TEXT_POLICY",
+        "line_start": 1,
+        "line_end": 1,
+        "start_offset": 0,
+        "end_offset": 48,
+        "quote_digest_sha256": "ca5713a63b65289fcfe948214590e37f82685a61bf699912caa792cd5fb9f1ee"
+      },
+      "machine_field_locator": null,
+      "exact_quote_or_machine_field_locator_present_flag": true,
+      "source_digest_sha256": "9aa8d995b5767ffd20a65f0c3bd04c517c8f9f42265b88db5b1d6e2df3d6cd30",
+      "extracted_fact": {
+        "fixture_value": "TEST_FIXTURE_NOT_EXTERNAL_FACT_VALUE"
+      },
+      "applicability_scope": {
+        "scope_id": "PR123_FIXTURE_SCOPE_KALSHI_ORDER_FIELD",
+        "venue_id": "KALSHI",
+        "platform_scope": "KALSHI",
+        "target_field_paths": [
+          "stage1.kalshi.order_entry.fixture_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "conflict_state": "NO_CONFLICT",
+      "conflict_resolution_state": "NO_CONFLICT",
+      "revalidation_state": "TEST_FIXTURE_CURRENT",
+      "revalidation_due_condition": "NOT_DUE_CURRENT",
+      "redaction_state": "TEST_FIXTURE_NO_SECRET",
+      "secret_like_value_detected_flag": false,
+      "private_doc_access_rights_state": "TEST_FIXTURE_NOT_PRIVATE_DOC",
+      "runtime_live_use_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false
+    },
+    {
+      "accepted_source_evidence_export_record_id": "PR124_ACCEPTED_EXPORT_STALE_CONFLICTED_FIXTURE",
+      "accepted_ledger_record_id": "PR124_ACCEPTED_LEDGER_STALE_CONFLICTED_FIXTURE",
+      "accepted_source_evidence_packet_id": "PR124_ACCEPTED_PACKET_STALE_CONFLICTED_FIXTURE",
+      "accepted_source_evidence_packet_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "canonical_text_digest_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_external_fact_authority": false,
+      "production_connector_semantic_authority": false,
+      "venue_id": "KALSHI",
+      "platform_scope": "KALSHI",
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "target_semantic_family": "order_entry_endpoint_shape",
+      "target_semantic_value_type": "OBJECT",
+      "accepted_value_type": "OBJECT",
+      "source_locator": "TEST_FIXTURE_NOT_EXTERNAL_FACT:STALE_CONFLICTED_PLACEHOLDER",
+      "source_locator_type": "PLACEHOLDER_NOT_FACTUAL_URL",
+      "source_locator_status": "TEST_FIXTURE_LOCATOR_NOT_EXTERNAL_FACT",
+      "quote_span_locator": {
+        "quote_span_locator_id": "PR124_FIXTURE_QUOTE_LOCATOR_STALE_CONFLICTED",
+        "canonicalization_policy_id": "PR124_FIXTURE_CANONICAL_TEXT_POLICY",
+        "line_start": 1,
+        "line_end": 1,
+        "start_offset": 0,
+        "end_offset": 48,
+        "quote_digest_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "machine_field_locator": null,
+      "exact_quote_or_machine_field_locator_present_flag": true,
+      "source_digest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "extracted_fact": {
+        "fixture_value": "TEST_FIXTURE_NOT_EXTERNAL_FACT_VALUE"
+      },
+      "applicability_scope": {
+        "scope_id": "PR124_FIXTURE_SCOPE_STALE_CONFLICTED",
+        "venue_id": "KALSHI",
+        "platform_scope": "KALSHI",
+        "target_field_paths": [
+          "stage1.kalshi.order_entry.fixture_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "conflict_state": "UNRESOLVED_CONFLICT",
+      "conflict_resolution_state": "UNRESOLVED_CONFLICT",
+      "revalidation_state": "STALE_REVALIDATION_REQUIRED",
+      "revalidation_due_condition": "REVALIDATION_DUE",
+      "redaction_state": "TEST_FIXTURE_NO_SECRET",
+      "secret_like_value_detected_flag": false,
+      "private_doc_access_rights_state": "TEST_FIXTURE_NOT_PRIVATE_DOC",
+      "runtime_live_use_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false
+    }
+  ]
+}
