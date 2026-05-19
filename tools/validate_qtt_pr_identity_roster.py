@@ -107,9 +107,9 @@ REQUIRED_NO_CLAIM_BOUNDARY = {
     "profit_latency_execution_quantum_advantage_evidence_created": False,
     "bug_free_status_claimed": False,
 }
-REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 125))
+REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 126))
 REQUIRED_ROADMAP_LABELS = tuple(f"PR #{number}" for number in range(97, 127))
-REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 125))
+REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 126))
 ROADMAP_RUNTIME_BLOCK_LABELS = tuple(f"PR #{number}" for number in range(105, 127))
 REQUIRED_PR115A_NOTE_PARTS = (
     "SHA dormant/non-participating",
@@ -360,7 +360,7 @@ def _validate_seed_scope(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     if not isinstance(scope, dict):
         return ["seed_scope must be an object"]
     if tuple(scope.get("github_pr_numbers_included", [])) != REQUIRED_GITHUB_AUDIT_NUMBERS:
-        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #124")
+        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #125")
     if tuple(scope.get("roadmap_pr_labels_included", [])) != REQUIRED_ROADMAP_LABELS:
         failures.append("seed_scope.roadmap_pr_labels_included must be roadmap PR #97 through #126")
     if tuple(scope.get("corrective_overlays_included", [])) != ("PR115A", "PR116A"):
@@ -787,18 +787,23 @@ def _validate_pr125_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
         "repo_canonical_pr_label": "PR125",
         "roadmap_pr_label": None,
         "blueprint_pr_label": None,
-        "github_pr_number": None,
+        "github_pr_number": 125,
         "repo_title": "Source revalidation, supersession, and materiality scheduler",
         "roadmap_title": None,
         "blueprint_title": None,
-        "github_title": None,
+        "github_title": "PR125 implement source revalidation supersession materiality scheduler",
         "branch_name": "pr125-source-revalidation-supersession-materiality-scheduler",
         "semantic_role": "CONTROL_PLANE_RECONCILIATION",
         "authority_scope": "CONTROL_PLANE_ONLY",
-        "current_status": "PENDING_OWNER_DECISION",
-        "github_audit_url": None,
+        "current_status": "MERGED",
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/125",
         "identity_relation_class": "REPO_CANONICAL_ONLY",
         "same_number_mismatch_recorded": True,
+        "github_pr_state": "MERGED",
+        "github_pr_mergedAt": "2026-05-19T20:03:45Z",
+        "github_pr_mergeCommit_oid": "c7bbb8769cea72efe74db9f7f3be4439493dd4bc",
+        "github_headRefName": "pr125-source-revalidation-supersession-materiality-scheduler",
+        "github_baseRefName": "main",
         "owner_authorized_roadmap_pr": "PR107",
         "owner_authorized_next_capability": "SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER",
         "controller_used_as_record_not_veto": True,
@@ -816,8 +821,8 @@ def _validate_pr125_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
     ):
         if marker not in pr125.get("validator_markers", []):
             failures.append(f"PR125 self-entry must reference {marker}")
-    if "GITHUB_AUDIT_NUMBER" in pr125.get("reference_types", []):
-        failures.append("PR125 self-entry must not claim a GitHub audit number before owner PR creation")
+    if "GITHUB_AUDIT_NUMBER" not in pr125.get("reference_types", []):
+        failures.append("PR125 self-entry reference_types must include GITHUB_AUDIT_NUMBER")
     missing_notes = _notes_contain(pr125, REQUIRED_PR125_NOTE_PARTS)
     if missing_notes:
         failures.append(f"PR125 self-entry notes missing: {', '.join(missing_notes)}")

@@ -1,0 +1,84 @@
+{
+  "fixture_id": "PR126_SOURCE_CHANGE_SNAPSHOT_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+  "source_change_snapshots": [
+    {
+      "source_change_snapshot_id": "PR126_SOURCE_CHANGE_IMPACT_SNAPSHOT_FIXTURE_V1",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_change_snapshot_state": "SOURCE_CHANGE_IMPACT_SNAPSHOT_READY",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "stale_accepted_packet_ids": [
+        "PR126_PACKET_STALE"
+      ],
+      "superseded_accepted_packet_ids": [
+        "PR126_PACKET_SUPERSEDED"
+      ],
+      "revalidation_due_packet_ids": [
+        "PR126_PACKET_REVALIDATION_REQUIRED"
+      ],
+      "connector_binding_revalidation_required_ids": [
+        "PR126_BINDING_REVALIDATION_REQUIRED"
+      ],
+      "connector_blocking_materiality_binding_ids": [
+        "PR126_BINDING_CONNECTOR_BLOCKING"
+      ],
+      "live_trading_blocking_materiality_binding_ids": [
+        "PR126_BINDING_LIVE_TRADING_BLOCKING"
+      ],
+      "no_new_binding_target_field_paths": [
+        "connectors.stage1.kalshi.order_entry.synthetic_event_field"
+      ],
+      "no_new_or_increased_exposure_scope_ids": [
+        "TEST_FIXTURE_STAGE1_FORECASTEX_RATE_LIMIT_SCOPE"
+      ],
+      "accepted_packet_scope_index": {
+        "PR126_PACKET_READY": {
+          "venue_id": "KALSHI",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_FEE_SCOPE"
+        },
+        "PR126_PACKET_STALE": {
+          "venue_id": "KALSHI",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_STALE_SCOPE"
+        },
+        "PR126_PACKET_SUPERSEDED": {
+          "venue_id": "KALSHI",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_SUPERSEDED_SCOPE"
+        },
+        "PR126_PACKET_REVALIDATION_REQUIRED": {
+          "venue_id": "POLYMARKET",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_POLYMARKET_TICK_SCOPE"
+        },
+        "PR126_PACKET_CONNECTOR_BLOCKING": {
+          "venue_id": "KALSHI",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_ORDER_ENTRY_SCOPE"
+        },
+        "PR126_PACKET_LIVE_TRADING_BLOCKING": {
+          "venue_id": "FORECASTEX_IBKR",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_FORECASTEX_RATE_LIMIT_SCOPE"
+        },
+        "PR126_PACKET_MISSING_UNIT_SCALE_SCOPE": {
+          "venue_id": "POLYMARKET",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_POLYMARKET_MISSING_UNIT_SCOPE"
+        },
+        "PR126_PACKET_CANONICALIZATION_FAILURE": {
+          "venue_id": "KALSHI",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_SETTLEMENT_SCOPE"
+        },
+        "PR126_PACKET_SCOPE_OR_VENUE_MISMATCH": {
+          "venue_id": "POLYMARKET",
+          "bound_value_scope": "TEST_FIXTURE_STAGE1_POLYMARKET_SCOPE"
+        }
+      },
+      "production_source_change_authority": false,
+      "source_retrieval_performed_by_pr126": false,
+      "source_acceptance_performed_by_pr126": false,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_execution_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "network_io_allowed_flag": false
+    }
+  ]
+}
