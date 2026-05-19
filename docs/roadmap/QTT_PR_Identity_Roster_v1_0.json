@@ -64,7 +64,8 @@
       116,
       117,
       118,
-      119
+      119,
+      120
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1754,6 +1755,42 @@
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
       "notes": "GitHub #119 is the audit number assigned to the merged pull request for repo-canonical PR119. This does not imply Roadmap PR #119 or Blueprint PR #119. Repo-canonical PR119 remains the implementation-truth label for the coverage triage routes PR."
+    },
+    {
+      "roster_entry_id": "PR120_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR120",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 120,
+      "repo_title": "Add master-plan roadmap crosswalk and market section indexes",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR120 add master-plan roadmap crosswalk and market section indexes",
+      "branch_name": "pr120-master-plan-roadmap-crosswalk-market-indexes",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "MASTER_PLAN_SECTION_COVERAGE_VALIDATION_OK",
+        "QTT_MASTER_PLAN_SECTION_ROADMAP_CROSSWALK_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR119_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/120",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "notes": "GitHub #120 is the audit number assigned to the merged pull request for repo-canonical PR120. This does not imply Roadmap PR #120 or Blueprint PR #120. Repo-canonical PR120 remains the implementation-truth label for the master-plan roadmap crosswalk and market section index PR."
     }
   ],
   "mismatch_summary": {
@@ -1848,6 +1885,13 @@
         "roadmap_pr_label": "PR #119",
         "roadmap_title": "Paper trading engine executor",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 120,
+        "github_title": "PR120 add master-plan roadmap crosswalk and market section indexes",
+        "roadmap_pr_label": "PR #120",
+        "roadmap_title": "Fill, cost, slippage, fee, tick, and latency simulator",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -1919,6 +1963,13 @@
         "github_title": "PR119 currentize identity roster and add controller-approved coverage triage routes",
         "roadmap_pr_label": "PR #119",
         "roadmap_title": "Paper trading engine executor",
+        "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 120,
+        "github_title": "PR120 add master-plan roadmap crosswalk and market section indexes",
+        "roadmap_pr_label": "PR #120",
+        "roadmap_title": "Fill, cost, slippage, fee, tick, and latency simulator",
         "relation": "SAME_NUMBER_MISMATCH"
       }
     ],

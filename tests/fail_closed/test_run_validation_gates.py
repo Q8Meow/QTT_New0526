@@ -1512,6 +1512,13 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_qtt_master_plan_section_coverage_command_matrix.py"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "qtt_test_gate.py"),
             "--phase",
             "first-coding-runbook",
@@ -5749,11 +5756,14 @@ def test_runner_includes_section_coverage_dev_gate_after_three_venue_and_before_
     crosswalk_index = command_names.index(
         "validate_qtt_master_plan_section_roadmap_crosswalk.py"
     )
+    command_matrix_index = command_names.index(
+        "validate_qtt_master_plan_section_coverage_command_matrix.py"
+    )
     qtt_gate_index = command_names.index("qtt_test_gate.py")
     no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
 
     assert three_venue_index < build_index < validate_index < triage_routes_index
-    assert triage_routes_index < crosswalk_index < qtt_gate_index
+    assert triage_routes_index < crosswalk_index < command_matrix_index < qtt_gate_index
     assert qtt_gate_index < no_runtime_index
     assert commands[build_index] == [
         python_executable,
@@ -5773,6 +5783,10 @@ def test_runner_includes_section_coverage_dev_gate_after_three_venue_and_before_
     assert commands[crosswalk_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_master_plan_section_roadmap_crosswalk.py"),
+    ]
+    assert commands[command_matrix_index] == [
+        python_executable,
+        str(Path("tools") / "validate_qtt_master_plan_section_coverage_command_matrix.py"),
     ]
 
 

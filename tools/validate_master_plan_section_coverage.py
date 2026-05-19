@@ -579,6 +579,20 @@ def validate_schema_enums_match_registry(
         ("unresolved_reason_code_enum", "unresolved_reason_code"),
         ("parent_capability_group_enum", "parent_capability_group_id"),
         ("market_taxonomy", "market_id"),
+        ("command_family_enum", "command_family"),
+        ("command_scope_class_enum", "command_scope_class"),
+        ("command_authority_class_enum", "command_authority_class"),
+        ("command_owner_class_enum", "command_owner_class"),
+        ("command_consumer_class_enum", "command_consumer_class"),
+        ("command_status_enum", "command_status"),
+        ("static_allowed_operation_enum", "static_allowed_operation"),
+        ("future_gated_operation_enum", "future_gated_operation"),
+        ("command_block_reason_enum", "command_block_reason"),
+        (
+            "explicit_future_market_candidate_family_enum",
+            "explicit_future_market_candidate_family",
+        ),
+        ("forbidden_market_taxonomy_value_enum", "forbidden_market_taxonomy_value"),
     )
     failures: list[str] = []
     for registry_field, schema_def in comparisons:
@@ -604,6 +618,13 @@ def _rows(report: Mapping[str, Any]) -> list[dict[str, Any]]:
     if not isinstance(crosswalk, Mapping):
         return []
     return [row for row in crosswalk.get("rows", []) if isinstance(row, dict)]
+
+
+def _command_rows(report: Mapping[str, Any]) -> list[dict[str, Any]]:
+    matrix = report.get("command_matrix", {})
+    if not isinstance(matrix, Mapping):
+        return []
+    return [row for row in matrix.get("rows", []) if isinstance(row, dict)]
 
 
 def validate_roadmap_crosswalk(
@@ -765,6 +786,273 @@ def validate_roadmap_crosswalk(
         ]
         if controller_reference not in controller_refs:
             failures.append(f"PR119 controller reference not preserved for {section_id}")
+    return failures
+
+
+def validate_command_matrix(
+    *,
+    report: Mapping[str, Any],
+    registry: Mapping[str, Any],
+) -> list[str]:
+    failures: list[str] = []
+    crosswalk_rows = _rows(report)
+    command_rows = _command_rows(report)
+    crosswalk_ids = [str(row.get("section_id")) for row in crosswalk_rows]
+    command_ids = [str(row.get("section_id")) for row in command_rows]
+    if len(command_rows) != len(crosswalk_rows):
+        failures.append("command matrix row count must equal crosswalk row count")
+    if command_ids != crosswalk_ids:
+        failures.append("command matrix ordering must match crosswalk document order")
+    duplicates = [section_id for section_id, count in Counter(command_ids).items() if count > 1]
+    if duplicates:
+        failures.append(f"command matrix contains duplicate section IDs: {', '.join(sorted(duplicates))}")
+    missing = sorted(set(crosswalk_ids) - set(command_ids))
+    if missing:
+        failures.append(f"command matrix missing section IDs: {', '.join(missing[:20])}")
+    extra = sorted(set(command_ids) - set(crosswalk_ids))
+    if extra:
+        failures.append(f"command matrix contains section IDs not in crosswalk: {', '.join(extra[:20])}")
+
+    config = registry.get("central_config", {})
+    if not isinstance(config, Mapping):
+        failures.append("registry central_config must be an object")
+        config = {}
+    command_families = set(_central_enum_values(config, "command_family_enum"))
+    command_scopes = set(_central_enum_values(config, "command_scope_class_enum"))
+    command_authorities = set(_central_enum_values(config, "command_authority_class_enum"))
+    command_owners = set(_central_enum_values(config, "command_owner_class_enum"))
+    command_consumers = set(_central_enum_values(config, "command_consumer_class_enum"))
+    command_statuses = set(_central_enum_values(config, "command_status_enum"))
+    static_operations = set(_central_enum_values(config, "static_allowed_operation_enum"))
+    future_operations = set(_central_enum_values(config, "future_gated_operation_enum"))
+    block_reasons = set(_central_enum_values(config, "command_block_reason_enum"))
+    future_families = set(
+        _central_enum_values(config, "explicit_future_market_candidate_family_enum")
+    )
+    forbidden_market_values = set(
+        _central_enum_values(config, "forbidden_market_taxonomy_value_enum")
+    )
+    stage1_rules = config.get("stage1_prediction_market_only_rules", {})
+    if not isinstance(stage1_rules, Mapping):
+        failures.append("stage1_prediction_market_only_rules must be centralized")
+        stage1_rules = {}
+    expected_stage1_ids = [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+    ]
+    if stage1_rules.get("stage1_launch_scope_locked_to_prediction_markets_flag") is not True:
+        failures.append("Stage 1 launch scope must remain prediction-market-only")
+    if list(stage1_rules.get("stage1_active_market_ids", [])) != expected_stage1_ids:
+        failures.append("Stage 1 active market IDs must remain prediction-market-only")
+    if stage1_rules.get("stage2_market_selection_created_flag") is not False:
+        failures.append("Stage 2 market selection must not be created")
+    if stage1_rules.get("future_market_launch_authority_created_flag") is not False:
+        failures.append("future market launch authority must not be created")
+    if stage1_rules.get("no_open_ended_future_market_taxonomy_flag") is not True:
+        failures.append("open-ended future market taxonomy must remain blocked")
+
+    required_fields = {
+        "document_order_index",
+        "section_id",
+        "crosswalk_reference",
+        "parent_capability_group_id",
+        "current_route_class",
+        "command_family",
+        "command_scope_class",
+        "command_authority_class",
+        "command_owner_class",
+        "command_consumer_class",
+        "command_status",
+        "static_allowed_now_operations",
+        "future_gated_operations",
+        "block_reason_codes",
+        "future_pr_labels",
+        "roadmap_pr_labels",
+        "blueprint_pr_labels",
+        "controller_state_references",
+        "required_validators",
+        "required_reports",
+        "required_artifacts",
+        "market_scope_summary",
+        "stage1_prediction_market_relevance",
+        "future_market_relevance",
+        "explicit_future_market_candidate_family_when_applicable",
+        "owner_review_future_market_scope_classification_when_applicable",
+        "quantum_forward_command_metadata",
+        "latency_command_metadata",
+        "source_connector_runtime_command_metadata",
+        "owner_review_required_flag",
+        "unresolved_reason_code_when_applicable",
+        "no_command_execution_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_market_launch_authority_created_flag",
+        "no_open_ended_future_market_taxonomy_flag",
+        "no_master_plan_text_mutation_flag",
+        "no_old_coverage_ledger_flag",
+    }
+    static_execution_operations = {
+        "FUTURE_SOURCE_RETRIEVAL",
+        "FUTURE_SOURCE_ACCEPTANCE",
+        "FUTURE_CONNECTOR_BINDING",
+        "FUTURE_RUNTIME_SNAPSHOT",
+        "FUTURE_RUNTIME_CASH_RECEIPT",
+        "FUTURE_REPLAY_EXECUTION",
+        "FUTURE_PAPER_EXECUTION",
+        "FUTURE_LIVE_CANARY",
+        "FUTURE_ORDER_INTENT",
+        "FUTURE_ORDER_EXECUTION",
+        "FUTURE_QUANTUM_BACKEND_RECEIPT",
+        "FUTURE_OPTIMIZER_EXECUTION",
+        "FUTURE_MARKET_EXPANSION",
+        "FUTURE_STAGE2_MARKET_SELECTION",
+    }
+    for index, row in enumerate(command_rows, start=1):
+        label = f"command_matrix.rows[{index}]"
+        missing_fields = sorted(required_fields - set(row))
+        if missing_fields:
+            failures.append(f"{label} missing required fields: {', '.join(missing_fields)}")
+            continue
+        if row.get("document_order_index") != index:
+            failures.append(f"{label}.document_order_index must be {index}")
+        reference = row.get("crosswalk_reference")
+        if not isinstance(reference, Mapping):
+            failures.append(f"{label}.crosswalk_reference must be an object")
+        else:
+            if reference.get("section_id") != row.get("section_id"):
+                failures.append(f"{label}.crosswalk_reference section_id must match row")
+            if reference.get("document_order_index") != row.get("document_order_index"):
+                failures.append(f"{label}.crosswalk_reference document_order_index must match row")
+            if "normalized_section_title" in reference or "section_title" in reference:
+                failures.append(f"{label}.crosswalk_reference must stay compact-normalized")
+        if row.get("command_family") not in command_families:
+            failures.append(f"{label} invalid command_family {row.get('command_family')}")
+        if row.get("command_scope_class") not in command_scopes:
+            failures.append(f"{label} invalid command_scope_class {row.get('command_scope_class')}")
+        if row.get("command_authority_class") not in command_authorities:
+            failures.append(f"{label} invalid command_authority_class {row.get('command_authority_class')}")
+        if row.get("command_owner_class") not in command_owners:
+            failures.append(f"{label} invalid command_owner_class {row.get('command_owner_class')}")
+        if row.get("command_consumer_class") not in command_consumers:
+            failures.append(f"{label} invalid command_consumer_class {row.get('command_consumer_class')}")
+        if row.get("command_status") not in command_statuses:
+            failures.append(f"{label} invalid command_status {row.get('command_status')}")
+        for operation in row.get("static_allowed_now_operations", []):
+            if operation not in static_operations:
+                failures.append(f"{label} invalid static operation {operation}")
+            if operation in static_execution_operations:
+                failures.append(f"{label} static operation must not be execution authority")
+        for operation in row.get("future_gated_operations", []):
+            if operation not in future_operations:
+                failures.append(f"{label} invalid future-gated operation {operation}")
+        for reason in row.get("block_reason_codes", []):
+            if reason not in block_reasons:
+                failures.append(f"{label} invalid block reason {reason}")
+        for flag in (
+            "no_command_execution_flag",
+            "no_runtime_live_order_profit_authority_created_flag",
+            "no_source_connector_replay_paper_authority_created_flag",
+            "no_quantum_backend_or_simulator_execution_created_flag",
+            "no_market_launch_authority_created_flag",
+            "no_open_ended_future_market_taxonomy_flag",
+            "no_master_plan_text_mutation_flag",
+            "no_old_coverage_ledger_flag",
+        ):
+            if row.get(flag) is not True:
+                failures.append(f"{label}.{flag} must be true")
+        market_summary = row.get("market_scope_summary")
+        if not isinstance(market_summary, Mapping):
+            failures.append(f"{label}.market_scope_summary must be an object")
+        else:
+            forbidden_seen = set(market_summary.get("forbidden_market_taxonomy_values_detected", []))
+            if forbidden_seen:
+                failures.append(f"{label} emitted forbidden market taxonomy values: {sorted(forbidden_seen)}")
+            families = set(market_summary.get("explicit_future_market_candidate_families", []))
+            invalid_families = families - future_families
+            if invalid_families:
+                failures.append(f"{label} invalid explicit future market families: {sorted(invalid_families)}")
+            for forbidden in forbidden_market_values:
+                if forbidden in set(market_summary.get("market_ids", [])) | families:
+                    failures.append(f"{label} emitted forbidden future market value {forbidden}")
+        if row.get("future_market_relevance") == "FUTURE_MARKET_PLANNING_DEFERRED":
+            if row.get("command_family") not in {
+                "FUTURE_MARKET_DEFERRED_COMMAND",
+                "MARKET_INDEX_COMMAND",
+                "UNRESOLVED_RESEARCH_COMMAND",
+                "OWNER_REVIEW_COMMAND",
+            }:
+                failures.append(f"{label} future-market row must stay deferred or owner-review")
+        quantum = row.get("quantum_forward_command_metadata")
+        if not isinstance(quantum, Mapping):
+            failures.append(f"{label}.quantum_forward_command_metadata must be an object")
+        else:
+            for flag in (
+                "no_backend_execution_flag",
+                "no_simulator_execution_flag",
+                "no_optimizer_runtime_execution_flag",
+                "no_quantum_advantage_claim_flag",
+                "no_profit_or_latency_superiority_claim_flag",
+            ):
+                if quantum.get(flag) is not True:
+                    failures.append(f"{label}.quantum_forward_command_metadata.{flag} must be true")
+        latency = row.get("latency_command_metadata")
+        if isinstance(latency, Mapping):
+            for flag in (
+                "no_latency_superiority_claim_flag",
+                "no_profit_or_latency_superiority_claim_flag",
+            ):
+                if latency.get(flag) is not True:
+                    failures.append(f"{label}.latency_command_metadata.{flag} must be true")
+        source_runtime = row.get("source_connector_runtime_command_metadata")
+        if isinstance(source_runtime, Mapping):
+            for flag in (
+                "no_source_retrieval_flag",
+                "no_source_fact_acceptance_flag",
+                "no_connector_semantic_binding_flag",
+                "no_runtime_authority_flag",
+                "no_replay_paper_result_flag",
+                "no_live_or_order_authority_flag",
+            ):
+                if source_runtime.get(flag) is not True:
+                    failures.append(f"{label}.source_connector_runtime_command_metadata.{flag} must be true")
+        if "normalized_section_title" in row:
+            failures.append(f"{label} must not duplicate normalized_section_title")
+
+    summary = report.get("command_matrix_summary", {})
+    if not isinstance(summary, Mapping):
+        failures.append("command_matrix_summary must be an object")
+    else:
+        expected_counts = {
+            "pr120_crosswalk_row_count": len(crosswalk_rows),
+            "command_matrix_row_count": len(command_rows),
+            "missing_section_count": len(missing),
+            "duplicate_section_count": len(duplicates),
+            "forbidden_market_taxonomy_value_count": 0,
+        }
+        for field, expected in expected_counts.items():
+            if summary.get(field) != expected:
+                failures.append(f"command_matrix_summary.{field} must be {expected!r}")
+        for field in (
+            "runtime_authority_created",
+            "live_authority_created",
+            "source_retrieval_created",
+            "source_fact_acceptance_created",
+            "connector_semantic_binding_created",
+            "replay_paper_result_created",
+            "order_authority_created",
+            "profit_evidence_created",
+            "latency_superiority_evidence_created",
+            "quantum_backend_simulator_optimizer_execution_created",
+            "market_launch_authority_created",
+            "stage2_market_selection_created",
+        ):
+            if summary.get(field) is not False:
+                failures.append(f"command_matrix_summary.{field} must be false")
+        if summary.get("deterministic_output") is not True:
+            failures.append("command_matrix_summary.deterministic_output must be true")
     return failures
 
 
@@ -950,6 +1238,7 @@ def validate(
     if report is not None:
         failures.extend(validate_no_pr_tracking_keys(report))
         failures.extend(validate_roadmap_crosswalk(report=report, registry=registry))
+        failures.extend(validate_command_matrix(report=report, registry=registry))
         failures.extend(validate_market_index(report))
 
     if mode == "final":

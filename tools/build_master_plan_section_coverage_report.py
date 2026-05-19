@@ -258,13 +258,213 @@ QUANTUM_FORWARD_METADATA_FIELDS = (
     "no_profit_or_latency_superiority_claim_flag",
 )
 
+COMMAND_FAMILIES = (
+    "COVERAGE_TRIAGE_COMMAND",
+    "PARENT_CAPABILITY_COMMAND",
+    "COMMAND_MATRIX_COMMAND",
+    "SOURCE_EVIDENCE_COMMAND",
+    "CONNECTOR_SEMANTIC_COMMAND",
+    "RUNTIME_RESOLVER_COMMAND",
+    "RUNTIME_CASH_COMMAND",
+    "REPLAY_PAPER_COMMAND",
+    "OWNER_REVIEW_COMMAND",
+    "LIVE_LAUNCH_GATED_COMMAND",
+    "ORDER_INTENT_GATED_COMMAND",
+    "RISK_SAFETY_COMMAND",
+    "DASHBOARD_OWNER_SURFACE_COMMAND",
+    "RESEARCH_INTAKE_COMMAND",
+    "ATOMICROWS_INVENTORY_COMMAND",
+    "EDGE_SELECTION_SCORING_COMMAND",
+    "QUANTUM_POLICY_COMMAND",
+    "QUANTUM_FORWARD_OPTIMIZATION_COMMAND",
+    "QUANTUM_BACKEND_GATED_COMMAND",
+    "LATENCY_COST_COMMAND",
+    "MARKET_INDEX_COMMAND",
+    "FUTURE_MARKET_DEFERRED_COMMAND",
+    "QUARANTINE_COMMAND",
+    "RETIREMENT_COMMAND",
+    "UNRESOLVED_RESEARCH_COMMAND",
+)
+
+COMMAND_SCOPE_CLASSES = (
+    "STATIC_CONTROL_PLANE_ONLY",
+    "STATIC_REPORTING_ONLY",
+    "STATIC_INDEX_ONLY",
+    "STATIC_VALIDATION_ONLY",
+    "FUTURE_SOURCE_WORKFLOW_GATED",
+    "FUTURE_CONNECTOR_BINDING_GATED",
+    "FUTURE_RUNTIME_GATED",
+    "FUTURE_REPLAY_PAPER_GATED",
+    "FUTURE_OWNER_REVIEW_GATED",
+    "FUTURE_LIVE_LAUNCH_GATED",
+    "FUTURE_QUANTUM_BACKEND_GATED",
+    "FUTURE_MARKET_EXPANSION_GATED",
+    "OWNER_REVIEW_REQUIRED",
+)
+
+COMMAND_AUTHORITY_CLASSES = (
+    "NO_EXECUTION_AUTHORITY",
+    "NO_RUNTIME_AUTHORITY",
+    "NO_SOURCE_RETRIEVAL_AUTHORITY",
+    "NO_SOURCE_ACCEPTANCE_AUTHORITY",
+    "NO_CONNECTOR_BINDING_AUTHORITY",
+    "NO_REPLAY_PAPER_RESULT_AUTHORITY",
+    "NO_ORDER_AUTHORITY",
+    "NO_LIVE_AUTHORITY",
+    "NO_PROFIT_EVIDENCE_AUTHORITY",
+    "NO_QUANTUM_BACKEND_AUTHORITY",
+    "NO_MARKET_LAUNCH_AUTHORITY",
+    "FUTURE_OWNER_APPROVAL_REQUIRED",
+)
+
+COMMAND_OWNER_CLASSES = (
+    "CODEX_STATIC_BUILDER",
+    "VALIDATION_GATE_BUILDER",
+    "SOURCE_EVIDENCE_AGENT_FUTURE",
+    "CONNECTOR_AGENT_FUTURE",
+    "RUNTIME_RESOLVER_AGENT_FUTURE",
+    "REPLAY_PAPER_AGENT_FUTURE",
+    "OWNER_REVIEW_AGENT_FUTURE",
+    "RISK_AGENT_FUTURE",
+    "DASHBOARD_AGENT_FUTURE",
+    "QUANTUM_AGENT_FUTURE",
+    "LATENCY_EXECUTION_QUALITY_AGENT_FUTURE",
+    "MARKET_EXPANSION_AGENT_FUTURE",
+    "OWNER_REVIEW_REQUIRED",
+)
+
+COMMAND_CONSUMER_CLASSES = (
+    "VALIDATION_REPORT_CONSUMER",
+    "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+    "FUTURE_SOURCE_WORKFLOW_CONSUMER",
+    "FUTURE_CONNECTOR_CONSUMER",
+    "FUTURE_RUNTIME_CONSUMER",
+    "FUTURE_REPLAY_PAPER_CONSUMER",
+    "FUTURE_OWNER_REVIEW_CONSUMER",
+    "FUTURE_LIVE_LAUNCH_CONSUMER",
+    "FUTURE_ORDER_INTENT_CONSUMER",
+    "FUTURE_QUANTUM_CONSUMER",
+    "FUTURE_LATENCY_CONSUMER",
+    "FUTURE_MARKET_EXPANSION_CONSUMER",
+    "OWNER_REVIEW_REQUIRED_CONSUMER",
+)
+
+COMMAND_STATUSES = (
+    "STATIC_COMMAND_INTENT_RECORDED",
+    "FUTURE_GATED_COMMAND_INTENT_RECORDED",
+    "OWNER_REVIEW_REQUIRED_COMMAND_INTENT_RECORDED",
+    "UNRESOLVED_COMMAND_INTENT_RECORDED",
+    "DEFERRED_FUTURE_MARKET_COMMAND_INTENT_RECORDED",
+)
+
+STATIC_ALLOWED_OPERATIONS = (
+    "READ_CROSSWALK",
+    "READ_ROUTE_MAP",
+    "READ_MARKET_INDEX",
+    "GENERATE_STATIC_REPORT",
+    "RUN_STATIC_VALIDATOR",
+    "CLASSIFY_UNRESOLVED",
+    "QUEUE_OWNER_REVIEW",
+    "REFERENCE_CONTROLLER_STATE",
+    "REFERENCE_ROADMAP_BLUEPRINT",
+)
+
+FUTURE_GATED_OPERATIONS = (
+    "FUTURE_SOURCE_RETRIEVAL",
+    "FUTURE_SOURCE_ACCEPTANCE",
+    "FUTURE_CONNECTOR_BINDING",
+    "FUTURE_RUNTIME_SNAPSHOT",
+    "FUTURE_RUNTIME_CASH_RECEIPT",
+    "FUTURE_REPLAY_EXECUTION",
+    "FUTURE_PAPER_EXECUTION",
+    "FUTURE_OWNER_REVIEW_RECEIPT",
+    "FUTURE_LIVE_CANARY",
+    "FUTURE_ORDER_INTENT",
+    "FUTURE_ORDER_EXECUTION",
+    "FUTURE_QUANTUM_BACKEND_RECEIPT",
+    "FUTURE_OPTIMIZER_EXECUTION",
+    "FUTURE_MARKET_EXPANSION",
+    "FUTURE_STAGE2_MARKET_SELECTION",
+)
+
+COMMAND_BLOCK_REASONS = (
+    "STATIC_CONTROL_PLANE_ONLY",
+    "FUTURE_SOURCE_RETRIEVAL_REQUIRES_PR105",
+    "SOURCE_FACT_ACCEPTANCE_NOT_CREATED",
+    "CONNECTOR_BINDING_REQUIRES_FUTURE_PR",
+    "RUNTIME_AUTHORITY_REQUIRES_FUTURE_PR",
+    "RUNTIME_CASH_RECEIPT_REQUIRES_FUTURE_PR",
+    "REPLAY_PAPER_RESULT_REQUIRES_FUTURE_PR",
+    "ORDER_AUTHORITY_REQUIRES_FUTURE_PR",
+    "LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL",
+    "PROFIT_EVIDENCE_NOT_CREATED",
+    "LATENCY_SUPERIORITY_EVIDENCE_NOT_CREATED",
+    "QUANTUM_BACKEND_EXECUTION_REQUIRES_FUTURE_CONTROLLER_STATE",
+    "QUANTUM_SIMULATOR_EXECUTION_NOT_CREATED",
+    "OPTIMIZER_RUNTIME_EXECUTION_NOT_CREATED",
+    "MARKET_LAUNCH_AUTHORITY_NOT_CREATED",
+    "STAGE2_MARKET_SELECTION_NOT_CREATED",
+    "FUTURE_MARKET_SCOPE_DEFERRED",
+    "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE",
+    "NO_EXACT_ARTIFACT_OWNER_FOUND",
+    "NO_OPEN_ENDED_MARKET_TAXONOMY_ALLOWED",
+    "MASTER_PLAN_TEXT_MUTATION_FORBIDDEN",
+    "OLD_COVERAGE_LEDGER_FORBIDDEN",
+    "IMPLEMENTATION_COMPLETION_NOT_CLAIMED",
+    "LAUNCH_READINESS_NOT_CLAIMED",
+)
+
+EXPLICIT_FUTURE_MARKET_CANDIDATE_FAMILIES = (
+    "STOCKS",
+    "CRYPTOCURRENCY",
+    "FUTURES",
+    "OPTIONS",
+    "EQUITIES",
+    "ETFS",
+    "FX",
+    "COMMODITIES",
+)
+
+FORBIDDEN_MARKET_TAXONOMY_VALUES = (
+    "ETC",
+    "OTHER",
+    "OTHER_MARKETS",
+    "MISC_MARKETS",
+    "GENERAL_MARKETS",
+    "UNKNOWN_MARKET",
+    "ANY_OTHER_MARKET",
+    "OTHER_OWNER_APPROVED_FUTURE_MARKET",
+)
+
 CENTRAL_CONFIG_FIELDS = (
     "roadmap_crosswalk_config",
+    "command_matrix_config",
     "route_class_enum",
     "route_confidence_class_enum",
     "parent_capability_group_enum",
     "unresolved_reason_code_enum",
     "market_taxonomy",
+    "command_family_enum",
+    "command_scope_class_enum",
+    "command_authority_class_enum",
+    "command_owner_class_enum",
+    "command_consumer_class_enum",
+    "command_status_enum",
+    "static_allowed_operation_enum",
+    "future_gated_operation_enum",
+    "command_block_reason_enum",
+    "explicit_future_market_candidate_family_enum",
+    "forbidden_market_taxonomy_value_enum",
+    "owner_review_future_market_scope_classification",
+    "route_class_to_command_family_rules",
+    "parent_capability_to_command_family_rules",
+    "market_scope_to_command_rules",
+    "quantum_command_rules",
+    "latency_command_rules",
+    "source_connector_runtime_replay_live_command_rules",
+    "stage1_prediction_market_only_rules",
+    "future_market_deferral_rules",
+    "no_open_ended_market_taxonomy_rules",
     "authority_boundary_defaults",
     "exact_pr119_route_preservation_rules",
     "roadmap_blueprint_controller_mapping_rules",
@@ -564,6 +764,9 @@ def _central_config_with_defaults(registry: dict[str, Any]) -> dict[str, Any]:
     config["roadmap_crosswalk_config"] = _dict_value(
         config.get("roadmap_crosswalk_config")
     )
+    config["command_matrix_config"] = _dict_value(
+        config.get("command_matrix_config")
+    )
     config["route_class_enum"] = _string_list(config.get("route_class_enum")) or list(
         ROUTE_CLASSES
     )
@@ -583,6 +786,69 @@ def _central_config_with_defaults(registry: dict[str, Any]) -> dict[str, Any]:
         for item in _list_value(config.get("market_taxonomy"))
         if isinstance(item, dict)
     ]
+    config["command_family_enum"] = _string_list(
+        config.get("command_family_enum")
+    ) or list(COMMAND_FAMILIES)
+    config["command_scope_class_enum"] = _string_list(
+        config.get("command_scope_class_enum")
+    ) or list(COMMAND_SCOPE_CLASSES)
+    config["command_authority_class_enum"] = _string_list(
+        config.get("command_authority_class_enum")
+    ) or list(COMMAND_AUTHORITY_CLASSES)
+    config["command_owner_class_enum"] = _string_list(
+        config.get("command_owner_class_enum")
+    ) or list(COMMAND_OWNER_CLASSES)
+    config["command_consumer_class_enum"] = _string_list(
+        config.get("command_consumer_class_enum")
+    ) or list(COMMAND_CONSUMER_CLASSES)
+    config["command_status_enum"] = _string_list(
+        config.get("command_status_enum")
+    ) or list(COMMAND_STATUSES)
+    config["static_allowed_operation_enum"] = _string_list(
+        config.get("static_allowed_operation_enum")
+    ) or list(STATIC_ALLOWED_OPERATIONS)
+    config["future_gated_operation_enum"] = _string_list(
+        config.get("future_gated_operation_enum")
+    ) or list(FUTURE_GATED_OPERATIONS)
+    config["command_block_reason_enum"] = _string_list(
+        config.get("command_block_reason_enum")
+    ) or list(COMMAND_BLOCK_REASONS)
+    config["explicit_future_market_candidate_family_enum"] = _string_list(
+        config.get("explicit_future_market_candidate_family_enum")
+    ) or list(EXPLICIT_FUTURE_MARKET_CANDIDATE_FAMILIES)
+    config["forbidden_market_taxonomy_value_enum"] = _string_list(
+        config.get("forbidden_market_taxonomy_value_enum")
+    ) or list(FORBIDDEN_MARKET_TAXONOMY_VALUES)
+    config["owner_review_future_market_scope_classification"] = _dict_value(
+        config.get("owner_review_future_market_scope_classification")
+    )
+    config["route_class_to_command_family_rules"] = [
+        item
+        for item in _list_value(config.get("route_class_to_command_family_rules"))
+        if isinstance(item, dict)
+    ]
+    config["parent_capability_to_command_family_rules"] = [
+        item
+        for item in _list_value(config.get("parent_capability_to_command_family_rules"))
+        if isinstance(item, dict)
+    ]
+    config["market_scope_to_command_rules"] = _dict_value(
+        config.get("market_scope_to_command_rules")
+    )
+    config["quantum_command_rules"] = _dict_value(config.get("quantum_command_rules"))
+    config["latency_command_rules"] = _dict_value(config.get("latency_command_rules"))
+    config["source_connector_runtime_replay_live_command_rules"] = _dict_value(
+        config.get("source_connector_runtime_replay_live_command_rules")
+    )
+    config["stage1_prediction_market_only_rules"] = _dict_value(
+        config.get("stage1_prediction_market_only_rules")
+    )
+    config["future_market_deferral_rules"] = _dict_value(
+        config.get("future_market_deferral_rules")
+    )
+    config["no_open_ended_market_taxonomy_rules"] = _dict_value(
+        config.get("no_open_ended_market_taxonomy_rules")
+    )
     config["authority_boundary_defaults"] = _dict_value(
         config.get("authority_boundary_defaults")
     )
@@ -1438,6 +1704,783 @@ def _crosswalk_summary(
     }
 
 
+def _rule_by_route_class(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        str(rule.get("route_class")): rule
+        for rule in config.get("route_class_to_command_family_rules", [])
+        if isinstance(rule, dict) and rule.get("route_class")
+    }
+
+
+def _parent_command_overrides(config: dict[str, Any]) -> dict[str, str]:
+    return {
+        str(rule.get("parent_capability_group_id")): str(rule.get("command_family"))
+        for rule in config.get("parent_capability_to_command_family_rules", [])
+        if isinstance(rule, dict)
+        and rule.get("parent_capability_group_id")
+        and rule.get("command_family")
+    }
+
+
+def _stage1_market_ids(config: dict[str, Any]) -> list[str]:
+    rules = config.get("stage1_prediction_market_only_rules", {})
+    ids = _string_list(_dict_value(rules).get("stage1_active_market_ids"))
+    return ids or [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+    ]
+
+
+def _future_market_family_tokens() -> dict[str, tuple[str, ...]]:
+    return {
+        "STOCKS": ("stock", "stocks"),
+        "CRYPTOCURRENCY": ("cryptocurrency", "crypto", "bitcoin", "ethereum"),
+        "FUTURES": ("futures",),
+        "OPTIONS": ("options",),
+        "EQUITIES": ("equity", "equities"),
+        "ETFS": ("etf", "etfs"),
+        "FX": ("fx", "foreign exchange"),
+        "COMMODITIES": ("commodity", "commodities"),
+    }
+
+
+def _explicit_future_market_families(
+    row: dict[str, Any],
+    config: dict[str, Any],
+) -> list[str]:
+    allowed = set(
+        config.get(
+            "explicit_future_market_candidate_family_enum",
+            EXPLICIT_FUTURE_MARKET_CANDIDATE_FAMILIES,
+        )
+    )
+    text = str(row.get("normalized_section_title") or "").lower()
+    matches: list[str] = []
+    for family, tokens in _future_market_family_tokens().items():
+        if family not in allowed:
+            continue
+        if any(_token_matches(text, token) for token in tokens):
+            matches.append(family)
+    return [family for family in EXPLICIT_FUTURE_MARKET_CANDIDATE_FAMILIES if family in matches]
+
+
+def _is_market_related_without_known_scope(
+    row: dict[str, Any],
+    *,
+    stage1_market_ids: set[str],
+    explicit_families: Sequence[str],
+) -> bool:
+    if explicit_families:
+        return False
+    market_ids = {
+        str(item.get("market_id"))
+        for item in row.get("market_relevance", [])
+        if isinstance(item, dict) and item.get("market_id")
+    }
+    if market_ids & stage1_market_ids:
+        return False
+    if market_ids - {"OWNER_REVIEW_REQUIRED_MARKET_CANDIDATE"}:
+        return False
+    title = str(row.get("normalized_section_title") or "").lower()
+    market_tokens = (
+        "market",
+        "venue",
+        "exchange",
+        "broker",
+        "orderbook",
+        "liquidity",
+        "contract",
+    )
+    return any(_token_matches(title, token) for token in market_tokens)
+
+
+def _command_profile_for_family(command_family: str) -> dict[str, str]:
+    profiles = {
+        "COMMAND_MATRIX_COMMAND": (
+            "STATIC_CONTROL_PLANE_ONLY",
+            "NO_EXECUTION_AUTHORITY",
+            "CODEX_STATIC_BUILDER",
+            "VALIDATION_REPORT_CONSUMER",
+        ),
+        "ATOMICROWS_INVENTORY_COMMAND": (
+            "STATIC_INDEX_ONLY",
+            "NO_EXECUTION_AUTHORITY",
+            "CODEX_STATIC_BUILDER",
+            "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+        ),
+        "EDGE_SELECTION_SCORING_COMMAND": (
+            "STATIC_REPORTING_ONLY",
+            "NO_EXECUTION_AUTHORITY",
+            "CODEX_STATIC_BUILDER",
+            "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+        ),
+        "ORDER_INTENT_GATED_COMMAND": (
+            "FUTURE_RUNTIME_GATED",
+            "NO_ORDER_AUTHORITY",
+            "RISK_AGENT_FUTURE",
+            "FUTURE_ORDER_INTENT_CONSUMER",
+        ),
+        "LIVE_LAUNCH_GATED_COMMAND": (
+            "FUTURE_LIVE_LAUNCH_GATED",
+            "NO_LIVE_AUTHORITY",
+            "RISK_AGENT_FUTURE",
+            "FUTURE_LIVE_LAUNCH_CONSUMER",
+        ),
+        "FUTURE_MARKET_DEFERRED_COMMAND": (
+            "FUTURE_MARKET_EXPANSION_GATED",
+            "NO_MARKET_LAUNCH_AUTHORITY",
+            "MARKET_EXPANSION_AGENT_FUTURE",
+            "FUTURE_MARKET_EXPANSION_CONSUMER",
+        ),
+        "MARKET_INDEX_COMMAND": (
+            "STATIC_INDEX_ONLY",
+            "NO_MARKET_LAUNCH_AUTHORITY",
+            "CODEX_STATIC_BUILDER",
+            "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+        ),
+    }
+    scope, authority, owner, consumer = profiles.get(
+        command_family,
+        (
+            "STATIC_CONTROL_PLANE_ONLY",
+            "NO_EXECUTION_AUTHORITY",
+            "CODEX_STATIC_BUILDER",
+            "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+        ),
+    )
+    return {
+        "command_scope_class": scope,
+        "command_authority_class": authority,
+        "command_owner_class": owner,
+        "command_consumer_class": consumer,
+    }
+
+
+def _future_operations_for_command(command_family: str) -> list[str]:
+    mapping = {
+        "SOURCE_EVIDENCE_COMMAND": [
+            "FUTURE_SOURCE_RETRIEVAL",
+            "FUTURE_SOURCE_ACCEPTANCE",
+        ],
+        "CONNECTOR_SEMANTIC_COMMAND": ["FUTURE_CONNECTOR_BINDING"],
+        "RUNTIME_RESOLVER_COMMAND": ["FUTURE_RUNTIME_SNAPSHOT"],
+        "RUNTIME_CASH_COMMAND": [
+            "FUTURE_RUNTIME_SNAPSHOT",
+            "FUTURE_RUNTIME_CASH_RECEIPT",
+        ],
+        "REPLAY_PAPER_COMMAND": [
+            "FUTURE_REPLAY_EXECUTION",
+            "FUTURE_PAPER_EXECUTION",
+        ],
+        "OWNER_REVIEW_COMMAND": ["FUTURE_OWNER_REVIEW_RECEIPT"],
+        "DASHBOARD_OWNER_SURFACE_COMMAND": ["FUTURE_OWNER_REVIEW_RECEIPT"],
+        "LIVE_LAUNCH_GATED_COMMAND": ["FUTURE_LIVE_CANARY"],
+        "ORDER_INTENT_GATED_COMMAND": [
+            "FUTURE_ORDER_INTENT",
+            "FUTURE_ORDER_EXECUTION",
+        ],
+        "QUANTUM_FORWARD_OPTIMIZATION_COMMAND": [
+            "FUTURE_QUANTUM_BACKEND_RECEIPT",
+            "FUTURE_OPTIMIZER_EXECUTION",
+        ],
+        "QUANTUM_BACKEND_GATED_COMMAND": ["FUTURE_QUANTUM_BACKEND_RECEIPT"],
+        "FUTURE_MARKET_DEFERRED_COMMAND": [
+            "FUTURE_MARKET_EXPANSION",
+            "FUTURE_STAGE2_MARKET_SELECTION",
+        ],
+    }
+    return list(mapping.get(command_family, []))
+
+
+def _block_reasons_for_command(
+    command_family: str,
+    *,
+    unresolved_reason: Any,
+    owner_review_future_market_scope: bool,
+) -> list[str]:
+    reasons = [
+        "STATIC_CONTROL_PLANE_ONLY",
+        "MASTER_PLAN_TEXT_MUTATION_FORBIDDEN",
+        "OLD_COVERAGE_LEDGER_FORBIDDEN",
+        "IMPLEMENTATION_COMPLETION_NOT_CLAIMED",
+        "LAUNCH_READINESS_NOT_CLAIMED",
+    ]
+    by_family = {
+        "SOURCE_EVIDENCE_COMMAND": [
+            "FUTURE_SOURCE_RETRIEVAL_REQUIRES_PR105",
+            "SOURCE_FACT_ACCEPTANCE_NOT_CREATED",
+        ],
+        "CONNECTOR_SEMANTIC_COMMAND": ["CONNECTOR_BINDING_REQUIRES_FUTURE_PR"],
+        "RUNTIME_RESOLVER_COMMAND": ["RUNTIME_AUTHORITY_REQUIRES_FUTURE_PR"],
+        "RUNTIME_CASH_COMMAND": [
+            "RUNTIME_AUTHORITY_REQUIRES_FUTURE_PR",
+            "RUNTIME_CASH_RECEIPT_REQUIRES_FUTURE_PR",
+        ],
+        "REPLAY_PAPER_COMMAND": ["REPLAY_PAPER_RESULT_REQUIRES_FUTURE_PR"],
+        "ORDER_INTENT_GATED_COMMAND": ["ORDER_AUTHORITY_REQUIRES_FUTURE_PR"],
+        "LIVE_LAUNCH_GATED_COMMAND": ["LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL"],
+        "OWNER_REVIEW_COMMAND": ["LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL"],
+        "DASHBOARD_OWNER_SURFACE_COMMAND": ["LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL"],
+        "LATENCY_COST_COMMAND": [
+            "PROFIT_EVIDENCE_NOT_CREATED",
+            "LATENCY_SUPERIORITY_EVIDENCE_NOT_CREATED",
+        ],
+        "QUANTUM_FORWARD_OPTIMIZATION_COMMAND": [
+            "QUANTUM_BACKEND_EXECUTION_REQUIRES_FUTURE_CONTROLLER_STATE",
+            "QUANTUM_SIMULATOR_EXECUTION_NOT_CREATED",
+            "OPTIMIZER_RUNTIME_EXECUTION_NOT_CREATED",
+        ],
+        "QUANTUM_BACKEND_GATED_COMMAND": [
+            "QUANTUM_BACKEND_EXECUTION_REQUIRES_FUTURE_CONTROLLER_STATE",
+            "QUANTUM_SIMULATOR_EXECUTION_NOT_CREATED",
+        ],
+        "FUTURE_MARKET_DEFERRED_COMMAND": [
+            "MARKET_LAUNCH_AUTHORITY_NOT_CREATED",
+            "STAGE2_MARKET_SELECTION_NOT_CREATED",
+            "FUTURE_MARKET_SCOPE_DEFERRED",
+        ],
+        "MARKET_INDEX_COMMAND": [
+            "MARKET_LAUNCH_AUTHORITY_NOT_CREATED",
+            "STAGE2_MARKET_SELECTION_NOT_CREATED",
+        ],
+    }
+    reasons.extend(by_family.get(command_family, []))
+    if unresolved_reason:
+        reasons.append("NO_EXACT_ARTIFACT_OWNER_FOUND")
+    if owner_review_future_market_scope:
+        reasons.append("OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE")
+        reasons.append("NO_OPEN_ENDED_MARKET_TAXONOMY_ALLOWED")
+    return [reason for reason in dict.fromkeys(reasons)]
+
+
+def _command_status(
+    command_family: str,
+    command_scope_class: str,
+    owner_review_required: bool,
+) -> str:
+    if command_family == "UNRESOLVED_RESEARCH_COMMAND":
+        return "UNRESOLVED_COMMAND_INTENT_RECORDED"
+    if command_family == "FUTURE_MARKET_DEFERRED_COMMAND":
+        return "DEFERRED_FUTURE_MARKET_COMMAND_INTENT_RECORDED"
+    if owner_review_required:
+        return "OWNER_REVIEW_REQUIRED_COMMAND_INTENT_RECORDED"
+    if command_scope_class.startswith("FUTURE_"):
+        return "FUTURE_GATED_COMMAND_INTENT_RECORDED"
+    return "STATIC_COMMAND_INTENT_RECORDED"
+
+
+def _quantum_command_relevance(row: dict[str, Any], command_family: str) -> str:
+    route_class = str(row.get("current_route_class") or "")
+    title = str(row.get("normalized_section_title") or "").lower()
+    if route_class == "QUANTUM_BACKEND_ROUTE":
+        return "TRUE_QUANTUM_BACKEND_FUTURE_GATED"
+    if route_class == "OPTIMIZER_ARBITRATION_ROUTE":
+        return "HYBRID_CLASSICAL_QUANTUM_ARBITRATION_FUTURE_GATED"
+    if "portfolio" in title or "candidate-set" in title or "candidate set" in title:
+        return "PORTFOLIO_CANDIDATE_SET_OPTIMIZATION_FUTURE_GATED"
+    if "qubo" in title or "ising" in title:
+        return "QUBO_ISING_FORMULATION_FUTURE_GATED"
+    if "qaoa" in title or "vqe" in title or "anneal" in title:
+        return "QAOA_VQE_ANNEALING_FUTURE_GATED"
+    if route_class == "QUANTUM_FORWARD_OPTIMIZATION_ROUTE":
+        return "QUANTUM_APPLICABILITY_METADATA_ONLY"
+    if command_family == "QUANTUM_POLICY_COMMAND":
+        return "QUANTUM_POLICY_METADATA_ONLY"
+    if "quantum" in title:
+        return "QUANTUM_APPLICABILITY_METADATA_ONLY"
+    if route_class == "LATENCY_COST_ROUTE" and "quantum" in title:
+        return "LATENCY_AWARE_QUANTUM_PATH_FUTURE_GATED"
+    return "NONE"
+
+
+def _quantum_command_metadata(
+    row: dict[str, Any],
+    command_family: str,
+    future_labels: Sequence[str],
+    controller_reference: str,
+) -> dict[str, Any]:
+    return {
+        "quantum_command_relevance_class": _quantum_command_relevance(
+            row, command_family
+        ),
+        "future_controller_reference": controller_reference,
+        "future_roadmap_consumer_labels": list(future_labels),
+        "no_backend_execution_flag": True,
+        "no_simulator_execution_flag": True,
+        "no_optimizer_runtime_execution_flag": True,
+        "no_quantum_advantage_claim_flag": True,
+        "no_profit_or_latency_superiority_claim_flag": True,
+    }
+
+
+def _latency_command_metadata(row: dict[str, Any], command_family: str) -> dict[str, Any]:
+    relevance = (
+        "LATENCY_COST_METADATA_ONLY"
+        if str(row.get("current_route_class")) == "LATENCY_COST_ROUTE"
+        or command_family == "LATENCY_COST_COMMAND"
+        else "NONE"
+    )
+    return {
+        "latency_command_relevance_class": relevance,
+        "no_latency_superiority_claim_flag": True,
+        "no_profit_or_latency_superiority_claim_flag": True,
+    }
+
+
+def _source_runtime_command_metadata(command_family: str) -> dict[str, Any]:
+    classes: list[str] = []
+    if command_family == "SOURCE_EVIDENCE_COMMAND":
+        classes.append("SOURCE_EVIDENCE_FUTURE_GATED")
+    if command_family == "CONNECTOR_SEMANTIC_COMMAND":
+        classes.append("CONNECTOR_SEMANTIC_FUTURE_GATED")
+    if command_family in {"RUNTIME_RESOLVER_COMMAND", "RUNTIME_CASH_COMMAND"}:
+        classes.append("RUNTIME_FUTURE_GATED")
+    if command_family == "REPLAY_PAPER_COMMAND":
+        classes.append("REPLAY_PAPER_FUTURE_GATED")
+    if command_family in {"LIVE_LAUNCH_GATED_COMMAND", "ORDER_INTENT_GATED_COMMAND"}:
+        classes.append("LIVE_ORDER_FUTURE_GATED")
+    return {
+        "source_connector_runtime_relevance_classes": classes or ["NONE"],
+        "no_source_retrieval_flag": True,
+        "no_source_fact_acceptance_flag": True,
+        "no_connector_semantic_binding_flag": True,
+        "no_runtime_authority_flag": True,
+        "no_replay_paper_result_flag": True,
+        "no_live_or_order_authority_flag": True,
+    }
+
+
+def _command_matrix_row(
+    row: dict[str, Any],
+    *,
+    zero_index: int,
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    route_rules = _rule_by_route_class(config)
+    parent_overrides = _parent_command_overrides(config)
+    route_class = str(row.get("current_route_class") or "")
+    rule = route_rules.get(route_class, {})
+    command_family = str(rule.get("command_family") or "UNRESOLVED_RESEARCH_COMMAND")
+    if route_class != "UNRESOLVED_DEFAULT_ROUTE":
+        command_family = parent_overrides.get(
+            str(row.get("parent_capability_group_id") or ""), command_family
+        )
+
+    stage1_ids = set(_stage1_market_ids(config))
+    market_ids = [
+        str(item.get("market_id"))
+        for item in row.get("market_relevance", [])
+        if isinstance(item, dict) and item.get("market_id")
+    ]
+    stage1_market_ids = [market_id for market_id in _stage1_market_ids(config) if market_id in market_ids]
+    explicit_families = _explicit_future_market_families(row, config)
+    owner_review_future_market_scope = _is_market_related_without_known_scope(
+        row,
+        stage1_market_ids=stage1_ids,
+        explicit_families=explicit_families,
+    )
+    if explicit_families:
+        command_family = "FUTURE_MARKET_DEFERRED_COMMAND"
+    elif route_class == "CROSS_MARKET_ROUTE":
+        command_family = "MARKET_INDEX_COMMAND"
+    elif owner_review_future_market_scope and command_family not in {
+        "MARKET_INDEX_COMMAND",
+        "FUTURE_MARKET_DEFERRED_COMMAND",
+    }:
+        command_family = "UNRESOLVED_RESEARCH_COMMAND"
+
+    profile = dict(rule)
+    if command_family != rule.get("command_family"):
+        profile.update(_command_profile_for_family(command_family))
+    command_scope_class = str(
+        profile.get("command_scope_class") or "STATIC_CONTROL_PLANE_ONLY"
+    )
+    command_authority_class = str(
+        profile.get("command_authority_class") or "NO_EXECUTION_AUTHORITY"
+    )
+    command_owner_class = str(profile.get("command_owner_class") or "CODEX_STATIC_BUILDER")
+    command_consumer_class = str(
+        profile.get("command_consumer_class") or "STATIC_ROADMAP_BLUEPRINT_CONSUMER"
+    )
+
+    future_labels = _sort_pr_labels(
+        set(_string_list(row.get("roadmap_pr_labels")))
+        | set(_string_list(row.get("blueprint_pr_labels")))
+        | {"PR #104"}
+    )
+    roadmap_labels = _sort_pr_labels(set(_string_list(row.get("roadmap_pr_labels"))) | {"PR #104"})
+    blueprint_labels = _sort_pr_labels(set(_string_list(row.get("blueprint_pr_labels"))) | {"PR #104"})
+    controller_refs = list(row.get("controller_state_references", []))
+    controller_reference = str(
+        config.get("command_matrix_config", {}).get("controller_decision_reference")
+        or "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/3"
+    )
+    if not any(
+        isinstance(item, dict)
+        and item.get("controller_entry_reference") == controller_reference
+        for item in controller_refs
+    ):
+        controller_refs.append(
+            {
+                "roadmap_pr_label": "PR #104",
+                "blueprint_pr_label": "PR #104",
+                "title": "Master-plan section coverage command matrix",
+                "controller_state": "CONTROL_PLANE_STATE_REFERENCED_BY_CONTROLLER",
+                "next_allowed_action_class": "FUTURE_REPO_PR_REQUIRED_BEFORE_MATERIALIZATION",
+                "controller_entry_reference": controller_reference,
+            }
+        )
+
+    static_ops = [
+        "READ_CROSSWALK",
+        "READ_ROUTE_MAP",
+        "GENERATE_STATIC_REPORT",
+        "RUN_STATIC_VALIDATOR",
+        "REFERENCE_CONTROLLER_STATE",
+        "REFERENCE_ROADMAP_BLUEPRINT",
+    ]
+    if stage1_market_ids or explicit_families or owner_review_future_market_scope:
+        static_ops.append("READ_MARKET_INDEX")
+    unresolved_reason = row.get("unresolved_reason_code_when_applicable")
+    owner_review_required = bool(
+        row.get("owner_review_required_flag")
+        or owner_review_future_market_scope
+        or command_family == "UNRESOLVED_RESEARCH_COMMAND"
+    )
+    if owner_review_required:
+        static_ops.extend(["CLASSIFY_UNRESOLVED", "QUEUE_OWNER_REVIEW"])
+    static_ops = [operation for operation in STATIC_ALLOWED_OPERATIONS if operation in set(static_ops)]
+    future_ops = _future_operations_for_command(command_family)
+    block_reasons = _block_reasons_for_command(
+        command_family,
+        unresolved_reason=unresolved_reason,
+        owner_review_future_market_scope=owner_review_future_market_scope,
+    )
+
+    return {
+        "document_order_index": int(row["document_order_index"]),
+        "section_id": str(row["section_id"]),
+        "crosswalk_reference": {
+            "report_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+            "json_pointer": f"#/roadmap_crosswalk/rows/{zero_index}",
+            "section_id": str(row["section_id"]),
+            "document_order_index": int(row["document_order_index"]),
+        },
+        "parent_capability_group_id": str(row.get("parent_capability_group_id") or ""),
+        "current_route_class": route_class,
+        "command_family": command_family,
+        "command_scope_class": command_scope_class,
+        "command_authority_class": command_authority_class,
+        "command_owner_class": command_owner_class,
+        "command_consumer_class": command_consumer_class,
+        "command_status": _command_status(
+            command_family, command_scope_class, owner_review_required
+        ),
+        "static_allowed_now_operations": static_ops,
+        "future_gated_operations": future_ops,
+        "block_reason_codes": block_reasons,
+        "future_pr_labels": future_labels,
+        "roadmap_pr_labels": roadmap_labels,
+        "blueprint_pr_labels": blueprint_labels,
+        "controller_state_references": controller_refs,
+        "required_validators": [
+            "tools/validate_master_plan_section_coverage.py",
+            "tools/validate_qtt_master_plan_section_coverage_triage_routes.py",
+            "tools/validate_qtt_master_plan_section_roadmap_crosswalk.py",
+            "tools/validate_qtt_master_plan_section_coverage_command_matrix.py",
+        ],
+        "required_reports": [
+            "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        ],
+        "required_artifacts": [
+            "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml",
+            "schemas/master_plan/master_plan_section_coverage_report.schema.json",
+            "tools/build_master_plan_section_coverage_report.py",
+            "tools/validate_master_plan_section_coverage.py",
+        ],
+        "market_scope_summary": {
+            "market_ids": market_ids,
+            "stage1_active_market_ids": stage1_market_ids,
+            "explicit_future_market_candidate_families": explicit_families,
+            "owner_review_future_market_scope_classification": (
+                "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE"
+                if owner_review_future_market_scope
+                else None
+            ),
+            "forbidden_market_taxonomy_values_detected": [],
+            "no_market_launch_authority_created_flag": True,
+            "no_stage2_market_selection_created_flag": True,
+        },
+        "stage1_prediction_market_relevance": (
+            "STAGE1_PREDICTION_MARKET_RELEVANT"
+            if stage1_market_ids
+            else "NOT_STAGE1_PREDICTION_MARKET_RELEVANT"
+        ),
+        "future_market_relevance": (
+            "FUTURE_MARKET_PLANNING_DEFERRED"
+            if explicit_families
+            else (
+                "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE"
+                if owner_review_future_market_scope
+                else "NOT_FUTURE_MARKET_RELEVANT"
+            )
+        ),
+        "explicit_future_market_candidate_family_when_applicable": explicit_families,
+        "owner_review_future_market_scope_classification_when_applicable": (
+            "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE"
+            if owner_review_future_market_scope
+            else None
+        ),
+        "quantum_forward_command_metadata": _quantum_command_metadata(
+            row, command_family, future_labels, controller_reference
+        ),
+        "latency_command_metadata": _latency_command_metadata(row, command_family),
+        "source_connector_runtime_command_metadata": _source_runtime_command_metadata(
+            command_family
+        ),
+        "owner_review_required_flag": owner_review_required,
+        "unresolved_reason_code_when_applicable": unresolved_reason,
+        "no_command_execution_flag": True,
+        "no_runtime_live_order_profit_authority_created_flag": True,
+        "no_source_connector_replay_paper_authority_created_flag": True,
+        "no_quantum_backend_or_simulator_execution_created_flag": True,
+        "no_market_launch_authority_created_flag": True,
+        "no_open_ended_future_market_taxonomy_flag": True,
+        "no_master_plan_text_mutation_flag": True,
+        "no_old_coverage_ledger_flag": True,
+    }
+
+
+def _build_command_matrix_rows(
+    rows: Sequence[dict[str, Any]],
+    config: dict[str, Any],
+) -> list[dict[str, Any]]:
+    return [
+        _command_matrix_row(row, zero_index=index, config=config)
+        for index, row in enumerate(rows)
+    ]
+
+
+def _command_matrix_summary(
+    *,
+    command_rows: Sequence[dict[str, Any]],
+    crosswalk_rows: Sequence[dict[str, Any]],
+    manifest: dict[str, Any],
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    section_ids = [_section_id(section) for section in manifest["sections"]]
+    row_ids = [str(row["section_id"]) for row in command_rows]
+    duplicates = sorted(
+        section_id for section_id, count in Counter(row_ids).items() if count > 1
+    )
+    missing = sorted(set(section_ids) - set(row_ids))
+    command_families = [str(row["command_family"]) for row in command_rows]
+    command_scopes = [str(row["command_scope_class"]) for row in command_rows]
+    command_authorities = [str(row["command_authority_class"]) for row in command_rows]
+    command_owners = [str(row["command_owner_class"]) for row in command_rows]
+    stage1_ids = _stage1_market_ids(config)
+    stage1_counts = {
+        market_id: sum(
+            market_id
+            in row.get("market_scope_summary", {}).get("stage1_active_market_ids", [])
+            for row in command_rows
+        )
+        for market_id in stage1_ids
+    }
+    future_family_counts = {
+        family: sum(
+            family
+            in row.get(
+                "explicit_future_market_candidate_family_when_applicable", []
+            )
+            for row in command_rows
+        )
+        for family in config.get(
+            "explicit_future_market_candidate_family_enum",
+            EXPLICIT_FUTURE_MARKET_CANDIDATE_FAMILIES,
+        )
+    }
+    forbidden_count = sum(
+        len(
+            row.get("market_scope_summary", {}).get(
+                "forbidden_market_taxonomy_values_detected", []
+            )
+        )
+        for row in command_rows
+    )
+    quantum_rows = [
+        row
+        for row in command_rows
+        if row["quantum_forward_command_metadata"][
+            "quantum_command_relevance_class"
+        ]
+        != "NONE"
+    ]
+    optimizer_count = sum(
+        "FUTURE_OPTIMIZER_EXECUTION" in row.get("future_gated_operations", [])
+        or "OPTIMIZER" in row["quantum_forward_command_metadata"][
+            "quantum_command_relevance_class"
+        ]
+        or "ARBITRATION" in row["quantum_forward_command_metadata"][
+            "quantum_command_relevance_class"
+        ]
+        for row in command_rows
+    )
+    latency_count = sum(
+        row["latency_command_metadata"]["latency_command_relevance_class"] != "NONE"
+        for row in command_rows
+    )
+    return {
+        "repo_canonical_pr_label": config["command_matrix_config"].get(
+            "repo_canonical_pr_label"
+        ),
+        "roadmap_pr_label": config["command_matrix_config"].get("roadmap_pr_label"),
+        "blueprint_pr_label": config["command_matrix_config"].get(
+            "blueprint_pr_label"
+        ),
+        "semantic_task_id": config["command_matrix_config"].get("semantic_task_id"),
+        "title": config["command_matrix_config"].get("title"),
+        "pr120_github_audit_currentization_evidence": config[
+            "command_matrix_config"
+        ].get("pr120_github_audit_currentization_evidence", {}),
+        "controller_decision_reference": config["command_matrix_config"].get(
+            "controller_decision_reference"
+        ),
+        "blueprint_decision_reference": config["command_matrix_config"].get(
+            "blueprint_decision_reference"
+        ),
+        "artifact_family_decision": config["command_matrix_config"].get(
+            "artifact_family_decision"
+        ),
+        "compact_normalized_command_matrix_flag": bool(
+            config["command_matrix_config"].get(
+                "compact_normalized_command_matrix_flag"
+            )
+        ),
+        "section_manifest_parser_visible_section_count": int(
+            manifest["section_count"]
+        ),
+        "pr120_crosswalk_row_count": len(crosswalk_rows),
+        "command_matrix_row_count": len(command_rows),
+        "missing_section_count": len(missing),
+        "duplicate_section_count": len(duplicates),
+        "missing_section_ids": missing,
+        "duplicate_section_ids": duplicates,
+        "ordering_matches_crosswalk_document_order": row_ids
+        == [str(row["section_id"]) for row in crosswalk_rows]
+        == section_ids,
+        "command_family_counts": _count_by(
+            command_families, config.get("command_family_enum", COMMAND_FAMILIES)
+        ),
+        "command_scope_class_counts": _count_by(
+            command_scopes,
+            config.get("command_scope_class_enum", COMMAND_SCOPE_CLASSES),
+        ),
+        "command_authority_class_counts": _count_by(
+            command_authorities,
+            config.get(
+                "command_authority_class_enum", COMMAND_AUTHORITY_CLASSES
+            ),
+        ),
+        "command_owner_class_counts": _count_by(
+            command_owners,
+            config.get("command_owner_class_enum", COMMAND_OWNER_CLASSES),
+        ),
+        "static_allowed_now_operation_counts": _count_list_values(
+            command_rows, "static_allowed_now_operations"
+        ),
+        "future_gated_operation_counts": _count_list_values(
+            command_rows, "future_gated_operations"
+        ),
+        "route_class_counts": _count_by(
+            [str(row["current_route_class"]) for row in command_rows],
+            config.get("route_class_enum", ROUTE_CLASSES),
+        ),
+        "parent_capability_group_counts": _count_by(
+            [str(row["parent_capability_group_id"]) for row in command_rows],
+            [
+                str(group.get("parent_capability_group_id"))
+                for group in config.get("parent_capability_group_enum", [])
+                if isinstance(group, dict)
+            ],
+        ),
+        "roadmap_pr_label_consumer_counts": _count_list_values(
+            command_rows, "roadmap_pr_labels"
+        ),
+        "blueprint_pr_label_consumer_counts": _count_list_values(
+            command_rows, "blueprint_pr_labels"
+        ),
+        "controller_state_consumer_counts": _controller_state_counts(command_rows),
+        "unresolved_command_count": command_families.count(
+            "UNRESOLVED_RESEARCH_COMMAND"
+        ),
+        "owner_review_required_command_count": sum(
+            bool(row.get("owner_review_required_flag")) for row in command_rows
+        ),
+        "stage1_prediction_market_command_count": sum(
+            bool(
+                row.get("market_scope_summary", {}).get("stage1_active_market_ids")
+            )
+            for row in command_rows
+        ),
+        "stage1_prediction_market_command_counts": stage1_counts,
+        "future_market_deferred_command_count": command_families.count(
+            "FUTURE_MARKET_DEFERRED_COMMAND"
+        ),
+        "explicit_future_market_family_command_counts": future_family_counts,
+        "owner_review_required_future_market_scope_count": sum(
+            row.get(
+                "owner_review_future_market_scope_classification_when_applicable"
+            )
+            == "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE"
+            for row in command_rows
+        ),
+        "forbidden_market_taxonomy_value_count": forbidden_count,
+        "kalshi_command_count": stage1_counts.get("KALSHI", 0),
+        "polymarket_command_count": stage1_counts.get("POLYMARKET", 0),
+        "forecastex_ibkr_command_count": stage1_counts.get("FORECASTEX_IBKR", 0),
+        "prediction_markets_general_command_count": stage1_counts.get(
+            "PREDICTION_MARKETS_GENERAL", 0
+        ),
+        "quantum_command_count": len(quantum_rows),
+        "optimizer_command_count": optimizer_count,
+        "latency_command_count": latency_count,
+        "source_evidence_command_count": command_families.count(
+            "SOURCE_EVIDENCE_COMMAND"
+        ),
+        "connector_command_count": command_families.count(
+            "CONNECTOR_SEMANTIC_COMMAND"
+        ),
+        "runtime_command_count": command_families.count(
+            "RUNTIME_RESOLVER_COMMAND"
+        )
+        + command_families.count("RUNTIME_CASH_COMMAND"),
+        "replay_paper_command_count": command_families.count("REPLAY_PAPER_COMMAND"),
+        "owner_governance_command_count": command_families.count(
+            "OWNER_REVIEW_COMMAND"
+        )
+        + command_families.count("DASHBOARD_OWNER_SURFACE_COMMAND")
+        + command_families.count("RISK_SAFETY_COMMAND"),
+        "old_coverage_ledger_reintroduction_flag": False,
+        "master_plan_mutation_count": 0,
+        "runtime_authority_created": False,
+        "live_authority_created": False,
+        "source_retrieval_created": False,
+        "source_fact_acceptance_created": False,
+        "connector_semantic_binding_created": False,
+        "replay_paper_result_created": False,
+        "order_authority_created": False,
+        "profit_evidence_created": False,
+        "latency_superiority_evidence_created": False,
+        "quantum_backend_simulator_optimizer_execution_created": False,
+        "market_launch_authority_created": False,
+        "stage2_market_selection_created": False,
+        "deterministic_output": True,
+    }
+
+
 def _group_section_ids(
     rows: Sequence[dict[str, Any]],
     field: str,
@@ -1634,6 +2677,9 @@ def build_report(
         blueprint_index=blueprint_index,
         controller=controller,
     )
+    command_matrix_rows = _build_command_matrix_rows(
+        crosswalk_rows, registry["central_config"]
+    )
     market_index = _market_section_index(crosswalk_rows, registry["central_config"])
     section_records = [
         _section_record(section, entries)
@@ -1644,6 +2690,12 @@ def build_report(
         manifest=manifest,
         config=registry["central_config"],
         roster=roster,
+    )
+    command_matrix_summary = _command_matrix_summary(
+        command_rows=command_matrix_rows,
+        crosswalk_rows=crosswalk_rows,
+        manifest=manifest,
+        config=registry["central_config"],
     )
     return {
         "report_type": REPORT_TYPE,
@@ -1695,6 +2747,43 @@ def build_report(
             "no_market_launch_or_stage2_launch_authority": True,
             "no_next_market_selection": True,
         },
+        "pr121_scope_summary": {
+            "repo_canonical_pr_label": command_matrix_summary[
+                "repo_canonical_pr_label"
+            ],
+            "roadmap_pr_label": command_matrix_summary["roadmap_pr_label"],
+            "blueprint_pr_label": command_matrix_summary["blueprint_pr_label"],
+            "semantic_task_id": command_matrix_summary["semantic_task_id"],
+            "title": command_matrix_summary["title"],
+            "materialized_capability": registry["central_config"][
+                "command_matrix_config"
+            ].get("materialized_capability"),
+            "state_transition": registry["central_config"][
+                "command_matrix_config"
+            ].get("state_transition"),
+            "pr120_github_audit_currentization_evidence": command_matrix_summary[
+                "pr120_github_audit_currentization_evidence"
+            ],
+            "controller_decision_reference": command_matrix_summary[
+                "controller_decision_reference"
+            ],
+            "blueprint_decision_reference": command_matrix_summary[
+                "blueprint_decision_reference"
+            ],
+            "artifact_family_decision": command_matrix_summary[
+                "artifact_family_decision"
+            ],
+            "compact_normalized_command_matrix_flag": command_matrix_summary[
+                "compact_normalized_command_matrix_flag"
+            ],
+            "static_control_plane_only": True,
+            "roadmap_pr105_source_retrieval_executor_implemented": False,
+            "no_old_coverage_ledger_reintroduction": True,
+            "no_master_plan_text_mutation": True,
+            "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority": True,
+            "no_market_launch_or_stage2_launch_authority": True,
+            "no_next_market_selection": True,
+        },
         "roadmap_crosswalk": {
             "crosswalk_id": registry["central_config"][
                 "roadmap_crosswalk_config"
@@ -1705,6 +2794,32 @@ def build_report(
             "rows": crosswalk_rows,
         },
         "roadmap_crosswalk_summary": crosswalk_summary,
+        "command_matrix": {
+            "command_matrix_id": registry["central_config"][
+                "command_matrix_config"
+            ].get("command_matrix_id"),
+            "authority_class": registry["central_config"][
+                "command_matrix_config"
+            ].get("authority_class"),
+            "repo_canonical_pr_label": command_matrix_summary[
+                "repo_canonical_pr_label"
+            ],
+            "roadmap_pr_label": command_matrix_summary["roadmap_pr_label"],
+            "blueprint_pr_label": command_matrix_summary["blueprint_pr_label"],
+            "semantic_task_id": command_matrix_summary["semantic_task_id"],
+            "materialized_capability": registry["central_config"][
+                "command_matrix_config"
+            ].get("materialized_capability"),
+            "state_transition": registry["central_config"][
+                "command_matrix_config"
+            ].get("state_transition"),
+            "source_crosswalk_reference": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json#/roadmap_crosswalk/rows",
+            "compact_normalized_command_matrix_flag": command_matrix_summary[
+                "compact_normalized_command_matrix_flag"
+            ],
+            "rows": command_matrix_rows,
+        },
+        "command_matrix_summary": command_matrix_summary,
         "market_specific_section_index": market_index,
         "market_specific_section_index_summary": _market_index_summary(
             market_index, registry["central_config"]

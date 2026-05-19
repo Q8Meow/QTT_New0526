@@ -105,13 +105,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_119_are_recorded():
+def test_same_number_mismatches_for_github_107_through_120_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 120))
+    assert numbers == set(range(107, 121))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -175,6 +175,28 @@ def test_pr119_self_entry_is_currentized_but_not_roadmap_or_blueprint_119():
     assert pr119["same_number_mismatch_recorded"] is True
     assert pr119["depends_on_roster_entries"] == [
         "PR118_REPO_CANONICAL_SELF_ENTRY"
+    ]
+
+
+def test_pr120_self_entry_is_currentized_but_not_roadmap_or_blueprint_120():
+    pr120 = _entry("PR120_REPO_CANONICAL_SELF_ENTRY")
+
+    assert pr120["repo_canonical_pr_label"] == "PR120"
+    assert pr120["github_pr_number"] == 120
+    assert (
+        pr120["github_audit_url"]
+        == "https://github.com/Q8Meow/QTT_New0526/pull/120"
+    )
+    assert (
+        pr120["github_title"]
+        == "PR120 add master-plan roadmap crosswalk and market section indexes"
+    )
+    assert pr120["roadmap_pr_label"] is None
+    assert pr120["blueprint_pr_label"] is None
+    assert pr120["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr120["same_number_mismatch_recorded"] is True
+    assert pr120["depends_on_roster_entries"] == [
+        "PR119_REPO_CANONICAL_SELF_ENTRY"
     ]
 
 
