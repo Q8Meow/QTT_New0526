@@ -1,0 +1,142 @@
+{
+  "fixture_id": "PR126_EXPECTED_IMPLEMENTATION_GATE_DECISIONS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "decision_receipts": [
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_CANONICALIZATION_FAILURE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_CANONICALIZATION_FAILURE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_CANONICALIZATION_FAILURE",
+      "implementation_gate_state": "REJECTED_CANONICALIZATION_FAILURE",
+      "decision_reason_code": "CANONICALIZATION_MEANING_NOT_PRESERVED"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_CONNECTOR_BLOCKING",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_CONNECTOR_BLOCKING",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_CONNECTOR_BLOCKING",
+      "implementation_gate_state": "REJECTED_CONNECTOR_BLOCKING_MATERIALITY",
+      "decision_reason_code": "CONNECTOR_BLOCKING_MATERIALITY"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_LIVE_TRADING_BLOCKING",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_LIVE_TRADING_BLOCKING",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_LIVE_TRADING_BLOCKING",
+      "implementation_gate_state": "REJECTED_LIVE_TRADING_BLOCKING_MATERIALITY",
+      "decision_reason_code": "LIVE_TRADING_BLOCKING_MATERIALITY"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_MISSING_ACCEPTED_SOURCE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_MISSING_ACCEPTED_SOURCE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_MISSING_ACCEPTED_SOURCE",
+      "implementation_gate_state": "REJECTED_MISSING_ACCEPTED_SOURCE_EVIDENCE",
+      "decision_reason_code": "ACCEPTED_SOURCE_EVIDENCE_NOT_FOUND"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_MISSING_UNIT_SCALE_SCOPE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_MISSING_UNIT_SCALE_SCOPE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_MISSING_UNIT_SCALE_SCOPE",
+      "implementation_gate_state": "REJECTED_MISSING_UNIT_SCALE_SCOPE",
+      "decision_reason_code": "MISSING_UNIT_SCALE_OR_SCOPE"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_READY",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_READY",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_READY",
+      "implementation_gate_state": "READY_FOR_PR126_FIXTURE_SCOPE_IMPLEMENTATION",
+      "decision_reason_code": "PR126_FIXTURE_SCOPE_IMPLEMENTATION_READY"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_REVALIDATION_REQUIRED",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_REVALIDATION_REQUIRED",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_REVALIDATION_REQUIRED",
+      "implementation_gate_state": "REJECTED_REVALIDATION_REQUIRED",
+      "decision_reason_code": "CONNECTOR_BINDING_REVALIDATION_REQUIRED"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_SCOPE_OR_VENUE_MISMATCH",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_SCOPE_OR_VENUE_MISMATCH",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_SCOPE_OR_VENUE_MISMATCH",
+      "implementation_gate_state": "REJECTED_SCOPE_OR_VENUE_MISMATCH",
+      "decision_reason_code": "SCOPE_OR_VENUE_MISMATCH"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_STALE_ACCEPTED_PACKET",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_STALE_ACCEPTED_PACKET",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_STALE",
+      "implementation_gate_state": "REJECTED_STALE_ACCEPTED_PACKET",
+      "decision_reason_code": "ACCEPTED_PACKET_STALE"
+    },
+    {
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_SUPERSEDED_ACCEPTED_PACKET",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_SUPERSEDED_ACCEPTED_PACKET",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_SUPERSEDED",
+      "implementation_gate_state": "REJECTED_SUPERSEDED_ACCEPTED_PACKET",
+      "decision_reason_code": "ACCEPTED_PACKET_SUPERSEDED"
+    }
+  ],
+  "rejection_records": [
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_CANONICALIZATION_FAILURE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_CANONICALIZATION_FAILURE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_CANONICALIZATION_FAILURE",
+      "implementation_gate_state": "REJECTED_CANONICALIZATION_FAILURE",
+      "rejection_reason_code": "CANONICALIZATION_MEANING_NOT_PRESERVED"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_CONNECTOR_BLOCKING",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_CONNECTOR_BLOCKING",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_CONNECTOR_BLOCKING",
+      "implementation_gate_state": "REJECTED_CONNECTOR_BLOCKING_MATERIALITY",
+      "rejection_reason_code": "CONNECTOR_BLOCKING_MATERIALITY"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_LIVE_TRADING_BLOCKING",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_LIVE_TRADING_BLOCKING",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_LIVE_TRADING_BLOCKING",
+      "implementation_gate_state": "REJECTED_LIVE_TRADING_BLOCKING_MATERIALITY",
+      "rejection_reason_code": "LIVE_TRADING_BLOCKING_MATERIALITY"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_MISSING_ACCEPTED_SOURCE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_MISSING_ACCEPTED_SOURCE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_MISSING_ACCEPTED_SOURCE",
+      "implementation_gate_state": "REJECTED_MISSING_ACCEPTED_SOURCE_EVIDENCE",
+      "rejection_reason_code": "ACCEPTED_SOURCE_EVIDENCE_NOT_FOUND"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_MISSING_UNIT_SCALE_SCOPE",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_MISSING_UNIT_SCALE_SCOPE",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_MISSING_UNIT_SCALE_SCOPE",
+      "implementation_gate_state": "REJECTED_MISSING_UNIT_SCALE_SCOPE",
+      "rejection_reason_code": "MISSING_UNIT_SCALE_OR_SCOPE"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_REVALIDATION_REQUIRED",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_REVALIDATION_REQUIRED",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_REVALIDATION_REQUIRED",
+      "implementation_gate_state": "REJECTED_REVALIDATION_REQUIRED",
+      "rejection_reason_code": "CONNECTOR_BINDING_REVALIDATION_REQUIRED"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_SCOPE_OR_VENUE_MISMATCH",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_SCOPE_OR_VENUE_MISMATCH",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_SCOPE_OR_VENUE_MISMATCH",
+      "implementation_gate_state": "REJECTED_SCOPE_OR_VENUE_MISMATCH",
+      "rejection_reason_code": "SCOPE_OR_VENUE_MISMATCH"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_STALE_ACCEPTED_PACKET",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_STALE_ACCEPTED_PACKET",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_STALE",
+      "implementation_gate_state": "REJECTED_STALE_ACCEPTED_PACKET",
+      "rejection_reason_code": "ACCEPTED_PACKET_STALE"
+    },
+    {
+      "connector_semantic_implementation_rejection_id": "PR126_IMPLEMENTATION_REJECTION_PR126_BINDING_SUPERSEDED_ACCEPTED_PACKET",
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_SUPERSEDED_ACCEPTED_PACKET",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_SUPERSEDED",
+      "implementation_gate_state": "REJECTED_SUPERSEDED_ACCEPTED_PACKET",
+      "rejection_reason_code": "ACCEPTED_PACKET_SUPERSEDED"
+    }
+  ]
+}

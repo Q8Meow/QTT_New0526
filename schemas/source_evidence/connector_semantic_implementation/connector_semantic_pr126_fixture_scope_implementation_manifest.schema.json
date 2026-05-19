@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/connector_semantic_implementation/connector_semantic_pr126_fixture_scope_implementation_manifest.schema.json",
+  "title": "Connector Semantic PR126 Fixture Scope Implementation Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "connector_semantic_pr126_fixture_scope_implementation_manifest_report_id",
+    "repo_pr_label",
+    "roadmap_pr_implemented",
+    "fixture_authority_class",
+    "production_connector_semantic_implementation_authority",
+    "future_production_launch_path_preserved",
+    "deterministic_fixture_time",
+    "manifest_record_count",
+    "manifest_records"
+  ],
+  "properties": {
+    "connector_semantic_pr126_fixture_scope_implementation_manifest_report_id": {
+      "type": "string"
+    },
+    "repo_pr_label": { "const": "PR126" },
+    "roadmap_pr_implemented": { "const": "PR108" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_connector_semantic_implementation_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true },
+    "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" },
+    "manifest_record_count": { "type": "integer", "minimum": 0 },
+    "manifest_records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/manifestRecord" }
+    }
+  },
+  "$defs": {
+    "manifestRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connector_semantic_pr126_fixture_scope_manifest_id",
+        "fixture_authority_class",
+        "production_connector_semantic_implementation_authority",
+        "future_production_launch_path_preserved",
+        "source_connector_binding_ledger_record_id",
+        "accepted_source_evidence_packet_id",
+        "source_change_snapshot_id",
+        "venue_id",
+        "target_field_path",
+        "semantic_surface_id",
+        "canonical_connector_namespace",
+        "bound_value_canonical",
+        "bound_value_type",
+        "bound_value_unit_or_scale",
+        "bound_value_scope",
+        "implementation_gate_state",
+        "implementation_decision_receipt_id",
+        "implementation_manifest_state",
+        "connector_binding_revalidation_state",
+        "source_change_snapshot_state",
+        "deterministic_fixture_time",
+        "production_connector_use_allowed_flag",
+        "network_io_allowed_flag",
+        "order_execution_allowed_flag",
+        "production_reachability_allowed_flag",
+        "runtime_resolver_snapshot_creation_allowed_flag",
+        "replay_paper_execution_allowed_flag",
+        "runtime_cash_receipt_created",
+        "quantum_backend_execution_allowed_flag",
+        "quantum_simulator_execution_allowed_flag",
+        "optimizer_execution_allowed_flag",
+        "production_values_filled_by_later_official_source_prs",
+        "accepted_source_fixture_authority_class"
+      ],
+      "properties": {
+        "connector_semantic_pr126_fixture_scope_manifest_id": { "type": "string" },
+        "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+        "production_connector_semantic_implementation_authority": { "const": false },
+        "future_production_launch_path_preserved": { "const": true },
+        "source_connector_binding_ledger_record_id": { "type": "string" },
+        "accepted_source_evidence_packet_id": { "type": "string" },
+        "source_change_snapshot_id": { "type": "string" },
+        "venue_id": { "type": "string" },
+        "target_field_path": { "type": "string" },
+        "semantic_surface_id": { "type": "string" },
+        "canonical_connector_namespace": { "type": "string" },
+        "bound_value_canonical": { "type": "string" },
+        "bound_value_type": { "type": "string" },
+        "bound_value_unit_or_scale": { "type": "string" },
+        "bound_value_scope": { "type": "string" },
+        "implementation_gate_state": {
+          "const": "READY_FOR_PR126_FIXTURE_SCOPE_IMPLEMENTATION"
+        },
+        "implementation_decision_receipt_id": { "type": "string" },
+        "implementation_manifest_state": {
+          "const": "PR126_FIXTURE_SCOPE_MANIFEST_READY"
+        },
+        "connector_binding_revalidation_state": { "type": "string" },
+        "source_change_snapshot_state": { "type": "string" },
+        "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" },
+        "production_connector_use_allowed_flag": { "const": false },
+        "network_io_allowed_flag": { "const": false },
+        "order_execution_allowed_flag": { "const": false },
+        "production_reachability_allowed_flag": { "const": false },
+        "runtime_resolver_snapshot_creation_allowed_flag": { "const": false },
+        "replay_paper_execution_allowed_flag": { "const": false },
+        "runtime_cash_receipt_created": { "const": false },
+        "quantum_backend_execution_allowed_flag": { "const": false },
+        "quantum_simulator_execution_allowed_flag": { "const": false },
+        "optimizer_execution_allowed_flag": { "const": false },
+        "production_values_filled_by_later_official_source_prs": { "const": true },
+        "accepted_source_fixture_authority_class": {
+          "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "fixture_id": "PR126_EXPECTED_FIXTURE_SCOPE_IMPLEMENTATION_MANIFEST_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "manifest_records": [
+    {
+      "connector_semantic_pr126_fixture_scope_manifest_id": "PR126_FIXTURE_SCOPE_IMPLEMENTATION_MANIFEST_PR126_BINDING_READY",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_implementation_authority": false,
+      "future_production_launch_path_preserved": true,
+      "source_connector_binding_ledger_record_id": "PR126_BINDING_READY",
+      "accepted_source_evidence_packet_id": "PR126_PACKET_READY",
+      "source_change_snapshot_id": "PR126_SOURCE_CHANGE_IMPACT_SNAPSHOT_FIXTURE_V1",
+      "venue_id": "KALSHI",
+      "target_field_path": "connectors.stage1.kalshi.fees.synthetic_fee_rate",
+      "semantic_surface_id": "STAGE1_PREDICTION_MARKET_CONNECTOR_SEMANTIC_SURFACE",
+      "canonical_connector_namespace": "stage1_prediction_markets.kalshi.pr126_fixture",
+      "bound_value_canonical": "TEST_FIXTURE_NOT_EXTERNAL_FACT:KALSHI_SYNTHETIC_FEE_RATE_READY",
+      "bound_value_type": "SYNTHETIC_DECIMAL_STRING",
+      "bound_value_unit_or_scale": "TEST_FIXTURE_DECIMAL_RATE",
+      "bound_value_scope": "TEST_FIXTURE_STAGE1_KALSHI_FEE_SCOPE",
+      "implementation_gate_state": "READY_FOR_PR126_FIXTURE_SCOPE_IMPLEMENTATION",
+      "implementation_decision_receipt_id": "PR126_IMPLEMENTATION_DECISION_PR126_BINDING_READY",
+      "implementation_manifest_state": "PR126_FIXTURE_SCOPE_MANIFEST_READY",
+      "connector_binding_revalidation_state": "FRESH",
+      "source_change_snapshot_state": "SOURCE_CHANGE_IMPACT_SNAPSHOT_READY",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "production_connector_use_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "production_reachability_allowed_flag": false,
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "replay_paper_execution_allowed_flag": false,
+      "runtime_cash_receipt_created": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "quantum_simulator_execution_allowed_flag": false,
+      "optimizer_execution_allowed_flag": false,
+      "production_values_filled_by_later_official_source_prs": true,
+      "accepted_source_fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    }
+  ]
+}

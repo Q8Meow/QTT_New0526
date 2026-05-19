@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/connector_semantic_implementation/connector_semantic_implementation_gate.schema.json",
+  "title": "Connector Semantic Implementation Gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "connector_semantic_implementation_gate_report_id",
+    "repo_pr_label",
+    "roadmap_pr_implemented",
+    "fixture_authority_class",
+    "production_connector_semantic_implementation_authority",
+    "future_production_launch_path_preserved",
+    "source_change_snapshot_id",
+    "deterministic_fixture_time",
+    "decision_receipts",
+    "rejection_records",
+    "manifest_records",
+    "summary"
+  ],
+  "properties": {
+    "connector_semantic_implementation_gate_report_id": { "type": "string" },
+    "repo_pr_label": { "const": "PR126" },
+    "roadmap_pr_implemented": { "const": "PR108" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_connector_semantic_implementation_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true },
+    "source_change_snapshot_id": { "type": "string" },
+    "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" },
+    "decision_receipts": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "rejection_records": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "manifest_records": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture_connector_binding_record_count",
+        "fixture_implementation_gate_success_count",
+        "fixture_implementation_gate_rejection_count",
+        "production_connector_semantic_implementation_count",
+        "production_connector_semantic_implementation_authority_count",
+        "runtime_resolver_snapshot_created_count",
+        "order_authority_created",
+        "network_io_created_count",
+        "future_production_launch_path_preserved",
+        "rejection_counts_by_state"
+      ],
+      "properties": {
+        "fixture_connector_binding_record_count": { "type": "integer", "minimum": 0 },
+        "fixture_implementation_gate_success_count": { "type": "integer", "minimum": 0 },
+        "fixture_implementation_gate_rejection_count": { "type": "integer", "minimum": 0 },
+        "production_connector_semantic_implementation_count": { "const": 0 },
+        "production_connector_semantic_implementation_authority_count": { "const": 0 },
+        "runtime_resolver_snapshot_created_count": { "const": 0 },
+        "order_authority_created": { "const": false },
+        "network_io_created_count": { "const": 0 },
+        "future_production_launch_path_preserved": { "const": true },
+        "rejection_counts_by_state": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

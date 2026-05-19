@@ -1,0 +1,18 @@
+{
+  "repo_pr_label": "PR126",
+  "currentized_prior_repo_pr_label": "PR125",
+  "github_pr_number": 125,
+  "github_pr_title": "PR125 implement source revalidation supersession materiality scheduler",
+  "github_pr_state": "MERGED",
+  "github_pr_mergedAt": "2026-05-19T20:03:45Z",
+  "github_pr_mergeCommit_oid": "c7bbb8769cea72efe74db9f7f3be4439493dd4bc",
+  "github_headRefName": "pr125-source-revalidation-supersession-materiality-scheduler",
+  "github_baseRefName": "main",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/125",
+  "owner_authorized_roadmap_pr": "PR108",
+  "owner_authorized_next_capability": "CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE",
+  "same_number_inference_used": false,
+  "identity_doctrine_preserved": true,
+  "controller_used_as_record_not_veto": true,
+  "implementation_scope": "ROADMAP_PR108_CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE"
+}
