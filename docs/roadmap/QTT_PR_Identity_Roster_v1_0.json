@@ -65,7 +65,8 @@
       117,
       118,
       119,
-      120
+      120,
+      121
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1791,6 +1792,42 @@
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
       "notes": "GitHub #120 is the audit number assigned to the merged pull request for repo-canonical PR120. This does not imply Roadmap PR #120 or Blueprint PR #120. Repo-canonical PR120 remains the implementation-truth label for the master-plan roadmap crosswalk and market section index PR."
+    },
+    {
+      "roster_entry_id": "PR121_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR121",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 121,
+      "repo_title": "Add master-plan section coverage command matrix",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR121 add master-plan section coverage command matrix",
+      "branch_name": "pr121-master-plan-section-coverage-command-matrix",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "MASTER_PLAN_SECTION_COVERAGE_VALIDATION_OK",
+        "QTT_MASTER_PLAN_SECTION_COVERAGE_COMMAND_MATRIX_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR120_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/121",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "notes": "GitHub #121 is the audit number assigned to the merged pull request for repo-canonical PR121. This does not imply Roadmap PR #121 or Blueprint PR #121. Repo-canonical PR121 remains the implementation-truth label for the master-plan section coverage command matrix PR."
     }
   ],
   "mismatch_summary": {
@@ -1892,6 +1929,13 @@
         "roadmap_pr_label": "PR #120",
         "roadmap_title": "Fill, cost, slippage, fee, tick, and latency simulator",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 121,
+        "github_title": "PR121 add master-plan section coverage command matrix",
+        "roadmap_pr_label": "PR #121",
+        "roadmap_title": "Replay/paper result packet writer and immutable ledger",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -1970,6 +2014,13 @@
         "github_title": "PR120 add master-plan roadmap crosswalk and market section indexes",
         "roadmap_pr_label": "PR #120",
         "roadmap_title": "Fill, cost, slippage, fee, tick, and latency simulator",
+        "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 121,
+        "github_title": "PR121 add master-plan section coverage command matrix",
+        "roadmap_pr_label": "PR #121",
+        "roadmap_title": "Replay/paper result packet writer and immutable ledger",
         "relation": "SAME_NUMBER_MISMATCH"
       }
     ],

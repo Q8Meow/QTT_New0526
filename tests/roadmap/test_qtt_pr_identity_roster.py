@@ -105,13 +105,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_120_are_recorded():
+def test_same_number_mismatches_for_github_107_through_121_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 121))
+    assert numbers == set(range(107, 122))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -198,6 +198,48 @@ def test_pr120_self_entry_is_currentized_but_not_roadmap_or_blueprint_120():
     assert pr120["depends_on_roster_entries"] == [
         "PR119_REPO_CANONICAL_SELF_ENTRY"
     ]
+
+
+def test_pr121_self_entry_is_currentized_but_not_roadmap_or_blueprint_121():
+    pr121 = _entry("PR121_REPO_CANONICAL_SELF_ENTRY")
+
+    assert pr121["repo_canonical_pr_label"] == "PR121"
+    assert pr121["github_pr_number"] == 121
+    assert (
+        pr121["github_audit_url"]
+        == "https://github.com/Q8Meow/QTT_New0526/pull/121"
+    )
+    assert pr121["github_title"] == "PR121 add master-plan section coverage command matrix"
+    assert pr121["branch_name"] == "pr121-master-plan-section-coverage-command-matrix"
+    assert pr121["roadmap_pr_label"] is None
+    assert pr121["blueprint_pr_label"] is None
+    assert pr121["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr121["same_number_mismatch_recorded"] is True
+    assert pr121["depends_on_roster_entries"] == [
+        "PR120_REPO_CANONICAL_SELF_ENTRY"
+    ]
+
+
+def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():
+    github_105 = _entry("GITHUB_PR_105_IDENTITY_MISMATCH")
+    roadmap_105 = _entry("ROADMAP_PR_105_PLANNED")
+
+    assert github_105["github_pr_number"] == 105
+    assert github_105["repo_canonical_pr_label"] == "REPAIR_PR_C0"
+    assert github_105["current_status"] == "MERGED"
+    assert github_105["identity_relation_class"] == "SAME_NUMBER_MISMATCH"
+    assert github_105["same_number_mismatch_recorded"] is True
+
+    assert roadmap_105["github_pr_number"] is None
+    assert roadmap_105["repo_canonical_pr_label"] is None
+    assert roadmap_105["current_status"] == "PLANNED"
+    assert roadmap_105["identity_relation_class"] == "ROADMAP_ONLY_PLANNED"
+    assert roadmap_105["roadmap_title"] == "Source-evidence retrieval executor"
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR122"
+        and entry["roadmap_pr_label"] == "PR #105"
+        for entry in _entries()
+    )
 
 
 def test_atomicrows_bundle_is_not_mutated_and_sha_is_not_created():

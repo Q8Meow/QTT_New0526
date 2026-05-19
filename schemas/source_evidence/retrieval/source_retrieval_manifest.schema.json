@@ -1,0 +1,65 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/source_retrieval_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Deterministic source retrieval manifest schema. Default posture is manifest-only/fixture-only/no-network and no accepted-source authority.",
+  "properties": {
+    "accepted_source_fact_count": {
+      "const": 0
+    },
+    "accepted_source_packet_created_count": {
+      "const": 0
+    },
+    "candidate_receipt_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "external_network_fetch_default_enabled": {
+      "const": false
+    },
+    "manifest_authority_class": {
+      "const": "SOURCE_RETRIEVAL_MANIFEST_CONTROL_PLANE_ONLY_NOT_FACT_AUTHORITY"
+    },
+    "manifest_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "manifest_mode": {
+      "enum": [
+        "MANIFEST_ONLY",
+        "FIXTURE_ONLY"
+      ]
+    },
+    "retrieval_targets": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "source_retrieval_state_machine_artifact": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "target_derivation_state": {
+      "$ref": "#/$defs/non_empty_string"
+    }
+  },
+  "required": [
+    "manifest_id",
+    "manifest_authority_class",
+    "manifest_mode",
+    "source_retrieval_state_machine_artifact",
+    "target_derivation_state",
+    "retrieval_targets",
+    "candidate_receipt_count",
+    "accepted_source_packet_created_count",
+    "accepted_source_fact_count",
+    "external_network_fetch_default_enabled"
+  ],
+  "title": "Source Retrieval Manifest Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    }
+  }
+}

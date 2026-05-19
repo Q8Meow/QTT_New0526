@@ -1,0 +1,37 @@
+{
+  "currentization_source": "gh_pr_view_121_verified_output",
+  "currentized_prior_repo_pr_label": "PR121",
+  "files_modified": [
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/generated/CODEX_REPO_PR121_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json",
+    "docs/master_plan/generated/QttPrIdentityRoster.report.json",
+    "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+    "tests/roadmap/test_qtt_pr_identity_roster.py",
+    "tests/roadmap/test_qtt_roadmap_execution_state_controller.py",
+    "tools/validate_qtt_pr_identity_roster.py"
+  ],
+  "github_baseRefName": "main",
+  "github_headRefName": "pr121-master-plan-section-coverage-command-matrix",
+  "github_pr_mergeCommit_oid": "6bda7d231a1a1eec85173d43d233cbce5d9ea8db",
+  "github_pr_mergedAt": "2026-05-19T00:40:08Z",
+  "github_pr_number": 121,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR121 add master-plan section coverage command matrix",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/121",
+  "identity_doctrine_preserved": true,
+  "repo_pr_label": "PR122",
+  "roadmap_state_changed_by_number_inference": false,
+  "same_number_inference_used": false,
+  "validation_commands_run": [
+    {
+      "command": ".\\.venv\\Scripts\\python.exe tools/validate_qtt_pr_identity_roster.py",
+      "result": "PASS",
+      "stdout": "QTT_PR_IDENTITY_ROSTER_OK"
+    },
+    {
+      "command": ".\\.venv\\Scripts\\python.exe -m pytest tests/roadmap/test_qtt_pr_identity_roster.py tests/roadmap/test_qtt_roadmap_execution_state_controller.py -q",
+      "result": "PASS",
+      "stdout": "31 passed in 0.70s"
+    }
+  ]
+}

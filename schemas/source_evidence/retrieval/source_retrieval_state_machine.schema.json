@@ -1,0 +1,184 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/source_retrieval_state_machine.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Central source-evidence retrieval state-machine schema. Blocker meanings live in the state-machine artifact, not downstream validators or reports.",
+  "properties": {
+    "active_stage1_platform_scopes": {
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "authority_class": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "blueprint_pr_label": {
+      "const": "PR #105"
+    },
+    "forbidden_market_taxonomy_values": {
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "future_market_families": {
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "generated_report_paths": {
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "metadata_classes": {
+      "type": "object"
+    },
+    "repo_pr_label": {
+      "const": "PR122"
+    },
+    "roadmap_pr_label": {
+      "const": "PR #105"
+    },
+    "source_packet_minimum_version": {
+      "const": "v1.3A"
+    },
+    "state_machine_id": {
+      "const": "QTT_SOURCE_EVIDENCE_RETRIEVAL_STATE_MACHINE_V1"
+    },
+    "state_machine_version": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "state_records": {
+      "items": {
+        "$ref": "#/$defs/state_record"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "state_machine_id",
+    "state_machine_version",
+    "repo_pr_label",
+    "roadmap_pr_label",
+    "blueprint_pr_label",
+    "authority_class",
+    "source_packet_minimum_version",
+    "active_stage1_platform_scopes",
+    "future_market_families",
+    "forbidden_market_taxonomy_values",
+    "metadata_classes",
+    "generated_report_paths",
+    "state_records"
+  ],
+  "title": "Source Retrieval State Machine Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "state_id_list": {
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "state_record": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_fact_authority_flag": {
+          "const": false
+        },
+        "allowed_next_states": {
+          "$ref": "#/$defs/state_id_list"
+        },
+        "authority_class": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "block_code": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "block_reason_canonical": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "blocked_next_states": {
+          "$ref": "#/$defs/state_id_list"
+        },
+        "candidate_receipt_allowed_flag": {
+          "type": "boolean"
+        },
+        "connector_semantic_unlock_allowed_flag": {
+          "const": false
+        },
+        "order_authority_allowed_flag": {
+          "const": false
+        },
+        "profit_evidence_allowed_flag": {
+          "const": false
+        },
+        "quantum_backend_execution_allowed_flag": {
+          "const": false
+        },
+        "requires_accepted_source_packet_flag": {
+          "type": "boolean"
+        },
+        "requires_conflict_clearance_flag": {
+          "type": "boolean"
+        },
+        "requires_fresh_revalidation_flag": {
+          "type": "boolean"
+        },
+        "requires_owner_review_flag": {
+          "type": "boolean"
+        },
+        "runtime_live_use_allowed_flag": {
+          "const": false
+        },
+        "source_change_materiality_default": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "state_family": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "state_id": {
+          "$ref": "#/$defs/non_empty_string"
+        }
+      },
+      "required": [
+        "state_id",
+        "state_family",
+        "authority_class",
+        "allowed_next_states",
+        "blocked_next_states",
+        "block_code",
+        "block_reason_canonical",
+        "accepted_fact_authority_flag",
+        "candidate_receipt_allowed_flag",
+        "connector_semantic_unlock_allowed_flag",
+        "runtime_live_use_allowed_flag",
+        "order_authority_allowed_flag",
+        "profit_evidence_allowed_flag",
+        "quantum_backend_execution_allowed_flag",
+        "requires_owner_review_flag",
+        "requires_accepted_source_packet_flag",
+        "requires_fresh_revalidation_flag",
+        "requires_conflict_clearance_flag",
+        "source_change_materiality_default"
+      ],
+      "type": "object"
+    }
+  }
+}

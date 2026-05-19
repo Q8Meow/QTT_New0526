@@ -226,6 +226,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_source_evidence_retrieval_executor.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),
@@ -1452,6 +1458,8 @@ def build_validation_commands(
             sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
             "-q",
+            "--basetemp",
+            _path(".tmp", "run_validation_gates_pytest"),
         ],
     ]
 

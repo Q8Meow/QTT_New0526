@@ -1,0 +1,42 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/source_redaction_policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Static redaction policy for candidate/control-plane source retrieval. Raw secret capture is forbidden.",
+  "properties": {
+    "policy_authority_class": {
+      "const": "SOURCE_REDACTION_POLICY_ONLY_NOT_FACT_AUTHORITY"
+    },
+    "redaction_policy_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "raw_secret_capture_allowed_flag": {
+      "const": false
+    },
+    "redacted_secret_alias_allowed_flag": {
+      "type": "boolean"
+    },
+    "secret_like_value_detected_state": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_packet_redaction_required_for_secret_like_values": {
+      "const": true
+    }
+  },
+  "required": [
+    "redaction_policy_id",
+    "policy_authority_class",
+    "raw_secret_capture_allowed_flag",
+    "redacted_secret_alias_allowed_flag",
+    "source_packet_redaction_required_for_secret_like_values",
+    "secret_like_value_detected_state"
+  ],
+  "title": "Source Redaction Policy Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    }
+  }
+}

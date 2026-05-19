@@ -340,6 +340,12 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_source_evidence_retrieval_executor.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -1568,6 +1574,8 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             python_executable,
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
             "-q",
+            "--basetemp",
+            str(Path(".tmp") / "run_validation_gates_pytest"),
         ],
     ]
 
@@ -1628,6 +1636,8 @@ def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
         python_executable,
         str(Path("tools") / "run_pytest_fresh_basetemp.py"),
         "-q",
+        "--basetemp",
+        str(Path(".tmp") / "run_validation_gates_pytest"),
     ]
 
 

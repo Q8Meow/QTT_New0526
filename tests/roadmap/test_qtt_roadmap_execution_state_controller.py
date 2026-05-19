@@ -131,6 +131,25 @@ def test_pr119_self_entry_is_currentized_without_implying_roadmap_or_blueprint_1
     assert _mapping("PR #119")["roster_entry_id"] == "ROADMAP_PR_119_PLANNED"
 
 
+def test_pr121_audit_number_does_not_change_roadmap_execution_state():
+    pr121 = _roster_entry("PR121_REPO_CANONICAL_SELF_ENTRY")
+    roadmap_121 = _mapping("PR #121")
+
+    assert pr121["repo_canonical_pr_label"] == "PR121"
+    assert pr121["github_pr_number"] == 121
+    assert pr121["roadmap_pr_label"] is None
+    assert pr121["blueprint_pr_label"] is None
+    assert pr121["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+
+    assert roadmap_121["title"] == "Replay/paper result packet writer and immutable ledger"
+    assert roadmap_121["roster_entry_id"] == "ROADMAP_PR_121_PLANNED"
+    assert roadmap_121["repo_delivery_status"] == "ROADMAP_BLUEPRINT_PLANNED_METADATA_ONLY"
+    assert (
+        roadmap_121["controller_state"]
+        == "REPLAY_PAPER_STATE_CONTROLLED_BY_RESULT_LEDGER"
+    )
+
+
 def test_roadmap_blueprint_labels_are_metadata_and_same_number_is_not_identity():
     controller = _controller()
     identity = controller["identity_translation_authority"]
