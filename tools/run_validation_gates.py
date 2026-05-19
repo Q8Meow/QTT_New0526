@@ -18,13 +18,23 @@ def _default_validation_dir() -> pathlib.Path:
     return pathlib.Path(tempfile.gettempdir()) / "qtt_validation_gates"
 
 
+def _repo_root() -> pathlib.Path:
+    return pathlib.Path(__file__).resolve().parents[1]
+
+
 def build_validation_commands(
     validation_dir: pathlib.Path | str | None = None,
+    pytest_basetemp: pathlib.Path | str | None = None,
 ) -> list[list[str]]:
     validation_dir = (
         _default_validation_dir()
         if validation_dir is None
         else pathlib.Path(validation_dir)
+    )
+    pytest_basetemp = (
+        validation_dir / "run_validation_gates_pytest"
+        if pytest_basetemp is None
+        else pathlib.Path(pytest_basetemp)
     )
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
@@ -223,6 +233,12 @@ def build_validation_commands(
                 "source_evidence",
                 "synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json",
             ),
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_source_evidence_retrieval_executor.py"),
+            "--repo-root",
+            ".",
         ],
         [
             sys.executable,
@@ -1452,6 +1468,8 @@ def build_validation_commands(
             sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
             "-q",
+            "--basetemp",
+            str(pytest_basetemp),
         ],
     ]
 
@@ -1473,8 +1491,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args:
         print("run_validation_gates.py does not accept arguments", file=sys.stderr)
         return 2
+    repo_root = _repo_root()
+    tmp_parent = repo_root / ".tmp"
+    tmp_parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
-        return run_commands(build_validation_commands(pathlib.Path(temp_dir)))
+        with tempfile.TemporaryDirectory(
+            prefix="run_validation_gates_pytest_",
+            dir=tmp_parent,
+        ) as pytest_temp_dir:
+            return run_commands(
+                build_validation_commands(
+                    pathlib.Path(temp_dir),
+                    pathlib.Path(pytest_temp_dir),
+                )
+            )
 
 
 if __name__ == "__main__":

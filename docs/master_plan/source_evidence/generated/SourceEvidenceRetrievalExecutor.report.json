@@ -1,0 +1,23 @@
+{
+  "accepted_source_fact_count": 0,
+  "accepted_source_packet_created_count": 0,
+  "candidate_receipt_count": 0,
+  "default_execution_mode": "MANIFEST_ONLY_NO_NETWORK",
+  "deterministic_output": true,
+  "external_network_fetch_default_enabled": false,
+  "fixture_only_executor_shell_created": true,
+  "network_fetch_count_in_tests": 0,
+  "order_authority_created": false,
+  "profit_evidence_created": false,
+  "quantum_backend_execution_count": 0,
+  "quantum_simulator_execution_count": 0,
+  "runtime_live_authority_created": false,
+  "source_retrieval_state_machine_artifact": "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+  "target_derivation_block": {
+    "block_code": "SOURCE_TARGET_DERIVATION_AMBIGUOUS_PENDING_CANONICAL_TARGET_RECORDS",
+    "block_reason_canonical": "Existing artifacts declare source-evidence retrieval intent but do not provide canonical target-field and source-locator records; target derivation would require invention.",
+    "block_reason_loaded_from_central_state_machine": true,
+    "block_reason_source": "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+    "state_id": "SOURCE_TARGET_DERIVATION_BLOCKED_AMBIGUOUS_CANONICAL_TARGET_RECORDS"
+  }
+}

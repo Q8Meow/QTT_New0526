@@ -1,0 +1,23 @@
+{
+  "accepted_source_fact_count": 0,
+  "accepted_source_packet_created_count": 0,
+  "block_receipt_code": "CODEX_PR122_SOURCE_EVIDENCE_TARGET_DERIVATION_BLOCK_RECEIPT",
+  "connector_semantic_binding_created_count": 0,
+  "implementation_scope_limited_to_schema_controller_reports": true,
+  "quantum_backend_simulator_optimizer_executions": 0,
+  "reason": "Existing artifacts declare source-evidence retrieval intent but do not provide canonical target-field and source-locator records; target derivation would require invention.",
+  "reason_loaded_from_central_state_machine": true,
+  "reason_source": "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+  "repo_pr_label": "PR122",
+  "roadmap_candidate_checked": "PR105",
+  "runtime_live_order_profit_authority_created": false,
+  "source_evidence_command_rows": 51,
+  "target_derivation_block": {
+    "block_code": "SOURCE_TARGET_DERIVATION_AMBIGUOUS_PENDING_CANONICAL_TARGET_RECORDS",
+    "block_reason_canonical": "Existing artifacts declare source-evidence retrieval intent but do not provide canonical target-field and source-locator records; target derivation would require invention.",
+    "block_reason_loaded_from_central_state_machine": true,
+    "block_reason_source": "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+    "state_id": "SOURCE_TARGET_DERIVATION_BLOCKED_AMBIGUOUS_CANONICAL_TARGET_RECORDS"
+  },
+  "target_field_source_locator_records_found": 0
+}

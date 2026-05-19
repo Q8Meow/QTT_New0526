@@ -1,0 +1,537 @@
+{
+  "active_stage1_platform_scopes": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "authority_class": "CONTROL_PLANE_CANDIDATE_RETRIEVAL_ONLY_NOT_FACT_AUTHORITY",
+  "blueprint_pr_label": "PR #105",
+  "forbidden_market_taxonomy_values": [
+    "ANY_OTHER_MARKET",
+    "OTHER",
+    "OTHER_OWNER_APPROVED_FUTURE_MARKET",
+    "UNKNOWN_MARKET",
+    "etc."
+  ],
+  "future_market_families": [
+    "COMMODITIES",
+    "CRYPTOCURRENCY",
+    "EQUITIES",
+    "ETFS",
+    "FUTURES",
+    "FX",
+    "OPTIONS",
+    "STOCKS"
+  ],
+  "generated_report_paths": [
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalExecutor.report.json",
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalManifest.report.json",
+    "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_RETRIEVAL_CONTROLLER_GATED_REPORT.json",
+    "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_TARGET_DERIVATION_BLOCK_RECEIPT.json"
+  ],
+  "metadata_classes": {
+    "algorithm_and_quantum": [
+      "QUBO",
+      "ISING",
+      "QAOA",
+      "VQE",
+      "ANNEALING",
+      "QUANTUM_INSPIRED_OPTIMIZER",
+      "HYBRID_CLASSICAL_QUANTUM_ARBITRATION",
+      "TRUE_QUANTUM_BACKEND_PROVIDER_RECEIPT_PATH",
+      "PORTFOLIO_CANDIDATE_SET_OPTIMIZATION",
+      "LATENCY_AWARE_QUANTUM_PATHING"
+    ],
+    "source_change_materiality": [
+      "INFO_ONLY",
+      "LOW_RISK",
+      "MEDIUM_RISK",
+      "HIGH_RISK",
+      "CONNECTOR_BLOCKING",
+      "LIVE_TRADING_BLOCKING",
+      "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING"
+    ]
+  },
+  "repo_pr_label": "PR122",
+  "roadmap_pr_label": "PR #105",
+  "source_packet_minimum_version": "v1.3A",
+  "state_machine_id": "QTT_SOURCE_EVIDENCE_RETRIEVAL_STATE_MACHINE_V1",
+  "state_machine_version": "v1.0",
+  "state_records": [
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "BLOCKED_MISSING_OWNER_PACKET",
+      "block_code": "OWNER_SOURCE_DEFINITIONS_PACKET_MISSING",
+      "block_reason_canonical": "Owner source-evidence definitions packet is missing; retrieval scope cannot be established.",
+      "blocked_next_states": [
+        "SOURCE_TARGET_DECLARED_NOT_RETRIEVED",
+        "SOURCE_RETRIEVAL_MANIFEST_READY",
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": false,
+      "requires_conflict_clearance_flag": false,
+      "requires_fresh_revalidation_flag": false,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "OWNER_PACKET_GATE",
+      "state_id": "OWNER_SOURCE_DEFINITIONS_PACKET_MISSING"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "BLOCKED_UNAPPROVED_OWNER_PACKET",
+      "block_code": "OWNER_SOURCE_DEFINITIONS_PACKET_PRESENT_NOT_APPROVED",
+      "block_reason_canonical": "Owner source-evidence definitions packet is present but not approved for retrieval scope.",
+      "blocked_next_states": [
+        "SOURCE_TARGET_DECLARED_NOT_RETRIEVED",
+        "SOURCE_RETRIEVAL_MANIFEST_READY",
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": false,
+      "requires_conflict_clearance_flag": false,
+      "requires_fresh_revalidation_flag": false,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "OWNER_PACKET_GATE",
+      "state_id": "OWNER_SOURCE_DEFINITIONS_PACKET_PRESENT_NOT_APPROVED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_TARGET_DECLARED_NOT_RETRIEVED"
+      ],
+      "authority_class": "OWNER_POLICY_SCOPE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY",
+      "block_code": "NO_BLOCK_OWNER_PACKET_APPROVED_FOR_RETRIEVAL_SCOPE",
+      "block_reason_canonical": "Owner packet authorizes retrieval scope policy only; it does not authorize external facts or connector semantics.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": false,
+      "requires_conflict_clearance_flag": false,
+      "requires_fresh_revalidation_flag": false,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "OWNER_PACKET_GATE",
+      "state_id": "OWNER_SOURCE_DEFINITIONS_PACKET_APPROVED_FOR_RETRIEVAL_SCOPE"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_RETRIEVAL_MANIFEST_READY"
+      ],
+      "authority_class": "TARGET_DECLARATION_ONLY_NOT_RETRIEVAL_EXECUTION",
+      "block_code": "SOURCE_TARGET_DECLARED_NOT_RETRIEVED",
+      "block_reason_canonical": "Retrieval target is declared but no source has been retrieved and no candidate receipt exists.",
+      "blocked_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "TARGET_READINESS",
+      "state_id": "SOURCE_TARGET_DECLARED_NOT_RETRIEVED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_RETRIEVAL_ATTEMPTED_FIXTURE_ONLY",
+        "SOURCE_RETRIEVAL_ATTEMPTED_EXTERNAL_GATED_DISABLED"
+      ],
+      "authority_class": "MANIFEST_ONLY_NO_NETWORK_BY_DEFAULT",
+      "block_code": "SOURCE_RETRIEVAL_MANIFEST_READY",
+      "block_reason_canonical": "Retrieval manifest is ready for fixture-only control-plane execution; network retrieval remains disabled by default.",
+      "blocked_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "MANIFEST_GATE",
+      "state_id": "SOURCE_RETRIEVAL_MANIFEST_READY"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED",
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CONFLICTED",
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_STALE"
+      ],
+      "authority_class": "FIXTURE_ONLY_CANDIDATE_RETRIEVAL_CONTROL_PLANE",
+      "block_code": "SOURCE_RETRIEVAL_ATTEMPTED_FIXTURE_ONLY",
+      "block_reason_canonical": "Fixture-only retrieval attempt may create candidate receipts but cannot create accepted facts.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": true,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "RETRIEVAL_ATTEMPT",
+      "state_id": "SOURCE_RETRIEVAL_ATTEMPTED_FIXTURE_ONLY"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "EXTERNAL_RETRIEVAL_GATED_DISABLED",
+      "block_code": "SOURCE_RETRIEVAL_ATTEMPTED_EXTERNAL_GATED_DISABLED",
+      "block_reason_canonical": "External retrieval is gated disabled in PR122 and requires a future owner/controller command.",
+      "blocked_next_states": [
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED",
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "RETRIEVAL_ATTEMPT",
+      "state_id": "SOURCE_RETRIEVAL_ATTEMPTED_EXTERNAL_GATED_DISABLED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+      ],
+      "authority_class": "CANDIDATE_RECEIPT_ONLY_NOT_ACCEPTED_FACT",
+      "block_code": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED",
+      "block_reason_canonical": "Candidate retrieval receipt exists but is not an accepted source fact or accepted source packet.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": true,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "CANDIDATE_RECEIPT",
+      "state_id": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+      ],
+      "authority_class": "CANDIDATE_RECEIPT_ONLY_NOT_ACCEPTED_FACT",
+      "block_code": "CANDIDATE_RETRIEVAL_ONLY_NOT_ACCEPTED_FACT",
+      "block_reason_canonical": "Candidate retrieval is control-plane evidence only and cannot unlock connector, runtime, order, or profit authority.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": true,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "CANDIDATE_RECEIPT",
+      "state_id": "CANDIDATE_RETRIEVAL_ONLY_NOT_ACCEPTED_FACT"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+      ],
+      "authority_class": "CONFLICTED_CANDIDATE_RECEIPT_BLOCKED",
+      "block_code": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CONFLICTED",
+      "block_reason_canonical": "Candidate retrieval receipt is conflicted and requires conflict clearance before any acceptance workflow.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": true,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "CANDIDATE_RECEIPT",
+      "state_id": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CONFLICTED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+      ],
+      "authority_class": "STALE_CANDIDATE_RECEIPT_BLOCKED",
+      "block_code": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_STALE",
+      "block_reason_canonical": "Candidate retrieval receipt is stale and requires fresh revalidation before any acceptance workflow.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": true,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "CANDIDATE_RECEIPT",
+      "state_id": "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_STALE"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "SECRET_OR_PRIVATE_VALUE_BLOCK",
+      "block_code": "SOURCE_BLOCKED_SECRET_OR_PRIVATE_VALUE_DETECTED",
+      "block_reason_canonical": "Secret-like or private value detected; raw capture is forbidden and redaction/quarantine is required.",
+      "blocked_next_states": [
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED",
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "LIVE_TRADING_BLOCKING",
+      "state_family": "PRIVATE_SECRET_BLOCK",
+      "state_id": "SOURCE_BLOCKED_SECRET_OR_PRIVATE_VALUE_DETECTED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "PRIVATE_DOC_ACCESS_RIGHTS_BLOCK",
+      "block_code": "SOURCE_BLOCKED_PRIVATE_DOC_UNCLEAR_ACCESS_RIGHTS",
+      "block_reason_canonical": "Private document access rights are unclear; use is quarantined until owner attestation.",
+      "blocked_next_states": [
+        "SOURCE_RETRIEVED_CANDIDATE_RECEIPT_CREATED_NOT_ACCEPTED",
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "LIVE_TRADING_BLOCKING",
+      "state_family": "PRIVATE_SECRET_BLOCK",
+      "state_id": "SOURCE_BLOCKED_PRIVATE_DOC_UNCLEAR_ACCESS_RIGHTS"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "NON_AUTHORITATIVE_SOURCE_CLASS_BLOCK",
+      "block_code": "SOURCE_BLOCKED_NON_AUTHORITATIVE_SOURCE_CLASS",
+      "block_reason_canonical": "Non-authoritative source class may seed review but cannot authorize facts or connector semantics.",
+      "blocked_next_states": [
+        "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "SOURCE_CLASS_BLOCK",
+      "state_id": "SOURCE_BLOCKED_NON_AUTHORITATIVE_SOURCE_CLASS"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+      "block_code": "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED",
+      "block_reason_canonical": "Accepted source-evidence packet is required before facts, target fields, connector semantics, or runtime use.",
+      "blocked_next_states": [
+        "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "ACCEPTANCE_GATE",
+      "state_id": "SOURCE_ACCEPTANCE_REQUIRED_NOT_PERFORMED"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "CONNECTOR_BINDING_BLOCKED",
+      "block_code": "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET",
+      "block_reason_canonical": "Connector binding is blocked until the exact target field has a fresh accepted source packet.",
+      "blocked_next_states": [
+        "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "CONNECTOR_GATE",
+      "state_id": "CONNECTOR_BINDING_BLOCKED_PENDING_ACCEPTED_TARGET_FIELD_PACKET"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "RUNTIME_LIVE_USE_BLOCKED",
+      "block_code": "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING",
+      "block_reason_canonical": "Runtime and live use are blocked pending accepted source evidence and connector binding.",
+      "blocked_next_states": [],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "LIVE_TRADING_BLOCKING",
+      "state_family": "RUNTIME_LIVE_GATE",
+      "state_id": "RUNTIME_LIVE_USE_BLOCKED_PENDING_ACCEPTED_SOURCE_AND_CONNECTOR_BINDING"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "QUANTUM_METADATA_ONLY",
+      "block_code": "QUANTUM_BACKEND_EXECUTION_BLOCKED_METADATA_ONLY",
+      "block_reason_canonical": "Quantum provider/backend metadata is source-target readiness only; no backend, simulator, optimizer, QUBO, Ising, QAOA, VQE, or annealing execution is allowed.",
+      "blocked_next_states": [],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "QUANTUM_GATE",
+      "state_id": "QUANTUM_BACKEND_EXECUTION_BLOCKED_METADATA_ONLY"
+    },
+    {
+      "accepted_fact_authority_flag": false,
+      "allowed_next_states": [],
+      "authority_class": "TARGET_DERIVATION_BLOCKED",
+      "block_code": "SOURCE_TARGET_DERIVATION_AMBIGUOUS_PENDING_CANONICAL_TARGET_RECORDS",
+      "block_reason_canonical": "Existing artifacts declare source-evidence retrieval intent but do not provide canonical target-field and source-locator records; target derivation would require invention.",
+      "blocked_next_states": [
+        "SOURCE_TARGET_DECLARED_NOT_RETRIEVED",
+        "SOURCE_RETRIEVAL_MANIFEST_READY",
+        "SOURCE_RETRIEVAL_ATTEMPTED_FIXTURE_ONLY"
+      ],
+      "candidate_receipt_allowed_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "requires_accepted_source_packet_flag": true,
+      "requires_conflict_clearance_flag": true,
+      "requires_fresh_revalidation_flag": true,
+      "requires_owner_review_flag": true,
+      "runtime_live_use_allowed_flag": false,
+      "source_change_materiality_default": "UNKNOWN_DEFAULTS_TO_CONNECTOR_BLOCKING",
+      "state_family": "TARGET_DERIVATION_GATE",
+      "state_id": "SOURCE_TARGET_DERIVATION_BLOCKED_AMBIGUOUS_CANONICAL_TARGET_RECORDS"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/machine_field_locator.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Machine payload field locator for later acceptance review. This locator is not an accepted fact and does not unlock connector semantics.",
+  "properties": {
+    "canonicalization_policy_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "machine_field_locator_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "payload_digest_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "payload_format": {
+      "enum": [
+        "JSON",
+        "CSV",
+        "YAML",
+        "XML",
+        "TEXT_FIXTURE"
+      ]
+    },
+    "payload_pointer": {
+      "$ref": "#/$defs/non_empty_string"
+    }
+  },
+  "required": [
+    "machine_field_locator_id",
+    "canonicalization_policy_id",
+    "payload_format",
+    "payload_pointer",
+    "payload_digest_sha256"
+  ],
+  "title": "Machine Field Locator Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    }
+  }
+}

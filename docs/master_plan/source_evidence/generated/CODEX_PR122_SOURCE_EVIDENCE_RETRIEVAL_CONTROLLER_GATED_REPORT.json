@@ -1,0 +1,323 @@
+{
+  "accepted_source_fact_count": 0,
+  "accepted_source_packet_created_count": 0,
+  "anti_hardcoding_test_added": true,
+  "atomicrows_bundle_created": false,
+  "atomicrows_sha_created": false,
+  "blueprint_candidate_checked": "PR105",
+  "blueprint_index_state": {
+    "entry": {
+      "branch": "pr105-source-evidence-retrieval-executor",
+      "category": "RUNTIME",
+      "delivery_label": "PR #105",
+      "depends_on": [
+        "PR #104 completed, merged, and validated on clean main",
+        "PR #104 static coverage command matrix",
+        "owner source-evidence definitions packet v1.3A"
+      ],
+      "domain": "source_evidence",
+      "downstream_consumers": [
+        "PR #106 \u2014 Accepted source-evidence acceptance executor and ledger",
+        "PR #141\u2013#151 Stage-1 live connector/order/canary/runbook consumers"
+      ],
+      "likely_files": [
+        "schemas/source_evidence/source_evidence_retrieval_executor.schema.json",
+        "schemas/source_evidence/source_evidence_retrieval_executor_receipt.schema.json",
+        "src/qtt/source_evidence/source_evidence_retrieval_executor.py",
+        "docs/master_plan/generated/SourceEvidenceRetrievalExecutor.report.json",
+        "tests/fixtures/source_evidence/source_evidence_retrieval_executor.fixture.json",
+        "tools/validate_source_evidence_retrieval_executor.py",
+        "tests/source_evidence/test_source_evidence_retrieval_executor.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tools/run_validation_gates.py"
+      ],
+      "master_plan_anchors": [
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "search: \"source-evidence workflow\"",
+        "search: \"accepted source packet\"",
+        "search: \"target field acceptance ledger\"",
+        "search: \"revalidation\"",
+        "search: \"supersession\"",
+        "search: \"materiality\"",
+        "search: \"Source-evidence retrieval executor\"",
+        "search: \"QTT_SOURCE_EVIDENCE_RETRIEVAL_EXECUTOR_OK\"",
+        "search: \"Stage 1 prediction markets\"",
+        "search: \"Kalshi\"",
+        "search: \"Polymarket\"",
+        "search: \"FORECASTEX_IBKR\""
+      ],
+      "must_not_create": "Accepted source facts, connector semantics, live reachability, orders, profit claims.",
+      "must_prove": "Retrieval manifests, digests, quote/machine-field locators, and redaction rules are deterministic.",
+      "number": 105,
+      "phase": "RUNTIME_ENGINE_S1_LAUNCH_ESSENTIAL",
+      "priority": "S1 launch-essential runtime",
+      "purpose": "Retrieve official source targets for Kalshi, Polymarket, and FORECASTEX_IBKR using owner-approved source classes; create candidate retrieval receipts only.",
+      "quantum_latency_emphasis": "Keep quantum backend/provider facts retrieval-gated; no provider capability invented.",
+      "semantic_task_id": "ROADMAP-SOURCE-EVIDENCE-RETRIEVAL-EXECUTOR",
+      "stage": "Stage 1 prediction markets",
+      "stop_conditions": [
+        "Required upstream artifact, registry, schema, generated report, or validator marker is missing.",
+        "Repository branch or clean-main baseline does not match the owner-provided per-PR prompt.",
+        "The exact file path conflicts with existing repo conventions and no safe canonical path can be inferred from current repo patterns.",
+        "Focused validator, focused tests, cumulative validation gates, fresh pytest, compileall, git diff --check, or master-plan diff check fails.",
+        "The PR would need to edit docs/master_plan/QTT_MasterPlan_Current.md, create AtomicRows bundle/hash, or open runtime/live/source/connector/order/profit/quantum-backend scope outside its exact authorization."
+      ],
+      "title": "Source-evidence retrieval executor",
+      "validation_commands": [
+        "& $Py tools\\validate_source_evidence_retrieval_executor.py",
+        "& $Py -m pytest tests\\source_evidence\\test_source_evidence_retrieval_executor.py tests\\fail_closed\\test_run_validation_gates.py -q",
+        "& $Py tools\\run_validation_gates.py",
+        "& $Py tools\\run_pytest_fresh_basetemp.py -q",
+        "if (Test-Path \"src\") { & $Py -m compileall tools tests src } else { & $Py -m compileall tools tests }",
+        "git diff --check",
+        "git diff -- docs/master_plan/QTT_MasterPlan_Current.md",
+        "git status --short"
+      ],
+      "validator_marker": "QTT_SOURCE_EVIDENCE_RETRIEVAL_EXECUTOR_OK"
+    },
+    "present": true,
+    "scope_match": true
+  },
+  "candidate_packet_schema_created": false,
+  "candidate_receipt_schema_created": true,
+  "centralized_state_machine_artifact": "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+  "checked_github_pr_number": 121,
+  "checked_schema_files": [
+    "schemas/source_evidence/retrieval/source_retrieval_state_machine.schema.json",
+    "schemas/source_evidence/retrieval/source_retrieval_target.schema.json",
+    "schemas/source_evidence/retrieval/source_retrieval_manifest.schema.json",
+    "schemas/source_evidence/retrieval/candidate_source_retrieval_receipt.schema.json",
+    "schemas/source_evidence/retrieval/source_locator.schema.json",
+    "schemas/source_evidence/retrieval/quote_span_locator.schema.json",
+    "schemas/source_evidence/retrieval/machine_field_locator.schema.json",
+    "schemas/source_evidence/retrieval/source_redaction_policy.schema.json"
+  ],
+  "connector_semantic_binding_created_count": 0,
+  "consolidated_roadmap_state": {
+    "header_found": true,
+    "marker_found": true,
+    "title_found": true
+  },
+  "controller_eligibility_state": "ELIGIBLE_FOR_SCHEMA_CONTROL_PLANE_WITH_TARGET_DERIVATION_BLOCK",
+  "currentized_prior_repo_pr": "PR121",
+  "deterministic_report_rerun_passed": true,
+  "downstream_reference_artifacts": [
+    "tools/validate_source_evidence_retrieval_executor.py",
+    "tools/source_evidence_retrieval_executor.py",
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalManifest.report.json",
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalExecutor.report.json",
+    "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_TARGET_DERIVATION_BLOCK_RECEIPT.json"
+  ],
+  "execution_superiority_claim_created": false,
+  "external_network_fetch_default_enabled": false,
+  "files_created": [
+    "schemas/source_evidence/retrieval/candidate_source_retrieval_receipt.schema.json",
+    "schemas/source_evidence/retrieval/machine_field_locator.schema.json",
+    "schemas/source_evidence/retrieval/quote_span_locator.schema.json",
+    "schemas/source_evidence/retrieval/source_locator.schema.json",
+    "schemas/source_evidence/retrieval/source_redaction_policy.schema.json",
+    "schemas/source_evidence/retrieval/source_retrieval_manifest.schema.json",
+    "schemas/source_evidence/retrieval/source_retrieval_state_machine.schema.json",
+    "schemas/source_evidence/retrieval/source_retrieval_target.schema.json",
+    "src/qtt/source_evidence/retrieval/__init__.py",
+    "src/qtt/source_evidence/retrieval/controller.py",
+    "src/qtt/source_evidence/retrieval/source_retrieval_state_machine.json",
+    "tests/source_evidence/test_pr122_pr105_controller_eligibility_required.py",
+    "tests/source_evidence/test_pr122_retrieval_receipt_is_not_accepted_fact.py",
+    "tests/source_evidence/test_pr122_source_retrieval_no_authority_boundaries.py",
+    "tests/source_evidence/test_pr122_source_retrieval_state_machine_centralized.py",
+    "tools/source_evidence_retrieval_executor.py",
+    "tools/validate_source_evidence_retrieval_executor.py",
+    "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_RETRIEVAL_CONTROLLER_GATED_REPORT.json",
+    "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_TARGET_DERIVATION_BLOCK_RECEIPT.json",
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalExecutor.report.json",
+    "docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalManifest.report.json"
+  ],
+  "files_modified": [
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tools/validate_qtt_pr_identity_roster.py",
+    "tools/run_validation_gates.py",
+    "tests/roadmap/test_qtt_pr_identity_roster.py",
+    "tests/roadmap/test_qtt_roadmap_execution_state_controller.py"
+  ],
+  "files_read": [
+    "docs/roadmap/README.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/completion/QTTSectionCoverageRegistry.yaml",
+    "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+    "docs/master_plan/generated/MasterPlanSectionRoadmapCrosswalk.json",
+    "docs/master_plan/generated/MasterPlanSectionCoverageCommandMatrix.json",
+    "docs/master_plan/generated/MasterPlanSectionMarketIndexes.json",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "schemas/source_evidence/source_evidence.schema.json",
+    "schemas/source_evidence/source_evidence_gate_confirmation.schema.json",
+    "tools/validate_source_evidence_static.py",
+    "tools/validate_source_evidence_gate_confirmation_static.py"
+  ],
+  "full_blueprint_state": {
+    "header_found": true,
+    "marker_found": true,
+    "title_found": true
+  },
+  "future_market_command_count_from_market_index": 69,
+  "future_market_target_count": 0,
+  "identity_roster_state": {
+    "github_105_is_audit_only_mismatch": {
+      "authority_scope": "REPAIR_ONLY",
+      "blueprint_pr_label": "PR #105",
+      "blueprint_title": "Source-evidence retrieval executor",
+      "branch_name": "pr105-repair-atomicrows-owner-approved-15-family-count-distribution",
+      "corrective_overlay": false,
+      "current_status": "MERGED",
+      "depends_on_roster_entries": [],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/105",
+      "github_pr_number": 105,
+      "github_title": "Add owner-approved AtomicRows family count distribution",
+      "identity_relation_class": "SAME_NUMBER_MISMATCH",
+      "notes": "GitHub #105 = Add owner-approved AtomicRows family count distribution. Roadmap PR #105 = Source-evidence retrieval executor. Same-number equality is forbidden; the GitHub audit number does not overwrite the roadmap or blueprint label.",
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "ROADMAP_DELIVERY_LABEL",
+        "BLUEPRINT_DELIVERY_LABEL",
+        "GITHUB_AUDIT_NUMBER",
+        "REPAIR_CHAIN_LABEL",
+        "BRANCH_REFERENCE",
+        "VALIDATOR_MARKER_REFERENCE"
+      ],
+      "repair_chain": [
+        "Repair PR C0",
+        "OWNER_APPROVED_ATOMICROWS_EXACT_15_FAMILY_COUNT_DISTRIBUTION"
+      ],
+      "repo_canonical_pr_label": "REPAIR_PR_C0",
+      "repo_title": "owner-approved AtomicRows family count distribution",
+      "roadmap_pr_label": "PR #105",
+      "roadmap_title": "Source-evidence retrieval executor",
+      "roster_entry_id": "GITHUB_PR_105_IDENTITY_MISMATCH",
+      "same_number_mismatch_recorded": true,
+      "semantic_role": "REPAIR_CHAIN",
+      "superseded_by": null,
+      "validator_markers": [
+        "QTT_ATOMICROWS_OWNER_APPROVED_EXACT_15_FAMILY_COUNT_DISTRIBUTION_OK"
+      ]
+    },
+    "roadmap_pr105_entry": {
+      "authority_scope": "RUNTIME_NON_LIVE",
+      "blueprint_pr_label": "PR #105",
+      "blueprint_title": "Source-evidence retrieval executor",
+      "branch_name": "pr105-source-evidence-retrieval-executor",
+      "corrective_overlay": false,
+      "current_status": "PLANNED",
+      "depends_on_roster_entries": [],
+      "github_audit_url": null,
+      "github_pr_number": null,
+      "github_title": null,
+      "identity_relation_class": "ROADMAP_ONLY_PLANNED",
+      "notes": "Roadmap/blueprint PR #105 remains a planning/orchestration label. It does not receive a GitHub audit number unless a future owner-approved PR is locally verified and recorded in this roster. This is part of the roadmap PR #105-#126 runtime/quantum-runtime planning block and creates no PR117 runtime/live authority.",
+      "reference_types": [
+        "ROADMAP_DELIVERY_LABEL",
+        "BLUEPRINT_DELIVERY_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE"
+      ],
+      "repair_chain": [],
+      "repo_canonical_pr_label": null,
+      "repo_title": null,
+      "roadmap_pr_label": "PR #105",
+      "roadmap_title": "Source-evidence retrieval executor",
+      "roster_entry_id": "ROADMAP_PR_105_PLANNED",
+      "same_number_mismatch_recorded": false,
+      "semantic_role": "ROADMAP_PLANNED",
+      "superseded_by": null,
+      "validator_markers": [
+        "QTT_SOURCE_EVIDENCE_RETRIEVAL_EXECUTOR_OK"
+      ]
+    },
+    "roadmap_pr105_present": true
+  },
+  "implementation_performed": true,
+  "latency_superiority_claim_created": false,
+  "master_plan_modified": false,
+  "network_fetch_count_in_tests": 0,
+  "optimizer_execution_count": 0,
+  "order_authority_created": false,
+  "owner_packet_state": {
+    "canonical_packet_present": true,
+    "connector_semantics_blocked": true,
+    "external_fact_authority_blocked": true,
+    "packet_version_minimum_required": "v1.3A",
+    "packet_version_present": true,
+    "retrieval_scope_approved": true
+  },
+  "owner_review_future_market_command_count": 334,
+  "owner_review_future_market_scope_count": 0,
+  "profit_evidence_created": false,
+  "quantum_advantage_claim_created": false,
+  "quantum_backend_execution_count": 0,
+  "quantum_simulator_execution_count": 0,
+  "reason_if_not_implemented": null,
+  "replay_paper_results_created_count": 0,
+  "repo_pr_label": "PR122",
+  "roadmap_candidate_checked": "PR105",
+  "roadmap_controller_state": {
+    "entry": {
+      "blueprint_pr_label": "PR #105",
+      "controller_state": "SOURCE_EVIDENCE_STATE_CONTROLLED_BY_ACCEPTED_SOURCE_WORKFLOW",
+      "identity_source": "QTT_PR_IDENTITY_ROSTER_V1_0",
+      "next_allowed_action_class": "FUTURE_REPO_PR_REQUIRED_BEFORE_MATERIALIZATION",
+      "repo_delivery_status": "ROADMAP_BLUEPRINT_PLANNED_METADATA_ONLY",
+      "roadmap_pr_label": "PR #105",
+      "roster_entry_id": "ROADMAP_PR_105_PLANNED",
+      "state_explanation_short": "Source-evidence state routes through the accepted-source workflow before any downstream use.",
+      "state_source": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0",
+      "title": "Source-evidence retrieval executor"
+    },
+    "present": true,
+    "state": "SOURCE_EVIDENCE_STATE_CONTROLLED_BY_ACCEPTED_SOURCE_WORKFLOW"
+  },
+  "roadmap_index_state": {
+    "entry": {
+      "branch": "pr105-source-evidence-retrieval-executor",
+      "category": "Runtime",
+      "delivery_label": "PR #105",
+      "marker": "QTT_SOURCE_EVIDENCE_RETRIEVAL_EXECUTOR_OK",
+      "number": 105,
+      "priority": "S1 launch-essential runtime",
+      "source_details": "Category: Runtime | Stage: Stage 1 prediction markets | Priority: S1 launch-essential runtime | Branch: pr105-source-evidence-retrieval-executor | Marker: QTT_SOURCE_EVIDENCE_RETRIEVAL_EXECUTOR_OK",
+      "stage": "Stage 1 prediction markets",
+      "title": "Source-evidence retrieval executor"
+    },
+    "present": true,
+    "scope_match": true
+  },
+  "runtime_cash_receipts_created_count": 0,
+  "runtime_live_authority_created": false,
+  "runtime_resolver_snapshot_created_count": 0,
+  "source_retrieval_target_count": 0,
+  "source_retrieval_target_derivation_source": {
+    "canonical_target_like_rows": 0,
+    "derivation_state": "SOURCE_TARGET_DERIVATION_BLOCKED_AMBIGUOUS_CANONICAL_TARGET_RECORDS",
+    "source_evidence_command_rows": 51,
+    "source_evidence_command_rows_declared_in_summary": 51
+  },
+  "stage1_command_count_by_platform_from_market_index": {
+    "FORECASTEX_IBKR": 25,
+    "KALSHI": 52,
+    "POLYMARKET": 38,
+    "PREDICTION_MARKETS_GENERAL": 109
+  },
+  "stage1_target_count_by_platform": {
+    "FORECASTEX_IBKR": 0,
+    "KALSHI": 0,
+    "POLYMARKET": 0,
+    "PREDICTION_MARKETS_GENERAL": 0
+  },
+  "target_derivation_block_receipt": "docs/master_plan/source_evidence/generated/CODEX_PR122_SOURCE_EVIDENCE_TARGET_DERIVATION_BLOCK_RECEIPT.json"
+}

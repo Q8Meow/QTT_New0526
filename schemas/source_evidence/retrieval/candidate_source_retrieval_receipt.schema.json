@@ -1,0 +1,128 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/candidate_source_retrieval_receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Candidate retrieval receipt schema. Candidate receipts are not accepted facts, accepted source packets, connector semantics, runtime/live/order authority, profit evidence, or quantum execution.",
+  "oneOf": [
+    {
+      "required": [
+        "canonicalized_content_digest"
+      ]
+    },
+    {
+      "required": [
+        "declared_no_content_block_state"
+      ]
+    }
+  ],
+  "properties": {
+    "accepted_fact_authority_flag": {
+      "const": false
+    },
+    "canonicalization_policy_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "canonicalized_content_digest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "capture_timestamp_utc": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "connector_semantic_unlock_allowed_flag": {
+      "const": false
+    },
+    "declared_no_content_block_state": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "fetch_or_capture_metadata": {
+      "type": "object"
+    },
+    "fetch_or_capture_mode": {
+      "enum": [
+        "FIXTURE_ONLY",
+        "MANIFEST_ONLY",
+        "EXTERNAL_GATED_DISABLED"
+      ]
+    },
+    "fixture_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "machine_field_locator": {
+      "type": "object"
+    },
+    "next_required_gate": {
+      "const": "ACCEPTED_SOURCE_EVIDENCE_PACKET_REQUIRED_FOR_TARGET_FIELD"
+    },
+    "order_authority_allowed_flag": {
+      "const": false
+    },
+    "private_doc_access_rights_state": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "profit_evidence_allowed_flag": {
+      "const": false
+    },
+    "quantum_backend_execution_allowed_flag": {
+      "const": false
+    },
+    "quote_span_locator": {
+      "type": "object"
+    },
+    "redaction_applied_flag": {
+      "type": "boolean"
+    },
+    "retrieval_receipt_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "retrieval_target_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "runtime_live_use_allowed_flag": {
+      "const": false
+    },
+    "secret_like_value_detected_flag": {
+      "type": "boolean"
+    },
+    "source_authority_state": {
+      "const": "CANDIDATE_RETRIEVAL_ONLY_NOT_ACCEPTED_FACT"
+    },
+    "source_class": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_locator": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "retrieval_receipt_id",
+    "retrieval_target_id",
+    "source_locator",
+    "source_class",
+    "source_authority_state",
+    "canonicalization_policy_id",
+    "fetch_or_capture_mode",
+    "fetch_or_capture_metadata",
+    "redaction_applied_flag",
+    "secret_like_value_detected_flag",
+    "private_doc_access_rights_state",
+    "accepted_fact_authority_flag",
+    "connector_semantic_unlock_allowed_flag",
+    "runtime_live_use_allowed_flag",
+    "order_authority_allowed_flag",
+    "profit_evidence_allowed_flag",
+    "quantum_backend_execution_allowed_flag",
+    "next_required_gate"
+  ],
+  "title": "Candidate Source Retrieval Receipt Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    }
+  }
+}

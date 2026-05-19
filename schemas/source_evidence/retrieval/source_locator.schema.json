@@ -1,0 +1,53 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/retrieval/source_locator.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Source locator contract for candidate/control-plane retrieval only. It creates no source facts, connector semantics, runtime authority, live reachability, orders, profit evidence, or quantum execution.",
+  "properties": {
+    "access_rights_state": {
+      "type": "string"
+    },
+    "locator_authority_class": {
+      "const": "SOURCE_LOCATOR_ONLY_NOT_FACT_AUTHORITY"
+    },
+    "locator_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "locator_type": {
+      "enum": [
+        "OWNER_UNSET_PENDING_OFFICIAL_SOURCE_DISCOVERY",
+        "OFFICIAL_URL",
+        "OFFICIAL_DOC_PATH",
+        "OFFICIAL_MACHINE_PAYLOAD_PATH",
+        "PRIVATE_DOC_OWNER_UPLOADED_QUARANTINED",
+        "FIXTURE_ONLY"
+      ]
+    },
+    "normalized_locator": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "redaction_required_flag": {
+      "type": "boolean"
+    },
+    "source_class": {
+      "$ref": "#/$defs/non_empty_string"
+    }
+  },
+  "required": [
+    "locator_id",
+    "locator_authority_class",
+    "locator_type",
+    "normalized_locator",
+    "source_class",
+    "access_rights_state",
+    "redaction_required_flag"
+  ],
+  "title": "Source Locator Schema",
+  "type": "object",
+  "$defs": {
+    "non_empty_string": {
+      "minLength": 1,
+      "type": "string"
+    }
+  }
+}
