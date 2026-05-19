@@ -16,6 +16,9 @@ ATOMICROWS_BUNDLE_SHA = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha
 PR122_AUDIT_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_REPO_PR122_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
 )
+PR123_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR123_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
 PR123_OWNER_AUTH_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
 )
@@ -111,13 +114,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_122_are_recorded():
+def test_same_number_mismatches_for_github_107_through_123_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 123))
+    assert numbers == set(range(107, 124))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -271,6 +274,58 @@ def test_repo_pr123_does_not_imply_roadmap_pr123_and_owner_authorized_pr106():
     assert receipt["owner_explicitly_authorized_roadmap_blueprint_pr106"] is True
     assert receipt["roadmap_controller_files_used_as_state_evidence_records_only"] is True
     assert receipt["same_number_identity_inference_used"] is False
+
+
+def test_pr123_github_audit_currentization_is_recorded_and_audit_only():
+    pr123 = _entry("PR123_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR123_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr123["repo_canonical_pr_label"] == "PR123"
+    assert pr123["github_pr_number"] == 123
+    assert pr123["github_audit_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/123"
+    assert pr123["github_title"] == "PR123 implement accepted source-evidence acceptance executor ledger"
+    assert pr123["branch_name"] == "pr123-accepted-source-evidence-acceptance-executor-ledger"
+    assert pr123["roadmap_pr_label"] is None
+    assert pr123["blueprint_pr_label"] is None
+    assert pr123["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr123["same_number_mismatch_recorded"] is True
+    assert pr123["depends_on_roster_entries"] == [
+        "PR122_REPO_CANONICAL_SELF_ENTRY"
+    ]
+    assert receipt["currentized_prior_repo_pr_label"] == "PR123"
+    assert receipt["github_pr_number"] == 123
+    assert receipt["github_pr_title"] == pr123["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-19T08:05:14Z"
+    assert (
+        receipt["github_pr_mergeCommit_oid"]
+        == "f80819434da508c8c214168d62ff0b5d83df2e37"
+    )
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_repo_pr124_does_not_imply_roadmap_pr124_and_owner_authorized_connector_gate():
+    receipt = json.loads(PR123_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    roadmap_124 = _entry("ROADMAP_PR_124_PLANNED")
+
+    assert roadmap_124["roadmap_title"] == (
+        "Neural signal walk-forward, calibration, and drift runtime"
+    )
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR124"
+        and entry["roadmap_pr_label"] == "PR #124"
+        for entry in _entries()
+    )
+    assert receipt["repo_pr_label"] == "PR124"
+    assert (
+        receipt["owner_authorized_next_capability"]
+        == "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+    )
+    assert receipt["implementation_scope"] == (
+        "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+    )
+    assert receipt["controller_used_as_record_not_veto"] is True
+    assert receipt["same_number_inference_used"] is False
 
 
 def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():

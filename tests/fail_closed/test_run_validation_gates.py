@@ -358,6 +358,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_accepted_source_to_connector_semantic_binding.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -4654,10 +4660,13 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
     )
     retrieval_index = command_names.index("validate_source_evidence_retrieval_executor.py")
     acceptance_index = command_names.index("validate_source_evidence_acceptance.py")
+    binding_index = command_names.index(
+        "validate_accepted_source_to_connector_semantic_binding.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert source_evidence_index < gate_confirmation_index < retrieval_index
-    assert retrieval_index < acceptance_index < connector_index
+    assert retrieval_index < acceptance_index < binding_index < connector_index
 
 
 def test_runner_includes_non_mutating_atomicrows_readiness_audit(monkeypatch):

@@ -126,6 +126,7 @@ LEDGER_RECORD_FIELDS = {
     "consumer_contract_state",
     "binding_packet_creation_allowed_flag",
     "production_connector_semantic_value_population_allowed_flag",
+    "production_connector_semantic_authority",
     "runtime_resolver_snapshot_creation_allowed_flag",
     "replay_paper_consumption_allowed_without_runtime_resolver_snapshot_input_lock_flag",
     "live_client_import_allowed_flag",
@@ -343,6 +344,7 @@ def validate_ledger_record(
     for field in [
         "candidate_source_evidence_packet_is_accepted_source_evidence_flag",
         "production_connector_semantic_value_population_allowed_flag",
+        "production_connector_semantic_authority",
         "runtime_resolver_snapshot_creation_allowed_flag",
         "replay_paper_consumption_allowed_without_runtime_resolver_snapshot_input_lock_flag",
         "live_client_import_allowed_flag",

@@ -67,7 +67,8 @@
       119,
       120,
       121,
-      122
+      122,
+      123
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1864,6 +1865,42 @@
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
       "notes": "GitHub #122 is the audit number assigned to the merged pull request for repo-canonical PR122. This does not imply Roadmap PR #122 or Blueprint PR #122. Repo-canonical PR122 remains the implementation-truth label for the source-evidence retrieval controller gate PR. Repo PR123 does not imply Roadmap PR #123. The owner explicitly authorized Roadmap PR106 for Repo PR123, and roadmap/controller artifacts are state evidence records, not veto authority."
+    },
+    {
+      "roster_entry_id": "PR123_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR123",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 123,
+      "repo_title": "Accepted source-evidence acceptance executor ledger",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR123 implement accepted source-evidence acceptance executor ledger",
+      "branch_name": "pr123-accepted-source-evidence-acceptance-executor-ledger",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_SOURCE_EVIDENCE_ACCEPTANCE_EXECUTOR_OK",
+        "QTT_ACCEPTED_SOURCE_EVIDENCE_ACCEPTANCE_EXECUTOR_AND_LEDGER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR122_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/123",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "notes": "GitHub #123 is the audit number assigned to the merged pull request for repo-canonical PR123. This does not imply Roadmap PR #123 or Blueprint PR #123. Repo-canonical PR123 remains the implementation-truth label for the accepted source-evidence acceptance executor ledger PR. Repo PR124 does not imply Roadmap PR #124. The owner explicitly authorized ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE for Repo PR124, and roadmap/controller artifacts are state evidence records, not veto authority."
     }
   ],
   "mismatch_summary": {
@@ -1978,6 +2015,13 @@
         "github_title": "PR122 add source-evidence retrieval controller gate",
         "roadmap_pr_label": "PR #122",
         "roadmap_title": "Dual-result runtime comparator and promotion blocker",
+        "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 123,
+        "github_title": "PR123 implement accepted source-evidence acceptance executor ledger",
+        "roadmap_pr_label": "PR #123",
+        "roadmap_title": "Prediction-market microstructure feature calibration runtime",
         "relation": "SAME_NUMBER_MISMATCH"
       }
     ],

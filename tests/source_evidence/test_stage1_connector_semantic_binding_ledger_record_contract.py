@@ -100,6 +100,7 @@ def test_binding_ledger_record_requires_accepted_export_target_field_record_sour
         "live_reachability_allowed_flag",
         "receipt_ids",
         "blocker_codes",
+        "production_connector_semantic_authority",
     }.issubset(required)
 
     assert record["consumer_contract_state"] == CONSUMABLE_STATE
@@ -111,6 +112,7 @@ def test_binding_ledger_record_requires_accepted_export_target_field_record_sour
     assert record["network_io_allowed_flag"] is False
     assert record["order_execution_allowed_flag"] is False
     assert record["live_reachability_allowed_flag"] is False
+    assert record["production_connector_semantic_authority"] is False
     assert validate_ledger_record(record, canonicalization_records_by_id=_canonicalization_by_id()) == []
 
 

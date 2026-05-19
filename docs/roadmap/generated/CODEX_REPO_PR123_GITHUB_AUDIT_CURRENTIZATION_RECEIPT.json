@@ -1,0 +1,17 @@
+{
+  "repo_pr_label": "PR124",
+  "currentized_prior_repo_pr_label": "PR123",
+  "github_pr_number": 123,
+  "github_pr_title": "PR123 implement accepted source-evidence acceptance executor ledger",
+  "github_pr_state": "MERGED",
+  "github_pr_mergedAt": "2026-05-19T08:05:14Z",
+  "github_pr_mergeCommit_oid": "f80819434da508c8c214168d62ff0b5d83df2e37",
+  "github_headRefName": "pr123-accepted-source-evidence-acceptance-executor-ledger",
+  "github_baseRefName": "main",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/123",
+  "owner_authorized_next_capability": "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE",
+  "same_number_inference_used": false,
+  "identity_doctrine_preserved": true,
+  "controller_used_as_record_not_veto": true,
+  "implementation_scope": "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+}

@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/pr124_connector_semantic_binding/stage1_connector_semantic_target_field_matrix.schema.json",
+  "title": "Stage-1 Connector Semantic Target Field Matrix Schema",
+  "description": "Static Stage-1 prediction-market connector semantic surface matrix. This schema enumerates the target semantic surfaces that PR124 can bind from accepted source evidence without creating production connector values or live authority.",
+  "type": "object",
+  "properties": {
+    "connector_semantic_target_field_matrix_record_type": {
+      "const": "STAGE1_CONNECTOR_SEMANTIC_TARGET_FIELD_MATRIX_RECORD"
+    },
+    "venue_id": {
+      "$ref": "#/$defs/venue_id"
+    },
+    "surface_id": {
+      "$ref": "#/$defs/surface_id"
+    },
+    "target_field_path": {
+      "$ref": "#/$defs/target_field_path"
+    },
+    "connector_scaffold_placeholder_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "venue_neutral_adapter_contract_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "stage1_packet_schema_ref": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "source_dependency_class": {
+      "$ref": "#/$defs/source_dependency_class"
+    },
+    "accepted_packet_required_flag": {
+      "const": true
+    },
+    "runtime_receipt_required_flag": {
+      "const": false
+    },
+    "owner_policy_allowed_flag": {
+      "const": true
+    },
+    "readiness_state": {
+      "$ref": "#/$defs/readiness_state"
+    },
+    "connector_semantic_implementation_allowed_flag": {
+      "const": true
+    }
+  },
+  "required": [
+    "venue_id",
+    "surface_id",
+    "target_field_path",
+    "connector_scaffold_placeholder_ref",
+    "venue_neutral_adapter_contract_ref",
+    "stage1_packet_schema_ref",
+    "source_dependency_class",
+    "accepted_packet_required_flag",
+    "runtime_receipt_required_flag",
+    "owner_policy_allowed_flag",
+    "readiness_state",
+    "connector_semantic_implementation_allowed_flag"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_field_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$"
+    },
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "PREDICTION_MARKETS_GENERAL"
+      ]
+    },
+    "surface_id": {
+      "enum": [
+        "authentication_flow",
+        "market_data_endpoint_shape",
+        "order_entry_endpoint_shape",
+        "private_state_endpoint_shape",
+        "fee_schedule",
+        "tick_size",
+        "min_order_constraint",
+        "max_order_constraint",
+        "rate_limit",
+        "throttle_behavior",
+        "order_status_enum",
+        "settlement_semantics",
+        "cancellation_semantics",
+        "partial_fill_semantics",
+        "historical_data_surface",
+        "replay_data_availability",
+        "websocket_or_streaming_semantics",
+        "error_reject_semantics",
+        "healthcheck_or_status_surface",
+        "payout_semantics",
+        "contract_event_identifier_semantics",
+        "market_resolution_semantics"
+      ]
+    },
+    "source_dependency_class": {
+      "enum": [
+        "ACCEPTED_SOURCE_EVIDENCE_REQUIRED",
+        "ACCEPTED_SOURCE_EVIDENCE_AND_TARGET_FIELD_LEDGER_REQUIRED"
+      ]
+    },
+    "readiness_state": {
+      "enum": [
+        "READY_FOR_STATIC_FIXTURE_CONSUMPTION",
+        "REJECTED_MISSING_ACCEPTED_SOURCE_EVIDENCE",
+        "REJECTED_TARGET_FIELD_MISMATCH",
+        "REJECTED_VENUE_MISMATCH",
+        "REJECTED_STALE_OR_CONFLICTED_ACCEPTED_PACKET",
+        "REJECTED_MISSING_UNIT_SCALE_SCOPE"
+      ]
+    }
+  }
+}
