@@ -10,6 +10,9 @@ from tools import validate_qtt_roadmap_execution_state_controller as controller_
 CONTROLLER_PATH = Path("docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json")
 SCHEMA_PATH = Path("schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json")
 ROSTER_PATH = Path("docs/roadmap/QTT_PR_Identity_Roster_v1_0.json")
+PR123_OWNER_AUTH_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
+)
 ACTIVE_REGISTRY_PATH = Path(
     "docs/master_plan/launch/QttActiveNonShaDay1GateStateRegistryContract.yaml"
 )
@@ -148,6 +151,28 @@ def test_pr121_audit_number_does_not_change_roadmap_execution_state():
         roadmap_121["controller_state"]
         == "REPLAY_PAPER_STATE_CONTROLLED_BY_RESULT_LEDGER"
     )
+
+
+def test_pr122_audit_number_and_pr123_owner_authorization_do_not_veto_pr106():
+    pr122 = _roster_entry("PR122_REPO_CANONICAL_SELF_ENTRY")
+    roadmap_122 = _mapping("PR #122")
+    roadmap_106 = _mapping("PR #106")
+    receipt = json.loads(PR123_OWNER_AUTH_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr122["repo_canonical_pr_label"] == "PR122"
+    assert pr122["github_pr_number"] == 122
+    assert pr122["roadmap_pr_label"] is None
+    assert pr122["blueprint_pr_label"] is None
+    assert pr122["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+
+    assert roadmap_122["title"] == "Dual-result runtime comparator and promotion blocker"
+    assert roadmap_122["roster_entry_id"] == "ROADMAP_PR_122_PLANNED"
+    assert roadmap_122["repo_delivery_status"] == "ROADMAP_BLUEPRINT_PLANNED_METADATA_ONLY"
+
+    assert roadmap_106["title"] == "Accepted source-evidence acceptance executor and ledger"
+    assert receipt["owner_explicitly_authorized_roadmap_blueprint_pr106"] is True
+    assert receipt["roadmap_controller_files_used_as_state_evidence_records_only"] is True
+    assert receipt["controller_used_as_record_not_veto"] is True
 
 
 def test_roadmap_blueprint_labels_are_metadata_and_same_number_is_not_identity():

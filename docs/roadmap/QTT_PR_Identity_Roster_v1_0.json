@@ -66,7 +66,8 @@
       118,
       119,
       120,
-      121
+      121,
+      122
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1828,6 +1829,41 @@
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
       "notes": "GitHub #121 is the audit number assigned to the merged pull request for repo-canonical PR121. This does not imply Roadmap PR #121 or Blueprint PR #121. Repo-canonical PR121 remains the implementation-truth label for the master-plan section coverage command matrix PR."
+    },
+    {
+      "roster_entry_id": "PR122_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR122",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 122,
+      "repo_title": "Source-evidence retrieval controller gate",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR122 add source-evidence retrieval controller gate",
+      "branch_name": "pr122-source-evidence-retrieval-controller-gated",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_SOURCE_EVIDENCE_RETRIEVAL_CONTROLLER_GATE_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR121_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/122",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "notes": "GitHub #122 is the audit number assigned to the merged pull request for repo-canonical PR122. This does not imply Roadmap PR #122 or Blueprint PR #122. Repo-canonical PR122 remains the implementation-truth label for the source-evidence retrieval controller gate PR. Repo PR123 does not imply Roadmap PR #123. The owner explicitly authorized Roadmap PR106 for Repo PR123, and roadmap/controller artifacts are state evidence records, not veto authority."
     }
   ],
   "mismatch_summary": {
@@ -1936,6 +1972,13 @@
         "roadmap_pr_label": "PR #121",
         "roadmap_title": "Replay/paper result packet writer and immutable ledger",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 122,
+        "github_title": "PR122 add source-evidence retrieval controller gate",
+        "roadmap_pr_label": "PR #122",
+        "roadmap_title": "Dual-result runtime comparator and promotion blocker",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -2021,6 +2064,13 @@
         "github_title": "PR121 add master-plan section coverage command matrix",
         "roadmap_pr_label": "PR #121",
         "roadmap_title": "Replay/paper result packet writer and immutable ledger",
+        "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 122,
+        "github_title": "PR122 add source-evidence retrieval controller gate",
+        "roadmap_pr_label": "PR #122",
+        "roadmap_title": "Dual-result runtime comparator and promotion blocker",
         "relation": "SAME_NUMBER_MISMATCH"
       }
     ],

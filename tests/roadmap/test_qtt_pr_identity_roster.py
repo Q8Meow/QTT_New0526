@@ -13,6 +13,12 @@ ROSTER_PATH = Path("docs/roadmap/QTT_PR_Identity_Roster_v1_0.json")
 SCHEMA_PATH = Path("schemas/roadmap/qtt_pr_identity_roster.schema.json")
 ATOMICROWS_BUNDLE = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl")
 ATOMICROWS_BUNDLE_SHA = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256")
+PR122_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR122_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
+PR123_OWNER_AUTH_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
+)
 
 
 def _roster() -> dict:
@@ -105,13 +111,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_121_are_recorded():
+def test_same_number_mismatches_for_github_107_through_122_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 122))
+    assert numbers == set(range(107, 123))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -218,6 +224,53 @@ def test_pr121_self_entry_is_currentized_but_not_roadmap_or_blueprint_121():
     assert pr121["depends_on_roster_entries"] == [
         "PR120_REPO_CANONICAL_SELF_ENTRY"
     ]
+
+
+def test_pr122_self_entry_is_currentized_but_not_roadmap_or_blueprint_122():
+    pr122 = _entry("PR122_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR122_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr122["repo_canonical_pr_label"] == "PR122"
+    assert pr122["github_pr_number"] == 122
+    assert pr122["github_audit_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/122"
+    assert pr122["github_title"] == "PR122 add source-evidence retrieval controller gate"
+    assert pr122["branch_name"] == "pr122-source-evidence-retrieval-controller-gated"
+    assert pr122["roadmap_pr_label"] is None
+    assert pr122["blueprint_pr_label"] is None
+    assert pr122["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr122["same_number_mismatch_recorded"] is True
+    assert pr122["depends_on_roster_entries"] == [
+        "PR121_REPO_CANONICAL_SELF_ENTRY"
+    ]
+    assert receipt["github_pr_number"] == 122
+    assert receipt["github_pr_title"] == pr122["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-19T05:38:14Z"
+    assert (
+        receipt["github_pr_mergeCommit_oid"]
+        == "1ca3f621349598ac73be1f1392600a862d25bb34"
+    )
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_repo_pr123_does_not_imply_roadmap_pr123_and_owner_authorized_pr106():
+    receipt = json.loads(PR123_OWNER_AUTH_RECEIPT_PATH.read_text(encoding="utf-8"))
+    roadmap_123 = _entry("ROADMAP_PR_123_PLANNED")
+
+    assert roadmap_123["roadmap_title"] == (
+        "Prediction-market microstructure feature calibration runtime"
+    )
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR123"
+        and entry["roadmap_pr_label"] == "PR #123"
+        for entry in _entries()
+    )
+    assert receipt["repo_pr_label"] == "PR123"
+    assert receipt["roadmap_pr_implemented"] == "PR106"
+    assert receipt["blueprint_pr_implemented"] == "PR106"
+    assert receipt["owner_explicitly_authorized_roadmap_blueprint_pr106"] is True
+    assert receipt["roadmap_controller_files_used_as_state_evidence_records_only"] is True
+    assert receipt["same_number_identity_inference_used"] is False
 
 
 def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():

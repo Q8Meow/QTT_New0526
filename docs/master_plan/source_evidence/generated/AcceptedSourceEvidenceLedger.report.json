@@ -1,0 +1,74 @@
+{
+  "accepted_ledger_record_count": 1,
+  "accepted_ledger_records": [
+    {
+      "acceptance_authority_state": "TARGET_FIELD_ACCEPTED_SOURCE_EVIDENCE_NONLIVE_ONLY",
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_1B1209B53C6165BDCC7579DA",
+      "acceptance_decision_receipt_ref": "PR123_ACCEPTANCE_DECISION_1B1209B53C6165BDCC7579DA",
+      "accepted_at_utc": "2026-05-19T00:00:00Z",
+      "accepted_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "accepted_ledger_record_id": "PR123_ACCEPTED_LEDGER_1B1209B53C6165BDCC7579DA",
+      "accepted_source_evidence_packet_id": "PR123_ACCEPTED_PACKET_1B1209B53C6165BDCC7579DA",
+      "accepted_value_label": "TEST_FIXTURE_NOT_EXTERNAL_FACT_LABEL",
+      "accepted_value_locator": "QUOTE_SPAN_LOCATOR",
+      "accepted_value_type": "OBJECT",
+      "applicability_scope": {
+        "cross_venue_scope_allowed": false,
+        "platform_scope": "KALSHI",
+        "scope_id": "PR123_FIXTURE_SCOPE_KALSHI_ORDER_FIELD",
+        "target_field_paths": [
+          "stage1.kalshi.order_entry.fixture_field"
+        ],
+        "venue_id": "KALSHI",
+        "wildcard_scope_allowed": false
+      },
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD",
+      "canonical_text_digest_sha256": "6d26893fdda5cbfc87487ca07a9328e03bd141a2594b893e4754a7183f725441",
+      "canonicalized_content_digest": "6d26893fdda5cbfc87487ca07a9328e03bd141a2594b893e4754a7183f725441",
+      "conflict_resolution_state": "NO_CONFLICT",
+      "conflict_state": "NO_CONFLICT",
+      "connector_semantic_unlock_allowed_flag": false,
+      "connector_semantic_unlock_candidate_flag": true,
+      "machine_field_locator": null,
+      "order_authority_allowed_flag": false,
+      "platform_scope": "KALSHI",
+      "production_external_fact_authority": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false,
+      "quote_span_locator": {
+        "canonicalization_policy_id": "PR123_FIXTURE_CANONICAL_TEXT_POLICY",
+        "end_offset": 48,
+        "line_end": 1,
+        "line_start": 1,
+        "quote_digest_sha256": "ca5713a63b65289fcfe948214590e37f82685a61bf699912caa792cd5fb9f1ee",
+        "quote_span_locator_id": "PR123_FIXTURE_QUOTE_LOCATOR_VALID",
+        "start_offset": 0
+      },
+      "receipt_ids": [
+        "PR123_ACCEPTANCE_DECISION_1B1209B53C6165BDCC7579DA"
+      ],
+      "redaction_state": "TEST_FIXTURE_NO_SECRET",
+      "retrieval_manifest_id": "PR123_FIXTURE_RETRIEVAL_MANIFEST",
+      "retrieval_target_id": "PR123_FIXTURE_RETRIEVAL_TARGET_KALSHI_ORDER_FIELD",
+      "revalidation_state": "TEST_FIXTURE_CURRENT",
+      "runtime_live_use_allowed_flag": false,
+      "source_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_change_materiality_class": "LOW_RISK",
+      "source_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_digest_sha256": "9aa8d995b5767ffd20a65f0c3bd04c517c8f9f42265b88db5b1d6e2df3d6cd30",
+      "source_locator": "TEST_FIXTURE_NOT_EXTERNAL_FACT:KALSHI_ORDER_FIELD_SOURCE_LOCATOR_PLACEHOLDER",
+      "source_locator_status": "TEST_FIXTURE_LOCATOR_NOT_EXTERNAL_FACT",
+      "source_locator_type": "PLACEHOLDER_NOT_FACTUAL_URL",
+      "source_target_id": "PR123_FIXTURE_SOURCE_TARGET_KALSHI_ORDER_FIELD",
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "venue_id": "KALSHI"
+    }
+  ],
+  "connector_semantic_unlock_allowed_flag": false,
+  "order_authority_allowed_flag": false,
+  "production_accepted_ledger_record_count": 0,
+  "production_external_fact_authority": false,
+  "profit_evidence_allowed_flag": false,
+  "quantum_backend_execution_allowed_flag": false,
+  "runtime_live_use_allowed_flag": false
+}

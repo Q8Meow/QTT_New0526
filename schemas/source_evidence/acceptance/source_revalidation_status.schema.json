@@ -1,0 +1,38 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/acceptance/source_revalidation_status.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Revalidation Status Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_revalidation_status_record_type": { "const": "SOURCE_REVALIDATION_STATUS" },
+    "revalidation_trigger_id": { "$ref": "#/$defs/non_empty_string" },
+    "candidate_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "target_field_path": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_trigger": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_due_at_or_event": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_due_condition": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "acceptance_blocked_by_staleness": { "type": "boolean" },
+    "fresh_revalidation_state_required_before_connector_binding": { "const": true },
+    "connector_semantic_binding_allowed_flag": { "const": false },
+    "runtime_live_use_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_revalidation_status_record_type",
+    "revalidation_trigger_id",
+    "candidate_source_evidence_packet_id",
+    "target_field_path",
+    "revalidation_trigger",
+    "revalidation_due_at_or_event",
+    "revalidation_due_condition",
+    "revalidation_state",
+    "acceptance_blocked_by_staleness",
+    "fresh_revalidation_state_required_before_connector_binding",
+    "connector_semantic_binding_allowed_flag",
+    "runtime_live_use_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 }
+  }
+}

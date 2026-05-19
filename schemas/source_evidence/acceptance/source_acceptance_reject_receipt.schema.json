@@ -1,0 +1,40 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/acceptance/source_acceptance_reject_receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Acceptance Reject Receipt Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_acceptance_reject_receipt_record_type": { "const": "SOURCE_ACCEPTANCE_REJECT_RECEIPT" },
+    "reject_receipt_id": { "$ref": "#/$defs/non_empty_string" },
+    "candidate_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "rejection_codes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/non_empty_string" } },
+    "rejection_messages": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/non_empty_string" } },
+    "accepted_source_evidence_packet_created": { "const": false },
+    "accepted_ledger_record_created": { "const": false },
+    "connector_semantic_binding_created": { "const": false },
+    "runtime_live_authority_created": { "const": false },
+    "order_authority_created": { "const": false },
+    "profit_evidence_created": { "const": false },
+    "quantum_backend_execution_created": { "const": false },
+    "rejected_at_utc": { "$ref": "#/$defs/non_empty_string" }
+  },
+  "required": [
+    "source_acceptance_reject_receipt_record_type",
+    "reject_receipt_id",
+    "candidate_source_evidence_packet_id",
+    "rejection_codes",
+    "rejection_messages",
+    "accepted_source_evidence_packet_created",
+    "accepted_ledger_record_created",
+    "connector_semantic_binding_created",
+    "runtime_live_authority_created",
+    "order_authority_created",
+    "profit_evidence_created",
+    "quantum_backend_execution_created",
+    "rejected_at_utc"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 }
+  }
+}

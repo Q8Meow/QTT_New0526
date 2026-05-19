@@ -1,0 +1,173 @@
+{
+  "fixture_id": "PR123_ACCEPTANCE_EXECUTOR_TEST_FIXTURE_SUITE",
+  "fixture_version": "PR106_ACCEPTANCE_EXECUTOR_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "synthetic_data_notice": "TEST_FIXTURE_NOT_EXTERNAL_FACT_SYNTHETIC_ONLY_NO_PRODUCTION_EXTERNAL_FACT",
+  "production_external_fact_authority": false,
+  "candidate_source_retrieval_receipts": [
+    {
+      "retrieval_receipt_id": "PR123_FIXTURE_RETRIEVAL_RECEIPT_VALID",
+      "retrieval_target_id": "PR123_FIXTURE_RETRIEVAL_TARGET_KALSHI_ORDER_FIELD",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_external_fact_authority": false,
+      "accepted_fact_authority_flag": false,
+      "connector_semantic_unlock_allowed_flag": false,
+      "runtime_live_use_allowed_flag": false,
+      "order_authority_allowed_flag": false,
+      "profit_evidence_allowed_flag": false,
+      "quantum_backend_execution_allowed_flag": false
+    }
+  ],
+  "candidate_source_evidence_packets": [
+    {
+      "candidate_source_evidence_packet_record_type": "CANDIDATE_SOURCE_EVIDENCE_PACKET",
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD",
+      "candidate_source_evidence_packet_version": "PR106_CANDIDATE_SOURCE_EVIDENCE_PACKET_V1",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "master_plan_edition": "v9.9.768",
+      "retrieval_manifest_id": "PR123_FIXTURE_RETRIEVAL_MANIFEST",
+      "retrieval_target_id": "PR123_FIXTURE_RETRIEVAL_TARGET_KALSHI_ORDER_FIELD",
+      "source_target_id": "PR123_FIXTURE_SOURCE_TARGET_KALSHI_ORDER_FIELD",
+      "venue_id": "KALSHI",
+      "platform_scope": "KALSHI",
+      "source_locator": "TEST_FIXTURE_NOT_EXTERNAL_FACT:KALSHI_ORDER_FIELD_SOURCE_LOCATOR_PLACEHOLDER",
+      "source_locator_type": "PLACEHOLDER_NOT_FACTUAL_URL",
+      "source_locator_status": "TEST_FIXTURE_LOCATOR_NOT_EXTERNAL_FACT",
+      "source_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "source_access_method": "TEST_FIXTURE_STATIC_CAPTURE",
+      "source_retrieval_method": "TEST_FIXTURE_NO_NETWORK",
+      "source_retrieved_at_utc": "2026-05-19T00:00:00Z",
+      "raw_capture_text": "TEST_FIXTURE_NOT_EXTERNAL_FACT raw capture for Kalshi target field validation.",
+      "canonical_text": "TEST_FIXTURE_NOT_EXTERNAL_FACT canonical text for Kalshi target field validation.",
+      "raw_capture_digest_sha256": "fea0a81624ff40adb6b05b1f0d0a51a6f90907d2b21d198c1efeb18c5f7f1073",
+      "canonical_text_digest_sha256": "6d26893fdda5cbfc87487ca07a9328e03bd141a2594b893e4754a7183f725441",
+      "source_digest_sha256": "9aa8d995b5767ffd20a65f0c3bd04c517c8f9f42265b88db5b1d6e2df3d6cd30",
+      "quote_span_locator_or_machine_field_locator": "QUOTE_SPAN_LOCATOR",
+      "exact_quote_or_machine_field_locator": {
+        "quote_span_locator": {
+          "quote_span_locator_id": "PR123_FIXTURE_QUOTE_LOCATOR_VALID",
+          "canonicalization_policy_id": "PR123_FIXTURE_CANONICAL_TEXT_POLICY",
+          "line_start": 1,
+          "line_end": 1,
+          "start_offset": 0,
+          "end_offset": 48,
+          "quote_digest_sha256": "ca5713a63b65289fcfe948214590e37f82685a61bf699912caa792cd5fb9f1ee"
+        }
+      },
+      "extracted_fact_payload": {
+        "fixture_value": "TEST_FIXTURE_NOT_EXTERNAL_FACT_VALUE"
+      },
+      "extracted_fact_type": "OBJECT",
+      "extracted_fact": {
+        "fixture_value": "TEST_FIXTURE_NOT_EXTERNAL_FACT_VALUE"
+      },
+      "accepted_value_label": "TEST_FIXTURE_NOT_EXTERNAL_FACT_LABEL",
+      "target_section_id": "source_evidence.stage1.kalshi.order_entry",
+      "target_field_paths_authorized": [
+        "stage1.kalshi.order_entry.fixture_field"
+      ],
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "applicability_scope": {
+        "scope_id": "PR123_FIXTURE_SCOPE_KALSHI_ORDER_FIELD",
+        "venue_id": "KALSHI",
+        "platform_scope": "KALSHI",
+        "target_field_paths": [
+          "stage1.kalshi.order_entry.fixture_field"
+        ],
+        "wildcard_scope_allowed": false,
+        "cross_venue_scope_allowed": false
+      },
+      "conflict_check_id": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "conflict_resolution_state": "NO_CONFLICT",
+      "conflict_state": "NO_CONFLICT",
+      "conflicting_packet_ids": [],
+      "revalidation_trigger": "TIME_OR_EVENT_BASED",
+      "revalidation_trigger_id": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "revalidation_due_at_or_event": "P7D_OR_SOURCE_CHANGE_EVENT",
+      "revalidation_due_condition": "NOT_DUE_CURRENT",
+      "revalidation_state": "TEST_FIXTURE_CURRENT",
+      "redaction_state": "TEST_FIXTURE_NO_SECRET",
+      "secret_like_value_detected_flag": false,
+      "private_doc_access_rights_state": "TEST_FIXTURE_NOT_PRIVATE_DOC",
+      "source_change_materiality_class": "LOW_RISK",
+      "supersedes_packet_ids": [],
+      "production_external_fact_authority": false,
+      "no_connector_semantic_population_flag": true,
+      "no_live_reachability_flag": true,
+      "no_order_execution_flag": true,
+      "no_runtime_cash_claim_flag": true,
+      "no_blocker_reduction_or_profit_claim_flag": true,
+      "no_claim_flags": {
+        "connector_semantic_binding_created": false,
+        "connector_semantic_value_populated": false,
+        "runtime_resolver_snapshot_created": false,
+        "runtime_live_authority_created": false,
+        "order_authority_created": false,
+        "runtime_cash_receipt_created": false,
+        "replay_paper_result_created": false,
+        "profit_evidence_created": false,
+        "latency_superiority_claim_created": false,
+        "execution_superiority_claim_created": false,
+        "quantum_backend_execution_created": false,
+        "quantum_simulator_execution_created": false,
+        "optimizer_execution_created": false,
+        "quantum_advantage_claim_created": false,
+        "atomicrows_bundle_created": false,
+        "atomicrows_sha_created": false
+      }
+    }
+  ],
+  "rejection_mutation_cases": [
+    {
+      "case_id": "MISSING_DIGEST",
+      "remove_fields": [
+        "source_digest_sha256"
+      ],
+      "expected_rejection_code": "MISSING_OR_MALFORMED_DIGEST"
+    },
+    {
+      "case_id": "SCOPE_MISMATCH",
+      "set_fields": {
+        "target_field_path": "stage1.kalshi.order_entry.other_fixture_field"
+      },
+      "expected_rejection_code": "TARGET_FIELD_OR_SCOPE_INVALID"
+    },
+    {
+      "case_id": "CONFLICTED_CANDIDATE",
+      "set_fields": {
+        "conflict_state": "UNRESOLVED_CONFLICT",
+        "conflict_resolution_state": "UNRESOLVED_CONFLICT"
+      },
+      "expected_rejection_code": "CONFLICT_STATE_BLOCKED"
+    },
+    {
+      "case_id": "STALE_REVALIDATION",
+      "set_fields": {
+        "revalidation_state": "STALE_REVALIDATION_REQUIRED",
+        "revalidation_due_condition": "REVALIDATION_DUE"
+      },
+      "expected_rejection_code": "REVALIDATION_STATE_BLOCKED"
+    },
+    {
+      "case_id": "SECRET_LIKE_UNREDACTED",
+      "set_fields": {
+        "secret_like_value_detected_flag": true,
+        "redaction_state": "NO_SECRET_DETECTED",
+        "extracted_fact": {
+          "api_key": "secret=sk-TESTFIXTURESECRET1234567890"
+        }
+      },
+      "expected_rejection_code": "SECRET_REDACTION_STATE_BLOCKED"
+    },
+    {
+      "case_id": "PRIVATE_DOC_UNCLEAR_ACCESS",
+      "set_fields": {
+        "source_locator_type": "OWNER_UPLOADED_PRIVATE_DOC_LOCATOR",
+        "private_doc_access_rights_state": "PRIVATE_DOC_ACCESS_RIGHTS_UNCLEAR"
+      },
+      "expected_rejection_code": "PRIVATE_DOC_ACCESS_RIGHTS_BLOCKED"
+    }
+  ]
+}

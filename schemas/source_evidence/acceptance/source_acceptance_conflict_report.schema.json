@@ -1,0 +1,36 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/acceptance/source_acceptance_conflict_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Acceptance Conflict Report Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_acceptance_conflict_report_record_type": { "const": "SOURCE_ACCEPTANCE_CONFLICT_REPORT" },
+    "conflict_check_id": { "$ref": "#/$defs/non_empty_string" },
+    "candidate_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "target_field_path": { "$ref": "#/$defs/non_empty_string" },
+    "conflict_state": { "$ref": "#/$defs/non_empty_string" },
+    "conflict_resolution_state": { "$ref": "#/$defs/non_empty_string" },
+    "conflicting_packet_ids": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/non_empty_string" } },
+    "acceptance_blocked_by_conflict": { "type": "boolean" },
+    "owner_or_risk_review_required": { "type": "boolean" },
+    "connector_semantic_binding_allowed_flag": { "const": false },
+    "runtime_live_use_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_acceptance_conflict_report_record_type",
+    "conflict_check_id",
+    "candidate_source_evidence_packet_id",
+    "target_field_path",
+    "conflict_state",
+    "conflict_resolution_state",
+    "conflicting_packet_ids",
+    "acceptance_blocked_by_conflict",
+    "owner_or_risk_review_required",
+    "connector_semantic_binding_allowed_flag",
+    "runtime_live_use_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR122",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr122-source-evidence-retrieval-controller-gated",
+  "github_pr_mergeCommit_oid": "1ca3f621349598ac73be1f1392600a862d25bb34",
+  "github_pr_mergedAt": "2026-05-19T05:38:14Z",
+  "github_pr_number": 122,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR122 add source-evidence retrieval controller gate",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/122",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_BLUEPRINT_PR106_ACCEPTED_SOURCE_EVIDENCE_ACCEPTANCE_EXECUTOR_AND_LEDGER",
+  "owner_authorized_next_roadmap_pr": "PR106",
+  "repo_pr_label": "PR123",
+  "same_number_inference_used": false
+}

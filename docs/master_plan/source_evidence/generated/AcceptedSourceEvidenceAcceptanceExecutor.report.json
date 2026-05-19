@@ -1,0 +1,201 @@
+{
+  "accepted_decision_count": 1,
+  "accepted_packet_ids": [
+    "PR123_ACCEPTED_PACKET_1B1209B53C6165BDCC7579DA"
+  ],
+  "decision_receipts": [
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_1B1209B53C6165BDCC7579DA",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": "PR123_ACCEPTED_LEDGER_1B1209B53C6165BDCC7579DA",
+      "accepted_source_evidence_packet_id": "PR123_ACCEPTED_PACKET_1B1209B53C6165BDCC7579DA",
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "ACCEPTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": null,
+      "rejection_codes": [],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": []
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_463129F6DB25898D2B4B1BB3",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_MISSING_DIGEST",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_463129F6DB25898D2B4B1BB3",
+      "rejection_codes": [
+        "MISSING_OR_MALFORMED_DIGEST"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": [
+        "candidate packet missing fields: source_digest_sha256"
+      ]
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_F022C06E0A3C5EB6073FA85B",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_SCOPE_MISMATCH",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_F022C06E0A3C5EB6073FA85B",
+      "rejection_codes": [
+        "TARGET_FIELD_OR_SCOPE_INVALID"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.other_fixture_field",
+      "validation_failure_messages": [
+        "target_field_path must be declared in target_field_paths_authorized",
+        "target_field_path must be declared in applicability_scope"
+      ]
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_DD1FACD8F41004515A1CB76B",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_CONFLICTED_CANDIDATE",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_DD1FACD8F41004515A1CB76B",
+      "rejection_codes": [
+        "CONFLICT_STATE_BLOCKED"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": [
+        "conflict_state blocks acceptance",
+        "conflict_resolution_state blocks acceptance"
+      ]
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_2818E4F96B16783A0E1D669B",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_STALE_REVALIDATION",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_2818E4F96B16783A0E1D669B",
+      "rejection_codes": [
+        "REVALIDATION_STATE_BLOCKED"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": [
+        "stale revalidation state blocks acceptance",
+        "revalidation_due_condition blocks acceptance"
+      ]
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_78B1C6075186E4DB7BE6AA79",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_SECRET_LIKE_UNREDACTED",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_78B1C6075186E4DB7BE6AA79",
+      "rejection_codes": [
+        "SECRET_REDACTION_STATE_BLOCKED"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": [
+        "secret-like values must be redacted before acceptance",
+        "secret-like value detected in candidate"
+      ]
+    },
+    {
+      "acceptance_decision_packet_id": "PR123_ACCEPTANCE_DECISION_9FDE75C4CD87C5C08E1776AC",
+      "acceptance_decision_receipt_record_type": "SOURCE_EVIDENCE_ACCEPTANCE_DECISION_RECEIPT",
+      "accepted_ledger_record_id": null,
+      "accepted_source_evidence_packet_id": null,
+      "candidate_source_evidence_packet_id": "PR123_FIXTURE_CANDIDATE_VALID_KALSHI_ORDER_FIELD_PRIVATE_DOC_UNCLEAR_ACCESS",
+      "conflict_report_ref": "PR123_FIXTURE_CONFLICT_CHECK_VALID",
+      "connector_semantic_binding_created_count": 0,
+      "decided_at_utc": "2026-05-19T00:00:00Z",
+      "decided_by_tool": "tools/source_evidence_acceptance_executor.py",
+      "decision": "REJECTED",
+      "order_authority_created": false,
+      "production_external_fact_authority": false,
+      "profit_evidence_created": false,
+      "quantum_backend_execution_count": 0,
+      "reject_receipt_ref": "PR123_REJECT_RECEIPT_9FDE75C4CD87C5C08E1776AC",
+      "rejection_codes": [
+        "PRIVATE_DOC_ACCESS_RIGHTS_BLOCKED",
+        "SOURCE_LOCATOR_INVALID"
+      ],
+      "revalidation_status_ref": "PR123_FIXTURE_REVALIDATION_TRIGGER_VALID",
+      "runtime_live_authority_created": false,
+      "target_field_path": "stage1.kalshi.order_entry.fixture_field",
+      "validation_failure_messages": [
+        "fixture candidate locator must be typed as non-factual fixture placeholder",
+        "private document access rights are unclear",
+        "private document locator requires owner access-rights attestation"
+      ]
+    }
+  ],
+  "deterministic_fixture_timestamp": "2026-05-19T00:00:00Z",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "order_authority_created": false,
+  "production_external_fact_authority": false,
+  "profit_evidence_created": false,
+  "quantum_backend_execution_count": 0,
+  "rejected_decision_count": 6,
+  "runtime_live_authority_created": false
+}
