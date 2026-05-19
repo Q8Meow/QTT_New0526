@@ -1,0 +1,47 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_supersession_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Supersession Record Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_supersession_record_id": { "$ref": "#/$defs/non_empty_string" },
+    "superseded_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "superseding_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "supersession_reason": { "$ref": "#/$defs/non_empty_string" },
+    "affected_target_field_paths": { "$ref": "#/$defs/string_array" },
+    "affected_connector_binding_ids": { "$ref": "#/$defs/string_array" },
+    "supersession_state": { "$ref": "#/$defs/supersession_state" },
+    "supersession_effective_at_fixture_time": { "$ref": "#/$defs/non_empty_string" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_source_change_authority": { "const": false }
+  },
+  "required": [
+    "source_supersession_record_id",
+    "superseded_packet_id",
+    "superseding_packet_id",
+    "supersession_reason",
+    "affected_target_field_paths",
+    "affected_connector_binding_ids",
+    "supersession_state",
+    "supersession_effective_at_fixture_time",
+    "fixture_authority_class",
+    "production_source_change_authority"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 },
+    "string_array": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/non_empty_string" }
+    },
+    "supersession_state": {
+      "enum": [
+        "NOT_SUPERSEDED",
+        "SUPERSEDED_BY_NEW_ACCEPTED_PACKET",
+        "PARTIALLY_SUPERSEDED",
+        "SUPERSESSION_REQUIRES_REVIEW"
+      ]
+    }
+  }
+}

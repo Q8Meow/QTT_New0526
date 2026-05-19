@@ -68,7 +68,8 @@
       120,
       121,
       122,
-      123
+      123,
+      124
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1901,6 +1902,85 @@
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
       "notes": "GitHub #123 is the audit number assigned to the merged pull request for repo-canonical PR123. This does not imply Roadmap PR #123 or Blueprint PR #123. Repo-canonical PR123 remains the implementation-truth label for the accepted source-evidence acceptance executor ledger PR. Repo PR124 does not imply Roadmap PR #124. The owner explicitly authorized ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE for Repo PR124, and roadmap/controller artifacts are state evidence records, not veto authority."
+    },
+    {
+      "roster_entry_id": "PR124_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR124",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 124,
+      "repo_title": "Accepted-source connector semantic binding consumer gate",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR124 implement accepted-source connector semantic binding consumer gate",
+      "branch_name": "pr124-accepted-source-to-connector-semantic-binding-consumer-gate",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR123_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/124",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-19T09:57:48Z",
+      "github_pr_mergeCommit_oid": "bc77112be515414837a46fba81abded63c956373",
+      "github_headRefName": "pr124-accepted-source-to-connector-semantic-binding-consumer-gate",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR106",
+      "owner_authorized_next_capability": "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE",
+      "notes": "GitHub #124 is the audit number assigned to the merged pull request for repo-canonical PR124. This does not imply Roadmap PR #124 or Blueprint PR #124. Repo-canonical PR124 remains the implementation-truth label for the accepted-source connector semantic binding consumer gate PR. Repo PR125 does not imply Roadmap PR #125. The owner explicitly authorized Roadmap PR107 for Repo PR125, and roadmap/controller artifacts are state evidence records, not veto authority."
+    },
+    {
+      "roster_entry_id": "PR125_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR125",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": null,
+      "repo_title": "Source revalidation, supersession, and materiality scheduler",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": null,
+      "branch_name": "pr125-source-revalidation-supersession-materiality-scheduler",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "PENDING_OWNER_DECISION",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR124_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": null,
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "owner_authorized_roadmap_pr": "PR107",
+      "owner_authorized_next_capability": "SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER",
+      "controller_used_as_record_not_veto": true,
+      "notes": "Repo-canonical PR125 is the implementation-truth label for the source revalidation, supersession, and materiality scheduler. Repo PR125 does not imply Roadmap PR #125 or Blueprint PR #125. The owner explicitly authorized Roadmap PR107 for Repo PR125. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction."
     }
   ],
   "mismatch_summary": {
@@ -2023,6 +2103,13 @@
         "roadmap_pr_label": "PR #123",
         "roadmap_title": "Prediction-market microstructure feature calibration runtime",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 124,
+        "github_title": "PR124 implement accepted-source connector semantic binding consumer gate",
+        "roadmap_pr_label": "PR #124",
+        "roadmap_title": "Neural signal walk-forward, calibration, and drift runtime",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -2116,11 +2203,21 @@
         "roadmap_pr_label": "PR #122",
         "roadmap_title": "Dual-result runtime comparator and promotion blocker",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 124,
+        "github_title": "PR124 implement accepted-source connector semantic binding consumer gate",
+        "roadmap_pr_label": "PR #124",
+        "roadmap_title": "Neural signal walk-forward, calibration, and drift runtime",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "roadmap_pr100_github102_sha_freeze_mismatch_confirmed": true,
     "roadmap_pr105_to_pr126_runtime_live_block_confirmed": true,
-    "pr117_self_entry_does_not_assume_same_number_identity": true
+    "pr117_self_entry_does_not_assume_same_number_identity": true,
+    "pr124_self_entry_does_not_assume_same_number_identity": true,
+    "pr125_owner_authorized_roadmap_pr107_not_roadmap_pr125": true,
+    "roadmap_controller_files_used_as_state_evidence_not_veto": true
   },
   "validation_expectations": {
     "validator_name": "validate_qtt_pr_identity_roster.py",

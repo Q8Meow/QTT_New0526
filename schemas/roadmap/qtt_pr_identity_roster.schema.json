@@ -125,6 +125,15 @@
         },
         "pr117_self_entry_does_not_assume_same_number_identity": {
           "const": true
+        },
+        "pr124_self_entry_does_not_assume_same_number_identity": {
+          "const": true
+        },
+        "pr125_owner_authorized_roadmap_pr107_not_roadmap_pr125": {
+          "const": true
+        },
+        "roadmap_controller_files_used_as_state_evidence_not_veto": {
+          "const": true
         }
       }
     },
@@ -370,6 +379,14 @@
         "github_audit_url": { "$ref": "#/$defs/nullableString" },
         "identity_relation_class": { "$ref": "#/$defs/identityRelationClass" },
         "same_number_mismatch_recorded": { "type": "boolean" },
+        "github_pr_state": { "$ref": "#/$defs/nullableString" },
+        "github_pr_mergedAt": { "$ref": "#/$defs/nullableString" },
+        "github_pr_mergeCommit_oid": { "$ref": "#/$defs/nullableString" },
+        "github_headRefName": { "$ref": "#/$defs/nullableString" },
+        "github_baseRefName": { "$ref": "#/$defs/nullableString" },
+        "owner_authorized_roadmap_pr": { "$ref": "#/$defs/nullableString" },
+        "owner_authorized_next_capability": { "$ref": "#/$defs/nullableString" },
+        "controller_used_as_record_not_veto": { "type": "boolean" },
         "notes": { "type": "string" }
       }
     },

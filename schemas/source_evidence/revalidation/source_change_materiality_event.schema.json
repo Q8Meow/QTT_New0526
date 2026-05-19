@@ -1,0 +1,106 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_change_materiality_event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Change Materiality Event Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_change_materiality_event_id": { "$ref": "#/$defs/non_empty_string" },
+    "source_change_event_id": { "$ref": "#/$defs/non_empty_string" },
+    "accepted_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "venue_id": { "$ref": "#/$defs/stage1_venue_id" },
+    "target_field_path": { "$ref": "#/$defs/non_empty_string" },
+    "declared_materiality_class": { "$ref": "#/$defs/non_empty_string" },
+    "materiality_class": { "$ref": "#/$defs/materiality_class" },
+    "unknown_materiality_defaulted_to_connector_blocking": { "type": "boolean" },
+    "source_change_route": { "$ref": "#/$defs/source_change_route" },
+    "source_change_summary": { "type": "string" },
+    "target_field_delta_detected": { "type": "boolean" },
+    "validator_confirms_no_target_field_delta": { "type": "boolean" },
+    "used_by_strategy_or_cost_model": { "type": "boolean" },
+    "affected_target_field_paths": { "$ref": "#/$defs/string_array" },
+    "affected_connector_binding_ids": { "$ref": "#/$defs/string_array" },
+    "affected_scope_ids": { "$ref": "#/$defs/string_array" },
+    "revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "connector_binding_revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "connector_binding_revalidation_required": { "type": "boolean" },
+    "no_new_binding_required": { "type": "boolean" },
+    "owner_or_risk_review_required": { "type": "boolean" },
+    "no_new_or_increased_exposure_required": { "type": "boolean" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_source_change_authority": { "const": false },
+    "production_revalidation_authority": { "const": false },
+    "live_pretrade_use_allowed_flag": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "source_retrieval_allowed_flag": { "const": false },
+    "source_acceptance_allowed_flag": { "const": false },
+    "connector_binding_mutation_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "live_reachability_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_change_materiality_event_id",
+    "source_change_event_id",
+    "accepted_source_evidence_packet_id",
+    "venue_id",
+    "target_field_path",
+    "declared_materiality_class",
+    "materiality_class",
+    "unknown_materiality_defaulted_to_connector_blocking",
+    "source_change_route",
+    "source_change_summary",
+    "target_field_delta_detected",
+    "validator_confirms_no_target_field_delta",
+    "used_by_strategy_or_cost_model",
+    "affected_target_field_paths",
+    "affected_connector_binding_ids",
+    "affected_scope_ids",
+    "revalidation_state",
+    "connector_binding_revalidation_state",
+    "connector_binding_revalidation_required",
+    "no_new_binding_required",
+    "owner_or_risk_review_required",
+    "no_new_or_increased_exposure_required",
+    "fixture_authority_class",
+    "production_source_change_authority",
+    "production_revalidation_authority",
+    "live_pretrade_use_allowed_flag",
+    "network_io_allowed_flag",
+    "source_retrieval_allowed_flag",
+    "source_acceptance_allowed_flag",
+    "connector_binding_mutation_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 },
+    "string_array": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/non_empty_string" }
+    },
+    "stage1_venue_id": {
+      "enum": ["KALSHI", "POLYMARKET", "FORECASTEX_IBKR", "PREDICTION_MARKETS_GENERAL"]
+    },
+    "materiality_class": {
+      "enum": [
+        "INFO_ONLY",
+        "LOW_RISK",
+        "MEDIUM_RISK",
+        "HIGH_RISK",
+        "CONNECTOR_BLOCKING",
+        "LIVE_TRADING_BLOCKING"
+      ]
+    },
+    "source_change_route": {
+      "enum": [
+        "RECORD_AND_KEEP_BINDING_IF_TARGET_FIELD_UNCHANGED",
+        "RECORD_REVALIDATION_AND_KEEP_BINDING_IF_VALIDATOR_CONFIRMS_NO_TARGET_FIELD_DELTA",
+        "REQUIRE_REVALIDATION_FOR_AFFECTED_TARGET_FIELD",
+        "REQUIRE_OWNER_OR_RISK_REVIEW_IF_USED_BY_STRATEGY_OR_COST_MODEL",
+        "DOWNGRADE_AFFECTED_CONNECTOR_BINDING_TO_REVALIDATION_REQUIRED",
+        "MARK_AFFECTED_SCOPE_NO_NEW_OR_INCREASED_EXPOSURE"
+      ]
+    }
+  }
+}

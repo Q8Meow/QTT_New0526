@@ -19,6 +19,9 @@ PR122_AUDIT_RECEIPT_PATH = Path(
 PR123_AUDIT_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_REPO_PR123_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
 )
+PR124_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR124_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
 PR123_OWNER_AUTH_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
 )
@@ -114,13 +117,13 @@ def test_github_116_does_not_overwrite_roadmap_116():
     assert roadmap_pr116["current_status"] == "PLANNED"
 
 
-def test_same_number_mismatches_for_github_107_through_123_are_recorded():
+def test_same_number_mismatches_for_github_107_through_124_are_recorded():
     records = _roster()["mismatch_summary"][
         "github_107_through_116_same_number_mismatches"
     ]
     numbers = {record["github_pr_number"] for record in records}
 
-    assert numbers == set(range(107, 124))
+    assert numbers == set(range(107, 125))
     assert any(
         record["github_pr_number"] == 107
         and record["github_title"] == "Add AtomicRows repair-chain grand debug logic audit"
@@ -305,9 +308,18 @@ def test_pr123_github_audit_currentization_is_recorded_and_audit_only():
 
 
 def test_repo_pr124_does_not_imply_roadmap_pr124_and_owner_authorized_connector_gate():
-    receipt = json.loads(PR123_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    pr124 = _entry("PR124_REPO_CANONICAL_SELF_ENTRY")
     roadmap_124 = _entry("ROADMAP_PR_124_PLANNED")
 
+    assert pr124["repo_canonical_pr_label"] == "PR124"
+    assert pr124["github_pr_number"] == 124
+    assert pr124["github_pr_state"] == "MERGED"
+    assert pr124["github_pr_mergedAt"] == "2026-05-19T09:57:48Z"
+    assert (
+        pr124["github_pr_mergeCommit_oid"]
+        == "bc77112be515414837a46fba81abded63c956373"
+    )
+    assert pr124["github_pr_number"] != 124 or pr124["roadmap_pr_label"] is None
     assert roadmap_124["roadmap_title"] == (
         "Neural signal walk-forward, calibration, and drift runtime"
     )
@@ -316,16 +328,73 @@ def test_repo_pr124_does_not_imply_roadmap_pr124_and_owner_authorized_connector_
         and entry["roadmap_pr_label"] == "PR #124"
         for entry in _entries()
     )
-    assert receipt["repo_pr_label"] == "PR124"
+
+
+def test_pr124_github_audit_currentization_receipt_is_recorded_and_audit_only():
+    pr124 = _entry("PR124_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR124_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert receipt["repo_pr_label"] == "PR125"
+    assert receipt["currentized_prior_repo_pr_label"] == "PR124"
+    assert receipt["github_pr_number"] == 124
+    assert receipt["github_pr_title"] == pr124["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-19T09:57:48Z"
     assert (
-        receipt["owner_authorized_next_capability"]
-        == "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+        receipt["github_pr_mergeCommit_oid"]
+        == "bc77112be515414837a46fba81abded63c956373"
     )
-    assert receipt["implementation_scope"] == (
-        "ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE"
+    assert (
+        receipt["github_headRefName"]
+        == "pr124-accepted-source-to-connector-semantic-binding-consumer-gate"
     )
-    assert receipt["controller_used_as_record_not_veto"] is True
+    assert receipt["github_baseRefName"] == "main"
     assert receipt["same_number_inference_used"] is False
+    assert pr124["roadmap_pr_label"] is None
+    assert pr124["blueprint_pr_label"] is None
+
+
+def test_repo_pr125_does_not_imply_roadmap_pr125_and_owner_authorized_pr107():
+    pr125 = _entry("PR125_REPO_CANONICAL_SELF_ENTRY")
+    roadmap_107 = _entry("ROADMAP_PR_107_PLANNED")
+    roadmap_125 = _entry("ROADMAP_PR_125_PLANNED")
+    receipt = json.loads(PR124_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert roadmap_107["roadmap_title"] == (
+        "Source revalidation, supersession, and materiality scheduler"
+    )
+    assert roadmap_125["roadmap_title"] != roadmap_107["roadmap_title"]
+    assert pr125["repo_canonical_pr_label"] == "PR125"
+    assert pr125["roadmap_pr_label"] is None
+    assert pr125["blueprint_pr_label"] is None
+    assert pr125["github_pr_number"] is None
+    assert pr125["owner_authorized_roadmap_pr"] == "PR107"
+    assert (
+        pr125["owner_authorized_next_capability"]
+        == "SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER"
+    )
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR125"
+        and entry["roadmap_pr_label"] == "PR #125"
+        for entry in _entries()
+    )
+    assert receipt["owner_authorized_roadmap_pr"] == "PR107"
+    assert receipt["controller_used_as_record_not_veto"] is True
+
+
+def test_roadmap_and_controller_files_are_state_evidence_not_veto_for_pr125():
+    roster = _roster()
+    pr125 = _entry("PR125_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR124_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert roster["mismatch_summary"][
+        "roadmap_controller_files_used_as_state_evidence_not_veto"
+    ] is True
+    assert pr125["controller_used_as_record_not_veto"] is True
+    assert receipt["controller_used_as_record_not_veto"] is True
+    assert receipt["implementation_scope"] == (
+        "ROADMAP_PR107_SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER"
+    )
 
 
 def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():

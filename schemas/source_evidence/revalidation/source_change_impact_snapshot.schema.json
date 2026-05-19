@@ -1,0 +1,73 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_change_impact_snapshot.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Change Impact Snapshot Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_change_snapshot_id": { "$ref": "#/$defs/non_empty_string" },
+    "snapshot_scope": { "$ref": "#/$defs/non_empty_string" },
+    "generated_by_tool": { "const": "tools/source_revalidation_scheduler.py" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_source_change_authority": { "const": false },
+    "source_change_snapshot_state": { "$ref": "#/$defs/non_empty_string" },
+    "deterministic_fixture_time": { "$ref": "#/$defs/non_empty_string" },
+    "affected_venue_ids": { "$ref": "#/$defs/string_array" },
+    "affected_target_field_paths": { "$ref": "#/$defs/string_array" },
+    "affected_connector_binding_ids": { "$ref": "#/$defs/string_array" },
+    "stale_accepted_packet_ids": { "$ref": "#/$defs/string_array" },
+    "superseded_accepted_packet_ids": { "$ref": "#/$defs/string_array" },
+    "revalidation_due_packet_ids": { "$ref": "#/$defs/string_array" },
+    "materiality_event_ids": { "$ref": "#/$defs/string_array" },
+    "connector_binding_revalidation_required_ids": { "$ref": "#/$defs/string_array" },
+    "no_new_binding_target_field_paths": { "$ref": "#/$defs/string_array" },
+    "no_new_or_increased_exposure_scope_ids": { "$ref": "#/$defs/string_array" },
+    "owner_or_risk_review_required_ids": { "$ref": "#/$defs/string_array" },
+    "live_pretrade_use_allowed_flag": { "const": false },
+    "live_pretrade_consumption_mode": {
+      "const": "PRECOMPUTED_SNAPSHOT_ONLY_FOR_FUTURE_PR"
+    },
+    "network_io_allowed_flag": { "const": false },
+    "source_retrieval_allowed_flag": { "const": false },
+    "source_acceptance_allowed_flag": { "const": false },
+    "connector_binding_mutation_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "live_reachability_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_change_snapshot_id",
+    "snapshot_scope",
+    "generated_by_tool",
+    "fixture_authority_class",
+    "production_source_change_authority",
+    "source_change_snapshot_state",
+    "deterministic_fixture_time",
+    "affected_venue_ids",
+    "affected_target_field_paths",
+    "affected_connector_binding_ids",
+    "stale_accepted_packet_ids",
+    "superseded_accepted_packet_ids",
+    "revalidation_due_packet_ids",
+    "materiality_event_ids",
+    "connector_binding_revalidation_required_ids",
+    "no_new_binding_target_field_paths",
+    "no_new_or_increased_exposure_scope_ids",
+    "owner_or_risk_review_required_ids",
+    "live_pretrade_use_allowed_flag",
+    "live_pretrade_consumption_mode",
+    "network_io_allowed_flag",
+    "source_retrieval_allowed_flag",
+    "source_acceptance_allowed_flag",
+    "connector_binding_mutation_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 },
+    "string_array": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/non_empty_string" }
+    }
+  }
+}

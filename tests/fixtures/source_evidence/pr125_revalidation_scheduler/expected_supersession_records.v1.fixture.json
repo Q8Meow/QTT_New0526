@@ -1,0 +1,24 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR125_EXPECTED_SUPERSESSION_RECORDS_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "source_supersession_records": [
+    {
+      "source_supersession_record_id": "PR125_SUPERSESSION_PR125_PACKET_KALSHI_FEE_RULES_OLD_BY_PR125_PACKET_KALSHI_FEE_RULES_NEW",
+      "superseded_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_OLD",
+      "superseding_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_NEW",
+      "supersession_reason": "TEST_FIXTURE_NEW_ACCEPTED_PACKET_FOR_SAME_TARGET_FIELD",
+      "affected_target_field_paths": [
+        "kalshi.fees.maker_fee_rule"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_KALSHI_FEE_OLD"
+      ],
+      "supersession_state": "SUPERSEDED_BY_NEW_ACCEPTED_PACKET",
+      "supersession_effective_at_fixture_time": "2026-05-19T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_source_change_authority": false
+    }
+  ]
+}
