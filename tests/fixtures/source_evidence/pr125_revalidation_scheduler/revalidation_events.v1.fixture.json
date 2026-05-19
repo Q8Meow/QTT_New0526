@@ -1,0 +1,156 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR125_REVALIDATION_EVENTS_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+  "revalidation_events": [
+    {
+      "source_change_event_id": "EVENT_CONNECTOR_BLOCKING_ORDER_ENTRY",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_ORDER_ENTRY_EVENT",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.order_entry.fields",
+      "declared_materiality_class": "CONNECTOR_BLOCKING",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT connector blocking change",
+      "target_field_delta_detected": true,
+      "validator_confirms_no_target_field_delta": false,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "kalshi.order_entry.fields"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_KALSHI_ORDER_ENTRY"
+      ],
+      "affected_scope_ids": [
+        "KALSHI_ORDER_ENTRY_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_HIGH_RISK_STRATEGY_COST_MODEL",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_NEW",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.fees.maker_fee_rule",
+      "declared_materiality_class": "HIGH_RISK",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT strategy cost model impact",
+      "target_field_delta_detected": true,
+      "validator_confirms_no_target_field_delta": false,
+      "used_by_strategy_or_cost_model": true,
+      "affected_target_field_paths": [
+        "kalshi.fees.maker_fee_rule"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_KALSHI_FEE_NEW"
+      ],
+      "affected_scope_ids": [
+        "KALSHI_FEE_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_INFO_ONLY_GENERAL_DOC",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_POLYMARKET_GENERAL_DOCS",
+      "venue_id": "POLYMARKET",
+      "target_field_path": "polymarket.docs.general_text",
+      "declared_materiality_class": "INFO_ONLY",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT info-only wording change",
+      "target_field_delta_detected": false,
+      "validator_confirms_no_target_field_delta": true,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "polymarket.docs.general_text"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_POLYMARKET_GENERAL_DOCS"
+      ],
+      "affected_scope_ids": [
+        "POLYMARKET_GENERAL_DOC_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_LIVE_TRADING_BLOCKING_RATE_LIMIT",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_FORECASTEX_RATE_LIMITS",
+      "venue_id": "FORECASTEX_IBKR",
+      "target_field_path": "forecast_ex_ibkr.rate_limits.request_budget",
+      "declared_materiality_class": "LIVE_TRADING_BLOCKING",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT live exposure blocking change",
+      "target_field_delta_detected": true,
+      "validator_confirms_no_target_field_delta": false,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "forecast_ex_ibkr.rate_limits.request_budget"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_FORECASTEX_RATE_LIMITS"
+      ],
+      "affected_scope_ids": [
+        "FORECASTEX_IBKR_LIVE_EXPOSURE_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_LOW_RISK_GENERAL_DOC_VALIDATED",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_POLYMARKET_GENERAL_DOCS",
+      "venue_id": "POLYMARKET",
+      "target_field_path": "polymarket.docs.general_text",
+      "declared_materiality_class": "LOW_RISK",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT low risk no target delta",
+      "target_field_delta_detected": false,
+      "validator_confirms_no_target_field_delta": true,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "polymarket.docs.general_text"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_POLYMARKET_GENERAL_DOCS"
+      ],
+      "affected_scope_ids": [
+        "POLYMARKET_GENERAL_DOC_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_MEDIUM_RISK_TARGET_DELTA",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_NEW",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.fees.maker_fee_rule",
+      "declared_materiality_class": "MEDIUM_RISK",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT target field revalidation required",
+      "target_field_delta_detected": true,
+      "validator_confirms_no_target_field_delta": false,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "kalshi.fees.maker_fee_rule"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_KALSHI_FEE_NEW"
+      ],
+      "affected_scope_ids": [
+        "KALSHI_FEE_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    },
+    {
+      "source_change_event_id": "EVENT_UNKNOWN_MATERIALITY_QUANTUM_DOC",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_QUANTUM_PROVIDER_DOC_METADATA",
+      "venue_id": "PREDICTION_MARKETS_GENERAL",
+      "target_field_path": "quantum_provider.documentation_metadata",
+      "declared_materiality_class": "UNKNOWN",
+      "source_change_summary": "TEST_FIXTURE_NOT_EXTERNAL_FACT unknown materiality defaults blocking",
+      "target_field_delta_detected": true,
+      "validator_confirms_no_target_field_delta": false,
+      "used_by_strategy_or_cost_model": false,
+      "affected_target_field_paths": [
+        "quantum_provider.documentation_metadata"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_QUANTUM_PROVIDER_DOC_METADATA"
+      ],
+      "affected_scope_ids": [
+        "PREDICTION_MARKETS_GENERAL_QUANTUM_METADATA_SCOPE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT"
+    }
+  ]
+}

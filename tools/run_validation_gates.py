@@ -254,6 +254,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_source_revalidation_scheduler.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

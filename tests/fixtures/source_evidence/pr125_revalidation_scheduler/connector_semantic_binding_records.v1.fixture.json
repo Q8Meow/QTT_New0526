@@ -1,0 +1,78 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR125_CONNECTOR_SEMANTIC_BINDING_RECORDS_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "connector_semantic_binding_records": [
+    {
+      "connector_binding_id": "PR125_BINDING_FORECASTEX_RATE_LIMITS",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_FORECASTEX_RATE_LIMITS",
+      "venue_id": "FORECASTEX_IBKR",
+      "target_field_path": "forecast_ex_ibkr.rate_limits.request_budget",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_KALSHI_FEE_NEW",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_NEW",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.fees.maker_fee_rule",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_KALSHI_FEE_OLD",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_FEE_RULES_OLD",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.fees.maker_fee_rule",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_KALSHI_ORDER_ENTRY",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_KALSHI_ORDER_ENTRY_EVENT",
+      "venue_id": "KALSHI",
+      "target_field_path": "kalshi.order_entry.fields",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_POLYMARKET_GENERAL_DOCS",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_POLYMARKET_GENERAL_DOCS",
+      "venue_id": "POLYMARKET",
+      "target_field_path": "polymarket.docs.general_text",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_QUANTUM_PROVIDER_DOC_METADATA",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_QUANTUM_PROVIDER_DOC_METADATA",
+      "venue_id": "PREDICTION_MARKETS_GENERAL",
+      "target_field_path": "quantum_provider.documentation_metadata",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    },
+    {
+      "connector_binding_id": "PR125_BINDING_POLYMARKET_TICK_RULES_STALE",
+      "accepted_source_evidence_packet_id": "PR125_PACKET_POLYMARKET_TICK_RULES_STALE",
+      "venue_id": "POLYMARKET",
+      "target_field_path": "polymarket.tick_rules.min_tick",
+      "connector_binding_revalidation_state": "NOT_REQUIRED_FOR_FIXTURE",
+      "source_chain_pr124_connector_fixture": true,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_connector_semantic_authority": false
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_revalidation_policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Revalidation Policy Schema",
+  "description": "PR125 / Roadmap PR107 owner-approved source revalidation policy. This schema defines control-plane scheduler policy only and creates no source retrieval, acceptance, live, order, profit, or quantum execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_revalidation_policy_id": { "$ref": "#/$defs/non_empty_string" },
+    "policy_authority": { "const": "OWNER_APPROVED_PR107_CONTROL_PLANE_POLICY" },
+    "live_critical_revalidation_interval": { "const": "P1D" },
+    "low_risk_revalidation_interval": { "const": "P7D" },
+    "event_triggered_revalidation_latency_class": {
+      "const": "IMMEDIATE_CONTROL_PLANE_REVALIDATION_BEFORE_NEW_BINDING_OR_NEW_LIVE_USE"
+    },
+    "live_critical_source_field_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/source_field_class" }
+    },
+    "low_risk_source_field_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/source_field_class" }
+    },
+    "unknown_materiality_defaults_connector_blocking": { "const": true },
+    "live_pretrade_use_allowed_flag": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "source_retrieval_allowed_flag": { "const": false },
+    "source_acceptance_allowed_flag": { "const": false },
+    "connector_binding_mutation_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "live_reachability_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_revalidation_policy_id",
+    "policy_authority",
+    "live_critical_revalidation_interval",
+    "low_risk_revalidation_interval",
+    "event_triggered_revalidation_latency_class",
+    "live_critical_source_field_classes",
+    "low_risk_source_field_classes",
+    "unknown_materiality_defaults_connector_blocking",
+    "live_pretrade_use_allowed_flag",
+    "network_io_allowed_flag",
+    "source_retrieval_allowed_flag",
+    "source_acceptance_allowed_flag",
+    "connector_binding_mutation_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 },
+    "source_field_class": {
+      "enum": [
+        "FEE_RULES",
+        "TICK_RULES",
+        "ORDER_ENTRY_FIELDS",
+        "ORDER_STATUS_FIELDS",
+        "ORDERBOOK_SCHEMA",
+        "WEBSOCKET_SCHEMA",
+        "SETTLEMENT_RULES",
+        "PAYOUT_RULES",
+        "RATE_LIMITS",
+        "ACCOUNT_BALANCE_SEMANTICS",
+        "PRIVATE_STATE_CASH_SEMANTICS",
+        "MARGIN_RESERVE_LOCK_SEMANTICS",
+        "ERROR_REJECT_THROTTLE_SEMANTICS",
+        "EXECUTION_LIFECYCLE_SEMANTICS",
+        "FILL_INTEGRITY_SEMANTICS",
+        "CASHFLOW_PNL_SEMANTICS",
+        "LATENCY_COMPONENT_SEMANTICS",
+        "SETTLEMENT_FINALITY_SEMANTICS",
+        "RECONCILIATION_SEMANTICS",
+        "NON_TARGET_FIELD_DOC_TEXT",
+        "GENERAL_EXPLANATORY_DOCS",
+        "UNUSED_EXAMPLES",
+        "CHANGELOG_ITEMS_WITH_NO_TARGET_FIELD_DELTA"
+      ]
+    }
+  }
+}

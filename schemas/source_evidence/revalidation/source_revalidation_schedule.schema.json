@@ -1,0 +1,88 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_revalidation_schedule.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Revalidation Schedule Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_revalidation_schedule_record_id": { "$ref": "#/$defs/non_empty_string" },
+    "accepted_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "venue_id": { "$ref": "#/$defs/stage1_venue_id" },
+    "platform_scope": { "$ref": "#/$defs/stage1_venue_id" },
+    "source_field_class": { "$ref": "#/$defs/non_empty_string" },
+    "target_field_path": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_interval": { "enum": ["P1D", "P7D"] },
+    "revalidation_state": { "$ref": "#/$defs/revalidation_state" },
+    "revalidation_due_state": { "$ref": "#/$defs/revalidation_due_state" },
+    "next_revalidation_due_at_fixture_time": { "$ref": "#/$defs/non_empty_string" },
+    "deterministic_fixture_time": { "$ref": "#/$defs/non_empty_string" },
+    "supersession_state": { "$ref": "#/$defs/supersession_state" },
+    "materiality_classification_required": { "const": true },
+    "connector_binding_revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_revalidation_authority": { "const": false },
+    "production_source_change_authority": { "const": false },
+    "live_pretrade_use_allowed_flag": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "source_retrieval_allowed_flag": { "const": false },
+    "source_acceptance_allowed_flag": { "const": false },
+    "connector_binding_mutation_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "live_reachability_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_revalidation_schedule_record_id",
+    "accepted_source_evidence_packet_id",
+    "venue_id",
+    "platform_scope",
+    "source_field_class",
+    "target_field_path",
+    "revalidation_interval",
+    "revalidation_state",
+    "revalidation_due_state",
+    "next_revalidation_due_at_fixture_time",
+    "deterministic_fixture_time",
+    "supersession_state",
+    "materiality_classification_required",
+    "connector_binding_revalidation_state",
+    "fixture_authority_class",
+    "production_revalidation_authority",
+    "production_source_change_authority",
+    "live_pretrade_use_allowed_flag",
+    "network_io_allowed_flag",
+    "source_retrieval_allowed_flag",
+    "source_acceptance_allowed_flag",
+    "connector_binding_mutation_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 },
+    "stage1_venue_id": {
+      "enum": ["KALSHI", "POLYMARKET", "FORECASTEX_IBKR", "PREDICTION_MARKETS_GENERAL"]
+    },
+    "revalidation_state": {
+      "enum": [
+        "FRESH",
+        "DUE_TIME_BASED",
+        "DUE_EVENT_TRIGGERED",
+        "STALE",
+        "SUPERSEDED",
+        "REVALIDATED_NO_TARGET_FIELD_DELTA",
+        "REVALIDATED_TARGET_FIELD_DELTA_DETECTED",
+        "OWNER_OR_RISK_REVIEW_REQUIRED"
+      ]
+    },
+    "revalidation_due_state": {
+      "enum": ["NOT_DUE", "DUE_TIME_BASED", "DUE_EVENT_TRIGGERED", "SUPERSEDED"]
+    },
+    "supersession_state": {
+      "enum": [
+        "NOT_SUPERSEDED",
+        "SUPERSEDED_BY_NEW_ACCEPTED_PACKET",
+        "PARTIALLY_SUPERSEDED",
+        "SUPERSESSION_REQUIRES_REVIEW"
+      ]
+    }
+  }
+}

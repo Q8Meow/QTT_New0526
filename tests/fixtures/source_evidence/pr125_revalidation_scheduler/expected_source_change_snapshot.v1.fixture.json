@@ -1,0 +1,87 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR125_EXPECTED_SOURCE_CHANGE_SNAPSHOT_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "source_change_impact_snapshots": [
+    {
+      "source_change_snapshot_id": "PR125_SOURCE_CHANGE_IMPACT_SNAPSHOT_FIXTURE_V1",
+      "snapshot_scope": "STAGE1_PREDICTION_MARKETS_SOURCE_REVALIDATION_FIXTURE",
+      "generated_by_tool": "tools/source_revalidation_scheduler.py",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_source_change_authority": false,
+      "source_change_snapshot_state": "PRECOMPUTED_CONTROL_PLANE_FIXTURE",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "affected_venue_ids": [
+        "FORECASTEX_IBKR",
+        "KALSHI",
+        "POLYMARKET",
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "affected_target_field_paths": [
+        "forecast_ex_ibkr.rate_limits.request_budget",
+        "kalshi.fees.maker_fee_rule",
+        "kalshi.order_entry.fields",
+        "polymarket.docs.general_text",
+        "quantum_provider.documentation_metadata"
+      ],
+      "affected_connector_binding_ids": [
+        "PR125_BINDING_FORECASTEX_RATE_LIMITS",
+        "PR125_BINDING_KALSHI_FEE_NEW",
+        "PR125_BINDING_KALSHI_FEE_OLD",
+        "PR125_BINDING_KALSHI_ORDER_ENTRY",
+        "PR125_BINDING_POLYMARKET_GENERAL_DOCS",
+        "PR125_BINDING_QUANTUM_PROVIDER_DOC_METADATA"
+      ],
+      "stale_accepted_packet_ids": [
+        "PR125_PACKET_POLYMARKET_TICK_RULES_STALE"
+      ],
+      "superseded_accepted_packet_ids": [
+        "PR125_PACKET_KALSHI_FEE_RULES_OLD"
+      ],
+      "revalidation_due_packet_ids": [
+        "PR125_PACKET_FORECASTEX_RATE_LIMITS",
+        "PR125_PACKET_KALSHI_FEE_RULES_NEW",
+        "PR125_PACKET_KALSHI_FEE_RULES_OLD",
+        "PR125_PACKET_KALSHI_ORDER_ENTRY_EVENT",
+        "PR125_PACKET_POLYMARKET_TICK_RULES_STALE",
+        "PR125_PACKET_QUANTUM_PROVIDER_DOC_METADATA"
+      ],
+      "materiality_event_ids": [
+        "PR125_MATERIALITY_EVENT_CONNECTOR_BLOCKING_ORDER_ENTRY",
+        "PR125_MATERIALITY_EVENT_HIGH_RISK_STRATEGY_COST_MODEL",
+        "PR125_MATERIALITY_EVENT_INFO_ONLY_GENERAL_DOC",
+        "PR125_MATERIALITY_EVENT_LIVE_TRADING_BLOCKING_RATE_LIMIT",
+        "PR125_MATERIALITY_EVENT_LOW_RISK_GENERAL_DOC_VALIDATED",
+        "PR125_MATERIALITY_EVENT_MEDIUM_RISK_TARGET_DELTA",
+        "PR125_MATERIALITY_EVENT_UNKNOWN_MATERIALITY_QUANTUM_DOC"
+      ],
+      "connector_binding_revalidation_required_ids": [
+        "PR125_BINDING_KALSHI_FEE_NEW",
+        "PR125_BINDING_KALSHI_FEE_OLD",
+        "PR125_BINDING_KALSHI_ORDER_ENTRY",
+        "PR125_BINDING_QUANTUM_PROVIDER_DOC_METADATA"
+      ],
+      "no_new_binding_target_field_paths": [
+        "forecast_ex_ibkr.rate_limits.request_budget",
+        "kalshi.fees.maker_fee_rule",
+        "kalshi.order_entry.fields",
+        "quantum_provider.documentation_metadata"
+      ],
+      "no_new_or_increased_exposure_scope_ids": [
+        "FORECASTEX_IBKR_LIVE_EXPOSURE_SCOPE"
+      ],
+      "owner_or_risk_review_required_ids": [
+        "PR125_MATERIALITY_EVENT_HIGH_RISK_STRATEGY_COST_MODEL"
+      ],
+      "live_pretrade_use_allowed_flag": false,
+      "live_pretrade_consumption_mode": "PRECOMPUTED_SNAPSHOT_ONLY_FOR_FUTURE_PR",
+      "network_io_allowed_flag": false,
+      "source_retrieval_allowed_flag": false,
+      "source_acceptance_allowed_flag": false,
+      "connector_binding_mutation_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false
+    }
+  ]
+}

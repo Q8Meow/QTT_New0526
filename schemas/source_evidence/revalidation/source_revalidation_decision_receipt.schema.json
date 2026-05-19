@@ -1,0 +1,46 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/revalidation/source_revalidation_decision_receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Revalidation Decision Receipt Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source_revalidation_decision_receipt_id": { "$ref": "#/$defs/non_empty_string" },
+    "accepted_source_evidence_packet_id": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "revalidation_due_state": { "$ref": "#/$defs/non_empty_string" },
+    "connector_binding_revalidation_state": { "$ref": "#/$defs/non_empty_string" },
+    "decision_reason": { "$ref": "#/$defs/non_empty_string" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_revalidation_authority": { "const": false },
+    "production_source_change_authority": { "const": false },
+    "live_pretrade_use_allowed_flag": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "source_retrieval_allowed_flag": { "const": false },
+    "source_acceptance_allowed_flag": { "const": false },
+    "connector_binding_mutation_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "live_reachability_allowed_flag": { "const": false }
+  },
+  "required": [
+    "source_revalidation_decision_receipt_id",
+    "accepted_source_evidence_packet_id",
+    "revalidation_state",
+    "revalidation_due_state",
+    "connector_binding_revalidation_state",
+    "decision_reason",
+    "fixture_authority_class",
+    "production_revalidation_authority",
+    "production_source_change_authority",
+    "live_pretrade_use_allowed_flag",
+    "network_io_allowed_flag",
+    "source_retrieval_allowed_flag",
+    "source_acceptance_allowed_flag",
+    "connector_binding_mutation_allowed_flag",
+    "order_execution_allowed_flag",
+    "live_reachability_allowed_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 }
+  }
+}

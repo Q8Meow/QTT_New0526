@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR124",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr124-accepted-source-to-connector-semantic-binding-consumer-gate",
+  "github_pr_mergeCommit_oid": "bc77112be515414837a46fba81abded63c956373",
+  "github_pr_mergedAt": "2026-05-19T09:57:48Z",
+  "github_pr_number": 124,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR124 implement accepted-source connector semantic binding consumer gate",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/124",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR107_SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER",
+  "owner_authorized_next_capability": "SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER",
+  "owner_authorized_roadmap_pr": "PR107",
+  "repo_pr_label": "PR125",
+  "same_number_inference_used": false
+}
