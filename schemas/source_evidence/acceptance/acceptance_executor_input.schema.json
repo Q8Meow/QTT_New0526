@@ -1,0 +1,37 @@
+{
+  "$id": "https://qtt.local/schemas/source_evidence/acceptance/acceptance_executor_input.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source-Evidence Acceptance Executor Input Schema",
+  "description": "Input envelope for PR106 accepted source-evidence acceptance executor. Candidate packets must carry exact target-field, source-locator, digest, conflict, revalidation, redaction, and private-document access state before acceptance.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "acceptance_executor_input_record_type": { "const": "SOURCE_EVIDENCE_ACCEPTANCE_EXECUTOR_INPUT" },
+    "acceptance_executor_input_id": { "$ref": "#/$defs/non_empty_string" },
+    "acceptance_executor_input_version": { "const": "PR106_ACCEPTANCE_EXECUTOR_INPUT_V1" },
+    "execution_mode": { "enum": ["FIXTURE_VALIDATION_ONLY", "PRODUCTION_CANDIDATE_VALIDATION"] },
+    "retrieval_manifest": { "type": ["object", "null"] },
+    "candidate_source_retrieval_receipt": { "type": ["object", "null"] },
+    "candidate_source_evidence_packet": { "type": "object" },
+    "no_live_pretrade_path_flag": { "const": true },
+    "no_connector_semantic_binding_flag": { "const": true },
+    "no_order_execution_flag": { "const": true },
+    "no_profit_or_quantum_advantage_claim_flag": { "const": true }
+  },
+  "required": [
+    "acceptance_executor_input_record_type",
+    "acceptance_executor_input_id",
+    "acceptance_executor_input_version",
+    "execution_mode",
+    "retrieval_manifest",
+    "candidate_source_retrieval_receipt",
+    "candidate_source_evidence_packet",
+    "no_live_pretrade_path_flag",
+    "no_connector_semantic_binding_flag",
+    "no_order_execution_flag",
+    "no_profit_or_quantum_advantage_claim_flag"
+  ],
+  "$defs": {
+    "non_empty_string": { "type": "string", "minLength": 1 }
+  }
+}

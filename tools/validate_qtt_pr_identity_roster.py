@@ -107,9 +107,9 @@ REQUIRED_NO_CLAIM_BOUNDARY = {
     "profit_latency_execution_quantum_advantage_evidence_created": False,
     "bug_free_status_claimed": False,
 }
-REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 122))
+REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 123))
 REQUIRED_ROADMAP_LABELS = tuple(f"PR #{number}" for number in range(97, 127))
-REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 117))
+REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 123))
 ROADMAP_RUNTIME_BLOCK_LABELS = tuple(f"PR #{number}" for number in range(105, 127))
 REQUIRED_PR115A_NOTE_PARTS = (
     "SHA dormant/non-participating",
@@ -165,6 +165,15 @@ REQUIRED_PR121_NOTE_PARTS = (
     "does not imply Roadmap PR #121",
     "Blueprint PR #121",
     "implementation-truth label",
+)
+REQUIRED_PR122_NOTE_PARTS = (
+    "GitHub #122 is the audit number assigned",
+    "repo-canonical PR122",
+    "does not imply Roadmap PR #122",
+    "Blueprint PR #122",
+    "Repo PR123 does not imply Roadmap PR #123",
+    "owner explicitly authorized Roadmap PR106 for Repo PR123",
+    "state evidence records, not veto authority",
 )
 
 
@@ -326,7 +335,7 @@ def _validate_seed_scope(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     if not isinstance(scope, dict):
         return ["seed_scope must be an object"]
     if tuple(scope.get("github_pr_numbers_included", [])) != REQUIRED_GITHUB_AUDIT_NUMBERS:
-        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #121")
+        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #122")
     if tuple(scope.get("roadmap_pr_labels_included", [])) != REQUIRED_ROADMAP_LABELS:
         failures.append("seed_scope.roadmap_pr_labels_included must be roadmap PR #97 through #126")
     if tuple(scope.get("corrective_overlays_included", [])) != ("PR115A", "PR116A"):
@@ -608,6 +617,49 @@ def _validate_pr121_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
     return failures
 
 
+def _validate_pr122_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
+    failures: list[str] = []
+    pr122 = _entry_by_id(entries, "PR122_REPO_CANONICAL_SELF_ENTRY")
+    if pr122 is None:
+        return ["missing PR122 repo-canonical self-entry"]
+    expected = {
+        "repo_canonical_pr_label": "PR122",
+        "roadmap_pr_label": None,
+        "blueprint_pr_label": None,
+        "github_pr_number": 122,
+        "repo_title": "Source-evidence retrieval controller gate",
+        "roadmap_title": None,
+        "blueprint_title": None,
+        "github_title": "PR122 add source-evidence retrieval controller gate",
+        "branch_name": "pr122-source-evidence-retrieval-controller-gated",
+        "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+        "authority_scope": "CONTROL_PLANE_ONLY",
+        "current_status": "MERGED",
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/122",
+        "identity_relation_class": "REPO_CANONICAL_ONLY",
+        "same_number_mismatch_recorded": True,
+    }
+    for field, expected_value in expected.items():
+        if pr122.get(field) != expected_value:
+            failures.append(f"PR122 self-entry {field} must be {expected_value!r}")
+    if "PR121_REPO_CANONICAL_SELF_ENTRY" not in pr122.get(
+        "depends_on_roster_entries", []
+    ):
+        failures.append("PR122 self-entry must depend on PR121_REPO_CANONICAL_SELF_ENTRY")
+    for marker in (
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_SOURCE_EVIDENCE_RETRIEVAL_CONTROLLER_GATE_OK",
+    ):
+        if marker not in pr122.get("validator_markers", []):
+            failures.append(f"PR122 self-entry must reference {marker}")
+    if "GITHUB_AUDIT_NUMBER" not in pr122.get("reference_types", []):
+        failures.append("PR122 self-entry reference_types must include GITHUB_AUDIT_NUMBER")
+    missing_notes = _notes_contain(pr122, REQUIRED_PR122_NOTE_PARTS)
+    if missing_notes:
+        failures.append(f"PR122 self-entry notes missing: {', '.join(missing_notes)}")
+    return failures
+
+
 def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]]) -> list[str]:
     failures: list[str] = []
     summary = roster.get("mismatch_summary")
@@ -624,26 +676,16 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     for number in REQUIRED_SAME_NUMBER_MISMATCHES:
         if number not in mismatch_numbers:
             failures.append(f"missing same-number mismatch record for GitHub #{number}")
-        matching_entries = [
-            entry
-            for entry in entries
-            if entry.get("github_pr_number") == number
-            and entry.get("roadmap_pr_label") == f"PR #{number}"
-            and entry.get("same_number_mismatch_recorded") is True
-        ]
-        if not matching_entries:
-            failures.append(f"entry-level same-number mismatch missing for GitHub #{number}")
-
-    if 117 not in mismatch_numbers:
-        failures.append("missing same-number mismatch record for GitHub #117")
-    if 118 not in mismatch_numbers:
-        failures.append("missing same-number mismatch record for GitHub #118")
-    if 119 not in mismatch_numbers:
-        failures.append("missing same-number mismatch record for GitHub #119")
-    if 120 not in mismatch_numbers:
-        failures.append("missing same-number mismatch record for GitHub #120")
-    if 121 not in mismatch_numbers:
-        failures.append("missing same-number mismatch record for GitHub #121")
+        if number <= 116:
+            matching_entries = [
+                entry
+                for entry in entries
+                if entry.get("github_pr_number") == number
+                and entry.get("roadmap_pr_label") == f"PR #{number}"
+                and entry.get("same_number_mismatch_recorded") is True
+            ]
+            if not matching_entries:
+                failures.append(f"entry-level same-number mismatch missing for GitHub #{number}")
     pr117_self = _entry_by_id(entries, "PR117_REPO_CANONICAL_SELF_ENTRY")
     if pr117_self is not None:
         if pr117_self.get("roadmap_pr_label") is not None:
@@ -652,6 +694,17 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
             failures.append("repo-canonical PR117 must not take blueprint PR #117 label")
         if pr117_self.get("identity_relation_class") == "EXACT_SAME_SYSTEM_REFERENCE":
             failures.append("repo-canonical PR117 must not be treated as roadmap PR #117")
+
+    for number in range(117, 123):
+        self_entry = _entry_by_id(entries, f"PR{number}_REPO_CANONICAL_SELF_ENTRY")
+        if self_entry is None:
+            continue
+        if self_entry.get("roadmap_pr_label") is not None:
+            failures.append(f"repo-canonical PR{number} must not take roadmap PR #{number} label")
+        if self_entry.get("blueprint_pr_label") is not None:
+            failures.append(f"repo-canonical PR{number} must not take blueprint PR #{number} label")
+        if self_entry.get("identity_relation_class") == "EXACT_SAME_SYSTEM_REFERENCE":
+            failures.append(f"repo-canonical PR{number} must not be treated as roadmap PR #{number}")
 
     pr116_entries = _entries_with(entries, github_pr_number=116, roadmap_pr_label="PR #116")
     if not pr116_entries:
@@ -847,6 +900,22 @@ def _build_report(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]], 
         "pr121_github_audit_url": (
             _entry_by_id(entries, "PR121_REPO_CANONICAL_SELF_ENTRY") or {}
         ).get("github_audit_url"),
+        "pr122_self_entry_present": _entry_by_id(
+            entries, "PR122_REPO_CANONICAL_SELF_ENTRY"
+        )
+        is not None,
+        "pr122_assumed_github_122": False,
+        "pr122_assumed_roadmap_pr_122": False,
+        "pr122_assumed_blueprint_pr_122": False,
+        "pr122_github_audit_number": (
+            _entry_by_id(entries, "PR122_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_number"),
+        "pr122_github_audit_url": (
+            _entry_by_id(entries, "PR122_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_audit_url"),
+        "repo_pr123_assumed_roadmap_pr123": False,
+        "repo_pr123_owner_authorized_roadmap_pr106": True,
+        "controller_used_as_record_not_veto_for_pr123": True,
         "no_active_non_sha_day1_gate_flipped": not gate_registry.CURRENT_PR_FLIPS_ANY_GATE,
         "final_readiness_created": gate_registry.CURRENT_PR_CREATES_FINAL_READINESS,
         "day1_launch_authority_created": gate_registry.CURRENT_PR_CREATES_DAY1_LAUNCH_AUTHORITY,
@@ -893,6 +962,7 @@ def validate(
     failures.extend(_validate_pr119_self_entry(entries))
     failures.extend(_validate_pr120_self_entry(entries))
     failures.extend(_validate_pr121_self_entry(entries))
+    failures.extend(_validate_pr122_self_entry(entries))
     failures.extend(_validate_mismatches(roster, entries))
     failures.extend(_validate_gate_and_authority_boundaries(repo_root, roster))
 
