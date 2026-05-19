@@ -46,9 +46,9 @@ PR116A maps to GitHub #116 and records the active non-SHA Day-1 gate registry. P
 
 Neither overlay flips an active non-SHA Day-1 gate, creates final readiness, creates Day-1 launch authority, or creates runtime/live/order/profit authority.
 
-## 7. GitHub #97-#118 vs roadmap mismatch summary
+## 7. GitHub #97-#120 vs roadmap mismatch summary
 
-The roster seeds GitHub #97 through #118 and roadmap PR #97 through PR #126.
+The roster seeds GitHub #97 through #120 and roadmap PR #97 through PR #126.
 
 Explicit same-number mismatches include:
 
@@ -61,6 +61,8 @@ Explicit same-number mismatches include:
 - GitHub #105 = `Add owner-approved AtomicRows family count distribution`; roadmap PR #105 = `Source-evidence retrieval executor`.
 - GitHub #117 = `PR117 add canonical PR identity roster`; roadmap PR #117 = `Historical dataset digest and loader`.
 - GitHub #118 = `PR118 add roadmap execution-state controller`; roadmap PR #118 = `Replay engine executor`.
+- GitHub #119 = `PR119 currentize identity roster and add controller-approved coverage triage routes`; roadmap PR #119 = `Paper trading engine executor`.
+- GitHub #120 = `PR120 add master-plan roadmap crosswalk and market section indexes`; roadmap PR #120 = `Fill, cost, slippage, fee, tick, and latency simulator`.
 
 The roster also records the roadmap PR #100 / GitHub #102 SHA/freeze authority mismatch.
 
@@ -85,6 +87,14 @@ This does not imply Roadmap PR #118 or Blueprint PR #118. Repo-canonical PR118 r
 Repo PR119 is currentized with GitHub audit number `119` and audit URL `https://github.com/Q8Meow/QTT_New0526/pull/119`.
 
 This does not imply Roadmap PR #119 or Blueprint PR #119. Repo-canonical PR119 remains the implementation-truth label for the coverage triage routes PR.
+
+## 7D. Repo PR120 self-entry
+
+`PR120_REPO_CANONICAL_SELF_ENTRY` records repo-canonical PR120 as `Add master-plan roadmap crosswalk and market section indexes`.
+
+Repo PR120 is currentized with GitHub audit number `120` and audit URL `https://github.com/Q8Meow/QTT_New0526/pull/120`.
+
+This does not imply Roadmap PR #120 or Blueprint PR #120. Repo-canonical PR120 remains the implementation-truth label for the master-plan roadmap crosswalk and market section index PR.
 
 ## 8. How to update the roster for every future PR
 
@@ -148,4 +158,4 @@ The report records validation evidence for identity mapping, overlays, mismatche
 
 ## 13. Owner handoff note
 
-The owner manually commits, pushes, opens PRs, and merges. PR117 is currentized to GitHub audit #117. PR118 is currentized to GitHub audit #118.
+The owner manually commits, pushes, opens PRs, and merges. PR117 is currentized to GitHub audit #117. PR118 is currentized to GitHub audit #118. PR119 is currentized to GitHub audit #119. PR120 is currentized to GitHub audit #120.

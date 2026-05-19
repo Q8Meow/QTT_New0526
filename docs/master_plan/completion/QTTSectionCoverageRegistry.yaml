@@ -26,6 +26,396 @@ roadmap_crosswalk_config:
     base_ref_name: main
     head_ref_name: pr119-identity-roster-currentization-and-coverage-triage-routes
     merge_commit_oid: caac13c3abcab7177c6d4aeae201385561600f01
+command_matrix_config:
+  command_matrix_id: QTT_MASTER_PLAN_SECTION_COVERAGE_STATIC_COMMAND_INTENT_MATRIX_V1_0
+  repo_canonical_pr_label: PR121
+  roadmap_pr_label: PR #104
+  blueprint_pr_label: PR #104
+  semantic_task_id: ROADMAP-MASTER-PLAN-SECTION-COVERAGE-COMMAND-MATRIX
+  title: Master-plan section coverage command matrix
+  authority_class: STATIC_CONTROL_PLANE_COMMAND_INTENT_MATRIX_NOT_RUNTIME_NOT_EXECUTION_AUTHORITY
+  materialized_capability: QTT_MASTER_PLAN_SECTION_COVERAGE_STATIC_COMMAND_INTENT_MATRIX_V1_0
+  state_transition: MASTER_PLAN_SECTION_COVERAGE_COMMAND_MATRIX_ESTABLISHED
+  controller_decision_reference: docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/3
+  blueprint_decision_reference: docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json#/entries/21
+  generated_report_path: docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+  source_crosswalk_report_path: docs/master_plan/generated/MasterPlanSectionCoverageReport.json
+  artifact_family_decision: EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED
+  compact_normalized_command_matrix_flag: true
+  optional_derivative_report_created: false
+  no_master_plan_text_mutation_flag: true
+  no_old_coverage_ledger_reintroduction_flag: true
+  no_runtime_command_executor_created_flag: true
+  no_source_retrieval_executor_created_flag: true
+  no_market_launch_authority_created_flag: true
+  pr120_github_audit_currentization_evidence:
+    evidence_source: GITHUB_CONNECTOR_GET_PR_INFO_AFTER_LOCAL_GH_BLOCKED
+    github_pr_number: 120
+    github_audit_url: https://github.com/Q8Meow/QTT_New0526/pull/120
+    github_title: PR120 add master-plan roadmap crosswalk and market section indexes
+    state: MERGED
+    merged: true
+    base_ref_name: main
+    head_ref_name: pr120-master-plan-roadmap-crosswalk-market-indexes
+    merge_commit_oid: b55df423f39e94466fa1c837a44ac07435da5b38
+command_family_enum:
+  - COVERAGE_TRIAGE_COMMAND
+  - PARENT_CAPABILITY_COMMAND
+  - COMMAND_MATRIX_COMMAND
+  - SOURCE_EVIDENCE_COMMAND
+  - CONNECTOR_SEMANTIC_COMMAND
+  - RUNTIME_RESOLVER_COMMAND
+  - RUNTIME_CASH_COMMAND
+  - REPLAY_PAPER_COMMAND
+  - OWNER_REVIEW_COMMAND
+  - LIVE_LAUNCH_GATED_COMMAND
+  - ORDER_INTENT_GATED_COMMAND
+  - RISK_SAFETY_COMMAND
+  - DASHBOARD_OWNER_SURFACE_COMMAND
+  - RESEARCH_INTAKE_COMMAND
+  - ATOMICROWS_INVENTORY_COMMAND
+  - EDGE_SELECTION_SCORING_COMMAND
+  - QUANTUM_POLICY_COMMAND
+  - QUANTUM_FORWARD_OPTIMIZATION_COMMAND
+  - QUANTUM_BACKEND_GATED_COMMAND
+  - LATENCY_COST_COMMAND
+  - MARKET_INDEX_COMMAND
+  - FUTURE_MARKET_DEFERRED_COMMAND
+  - QUARANTINE_COMMAND
+  - RETIREMENT_COMMAND
+  - UNRESOLVED_RESEARCH_COMMAND
+command_scope_class_enum:
+  - STATIC_CONTROL_PLANE_ONLY
+  - STATIC_REPORTING_ONLY
+  - STATIC_INDEX_ONLY
+  - STATIC_VALIDATION_ONLY
+  - FUTURE_SOURCE_WORKFLOW_GATED
+  - FUTURE_CONNECTOR_BINDING_GATED
+  - FUTURE_RUNTIME_GATED
+  - FUTURE_REPLAY_PAPER_GATED
+  - FUTURE_OWNER_REVIEW_GATED
+  - FUTURE_LIVE_LAUNCH_GATED
+  - FUTURE_QUANTUM_BACKEND_GATED
+  - FUTURE_MARKET_EXPANSION_GATED
+  - OWNER_REVIEW_REQUIRED
+command_authority_class_enum:
+  - NO_EXECUTION_AUTHORITY
+  - NO_RUNTIME_AUTHORITY
+  - NO_SOURCE_RETRIEVAL_AUTHORITY
+  - NO_SOURCE_ACCEPTANCE_AUTHORITY
+  - NO_CONNECTOR_BINDING_AUTHORITY
+  - NO_REPLAY_PAPER_RESULT_AUTHORITY
+  - NO_ORDER_AUTHORITY
+  - NO_LIVE_AUTHORITY
+  - NO_PROFIT_EVIDENCE_AUTHORITY
+  - NO_QUANTUM_BACKEND_AUTHORITY
+  - NO_MARKET_LAUNCH_AUTHORITY
+  - FUTURE_OWNER_APPROVAL_REQUIRED
+command_owner_class_enum:
+  - CODEX_STATIC_BUILDER
+  - VALIDATION_GATE_BUILDER
+  - SOURCE_EVIDENCE_AGENT_FUTURE
+  - CONNECTOR_AGENT_FUTURE
+  - RUNTIME_RESOLVER_AGENT_FUTURE
+  - REPLAY_PAPER_AGENT_FUTURE
+  - OWNER_REVIEW_AGENT_FUTURE
+  - RISK_AGENT_FUTURE
+  - DASHBOARD_AGENT_FUTURE
+  - QUANTUM_AGENT_FUTURE
+  - LATENCY_EXECUTION_QUALITY_AGENT_FUTURE
+  - MARKET_EXPANSION_AGENT_FUTURE
+  - OWNER_REVIEW_REQUIRED
+command_consumer_class_enum:
+  - VALIDATION_REPORT_CONSUMER
+  - STATIC_ROADMAP_BLUEPRINT_CONSUMER
+  - FUTURE_SOURCE_WORKFLOW_CONSUMER
+  - FUTURE_CONNECTOR_CONSUMER
+  - FUTURE_RUNTIME_CONSUMER
+  - FUTURE_REPLAY_PAPER_CONSUMER
+  - FUTURE_OWNER_REVIEW_CONSUMER
+  - FUTURE_LIVE_LAUNCH_CONSUMER
+  - FUTURE_ORDER_INTENT_CONSUMER
+  - FUTURE_QUANTUM_CONSUMER
+  - FUTURE_LATENCY_CONSUMER
+  - FUTURE_MARKET_EXPANSION_CONSUMER
+  - OWNER_REVIEW_REQUIRED_CONSUMER
+command_status_enum:
+  - STATIC_COMMAND_INTENT_RECORDED
+  - FUTURE_GATED_COMMAND_INTENT_RECORDED
+  - OWNER_REVIEW_REQUIRED_COMMAND_INTENT_RECORDED
+  - UNRESOLVED_COMMAND_INTENT_RECORDED
+  - DEFERRED_FUTURE_MARKET_COMMAND_INTENT_RECORDED
+static_allowed_operation_enum:
+  - READ_CROSSWALK
+  - READ_ROUTE_MAP
+  - READ_MARKET_INDEX
+  - GENERATE_STATIC_REPORT
+  - RUN_STATIC_VALIDATOR
+  - CLASSIFY_UNRESOLVED
+  - QUEUE_OWNER_REVIEW
+  - REFERENCE_CONTROLLER_STATE
+  - REFERENCE_ROADMAP_BLUEPRINT
+future_gated_operation_enum:
+  - FUTURE_SOURCE_RETRIEVAL
+  - FUTURE_SOURCE_ACCEPTANCE
+  - FUTURE_CONNECTOR_BINDING
+  - FUTURE_RUNTIME_SNAPSHOT
+  - FUTURE_RUNTIME_CASH_RECEIPT
+  - FUTURE_REPLAY_EXECUTION
+  - FUTURE_PAPER_EXECUTION
+  - FUTURE_OWNER_REVIEW_RECEIPT
+  - FUTURE_LIVE_CANARY
+  - FUTURE_ORDER_INTENT
+  - FUTURE_ORDER_EXECUTION
+  - FUTURE_QUANTUM_BACKEND_RECEIPT
+  - FUTURE_OPTIMIZER_EXECUTION
+  - FUTURE_MARKET_EXPANSION
+  - FUTURE_STAGE2_MARKET_SELECTION
+command_block_reason_enum:
+  - STATIC_CONTROL_PLANE_ONLY
+  - FUTURE_SOURCE_RETRIEVAL_REQUIRES_PR105
+  - SOURCE_FACT_ACCEPTANCE_NOT_CREATED
+  - CONNECTOR_BINDING_REQUIRES_FUTURE_PR
+  - RUNTIME_AUTHORITY_REQUIRES_FUTURE_PR
+  - RUNTIME_CASH_RECEIPT_REQUIRES_FUTURE_PR
+  - REPLAY_PAPER_RESULT_REQUIRES_FUTURE_PR
+  - ORDER_AUTHORITY_REQUIRES_FUTURE_PR
+  - LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL
+  - PROFIT_EVIDENCE_NOT_CREATED
+  - LATENCY_SUPERIORITY_EVIDENCE_NOT_CREATED
+  - QUANTUM_BACKEND_EXECUTION_REQUIRES_FUTURE_CONTROLLER_STATE
+  - QUANTUM_SIMULATOR_EXECUTION_NOT_CREATED
+  - OPTIMIZER_RUNTIME_EXECUTION_NOT_CREATED
+  - MARKET_LAUNCH_AUTHORITY_NOT_CREATED
+  - STAGE2_MARKET_SELECTION_NOT_CREATED
+  - FUTURE_MARKET_SCOPE_DEFERRED
+  - OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE
+  - NO_EXACT_ARTIFACT_OWNER_FOUND
+  - NO_OPEN_ENDED_MARKET_TAXONOMY_ALLOWED
+  - MASTER_PLAN_TEXT_MUTATION_FORBIDDEN
+  - OLD_COVERAGE_LEDGER_FORBIDDEN
+  - IMPLEMENTATION_COMPLETION_NOT_CLAIMED
+  - LAUNCH_READINESS_NOT_CLAIMED
+explicit_future_market_candidate_family_enum:
+  - STOCKS
+  - CRYPTOCURRENCY
+  - FUTURES
+  - OPTIONS
+  - EQUITIES
+  - ETFS
+  - FX
+  - COMMODITIES
+forbidden_market_taxonomy_value_enum:
+  - ETC
+  - OTHER
+  - OTHER_MARKETS
+  - MISC_MARKETS
+  - GENERAL_MARKETS
+  - UNKNOWN_MARKET
+  - ANY_OTHER_MARKET
+  - OTHER_OWNER_APPROVED_FUTURE_MARKET
+owner_review_future_market_scope_classification:
+  classification_id: OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE
+  is_market_taxonomy_value: false
+  owner_review_required_flag: true
+route_class_to_command_family_rules:
+  - route_class: CAPABILITY_ROUTE
+    command_family: PARENT_CAPABILITY_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: CODEX_STATIC_BUILDER
+    command_consumer_class: STATIC_ROADMAP_BLUEPRINT_CONSUMER
+  - route_class: POLICY_ROUTE
+    command_family: RISK_SAFETY_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: VALIDATION_GATE_BUILDER
+    command_consumer_class: VALIDATION_REPORT_CONSUMER
+  - route_class: SOURCE_EVIDENCE_ROUTE
+    command_family: SOURCE_EVIDENCE_COMMAND
+    command_scope_class: FUTURE_SOURCE_WORKFLOW_GATED
+    command_authority_class: NO_SOURCE_RETRIEVAL_AUTHORITY
+    command_owner_class: SOURCE_EVIDENCE_AGENT_FUTURE
+    command_consumer_class: FUTURE_SOURCE_WORKFLOW_CONSUMER
+  - route_class: CONNECTOR_SEMANTIC_ROUTE
+    command_family: CONNECTOR_SEMANTIC_COMMAND
+    command_scope_class: FUTURE_CONNECTOR_BINDING_GATED
+    command_authority_class: NO_CONNECTOR_BINDING_AUTHORITY
+    command_owner_class: CONNECTOR_AGENT_FUTURE
+    command_consumer_class: FUTURE_CONNECTOR_CONSUMER
+  - route_class: REPLAY_PAPER_ROUTE
+    command_family: REPLAY_PAPER_COMMAND
+    command_scope_class: FUTURE_REPLAY_PAPER_GATED
+    command_authority_class: NO_REPLAY_PAPER_RESULT_AUTHORITY
+    command_owner_class: REPLAY_PAPER_AGENT_FUTURE
+    command_consumer_class: FUTURE_REPLAY_PAPER_CONSUMER
+  - route_class: RUNTIME_ROUTE
+    command_family: RUNTIME_RESOLVER_COMMAND
+    command_scope_class: FUTURE_RUNTIME_GATED
+    command_authority_class: NO_RUNTIME_AUTHORITY
+    command_owner_class: RUNTIME_RESOLVER_AGENT_FUTURE
+    command_consumer_class: FUTURE_RUNTIME_CONSUMER
+  - route_class: RUNTIME_CASH_ROUTE
+    command_family: RUNTIME_CASH_COMMAND
+    command_scope_class: FUTURE_RUNTIME_GATED
+    command_authority_class: NO_RUNTIME_AUTHORITY
+    command_owner_class: RUNTIME_RESOLVER_AGENT_FUTURE
+    command_consumer_class: FUTURE_RUNTIME_CONSUMER
+  - route_class: OWNER_ROUTE
+    command_family: OWNER_REVIEW_COMMAND
+    command_scope_class: FUTURE_OWNER_REVIEW_GATED
+    command_authority_class: FUTURE_OWNER_APPROVAL_REQUIRED
+    command_owner_class: OWNER_REVIEW_AGENT_FUTURE
+    command_consumer_class: FUTURE_OWNER_REVIEW_CONSUMER
+  - route_class: GOVERNANCE_ROUTE
+    command_family: RISK_SAFETY_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: VALIDATION_GATE_BUILDER
+    command_consumer_class: VALIDATION_REPORT_CONSUMER
+  - route_class: RISK_ROUTE
+    command_family: RISK_SAFETY_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_ORDER_AUTHORITY
+    command_owner_class: RISK_AGENT_FUTURE
+    command_consumer_class: FUTURE_ORDER_INTENT_CONSUMER
+  - route_class: DASHBOARD_OWNER_SURFACE_ROUTE
+    command_family: DASHBOARD_OWNER_SURFACE_COMMAND
+    command_scope_class: FUTURE_OWNER_REVIEW_GATED
+    command_authority_class: FUTURE_OWNER_APPROVAL_REQUIRED
+    command_owner_class: DASHBOARD_AGENT_FUTURE
+    command_consumer_class: FUTURE_OWNER_REVIEW_CONSUMER
+  - route_class: RESEARCH_ROUTE
+    command_family: RESEARCH_INTAKE_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: CODEX_STATIC_BUILDER
+    command_consumer_class: STATIC_ROADMAP_BLUEPRINT_CONSUMER
+  - route_class: QUARANTINE_ROUTE
+    command_family: QUARANTINE_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: VALIDATION_GATE_BUILDER
+    command_consumer_class: VALIDATION_REPORT_CONSUMER
+  - route_class: RETIREMENT_ROUTE
+    command_family: RETIREMENT_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: VALIDATION_GATE_BUILDER
+    command_consumer_class: VALIDATION_REPORT_CONSUMER
+  - route_class: CONTROLLER_REFERENCED_ROUTE
+    command_family: COVERAGE_TRIAGE_COMMAND
+    command_scope_class: STATIC_CONTROL_PLANE_ONLY
+    command_authority_class: NO_EXECUTION_AUTHORITY
+    command_owner_class: CODEX_STATIC_BUILDER
+    command_consumer_class: STATIC_ROADMAP_BLUEPRINT_CONSUMER
+  - route_class: QUANTUM_FORWARD_OPTIMIZATION_ROUTE
+    command_family: QUANTUM_FORWARD_OPTIMIZATION_COMMAND
+    command_scope_class: FUTURE_QUANTUM_BACKEND_GATED
+    command_authority_class: NO_QUANTUM_BACKEND_AUTHORITY
+    command_owner_class: QUANTUM_AGENT_FUTURE
+    command_consumer_class: FUTURE_QUANTUM_CONSUMER
+  - route_class: QUANTUM_BACKEND_ROUTE
+    command_family: QUANTUM_BACKEND_GATED_COMMAND
+    command_scope_class: FUTURE_QUANTUM_BACKEND_GATED
+    command_authority_class: NO_QUANTUM_BACKEND_AUTHORITY
+    command_owner_class: QUANTUM_AGENT_FUTURE
+    command_consumer_class: FUTURE_QUANTUM_CONSUMER
+  - route_class: OPTIMIZER_ARBITRATION_ROUTE
+    command_family: QUANTUM_FORWARD_OPTIMIZATION_COMMAND
+    command_scope_class: FUTURE_QUANTUM_BACKEND_GATED
+    command_authority_class: NO_QUANTUM_BACKEND_AUTHORITY
+    command_owner_class: QUANTUM_AGENT_FUTURE
+    command_consumer_class: FUTURE_QUANTUM_CONSUMER
+  - route_class: LATENCY_COST_ROUTE
+    command_family: LATENCY_COST_COMMAND
+    command_scope_class: STATIC_REPORTING_ONLY
+    command_authority_class: NO_PROFIT_EVIDENCE_AUTHORITY
+    command_owner_class: LATENCY_EXECUTION_QUALITY_AGENT_FUTURE
+    command_consumer_class: FUTURE_LATENCY_CONSUMER
+  - route_class: MARKET_EXPANSION_ROUTE
+    command_family: FUTURE_MARKET_DEFERRED_COMMAND
+    command_scope_class: FUTURE_MARKET_EXPANSION_GATED
+    command_authority_class: NO_MARKET_LAUNCH_AUTHORITY
+    command_owner_class: MARKET_EXPANSION_AGENT_FUTURE
+    command_consumer_class: FUTURE_MARKET_EXPANSION_CONSUMER
+  - route_class: CROSS_MARKET_ROUTE
+    command_family: MARKET_INDEX_COMMAND
+    command_scope_class: STATIC_INDEX_ONLY
+    command_authority_class: NO_MARKET_LAUNCH_AUTHORITY
+    command_owner_class: CODEX_STATIC_BUILDER
+    command_consumer_class: STATIC_ROADMAP_BLUEPRINT_CONSUMER
+  - route_class: UNRESOLVED_DEFAULT_ROUTE
+    command_family: UNRESOLVED_RESEARCH_COMMAND
+    command_scope_class: OWNER_REVIEW_REQUIRED
+    command_authority_class: FUTURE_OWNER_APPROVAL_REQUIRED
+    command_owner_class: OWNER_REVIEW_REQUIRED
+    command_consumer_class: OWNER_REVIEW_REQUIRED_CONSUMER
+parent_capability_to_command_family_rules:
+  - parent_capability_group_id: MASTER_PLAN_SECTION_COVERAGE_AND_COMPLETION
+    command_family: COMMAND_MATRIX_COMMAND
+  - parent_capability_group_id: ATOMICROWS_PARAMETER_ALGORITHM_AGENT_INVENTORY
+    command_family: ATOMICROWS_INVENTORY_COMMAND
+  - parent_capability_group_id: EDGE_STACK_SCORING_SELECTION_AND_HANDOFF
+    command_family: EDGE_SELECTION_SCORING_COMMAND
+  - parent_capability_group_id: ORDER_INTENT_EXECUTION_ROUTER_AND_PRETRADE_GATES
+    command_family: ORDER_INTENT_GATED_COMMAND
+  - parent_capability_group_id: LAUNCH_RUNBOOK_CANARY_ARBITRAGE_AND_LIVE_PROMOTION
+    command_family: LIVE_LAUNCH_GATED_COMMAND
+market_scope_to_command_rules:
+  stage1_active_market_ids:
+    - PREDICTION_MARKETS_GENERAL
+    - KALSHI
+    - POLYMARKET
+    - FORECASTEX_IBKR
+  future_market_command_families:
+    - FUTURE_MARKET_DEFERRED_COMMAND
+    - MARKET_INDEX_COMMAND
+    - OWNER_REVIEW_COMMAND
+    - UNRESOLVED_RESEARCH_COMMAND
+  owner_review_classification: OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE
+quantum_command_rules:
+  metadata_only_default: QUANTUM_POLICY_METADATA_ONLY
+  backend_gated_class: TRUE_QUANTUM_BACKEND_FUTURE_GATED
+  optimizer_gated_class: QUANTUM_INSPIRED_OPTIMIZER_FUTURE_GATED
+  no_backend_execution_flag: true
+  no_simulator_execution_flag: true
+  no_optimizer_runtime_execution_flag: true
+  no_quantum_advantage_claim_flag: true
+  no_profit_or_latency_superiority_claim_flag: true
+latency_command_rules:
+  metadata_only_class: LATENCY_COST_METADATA_ONLY
+  no_latency_superiority_claim_flag: true
+  no_profit_or_latency_superiority_claim_flag: true
+source_connector_runtime_replay_live_command_rules:
+  source_retrieval_created_flag: false
+  source_fact_acceptance_created_flag: false
+  connector_semantic_binding_created_flag: false
+  runtime_authority_created_flag: false
+  replay_paper_result_created_flag: false
+  live_authority_created_flag: false
+  order_authority_created_flag: false
+stage1_prediction_market_only_rules:
+  stage1_launch_scope_locked_to_prediction_markets_flag: true
+  stage1_active_market_ids:
+    - PREDICTION_MARKETS_GENERAL
+    - KALSHI
+    - POLYMARKET
+    - FORECASTEX_IBKR
+  stage2_market_selection_created_flag: false
+  future_market_launch_authority_created_flag: false
+  future_market_command_rows_are_deferred_flag: true
+  explicit_future_market_families_remain_owner_selected_future_scope_flag: true
+  no_open_ended_future_market_taxonomy_flag: true
+future_market_deferral_rules:
+  future_market_ids_are_planning_metadata_only: true
+  no_stage2_launch_authority_created_flag: true
+  no_next_market_selected_flag: true
+  no_market_priority_selected_flag: true
+no_open_ended_market_taxonomy_rules:
+  exact_token_matching_required: true
+  forbidden_taxonomy_values_blocked: true
+  owner_review_holding_classification_is_not_market: OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE
 route_class_enum:
   - CAPABILITY_ROUTE
   - POLICY_ROUTE

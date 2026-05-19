@@ -16,8 +16,11 @@
     "route_map_summary",
     "central_config",
     "pr120_scope_summary",
+    "pr121_scope_summary",
     "roadmap_crosswalk",
     "roadmap_crosswalk_summary",
+    "command_matrix",
+    "command_matrix_summary",
     "market_specific_section_index",
     "market_specific_section_index_summary",
     "authority_boundary",
@@ -76,8 +79,11 @@
     "route_map_summary": { "$ref": "#/$defs/route_map_summary" },
     "central_config": { "type": "object" },
     "pr120_scope_summary": { "$ref": "#/$defs/pr120_scope_summary" },
+    "pr121_scope_summary": { "$ref": "#/$defs/pr121_scope_summary" },
     "roadmap_crosswalk": { "$ref": "#/$defs/roadmap_crosswalk" },
     "roadmap_crosswalk_summary": { "$ref": "#/$defs/roadmap_crosswalk_summary" },
+    "command_matrix": { "$ref": "#/$defs/command_matrix" },
+    "command_matrix_summary": { "$ref": "#/$defs/command_matrix_summary" },
     "market_specific_section_index": { "$ref": "#/$defs/market_specific_section_index" },
     "market_specific_section_index_summary": { "$ref": "#/$defs/market_specific_section_index_summary" },
     "authority_boundary": { "$ref": "#/$defs/authority_boundary" },
@@ -594,6 +600,422 @@
         "no_launch_authority_created_flag": { "const": true }
       }
     },
+    "command_family": {
+      "enum": [
+        "COVERAGE_TRIAGE_COMMAND",
+        "PARENT_CAPABILITY_COMMAND",
+        "COMMAND_MATRIX_COMMAND",
+        "SOURCE_EVIDENCE_COMMAND",
+        "CONNECTOR_SEMANTIC_COMMAND",
+        "RUNTIME_RESOLVER_COMMAND",
+        "RUNTIME_CASH_COMMAND",
+        "REPLAY_PAPER_COMMAND",
+        "OWNER_REVIEW_COMMAND",
+        "LIVE_LAUNCH_GATED_COMMAND",
+        "ORDER_INTENT_GATED_COMMAND",
+        "RISK_SAFETY_COMMAND",
+        "DASHBOARD_OWNER_SURFACE_COMMAND",
+        "RESEARCH_INTAKE_COMMAND",
+        "ATOMICROWS_INVENTORY_COMMAND",
+        "EDGE_SELECTION_SCORING_COMMAND",
+        "QUANTUM_POLICY_COMMAND",
+        "QUANTUM_FORWARD_OPTIMIZATION_COMMAND",
+        "QUANTUM_BACKEND_GATED_COMMAND",
+        "LATENCY_COST_COMMAND",
+        "MARKET_INDEX_COMMAND",
+        "FUTURE_MARKET_DEFERRED_COMMAND",
+        "QUARANTINE_COMMAND",
+        "RETIREMENT_COMMAND",
+        "UNRESOLVED_RESEARCH_COMMAND"
+      ]
+    },
+    "command_scope_class": {
+      "enum": [
+        "STATIC_CONTROL_PLANE_ONLY",
+        "STATIC_REPORTING_ONLY",
+        "STATIC_INDEX_ONLY",
+        "STATIC_VALIDATION_ONLY",
+        "FUTURE_SOURCE_WORKFLOW_GATED",
+        "FUTURE_CONNECTOR_BINDING_GATED",
+        "FUTURE_RUNTIME_GATED",
+        "FUTURE_REPLAY_PAPER_GATED",
+        "FUTURE_OWNER_REVIEW_GATED",
+        "FUTURE_LIVE_LAUNCH_GATED",
+        "FUTURE_QUANTUM_BACKEND_GATED",
+        "FUTURE_MARKET_EXPANSION_GATED",
+        "OWNER_REVIEW_REQUIRED"
+      ]
+    },
+    "command_authority_class": {
+      "enum": [
+        "NO_EXECUTION_AUTHORITY",
+        "NO_RUNTIME_AUTHORITY",
+        "NO_SOURCE_RETRIEVAL_AUTHORITY",
+        "NO_SOURCE_ACCEPTANCE_AUTHORITY",
+        "NO_CONNECTOR_BINDING_AUTHORITY",
+        "NO_REPLAY_PAPER_RESULT_AUTHORITY",
+        "NO_ORDER_AUTHORITY",
+        "NO_LIVE_AUTHORITY",
+        "NO_PROFIT_EVIDENCE_AUTHORITY",
+        "NO_QUANTUM_BACKEND_AUTHORITY",
+        "NO_MARKET_LAUNCH_AUTHORITY",
+        "FUTURE_OWNER_APPROVAL_REQUIRED"
+      ]
+    },
+    "command_owner_class": {
+      "enum": [
+        "CODEX_STATIC_BUILDER",
+        "VALIDATION_GATE_BUILDER",
+        "SOURCE_EVIDENCE_AGENT_FUTURE",
+        "CONNECTOR_AGENT_FUTURE",
+        "RUNTIME_RESOLVER_AGENT_FUTURE",
+        "REPLAY_PAPER_AGENT_FUTURE",
+        "OWNER_REVIEW_AGENT_FUTURE",
+        "RISK_AGENT_FUTURE",
+        "DASHBOARD_AGENT_FUTURE",
+        "QUANTUM_AGENT_FUTURE",
+        "LATENCY_EXECUTION_QUALITY_AGENT_FUTURE",
+        "MARKET_EXPANSION_AGENT_FUTURE",
+        "OWNER_REVIEW_REQUIRED"
+      ]
+    },
+    "command_consumer_class": {
+      "enum": [
+        "VALIDATION_REPORT_CONSUMER",
+        "STATIC_ROADMAP_BLUEPRINT_CONSUMER",
+        "FUTURE_SOURCE_WORKFLOW_CONSUMER",
+        "FUTURE_CONNECTOR_CONSUMER",
+        "FUTURE_RUNTIME_CONSUMER",
+        "FUTURE_REPLAY_PAPER_CONSUMER",
+        "FUTURE_OWNER_REVIEW_CONSUMER",
+        "FUTURE_LIVE_LAUNCH_CONSUMER",
+        "FUTURE_ORDER_INTENT_CONSUMER",
+        "FUTURE_QUANTUM_CONSUMER",
+        "FUTURE_LATENCY_CONSUMER",
+        "FUTURE_MARKET_EXPANSION_CONSUMER",
+        "OWNER_REVIEW_REQUIRED_CONSUMER"
+      ]
+    },
+    "command_status": {
+      "enum": [
+        "STATIC_COMMAND_INTENT_RECORDED",
+        "FUTURE_GATED_COMMAND_INTENT_RECORDED",
+        "OWNER_REVIEW_REQUIRED_COMMAND_INTENT_RECORDED",
+        "UNRESOLVED_COMMAND_INTENT_RECORDED",
+        "DEFERRED_FUTURE_MARKET_COMMAND_INTENT_RECORDED"
+      ]
+    },
+    "static_allowed_operation": {
+      "enum": [
+        "READ_CROSSWALK",
+        "READ_ROUTE_MAP",
+        "READ_MARKET_INDEX",
+        "GENERATE_STATIC_REPORT",
+        "RUN_STATIC_VALIDATOR",
+        "CLASSIFY_UNRESOLVED",
+        "QUEUE_OWNER_REVIEW",
+        "REFERENCE_CONTROLLER_STATE",
+        "REFERENCE_ROADMAP_BLUEPRINT"
+      ]
+    },
+    "future_gated_operation": {
+      "enum": [
+        "FUTURE_SOURCE_RETRIEVAL",
+        "FUTURE_SOURCE_ACCEPTANCE",
+        "FUTURE_CONNECTOR_BINDING",
+        "FUTURE_RUNTIME_SNAPSHOT",
+        "FUTURE_RUNTIME_CASH_RECEIPT",
+        "FUTURE_REPLAY_EXECUTION",
+        "FUTURE_PAPER_EXECUTION",
+        "FUTURE_OWNER_REVIEW_RECEIPT",
+        "FUTURE_LIVE_CANARY",
+        "FUTURE_ORDER_INTENT",
+        "FUTURE_ORDER_EXECUTION",
+        "FUTURE_QUANTUM_BACKEND_RECEIPT",
+        "FUTURE_OPTIMIZER_EXECUTION",
+        "FUTURE_MARKET_EXPANSION",
+        "FUTURE_STAGE2_MARKET_SELECTION"
+      ]
+    },
+    "command_block_reason": {
+      "enum": [
+        "STATIC_CONTROL_PLANE_ONLY",
+        "FUTURE_SOURCE_RETRIEVAL_REQUIRES_PR105",
+        "SOURCE_FACT_ACCEPTANCE_NOT_CREATED",
+        "CONNECTOR_BINDING_REQUIRES_FUTURE_PR",
+        "RUNTIME_AUTHORITY_REQUIRES_FUTURE_PR",
+        "RUNTIME_CASH_RECEIPT_REQUIRES_FUTURE_PR",
+        "REPLAY_PAPER_RESULT_REQUIRES_FUTURE_PR",
+        "ORDER_AUTHORITY_REQUIRES_FUTURE_PR",
+        "LIVE_AUTHORITY_REQUIRES_OWNER_APPROVAL",
+        "PROFIT_EVIDENCE_NOT_CREATED",
+        "LATENCY_SUPERIORITY_EVIDENCE_NOT_CREATED",
+        "QUANTUM_BACKEND_EXECUTION_REQUIRES_FUTURE_CONTROLLER_STATE",
+        "QUANTUM_SIMULATOR_EXECUTION_NOT_CREATED",
+        "OPTIMIZER_RUNTIME_EXECUTION_NOT_CREATED",
+        "MARKET_LAUNCH_AUTHORITY_NOT_CREATED",
+        "STAGE2_MARKET_SELECTION_NOT_CREATED",
+        "FUTURE_MARKET_SCOPE_DEFERRED",
+        "OWNER_REVIEW_REQUIRED_FUTURE_MARKET_SCOPE",
+        "NO_EXACT_ARTIFACT_OWNER_FOUND",
+        "NO_OPEN_ENDED_MARKET_TAXONOMY_ALLOWED",
+        "MASTER_PLAN_TEXT_MUTATION_FORBIDDEN",
+        "OLD_COVERAGE_LEDGER_FORBIDDEN",
+        "IMPLEMENTATION_COMPLETION_NOT_CLAIMED",
+        "LAUNCH_READINESS_NOT_CLAIMED"
+      ]
+    },
+    "explicit_future_market_candidate_family": {
+      "enum": [
+        "STOCKS",
+        "CRYPTOCURRENCY",
+        "FUTURES",
+        "OPTIONS",
+        "EQUITIES",
+        "ETFS",
+        "FX",
+        "COMMODITIES"
+      ]
+    },
+    "forbidden_market_taxonomy_value": {
+      "enum": [
+        "ETC",
+        "OTHER",
+        "OTHER_MARKETS",
+        "MISC_MARKETS",
+        "GENERAL_MARKETS",
+        "UNKNOWN_MARKET",
+        "ANY_OTHER_MARKET",
+        "OTHER_OWNER_APPROVED_FUTURE_MARKET"
+      ]
+    },
+    "crosswalk_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_path", "json_pointer", "section_id", "document_order_index"],
+      "properties": {
+        "report_path": {
+          "const": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+        },
+        "json_pointer": { "type": "string" },
+        "section_id": { "type": "string" },
+        "document_order_index": { "type": "integer" }
+      }
+    },
+    "command_market_scope_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "market_ids",
+        "stage1_active_market_ids",
+        "explicit_future_market_candidate_families",
+        "owner_review_future_market_scope_classification",
+        "forbidden_market_taxonomy_values_detected",
+        "no_market_launch_authority_created_flag",
+        "no_stage2_market_selection_created_flag"
+      ],
+      "properties": {
+        "market_ids": { "$ref": "#/$defs/string_list" },
+        "stage1_active_market_ids": { "$ref": "#/$defs/string_list" },
+        "explicit_future_market_candidate_families": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/explicit_future_market_candidate_family" }
+        },
+        "owner_review_future_market_scope_classification": {
+          "type": ["string", "null"]
+        },
+        "forbidden_market_taxonomy_values_detected": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/forbidden_market_taxonomy_value" }
+        },
+        "no_market_launch_authority_created_flag": { "const": true },
+        "no_stage2_market_selection_created_flag": { "const": true }
+      }
+    },
+    "quantum_forward_command_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantum_command_relevance_class",
+        "future_controller_reference",
+        "future_roadmap_consumer_labels",
+        "no_backend_execution_flag",
+        "no_simulator_execution_flag",
+        "no_optimizer_runtime_execution_flag",
+        "no_quantum_advantage_claim_flag",
+        "no_profit_or_latency_superiority_claim_flag"
+      ],
+      "properties": {
+        "quantum_command_relevance_class": {
+          "enum": [
+            "NONE",
+            "QUANTUM_POLICY_METADATA_ONLY",
+            "QUANTUM_APPLICABILITY_METADATA_ONLY",
+            "QUBO_ISING_FORMULATION_FUTURE_GATED",
+            "QAOA_VQE_ANNEALING_FUTURE_GATED",
+            "QUANTUM_INSPIRED_OPTIMIZER_FUTURE_GATED",
+            "TRUE_QUANTUM_BACKEND_FUTURE_GATED",
+            "HYBRID_CLASSICAL_QUANTUM_ARBITRATION_FUTURE_GATED",
+            "PORTFOLIO_CANDIDATE_SET_OPTIMIZATION_FUTURE_GATED",
+            "LATENCY_AWARE_QUANTUM_PATH_FUTURE_GATED"
+          ]
+        },
+        "future_controller_reference": { "type": "string" },
+        "future_roadmap_consumer_labels": { "$ref": "#/$defs/string_list" },
+        "no_backend_execution_flag": { "const": true },
+        "no_simulator_execution_flag": { "const": true },
+        "no_optimizer_runtime_execution_flag": { "const": true },
+        "no_quantum_advantage_claim_flag": { "const": true },
+        "no_profit_or_latency_superiority_claim_flag": { "const": true }
+      }
+    },
+    "latency_command_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latency_command_relevance_class",
+        "no_latency_superiority_claim_flag",
+        "no_profit_or_latency_superiority_claim_flag"
+      ],
+      "properties": {
+        "latency_command_relevance_class": {
+          "enum": ["NONE", "LATENCY_COST_METADATA_ONLY"]
+        },
+        "no_latency_superiority_claim_flag": { "const": true },
+        "no_profit_or_latency_superiority_claim_flag": { "const": true }
+      }
+    },
+    "source_connector_runtime_command_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_connector_runtime_relevance_classes",
+        "no_source_retrieval_flag",
+        "no_source_fact_acceptance_flag",
+        "no_connector_semantic_binding_flag",
+        "no_runtime_authority_flag",
+        "no_replay_paper_result_flag",
+        "no_live_or_order_authority_flag"
+      ],
+      "properties": {
+        "source_connector_runtime_relevance_classes": { "$ref": "#/$defs/string_list" },
+        "no_source_retrieval_flag": { "const": true },
+        "no_source_fact_acceptance_flag": { "const": true },
+        "no_connector_semantic_binding_flag": { "const": true },
+        "no_runtime_authority_flag": { "const": true },
+        "no_replay_paper_result_flag": { "const": true },
+        "no_live_or_order_authority_flag": { "const": true }
+      }
+    },
+    "command_matrix_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_order_index",
+        "section_id",
+        "crosswalk_reference",
+        "parent_capability_group_id",
+        "current_route_class",
+        "command_family",
+        "command_scope_class",
+        "command_authority_class",
+        "command_owner_class",
+        "command_consumer_class",
+        "command_status",
+        "static_allowed_now_operations",
+        "future_gated_operations",
+        "block_reason_codes",
+        "future_pr_labels",
+        "roadmap_pr_labels",
+        "blueprint_pr_labels",
+        "controller_state_references",
+        "required_validators",
+        "required_reports",
+        "required_artifacts",
+        "market_scope_summary",
+        "stage1_prediction_market_relevance",
+        "future_market_relevance",
+        "explicit_future_market_candidate_family_when_applicable",
+        "owner_review_future_market_scope_classification_when_applicable",
+        "quantum_forward_command_metadata",
+        "latency_command_metadata",
+        "source_connector_runtime_command_metadata",
+        "owner_review_required_flag",
+        "unresolved_reason_code_when_applicable",
+        "no_command_execution_flag",
+        "no_runtime_live_order_profit_authority_created_flag",
+        "no_source_connector_replay_paper_authority_created_flag",
+        "no_quantum_backend_or_simulator_execution_created_flag",
+        "no_market_launch_authority_created_flag",
+        "no_open_ended_future_market_taxonomy_flag",
+        "no_master_plan_text_mutation_flag",
+        "no_old_coverage_ledger_flag"
+      ],
+      "properties": {
+        "document_order_index": { "type": "integer" },
+        "section_id": { "type": "string" },
+        "crosswalk_reference": { "$ref": "#/$defs/crosswalk_reference" },
+        "parent_capability_group_id": { "$ref": "#/$defs/parent_capability_group_id" },
+        "current_route_class": { "$ref": "#/$defs/route_class" },
+        "command_family": { "$ref": "#/$defs/command_family" },
+        "command_scope_class": { "$ref": "#/$defs/command_scope_class" },
+        "command_authority_class": { "$ref": "#/$defs/command_authority_class" },
+        "command_owner_class": { "$ref": "#/$defs/command_owner_class" },
+        "command_consumer_class": { "$ref": "#/$defs/command_consumer_class" },
+        "command_status": { "$ref": "#/$defs/command_status" },
+        "static_allowed_now_operations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/static_allowed_operation" }
+        },
+        "future_gated_operations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/future_gated_operation" }
+        },
+        "block_reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/command_block_reason" }
+        },
+        "future_pr_labels": { "$ref": "#/$defs/string_list" },
+        "roadmap_pr_labels": { "$ref": "#/$defs/string_list" },
+        "blueprint_pr_labels": { "$ref": "#/$defs/string_list" },
+        "controller_state_references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/controller_state_reference" }
+        },
+        "required_validators": { "$ref": "#/$defs/string_list" },
+        "required_reports": { "$ref": "#/$defs/string_list" },
+        "required_artifacts": { "$ref": "#/$defs/string_list" },
+        "market_scope_summary": { "$ref": "#/$defs/command_market_scope_summary" },
+        "stage1_prediction_market_relevance": { "type": "string" },
+        "future_market_relevance": { "type": "string" },
+        "explicit_future_market_candidate_family_when_applicable": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/explicit_future_market_candidate_family" }
+        },
+        "owner_review_future_market_scope_classification_when_applicable": {
+          "type": ["string", "null"]
+        },
+        "quantum_forward_command_metadata": {
+          "$ref": "#/$defs/quantum_forward_command_metadata"
+        },
+        "latency_command_metadata": { "$ref": "#/$defs/latency_command_metadata" },
+        "source_connector_runtime_command_metadata": {
+          "$ref": "#/$defs/source_connector_runtime_command_metadata"
+        },
+        "owner_review_required_flag": { "type": "boolean" },
+        "unresolved_reason_code_when_applicable": {
+          "type": ["string", "null"]
+        },
+        "no_command_execution_flag": { "const": true },
+        "no_runtime_live_order_profit_authority_created_flag": { "const": true },
+        "no_source_connector_replay_paper_authority_created_flag": { "const": true },
+        "no_quantum_backend_or_simulator_execution_created_flag": { "const": true },
+        "no_market_launch_authority_created_flag": { "const": true },
+        "no_open_ended_future_market_taxonomy_flag": { "const": true },
+        "no_master_plan_text_mutation_flag": { "const": true },
+        "no_old_coverage_ledger_flag": { "const": true }
+      }
+    },
     "roadmap_crosswalk_row": {
       "type": "object",
       "additionalProperties": false,
@@ -740,6 +1162,210 @@
         "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority": { "const": true },
         "no_market_launch_or_stage2_launch_authority": { "const": true },
         "no_next_market_selection": { "const": true }
+      }
+    },
+    "pr121_scope_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "semantic_task_id",
+        "title",
+        "materialized_capability",
+        "state_transition",
+        "pr120_github_audit_currentization_evidence",
+        "controller_decision_reference",
+        "blueprint_decision_reference",
+        "artifact_family_decision",
+        "compact_normalized_command_matrix_flag",
+        "static_control_plane_only",
+        "roadmap_pr105_source_retrieval_executor_implemented",
+        "no_old_coverage_ledger_reintroduction",
+        "no_master_plan_text_mutation",
+        "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority",
+        "no_market_launch_or_stage2_launch_authority",
+        "no_next_market_selection"
+      ],
+      "properties": {
+        "repo_canonical_pr_label": { "const": "PR121" },
+        "roadmap_pr_label": { "const": "PR #104" },
+        "blueprint_pr_label": { "const": "PR #104" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-SECTION-COVERAGE-COMMAND-MATRIX"
+        },
+        "title": { "const": "Master-plan section coverage command matrix" },
+        "materialized_capability": {
+          "const": "QTT_MASTER_PLAN_SECTION_COVERAGE_STATIC_COMMAND_INTENT_MATRIX_V1_0"
+        },
+        "state_transition": {
+          "const": "MASTER_PLAN_SECTION_COVERAGE_COMMAND_MATRIX_ESTABLISHED"
+        },
+        "pr120_github_audit_currentization_evidence": { "type": "object" },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/3"
+        },
+        "blueprint_decision_reference": {
+          "const": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json#/entries/21"
+        },
+        "artifact_family_decision": {
+          "const": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED"
+        },
+        "compact_normalized_command_matrix_flag": { "const": true },
+        "static_control_plane_only": { "const": true },
+        "roadmap_pr105_source_retrieval_executor_implemented": { "const": false },
+        "no_old_coverage_ledger_reintroduction": { "const": true },
+        "no_master_plan_text_mutation": { "const": true },
+        "no_runtime_live_source_connector_replay_paper_order_profit_latency_superiority_quantum_execution_authority": { "const": true },
+        "no_market_launch_or_stage2_launch_authority": { "const": true },
+        "no_next_market_selection": { "const": true }
+      }
+    },
+    "command_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command_matrix_id",
+        "authority_class",
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "semantic_task_id",
+        "materialized_capability",
+        "state_transition",
+        "source_crosswalk_reference",
+        "compact_normalized_command_matrix_flag",
+        "rows"
+      ],
+      "properties": {
+        "command_matrix_id": {
+          "const": "QTT_MASTER_PLAN_SECTION_COVERAGE_STATIC_COMMAND_INTENT_MATRIX_V1_0"
+        },
+        "authority_class": {
+          "const": "STATIC_CONTROL_PLANE_COMMAND_INTENT_MATRIX_NOT_RUNTIME_NOT_EXECUTION_AUTHORITY"
+        },
+        "repo_canonical_pr_label": { "const": "PR121" },
+        "roadmap_pr_label": { "const": "PR #104" },
+        "blueprint_pr_label": { "const": "PR #104" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-SECTION-COVERAGE-COMMAND-MATRIX"
+        },
+        "materialized_capability": {
+          "const": "QTT_MASTER_PLAN_SECTION_COVERAGE_STATIC_COMMAND_INTENT_MATRIX_V1_0"
+        },
+        "state_transition": {
+          "const": "MASTER_PLAN_SECTION_COVERAGE_COMMAND_MATRIX_ESTABLISHED"
+        },
+        "source_crosswalk_reference": {
+          "const": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json#/roadmap_crosswalk/rows"
+        },
+        "compact_normalized_command_matrix_flag": { "const": true },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/command_matrix_row" }
+        }
+      }
+    },
+    "command_matrix_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "repo_canonical_pr_label",
+        "roadmap_pr_label",
+        "blueprint_pr_label",
+        "semantic_task_id",
+        "pr120_github_audit_currentization_evidence",
+        "controller_decision_reference",
+        "blueprint_decision_reference",
+        "artifact_family_decision",
+        "compact_normalized_command_matrix_flag",
+        "section_manifest_parser_visible_section_count",
+        "pr120_crosswalk_row_count",
+        "command_matrix_row_count",
+        "missing_section_count",
+        "duplicate_section_count",
+        "ordering_matches_crosswalk_document_order",
+        "command_family_counts",
+        "command_scope_class_counts",
+        "command_authority_class_counts",
+        "command_owner_class_counts",
+        "static_allowed_now_operation_counts",
+        "future_gated_operation_counts",
+        "stage1_prediction_market_command_counts",
+        "future_market_deferred_command_count",
+        "explicit_future_market_family_command_counts",
+        "owner_review_required_future_market_scope_count",
+        "forbidden_market_taxonomy_value_count",
+        "quantum_command_count",
+        "optimizer_command_count",
+        "latency_command_count",
+        "runtime_authority_created",
+        "live_authority_created",
+        "source_retrieval_created",
+        "source_fact_acceptance_created",
+        "connector_semantic_binding_created",
+        "replay_paper_result_created",
+        "order_authority_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "quantum_backend_simulator_optimizer_execution_created",
+        "market_launch_authority_created",
+        "stage2_market_selection_created",
+        "deterministic_output"
+      ],
+      "properties": {
+        "repo_canonical_pr_label": { "const": "PR121" },
+        "roadmap_pr_label": { "const": "PR #104" },
+        "blueprint_pr_label": { "const": "PR #104" },
+        "semantic_task_id": {
+          "const": "ROADMAP-MASTER-PLAN-SECTION-COVERAGE-COMMAND-MATRIX"
+        },
+        "pr120_github_audit_currentization_evidence": { "type": "object" },
+        "controller_decision_reference": {
+          "const": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/roadmap_range_currentization/3"
+        },
+        "blueprint_decision_reference": {
+          "const": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json#/entries/21"
+        },
+        "artifact_family_decision": {
+          "const": "EXISTING_MASTER_PLAN_SECTION_COVERAGE_FAMILY_EXTENDED"
+        },
+        "compact_normalized_command_matrix_flag": { "const": true },
+        "section_manifest_parser_visible_section_count": { "type": "integer" },
+        "pr120_crosswalk_row_count": { "type": "integer" },
+        "command_matrix_row_count": { "type": "integer" },
+        "missing_section_count": { "type": "integer" },
+        "duplicate_section_count": { "type": "integer" },
+        "ordering_matches_crosswalk_document_order": { "const": true },
+        "command_family_counts": { "type": "object" },
+        "command_scope_class_counts": { "type": "object" },
+        "command_authority_class_counts": { "type": "object" },
+        "command_owner_class_counts": { "type": "object" },
+        "static_allowed_now_operation_counts": { "type": "object" },
+        "future_gated_operation_counts": { "type": "object" },
+        "stage1_prediction_market_command_counts": { "type": "object" },
+        "future_market_deferred_command_count": { "type": "integer" },
+        "explicit_future_market_family_command_counts": { "type": "object" },
+        "owner_review_required_future_market_scope_count": { "type": "integer" },
+        "forbidden_market_taxonomy_value_count": { "const": 0 },
+        "quantum_command_count": { "type": "integer" },
+        "optimizer_command_count": { "type": "integer" },
+        "latency_command_count": { "type": "integer" },
+        "runtime_authority_created": { "const": false },
+        "live_authority_created": { "const": false },
+        "source_retrieval_created": { "const": false },
+        "source_fact_acceptance_created": { "const": false },
+        "connector_semantic_binding_created": { "const": false },
+        "replay_paper_result_created": { "const": false },
+        "order_authority_created": { "const": false },
+        "profit_evidence_created": { "const": false },
+        "latency_superiority_evidence_created": { "const": false },
+        "quantum_backend_simulator_optimizer_execution_created": { "const": false },
+        "market_launch_authority_created": { "const": false },
+        "stage2_market_selection_created": { "const": false },
+        "deterministic_output": { "const": true }
       }
     },
     "roadmap_crosswalk_summary": {
