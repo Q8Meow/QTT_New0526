@@ -1,0 +1,48 @@
+{
+  "future_cross_venue_normalization_path_preserved": true,
+  "handoff": {
+    "cross_venue_normalization_handoff_id": "PR127_CROSS_VENUE_NORMALIZATION_HANDOFF_FIXTURE_V1",
+    "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+    "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+    "future_cross_venue_normalization_path_preserved": true,
+    "future_roadmap_pr": "PR110",
+    "lifecycle_model_ids": [
+      "PR127_LIFECYCLE_MODEL_FORECASTEX_IBKR_FIXTURE",
+      "PR127_LIFECYCLE_MODEL_KALSHI_FIXTURE",
+      "PR127_LIFECYCLE_MODEL_POLYMARKET_FIXTURE"
+    ],
+    "placeholder_semantic_families_requiring_future_source_support": [
+      "fill_integrity",
+      "cashflow_pnl",
+      "latency_component",
+      "settlement_finality",
+      "reconciliation"
+    ],
+    "production_arbitrage_comparability_authority": false,
+    "production_cross_venue_normalization_authority": false,
+    "required_future_normalization_dimensions": [
+      "execution_phase_taxonomy",
+      "execution_transition_taxonomy",
+      "fill_integrity_taxonomy",
+      "cashflow_pnl_taxonomy",
+      "latency_component_taxonomy",
+      "settlement_finality_taxonomy",
+      "reconciliation_taxonomy",
+      "order_state_taxonomy",
+      "cancellation_state_taxonomy",
+      "partial_fill_state_taxonomy",
+      "rejection_error_taxonomy"
+    ],
+    "source_repo_pr_label": "PR127",
+    "venue_ids_in_scope": [
+      "KALSHI",
+      "POLYMARKET",
+      "FORECASTEX_IBKR"
+    ]
+  },
+  "per_venue_execution_lifecycle_cross_venue_handoff_report_id": "PR127_PER_VENUE_EXECUTION_LIFECYCLE_CROSS_VENUE_HANDOFF_REPORT",
+  "production_arbitrage_comparability_authority_count": 0,
+  "production_cross_venue_normalization_authority_count": 0,
+  "repo_pr_label": "PR127",
+  "roadmap_pr_implemented": "PR109"
+}

@@ -376,6 +376,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_per_venue_execution_lifecycle_model.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -4679,11 +4685,28 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
     implementation_index = command_names.index(
         "validate_connector_semantic_binding_implementation_gate.py"
     )
+    lifecycle_index = command_names.index(
+        "validate_per_venue_execution_lifecycle_model.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert source_evidence_index < gate_confirmation_index < retrieval_index
     assert retrieval_index < acceptance_index < binding_index < revalidation_index
-    assert revalidation_index < implementation_index < connector_index
+    assert revalidation_index < implementation_index < lifecycle_index < connector_index
+
+
+def test_runner_includes_per_venue_execution_lifecycle_model_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+
+    assert [
+        python_executable,
+        str(Path("tools") / "validate_per_venue_execution_lifecycle_model.py"),
+        "--repo-root",
+        ".",
+    ] in commands
 
 
 def test_runner_includes_non_mutating_atomicrows_readiness_audit(monkeypatch):

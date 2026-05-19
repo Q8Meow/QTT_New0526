@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/execution_lifecycle/per_venue_execution_lifecycle_validation_receipt.schema.json",
+  "title": "Per Venue Execution Lifecycle Validation Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "validation_receipt_id",
+    "lifecycle_model_candidate_id",
+    "venue_id",
+    "lifecycle_validation_state",
+    "lifecycle_model_state",
+    "fixture_authority_class",
+    "production_execution_lifecycle_authority",
+    "future_cross_venue_normalization_path_preserved",
+    "future_production_launch_path_preserved",
+    "deterministic_fixture_time"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_execution_lifecycle_authority": { "const": false },
+    "future_cross_venue_normalization_path_preserved": { "const": true },
+    "future_production_launch_path_preserved": { "const": true },
+    "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" }
+  }
+}

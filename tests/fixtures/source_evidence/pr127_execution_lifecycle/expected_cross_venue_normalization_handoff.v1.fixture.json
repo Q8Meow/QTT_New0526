@@ -1,0 +1,19 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR127_EXPECTED_CROSS_VENUE_NORMALIZATION_HANDOFF_FIXTURE_V1",
+  "cross_venue_normalization_handoff_id": "PR127_CROSS_VENUE_NORMALIZATION_HANDOFF_FIXTURE_V1",
+  "venue_ids_in_scope": [
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "lifecycle_model_ids": [
+    "PR127_LIFECYCLE_MODEL_FORECASTEX_IBKR_FIXTURE",
+    "PR127_LIFECYCLE_MODEL_KALSHI_FIXTURE",
+    "PR127_LIFECYCLE_MODEL_POLYMARKET_FIXTURE"
+  ],
+  "future_roadmap_pr": "PR110",
+  "production_cross_venue_normalization_authority": false,
+  "production_arbitrage_comparability_authority": false
+}

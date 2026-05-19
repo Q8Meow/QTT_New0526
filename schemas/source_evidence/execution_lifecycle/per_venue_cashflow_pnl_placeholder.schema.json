@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/execution_lifecycle/per_venue_cashflow_pnl_placeholder.schema.json",
+  "title": "Per Venue Cashflow PnL Placeholder",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "placeholder_record_type",
+    "placeholder_id",
+    "venue_id",
+    "target_semantic_family",
+    "accepted_source_evidence_required_flag",
+    "runtime_receipt_required_flag",
+    "production_value_populated",
+    "fixture_authority_class",
+    "production_execution_lifecycle_authority",
+    "future_pr_required_for_production_population"
+  ],
+  "properties": {
+    "placeholder_record_type": { "const": "CASHFLOW_PNL_PLACEHOLDER" },
+    "target_semantic_family": { "const": "cashflow_pnl" },
+    "accepted_source_evidence_required_flag": { "const": true },
+    "runtime_receipt_required_flag": { "const": true },
+    "production_value_populated": { "const": false },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_execution_lifecycle_authority": { "const": false }
+  }
+}

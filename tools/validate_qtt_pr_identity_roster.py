@@ -107,9 +107,9 @@ REQUIRED_NO_CLAIM_BOUNDARY = {
     "profit_latency_execution_quantum_advantage_evidence_created": False,
     "bug_free_status_claimed": False,
 }
-REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 126))
+REQUIRED_GITHUB_AUDIT_NUMBERS = tuple(range(97, 127))
 REQUIRED_ROADMAP_LABELS = tuple(f"PR #{number}" for number in range(97, 127))
-REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 126))
+REQUIRED_SAME_NUMBER_MISMATCHES = tuple(range(107, 127))
 ROADMAP_RUNTIME_BLOCK_LABELS = tuple(f"PR #{number}" for number in range(105, 127))
 REQUIRED_PR115A_NOTE_PARTS = (
     "SHA dormant/non-participating",
@@ -198,6 +198,13 @@ REQUIRED_PR125_NOTE_PARTS = (
     "source revalidation, supersession, and materiality scheduler",
     "Repo PR125 does not imply Roadmap PR #125",
     "owner explicitly authorized Roadmap PR107 for Repo PR125",
+    "state evidence records, not veto authority",
+)
+REQUIRED_PR126_NOTE_PARTS = (
+    "repo-canonical PR126",
+    "connector semantic binding implementation gate",
+    "Repo PR126 does not imply Roadmap PR #126",
+    "owner explicitly authorized Roadmap PR108 for Repo PR126",
     "state evidence records, not veto authority",
 )
 
@@ -360,7 +367,7 @@ def _validate_seed_scope(roster: Mapping[str, Any], entries: Sequence[dict[str, 
     if not isinstance(scope, dict):
         return ["seed_scope must be an object"]
     if tuple(scope.get("github_pr_numbers_included", [])) != REQUIRED_GITHUB_AUDIT_NUMBERS:
-        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #125")
+        failures.append("seed_scope.github_pr_numbers_included must be GitHub PR #97 through #126")
     if tuple(scope.get("roadmap_pr_labels_included", [])) != REQUIRED_ROADMAP_LABELS:
         failures.append("seed_scope.roadmap_pr_labels_included must be roadmap PR #97 through #126")
     if tuple(scope.get("corrective_overlays_included", [])) != ("PR115A", "PR116A"):
@@ -829,6 +836,57 @@ def _validate_pr125_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
     return failures
 
 
+def _validate_pr126_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
+    failures: list[str] = []
+    pr126 = _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY")
+    if pr126 is None:
+        return ["missing PR126 repo-canonical self-entry"]
+    expected = {
+        "repo_canonical_pr_label": "PR126",
+        "roadmap_pr_label": None,
+        "blueprint_pr_label": None,
+        "github_pr_number": 126,
+        "repo_title": "Connector semantic binding implementation gate",
+        "roadmap_title": None,
+        "blueprint_title": None,
+        "github_title": "PR126 implement connector semantic binding implementation gate",
+        "branch_name": "pr126-connector-semantic-binding-implementation-gate",
+        "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+        "authority_scope": "CONTROL_PLANE_ONLY",
+        "current_status": "MERGED",
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/126",
+        "identity_relation_class": "REPO_CANONICAL_ONLY",
+        "same_number_mismatch_recorded": True,
+        "github_pr_state": "MERGED",
+        "github_pr_mergedAt": "2026-05-19T21:39:57Z",
+        "github_pr_mergeCommit_oid": "bbbf11f59da644b7519354802695b7cab050b6af",
+        "github_headRefName": "pr126-connector-semantic-binding-implementation-gate",
+        "github_baseRefName": "main",
+        "owner_authorized_roadmap_pr": "PR108",
+        "owner_authorized_next_capability": "CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE",
+        "controller_used_as_record_not_veto": True,
+    }
+    for field, expected_value in expected.items():
+        if pr126.get(field) != expected_value:
+            failures.append(f"PR126 self-entry {field} must be {expected_value!r}")
+    if "PR125_REPO_CANONICAL_SELF_ENTRY" not in pr126.get(
+        "depends_on_roster_entries", []
+    ):
+        failures.append("PR126 self-entry must depend on PR125_REPO_CANONICAL_SELF_ENTRY")
+    for marker in (
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE_OK",
+    ):
+        if marker not in pr126.get("validator_markers", []):
+            failures.append(f"PR126 self-entry must reference {marker}")
+    if "GITHUB_AUDIT_NUMBER" not in pr126.get("reference_types", []):
+        failures.append("PR126 self-entry reference_types must include GITHUB_AUDIT_NUMBER")
+    missing_notes = _notes_contain(pr126, REQUIRED_PR126_NOTE_PARTS)
+    if missing_notes:
+        failures.append(f"PR126 self-entry notes missing: {', '.join(missing_notes)}")
+    return failures
+
+
 def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]]) -> list[str]:
     failures: list[str] = []
     summary = roster.get("mismatch_summary")
@@ -864,7 +922,7 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
         if pr117_self.get("identity_relation_class") == "EXACT_SAME_SYSTEM_REFERENCE":
             failures.append("repo-canonical PR117 must not be treated as roadmap PR #117")
 
-    for number in range(117, 126):
+    for number in range(117, 127):
         self_entry = _entry_by_id(entries, f"PR{number}_REPO_CANONICAL_SELF_ENTRY")
         if self_entry is None:
             continue
@@ -903,6 +961,10 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
         failures.append("PR124 self-entry same-number mismatch summary must be confirmed")
     if summary.get("pr125_owner_authorized_roadmap_pr107_not_roadmap_pr125") is not True:
         failures.append("Repo PR125 owner authorization for Roadmap PR107 must be recorded")
+    if summary.get("pr126_owner_authorized_roadmap_pr108_not_roadmap_pr126") is not True:
+        failures.append("Repo PR126 owner authorization for Roadmap PR108 must be recorded")
+    if summary.get("pr127_owner_authorized_roadmap_pr109_not_roadmap_pr127") is not True:
+        failures.append("Repo PR127 owner authorization for Roadmap PR109 must be recorded")
     if summary.get("roadmap_controller_files_used_as_state_evidence_not_veto") is not True:
         failures.append("roadmap/controller files must be recorded as state evidence, not veto authority")
     for label in ROADMAP_RUNTIME_BLOCK_LABELS:
@@ -1132,6 +1194,33 @@ def _build_report(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]], 
         "pr125_assumed_blueprint_pr_125": False,
         "repo_pr125_owner_authorized_roadmap_pr107": True,
         "controller_used_as_record_not_veto_for_pr125": True,
+        "pr126_self_entry_present": _entry_by_id(
+            entries, "PR126_REPO_CANONICAL_SELF_ENTRY"
+        )
+        is not None,
+        "pr126_assumed_github_126": False,
+        "pr126_assumed_roadmap_pr_126": False,
+        "pr126_assumed_blueprint_pr_126": False,
+        "pr126_github_audit_number": (
+            _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_number"),
+        "pr126_github_audit_url": (
+            _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_audit_url"),
+        "pr126_github_pr_state": (
+            _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_state"),
+        "pr126_github_pr_mergedAt": (
+            _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_mergedAt"),
+        "pr126_github_pr_mergeCommit_oid": (
+            _entry_by_id(entries, "PR126_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_mergeCommit_oid"),
+        "repo_pr126_owner_authorized_roadmap_pr108": True,
+        "controller_used_as_record_not_veto_for_pr126": True,
+        "repo_pr127_assumed_roadmap_pr127": False,
+        "repo_pr127_owner_authorized_roadmap_pr109": True,
+        "controller_used_as_record_not_veto_for_pr127": True,
         "repo_pr123_assumed_roadmap_pr123": False,
         "repo_pr123_owner_authorized_roadmap_pr106": True,
         "controller_used_as_record_not_veto_for_pr123": True,
@@ -1188,6 +1277,7 @@ def validate(
     failures.extend(_validate_pr123_self_entry(entries))
     failures.extend(_validate_pr124_self_entry(entries))
     failures.extend(_validate_pr125_self_entry(entries))
+    failures.extend(_validate_pr126_self_entry(entries))
     failures.extend(_validate_mismatches(roster, entries))
     failures.extend(_validate_gate_and_authority_boundaries(repo_root, roster))
 
