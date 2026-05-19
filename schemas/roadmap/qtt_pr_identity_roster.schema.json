@@ -104,7 +104,9 @@
         "explicit_mismatch_examples",
         "roadmap_pr100_github102_sha_freeze_mismatch_confirmed",
         "roadmap_pr105_to_pr126_runtime_live_block_confirmed",
-        "pr117_self_entry_does_not_assume_same_number_identity"
+        "pr117_self_entry_does_not_assume_same_number_identity",
+        "pr126_owner_authorized_roadmap_pr108_not_roadmap_pr126",
+        "pr127_owner_authorized_roadmap_pr109_not_roadmap_pr127"
       ],
       "properties": {
         "github_107_through_116_same_number_mismatches": {
@@ -130,6 +132,12 @@
           "const": true
         },
         "pr125_owner_authorized_roadmap_pr107_not_roadmap_pr125": {
+          "const": true
+        },
+        "pr126_owner_authorized_roadmap_pr108_not_roadmap_pr126": {
+          "const": true
+        },
+        "pr127_owner_authorized_roadmap_pr109_not_roadmap_pr127": {
           "const": true
         },
         "roadmap_controller_files_used_as_state_evidence_not_veto": {

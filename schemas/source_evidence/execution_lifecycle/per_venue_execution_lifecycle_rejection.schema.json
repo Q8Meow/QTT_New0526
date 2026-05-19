@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/execution_lifecycle/per_venue_execution_lifecycle_rejection.schema.json",
+  "title": "Per Venue Execution Lifecycle Rejection",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "rejection_id",
+    "validation_receipt_id",
+    "lifecycle_model_candidate_id",
+    "venue_id",
+    "lifecycle_model_state",
+    "rejection_reason_code",
+    "fixture_authority_class",
+    "production_execution_lifecycle_authority",
+    "future_cross_venue_normalization_path_preserved",
+    "future_production_launch_path_preserved",
+    "deterministic_fixture_time"
+  ],
+  "properties": {
+    "lifecycle_model_state": {
+      "enum": [
+        "REJECTED_MISSING_CONNECTOR_IMPLEMENTATION_GATE",
+        "REJECTED_MISSING_ACCEPTED_SOURCE_EVIDENCE",
+        "REJECTED_STALE_ACCEPTED_PACKET",
+        "REJECTED_SUPERSEDED_ACCEPTED_PACKET",
+        "REJECTED_REVALIDATION_REQUIRED",
+        "REJECTED_CONNECTOR_BLOCKING_MATERIALITY",
+        "REJECTED_TRADING_BLOCKING_MATERIALITY",
+        "REJECTED_SCOPE_OR_VENUE_MISMATCH",
+        "REJECTED_MISSING_LIFECYCLE_SEMANTIC_SUPPORT",
+        "REJECTED_MISSING_FILL_INTEGRITY_SUPPORT",
+        "REJECTED_MISSING_CASHFLOW_PNL_SUPPORT",
+        "REJECTED_MISSING_LATENCY_COMPONENT_SUPPORT",
+        "REJECTED_MISSING_SETTLEMENT_FINALITY_SUPPORT",
+        "REJECTED_MISSING_RECONCILIATION_SUPPORT"
+      ]
+    },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_execution_lifecycle_authority": { "const": false },
+    "future_cross_venue_normalization_path_preserved": { "const": true },
+    "future_production_launch_path_preserved": { "const": true },
+    "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" }
+  }
+}

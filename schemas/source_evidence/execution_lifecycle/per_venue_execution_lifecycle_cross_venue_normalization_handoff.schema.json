@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/execution_lifecycle/per_venue_execution_lifecycle_cross_venue_normalization_handoff.schema.json",
+  "title": "Per Venue Execution Lifecycle Cross Venue Normalization Handoff",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "cross_venue_normalization_handoff_id",
+    "fixture_authority_class",
+    "source_repo_pr_label",
+    "future_roadmap_pr",
+    "venue_ids_in_scope",
+    "lifecycle_model_ids",
+    "placeholder_semantic_families_requiring_future_source_support",
+    "required_future_normalization_dimensions",
+    "production_cross_venue_normalization_authority",
+    "production_arbitrage_comparability_authority",
+    "future_cross_venue_normalization_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "source_repo_pr_label": { "const": "PR127" },
+    "future_roadmap_pr": { "const": "PR110" },
+    "production_cross_venue_normalization_authority": { "const": false },
+    "production_arbitrage_comparability_authority": { "const": false },
+    "future_cross_venue_normalization_path_preserved": { "const": true }
+  }
+}

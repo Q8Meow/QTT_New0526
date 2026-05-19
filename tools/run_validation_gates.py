@@ -266,6 +266,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_per_venue_execution_lifecycle_model.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

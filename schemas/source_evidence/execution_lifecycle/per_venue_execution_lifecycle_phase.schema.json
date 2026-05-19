@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qtt.local/schemas/source_evidence/execution_lifecycle/per_venue_execution_lifecycle_phase.schema.json",
+  "title": "Per Venue Execution Lifecycle Phase",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "execution_lifecycle_phase_record_id",
+    "per_venue_execution_lifecycle_model_id",
+    "venue_id",
+    "phase_ordinal",
+    "phase_family",
+    "execution_phase_state",
+    "fixture_authority_class",
+    "production_execution_lifecycle_authority",
+    "deterministic_fixture_time"
+  ],
+  "properties": {
+    "phase_family": {
+      "enum": [
+        "ORDER_INTENT_DECLARED_FIXTURE",
+        "CONNECTOR_SEMANTIC_IMPLEMENTATION_CONFIRMED_FIXTURE",
+        "ORDER_SUBMISSION_PREPARED_FIXTURE",
+        "VENUE_ACKNOWLEDGEMENT_PENDING_FIXTURE",
+        "VENUE_STATE_UPDATE_PENDING_FIXTURE",
+        "FILL_INTEGRITY_EVALUATION_PENDING_FIXTURE",
+        "CASHFLOW_PNL_MAPPING_PENDING_FIXTURE",
+        "SETTLEMENT_FINALITY_PENDING_FIXTURE",
+        "RECONCILIATION_PENDING_FIXTURE",
+        "LIFECYCLE_TERMINAL_STATE_PENDING_FIXTURE"
+      ]
+    },
+    "execution_phase_state": { "const": "PR127_GENERIC_FIXTURE_PHASE_PENDING" },
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_execution_lifecycle_authority": { "const": false },
+    "deterministic_fixture_time": { "const": "2026-05-19T00:00:00Z" }
+  }
+}

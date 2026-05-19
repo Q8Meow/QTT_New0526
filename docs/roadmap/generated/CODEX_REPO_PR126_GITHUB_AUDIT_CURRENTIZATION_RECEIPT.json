@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR126",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr126-connector-semantic-binding-implementation-gate",
+  "github_pr_mergeCommit_oid": "bbbf11f59da644b7519354802695b7cab050b6af",
+  "github_pr_mergedAt": "2026-05-19T21:39:57Z",
+  "github_pr_number": 126,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR126 implement connector semantic binding implementation gate",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/126",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR109_PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER",
+  "owner_authorized_next_capability": "PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER",
+  "owner_authorized_roadmap_pr": "PR109",
+  "repo_pr_label": "PR127",
+  "same_number_inference_used": false
+}

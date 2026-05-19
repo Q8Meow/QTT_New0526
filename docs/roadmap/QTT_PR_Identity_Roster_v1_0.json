@@ -70,7 +70,8 @@
       122,
       123,
       124,
-      125
+      125,
+      126
     ],
     "roadmap_pr_labels_included": [
       "PR #97",
@@ -1988,6 +1989,49 @@
       "owner_authorized_next_capability": "SOURCE_REVALIDATION_SUPERSESSION_AND_MATERIALITY_SCHEDULER",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #125 is the audit number assigned to the merged pull request for repo-canonical PR125. Repo-canonical PR125 is the implementation-truth label for the source revalidation, supersession, and materiality scheduler. Repo PR125 does not imply Roadmap PR #125 or Blueprint PR #125. The owner explicitly authorized Roadmap PR107 for Repo PR125. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction."
+    },
+    {
+      "roster_entry_id": "PR126_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR126",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 126,
+      "repo_title": "Connector semantic binding implementation gate",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR126 implement connector semantic binding implementation gate",
+      "branch_name": "pr126-connector-semantic-binding-implementation-gate",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR125_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/126",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-19T21:39:57Z",
+      "github_pr_mergeCommit_oid": "bbbf11f59da644b7519354802695b7cab050b6af",
+      "github_headRefName": "pr126-connector-semantic-binding-implementation-gate",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR108",
+      "owner_authorized_next_capability": "CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #126 is the audit number assigned to the merged pull request for repo-canonical PR126. Repo-canonical PR126 is the implementation-truth label for the connector semantic binding implementation gate. Repo PR126 does not imply Roadmap PR #126 or Blueprint PR #126. The owner explicitly authorized Roadmap PR108 for Repo PR126. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction."
     }
   ],
   "mismatch_summary": {
@@ -2124,6 +2168,13 @@
         "roadmap_pr_label": "PR #125",
         "roadmap_title": "Quantum provider capability receipts",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 126,
+        "github_title": "PR126 implement connector semantic binding implementation gate",
+        "roadmap_pr_label": "PR #126",
+        "roadmap_title": "Quantum problem compiler for QUBO, Ising, and portfolio/candidate-set representations",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "explicit_mismatch_examples": [
@@ -2231,6 +2282,13 @@
         "roadmap_pr_label": "PR #125",
         "roadmap_title": "Quantum provider capability receipts",
         "relation": "SAME_NUMBER_MISMATCH"
+      },
+      {
+        "github_pr_number": 126,
+        "github_title": "PR126 implement connector semantic binding implementation gate",
+        "roadmap_pr_label": "PR #126",
+        "roadmap_title": "Quantum problem compiler for QUBO, Ising, and portfolio/candidate-set representations",
+        "relation": "SAME_NUMBER_MISMATCH"
       }
     ],
     "roadmap_pr100_github102_sha_freeze_mismatch_confirmed": true,
@@ -2238,6 +2296,8 @@
     "pr117_self_entry_does_not_assume_same_number_identity": true,
     "pr124_self_entry_does_not_assume_same_number_identity": true,
     "pr125_owner_authorized_roadmap_pr107_not_roadmap_pr125": true,
+    "pr126_owner_authorized_roadmap_pr108_not_roadmap_pr126": true,
+    "pr127_owner_authorized_roadmap_pr109_not_roadmap_pr127": true,
     "roadmap_controller_files_used_as_state_evidence_not_veto": true
   },
   "validation_expectations": {

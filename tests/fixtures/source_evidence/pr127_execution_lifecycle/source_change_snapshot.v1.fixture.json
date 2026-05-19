@@ -1,0 +1,42 @@
+{
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "fixture_id": "PR127_SOURCE_CHANGE_SNAPSHOT_FIXTURE_V1",
+  "source_change_snapshots": [
+    {
+      "source_change_snapshot_id": "PR127_SOURCE_CHANGE_IMPACT_SNAPSHOT_FIXTURE_V1",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "production_source_change_authority": false,
+      "source_change_snapshot_state": "PRECOMPUTED_CONTROL_PLANE_FIXTURE",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "affected_venue_ids": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR",
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "stale_accepted_packet_ids": [
+        "PR127_PACKET_STALE"
+      ],
+      "superseded_accepted_packet_ids": [
+        "PR127_PACKET_SUPERSEDED"
+      ],
+      "revalidation_due_packet_ids": [
+        "PR127_PACKET_REVALIDATION_REQUIRED"
+      ],
+      "connector_blocking_materiality_binding_ids": [
+        "PR127_BINDING_CONNECTOR_BLOCKING"
+      ],
+      "trading_blocking_materiality_binding_ids": [
+        "PR127_BINDING_TRADING_BLOCKING"
+      ],
+      "live_pretrade_use_allowed_flag": false,
+      "network_io_allowed_flag": false,
+      "source_retrieval_allowed_flag": false,
+      "source_acceptance_allowed_flag": false,
+      "connector_binding_mutation_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "live_reachability_allowed_flag": false
+    }
+  ]
+}
