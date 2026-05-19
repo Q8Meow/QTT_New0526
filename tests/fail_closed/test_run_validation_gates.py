@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 from tools import (
@@ -153,8 +154,13 @@ from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_
 from tools import run_validation_gates as runner
 
 
-def _expected_commands(python_executable: str) -> list[list[str]]:
+def _expected_commands(
+    python_executable: str,
+    pytest_basetemp: Path | None = None,
+) -> list[list[str]]:
     validation_dir = runner._default_validation_dir()
+    if pytest_basetemp is None:
+        pytest_basetemp = validation_dir / "run_validation_gates_pytest"
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
@@ -1575,9 +1581,14 @@ def _expected_commands(python_executable: str) -> list[list[str]]:
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",
-            str(Path(".tmp") / "run_validation_gates_pytest"),
+            str(pytest_basetemp),
         ],
     ]
+
+
+def _pytest_basetemp_from_commands(commands: list[list[str]]) -> Path:
+    pytest_command = commands[-1]
+    return Path(pytest_command[pytest_command.index("--basetemp") + 1])
 
 
 def test_runner_builds_expected_command_sequence(monkeypatch):
@@ -1628,16 +1639,17 @@ def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
 
 def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    pytest_basetemp = Path(".tmp") / "run_validation_gates_pytest_123"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
-    commands = runner.build_validation_commands()
+    commands = runner.build_validation_commands(pytest_basetemp=pytest_basetemp)
 
     assert commands[-1] == [
         python_executable,
         str(Path("tools") / "run_pytest_fresh_basetemp.py"),
         "-q",
         "--basetemp",
-        str(Path(".tmp") / "run_validation_gates_pytest"),
+        str(pytest_basetemp),
     ]
 
 
@@ -6167,5 +6179,104 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
 
     assert exit_code == 0
     validation_dir = Path(seen[0][5]).parent
-    assert seen == runner.build_validation_commands(validation_dir)
+    pytest_basetemp = _pytest_basetemp_from_commands(seen)
+    assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+    assert seen == runner.build_validation_commands(validation_dir, pytest_basetemp)
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+
+
+def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
+    class Completed:
+        returncode = 0
+
+    repo_root = (Path(".tmp") / "test_run_validation_gates_repo_root").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    repo_root.mkdir(parents=True)
+    tmp_parent = repo_root / ".tmp"
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        assert tmp_parent.is_dir()
+        seen.append(command)
+        return Completed()
+
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    assert not tmp_parent.exists()
+
+    try:
+        exit_code = runner.main([])
+
+        assert exit_code == 0
+        assert seen
+        pytest_basetemp = _pytest_basetemp_from_commands(seen)
+        assert tmp_parent.is_dir()
+        assert pytest_basetemp.parent == tmp_parent
+        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+    finally:
+        shutil.rmtree(repo_root, ignore_errors=True)
+
+
+def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
+    repo_root = (Path(".tmp") / "test_run_validation_gates_unique_repo_root").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    repo_root.mkdir(parents=True)
+    tmp_parent = repo_root / ".tmp"
+    pytest_basetemps: list[Path] = []
+
+    def fake_run_commands(commands: list[list[str]]) -> int:
+        pytest_basetemp = _pytest_basetemp_from_commands(commands)
+        assert pytest_basetemp.parent == tmp_parent
+        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert pytest_basetemp.is_dir()
+        pytest_basetemps.append(pytest_basetemp)
+        return 0
+
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner, "run_commands", fake_run_commands)
+
+    try:
+        assert runner.main([]) == 0
+        assert runner.main([]) == 0
+
+        assert len(pytest_basetemps) == 2
+        assert pytest_basetemps[0] != pytest_basetemps[1]
+    finally:
+        shutil.rmtree(repo_root, ignore_errors=True)
+
+
+def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
+    repo_root = (Path(".tmp") / "test_run_validation_gates_stale_repo_root").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    tmp_parent = repo_root / ".tmp"
+    stale_basetemp = tmp_parent / "run_validation_gates_pytest"
+    sentinel = stale_basetemp / "sentinel.txt"
+    stale_basetemp.mkdir(parents=True)
+    sentinel.write_text("do-not-touch", encoding="utf-8")
+    pytest_basetemps: list[Path] = []
+
+    def fake_run_commands(commands: list[list[str]]) -> int:
+        pytest_basetemp = _pytest_basetemp_from_commands(commands)
+        assert pytest_basetemp != stale_basetemp
+        assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
+        assert stale_basetemp.is_dir()
+        assert sentinel.read_text(encoding="utf-8") == "do-not-touch"
+        pytest_basetemps.append(pytest_basetemp)
+        return 0
+
+    original_cwd = Path.cwd()
+    monkeypatch.chdir(repo_root)
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner, "run_commands", fake_run_commands)
+
+    try:
+        assert runner.main([]) == 0
+
+        assert pytest_basetemps
+        assert stale_basetemp.is_dir()
+        assert sentinel.read_text(encoding="utf-8") == "do-not-touch"
+    finally:
+        monkeypatch.chdir(original_cwd)
+        shutil.rmtree(repo_root, ignore_errors=True)
