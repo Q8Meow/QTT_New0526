@@ -40,6 +40,9 @@ PR129_AUDIT_RECEIPT_PATH = Path(
 PR130_AUDIT_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_REPO_PR130_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
 )
+PR131_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR131_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
 PR123_OWNER_AUTH_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
 )
@@ -775,6 +778,65 @@ def test_repo_pr131_does_not_imply_roadmap_pr131_and_owner_authorized_pr113():
     )
     assert receipt["implementation_scope"] == (
         "ROADMAP_PR113_CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE"
+    )
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_pr131_github_audit_currentization_is_recorded_and_audit_only():
+    pr131 = _entry("PR131_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR131_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr131["repo_canonical_pr_label"] == "PR131"
+    assert pr131["github_pr_number"] == 131
+    assert pr131["github_title"] == (
+        "PR131 implement credential alias secret no-capture readiness gate"
+    )
+    assert pr131["github_pr_state"] == "MERGED"
+    assert pr131["github_pr_mergedAt"] == "2026-05-20T07:27:58Z"
+    assert pr131["github_pr_mergeCommit_oid"] == (
+        "231f71551f9199b497f4bdabadf64d06affddf9f"
+    )
+    assert pr131["github_headRefName"] == (
+        "pr131-credential-alias-secret-no-capture-readiness-gate"
+    )
+    assert pr131["github_baseRefName"] == "main"
+    assert pr131["roadmap_pr_label"] is None
+    assert pr131["blueprint_pr_label"] is None
+    assert pr131["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr131["same_number_mismatch_recorded"] is True
+
+    assert receipt["repo_pr_label"] == "PR132"
+    assert receipt["currentized_prior_repo_pr_label"] == "PR131"
+    assert receipt["github_pr_number"] == 131
+    assert receipt["github_pr_title"] == pr131["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-20T07:27:58Z"
+    assert receipt["github_pr_mergeCommit_oid"] == (
+        "231f71551f9199b497f4bdabadf64d06affddf9f"
+    )
+    assert receipt["github_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/131"
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_repo_pr132_does_not_imply_roadmap_pr132_and_owner_authorized_pr114():
+    receipt = json.loads(PR131_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    roadmap_114 = _entry("GITHUB_PR_114_IDENTITY_MISMATCH")
+
+    assert roadmap_114["roadmap_title"] == "Venue market-data ingest adapters"
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR132"
+        and entry["roadmap_pr_label"] == "PR #132"
+        for entry in _entries()
+    )
+    assert receipt["repo_pr_label"] == "PR132"
+    assert receipt["owner_authorized_roadmap_pr"] == "PR113"
+    assert (
+        receipt["owner_authorized_next_capability"]
+        == "CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE"
+    )
+    assert receipt["next_owner_authorized_roadmap_pr"] == "PR114"
+    assert receipt["next_implementation_scope"] == (
+        "ROADMAP_PR114_VENUE_MARKET_DATA_INGEST_ADAPTER_CONTRACTS"
     )
     assert receipt["same_number_inference_used"] is False
 

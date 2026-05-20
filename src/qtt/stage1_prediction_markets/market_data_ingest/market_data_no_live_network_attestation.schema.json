@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "atomicrows_authority_created": {
+      "const": false
+    },
+    "atomicrows_bundle_consumed": {
+      "const": false
+    },
+    "atomicrows_bundle_created": {
+      "const": false
+    },
+    "atomicrows_row_records_created_count": {
+      "const": 0
+    },
+    "atomicrows_sha_created": {
+      "const": false
+    },
+    "attestation_id": {
+      "type": "string"
+    },
+    "authority_class": {
+      "const": "FIXTURE_BACKED_MARKET_DATA_INGEST_CONTRACT_ONLY_NOT_LIVE_MARKET_DATA_AUTHORITY"
+    },
+    "connector_semantic_binding_created": {
+      "const": false
+    },
+    "created_by": {
+      "const": "CODEX_PR132_FIXTURE_OR_VALIDATOR"
+    },
+    "credential_provider_call_count": {
+      "const": 0
+    },
+    "credential_provider_called": {
+      "const": false
+    },
+    "environment_credential_read_count": {
+      "const": 0
+    },
+    "event_state_snapshot_created": {
+      "const": false
+    },
+    "feature_vector_created_count": {
+      "const": 0
+    },
+    "fixtures_contain_live_market_payload": {
+      "const": false
+    },
+    "future_atomicrows_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_market_data_feature_row_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_parameter_row_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_quantum_feature_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_qaoa_qubo_market_state_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_annealing_liquidity_state_ref": {
+      "type": "string"
+    },
+    "future_quantum_feature_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_kernel_market_regime_feature_ref": {
+      "type": "string"
+    },
+    "future_quantum_market_microstructure_feature_family_ref": {
+      "type": "string"
+    },
+    "future_quantum_optimizer_market_data_feature_ref": {
+      "type": "string"
+    },
+    "historical_dataset_digest_created": {
+      "const": false
+    },
+    "historical_dataset_digest_created_count": {
+      "const": 0
+    },
+    "live_credential_resolution_performed": {
+      "const": false
+    },
+    "live_market_data_fetch_count": {
+      "const": 0
+    },
+    "live_market_data_fetch_created": {
+      "const": false
+    },
+    "logs_contain_live_market_payload": {
+      "const": false
+    },
+    "market_data_feature_vector_created": {
+      "const": false
+    },
+    "network_io_count": {
+      "const": 0
+    },
+    "network_io_created": {
+      "const": false
+    },
+    "neural_inference_created": {
+      "const": false
+    },
+    "neural_training_created": {
+      "const": false
+    },
+    "official_venue_semantics_fabricated": {
+      "const": false
+    },
+    "order_authority_count": {
+      "const": 0
+    },
+    "order_authority_created": {
+      "const": false
+    },
+    "order_execution_count": {
+      "const": 0
+    },
+    "order_execution_created": {
+      "const": false
+    },
+    "orderbook_snapshot_created": {
+      "const": false
+    },
+    "orderbook_snapshot_created_count": {
+      "const": 0
+    },
+    "paper_result_created": {
+      "const": false
+    },
+    "private_state_fetch_count": {
+      "const": 0
+    },
+    "private_state_fetch_created": {
+      "const": false
+    },
+    "production_connector_authority_created": {
+      "const": false
+    },
+    "production_connector_client_count": {
+      "const": 0
+    },
+    "profit_evidence_created": {
+      "const": false
+    },
+    "quantum_advantage_claim_created": {
+      "const": false
+    },
+    "quantum_advantage_claim_created_count": {
+      "const": 0
+    },
+    "quantum_backend_called": {
+      "const": false
+    },
+    "quantum_backend_simulator_optimizer_execution_count": {
+      "const": 0
+    },
+    "quantum_execution_created": {
+      "const": false
+    },
+    "quantum_feature_computation_created": {
+      "const": false
+    },
+    "quantum_feature_computation_created_count": {
+      "const": 0
+    },
+    "quantum_optimizer_called": {
+      "const": false
+    },
+    "quantum_optimizer_input_created": {
+      "const": false
+    },
+    "quantum_optimizer_input_created_count": {
+      "const": 0
+    },
+    "quantum_ready_market_data_contract": {
+      "const": true
+    },
+    "quantum_simulator_called": {
+      "const": false
+    },
+    "quantum_trading_signal_created": {
+      "const": false
+    },
+    "quantum_trading_signal_created_count": {
+      "const": 0
+    },
+    "raw_secret_capture_created": {
+      "const": false
+    },
+    "record_type": {
+      "const": "MARKET_DATA_NO_LIVE_NETWORK_ATTESTATION"
+    },
+    "replay_result_created": {
+      "const": false
+    },
+    "reports_contain_live_market_payload": {
+      "const": false
+    },
+    "rest_client_created": {
+      "const": false
+    },
+    "rest_client_import_count": {
+      "const": 0
+    },
+    "runtime_cash_authority_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created_count": {
+      "const": 0
+    },
+    "scanned_artifact_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "PR132_MARKET_DATA_INGEST_SCHEMA_V1"
+    },
+    "scope_id": {
+      "enum": [
+        "PREDICTION_MARKETS_GENERAL"
+      ]
+    },
+    "scoring_ranking_arbitration_output_created": {
+      "const": false
+    },
+    "socket_import_count": {
+      "const": 0
+    },
+    "source_acceptance_created": {
+      "const": false
+    },
+    "source_retrieval_created": {
+      "const": false
+    },
+    "trading_signal_created": {
+      "const": false
+    },
+    "trading_signal_created_count": {
+      "const": 0
+    },
+    "venue_api_call_count": {
+      "const": 0
+    },
+    "venue_api_call_created": {
+      "const": false
+    },
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ]
+    },
+    "websocket_client_created": {
+      "const": false
+    },
+    "websocket_client_import_count": {
+      "const": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_type",
+    "created_by",
+    "authority_class",
+    "source_retrieval_created",
+    "source_acceptance_created",
+    "official_venue_semantics_fabricated",
+    "live_market_data_fetch_created",
+    "rest_client_created",
+    "websocket_client_created",
+    "venue_api_call_created",
+    "network_io_created",
+    "credential_provider_called",
+    "live_credential_resolution_performed",
+    "raw_secret_capture_created",
+    "production_connector_authority_created",
+    "private_state_fetch_created",
+    "runtime_cash_authority_created",
+    "orderbook_snapshot_created",
+    "event_state_snapshot_created",
+    "runtime_resolver_snapshot_created",
+    "historical_dataset_digest_created",
+    "market_data_feature_vector_created",
+    "trading_signal_created",
+    "scoring_ranking_arbitration_output_created",
+    "order_authority_created",
+    "order_execution_created",
+    "replay_result_created",
+    "paper_result_created",
+    "profit_evidence_created",
+    "neural_training_created",
+    "neural_inference_created",
+    "future_quantum_feature_encoding_ref",
+    "future_quantum_optimizer_market_data_feature_ref",
+    "future_quantum_market_microstructure_feature_family_ref",
+    "future_qaoa_qubo_market_state_encoding_ref",
+    "future_quantum_kernel_market_regime_feature_ref",
+    "future_quantum_annealing_liquidity_state_ref",
+    "quantum_ready_market_data_contract",
+    "quantum_execution_created",
+    "quantum_backend_called",
+    "quantum_simulator_called",
+    "quantum_optimizer_called",
+    "quantum_feature_computation_created",
+    "quantum_optimizer_input_created",
+    "quantum_trading_signal_created",
+    "quantum_advantage_claim_created",
+    "atomicrows_bundle_consumed",
+    "atomicrows_bundle_created",
+    "atomicrows_sha_created",
+    "attestation_id",
+    "scanned_artifact_refs",
+    "rest_client_import_count",
+    "websocket_client_import_count",
+    "socket_import_count",
+    "network_io_count",
+    "venue_api_call_count",
+    "live_market_data_fetch_count",
+    "environment_credential_read_count",
+    "credential_provider_call_count",
+    "production_connector_client_count",
+    "private_state_fetch_count",
+    "orderbook_snapshot_created_count",
+    "runtime_resolver_snapshot_created_count",
+    "historical_dataset_digest_created_count",
+    "feature_vector_created_count",
+    "trading_signal_created_count",
+    "quantum_feature_computation_created_count",
+    "quantum_optimizer_input_created_count",
+    "quantum_trading_signal_created_count",
+    "quantum_backend_simulator_optimizer_execution_count",
+    "quantum_advantage_claim_created_count",
+    "order_authority_count",
+    "order_execution_count",
+    "logs_contain_live_market_payload",
+    "reports_contain_live_market_payload",
+    "fixtures_contain_live_market_payload"
+  ],
+  "title": "PR132 Market Data No Live Network Attestation",
+  "type": "object"
+}
