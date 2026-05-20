@@ -1,0 +1,39 @@
+{
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR131_PRIVATE_STATE_DOWNSTREAM_HANDOFF_INPUT_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "private_state_downstream_handoff": {
+    "account_wallet_balance_receipt_ids": [
+      "PR130_KALSHI_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "PR130_POLYMARKET_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "PR130_FORECASTEX_IBKR_ACCOUNT_WALLET_BALANCE_RECEIPT_V1"
+    ],
+    "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+    "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+    "future_atomicrows_bridge_materialization_recommended_after_repo_pr": "PR135",
+    "future_credential_alias_secret_no_capture_pr": "PR113",
+    "future_market_data_ingest_pr": "PR114",
+    "future_orderbook_event_snapshot_pr": "PR115",
+    "future_production_launch_path_preserved": true,
+    "future_runtime_resolver_snapshot_pr": "PR116",
+    "private_state_downstream_handoff_id": "PR130_PRIVATE_STATE_DOWNSTREAM_HANDOFF_V1",
+    "private_state_read_receipt_ids": [
+      "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1",
+      "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1",
+      "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1"
+    ],
+    "private_state_to_runtime_cash_linkage_receipt_ids": [
+      "PR130_KALSHI_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1",
+      "PR130_POLYMARKET_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1",
+      "PR130_FORECASTEX_IBKR_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1"
+    ],
+    "production_downstream_authority": false,
+    "source_repo_pr_label": "PR130",
+    "venue_ids_in_scope": [
+      "KALSHI",
+      "POLYMARKET",
+      "FORECASTEX_IBKR"
+    ]
+  }
+}

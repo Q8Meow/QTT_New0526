@@ -400,6 +400,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "credential_alias_secret_no_capture_readiness_validate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -1699,6 +1705,54 @@ def test_runner_includes_pr130_private_state_receipt_gate_after_runtime_cash(mon
         "--repo-root",
         ".",
     ]
+
+
+def test_runner_includes_pr131_credential_readiness_gate_after_private_state(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    private_state_index = command_names.index("private_state_read_receipt_gate_validate.py")
+    credential_index = command_names.index(
+        "credential_alias_secret_no_capture_readiness_validate.py"
+    )
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert private_state_index < credential_index < no_runtime_index
+    assert commands[credential_index] == [
+        python_executable,
+        str(Path("tools") / "credential_alias_secret_no_capture_readiness_validate.py"),
+        "--repo-root",
+        ".",
+    ]
+
+
+def test_runner_fails_closed_if_pr131_credential_readiness_gate_fails(monkeypatch, capsys):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "private_state_read_receipt_gate_validate.py"],
+        ["python", "credential_alias_secret_no_capture_readiness_validate.py"],
+        ["python", "later_gate.py"],
+    ]
+    returncodes = [0, 41, 0]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(returncodes[len(seen) - 1])
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 41
+    assert seen == commands[:2]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
 def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
@@ -4726,6 +4780,10 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
         "validate_cross_venue_execution_normalization_binding.py"
     )
     runtime_cash_index = command_names.index("runtime_cash_component_field_map_validate.py")
+    private_state_index = command_names.index("private_state_read_receipt_gate_validate.py")
+    credential_index = command_names.index(
+        "credential_alias_secret_no_capture_readiness_validate.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert source_evidence_index < gate_confirmation_index < retrieval_index
@@ -4736,6 +4794,8 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
         < lifecycle_index
         < normalization_index
         < runtime_cash_index
+        < private_state_index
+        < credential_index
         < connector_index
     )
 

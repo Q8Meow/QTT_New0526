@@ -1,0 +1,43 @@
+{
+  "branch_verified": "pr131-credential-alias-secret-no-capture-readiness-gate",
+  "head_verified": "b50da75",
+  "mandatory_files_read": [
+    "docs/roadmap/README.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md"
+  ],
+  "no_github_cli_commands_run_by_codex": true,
+  "no_network_commands_run_by_codex": true,
+  "owner_source_packet_secret_policy_observed": true,
+  "pr129_artifacts_inspected": [
+    "src/qtt/stage1_prediction_markets/capital_risk/",
+    "src/qtt/stage1_prediction_markets/capital_risk/validator.py",
+    "src/qtt/stage1_prediction_markets/capital_risk/field_map_constants.py",
+    "docs/master_plan/source_evidence/generated/RuntimeCashComponentFieldMap.report.json",
+    "docs/master_plan/source_evidence/generated/RuntimeCashDownstreamHandoff.report.json"
+  ],
+  "pr130_artifacts_inspected": [
+    "src/qtt/stage1_prediction_markets/private_state_receipts/",
+    "src/qtt/stage1_prediction_markets/private_state_receipts/validator.py",
+    "src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py",
+    "src/qtt/stage1_prediction_markets/private_state_receipts/canonical_redaction.py",
+    "docs/master_plan/source_evidence/generated/CODEX_PR130_ACCOUNT_WALLET_BALANCE_PRIVATE_STATE_READ_RECEIPT_GATE_REPORT.json",
+    "docs/master_plan/source_evidence/generated/PrivateStateDownstreamHandoff.report.json",
+    "tools/private_state_read_receipt_gate_validate.py",
+    "tools/run_validation_gates.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/source_evidence/pr130_private_state_read_receipt_support.py"
+  ],
+  "raw_secret_capture_allowed_flag_observed": false,
+  "repo_pr_label": "PR131",
+  "roadmap_pr": "PR113",
+  "secret_alias_reference_allowed_flag_observed": true,
+  "source_packet_redaction_required_for_secret_like_values_observed": true,
+  "worktree_clean_before_edits": true
+}

@@ -1,0 +1,24 @@
+{
+  "atomicrows_bundle_sha_mutation_forbidden": true,
+  "authorized_roadmap_pr": "PR113",
+  "credential_aliases_are_non_secret_references": true,
+  "credential_provider_calls_forbidden": true,
+  "credential_readiness_is_control_plane_metadata_only": true,
+  "downstream_prs_preserved": [
+    "PR114",
+    "PR115",
+    "PR116"
+  ],
+  "implementation_scope": "ROADMAP_PR113_CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE",
+  "live_credential_resolution_forbidden": true,
+  "order_authority_forbidden": true,
+  "private_state_fetch_forbidden": true,
+  "production_connector_creation_forbidden": true,
+  "quantum_execution_forbidden": true,
+  "raw_secret_material_forbidden": true,
+  "replay_paper_live_use_forbidden": true,
+  "repo_pr_label": "PR131",
+  "same_number_inference_used": false,
+  "unauthorized_roadmap_pr_same_number": "PR131",
+  "venue_api_calls_forbidden": true
+}

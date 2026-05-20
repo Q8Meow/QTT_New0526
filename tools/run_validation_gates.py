@@ -290,6 +290,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "credential_alias_secret_no_capture_readiness_validate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),
