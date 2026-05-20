@@ -1,0 +1,189 @@
+{
+  "event_state_snapshot": {
+    "atomicrows_4183_completion_claim_created": false,
+    "atomicrows_authority_created": false,
+    "atomicrows_bridge_authority_created": false,
+    "atomicrows_bundle_consumed": false,
+    "atomicrows_bundle_created": false,
+    "atomicrows_bundle_edited": false,
+    "atomicrows_full_materialization_authorized": false,
+    "atomicrows_pre_bridge_compatibility_metadata_created": true,
+    "atomicrows_row_records_created_count": 0,
+    "atomicrows_sha_created": false,
+    "authority_class": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY",
+    "canonical_event_state_rank": 0,
+    "canonical_sort_key": "PR133_KALSHI_EVENT_STATE_AGGREGATE_SORT_KEY",
+    "created_by": "CODEX_PR133_FIXTURE_OR_VALIDATOR",
+    "credential_provider_called": false,
+    "deterministic_sequence_id": "PR133_EVENT_STATE_SEQUENCE_0001",
+    "event_state_snapshot_is_atomicrows_row": false,
+    "event_state_snapshot_is_feature_vector": false,
+    "event_state_snapshot_is_order_authority": false,
+    "event_state_snapshot_is_quantum_feature_vector": false,
+    "event_state_snapshot_is_runtime_resolver_snapshot": false,
+    "event_state_snapshot_is_trading_signal": false,
+    "event_states": [
+      {
+        "canonical_event_state_rank": 10,
+        "canonical_sort_key": "0010|PR133_KALSHI_OPEN_METADATA_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_OPEN_METADATA_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "OPEN_METADATA",
+        "qtt_internal_lifecycle_state_class": "OPEN_METADATA",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_OPEN_METADATA_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 20,
+        "canonical_sort_key": "0020|PR133_KALSHI_PAUSED_METADATA_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_PAUSED_METADATA_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "PAUSED_METADATA",
+        "qtt_internal_lifecycle_state_class": "PAUSED_METADATA",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_PAUSED_METADATA_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 30,
+        "canonical_sort_key": "0030|PR133_KALSHI_CLOSED_METADATA_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_CLOSED_METADATA_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "CLOSED_METADATA",
+        "qtt_internal_lifecycle_state_class": "CLOSED_METADATA",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_CLOSED_METADATA_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 40,
+        "canonical_sort_key": "0040|PR133_KALSHI_SETTLED_METADATA_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_SETTLED_METADATA_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "SETTLED_METADATA",
+        "qtt_internal_lifecycle_state_class": "SETTLED_METADATA",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_SETTLED_METADATA_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 50,
+        "canonical_sort_key": "0050|PR133_KALSHI_CANCELED_METADATA_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_CANCELED_METADATA_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "CANCELED_METADATA",
+        "qtt_internal_lifecycle_state_class": "CANCELED_METADATA",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_CANCELED_METADATA_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 90,
+        "canonical_sort_key": "0090|PR133_KALSHI_UNKNOWN_SOURCE_REQUIRED_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_UNKNOWN_SOURCE_REQUIRED_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "UNKNOWN_SOURCE_REQUIRED",
+        "qtt_internal_lifecycle_state_class": "UNKNOWN_SOURCE_REQUIRED",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_UNKNOWN_SOURCE_REQUIRED_EVENT_STATE_V1"
+      },
+      {
+        "canonical_event_state_rank": 91,
+        "canonical_sort_key": "0091|PR133_KALSHI_CONNECTOR_SEMANTIC_REQUIRED_EVENT_STATE_V1",
+        "deterministic_sequence_id": "PR133_KALSHI_CONNECTOR_SEMANTIC_REQUIRED_EVENT_STATE_SEQUENCE",
+        "qtt_internal_event_status_class": "CONNECTOR_SEMANTIC_REQUIRED",
+        "qtt_internal_lifecycle_state_class": "CONNECTOR_SEMANTIC_REQUIRED",
+        "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+        "synthetic_event_state_id": "PR133_KALSHI_CONNECTOR_SEMANTIC_REQUIRED_EVENT_STATE_V1"
+      }
+    ],
+    "fixture_event_state_snapshot_created": true,
+    "future_atomicrows_bridge_after_pr135_ref": "FUTURE_ATOMICROWS_BRIDGE_AFTER_PR135_REF_METADATA_ONLY_KALSHI",
+    "future_atomicrows_bridge_candidate_repo_pr": "PR136",
+    "future_atomicrows_bridge_recommended_after_repo_pr": "PR135",
+    "future_atomicrows_event_state_feature_family_refs": [
+      "FUTURE_ATOMICROWS_EVENT_STATE_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_family_refs": [
+      "FUTURE_ATOMICROWS_FAMILY_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_market_data_feature_row_refs": [
+      "FUTURE_ATOMICROWS_MARKET_DATA_FEATURE_ROW_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_orderbook_depth_feature_family_refs": [
+      "FUTURE_ATOMICROWS_ORDERBOOK_DEPTH_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_parameter_row_refs": [
+      "FUTURE_ATOMICROWS_PARAMETER_ROW_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_quantum_snapshot_feature_family_refs": [
+      "FUTURE_ATOMICROWS_QUANTUM_SNAPSHOT_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_atomicrows_snapshot_feature_row_refs": [
+      "FUTURE_ATOMICROWS_SNAPSHOT_FEATURE_ROW_REF_METADATA_ONLY_KALSHI"
+    ],
+    "future_qaoa_qubo_liquidity_state_encoding_ref": "FUTURE_QAOA_QUBO_LIQUIDITY_STATE_ENCODING_REF_METADATA_ONLY_KALSHI",
+    "future_quantum_amplitude_encoding_snapshot_ref": "FUTURE_QUANTUM_AMPLITUDE_ENCODING_SNAPSHOT_REF_METADATA_ONLY_KALSHI",
+    "future_quantum_annealing_depth_imbalance_ref": "FUTURE_QUANTUM_ANNEALING_DEPTH_IMBALANCE_REF_METADATA_ONLY_KALSHI",
+    "future_quantum_kernel_event_state_regime_ref": "FUTURE_QUANTUM_KERNEL_EVENT_STATE_REGIME_REF_METADATA_ONLY_KALSHI",
+    "future_quantum_microstructure_graph_ref": "FUTURE_QUANTUM_MICROSTRUCTURE_GRAPH_REF_METADATA_ONLY_KALSHI",
+    "future_quantum_orderbook_state_encoding_ref": "FUTURE_QUANTUM_ORDERBOOK_STATE_ENCODING_REF_METADATA_ONLY_KALSHI",
+    "historical_dataset_digest_created": false,
+    "live_credential_resolution_performed": false,
+    "live_event_state_snapshot_created": false,
+    "live_market_data_fetch_created": false,
+    "live_orderbook_snapshot_created": false,
+    "market_data_feature_vector_created": false,
+    "network_io_created": false,
+    "neural_inference_created": false,
+    "neural_training_created": false,
+    "no_live_fetch": true,
+    "no_network_io": true,
+    "no_order_authority": true,
+    "no_profit_evidence": true,
+    "no_quantum_execution": true,
+    "official_venue_field_value_source_state": "ACCEPTED_SOURCE_GATED",
+    "official_venue_semantics_fabricated": false,
+    "order_authority_created": false,
+    "order_execution_created": false,
+    "paper_result_created": false,
+    "private_state_fetch_created": false,
+    "production_connector_authority_created": false,
+    "profit_evidence_created": false,
+    "qtt_internal_event_status_class": "QTT_INTERNAL_STATUS_METADATA_MIXED",
+    "qtt_internal_lifecycle_state_class": "UNKNOWN_SOURCE_REQUIRED",
+    "qtt_internal_settlement_state_class": "QTT_INTERNAL_SETTLEMENT_METADATA_ONLY",
+    "qtt_internal_snapshot_class": "QTT_INTERNAL_EVENT_LIFECYCLE_METADATA_SNAPSHOT",
+    "quantum_advantage_claim_created": false,
+    "quantum_backend_called": false,
+    "quantum_execution_created": false,
+    "quantum_optimizer_called": false,
+    "quantum_optimizer_input_created": false,
+    "quantum_ready_snapshot_contract": true,
+    "quantum_simulator_called": false,
+    "quantum_snapshot_feature_computation_created": false,
+    "quantum_trading_signal_created": false,
+    "raw_secret_capture_created": false,
+    "record_type": "EVENT_STATE_SNAPSHOT_RECORD",
+    "replay_result_created": false,
+    "rest_client_created": false,
+    "runtime_cash_authority_created": false,
+    "runtime_resolver_snapshot_created": false,
+    "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1",
+    "scoring_ranking_arbitration_output_created": false,
+    "snapshot_class": "SYNTHETIC_FIXTURE_EVENT_STATE_SNAPSHOT",
+    "snapshot_id": "PR133_KALSHI_EVENT_STATE_SNAPSHOT_V1",
+    "snapshot_input_lock_ref": "PR133_MISSING_INPUT_LOCK",
+    "source_acceptance_created": false,
+    "source_retrieval_created": false,
+    "synthetic_event_state_id": "PR133_KALSHI_EVENT_STATE_AGGREGATE_V1",
+    "synthetic_event_state_refs": [
+      "PR133_KALSHI_OPEN_METADATA_EVENT_STATE_V1",
+      "PR133_KALSHI_PAUSED_METADATA_EVENT_STATE_V1",
+      "PR133_KALSHI_CLOSED_METADATA_EVENT_STATE_V1",
+      "PR133_KALSHI_SETTLED_METADATA_EVENT_STATE_V1",
+      "PR133_KALSHI_CANCELED_METADATA_EVENT_STATE_V1",
+      "PR133_KALSHI_UNKNOWN_SOURCE_REQUIRED_EVENT_STATE_V1",
+      "PR133_KALSHI_CONNECTOR_SEMANTIC_REQUIRED_EVENT_STATE_V1"
+    ],
+    "trading_signal_created": false,
+    "venue_api_call_created": false,
+    "venue_id": "KALSHI",
+    "websocket_client_created": false
+  },
+  "execution": "DISABLED",
+  "expected_block": "BLOCKED_MISSING_SNAPSHOT_INPUT_LOCK",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR133_MALFORMED_MISSING_SNAPSHOT_INPUT_LOCK_V1",
+  "mode": "SOURCE_REQUIRED"
+}

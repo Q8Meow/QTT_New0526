@@ -2247,6 +2247,49 @@
       "owner_authorized_next_capability": "CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #131 is the audit number assigned to the merged pull request for repo-canonical PR131. Repo-canonical PR131 is the implementation-truth label for the credential alias secret no-capture readiness gate. Repo PR131 does not imply Roadmap PR #131 or Blueprint PR #131. The owner explicitly authorized Roadmap PR113 for Repo PR131. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR132 does not imply Roadmap PR #132; the owner explicitly authorized Roadmap PR114 for Repo PR132."
+    },
+    {
+      "roster_entry_id": "PR132_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR132",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 132,
+      "repo_title": "Venue market-data ingest adapter contracts",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR132 implement venue market-data ingest adapter contracts",
+      "branch_name": "pr132-venue-market-data-ingest-adapters",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_VENUE_MARKET_DATA_INGEST_ADAPTERS_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR131_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/132",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-20T21:06:12Z",
+      "github_pr_mergeCommit_oid": "56e02c41f7b95f1a48071184feee1df966baa8d0",
+      "github_headRefName": "pr132-venue-market-data-ingest-adapters",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR114",
+      "owner_authorized_next_capability": "VENUE_MARKET_DATA_INGEST_ADAPTER_CONTRACTS",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #132 is the audit number assigned to the merged pull request for repo-canonical PR132. Repo-canonical PR132 is the implementation-truth label for venue market-data ingest adapter contracts. Repo PR132 does not imply Roadmap PR #132 or Blueprint PR #132. The owner explicitly authorized Roadmap PR114 for Repo PR132. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR133 does not imply Roadmap PR #133; the owner explicitly authorized Roadmap PR115 for Repo PR133."
     }
   ],
   "mismatch_summary": {
