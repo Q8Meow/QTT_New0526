@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-pr129-runtime-cash-component-reconciliation-report-v1",
+  "title": "PR129 Runtime Cash Component Reconciliation Report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runtime_cash_component_reconciliation_report_id",
+    "fixture_authority_class",
+    "cash_component_reconciliation_state",
+    "production_runtime_cash_authority",
+    "production_new_exposure_cash_gate_authority",
+    "venue_ids",
+    "excluded_component_ids",
+    "blocked_component_ids",
+    "unknown_component_present_flag",
+    "unreconciled_component_present_flag",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_runtime_cash_authority": { "const": false },
+    "production_new_exposure_cash_gate_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

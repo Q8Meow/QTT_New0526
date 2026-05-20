@@ -1,0 +1,17 @@
+{
+  "fixture_id": "PR129_EXPECTED_RUNTIME_CASH_DOWNSTREAM_HANDOFF_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "runtime_cash_downstream_handoff_id": "PR129_RUNTIME_CASH_DOWNSTREAM_HANDOFF_V1",
+  "source_repo_pr_label": "PR129",
+  "future_private_state_read_receipt_pr": "PR112",
+  "future_credential_alias_secret_no_capture_pr": "PR113",
+  "future_market_data_ingest_pr": "PR114",
+  "future_orderbook_event_snapshot_pr": "PR115",
+  "future_runtime_resolver_snapshot_pr": "PR116",
+  "future_atomicrows_bridge_materialization_recommended_after_repo_pr": "PR135",
+  "production_downstream_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

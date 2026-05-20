@@ -1,0 +1,29 @@
+{
+  "fixture_id": "PR129_EXPECTED_RUNTIME_AVAILABLE_AFTER_COMMITMENTS_RECEIPTS_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "expected_receipts": [
+    {
+      "venue_id": "KALSHI",
+      "raw_available_after_commitments_fixture": { "amount": "65.00", "currency": "USD" },
+      "available_after_commitments_for_new_exposure_fixture": { "amount": "65.00", "currency": "USD" },
+      "negative_available_after_commitments_clamped_to_zero_flag": false
+    },
+    {
+      "venue_id": "POLYMARKET",
+      "raw_available_after_commitments_fixture": { "amount": "-5.00", "currency": "USD" },
+      "available_after_commitments_for_new_exposure_fixture": { "amount": "0.00", "currency": "USD" },
+      "negative_available_after_commitments_clamped_to_zero_flag": true
+    },
+    {
+      "venue_id": "FORECASTEX_IBKR",
+      "raw_available_after_commitments_fixture": { "amount": "100.00", "currency": "USD" },
+      "available_after_commitments_for_new_exposure_fixture": { "amount": "100.00", "currency": "USD" },
+      "negative_available_after_commitments_clamped_to_zero_flag": false
+    }
+  ],
+  "production_runtime_cash_receipt_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

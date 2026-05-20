@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-pr129-runtime-cash-decimal-policy-v1",
+  "title": "PR129 Runtime Cash Decimal Policy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runtime_cash_decimal_policy_id",
+    "fixture_authority_class",
+    "runtime_cash_decimal_policy_state",
+    "cash_math_type",
+    "binary_float_cash_math_allowed",
+    "monetary_values_stored_as_strings",
+    "currency_scales",
+    "rounding_mode",
+    "missing_unknown_values_silent_zero_allowed",
+    "deterministic_fixture_time"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "cash_math_type": { "const": "decimal.Decimal" },
+    "binary_float_cash_math_allowed": { "const": false },
+    "monetary_values_stored_as_strings": { "const": true },
+    "missing_unknown_values_silent_zero_allowed": { "const": false }
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "fixture_id": "PR129_ACCEPTED_SOURCE_EVIDENCE_RECORDS_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "active_stage1_venues": [
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "shared_scope_metadata": [
+    "PREDICTION_MARKETS_GENERAL"
+  ],
+  "component_records": [
+    {
+      "venue_id": "KALSHI",
+      "components": [
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-verified-available-cash",
+          "cash_component_class": "VERIFIED_AVAILABLE_CASH",
+          "raw_venue_field_locator": "fixture.kalshi.balance.verified_available_cash",
+          "target_field_path": "runtime_cash.KALSHI.verified_available_cash"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_OPEN_ORDER_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-open-order-lock",
+          "cash_component_class": "OPEN_ORDER_LOCK",
+          "raw_venue_field_locator": "fixture.kalshi.balance.open_order_lock",
+          "target_field_path": "runtime_cash.KALSHI.open_order_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_REQUIRED_RESERVE_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-required-reserve",
+          "cash_component_class": "REQUIRED_RESERVE",
+          "raw_venue_field_locator": "fixture.kalshi.balance.required_reserve",
+          "target_field_path": "runtime_cash.KALSHI.required_reserve"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_MARGIN_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-margin-lock",
+          "cash_component_class": "MARGIN_LOCK",
+          "raw_venue_field_locator": "fixture.kalshi.balance.margin_lock",
+          "target_field_path": "runtime_cash.KALSHI.margin_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_UNSETTLED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-unsettled-funds",
+          "cash_component_class": "UNSETTLED_FUNDS",
+          "raw_venue_field_locator": "fixture.kalshi.balance.unsettled_funds",
+          "target_field_path": "runtime_cash.KALSHI.unsettled_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-locked-withdrawal-restricted",
+          "cash_component_class": "LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS",
+          "raw_venue_field_locator": "fixture.kalshi.balance.locked_or_withdrawal_restricted_funds",
+          "target_field_path": "runtime_cash.KALSHI.locked_or_withdrawal_restricted_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_KALSHI_PENDING_USE_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-kalshi-pending-use-funds",
+          "cash_component_class": "PENDING_USE_FUNDS",
+          "raw_venue_field_locator": "fixture.kalshi.balance.pending_use_funds",
+          "target_field_path": "runtime_cash.KALSHI.pending_use_funds"
+        }
+      ]
+    },
+    {
+      "venue_id": "POLYMARKET",
+      "components": [
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-verified-available-cash",
+          "cash_component_class": "VERIFIED_AVAILABLE_CASH",
+          "raw_venue_field_locator": "fixture.polymarket.balance.verified_available_cash",
+          "target_field_path": "runtime_cash.POLYMARKET.verified_available_cash"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_OPEN_ORDER_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-open-order-lock",
+          "cash_component_class": "OPEN_ORDER_LOCK",
+          "raw_venue_field_locator": "fixture.polymarket.balance.open_order_lock",
+          "target_field_path": "runtime_cash.POLYMARKET.open_order_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_REQUIRED_RESERVE_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-required-reserve",
+          "cash_component_class": "REQUIRED_RESERVE",
+          "raw_venue_field_locator": "fixture.polymarket.balance.required_reserve",
+          "target_field_path": "runtime_cash.POLYMARKET.required_reserve"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_MARGIN_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-margin-lock",
+          "cash_component_class": "MARGIN_LOCK",
+          "raw_venue_field_locator": "fixture.polymarket.balance.margin_lock",
+          "target_field_path": "runtime_cash.POLYMARKET.margin_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_UNSETTLED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-unsettled-funds",
+          "cash_component_class": "UNSETTLED_FUNDS",
+          "raw_venue_field_locator": "fixture.polymarket.balance.unsettled_funds",
+          "target_field_path": "runtime_cash.POLYMARKET.unsettled_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-locked-withdrawal-restricted",
+          "cash_component_class": "LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS",
+          "raw_venue_field_locator": "fixture.polymarket.balance.locked_or_withdrawal_restricted_funds",
+          "target_field_path": "runtime_cash.POLYMARKET.locked_or_withdrawal_restricted_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_POLYMARKET_PENDING_USE_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-polymarket-pending-use-funds",
+          "cash_component_class": "PENDING_USE_FUNDS",
+          "raw_venue_field_locator": "fixture.polymarket.balance.pending_use_funds",
+          "target_field_path": "runtime_cash.POLYMARKET.pending_use_funds"
+        }
+      ]
+    },
+    {
+      "venue_id": "FORECASTEX_IBKR",
+      "components": [
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-verified-available-cash",
+          "cash_component_class": "VERIFIED_AVAILABLE_CASH",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.verified_available_cash",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.verified_available_cash"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_OPEN_ORDER_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-open-order-lock",
+          "cash_component_class": "OPEN_ORDER_LOCK",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.open_order_lock",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.open_order_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_REQUIRED_RESERVE_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-required-reserve",
+          "cash_component_class": "REQUIRED_RESERVE",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.required_reserve",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.required_reserve"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_MARGIN_LOCK_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-margin-lock",
+          "cash_component_class": "MARGIN_LOCK",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.margin_lock",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.margin_lock"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_UNSETTLED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-unsettled-funds",
+          "cash_component_class": "UNSETTLED_FUNDS",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.unsettled_funds",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.unsettled_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-locked-withdrawal-restricted",
+          "cash_component_class": "LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.locked_or_withdrawal_restricted_funds",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.locked_or_withdrawal_restricted_funds"
+        },
+        {
+          "accepted_source_packet_id": "PR129_FORECASTEX_IBKR_PENDING_USE_FUNDS_SOURCE_PACKET",
+          "accepted_source_packet_digest": "sha256:pr129-forecastex-ibkr-pending-use-funds",
+          "cash_component_class": "PENDING_USE_FUNDS",
+          "raw_venue_field_locator": "fixture.forecastex_ibkr.balance.pending_use_funds",
+          "target_field_path": "runtime_cash.FORECASTEX_IBKR.pending_use_funds"
+        }
+      ]
+    }
+  ],
+  "fixture_amounts_by_venue": {
+    "KALSHI": {
+      "owner_policy_capital_remaining_for_venue_fixture": { "amount": "100.00", "currency": "USD" },
+      "runtime_verified_available_cash_fixture": { "amount": "80.00", "currency": "USD" },
+      "open_order_lock_total_fixture": { "amount": "10.00", "currency": "USD" },
+      "required_reserve_total_fixture": { "amount": "5.00", "currency": "USD" }
+    },
+    "POLYMARKET": {
+      "owner_policy_capital_remaining_for_venue_fixture": { "amount": "70.00", "currency": "USD" },
+      "runtime_verified_available_cash_fixture": { "amount": "50.00", "currency": "USD" },
+      "open_order_lock_total_fixture": { "amount": "30.00", "currency": "USD" },
+      "required_reserve_total_fixture": { "amount": "25.00", "currency": "USD" }
+    },
+    "FORECASTEX_IBKR": {
+      "owner_policy_capital_remaining_for_venue_fixture": { "amount": "200.00", "currency": "USD" },
+      "runtime_verified_available_cash_fixture": { "amount": "150.00", "currency": "USD" },
+      "open_order_lock_total_fixture": { "amount": "20.00", "currency": "USD" },
+      "required_reserve_total_fixture": { "amount": "30.00", "currency": "USD" }
+    }
+  },
+  "source_change_snapshot_ids_by_venue": {
+    "KALSHI": "PR129_SOURCE_CHANGE_SNAPSHOT_KALSHI",
+    "POLYMARKET": "PR129_SOURCE_CHANGE_SNAPSHOT_POLYMARKET",
+    "FORECASTEX_IBKR": "PR129_SOURCE_CHANGE_SNAPSHOT_FORECASTEX_IBKR"
+  },
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

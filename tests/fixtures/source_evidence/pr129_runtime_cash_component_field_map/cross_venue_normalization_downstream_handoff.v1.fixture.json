@@ -1,0 +1,19 @@
+{
+  "fixture_id": "PR129_CROSS_VENUE_NORMALIZATION_DOWNSTREAM_HANDOFF_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "source_repo_pr_label": "PR128",
+  "future_runtime_cash_component_field_map_pr": "PR111",
+  "venue_ids_in_scope": [
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "shared_scope_metadata": [
+    "PREDICTION_MARKETS_GENERAL"
+  ],
+  "production_downstream_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

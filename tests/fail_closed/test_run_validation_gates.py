@@ -388,6 +388,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "runtime_cash_component_field_map_validate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -4697,6 +4703,7 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
     normalization_index = command_names.index(
         "validate_cross_venue_execution_normalization_binding.py"
     )
+    runtime_cash_index = command_names.index("runtime_cash_component_field_map_validate.py")
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert source_evidence_index < gate_confirmation_index < retrieval_index
@@ -4706,6 +4713,7 @@ def test_runner_orders_source_evidence_gate_confirmation_before_connectors(monke
         < implementation_index
         < lifecycle_index
         < normalization_index
+        < runtime_cash_index
         < connector_index
     )
 
@@ -4733,6 +4741,20 @@ def test_runner_includes_cross_venue_execution_normalization_validator(monkeypat
     assert [
         python_executable,
         str(Path("tools") / "validate_cross_venue_execution_normalization_binding.py"),
+        "--repo-root",
+        ".",
+    ] in commands
+
+
+def test_runner_includes_runtime_cash_component_field_map_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+
+    assert [
+        python_executable,
+        str(Path("tools") / "runtime_cash_component_field_map_validate.py"),
         "--repo-root",
         ".",
     ] in commands

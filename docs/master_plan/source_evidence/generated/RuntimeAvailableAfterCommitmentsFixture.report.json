@@ -1,0 +1,190 @@
+{
+  "available_after_commitments_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+  "production_runtime_cash_receipt_authority": false,
+  "runtime_available_after_commitments_fixture_report_id": "PR129_RUNTIME_AVAILABLE_AFTER_COMMITMENTS_FIXTURE_REPORT_V1",
+  "runtime_available_after_commitments_receipts": [
+    {
+      "account_wallet_balance_private_state_fetch_allowed_flag": false,
+      "available_after_commitments_for_new_exposure_fixture": {
+        "amount": "65.00",
+        "currency": "USD"
+      },
+      "available_after_commitments_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+      "blocked_component_ids": [],
+      "cash_component_reconciliation_report_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "excluded_component_ids": [
+        "PR129_KALSHI_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_KALSHI_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_atomicrows_bridge_path_preserved": true,
+      "future_credential_alias_secret_no_capture_path_preserved": true,
+      "future_market_data_ingest_path_preserved": true,
+      "future_orderbook_event_snapshot_path_preserved": true,
+      "future_private_state_read_receipt_path_preserved": true,
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "negative_available_after_commitments_clamped_to_zero_flag": false,
+      "network_io_allowed_flag": false,
+      "open_order_lock_total_fixture": {
+        "amount": "10.00",
+        "currency": "USD"
+      },
+      "order_execution_allowed_flag": false,
+      "order_routing_authority_allowed_flag": false,
+      "owner_policy_capital_remaining_for_venue_fixture": {
+        "amount": "100.00",
+        "currency": "USD"
+      },
+      "production_connector_use_allowed_flag": false,
+      "production_runtime_cash_receipt_authority": false,
+      "raw_available_after_commitments_fixture": {
+        "amount": "65.00",
+        "currency": "USD"
+      },
+      "replay_paper_execution_allowed_flag": false,
+      "required_reserve_total_fixture": {
+        "amount": "5.00",
+        "currency": "USD"
+      },
+      "runtime_available_after_commitments_receipt_id": "PR129_KALSHI_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_available_after_open_orders_and_required_reserves_fixture": {
+        "amount": "65.00",
+        "currency": "USD"
+      },
+      "runtime_cash_component_field_map_id": "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "runtime_verified_available_cash_fixture": {
+        "amount": "80.00",
+        "currency": "USD"
+      },
+      "venue_id": "KALSHI"
+    },
+    {
+      "account_wallet_balance_private_state_fetch_allowed_flag": false,
+      "available_after_commitments_for_new_exposure_fixture": {
+        "amount": "0.00",
+        "currency": "USD"
+      },
+      "available_after_commitments_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+      "blocked_component_ids": [],
+      "cash_component_reconciliation_report_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "excluded_component_ids": [
+        "PR129_POLYMARKET_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_POLYMARKET_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_atomicrows_bridge_path_preserved": true,
+      "future_credential_alias_secret_no_capture_path_preserved": true,
+      "future_market_data_ingest_path_preserved": true,
+      "future_orderbook_event_snapshot_path_preserved": true,
+      "future_private_state_read_receipt_path_preserved": true,
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "negative_available_after_commitments_clamped_to_zero_flag": true,
+      "network_io_allowed_flag": false,
+      "open_order_lock_total_fixture": {
+        "amount": "30.00",
+        "currency": "USD"
+      },
+      "order_execution_allowed_flag": false,
+      "order_routing_authority_allowed_flag": false,
+      "owner_policy_capital_remaining_for_venue_fixture": {
+        "amount": "70.00",
+        "currency": "USD"
+      },
+      "production_connector_use_allowed_flag": false,
+      "production_runtime_cash_receipt_authority": false,
+      "raw_available_after_commitments_fixture": {
+        "amount": "-5.00",
+        "currency": "USD"
+      },
+      "replay_paper_execution_allowed_flag": false,
+      "required_reserve_total_fixture": {
+        "amount": "25.00",
+        "currency": "USD"
+      },
+      "runtime_available_after_commitments_receipt_id": "PR129_POLYMARKET_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_available_after_open_orders_and_required_reserves_fixture": {
+        "amount": "-5.00",
+        "currency": "USD"
+      },
+      "runtime_cash_component_field_map_id": "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "runtime_verified_available_cash_fixture": {
+        "amount": "50.00",
+        "currency": "USD"
+      },
+      "venue_id": "POLYMARKET"
+    },
+    {
+      "account_wallet_balance_private_state_fetch_allowed_flag": false,
+      "available_after_commitments_for_new_exposure_fixture": {
+        "amount": "100.00",
+        "currency": "USD"
+      },
+      "available_after_commitments_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+      "blocked_component_ids": [
+        "PR129_FORECASTEX_IBKR_UNKNOWN_COMPONENT_REJECTION_V1"
+      ],
+      "cash_component_reconciliation_report_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "excluded_component_ids": [
+        "PR129_FORECASTEX_IBKR_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_atomicrows_bridge_path_preserved": true,
+      "future_credential_alias_secret_no_capture_path_preserved": true,
+      "future_market_data_ingest_path_preserved": true,
+      "future_orderbook_event_snapshot_path_preserved": true,
+      "future_private_state_read_receipt_path_preserved": true,
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "negative_available_after_commitments_clamped_to_zero_flag": false,
+      "network_io_allowed_flag": false,
+      "open_order_lock_total_fixture": {
+        "amount": "20.00",
+        "currency": "USD"
+      },
+      "order_execution_allowed_flag": false,
+      "order_routing_authority_allowed_flag": false,
+      "owner_policy_capital_remaining_for_venue_fixture": {
+        "amount": "200.00",
+        "currency": "USD"
+      },
+      "production_connector_use_allowed_flag": false,
+      "production_runtime_cash_receipt_authority": false,
+      "raw_available_after_commitments_fixture": {
+        "amount": "100.00",
+        "currency": "USD"
+      },
+      "replay_paper_execution_allowed_flag": false,
+      "required_reserve_total_fixture": {
+        "amount": "30.00",
+        "currency": "USD"
+      },
+      "runtime_available_after_commitments_receipt_id": "PR129_FORECASTEX_IBKR_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_available_after_open_orders_and_required_reserves_fixture": {
+        "amount": "100.00",
+        "currency": "USD"
+      },
+      "runtime_cash_component_field_map_id": "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "runtime_verified_available_cash_fixture": {
+        "amount": "150.00",
+        "currency": "USD"
+      },
+      "venue_id": "FORECASTEX_IBKR"
+    }
+  ]
+}
