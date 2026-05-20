@@ -1,0 +1,8 @@
+{
+  "execution": "DISABLED",
+  "expected_block": "BLOCKED_MISSING_PR130_HANDOFF",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR131_MALFORMED_MISSING_PR130_HANDOFF_V1",
+  "mode": "SOURCE_REQUIRED",
+  "private_state_downstream_handoff": null
+}

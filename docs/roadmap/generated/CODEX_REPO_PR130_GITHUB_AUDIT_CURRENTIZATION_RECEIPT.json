@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR130",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr130-account-wallet-balance-private-state-read-receipt-gate",
+  "github_pr_mergeCommit_oid": "b50da75d0b1e97c49eb218573fda3cf2c0a02351",
+  "github_pr_mergedAt": "2026-05-20T04:55:59Z",
+  "github_pr_number": 130,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR130 implement account wallet balance private-state read receipt gate",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/130",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR113_CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE",
+  "owner_authorized_next_capability": "CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE",
+  "owner_authorized_roadmap_pr": "PR113",
+  "repo_pr_label": "PR131",
+  "same_number_inference_used": false
+}
