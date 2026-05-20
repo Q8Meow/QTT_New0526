@@ -1,0 +1,20 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR131",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr131-credential-alias-secret-no-capture-readiness-gate",
+  "github_pr_mergeCommit_oid": "231f71551f9199b497f4bdabadf64d06affddf9f",
+  "github_pr_mergedAt": "2026-05-20T07:27:58Z",
+  "github_pr_number": 131,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR131 implement credential alias secret no-capture readiness gate",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/131",
+  "identity_doctrine_preserved": true,
+  "next_implementation_scope": "ROADMAP_PR114_VENUE_MARKET_DATA_INGEST_ADAPTER_CONTRACTS",
+  "next_owner_authorized_roadmap_pr": "PR114",
+  "next_repo_pr_label": "PR132",
+  "owner_authorized_next_capability": "CREDENTIAL_ALIAS_AND_SECRET_NO_CAPTURE_READINESS_GATE",
+  "owner_authorized_roadmap_pr": "PR113",
+  "repo_pr_label": "PR132",
+  "same_number_inference_used": false
+}
