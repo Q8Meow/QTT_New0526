@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-stage1-private-state-redaction-attestation-v1",
+  "title": "PR130 Private-State Redaction Attestation",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "redaction_attestation_id",
+    "fixture_authority_class",
+    "redaction_attestation_state",
+    "private_state_read_receipt_id",
+    "redaction_policy_id",
+    "redacted_fields",
+    "retained_fields",
+    "redacted_payload_digest",
+    "canonicalized_redacted_payload_digest",
+    "canonicalization_policy_id",
+    "raw_payload_stored_flag",
+    "secret_like_value_detected_flag",
+    "unredacted_private_payload_detected_flag",
+    "deterministic_fixture_time"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "redaction_attestation_state": { "const": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT" },
+    "raw_payload_stored_flag": { "const": false },
+    "secret_like_value_detected_flag": { "const": false },
+    "unredacted_private_payload_detected_flag": { "const": false }
+  }
+}

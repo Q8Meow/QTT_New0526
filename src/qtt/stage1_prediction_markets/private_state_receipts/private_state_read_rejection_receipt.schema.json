@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-stage1-private-state-read-rejection-receipt-v1",
+  "title": "PR130 Private-State Read Rejection Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "private_state_read_rejection_receipt_id",
+    "fixture_authority_class",
+    "private_state_read_receipt_state",
+    "venue_id",
+    "platform_scope",
+    "production_private_state_read_authority",
+    "production_account_balance_authority",
+    "production_wallet_balance_authority",
+    "production_runtime_cash_receipt_authority",
+    "network_io_allowed_flag",
+    "production_connector_use_allowed_flag",
+    "order_execution_allowed_flag",
+    "order_routing_authority_allowed_flag",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "private_state_read_receipt_state": {
+      "enum": [
+        "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+        "REJECTED_MISSING_RUNTIME_CASH_FIELD_MAP",
+        "REJECTED_MISSING_CREDENTIAL_ALIAS_PLACEHOLDER",
+        "REJECTED_SECRET_CAPTURE_ATTEMPT",
+        "REJECTED_UNREDACTED_PRIVATE_STATE_PAYLOAD",
+        "REJECTED_MISSING_REDACTION_ATTESTATION",
+        "REJECTED_MISSING_NO_SECRET_CAPTURE_ATTESTATION",
+        "REJECTED_SCOPE_OR_VENUE_MISMATCH",
+        "REJECTED_STALE_PRIVATE_STATE_RECEIPT",
+        "REJECTED_SUPERSEDED_PRIVATE_STATE_RECEIPT",
+        "REJECTED_PRODUCTION_PRIVATE_STATE_FETCH_ATTEMPT",
+        "REJECTED_NETWORK_IO_ATTEMPT",
+        "REJECTED_PRODUCTION_RUNTIME_CASH_AUTHORITY_ATTEMPT",
+        "REJECTED_CREDENTIAL_ALIAS_AUTHORITY_ATTEMPT",
+        "REJECTED_ATOMICROWS_AUTHORITY_ATTEMPT"
+      ]
+    },
+    "production_private_state_read_authority": { "const": false },
+    "production_account_balance_authority": { "const": false },
+    "production_wallet_balance_authority": { "const": false },
+    "production_runtime_cash_receipt_authority": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "production_connector_use_allowed_flag": { "const": false },
+    "order_execution_allowed_flag": { "const": false },
+    "order_routing_authority_allowed_flag": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

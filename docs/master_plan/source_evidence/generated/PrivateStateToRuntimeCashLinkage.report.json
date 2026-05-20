@@ -1,0 +1,88 @@
+{
+  "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "private_state_to_runtime_cash_linkage_receipts": [
+    {
+      "account_wallet_balance_receipt_id": "PR130_KALSHI_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "linkage_validation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "linked_cash_component_classes": [
+        "VERIFIED_AVAILABLE_CASH",
+        "OPEN_ORDER_LOCK",
+        "REQUIRED_RESERVE"
+      ],
+      "no_secret_capture_attestation_valid_flag": true,
+      "order_authority_allowed_flag": false,
+      "private_state_read_receipt_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_receipt_id": "PR130_KALSHI_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "production_cash_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "redaction_attestation_valid_flag": true,
+      "runtime_available_after_commitments_receipt_ref": "PR129_KALSHI_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "stale_private_state_receipt_present_flag": false,
+      "unknown_or_unreconciled_component_present_flag": false
+    },
+    {
+      "account_wallet_balance_receipt_id": "PR130_POLYMARKET_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "linkage_validation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "linked_cash_component_classes": [
+        "VERIFIED_AVAILABLE_CASH",
+        "OPEN_ORDER_LOCK",
+        "REQUIRED_RESERVE"
+      ],
+      "no_secret_capture_attestation_valid_flag": true,
+      "order_authority_allowed_flag": false,
+      "private_state_read_receipt_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_receipt_id": "PR130_POLYMARKET_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "production_cash_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "redaction_attestation_valid_flag": true,
+      "runtime_available_after_commitments_receipt_ref": "PR129_POLYMARKET_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "stale_private_state_receipt_present_flag": false,
+      "unknown_or_unreconciled_component_present_flag": false
+    },
+    {
+      "account_wallet_balance_receipt_id": "PR130_FORECASTEX_IBKR_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "linkage_validation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "linked_cash_component_classes": [
+        "VERIFIED_AVAILABLE_CASH",
+        "OPEN_ORDER_LOCK",
+        "REQUIRED_RESERVE"
+      ],
+      "no_secret_capture_attestation_valid_flag": true,
+      "order_authority_allowed_flag": false,
+      "private_state_read_receipt_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_receipt_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_RECEIPT_V1",
+      "private_state_to_runtime_cash_linkage_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "production_cash_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "redaction_attestation_valid_flag": true,
+      "runtime_available_after_commitments_receipt_ref": "PR129_FORECASTEX_IBKR_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "stale_private_state_receipt_present_flag": false,
+      "unknown_or_unreconciled_component_present_flag": false
+    }
+  ],
+  "private_state_to_runtime_cash_linkage_report_id": "PR130_PRIVATE_STATE_TO_RUNTIME_CASH_LINKAGE_REPORT_V1",
+  "private_state_to_runtime_cash_linkage_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+  "production_new_exposure_cash_gate_authority": false,
+  "production_runtime_cash_receipt_authority": false
+}

@@ -1,0 +1,137 @@
+{
+  "account_wallet_balance_private_state_receipt_report_id": "PR130_ACCOUNT_WALLET_BALANCE_PRIVATE_STATE_RECEIPT_REPORT_V1",
+  "account_wallet_balance_receipt_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+  "account_wallet_balance_receipts": [
+    {
+      "accepted_source_evidence_required_flag": true,
+      "account_scope_id": "PR130_KALSHI_FIXTURE_ACCOUNT_SCOPE",
+      "account_wallet_balance_receipt_id": "PR130_KALSHI_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "account_wallet_balance_receipt_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "amount_value_is_production_private_state": false,
+      "amount_value_policy": "REDACTED_OR_FIXTURE_STRING_ONLY",
+      "canonical_cash_component_names": [
+        "verified_available_cash",
+        "open_order_lock",
+        "required_reserve",
+        "margin_lock",
+        "unsettled_funds",
+        "locked_or_withdrawal_restricted_funds",
+        "pending_use_funds"
+      ],
+      "currency_codes": [
+        "USD"
+      ],
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "no_secret_capture_attestation_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1_NO_SECRET_CAPTURE_ATTESTATION_V1",
+      "private_state_read_receipt_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_read_receipt_required_flag": true,
+      "production_account_balance_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "production_wallet_balance_authority": false,
+      "redacted_balance_component_refs": [
+        "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+        "PR129_KALSHI_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+        "PR129_KALSHI_REQUIRED_RESERVE_FIELD_MAP_V1",
+        "PR129_KALSHI_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_KALSHI_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "redaction_attestation_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "runtime_cash_component_field_map_id": "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "venue_id": "KALSHI",
+      "wallet_scope_id": "PR130_KALSHI_FIXTURE_WALLET_SCOPE"
+    },
+    {
+      "accepted_source_evidence_required_flag": true,
+      "account_scope_id": "PR130_POLYMARKET_FIXTURE_ACCOUNT_SCOPE",
+      "account_wallet_balance_receipt_id": "PR130_POLYMARKET_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "account_wallet_balance_receipt_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "amount_value_is_production_private_state": false,
+      "amount_value_policy": "REDACTED_OR_FIXTURE_STRING_ONLY",
+      "canonical_cash_component_names": [
+        "verified_available_cash",
+        "open_order_lock",
+        "required_reserve",
+        "margin_lock",
+        "unsettled_funds",
+        "locked_or_withdrawal_restricted_funds",
+        "pending_use_funds"
+      ],
+      "currency_codes": [
+        "USD"
+      ],
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "no_secret_capture_attestation_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1_NO_SECRET_CAPTURE_ATTESTATION_V1",
+      "private_state_read_receipt_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_read_receipt_required_flag": true,
+      "production_account_balance_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "production_wallet_balance_authority": false,
+      "redacted_balance_component_refs": [
+        "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+        "PR129_POLYMARKET_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+        "PR129_POLYMARKET_REQUIRED_RESERVE_FIELD_MAP_V1",
+        "PR129_POLYMARKET_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_POLYMARKET_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "redaction_attestation_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "runtime_cash_component_field_map_id": "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "venue_id": "POLYMARKET",
+      "wallet_scope_id": "PR130_POLYMARKET_FIXTURE_WALLET_SCOPE"
+    },
+    {
+      "accepted_source_evidence_required_flag": true,
+      "account_scope_id": "PR130_FORECASTEX_IBKR_FIXTURE_ACCOUNT_SCOPE",
+      "account_wallet_balance_receipt_id": "PR130_FORECASTEX_IBKR_ACCOUNT_WALLET_BALANCE_RECEIPT_V1",
+      "account_wallet_balance_receipt_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "amount_value_is_production_private_state": false,
+      "amount_value_policy": "REDACTED_OR_FIXTURE_STRING_ONLY",
+      "canonical_cash_component_names": [
+        "verified_available_cash",
+        "open_order_lock",
+        "required_reserve",
+        "margin_lock",
+        "unsettled_funds",
+        "locked_or_withdrawal_restricted_funds",
+        "pending_use_funds"
+      ],
+      "currency_codes": [
+        "USD"
+      ],
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "no_secret_capture_attestation_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1_NO_SECRET_CAPTURE_ATTESTATION_V1",
+      "private_state_read_receipt_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1",
+      "private_state_read_receipt_required_flag": true,
+      "production_account_balance_authority": false,
+      "production_runtime_cash_receipt_authority": false,
+      "production_wallet_balance_authority": false,
+      "redacted_balance_component_refs": [
+        "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_REQUIRED_RESERVE_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "redaction_attestation_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "runtime_cash_component_field_map_id": "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "venue_id": "FORECASTEX_IBKR",
+      "wallet_scope_id": "PR130_FORECASTEX_IBKR_FIXTURE_WALLET_SCOPE"
+    }
+  ],
+  "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "production_account_balance_authority": false,
+  "production_runtime_cash_receipt_authority": false,
+  "production_wallet_balance_authority": false
+}
