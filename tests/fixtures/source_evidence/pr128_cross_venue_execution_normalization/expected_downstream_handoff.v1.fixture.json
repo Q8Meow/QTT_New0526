@@ -1,0 +1,16 @@
+{
+  "cross_venue_execution_downstream_handoff_id": "PR128_CROSS_VENUE_EXECUTION_DOWNSTREAM_HANDOFF_FIXTURE_V1",
+  "execution": "DISABLED",
+  "fixture_id": "PR128_EXPECTED_DOWNSTREAM_HANDOFF_FIXTURE_V1",
+  "future_prs": [
+    "PR111",
+    "PR112",
+    "PR113",
+    "PR114",
+    "PR115",
+    "PR116"
+  ],
+  "future_production_launch_path_preserved": true,
+  "mode": "SOURCE_REQUIRED",
+  "production_downstream_authority": false
+}

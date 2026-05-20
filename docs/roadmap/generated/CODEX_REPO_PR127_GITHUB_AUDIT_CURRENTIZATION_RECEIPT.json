@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR127",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr127-per-venue-execution-lifecycle-model-builder",
+  "github_pr_mergeCommit_oid": "84848c0bbe2fb17ca02b76acd6cca45150ac59f9",
+  "github_pr_mergedAt": "2026-05-19T23:11:19Z",
+  "github_pr_number": 127,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR127 implement per-venue execution lifecycle model builder",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/127",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR110_CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING",
+  "owner_authorized_next_capability": "CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING",
+  "owner_authorized_roadmap_pr": "PR110",
+  "repo_pr_label": "PR128",
+  "same_number_inference_used": false
+}

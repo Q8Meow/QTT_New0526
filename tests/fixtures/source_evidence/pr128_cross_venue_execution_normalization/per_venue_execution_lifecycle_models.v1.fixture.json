@@ -1,0 +1,13 @@
+{
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR128_PR127_PER_VENUE_EXECUTION_LIFECYCLE_MODELS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "model_ids_by_venue": {
+    "FORECASTEX_IBKR": "PR127_LIFECYCLE_MODEL_FORECASTEX_IBKR_FIXTURE",
+    "KALSHI": "PR127_LIFECYCLE_MODEL_KALSHI_FIXTURE",
+    "POLYMARKET": "PR127_LIFECYCLE_MODEL_POLYMARKET_FIXTURE"
+  },
+  "production_cross_venue_normalization_authority": false,
+  "source_repo_pr_label": "PR127"
+}

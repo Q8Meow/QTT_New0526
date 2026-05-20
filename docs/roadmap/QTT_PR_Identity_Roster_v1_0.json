@@ -2032,6 +2032,49 @@
       "owner_authorized_next_capability": "CONNECTOR_SEMANTIC_BINDING_IMPLEMENTATION_GATE",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #126 is the audit number assigned to the merged pull request for repo-canonical PR126. Repo-canonical PR126 is the implementation-truth label for the connector semantic binding implementation gate. Repo PR126 does not imply Roadmap PR #126 or Blueprint PR #126. The owner explicitly authorized Roadmap PR108 for Repo PR126. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction."
+    },
+    {
+      "roster_entry_id": "PR127_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR127",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 127,
+      "repo_title": "Per-venue execution lifecycle model builder",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR127 implement per-venue execution lifecycle model builder",
+      "branch_name": "pr127-per-venue-execution-lifecycle-model-builder",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR126_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/127",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-19T23:11:19Z",
+      "github_pr_mergeCommit_oid": "84848c0bbe2fb17ca02b76acd6cca45150ac59f9",
+      "github_headRefName": "pr127-per-venue-execution-lifecycle-model-builder",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR109",
+      "owner_authorized_next_capability": "PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #127 is the audit number assigned to the merged pull request for repo-canonical PR127. Repo-canonical PR127 is the implementation-truth label for the per-venue execution lifecycle model builder. Repo PR127 does not imply Roadmap PR #127 or Blueprint PR #127. The owner explicitly authorized Roadmap PR109 for Repo PR127. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR128 does not imply Roadmap PR #128; the owner explicitly authorized Roadmap PR110 for Repo PR128."
     }
   ],
   "mismatch_summary": {

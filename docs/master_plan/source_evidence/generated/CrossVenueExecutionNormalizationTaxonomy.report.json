@@ -1,0 +1,81 @@
+{
+  "cross_venue_execution_normalization_taxonomy_report_id": "PR128_CROSS_VENUE_EXECUTION_NORMALIZATION_TAXONOMY_REPORT",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_normalized_taxonomy_count": 11,
+  "future_production_launch_path_preserved": true,
+  "production_arbitrage_comparability_authority_count": 0,
+  "production_cross_venue_normalization_authority_count": 0,
+  "repo_pr_label": "PR128",
+  "roadmap_pr_implemented": "PR110",
+  "taxonomy_records": [
+    {
+      "cancellation_state_taxonomy": [
+        "CANCELLATION_STATE_PLACEHOLDER_NOT_VENUE_FACT"
+      ],
+      "cashflow_pnl_taxonomy": [
+        "CASHFLOW_PNL_PLACEHOLDER_REQUIRES_PR111_RECEIPTS"
+      ],
+      "cross_venue_execution_normalization_taxonomy_id": "PR128_CROSS_VENUE_EXECUTION_NORMALIZATION_TAXONOMY_FIXTURE_V1",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "execution_phase_taxonomy": [
+        "ORDER_INTENT_DECLARED_FIXTURE",
+        "CONNECTOR_SEMANTIC_IMPLEMENTATION_CONFIRMED_FIXTURE",
+        "ORDER_SUBMISSION_PREPARED_FIXTURE",
+        "VENUE_ACKNOWLEDGEMENT_PENDING_FIXTURE",
+        "VENUE_STATE_UPDATE_PENDING_FIXTURE",
+        "FILL_INTEGRITY_EVALUATION_PENDING_FIXTURE",
+        "CASHFLOW_PNL_MAPPING_PENDING_FIXTURE",
+        "SETTLEMENT_FINALITY_PENDING_FIXTURE",
+        "RECONCILIATION_PENDING_FIXTURE",
+        "LIFECYCLE_TERMINAL_STATE_PENDING_FIXTURE"
+      ],
+      "execution_transition_taxonomy": [
+        "INTENT_TO_PREPARED",
+        "PREPARED_TO_ACK_PENDING",
+        "ACK_PENDING_TO_STATE_UPDATE_PENDING",
+        "STATE_UPDATE_TO_FILL_INTEGRITY_PENDING",
+        "FILL_INTEGRITY_TO_CASHFLOW_PNL_PENDING",
+        "CASHFLOW_PNL_TO_SETTLEMENT_FINALITY_PENDING",
+        "SETTLEMENT_FINALITY_TO_RECONCILIATION_PENDING",
+        "RECONCILIATION_TO_TERMINAL_PENDING"
+      ],
+      "fill_integrity_taxonomy": [
+        "FILL_INTEGRITY_PLACEHOLDER_REQUIRES_ACCEPTED_SOURCE"
+      ],
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "latency_component_taxonomy": [
+        "LATENCY_COMPONENT_PLACEHOLDER_REQUIRES_FUTURE_SOURCE"
+      ],
+      "normalization_state": "READY_FOR_PR128_FIXTURE_SCOPE_NORMALIZATION",
+      "order_state_taxonomy": [
+        "ORDER_STATE_PLACEHOLDER_NOT_VENUE_FACT"
+      ],
+      "partial_fill_state_taxonomy": [
+        "PARTIAL_FILL_STATE_PLACEHOLDER_NOT_VENUE_FACT"
+      ],
+      "production_arbitrage_comparability_authority": false,
+      "production_cross_venue_normalization_authority": false,
+      "production_order_authority": false,
+      "reconciliation_taxonomy": [
+        "RECONCILIATION_PLACEHOLDER_REQUIRES_FUTURE_RECEIPTS"
+      ],
+      "rejection_error_taxonomy": [
+        "REJECTION_ERROR_PLACEHOLDER_NOT_VENUE_FACT"
+      ],
+      "settlement_finality_taxonomy": [
+        "SETTLEMENT_FINALITY_PLACEHOLDER_REQUIRES_FUTURE_SOURCE"
+      ],
+      "shared_scope_metadata_ids": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "taxonomy_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "taxonomy_scope": "QTT_PR128_FIXTURE_SCOPE_NOT_EXTERNAL_FACT",
+      "venue_ids_in_scope": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ]
+    }
+  ]
+}
