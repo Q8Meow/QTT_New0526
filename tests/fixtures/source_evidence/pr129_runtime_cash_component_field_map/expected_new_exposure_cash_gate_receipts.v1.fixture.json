@@ -1,0 +1,31 @@
+{
+  "fixture_id": "PR129_EXPECTED_NEW_EXPOSURE_CASH_GATE_RECEIPTS_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "expected_gate_decisions": [
+    {
+      "venue_id": "KALSHI",
+      "new_or_increased_exposure_allowed_fixture": true,
+      "blocked_reason_codes": []
+    },
+    {
+      "venue_id": "POLYMARKET",
+      "new_or_increased_exposure_allowed_fixture": false,
+      "blocked_reason_codes": [
+        "NEGATIVE_OR_ZERO_AVAILABLE_AFTER_COMMITMENTS"
+      ]
+    },
+    {
+      "venue_id": "FORECASTEX_IBKR",
+      "new_or_increased_exposure_allowed_fixture": false,
+      "blocked_reason_codes": [
+        "UNKNOWN_CASH_COMPONENT_PRESENT",
+        "UNRECONCILED_CASH_COMPONENT_PRESENT"
+      ]
+    }
+  ],
+  "production_new_exposure_cash_gate_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

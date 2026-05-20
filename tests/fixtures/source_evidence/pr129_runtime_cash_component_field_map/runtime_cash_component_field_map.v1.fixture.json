@@ -1,0 +1,12 @@
+{
+  "fixture_id": "PR129_RUNTIME_CASH_COMPONENT_FIELD_MAP_EXPECTED_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "expected_stage1_venue_count": 3,
+  "expected_known_component_count_per_venue": 7,
+  "expected_runtime_cash_component_field_map_count": 21,
+  "production_runtime_cash_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "PR129_EXPECTED_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "expected_reconciliation_report_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+  "expected_excluded_reserved_cash_component_count": 3,
+  "expected_excluded_margin_lock_component_count": 3,
+  "expected_excluded_unsettled_funds_component_count": 3,
+  "expected_excluded_locked_or_withdrawal_restricted_component_count": 3,
+  "expected_excluded_pending_use_component_count": 3,
+  "expected_unknown_component_present_flag": true,
+  "expected_unreconciled_component_present_flag": true,
+  "production_runtime_cash_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

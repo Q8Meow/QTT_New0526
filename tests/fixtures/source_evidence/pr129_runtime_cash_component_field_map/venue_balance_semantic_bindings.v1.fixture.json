@@ -1,0 +1,12 @@
+{
+  "fixture_id": "PR129_VENUE_BALANCE_SEMANTIC_BINDINGS_EXPECTED_FIXTURE_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "expected_venue_balance_semantic_binding_count": 3,
+  "production_runtime_cash_authority": false,
+  "production_runtime_cash_receipt_authority": false,
+  "production_new_exposure_cash_gate_authority": false,
+  "future_production_launch_path_preserved": true,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

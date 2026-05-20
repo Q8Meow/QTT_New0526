@@ -1,0 +1,79 @@
+{
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+  "new_exposure_cash_gate_fixture_report_id": "PR129_NEW_EXPOSURE_CASH_GATE_FIXTURE_REPORT_V1",
+  "new_exposure_cash_gate_receipts": [
+    {
+      "blocked_reason_codes": [],
+      "connector_blocking_cash_materiality_present_flag": false,
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "negative_or_zero_available_after_commitments_flag": false,
+      "new_exposure_cash_gate_receipt_id": "PR129_KALSHI_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1",
+      "new_exposure_cash_gate_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+      "new_or_increased_exposure_allowed_fixture": true,
+      "order_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_order_authority_allowed_flag": false,
+      "runtime_available_after_commitments_receipt_id": "PR129_KALSHI_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "source_change_snapshot_id": "PR129_SOURCE_CHANGE_SNAPSHOT_KALSHI",
+      "stale_cash_source_present_flag": false,
+      "trading_blocking_cash_materiality_present_flag": false,
+      "unknown_component_present_flag": false,
+      "unreconciled_component_present_flag": false,
+      "venue_id": "KALSHI"
+    },
+    {
+      "blocked_reason_codes": [
+        "NEGATIVE_OR_ZERO_AVAILABLE_AFTER_COMMITMENTS"
+      ],
+      "connector_blocking_cash_materiality_present_flag": false,
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "negative_or_zero_available_after_commitments_flag": true,
+      "new_exposure_cash_gate_receipt_id": "PR129_POLYMARKET_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1",
+      "new_exposure_cash_gate_state": "REJECTED_UNRECONCILED_CASH_COMPONENT",
+      "new_or_increased_exposure_allowed_fixture": false,
+      "order_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_order_authority_allowed_flag": false,
+      "runtime_available_after_commitments_receipt_id": "PR129_POLYMARKET_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "source_change_snapshot_id": "PR129_SOURCE_CHANGE_SNAPSHOT_POLYMARKET",
+      "stale_cash_source_present_flag": false,
+      "trading_blocking_cash_materiality_present_flag": false,
+      "unknown_component_present_flag": false,
+      "unreconciled_component_present_flag": false,
+      "venue_id": "POLYMARKET"
+    },
+    {
+      "blocked_reason_codes": [
+        "UNKNOWN_CASH_COMPONENT_PRESENT",
+        "UNRECONCILED_CASH_COMPONENT_PRESENT"
+      ],
+      "connector_blocking_cash_materiality_present_flag": false,
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_production_launch_path_preserved": true,
+      "negative_or_zero_available_after_commitments_flag": false,
+      "new_exposure_cash_gate_receipt_id": "PR129_FORECASTEX_IBKR_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1",
+      "new_exposure_cash_gate_state": "REJECTED_UNRECONCILED_CASH_COMPONENT",
+      "new_or_increased_exposure_allowed_fixture": false,
+      "order_authority_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_order_authority_allowed_flag": false,
+      "runtime_available_after_commitments_receipt_id": "PR129_FORECASTEX_IBKR_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "runtime_cash_component_field_map_id": "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "source_change_snapshot_id": "PR129_SOURCE_CHANGE_SNAPSHOT_FORECASTEX_IBKR",
+      "stale_cash_source_present_flag": false,
+      "trading_blocking_cash_materiality_present_flag": false,
+      "unknown_component_present_flag": true,
+      "unreconciled_component_present_flag": true,
+      "venue_id": "FORECASTEX_IBKR"
+    }
+  ],
+  "new_exposure_cash_gate_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+  "production_new_exposure_cash_gate_authority": false
+}

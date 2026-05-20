@@ -1,0 +1,61 @@
+{
+  "reconciliation_reports": [
+    {
+      "account_wallet_balance_private_state_fetch_allowed_flag": false,
+      "blocked_component_ids": [
+        "PR129_FORECASTEX_IBKR_UNKNOWN_COMPONENT_REJECTION_V1"
+      ],
+      "cash_component_reconciliation_state": "READY_FOR_PR129_FIXTURE_SCOPE_FIELD_MAP",
+      "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+      "excluded_component_ids": [
+        "PR129_KALSHI_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_KALSHI_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_KALSHI_PENDING_USE_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_POLYMARKET_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_POLYMARKET_PENDING_USE_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_MARGIN_LOCK_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_UNSETTLED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_PENDING_USE_FUNDS_FIELD_MAP_V1"
+      ],
+      "excluded_locked_or_withdrawal_restricted_component_count": 3,
+      "excluded_margin_lock_component_count": 3,
+      "excluded_pending_use_component_count": 3,
+      "excluded_reserved_cash_component_count": 3,
+      "excluded_unsettled_funds_component_count": 3,
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "future_atomicrows_bridge_path_preserved": true,
+      "future_credential_alias_secret_no_capture_path_preserved": true,
+      "future_market_data_ingest_path_preserved": true,
+      "future_orderbook_event_snapshot_path_preserved": true,
+      "future_private_state_read_receipt_path_preserved": true,
+      "future_production_launch_path_preserved": true,
+      "future_runtime_resolver_snapshot_path_preserved": true,
+      "network_io_allowed_flag": false,
+      "order_execution_allowed_flag": false,
+      "order_routing_authority_allowed_flag": false,
+      "production_connector_use_allowed_flag": false,
+      "production_new_exposure_cash_gate_authority": false,
+      "production_runtime_cash_authority": false,
+      "replay_paper_execution_allowed_flag": false,
+      "reserved_component_ids": [
+        "PR129_KALSHI_REQUIRED_RESERVE_FIELD_MAP_V1",
+        "PR129_POLYMARKET_REQUIRED_RESERVE_FIELD_MAP_V1",
+        "PR129_FORECASTEX_IBKR_REQUIRED_RESERVE_FIELD_MAP_V1"
+      ],
+      "runtime_cash_component_reconciliation_report_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_REPORT_V1",
+      "runtime_resolver_snapshot_creation_allowed_flag": false,
+      "unknown_component_present_flag": true,
+      "unreconciled_component_present_flag": true,
+      "venue_ids": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ]
+    }
+  ],
+  "runtime_cash_component_reconciliation_report_package_id": "PR129_RUNTIME_CASH_COMPONENT_RECONCILIATION_PACKAGE_V1"
+}

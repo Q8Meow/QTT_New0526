@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-pr129-runtime-available-after-commitments-receipt-v1",
+  "title": "PR129 Runtime Available After Commitments Fixture Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runtime_available_after_commitments_receipt_id",
+    "fixture_authority_class",
+    "production_runtime_cash_receipt_authority",
+    "runtime_cash_component_field_map_id",
+    "venue_id",
+    "owner_policy_capital_remaining_for_venue_fixture",
+    "runtime_verified_available_cash_fixture",
+    "open_order_lock_total_fixture",
+    "required_reserve_total_fixture",
+    "runtime_available_after_open_orders_and_required_reserves_fixture",
+    "raw_available_after_commitments_fixture",
+    "available_after_commitments_for_new_exposure_fixture",
+    "negative_available_after_commitments_clamped_to_zero_flag",
+    "excluded_component_ids",
+    "blocked_component_ids",
+    "cash_component_reconciliation_report_id",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_runtime_cash_receipt_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

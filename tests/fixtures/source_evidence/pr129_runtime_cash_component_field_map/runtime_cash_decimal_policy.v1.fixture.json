@@ -1,0 +1,15 @@
+{
+  "runtime_cash_decimal_policy_id": "PR129_RUNTIME_CASH_DECIMAL_POLICY_V1",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "mode": "SOURCE_REQUIRED",
+  "execution": "DISABLED",
+  "cash_math_type": "decimal.Decimal",
+  "binary_float_cash_math_allowed": false,
+  "monetary_values_stored_as_strings": true,
+  "currency_scales": {
+    "USD": 2
+  },
+  "rounding_mode": "ROUND_HALF_EVEN",
+  "missing_unknown_values_silent_zero_allowed": false,
+  "deterministic_fixture_time": "2026-05-19T00:00:00Z"
+}

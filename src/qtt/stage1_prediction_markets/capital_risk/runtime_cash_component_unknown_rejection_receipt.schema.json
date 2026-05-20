@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-pr129-runtime-cash-component-unknown-rejection-v1",
+  "title": "PR129 Runtime Cash Component Unknown Rejection Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runtime_cash_component_unknown_rejection_receipt_id",
+    "fixture_authority_class",
+    "runtime_cash_field_map_state",
+    "cash_component_reconciliation_state",
+    "production_runtime_cash_authority",
+    "venue_id",
+    "canonical_cash_component_name",
+    "cash_component_class",
+    "unknown_component_blocks_new_exposure_flag",
+    "unreconciled_component_blocks_new_exposure_flag",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_runtime_cash_authority": { "const": false },
+    "runtime_cash_field_map_state": { "const": "REJECTED_UNKNOWN_CASH_COMPONENT" },
+    "cash_component_class": { "const": "UNKNOWN_OR_UNRECONCILED_COMPONENT" },
+    "unknown_component_blocks_new_exposure_flag": { "const": true },
+    "unreconciled_component_blocks_new_exposure_flag": { "const": true },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

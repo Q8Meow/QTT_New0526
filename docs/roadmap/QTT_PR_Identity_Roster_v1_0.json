@@ -2075,6 +2075,49 @@
       "owner_authorized_next_capability": "PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #127 is the audit number assigned to the merged pull request for repo-canonical PR127. Repo-canonical PR127 is the implementation-truth label for the per-venue execution lifecycle model builder. Repo PR127 does not imply Roadmap PR #127 or Blueprint PR #127. The owner explicitly authorized Roadmap PR109 for Repo PR127. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR128 does not imply Roadmap PR #128; the owner explicitly authorized Roadmap PR110 for Repo PR128."
+    },
+    {
+      "roster_entry_id": "PR128_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR128",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 128,
+      "repo_title": "Cross-venue execution normalization binding",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR128 implement cross-venue execution normalization binding",
+      "branch_name": "pr128-cross-venue-execution-normalization-binding",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR127_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/128",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-20T00:56:34Z",
+      "github_pr_mergeCommit_oid": "f16e6a54b16bc37a3e592b9af7bb3365ff5ed089",
+      "github_headRefName": "pr128-cross-venue-execution-normalization-binding",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR110",
+      "owner_authorized_next_capability": "CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #128 is the audit number assigned to the merged pull request for repo-canonical PR128. Repo-canonical PR128 is the implementation-truth label for the cross-venue execution normalization binding. Repo PR128 does not imply Roadmap PR #128 or Blueprint PR #128. The owner explicitly authorized Roadmap PR110 for Repo PR128. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR129 does not imply Roadmap PR #129; the owner explicitly authorized Roadmap PR111 for Repo PR129."
     }
   ],
   "mismatch_summary": {

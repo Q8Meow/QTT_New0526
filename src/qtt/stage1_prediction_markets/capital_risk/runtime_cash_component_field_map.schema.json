@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-pr129-runtime-cash-component-field-map-v1",
+  "title": "PR129 Runtime Cash Component Field Map Packet",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "runtime_cash_component_field_map_id",
+    "fixture_authority_class",
+    "production_runtime_cash_authority",
+    "venue_id",
+    "account_scope_id",
+    "source_packet_ids_by_component",
+    "accepted_source_packet_digest_by_component",
+    "target_field_path_by_component",
+    "raw_venue_field_locator_by_component",
+    "canonical_cash_component_name",
+    "cash_component_class",
+    "cash_component_sign",
+    "cash_component_currency",
+    "cash_component_timestamp_policy",
+    "cash_component_staleness_policy",
+    "unknown_component_blocks_new_exposure_flag",
+    "unreconciled_component_blocks_new_exposure_flag",
+    "accepted_source_evidence_required_flag",
+    "private_state_read_receipt_required_future_pr",
+    "runtime_resolver_snapshot_future_pr",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_runtime_cash_authority": { "const": false },
+    "cash_component_class": {
+      "enum": [
+        "VERIFIED_AVAILABLE_CASH",
+        "OPEN_ORDER_LOCK",
+        "REQUIRED_RESERVE",
+        "MARGIN_LOCK",
+        "UNSETTLED_FUNDS",
+        "LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS",
+        "PENDING_USE_FUNDS",
+        "UNKNOWN_OR_UNRECONCILED_COMPONENT"
+      ]
+    },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

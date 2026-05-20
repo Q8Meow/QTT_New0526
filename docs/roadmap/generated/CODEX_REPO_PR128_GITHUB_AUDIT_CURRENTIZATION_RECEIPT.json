@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR128",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr128-cross-venue-execution-normalization-binding",
+  "github_pr_mergeCommit_oid": "f16e6a54b16bc37a3e592b9af7bb3365ff5ed089",
+  "github_pr_mergedAt": "2026-05-20T00:56:34Z",
+  "github_pr_number": 128,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR128 implement cross-venue execution normalization binding",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/128",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR111_RUNTIME_CASH_COMPONENT_FIELD_MAP_EXECUTOR",
+  "owner_authorized_next_capability": "RUNTIME_CASH_COMPONENT_FIELD_MAP_EXECUTOR",
+  "owner_authorized_roadmap_pr": "PR111",
+  "repo_pr_label": "PR129",
+  "same_number_inference_used": false
+}
