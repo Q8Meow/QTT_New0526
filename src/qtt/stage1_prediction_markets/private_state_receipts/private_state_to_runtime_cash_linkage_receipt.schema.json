@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-stage1-private-state-to-runtime-cash-linkage-receipt-v1",
+  "title": "PR130 Private-State To Runtime Cash Linkage Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "private_state_to_runtime_cash_linkage_receipt_id",
+    "fixture_authority_class",
+    "private_state_to_runtime_cash_linkage_state",
+    "production_runtime_cash_receipt_authority",
+    "production_new_exposure_cash_gate_authority",
+    "private_state_read_receipt_id",
+    "account_wallet_balance_receipt_id",
+    "runtime_cash_component_field_map_id",
+    "runtime_available_after_commitments_receipt_ref",
+    "linked_cash_component_classes",
+    "linkage_validation_state",
+    "unknown_or_unreconciled_component_present_flag",
+    "stale_private_state_receipt_present_flag",
+    "redaction_attestation_valid_flag",
+    "no_secret_capture_attestation_valid_flag",
+    "production_cash_authority_allowed_flag",
+    "order_authority_allowed_flag",
+    "deterministic_fixture_time",
+    "future_runtime_resolver_snapshot_path_preserved",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "private_state_to_runtime_cash_linkage_state": { "const": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT" },
+    "production_runtime_cash_receipt_authority": { "const": false },
+    "production_new_exposure_cash_gate_authority": { "const": false },
+    "stale_private_state_receipt_present_flag": { "const": false },
+    "redaction_attestation_valid_flag": { "const": true },
+    "no_secret_capture_attestation_valid_flag": { "const": true },
+    "production_cash_authority_allowed_flag": { "const": false },
+    "order_authority_allowed_flag": { "const": false },
+    "future_runtime_resolver_snapshot_path_preserved": { "const": true },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

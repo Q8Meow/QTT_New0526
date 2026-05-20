@@ -394,6 +394,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "private_state_read_receipt_gate_validate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -1673,9 +1679,25 @@ def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
         python_executable,
         str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
     ]
-    assert commands[controller_index] == [
+
+
+def test_runner_includes_pr130_private_state_receipt_gate_after_runtime_cash(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    runtime_cash_index = command_names.index("runtime_cash_component_field_map_validate.py")
+    private_state_index = command_names.index("private_state_read_receipt_gate_validate.py")
+    no_runtime_index = command_names.index("validate_no_runtime_artifacts.py")
+
+    assert runtime_cash_index < private_state_index < no_runtime_index
+    assert commands[private_state_index] == [
         python_executable,
-        str(Path("tools") / "validate_qtt_roadmap_execution_state_controller.py"),
+        str(Path("tools") / "private_state_read_receipt_gate_validate.py"),
+        "--repo-root",
+        ".",
     ]
 
 

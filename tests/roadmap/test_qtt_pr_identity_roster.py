@@ -34,6 +34,9 @@ PR127_AUDIT_RECEIPT_PATH = Path(
 PR128_AUDIT_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_REPO_PR128_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
 )
+PR129_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR129_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
 PR123_OWNER_AUTH_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
 )
@@ -640,6 +643,77 @@ def test_roadmap_and_controller_files_are_state_evidence_not_veto_for_pr129():
     assert receipt["controller_used_as_record_not_veto"] is True
     assert receipt["identity_doctrine_preserved"] is True
     assert receipt["owner_authorized_roadmap_pr"] == "PR111"
+
+
+def test_pr129_github_audit_currentization_is_recorded_and_audit_only():
+    pr129 = _entry("PR129_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR129_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr129["repo_canonical_pr_label"] == "PR129"
+    assert pr129["github_pr_number"] == 129
+    assert pr129["github_title"] == "PR129 implement runtime cash component field-map executor"
+    assert pr129["github_pr_state"] == "MERGED"
+    assert pr129["github_pr_mergedAt"] == "2026-05-20T03:24:12Z"
+    assert pr129["github_pr_mergeCommit_oid"] == (
+        "fad25e8fcc75b1ffc78e93705d36129ba9eab291"
+    )
+    assert pr129["github_headRefName"] == (
+        "pr129-runtime-cash-component-field-map-executor"
+    )
+    assert pr129["github_baseRefName"] == "main"
+    assert pr129["roadmap_pr_label"] is None
+    assert pr129["blueprint_pr_label"] is None
+    assert pr129["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr129["same_number_mismatch_recorded"] is True
+
+    assert receipt["repo_pr_label"] == "PR130"
+    assert receipt["currentized_prior_repo_pr_label"] == "PR129"
+    assert receipt["github_pr_number"] == 129
+    assert receipt["github_pr_title"] == pr129["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-20T03:24:12Z"
+    assert receipt["github_pr_mergeCommit_oid"] == (
+        "fad25e8fcc75b1ffc78e93705d36129ba9eab291"
+    )
+    assert receipt["github_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/129"
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_repo_pr130_does_not_imply_roadmap_pr130_and_owner_authorized_pr112():
+    receipt = json.loads(PR129_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    roadmap_112 = _entry("GITHUB_PR_112_IDENTITY_MISMATCH")
+
+    assert roadmap_112["roadmap_title"] == (
+        "Account, wallet, balance, and private-state read receipt gate"
+    )
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR130"
+        and entry["roadmap_pr_label"] == "PR #130"
+        for entry in _entries()
+    )
+    assert receipt["repo_pr_label"] == "PR130"
+    assert receipt["owner_authorized_roadmap_pr"] == "PR112"
+    assert (
+        receipt["owner_authorized_next_capability"]
+        == "ACCOUNT_WALLET_BALANCE_AND_PRIVATE_STATE_READ_RECEIPT_GATE"
+    )
+    assert receipt["implementation_scope"] == (
+        "ROADMAP_PR112_ACCOUNT_WALLET_BALANCE_AND_PRIVATE_STATE_READ_RECEIPT_GATE"
+    )
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_roadmap_and_controller_files_are_state_evidence_not_veto_for_pr130():
+    pr129 = _entry("PR129_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR129_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert _roster()["mismatch_summary"][
+        "roadmap_controller_files_used_as_state_evidence_not_veto"
+    ] is True
+    assert pr129["controller_used_as_record_not_veto"] is True
+    assert receipt["controller_used_as_record_not_veto"] is True
+    assert receipt["identity_doctrine_preserved"] is True
+    assert receipt["owner_authorized_roadmap_pr"] == "PR112"
 
 
 def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():

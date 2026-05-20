@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-stage1-private-state-read-request-v1",
+  "title": "PR130 Private-State Read Request",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "private_state_read_request_id",
+    "fixture_authority_class",
+    "private_state_read_request_state",
+    "production_private_state_read_authority",
+    "venue_id",
+    "platform_scope",
+    "account_scope_id",
+    "requested_private_state_surface",
+    "requested_field_map_ref",
+    "runtime_cash_component_field_map_id",
+    "credential_alias_placeholder_ref",
+    "credential_alias_required_future_pr",
+    "credential_alias_authority_created",
+    "raw_secret_capture_allowed_flag",
+    "network_io_allowed_flag",
+    "production_connector_use_allowed_flag",
+    "request_purpose",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "private_state_read_request_state": { "const": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT" },
+    "production_private_state_read_authority": { "const": false },
+    "credential_alias_required_future_pr": { "const": "PR113" },
+    "credential_alias_authority_created": { "const": false },
+    "raw_secret_capture_allowed_flag": { "const": false },
+    "network_io_allowed_flag": { "const": false },
+    "production_connector_use_allowed_flag": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

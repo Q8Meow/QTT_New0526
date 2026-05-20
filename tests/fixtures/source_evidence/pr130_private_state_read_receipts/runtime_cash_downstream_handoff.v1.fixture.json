@@ -1,0 +1,58 @@
+{
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR130_RUNTIME_CASH_DOWNSTREAM_HANDOFF_INPUT_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "runtime_cash_downstream_handoff": {
+    "deterministic_fixture_time": "2026-05-19T00:00:00Z",
+    "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+    "future_atomicrows_bridge_materialization_recommended_after_repo_pr": "PR135",
+    "future_credential_alias_secret_no_capture_pr": "PR113",
+    "future_market_data_ingest_pr": "PR114",
+    "future_orderbook_event_snapshot_pr": "PR115",
+    "future_private_state_read_receipt_pr": "PR112",
+    "future_production_launch_path_preserved": true,
+    "future_runtime_resolver_snapshot_pr": "PR116",
+    "new_exposure_cash_gate_receipt_ids": [
+      "PR129_KALSHI_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1",
+      "PR129_POLYMARKET_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1",
+      "PR129_FORECASTEX_IBKR_NEW_EXPOSURE_CASH_GATE_RECEIPT_V1"
+    ],
+    "production_downstream_authority": false,
+    "runtime_available_after_commitments_receipt_ids": [
+      "PR129_KALSHI_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "PR129_POLYMARKET_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1",
+      "PR129_FORECASTEX_IBKR_AVAILABLE_AFTER_COMMITMENTS_RECEIPT_V1"
+    ],
+    "runtime_cash_component_field_map_ids": [
+      "PR129_KALSHI_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "PR129_KALSHI_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+      "PR129_KALSHI_REQUIRED_RESERVE_FIELD_MAP_V1",
+      "PR129_KALSHI_MARGIN_LOCK_FIELD_MAP_V1",
+      "PR129_KALSHI_UNSETTLED_FUNDS_FIELD_MAP_V1",
+      "PR129_KALSHI_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+      "PR129_KALSHI_PENDING_USE_FUNDS_FIELD_MAP_V1",
+      "PR129_POLYMARKET_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "PR129_POLYMARKET_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+      "PR129_POLYMARKET_REQUIRED_RESERVE_FIELD_MAP_V1",
+      "PR129_POLYMARKET_MARGIN_LOCK_FIELD_MAP_V1",
+      "PR129_POLYMARKET_UNSETTLED_FUNDS_FIELD_MAP_V1",
+      "PR129_POLYMARKET_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+      "PR129_POLYMARKET_PENDING_USE_FUNDS_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_VERIFIED_AVAILABLE_CASH_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_OPEN_ORDER_LOCK_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_REQUIRED_RESERVE_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_MARGIN_LOCK_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_UNSETTLED_FUNDS_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_LOCKED_OR_WITHDRAWAL_RESTRICTED_FUNDS_FIELD_MAP_V1",
+      "PR129_FORECASTEX_IBKR_PENDING_USE_FUNDS_FIELD_MAP_V1"
+    ],
+    "runtime_cash_downstream_handoff_id": "PR129_RUNTIME_CASH_DOWNSTREAM_HANDOFF_V1",
+    "source_repo_pr_label": "PR129",
+    "venue_ids_in_scope": [
+      "KALSHI",
+      "POLYMARKET",
+      "FORECASTEX_IBKR"
+    ]
+  }
+}

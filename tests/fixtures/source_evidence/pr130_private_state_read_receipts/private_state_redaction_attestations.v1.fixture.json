@@ -1,0 +1,89 @@
+{
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR130_PRIVATE_STATE_REDACTION_ATTESTATIONS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "private_state_redaction_attestations": [
+    {
+      "canonicalization_policy_id": "PR130_CANONICAL_JSON_SORT_KEYS_COMPACT_UTF8_SHA256_V1",
+      "canonicalized_redacted_payload_digest": "6a630c619a8dfbc0cf4c8950b03e20bc59aff0fc45de09779490dd8bc385ef10",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "private_state_read_receipt_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1",
+      "raw_payload_stored_flag": false,
+      "redacted_fields": [
+        "account_private_state_identifiers",
+        "wallet_private_state_identifiers",
+        "balance_component_values",
+        "private_state_payload_body"
+      ],
+      "redacted_payload_digest": "6a630c619a8dfbc0cf4c8950b03e20bc59aff0fc45de09779490dd8bc385ef10",
+      "redaction_attestation_id": "PR130_KALSHI_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "redaction_attestation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "redaction_policy_id": "PR130_REDACTION_POLICY_FIELD_NAMES_MARKERS_DIGESTS_ONLY_V1",
+      "retained_fields": [
+        "field_name",
+        "redaction_marker",
+        "data_type_label",
+        "fixture_placeholder_value",
+        "non_secret_digest"
+      ],
+      "secret_like_value_detected_flag": false,
+      "unredacted_private_payload_detected_flag": false
+    },
+    {
+      "canonicalization_policy_id": "PR130_CANONICAL_JSON_SORT_KEYS_COMPACT_UTF8_SHA256_V1",
+      "canonicalized_redacted_payload_digest": "6b62e391e8032c215f23e85a1f1c8d6d6093017c8677254e97016aeeb5e73731",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "private_state_read_receipt_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1",
+      "raw_payload_stored_flag": false,
+      "redacted_fields": [
+        "account_private_state_identifiers",
+        "wallet_private_state_identifiers",
+        "balance_component_values",
+        "private_state_payload_body"
+      ],
+      "redacted_payload_digest": "6b62e391e8032c215f23e85a1f1c8d6d6093017c8677254e97016aeeb5e73731",
+      "redaction_attestation_id": "PR130_POLYMARKET_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "redaction_attestation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "redaction_policy_id": "PR130_REDACTION_POLICY_FIELD_NAMES_MARKERS_DIGESTS_ONLY_V1",
+      "retained_fields": [
+        "field_name",
+        "redaction_marker",
+        "data_type_label",
+        "fixture_placeholder_value",
+        "non_secret_digest"
+      ],
+      "secret_like_value_detected_flag": false,
+      "unredacted_private_payload_detected_flag": false
+    },
+    {
+      "canonicalization_policy_id": "PR130_CANONICAL_JSON_SORT_KEYS_COMPACT_UTF8_SHA256_V1",
+      "canonicalized_redacted_payload_digest": "8ce4c3fb55286205f23a4b86c3af20420a24ce4cf3a53907402cf5c22fae539f",
+      "deterministic_fixture_time": "2026-05-20T00:00:00Z",
+      "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+      "private_state_read_receipt_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1",
+      "raw_payload_stored_flag": false,
+      "redacted_fields": [
+        "account_private_state_identifiers",
+        "wallet_private_state_identifiers",
+        "balance_component_values",
+        "private_state_payload_body"
+      ],
+      "redacted_payload_digest": "8ce4c3fb55286205f23a4b86c3af20420a24ce4cf3a53907402cf5c22fae539f",
+      "redaction_attestation_id": "PR130_FORECASTEX_IBKR_PRIVATE_STATE_READ_RECEIPT_V1_REDACTION_ATTESTATION_V1",
+      "redaction_attestation_state": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT",
+      "redaction_policy_id": "PR130_REDACTION_POLICY_FIELD_NAMES_MARKERS_DIGESTS_ONLY_V1",
+      "retained_fields": [
+        "field_name",
+        "redaction_marker",
+        "data_type_label",
+        "fixture_placeholder_value",
+        "non_secret_digest"
+      ],
+      "secret_like_value_detected_flag": false,
+      "unredacted_private_payload_detected_flag": false
+    }
+  ]
+}

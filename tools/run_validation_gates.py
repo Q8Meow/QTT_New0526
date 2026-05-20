@@ -284,6 +284,12 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "private_state_read_receipt_gate_validate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

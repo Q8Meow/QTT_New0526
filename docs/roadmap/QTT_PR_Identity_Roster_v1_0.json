@@ -2118,6 +2118,49 @@
       "owner_authorized_next_capability": "CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #128 is the audit number assigned to the merged pull request for repo-canonical PR128. Repo-canonical PR128 is the implementation-truth label for the cross-venue execution normalization binding. Repo PR128 does not imply Roadmap PR #128 or Blueprint PR #128. The owner explicitly authorized Roadmap PR110 for Repo PR128. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR129 does not imply Roadmap PR #129; the owner explicitly authorized Roadmap PR111 for Repo PR129."
+    },
+    {
+      "roster_entry_id": "PR129_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR129",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 129,
+      "repo_title": "Runtime cash component field-map executor",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR129 implement runtime cash component field-map executor",
+      "branch_name": "pr129-runtime-cash-component-field-map-executor",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_RUNTIME_CASH_COMPONENT_FIELD_MAP_EXECUTOR_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR128_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/129",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-20T03:24:12Z",
+      "github_pr_mergeCommit_oid": "fad25e8fcc75b1ffc78e93705d36129ba9eab291",
+      "github_headRefName": "pr129-runtime-cash-component-field-map-executor",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR111",
+      "owner_authorized_next_capability": "RUNTIME_CASH_COMPONENT_FIELD_MAP_EXECUTOR",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #129 is the audit number assigned to the merged pull request for repo-canonical PR129. Repo-canonical PR129 is the implementation-truth label for the runtime cash component field-map executor. Repo PR129 does not imply Roadmap PR #129 or Blueprint PR #129. The owner explicitly authorized Roadmap PR111 for Repo PR129. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR130 does not imply Roadmap PR #130; the owner explicitly authorized Roadmap PR112 for Repo PR130."
     }
   ],
   "mismatch_summary": {

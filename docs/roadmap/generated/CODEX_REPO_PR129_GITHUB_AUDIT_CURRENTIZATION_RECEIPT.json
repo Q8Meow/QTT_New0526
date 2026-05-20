@@ -1,0 +1,18 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR129",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr129-runtime-cash-component-field-map-executor",
+  "github_pr_mergeCommit_oid": "fad25e8fcc75b1ffc78e93705d36129ba9eab291",
+  "github_pr_mergedAt": "2026-05-20T03:24:12Z",
+  "github_pr_number": 129,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR129 implement runtime cash component field-map executor",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/129",
+  "identity_doctrine_preserved": true,
+  "implementation_scope": "ROADMAP_PR112_ACCOUNT_WALLET_BALANCE_AND_PRIVATE_STATE_READ_RECEIPT_GATE",
+  "owner_authorized_next_capability": "ACCOUNT_WALLET_BALANCE_AND_PRIVATE_STATE_READ_RECEIPT_GATE",
+  "owner_authorized_roadmap_pr": "PR112",
+  "repo_pr_label": "PR130",
+  "same_number_inference_used": false
+}

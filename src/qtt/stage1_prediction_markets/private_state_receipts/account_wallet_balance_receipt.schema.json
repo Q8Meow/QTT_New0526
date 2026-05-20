@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-stage1-account-wallet-balance-receipt-v1",
+  "title": "PR130 Account Wallet Balance Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "account_wallet_balance_receipt_id",
+    "fixture_authority_class",
+    "account_wallet_balance_receipt_state",
+    "production_account_balance_authority",
+    "production_wallet_balance_authority",
+    "production_runtime_cash_receipt_authority",
+    "private_state_read_receipt_id",
+    "runtime_cash_component_field_map_id",
+    "venue_id",
+    "account_scope_id",
+    "redacted_balance_component_refs",
+    "canonical_cash_component_names",
+    "currency_codes",
+    "amount_value_policy",
+    "amount_value_is_production_private_state",
+    "accepted_source_evidence_required_flag",
+    "private_state_read_receipt_required_flag",
+    "no_secret_capture_attestation_id",
+    "redaction_attestation_id",
+    "deterministic_fixture_time",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "account_wallet_balance_receipt_state": { "const": "READY_FOR_PR130_FIXTURE_SCOPE_RECEIPT" },
+    "production_account_balance_authority": { "const": false },
+    "production_wallet_balance_authority": { "const": false },
+    "production_runtime_cash_receipt_authority": { "const": false },
+    "amount_value_policy": { "const": "REDACTED_OR_FIXTURE_STRING_ONLY" },
+    "amount_value_is_production_private_state": { "const": false },
+    "accepted_source_evidence_required_flag": { "const": true },
+    "private_state_read_receipt_required_flag": { "const": true },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}
