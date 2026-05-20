@@ -1,0 +1,1028 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted_source_dependency_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "allowed_use": {
+      "type": "string"
+    },
+    "ask_side_sorting_verified": {
+      "const": true
+    },
+    "atomicrows_4183_completion_claim_created": {
+      "const": false
+    },
+    "atomicrows_4183_completion_claim_created_count": {
+      "const": 0
+    },
+    "atomicrows_authority_created": {
+      "const": false
+    },
+    "atomicrows_bridge_authority_created": {
+      "const": false
+    },
+    "atomicrows_bundle_consumed": {
+      "const": false
+    },
+    "atomicrows_bundle_created": {
+      "const": false
+    },
+    "atomicrows_bundle_created_count": {
+      "const": 0
+    },
+    "atomicrows_bundle_edited": {
+      "const": false
+    },
+    "atomicrows_full_materialization_authorized": {
+      "const": false
+    },
+    "atomicrows_pre_bridge_compatibility_metadata_created": {
+      "const": true
+    },
+    "atomicrows_row_records_created_count": {
+      "const": 0
+    },
+    "atomicrows_sha_created": {
+      "const": false
+    },
+    "atomicrows_sha_created_count": {
+      "const": 0
+    },
+    "authority_class": {
+      "const": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY"
+    },
+    "bid_side_sorting_verified": {
+      "const": true
+    },
+    "binding_id": {
+      "type": "string"
+    },
+    "bridge_materialization_authorized_now": {
+      "const": false
+    },
+    "bridge_may_consume_after_pr135": {
+      "const": true
+    },
+    "builder_name": {
+      "type": "string"
+    },
+    "builder_scope": {
+      "const": "FIXTURE_BACKED_CONTRACT_ONLY"
+    },
+    "builder_version": {
+      "type": "string"
+    },
+    "bundle_materialization_authorized_now": {
+      "const": false
+    },
+    "canonical_depth_side": {
+      "enum": [
+        "BID_METADATA",
+        "ASK_METADATA",
+        "UNKNOWN_SOURCE_REQUIRED"
+      ]
+    },
+    "canonical_event_state_rank": {
+      "type": "integer"
+    },
+    "canonical_market_data_ingest_event_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "canonical_price_rank": {
+      "type": "integer"
+    },
+    "canonical_quantity_rank": {
+      "type": "integer"
+    },
+    "canonical_sequence_verified": {
+      "const": true
+    },
+    "canonical_sort_key": {
+      "type": "string"
+    },
+    "compatibility_class": {
+      "const": "PRE_BRIDGE_METADATA_ONLY"
+    },
+    "compatibility_id": {
+      "type": "string"
+    },
+    "connector_semantic_binding_created": {
+      "const": false
+    },
+    "connector_semantic_dependency_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "contains_atomicrows_bundle": {
+      "const": false
+    },
+    "contains_atomicrows_materialized_rows": {
+      "const": false
+    },
+    "contains_atomicrows_sha": {
+      "const": false
+    },
+    "contains_feature_vector": {
+      "const": false
+    },
+    "contains_fixture_event_state_snapshot": {
+      "const": true
+    },
+    "contains_fixture_orderbook_snapshot": {
+      "const": true
+    },
+    "contains_historical_dataset_digest": {
+      "const": false
+    },
+    "contains_live_credentials": {
+      "const": false
+    },
+    "contains_live_event_state_snapshot": {
+      "const": false
+    },
+    "contains_live_market_data": {
+      "const": false
+    },
+    "contains_live_orderbook_snapshot": {
+      "const": false
+    },
+    "contains_order_authority": {
+      "const": false
+    },
+    "contains_private_state_payload": {
+      "const": false
+    },
+    "contains_profit_evidence": {
+      "const": false
+    },
+    "contains_quantum_execution": {
+      "const": false
+    },
+    "contains_quantum_feature_vector": {
+      "const": false
+    },
+    "contains_quantum_optimizer_input": {
+      "const": false
+    },
+    "contains_quantum_trading_signal": {
+      "const": false
+    },
+    "contains_runtime_resolver_snapshot": {
+      "const": false
+    },
+    "contains_trading_signal": {
+      "const": false
+    },
+    "created_by": {
+      "const": "CODEX_PR133_FIXTURE_OR_VALIDATOR"
+    },
+    "credential_provider_called": {
+      "const": false
+    },
+    "credential_readiness_dependency_ref": {
+      "type": "string"
+    },
+    "cross_venue_scope_mismatch_count": {
+      "const": 0
+    },
+    "crossed_book_trading_evidence_created": {
+      "const": false
+    },
+    "crossed_book_trading_evidence_created_count": {
+      "const": 0
+    },
+    "crossed_book_valid_trading_evidence_created": {
+      "const": false
+    },
+    "depth_levels": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "deterministic_sequence_id": {
+      "type": "string"
+    },
+    "deterministic_sorting_verified": {
+      "const": true
+    },
+    "disallowed_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "downstream_atomicrows_bridge_authorized_now": {
+      "const": false
+    },
+    "downstream_atomicrows_bridge_recommended_after_pr135": {
+      "const": true
+    },
+    "downstream_atomicrows_bundle_sha_authorized_now": {
+      "const": false
+    },
+    "downstream_pr116_contract_prepared": {
+      "const": true
+    },
+    "downstream_pr116_execution_authorized": {
+      "const": false
+    },
+    "downstream_pr117_contract_prepared": {
+      "const": true
+    },
+    "downstream_pr117_execution_authorized": {
+      "const": false
+    },
+    "downstream_prs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "downstream_quantum_feature_computation_authorized": {
+      "const": false
+    },
+    "downstream_quantum_optimizer_input_creation_authorized": {
+      "const": false
+    },
+    "downstream_quantum_trading_signal_creation_authorized": {
+      "const": false
+    },
+    "duplicate_canonical_sort_key_count": {
+      "const": 0
+    },
+    "duplicate_depth_level_allowed": {
+      "const": false
+    },
+    "duplicate_event_state_snapshot_id_count": {
+      "const": 0
+    },
+    "duplicate_orderbook_snapshot_id_count": {
+      "const": 0
+    },
+    "duplicate_snapshot_id_allowed": {
+      "const": false
+    },
+    "duplicate_synthetic_depth_level_id_count": {
+      "const": 0
+    },
+    "duplicate_synthetic_event_state_id_count": {
+      "const": 0
+    },
+    "event_state_canonical_sort_rules_ref": {
+      "type": "string"
+    },
+    "event_state_canonicalization_verified": {
+      "const": true
+    },
+    "event_state_snapshot_is_atomicrows_row": {
+      "const": false
+    },
+    "event_state_snapshot_is_feature_vector": {
+      "const": false
+    },
+    "event_state_snapshot_is_order_authority": {
+      "const": false
+    },
+    "event_state_snapshot_is_quantum_feature_vector": {
+      "const": false
+    },
+    "event_state_snapshot_is_runtime_resolver_snapshot": {
+      "const": false
+    },
+    "event_state_snapshot_is_trading_signal": {
+      "const": false
+    },
+    "event_state_snapshot_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "event_state_sorting_verified": {
+      "const": true
+    },
+    "event_states": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "feature_vector_created": {
+      "const": false
+    },
+    "feature_vector_created_count": {
+      "const": 0
+    },
+    "fixture_event_state_snapshot_created": {
+      "const": true
+    },
+    "fixture_orderbook_snapshot_created": {
+      "const": true
+    },
+    "future_atomicrows_bridge_after_pr135_ref": {
+      "type": "string"
+    },
+    "future_atomicrows_bridge_candidate_repo_pr": {
+      "const": "PR136"
+    },
+    "future_atomicrows_bridge_recommended_after_repo_pr": {
+      "const": "PR135"
+    },
+    "future_atomicrows_bridge_requires_post_pr135_owner_authorization": {
+      "const": true
+    },
+    "future_atomicrows_bundle_sha_requires_explicit_owner_authorization": {
+      "const": true
+    },
+    "future_atomicrows_event_state_feature_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_market_data_feature_row_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_orderbook_depth_feature_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_parameter_row_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_quantum_snapshot_feature_family_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_atomicrows_snapshot_feature_row_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "future_historical_dataset_use_requires_pr135_authorization": {
+      "const": true
+    },
+    "future_hot_path_snapshot_ref": {
+      "type": "string"
+    },
+    "future_live_use_requires_accepted_source_packet": {
+      "const": true
+    },
+    "future_live_use_requires_connector_semantic_binding": {
+      "const": true
+    },
+    "future_live_use_requires_credential_provider_receipt_if_credentials_needed": {
+      "const": true
+    },
+    "future_live_use_requires_fresh_revalidation_state": {
+      "const": true
+    },
+    "future_live_use_requires_owner_approval": {
+      "const": true
+    },
+    "future_low_latency_snapshot_ref": {
+      "type": "string"
+    },
+    "future_pr116_runtime_resolver_contract_ref": {
+      "type": "string"
+    },
+    "future_pr117_historical_dataset_digest_contract_ref": {
+      "type": "string"
+    },
+    "future_qaoa_qubo_liquidity_state_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_amplitude_encoding_snapshot_ref": {
+      "type": "string"
+    },
+    "future_quantum_annealing_depth_imbalance_ref": {
+      "type": "string"
+    },
+    "future_quantum_kernel_event_state_regime_ref": {
+      "type": "string"
+    },
+    "future_quantum_microstructure_graph_ref": {
+      "type": "string"
+    },
+    "future_quantum_orderbook_state_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_use_requires_owner_approval": {
+      "const": true
+    },
+    "future_quantum_use_requires_pr116_pr117_data_chain": {
+      "const": true
+    },
+    "future_quantum_use_requires_replay_paper_validation": {
+      "const": true
+    },
+    "future_runtime_resolver_use_requires_pr134_authorization": {
+      "const": true
+    },
+    "handoff_id": {
+      "type": "string"
+    },
+    "historical_dataset_digest_allowed": {
+      "const": false
+    },
+    "historical_dataset_digest_created": {
+      "const": false
+    },
+    "input_contains_live_market_data": {
+      "const": false
+    },
+    "input_contains_official_venue_semantic_values": {
+      "const": false
+    },
+    "input_lock_id": {
+      "type": "string"
+    },
+    "input_lock_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "input_lock_required_for_each_snapshot": {
+      "const": true
+    },
+    "input_payload_is_synthetic": {
+      "const": true
+    },
+    "integrity_receipt_id": {
+      "type": "string"
+    },
+    "invalid_event_lifecycle_state_allowed": {
+      "const": false
+    },
+    "invalid_event_lifecycle_state_count": {
+      "const": 0
+    },
+    "invalid_orderbook_side_count": {
+      "const": 0
+    },
+    "live_credential_resolution_performed": {
+      "const": false
+    },
+    "live_event_state_snapshot_created": {
+      "const": false
+    },
+    "live_fetch_performed": {
+      "const": false
+    },
+    "live_market_data_fetch_created": {
+      "const": false
+    },
+    "live_market_payload_count": {
+      "const": 0
+    },
+    "live_orderbook_snapshot_created": {
+      "const": false
+    },
+    "live_snapshot_build_allowed": {
+      "const": false
+    },
+    "live_use_requires_accepted_source_and_connector_semantic_binding": {
+      "const": true
+    },
+    "live_use_requires_future_owner_approval": {
+      "const": true
+    },
+    "market_data_feature_vector_created": {
+      "const": false
+    },
+    "market_data_ingest_handoff_ref": {
+      "type": "string"
+    },
+    "market_data_source_dependency_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "missing_snapshot_input_lock_allowed": {
+      "const": false
+    },
+    "missing_snapshot_input_lock_count": {
+      "const": 0
+    },
+    "network_io_created": {
+      "const": false
+    },
+    "neural_inference_created": {
+      "const": false
+    },
+    "neural_training_created": {
+      "const": false
+    },
+    "no_live_fetch": {
+      "const": true
+    },
+    "no_network_io": {
+      "const": true
+    },
+    "no_order_authority": {
+      "const": true
+    },
+    "no_profit_evidence": {
+      "const": true
+    },
+    "no_quantum_execution": {
+      "const": true
+    },
+    "official_semantics_fabricated": {
+      "const": false
+    },
+    "official_semantics_fabricated_count": {
+      "const": 0
+    },
+    "official_venue_field_value_source_state": {
+      "type": "string"
+    },
+    "official_venue_semantics_fabricated": {
+      "const": false
+    },
+    "order_authority_count": {
+      "const": 0
+    },
+    "order_authority_created": {
+      "const": false
+    },
+    "order_execution_count": {
+      "const": 0
+    },
+    "order_execution_created": {
+      "const": false
+    },
+    "orderbook_canonical_sort_rules_ref": {
+      "type": "string"
+    },
+    "orderbook_canonicalization_verified": {
+      "const": true
+    },
+    "orderbook_snapshot_is_atomicrows_row": {
+      "const": false
+    },
+    "orderbook_snapshot_is_feature_vector": {
+      "const": false
+    },
+    "orderbook_snapshot_is_order_authority": {
+      "const": false
+    },
+    "orderbook_snapshot_is_quantum_feature_vector": {
+      "const": false
+    },
+    "orderbook_snapshot_is_runtime_resolver_snapshot": {
+      "const": false
+    },
+    "orderbook_snapshot_is_trading_signal": {
+      "const": false
+    },
+    "orderbook_snapshot_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "paper_result_created": {
+      "const": false
+    },
+    "private_state_fetch_created": {
+      "const": false
+    },
+    "producer_pr": {
+      "const": "PR133"
+    },
+    "producer_roadmap_pr": {
+      "const": "PR115"
+    },
+    "production_connector_authority_created": {
+      "const": false
+    },
+    "profit_evidence_created": {
+      "const": false
+    },
+    "qtt_internal_event_status_class": {
+      "type": "string"
+    },
+    "qtt_internal_lifecycle_state_class": {
+      "enum": [
+        "OPEN_METADATA",
+        "PAUSED_METADATA",
+        "CLOSED_METADATA",
+        "SETTLED_METADATA",
+        "CANCELED_METADATA",
+        "UNKNOWN_SOURCE_REQUIRED",
+        "CONNECTOR_SEMANTIC_REQUIRED"
+      ]
+    },
+    "qtt_internal_orderbook_side_class": {
+      "type": "string"
+    },
+    "qtt_internal_price_level_class": {
+      "type": "string"
+    },
+    "qtt_internal_quantity_level_class": {
+      "type": "string"
+    },
+    "qtt_internal_settlement_state_class": {
+      "type": "string"
+    },
+    "qtt_internal_snapshot_class": {
+      "type": "string"
+    },
+    "quantum_advantage_claim_created": {
+      "const": false
+    },
+    "quantum_backend_called": {
+      "const": false
+    },
+    "quantum_execution_created": {
+      "const": false
+    },
+    "quantum_optimizer_called": {
+      "const": false
+    },
+    "quantum_optimizer_input_created": {
+      "const": false
+    },
+    "quantum_optimizer_input_created_count": {
+      "const": 0
+    },
+    "quantum_ready_snapshot_contract": {
+      "const": true
+    },
+    "quantum_simulator_called": {
+      "const": false
+    },
+    "quantum_snapshot_feature_computation_created": {
+      "const": false
+    },
+    "quantum_snapshot_feature_computation_created_count": {
+      "const": 0
+    },
+    "quantum_trading_signal_created": {
+      "const": false
+    },
+    "quantum_trading_signal_created_count": {
+      "const": 0
+    },
+    "raw_live_payload_stored": {
+      "const": false
+    },
+    "raw_secret_capture_created": {
+      "const": false
+    },
+    "record_type": {
+      "const": "ORDERBOOK_EVENT_STATE_SNAPSHOT_INTEGRITY_RECEIPT"
+    },
+    "rejected_action_or_payload_class": {
+      "type": "string"
+    },
+    "rejected_artifact_ref": {
+      "type": "string"
+    },
+    "rejected_reason_code": {
+      "enum": [
+        "BLOCKED_MISSING_PR132_MARKET_DATA_INGEST_HANDOFF",
+        "BLOCKED_MALFORMED_PR132_MARKET_DATA_INGEST_HANDOFF",
+        "BLOCKED_SCOPE_MISMATCH",
+        "BLOCKED_LIVE_MARKET_DATA_FETCH",
+        "BLOCKED_REST_CLIENT_ATTEMPT",
+        "BLOCKED_WEBSOCKET_CLIENT_ATTEMPT",
+        "BLOCKED_VENUE_API_CALL",
+        "BLOCKED_UNACCEPTED_OFFICIAL_ORDERBOOK_EVENT_STATE_SEMANTICS",
+        "BLOCKED_CREDENTIAL_PROVIDER_CALL",
+        "BLOCKED_LIVE_CREDENTIAL_RESOLUTION",
+        "BLOCKED_PRIVATE_STATE_FETCH",
+        "BLOCKED_RUNTIME_CASH_AUTHORITY",
+        "BLOCKED_LIVE_ORDERBOOK_SNAPSHOT_CREATED",
+        "BLOCKED_LIVE_EVENT_STATE_SNAPSHOT_CREATED",
+        "BLOCKED_RUNTIME_RESOLVER_SNAPSHOT_CREATED",
+        "BLOCKED_HISTORICAL_DATASET_DIGEST_CREATED",
+        "BLOCKED_FEATURE_VECTOR_CREATED",
+        "BLOCKED_TRADING_SIGNAL_CREATED",
+        "BLOCKED_SCORING_RANKING_ARBITRATION_OUTPUT_CREATED",
+        "BLOCKED_ORDER_AUTHORITY_OR_EXECUTION",
+        "BLOCKED_REPLAY_PAPER_LIVE_RESULT_CREATED",
+        "BLOCKED_PROFIT_EVIDENCE_CREATED",
+        "BLOCKED_NEURAL_TRAINING_INFERENCE",
+        "BLOCKED_QUANTUM_EXECUTION",
+        "BLOCKED_QUANTUM_SNAPSHOT_FEATURE_COMPUTATION_CREATED",
+        "BLOCKED_QUANTUM_OPTIMIZER_INPUT_CREATED",
+        "BLOCKED_QUANTUM_TRADING_SIGNAL_CREATED",
+        "BLOCKED_QUANTUM_ADVANTAGE_CLAIM_CREATED",
+        "BLOCKED_ATOMICROWS_BUNDLE_SHA_MUTATION",
+        "BLOCKED_ATOMICROWS_ROW_RECORD_CREATED",
+        "BLOCKED_ATOMICROWS_BRIDGE_AUTHORITY_CREATED",
+        "BLOCKED_ATOMICROWS_4183_COMPLETION_CLAIM_CREATED",
+        "BLOCKED_DUPLICATE_DEPTH_LEVEL_ID",
+        "BLOCKED_DUPLICATE_SNAPSHOT_ID",
+        "BLOCKED_CROSSED_BOOK_TRADING_EVIDENCE_CLAIM",
+        "BLOCKED_INVALID_EVENT_LIFECYCLE_STATE",
+        "BLOCKED_MISSING_SNAPSHOT_INPUT_LOCK"
+      ]
+    },
+    "rejection_id": {
+      "type": "string"
+    },
+    "replay_result_created": {
+      "const": false
+    },
+    "rest_client_created": {
+      "const": false
+    },
+    "runtime_cash_authority_created": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_allowed": {
+      "const": false
+    },
+    "runtime_resolver_snapshot_created": {
+      "const": false
+    },
+    "schema_version": {
+      "const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"
+    },
+    "scope_id": {
+      "enum": [
+        "PREDICTION_MARKETS_GENERAL"
+      ]
+    },
+    "scoring_ranking_arbitration_output_created": {
+      "const": false
+    },
+    "sha_freeze_authorized_now": {
+      "const": false
+    },
+    "shared_scope": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "snapshot_build_allowed": {
+      "const": true
+    },
+    "snapshot_builder_binding_ref": {
+      "type": "string"
+    },
+    "snapshot_builder_binding_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "snapshot_class": {
+      "enum": [
+        "SYNTHETIC_FIXTURE_ORDERBOOK_SNAPSHOT",
+        "QTT_INTERNAL_ORDERBOOK_DEPTH_METADATA_SNAPSHOT",
+        "QTT_INTERNAL_BBO_METADATA_SNAPSHOT",
+        "QTT_INTERNAL_LIQUIDITY_METADATA_SNAPSHOT",
+        "SOURCE_REQUIRED_ORDERBOOK_SNAPSHOT_PLACEHOLDER",
+        "CONNECTOR_SEMANTIC_REQUIRED_ORDERBOOK_SNAPSHOT_PLACEHOLDER",
+        "SYNTHETIC_FIXTURE_EVENT_STATE_SNAPSHOT",
+        "QTT_INTERNAL_MARKET_STATUS_METADATA_SNAPSHOT",
+        "QTT_INTERNAL_SETTLEMENT_STATUS_METADATA_SNAPSHOT",
+        "QTT_INTERNAL_VENUE_HEALTH_METADATA_SNAPSHOT",
+        "QTT_INTERNAL_EVENT_LIFECYCLE_METADATA_SNAPSHOT",
+        "SOURCE_REQUIRED_EVENT_STATE_SNAPSHOT_PLACEHOLDER",
+        "CONNECTOR_SEMANTIC_REQUIRED_EVENT_STATE_SNAPSHOT_PLACEHOLDER"
+      ]
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "snapshot_input_class": {
+      "enum": [
+        "SYNTHETIC_FIXTURE_MARKET_DATA_INGEST_INPUT",
+        "PR132_MARKET_DATA_INGEST_HANDOFF_INPUT",
+        "ACCEPTED_SOURCE_GATED_SNAPSHOT_INPUT_METADATA",
+        "SOURCE_REQUIRED_SNAPSHOT_INPUT_PLACEHOLDER",
+        "CONNECTOR_SEMANTIC_REQUIRED_SNAPSHOT_INPUT_PLACEHOLDER"
+      ]
+    },
+    "snapshot_input_lock_ref": {
+      "type": "string"
+    },
+    "snapshot_input_lock_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "snapshot_integrity_receipt_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "source_acceptance_created": {
+      "const": false
+    },
+    "source_dependency_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "source_dependency_state": {
+      "enum": [
+        "ACCEPTED_SOURCE_GATED",
+        "CONNECTOR_SEMANTIC_GATED",
+        "SOURCE_REQUIRED",
+        "CONNECTOR_SEMANTIC_REQUIRED",
+        "BLOCKED_SCOPE_MISMATCH"
+      ]
+    },
+    "source_fact_accepted": {
+      "const": false
+    },
+    "source_retrieval_created": {
+      "const": false
+    },
+    "synthetic_depth_level_id": {
+      "type": "string"
+    },
+    "synthetic_depth_level_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "synthetic_event_state_id": {
+      "type": "string"
+    },
+    "synthetic_event_state_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "trading_signal_created": {
+      "const": false
+    },
+    "upstream_prs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validator_fail_closed": {
+      "const": true
+    },
+    "venue_api_call_created": {
+      "const": false
+    },
+    "venue_id": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ]
+    },
+    "venue_specific_scope": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "websocket_client_created": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_type",
+    "created_by",
+    "authority_class",
+    "venue_id",
+    "scope_id",
+    "source_retrieval_created",
+    "source_acceptance_created",
+    "official_venue_semantics_fabricated",
+    "live_market_data_fetch_created",
+    "rest_client_created",
+    "websocket_client_created",
+    "venue_api_call_created",
+    "network_io_created",
+    "credential_provider_called",
+    "live_credential_resolution_performed",
+    "raw_secret_capture_created",
+    "production_connector_authority_created",
+    "private_state_fetch_created",
+    "runtime_cash_authority_created",
+    "live_orderbook_snapshot_created",
+    "live_event_state_snapshot_created",
+    "runtime_resolver_snapshot_created",
+    "historical_dataset_digest_created",
+    "market_data_feature_vector_created",
+    "trading_signal_created",
+    "scoring_ranking_arbitration_output_created",
+    "order_authority_created",
+    "order_execution_created",
+    "replay_result_created",
+    "paper_result_created",
+    "profit_evidence_created",
+    "neural_training_created",
+    "neural_inference_created",
+    "quantum_execution_created",
+    "quantum_backend_called",
+    "quantum_simulator_called",
+    "quantum_optimizer_called",
+    "quantum_snapshot_feature_computation_created",
+    "quantum_optimizer_input_created",
+    "quantum_trading_signal_created",
+    "quantum_advantage_claim_created",
+    "atomicrows_bridge_authority_created",
+    "atomicrows_full_materialization_authorized",
+    "atomicrows_bundle_consumed",
+    "atomicrows_bundle_created",
+    "atomicrows_bundle_edited",
+    "atomicrows_sha_created",
+    "atomicrows_row_records_created_count",
+    "atomicrows_4183_completion_claim_created",
+    "atomicrows_authority_created",
+    "quantum_ready_snapshot_contract",
+    "future_quantum_orderbook_state_encoding_ref",
+    "future_qaoa_qubo_liquidity_state_encoding_ref",
+    "future_quantum_kernel_event_state_regime_ref",
+    "future_quantum_annealing_depth_imbalance_ref",
+    "future_quantum_microstructure_graph_ref",
+    "future_quantum_amplitude_encoding_snapshot_ref",
+    "atomicrows_pre_bridge_compatibility_metadata_created",
+    "future_atomicrows_snapshot_feature_row_refs",
+    "future_atomicrows_orderbook_depth_feature_family_refs",
+    "future_atomicrows_event_state_feature_family_refs",
+    "future_atomicrows_market_data_feature_row_refs",
+    "future_atomicrows_quantum_snapshot_feature_family_refs",
+    "future_atomicrows_parameter_row_refs",
+    "future_atomicrows_family_refs",
+    "future_atomicrows_bridge_after_pr135_ref",
+    "future_atomicrows_bridge_recommended_after_repo_pr",
+    "future_atomicrows_bridge_candidate_repo_pr",
+    "integrity_receipt_id",
+    "snapshot_builder_binding_ref",
+    "orderbook_snapshot_refs",
+    "event_state_snapshot_refs",
+    "deterministic_sorting_verified",
+    "canonical_sequence_verified",
+    "bid_side_sorting_verified",
+    "ask_side_sorting_verified",
+    "event_state_sorting_verified",
+    "duplicate_synthetic_depth_level_id_count",
+    "duplicate_synthetic_event_state_id_count",
+    "duplicate_orderbook_snapshot_id_count",
+    "duplicate_event_state_snapshot_id_count",
+    "duplicate_canonical_sort_key_count",
+    "invalid_orderbook_side_count",
+    "invalid_event_lifecycle_state_count",
+    "missing_snapshot_input_lock_count",
+    "crossed_book_trading_evidence_created_count",
+    "cross_venue_scope_mismatch_count",
+    "live_market_payload_count",
+    "official_semantics_fabricated_count",
+    "runtime_resolver_snapshot_created_count",
+    "historical_dataset_digest_created_count",
+    "feature_vector_created_count",
+    "trading_signal_created_count",
+    "quantum_snapshot_feature_computation_created_count",
+    "quantum_optimizer_input_created_count",
+    "quantum_trading_signal_created_count",
+    "atomicrows_bundle_created_count",
+    "atomicrows_sha_created_count",
+    "atomicrows_4183_completion_claim_created_count",
+    "order_authority_count",
+    "order_execution_count"
+  ],
+  "title": "PR133 Snapshot Integrity Receipt",
+  "type": "object"
+}

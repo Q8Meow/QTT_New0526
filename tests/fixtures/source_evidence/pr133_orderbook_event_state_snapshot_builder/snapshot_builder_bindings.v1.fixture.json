@@ -1,0 +1,576 @@
+{
+  "execution": "DISABLED",
+  "fixture_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "fixture_id": "PR133_SNAPSHOT_BUILDER_BINDINGS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "snapshot_builder_bindings": [
+    {
+      "allowed_use": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY",
+      "atomicrows_4183_completion_claim_created": false,
+      "atomicrows_authority_created": false,
+      "atomicrows_bridge_authority_created": false,
+      "atomicrows_bundle_consumed": false,
+      "atomicrows_bundle_created": false,
+      "atomicrows_bundle_edited": false,
+      "atomicrows_full_materialization_authorized": false,
+      "atomicrows_pre_bridge_compatibility_metadata_created": true,
+      "atomicrows_row_records_created_count": 0,
+      "atomicrows_sha_created": false,
+      "authority_class": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY",
+      "binding_id": "PR133_KALSHI_SNAPSHOT_BUILDER_BINDING_V1",
+      "builder_name": "PR133_KALSHI_FIXTURE_SNAPSHOT_BUILDER",
+      "builder_scope": "FIXTURE_BACKED_CONTRACT_ONLY",
+      "builder_version": "v1",
+      "connector_semantic_dependency_refs": [
+        "PR124_CONNECTOR_SEMANTIC_BINDING_REF_METADATA_ONLY_KALSHI"
+      ],
+      "created_by": "CODEX_PR133_FIXTURE_OR_VALIDATOR",
+      "credential_provider_called": false,
+      "credential_readiness_handoff_ref": "PR131_CREDENTIAL_READINESS_DOWNSTREAM_HANDOFF_V1",
+      "disallowed_use": [
+        "LIVE_MARKET_DATA_FETCH",
+        "LIVE_WEBSOCKET_SUBSCRIBE",
+        "VENUE_API_CALL",
+        "PRODUCTION_CONNECTOR_CLIENT",
+        "LIVE_ORDERBOOK_SNAPSHOT_CREATE",
+        "LIVE_EVENT_STATE_SNAPSHOT_CREATE",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATE",
+        "HISTORICAL_DATASET_DIGEST_CREATE",
+        "MARKET_DATA_FEATURE_VECTOR_CREATE",
+        "TRADING_SIGNAL_CREATE",
+        "QUANTUM_SNAPSHOT_FEATURE_COMPUTE",
+        "QUANTUM_OPTIMIZER_INPUT_CREATE",
+        "QUANTUM_TRADING_SIGNAL_CREATE",
+        "ATOMICROWS_BUNDLE_CREATE",
+        "ATOMICROWS_ROW_RECORD_CREATE",
+        "ATOMICROWS_SHA_CREATE",
+        "ORDER_SUBMISSION",
+        "ORDER_CANCELLATION",
+        "ORDER_REDUCTION",
+        "ORDER_CLOSE"
+      ],
+      "event_state_canonical_sort_rules_ref": "PR133_EVENT_STATE_CANONICAL_SORT_RULES_POLICY",
+      "event_state_snapshot_refs": [
+        "PR133_KALSHI_EVENT_STATE_SNAPSHOT_V1"
+      ],
+      "future_atomicrows_bridge_after_pr135_ref": "FUTURE_ATOMICROWS_BRIDGE_AFTER_PR135_REF_METADATA_ONLY_KALSHI",
+      "future_atomicrows_bridge_candidate_repo_pr": "PR136",
+      "future_atomicrows_bridge_recommended_after_repo_pr": "PR135",
+      "future_atomicrows_bridge_requires_post_pr135_owner_authorization": true,
+      "future_atomicrows_bundle_sha_requires_explicit_owner_authorization": true,
+      "future_atomicrows_event_state_feature_family_refs": [
+        "FUTURE_ATOMICROWS_EVENT_STATE_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_family_refs": [
+        "FUTURE_ATOMICROWS_FAMILY_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_market_data_feature_row_refs": [
+        "FUTURE_ATOMICROWS_MARKET_DATA_FEATURE_ROW_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_orderbook_depth_feature_family_refs": [
+        "FUTURE_ATOMICROWS_ORDERBOOK_DEPTH_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_parameter_row_refs": [
+        "FUTURE_ATOMICROWS_PARAMETER_ROW_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_quantum_snapshot_feature_family_refs": [
+        "FUTURE_ATOMICROWS_QUANTUM_SNAPSHOT_FEATURE_FAMILY_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_atomicrows_snapshot_feature_row_refs": [
+        "FUTURE_ATOMICROWS_SNAPSHOT_FEATURE_ROW_REF_METADATA_ONLY_KALSHI"
+      ],
+      "future_historical_dataset_use_requires_pr135_authorization": true,
+      "future_live_use_requires_accepted_source_packet": true,
+      "future_live_use_requires_connector_semantic_binding": true,
+      "future_live_use_requires_credential_provider_receipt_if_credentials_needed": true,
+      "future_live_use_requires_fresh_revalidation_state": true,
+      "future_live_use_requires_owner_approval": true,
+      "future_qaoa_qubo_liquidity_state_encoding_ref": "FUTURE_QAOA_QUBO_LIQUIDITY_STATE_ENCODING_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_amplitude_encoding_snapshot_ref": "FUTURE_QUANTUM_AMPLITUDE_ENCODING_SNAPSHOT_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_annealing_depth_imbalance_ref": "FUTURE_QUANTUM_ANNEALING_DEPTH_IMBALANCE_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_kernel_event_state_regime_ref": "FUTURE_QUANTUM_KERNEL_EVENT_STATE_REGIME_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_microstructure_graph_ref": "FUTURE_QUANTUM_MICROSTRUCTURE_GRAPH_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_orderbook_state_encoding_ref": "FUTURE_QUANTUM_ORDERBOOK_STATE_ENCODING_REF_METADATA_ONLY_KALSHI",
+      "future_quantum_use_requires_owner_approval": true,
+      "future_quantum_use_requires_pr116_pr117_data_chain": true,
+      "future_quantum_use_requires_replay_paper_validation": true,
+      "future_runtime_resolver_use_requires_pr134_authorization": true,
+      "historical_dataset_digest_created": false,
+      "input_lock_refs": [
+        "PR133_KALSHI_SNAPSHOT_INPUT_LOCK_V1"
+      ],
+      "live_credential_resolution_performed": false,
+      "live_event_state_snapshot_created": false,
+      "live_market_data_fetch_created": false,
+      "live_orderbook_snapshot_created": false,
+      "market_data_feature_vector_created": false,
+      "market_data_ingest_handoff_ref": "PR132_MARKET_DATA_INGEST_DOWNSTREAM_HANDOFF_V1",
+      "network_io_created": false,
+      "neural_inference_created": false,
+      "neural_training_created": false,
+      "official_venue_semantics_fabricated": false,
+      "order_authority_created": false,
+      "order_execution_created": false,
+      "orderbook_canonical_sort_rules_ref": "PR133_ORDERBOOK_CANONICAL_SORT_RULES_POLICY",
+      "orderbook_snapshot_refs": [
+        "PR133_KALSHI_ORDERBOOK_SNAPSHOT_V1"
+      ],
+      "paper_result_created": false,
+      "private_state_fetch_created": false,
+      "production_connector_authority_created": false,
+      "profit_evidence_created": false,
+      "quantum_advantage_claim_created": false,
+      "quantum_backend_called": false,
+      "quantum_execution_created": false,
+      "quantum_optimizer_called": false,
+      "quantum_optimizer_input_created": false,
+      "quantum_ready_snapshot_contract": true,
+      "quantum_simulator_called": false,
+      "quantum_snapshot_feature_computation_created": false,
+      "quantum_trading_signal_created": false,
+      "raw_secret_capture_created": false,
+      "record_type": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING",
+      "replay_result_created": false,
+      "rest_client_created": false,
+      "runtime_cash_authority_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1",
+      "scoring_ranking_arbitration_output_created": false,
+      "source_acceptance_created": false,
+      "source_dependency_refs": [
+        "PR132_KALSHI_ORDERBOOK_INPUT_METADATA_ENVELOPE_FOR_PR115_ONLY_SOURCE_DEPENDENCY_V1"
+      ],
+      "source_retrieval_created": false,
+      "trading_signal_created": false,
+      "venue_api_call_created": false,
+      "venue_id": "KALSHI",
+      "websocket_client_created": false
+    },
+    {
+      "allowed_use": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY",
+      "atomicrows_4183_completion_claim_created": false,
+      "atomicrows_authority_created": false,
+      "atomicrows_bridge_authority_created": false,
+      "atomicrows_bundle_consumed": false,
+      "atomicrows_bundle_created": false,
+      "atomicrows_bundle_edited": false,
+      "atomicrows_full_materialization_authorized": false,
+      "atomicrows_pre_bridge_compatibility_metadata_created": true,
+      "atomicrows_row_records_created_count": 0,
+      "atomicrows_sha_created": false,
+      "authority_class": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY",
+      "binding_id": "PR133_POLYMARKET_SNAPSHOT_BUILDER_BINDING_V1",
+      "builder_name": "PR133_POLYMARKET_FIXTURE_SNAPSHOT_BUILDER",
+      "builder_scope": "FIXTURE_BACKED_CONTRACT_ONLY",
+      "builder_version": "v1",
+      "connector_semantic_dependency_refs": [
+        "PR124_CONNECTOR_SEMANTIC_BINDING_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "created_by": "CODEX_PR133_FIXTURE_OR_VALIDATOR",
+      "credential_provider_called": false,
+      "credential_readiness_handoff_ref": "PR131_CREDENTIAL_READINESS_DOWNSTREAM_HANDOFF_V1",
+      "disallowed_use": [
+        "LIVE_MARKET_DATA_FETCH",
+        "LIVE_WEBSOCKET_SUBSCRIBE",
+        "VENUE_API_CALL",
+        "PRODUCTION_CONNECTOR_CLIENT",
+        "LIVE_ORDERBOOK_SNAPSHOT_CREATE",
+        "LIVE_EVENT_STATE_SNAPSHOT_CREATE",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATE",
+        "HISTORICAL_DATASET_DIGEST_CREATE",
+        "MARKET_DATA_FEATURE_VECTOR_CREATE",
+        "TRADING_SIGNAL_CREATE",
+        "QUANTUM_SNAPSHOT_FEATURE_COMPUTE",
+        "QUANTUM_OPTIMIZER_INPUT_CREATE",
+        "QUANTUM_TRADING_SIGNAL_CREATE",
+        "ATOMICROWS_BUNDLE_CREATE",
+        "ATOMICROWS_ROW_RECORD_CREATE",
+        "ATOMICROWS_SHA_CREATE",
+        "ORDER_SUBMISSION",
+        "ORDER_CANCELLATION",
+        "ORDER_REDUCTION",
+        "ORDER_CLOSE"
+      ],
+      "event_state_canonical_sort_rules_ref": "PR133_EVENT_STATE_CANONICAL_SORT_RULES_POLICY",
+      "event_state_snapshot_refs": [
+        "PR133_POLYMARKET_EVENT_STATE_SNAPSHOT_V1"
+      ],
+      "future_atomicrows_bridge_after_pr135_ref": "FUTURE_ATOMICROWS_BRIDGE_AFTER_PR135_REF_METADATA_ONLY_POLYMARKET",
+      "future_atomicrows_bridge_candidate_repo_pr": "PR136",
+      "future_atomicrows_bridge_recommended_after_repo_pr": "PR135",
+      "future_atomicrows_bridge_requires_post_pr135_owner_authorization": true,
+      "future_atomicrows_bundle_sha_requires_explicit_owner_authorization": true,
+      "future_atomicrows_event_state_feature_family_refs": [
+        "FUTURE_ATOMICROWS_EVENT_STATE_FEATURE_FAMILY_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_family_refs": [
+        "FUTURE_ATOMICROWS_FAMILY_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_market_data_feature_row_refs": [
+        "FUTURE_ATOMICROWS_MARKET_DATA_FEATURE_ROW_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_orderbook_depth_feature_family_refs": [
+        "FUTURE_ATOMICROWS_ORDERBOOK_DEPTH_FEATURE_FAMILY_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_parameter_row_refs": [
+        "FUTURE_ATOMICROWS_PARAMETER_ROW_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_quantum_snapshot_feature_family_refs": [
+        "FUTURE_ATOMICROWS_QUANTUM_SNAPSHOT_FEATURE_FAMILY_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_atomicrows_snapshot_feature_row_refs": [
+        "FUTURE_ATOMICROWS_SNAPSHOT_FEATURE_ROW_REF_METADATA_ONLY_POLYMARKET"
+      ],
+      "future_historical_dataset_use_requires_pr135_authorization": true,
+      "future_live_use_requires_accepted_source_packet": true,
+      "future_live_use_requires_connector_semantic_binding": true,
+      "future_live_use_requires_credential_provider_receipt_if_credentials_needed": true,
+      "future_live_use_requires_fresh_revalidation_state": true,
+      "future_live_use_requires_owner_approval": true,
+      "future_qaoa_qubo_liquidity_state_encoding_ref": "FUTURE_QAOA_QUBO_LIQUIDITY_STATE_ENCODING_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_amplitude_encoding_snapshot_ref": "FUTURE_QUANTUM_AMPLITUDE_ENCODING_SNAPSHOT_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_annealing_depth_imbalance_ref": "FUTURE_QUANTUM_ANNEALING_DEPTH_IMBALANCE_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_kernel_event_state_regime_ref": "FUTURE_QUANTUM_KERNEL_EVENT_STATE_REGIME_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_microstructure_graph_ref": "FUTURE_QUANTUM_MICROSTRUCTURE_GRAPH_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_orderbook_state_encoding_ref": "FUTURE_QUANTUM_ORDERBOOK_STATE_ENCODING_REF_METADATA_ONLY_POLYMARKET",
+      "future_quantum_use_requires_owner_approval": true,
+      "future_quantum_use_requires_pr116_pr117_data_chain": true,
+      "future_quantum_use_requires_replay_paper_validation": true,
+      "future_runtime_resolver_use_requires_pr134_authorization": true,
+      "historical_dataset_digest_created": false,
+      "input_lock_refs": [
+        "PR133_POLYMARKET_SNAPSHOT_INPUT_LOCK_V1"
+      ],
+      "live_credential_resolution_performed": false,
+      "live_event_state_snapshot_created": false,
+      "live_market_data_fetch_created": false,
+      "live_orderbook_snapshot_created": false,
+      "market_data_feature_vector_created": false,
+      "market_data_ingest_handoff_ref": "PR132_MARKET_DATA_INGEST_DOWNSTREAM_HANDOFF_V1",
+      "network_io_created": false,
+      "neural_inference_created": false,
+      "neural_training_created": false,
+      "official_venue_semantics_fabricated": false,
+      "order_authority_created": false,
+      "order_execution_created": false,
+      "orderbook_canonical_sort_rules_ref": "PR133_ORDERBOOK_CANONICAL_SORT_RULES_POLICY",
+      "orderbook_snapshot_refs": [
+        "PR133_POLYMARKET_ORDERBOOK_SNAPSHOT_V1"
+      ],
+      "paper_result_created": false,
+      "private_state_fetch_created": false,
+      "production_connector_authority_created": false,
+      "profit_evidence_created": false,
+      "quantum_advantage_claim_created": false,
+      "quantum_backend_called": false,
+      "quantum_execution_created": false,
+      "quantum_optimizer_called": false,
+      "quantum_optimizer_input_created": false,
+      "quantum_ready_snapshot_contract": true,
+      "quantum_simulator_called": false,
+      "quantum_snapshot_feature_computation_created": false,
+      "quantum_trading_signal_created": false,
+      "raw_secret_capture_created": false,
+      "record_type": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING",
+      "replay_result_created": false,
+      "rest_client_created": false,
+      "runtime_cash_authority_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1",
+      "scoring_ranking_arbitration_output_created": false,
+      "source_acceptance_created": false,
+      "source_dependency_refs": [
+        "PR132_POLYMARKET_ORDERBOOK_INPUT_METADATA_ENVELOPE_FOR_PR115_ONLY_SOURCE_DEPENDENCY_V1"
+      ],
+      "source_retrieval_created": false,
+      "trading_signal_created": false,
+      "venue_api_call_created": false,
+      "venue_id": "POLYMARKET",
+      "websocket_client_created": false
+    },
+    {
+      "allowed_use": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY",
+      "atomicrows_4183_completion_claim_created": false,
+      "atomicrows_authority_created": false,
+      "atomicrows_bridge_authority_created": false,
+      "atomicrows_bundle_consumed": false,
+      "atomicrows_bundle_created": false,
+      "atomicrows_bundle_edited": false,
+      "atomicrows_full_materialization_authorized": false,
+      "atomicrows_pre_bridge_compatibility_metadata_created": true,
+      "atomicrows_row_records_created_count": 0,
+      "atomicrows_sha_created": false,
+      "authority_class": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY",
+      "binding_id": "PR133_FORECASTEX_IBKR_SNAPSHOT_BUILDER_BINDING_V1",
+      "builder_name": "PR133_FORECASTEX_IBKR_FIXTURE_SNAPSHOT_BUILDER",
+      "builder_scope": "FIXTURE_BACKED_CONTRACT_ONLY",
+      "builder_version": "v1",
+      "connector_semantic_dependency_refs": [
+        "PR124_CONNECTOR_SEMANTIC_BINDING_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "created_by": "CODEX_PR133_FIXTURE_OR_VALIDATOR",
+      "credential_provider_called": false,
+      "credential_readiness_handoff_ref": "PR131_CREDENTIAL_READINESS_DOWNSTREAM_HANDOFF_V1",
+      "disallowed_use": [
+        "LIVE_MARKET_DATA_FETCH",
+        "LIVE_WEBSOCKET_SUBSCRIBE",
+        "VENUE_API_CALL",
+        "PRODUCTION_CONNECTOR_CLIENT",
+        "LIVE_ORDERBOOK_SNAPSHOT_CREATE",
+        "LIVE_EVENT_STATE_SNAPSHOT_CREATE",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATE",
+        "HISTORICAL_DATASET_DIGEST_CREATE",
+        "MARKET_DATA_FEATURE_VECTOR_CREATE",
+        "TRADING_SIGNAL_CREATE",
+        "QUANTUM_SNAPSHOT_FEATURE_COMPUTE",
+        "QUANTUM_OPTIMIZER_INPUT_CREATE",
+        "QUANTUM_TRADING_SIGNAL_CREATE",
+        "ATOMICROWS_BUNDLE_CREATE",
+        "ATOMICROWS_ROW_RECORD_CREATE",
+        "ATOMICROWS_SHA_CREATE",
+        "ORDER_SUBMISSION",
+        "ORDER_CANCELLATION",
+        "ORDER_REDUCTION",
+        "ORDER_CLOSE"
+      ],
+      "event_state_canonical_sort_rules_ref": "PR133_EVENT_STATE_CANONICAL_SORT_RULES_POLICY",
+      "event_state_snapshot_refs": [
+        "PR133_FORECASTEX_IBKR_EVENT_STATE_SNAPSHOT_V1"
+      ],
+      "future_atomicrows_bridge_after_pr135_ref": "FUTURE_ATOMICROWS_BRIDGE_AFTER_PR135_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_atomicrows_bridge_candidate_repo_pr": "PR136",
+      "future_atomicrows_bridge_recommended_after_repo_pr": "PR135",
+      "future_atomicrows_bridge_requires_post_pr135_owner_authorization": true,
+      "future_atomicrows_bundle_sha_requires_explicit_owner_authorization": true,
+      "future_atomicrows_event_state_feature_family_refs": [
+        "FUTURE_ATOMICROWS_EVENT_STATE_FEATURE_FAMILY_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_family_refs": [
+        "FUTURE_ATOMICROWS_FAMILY_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_market_data_feature_row_refs": [
+        "FUTURE_ATOMICROWS_MARKET_DATA_FEATURE_ROW_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_orderbook_depth_feature_family_refs": [
+        "FUTURE_ATOMICROWS_ORDERBOOK_DEPTH_FEATURE_FAMILY_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_parameter_row_refs": [
+        "FUTURE_ATOMICROWS_PARAMETER_ROW_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_quantum_snapshot_feature_family_refs": [
+        "FUTURE_ATOMICROWS_QUANTUM_SNAPSHOT_FEATURE_FAMILY_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_atomicrows_snapshot_feature_row_refs": [
+        "FUTURE_ATOMICROWS_SNAPSHOT_FEATURE_ROW_REF_METADATA_ONLY_FORECASTEX_IBKR"
+      ],
+      "future_historical_dataset_use_requires_pr135_authorization": true,
+      "future_live_use_requires_accepted_source_packet": true,
+      "future_live_use_requires_connector_semantic_binding": true,
+      "future_live_use_requires_credential_provider_receipt_if_credentials_needed": true,
+      "future_live_use_requires_fresh_revalidation_state": true,
+      "future_live_use_requires_owner_approval": true,
+      "future_qaoa_qubo_liquidity_state_encoding_ref": "FUTURE_QAOA_QUBO_LIQUIDITY_STATE_ENCODING_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_amplitude_encoding_snapshot_ref": "FUTURE_QUANTUM_AMPLITUDE_ENCODING_SNAPSHOT_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_annealing_depth_imbalance_ref": "FUTURE_QUANTUM_ANNEALING_DEPTH_IMBALANCE_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_kernel_event_state_regime_ref": "FUTURE_QUANTUM_KERNEL_EVENT_STATE_REGIME_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_microstructure_graph_ref": "FUTURE_QUANTUM_MICROSTRUCTURE_GRAPH_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_orderbook_state_encoding_ref": "FUTURE_QUANTUM_ORDERBOOK_STATE_ENCODING_REF_METADATA_ONLY_FORECASTEX_IBKR",
+      "future_quantum_use_requires_owner_approval": true,
+      "future_quantum_use_requires_pr116_pr117_data_chain": true,
+      "future_quantum_use_requires_replay_paper_validation": true,
+      "future_runtime_resolver_use_requires_pr134_authorization": true,
+      "historical_dataset_digest_created": false,
+      "input_lock_refs": [
+        "PR133_FORECASTEX_IBKR_SNAPSHOT_INPUT_LOCK_V1"
+      ],
+      "live_credential_resolution_performed": false,
+      "live_event_state_snapshot_created": false,
+      "live_market_data_fetch_created": false,
+      "live_orderbook_snapshot_created": false,
+      "market_data_feature_vector_created": false,
+      "market_data_ingest_handoff_ref": "PR132_MARKET_DATA_INGEST_DOWNSTREAM_HANDOFF_V1",
+      "network_io_created": false,
+      "neural_inference_created": false,
+      "neural_training_created": false,
+      "official_venue_semantics_fabricated": false,
+      "order_authority_created": false,
+      "order_execution_created": false,
+      "orderbook_canonical_sort_rules_ref": "PR133_ORDERBOOK_CANONICAL_SORT_RULES_POLICY",
+      "orderbook_snapshot_refs": [
+        "PR133_FORECASTEX_IBKR_ORDERBOOK_SNAPSHOT_V1"
+      ],
+      "paper_result_created": false,
+      "private_state_fetch_created": false,
+      "production_connector_authority_created": false,
+      "profit_evidence_created": false,
+      "quantum_advantage_claim_created": false,
+      "quantum_backend_called": false,
+      "quantum_execution_created": false,
+      "quantum_optimizer_called": false,
+      "quantum_optimizer_input_created": false,
+      "quantum_ready_snapshot_contract": true,
+      "quantum_simulator_called": false,
+      "quantum_snapshot_feature_computation_created": false,
+      "quantum_trading_signal_created": false,
+      "raw_secret_capture_created": false,
+      "record_type": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING",
+      "replay_result_created": false,
+      "rest_client_created": false,
+      "runtime_cash_authority_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1",
+      "scoring_ranking_arbitration_output_created": false,
+      "source_acceptance_created": false,
+      "source_dependency_refs": [
+        "PR132_FORECASTEX_IBKR_ORDERBOOK_INPUT_METADATA_ENVELOPE_FOR_PR115_ONLY_SOURCE_DEPENDENCY_V1"
+      ],
+      "source_retrieval_created": false,
+      "trading_signal_created": false,
+      "venue_api_call_created": false,
+      "venue_id": "FORECASTEX_IBKR",
+      "websocket_client_created": false
+    },
+    {
+      "allowed_use": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY",
+      "atomicrows_4183_completion_claim_created": false,
+      "atomicrows_authority_created": false,
+      "atomicrows_bridge_authority_created": false,
+      "atomicrows_bundle_consumed": false,
+      "atomicrows_bundle_created": false,
+      "atomicrows_bundle_edited": false,
+      "atomicrows_full_materialization_authorized": false,
+      "atomicrows_pre_bridge_compatibility_metadata_created": true,
+      "atomicrows_row_records_created_count": 0,
+      "atomicrows_sha_created": false,
+      "authority_class": "FIXTURE_BACKED_ORDERBOOK_EVENT_STATE_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_OR_RUNTIME_AUTHORITY",
+      "binding_id": "PR133_PREDICTION_MARKETS_GENERAL_SNAPSHOT_BUILDER_BINDING_V1",
+      "builder_name": "PR133_PREDICTION_MARKETS_GENERAL_FIXTURE_SNAPSHOT_BUILDER",
+      "builder_scope": "FIXTURE_BACKED_CONTRACT_ONLY",
+      "builder_version": "v1",
+      "connector_semantic_dependency_refs": [
+        "PR124_CONNECTOR_SEMANTIC_BINDING_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "created_by": "CODEX_PR133_FIXTURE_OR_VALIDATOR",
+      "credential_provider_called": false,
+      "credential_readiness_handoff_ref": "PR131_CREDENTIAL_READINESS_DOWNSTREAM_HANDOFF_V1",
+      "disallowed_use": [
+        "LIVE_MARKET_DATA_FETCH",
+        "LIVE_WEBSOCKET_SUBSCRIBE",
+        "VENUE_API_CALL",
+        "PRODUCTION_CONNECTOR_CLIENT",
+        "LIVE_ORDERBOOK_SNAPSHOT_CREATE",
+        "LIVE_EVENT_STATE_SNAPSHOT_CREATE",
+        "RUNTIME_RESOLVER_SNAPSHOT_CREATE",
+        "HISTORICAL_DATASET_DIGEST_CREATE",
+        "MARKET_DATA_FEATURE_VECTOR_CREATE",
+        "TRADING_SIGNAL_CREATE",
+        "QUANTUM_SNAPSHOT_FEATURE_COMPUTE",
+        "QUANTUM_OPTIMIZER_INPUT_CREATE",
+        "QUANTUM_TRADING_SIGNAL_CREATE",
+        "ATOMICROWS_BUNDLE_CREATE",
+        "ATOMICROWS_ROW_RECORD_CREATE",
+        "ATOMICROWS_SHA_CREATE",
+        "ORDER_SUBMISSION",
+        "ORDER_CANCELLATION",
+        "ORDER_REDUCTION",
+        "ORDER_CLOSE"
+      ],
+      "event_state_canonical_sort_rules_ref": "PR133_EVENT_STATE_CANONICAL_SORT_RULES_POLICY",
+      "event_state_snapshot_refs": [
+        "PR133_PREDICTION_MARKETS_GENERAL_EVENT_STATE_SNAPSHOT_V1"
+      ],
+      "future_atomicrows_bridge_after_pr135_ref": "FUTURE_ATOMICROWS_BRIDGE_AFTER_PR135_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_atomicrows_bridge_candidate_repo_pr": "PR136",
+      "future_atomicrows_bridge_recommended_after_repo_pr": "PR135",
+      "future_atomicrows_bridge_requires_post_pr135_owner_authorization": true,
+      "future_atomicrows_bundle_sha_requires_explicit_owner_authorization": true,
+      "future_atomicrows_event_state_feature_family_refs": [
+        "FUTURE_ATOMICROWS_EVENT_STATE_FEATURE_FAMILY_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_family_refs": [
+        "FUTURE_ATOMICROWS_FAMILY_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_market_data_feature_row_refs": [
+        "FUTURE_ATOMICROWS_MARKET_DATA_FEATURE_ROW_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_orderbook_depth_feature_family_refs": [
+        "FUTURE_ATOMICROWS_ORDERBOOK_DEPTH_FEATURE_FAMILY_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_parameter_row_refs": [
+        "FUTURE_ATOMICROWS_PARAMETER_ROW_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_quantum_snapshot_feature_family_refs": [
+        "FUTURE_ATOMICROWS_QUANTUM_SNAPSHOT_FEATURE_FAMILY_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_atomicrows_snapshot_feature_row_refs": [
+        "FUTURE_ATOMICROWS_SNAPSHOT_FEATURE_ROW_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL"
+      ],
+      "future_historical_dataset_use_requires_pr135_authorization": true,
+      "future_live_use_requires_accepted_source_packet": true,
+      "future_live_use_requires_connector_semantic_binding": true,
+      "future_live_use_requires_credential_provider_receipt_if_credentials_needed": true,
+      "future_live_use_requires_fresh_revalidation_state": true,
+      "future_live_use_requires_owner_approval": true,
+      "future_qaoa_qubo_liquidity_state_encoding_ref": "FUTURE_QAOA_QUBO_LIQUIDITY_STATE_ENCODING_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_amplitude_encoding_snapshot_ref": "FUTURE_QUANTUM_AMPLITUDE_ENCODING_SNAPSHOT_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_annealing_depth_imbalance_ref": "FUTURE_QUANTUM_ANNEALING_DEPTH_IMBALANCE_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_kernel_event_state_regime_ref": "FUTURE_QUANTUM_KERNEL_EVENT_STATE_REGIME_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_microstructure_graph_ref": "FUTURE_QUANTUM_MICROSTRUCTURE_GRAPH_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_orderbook_state_encoding_ref": "FUTURE_QUANTUM_ORDERBOOK_STATE_ENCODING_REF_METADATA_ONLY_PREDICTION_MARKETS_GENERAL",
+      "future_quantum_use_requires_owner_approval": true,
+      "future_quantum_use_requires_pr116_pr117_data_chain": true,
+      "future_quantum_use_requires_replay_paper_validation": true,
+      "future_runtime_resolver_use_requires_pr134_authorization": true,
+      "historical_dataset_digest_created": false,
+      "input_lock_refs": [
+        "PR133_PREDICTION_MARKETS_GENERAL_SNAPSHOT_INPUT_LOCK_V1"
+      ],
+      "live_credential_resolution_performed": false,
+      "live_event_state_snapshot_created": false,
+      "live_market_data_fetch_created": false,
+      "live_orderbook_snapshot_created": false,
+      "market_data_feature_vector_created": false,
+      "market_data_ingest_handoff_ref": "PR132_MARKET_DATA_INGEST_DOWNSTREAM_HANDOFF_V1",
+      "network_io_created": false,
+      "neural_inference_created": false,
+      "neural_training_created": false,
+      "official_venue_semantics_fabricated": false,
+      "order_authority_created": false,
+      "order_execution_created": false,
+      "orderbook_canonical_sort_rules_ref": "PR133_ORDERBOOK_CANONICAL_SORT_RULES_POLICY",
+      "orderbook_snapshot_refs": [
+        "PR133_PREDICTION_MARKETS_GENERAL_ORDERBOOK_SNAPSHOT_V1"
+      ],
+      "paper_result_created": false,
+      "private_state_fetch_created": false,
+      "production_connector_authority_created": false,
+      "profit_evidence_created": false,
+      "quantum_advantage_claim_created": false,
+      "quantum_backend_called": false,
+      "quantum_execution_created": false,
+      "quantum_optimizer_called": false,
+      "quantum_optimizer_input_created": false,
+      "quantum_ready_snapshot_contract": true,
+      "quantum_simulator_called": false,
+      "quantum_snapshot_feature_computation_created": false,
+      "quantum_trading_signal_created": false,
+      "raw_secret_capture_created": false,
+      "record_type": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING",
+      "replay_result_created": false,
+      "rest_client_created": false,
+      "runtime_cash_authority_created": false,
+      "runtime_resolver_snapshot_created": false,
+      "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1",
+      "scope_id": "PREDICTION_MARKETS_GENERAL",
+      "scoring_ranking_arbitration_output_created": false,
+      "source_acceptance_created": false,
+      "source_dependency_refs": [
+        "PR132_PREDICTION_MARKETS_GENERAL_ORDERBOOK_INPUT_METADATA_ENVELOPE_FOR_PR115_ONLY_SOURCE_DEPENDENCY_V1"
+      ],
+      "source_retrieval_created": false,
+      "trading_signal_created": false,
+      "venue_api_call_created": false,
+      "websocket_client_created": false
+    }
+  ]
+}

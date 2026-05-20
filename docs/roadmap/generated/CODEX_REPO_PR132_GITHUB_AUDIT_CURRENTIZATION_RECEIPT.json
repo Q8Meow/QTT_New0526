@@ -1,0 +1,20 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR132",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr132-venue-market-data-ingest-adapters",
+  "github_pr_mergeCommit_oid": "56e02c41f7b95f1a48071184feee1df966baa8d0",
+  "github_pr_mergedAt": "2026-05-20T21:06:12Z",
+  "github_pr_number": 132,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR132 implement venue market-data ingest adapter contracts",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/132",
+  "identity_doctrine_preserved": true,
+  "next_implementation_scope": "ROADMAP_PR115_ORDERBOOK_AND_EVENT_STATE_SNAPSHOT_BUILDER_CONTRACTS",
+  "next_owner_authorized_roadmap_pr": "PR115",
+  "next_repo_pr_label": "PR133",
+  "owner_authorized_next_capability": "VENUE_MARKET_DATA_INGEST_ADAPTER_CONTRACTS",
+  "owner_authorized_roadmap_pr": "PR114",
+  "repo_pr_label": "PR133",
+  "same_number_inference_used": false
+}
