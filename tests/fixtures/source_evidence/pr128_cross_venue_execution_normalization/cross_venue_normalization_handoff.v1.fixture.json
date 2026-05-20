@@ -1,0 +1,14 @@
+{
+  "cross_venue_normalization_handoff_id": "PR127_CROSS_VENUE_NORMALIZATION_HANDOFF_FIXTURE_V1",
+  "execution": "DISABLED",
+  "fixture_id": "PR128_PR127_CROSS_VENUE_NORMALIZATION_HANDOFF_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "production_arbitrage_comparability_authority": false,
+  "production_cross_venue_normalization_authority": false,
+  "source_repo_pr_label": "PR127",
+  "venue_ids_in_scope": [
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ]
+}

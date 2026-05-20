@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-source-evidence-cross-venue-execution-normalization-validation-receipt-v1",
+  "title": "Cross-Venue Execution Normalization Validation Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "cross_venue_normalization_validation_receipt_id",
+    "fixture_authority_class",
+    "normalization_validation_state",
+    "normalization_state",
+    "decision_reason_code",
+    "venue_ids_in_scope",
+    "production_cross_venue_normalization_authority",
+    "production_arbitrage_comparability_authority",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_cross_venue_normalization_authority": { "const": false },
+    "production_arbitrage_comparability_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

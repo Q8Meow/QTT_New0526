@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-source-evidence-cross-venue-execution-normalization-taxonomy-v1",
+  "title": "Cross-Venue Execution Normalization Taxonomy",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "cross_venue_execution_normalization_taxonomy_id",
+    "fixture_authority_class",
+    "taxonomy_authority_class",
+    "production_cross_venue_normalization_authority",
+    "production_arbitrage_comparability_authority",
+    "venue_ids_in_scope",
+    "shared_scope_metadata_ids",
+    "execution_phase_taxonomy",
+    "execution_transition_taxonomy",
+    "fill_integrity_taxonomy",
+    "cashflow_pnl_taxonomy",
+    "latency_component_taxonomy",
+    "settlement_finality_taxonomy",
+    "reconciliation_taxonomy",
+    "order_state_taxonomy",
+    "cancellation_state_taxonomy",
+    "partial_fill_state_taxonomy",
+    "rejection_error_taxonomy",
+    "normalization_state",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "taxonomy_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_cross_venue_normalization_authority": { "const": false },
+    "production_arbitrage_comparability_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

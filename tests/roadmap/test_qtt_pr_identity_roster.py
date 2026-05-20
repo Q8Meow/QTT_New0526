@@ -28,6 +28,9 @@ PR125_AUDIT_RECEIPT_PATH = Path(
 PR126_AUDIT_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_REPO_PR126_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
 )
+PR127_AUDIT_RECEIPT_PATH = Path(
+    "docs/roadmap/generated/CODEX_REPO_PR127_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json"
+)
 PR123_OWNER_AUTH_RECEIPT_PATH = Path(
     "docs/roadmap/generated/CODEX_PR123_OWNER_AUTHORIZED_PR106_IMPLEMENTATION_RECEIPT.json"
 )
@@ -504,6 +507,72 @@ def test_roadmap_and_controller_files_are_state_evidence_not_veto_for_pr127():
     assert receipt["implementation_scope"] == (
         "ROADMAP_PR109_PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER"
     )
+
+
+def test_pr127_github_audit_currentization_is_recorded_and_audit_only():
+    pr127 = _entry("PR127_REPO_CANONICAL_SELF_ENTRY")
+    receipt = json.loads(PR127_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert pr127["repo_canonical_pr_label"] == "PR127"
+    assert pr127["github_pr_number"] == 127
+    assert pr127["github_title"] == "PR127 implement per-venue execution lifecycle model builder"
+    assert pr127["github_pr_state"] == "MERGED"
+    assert pr127["github_pr_mergedAt"] == "2026-05-19T23:11:19Z"
+    assert pr127["github_pr_mergeCommit_oid"] == (
+        "84848c0bbe2fb17ca02b76acd6cca45150ac59f9"
+    )
+    assert pr127["roadmap_pr_label"] is None
+    assert pr127["blueprint_pr_label"] is None
+    assert pr127["identity_relation_class"] == "REPO_CANONICAL_ONLY"
+    assert pr127["same_number_mismatch_recorded"] is True
+
+    assert receipt["repo_pr_label"] == "PR128"
+    assert receipt["currentized_prior_repo_pr_label"] == "PR127"
+    assert receipt["github_pr_number"] == 127
+    assert receipt["github_pr_title"] == pr127["github_title"]
+    assert receipt["github_pr_state"] == "MERGED"
+    assert receipt["github_pr_mergedAt"] == "2026-05-19T23:11:19Z"
+    assert receipt["github_pr_mergeCommit_oid"] == (
+        "84848c0bbe2fb17ca02b76acd6cca45150ac59f9"
+    )
+    assert receipt["github_headRefName"] == (
+        "pr127-per-venue-execution-lifecycle-model-builder"
+    )
+    assert receipt["github_baseRefName"] == "main"
+    assert receipt["github_url"] == "https://github.com/Q8Meow/QTT_New0526/pull/127"
+    assert receipt["same_number_inference_used"] is False
+
+
+def test_repo_pr128_does_not_imply_roadmap_pr128_and_owner_authorized_pr110():
+    receipt = json.loads(PR127_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert not any(
+        entry["repo_canonical_pr_label"] == "PR128"
+        and entry["roadmap_pr_label"] == "PR #128"
+        for entry in _entries()
+    )
+    assert receipt["repo_pr_label"] == "PR128"
+    assert receipt["owner_authorized_roadmap_pr"] == "PR110"
+    assert (
+        receipt["owner_authorized_next_capability"]
+        == "CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING"
+    )
+    assert receipt["implementation_scope"] == (
+        "ROADMAP_PR110_CROSS_VENUE_EXECUTION_NORMALIZATION_BINDING"
+    )
+    assert receipt["identity_doctrine_preserved"] is True
+    assert receipt["controller_used_as_record_not_veto"] is True
+
+
+def test_roadmap_and_controller_files_are_state_evidence_not_veto_for_pr128():
+    roster = _roster()
+    receipt = json.loads(PR127_AUDIT_RECEIPT_PATH.read_text(encoding="utf-8"))
+
+    assert roster["mismatch_summary"][
+        "roadmap_controller_files_used_as_state_evidence_not_veto"
+    ] is True
+    assert receipt["controller_used_as_record_not_veto"] is True
+    assert receipt["owner_authorized_roadmap_pr"] == "PR110"
 
 
 def test_pr105_is_not_inferred_from_github_105_or_repo_pr122():

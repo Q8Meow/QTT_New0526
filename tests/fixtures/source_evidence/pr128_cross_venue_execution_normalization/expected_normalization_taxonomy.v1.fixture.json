@@ -1,0 +1,22 @@
+{
+  "execution": "DISABLED",
+  "fixture_id": "PR128_EXPECTED_NORMALIZATION_TAXONOMY_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "normalization_dimensions": [
+    "execution_phase_taxonomy",
+    "execution_transition_taxonomy",
+    "fill_integrity_taxonomy",
+    "cashflow_pnl_taxonomy",
+    "latency_component_taxonomy",
+    "settlement_finality_taxonomy",
+    "reconciliation_taxonomy",
+    "order_state_taxonomy",
+    "cancellation_state_taxonomy",
+    "partial_fill_state_taxonomy",
+    "rejection_error_taxonomy"
+  ],
+  "production_arbitrage_comparability_authority": false,
+  "production_cross_venue_normalization_authority": false,
+  "taxonomy_authority_class": "TEST_FIXTURE_NOT_EXTERNAL_FACT",
+  "taxonomy_id": "PR128_CROSS_VENUE_EXECUTION_NORMALIZATION_TAXONOMY_FIXTURE_V1"
+}

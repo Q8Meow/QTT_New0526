@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-source-evidence-cross-venue-execution-downstream-handoff-v1",
+  "title": "Cross-Venue Execution Downstream Handoff",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "cross_venue_execution_downstream_handoff_id",
+    "fixture_authority_class",
+    "source_repo_pr_label",
+    "venue_ids_in_scope",
+    "normalized_phase_binding_ids",
+    "normalized_transition_binding_ids",
+    "placeholder_normalization_record_ids",
+    "arbitrage_comparability_precondition_ids",
+    "future_runtime_cash_component_field_map_pr",
+    "future_private_state_read_receipt_pr",
+    "future_credential_alias_secret_no_capture_pr",
+    "future_market_data_ingest_pr",
+    "future_orderbook_event_snapshot_pr",
+    "future_runtime_resolver_snapshot_pr",
+    "production_downstream_authority",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "source_repo_pr_label": { "const": "PR128" },
+    "production_downstream_authority": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "execution": "DISABLED",
+  "fixture_id": "PR128_EXPECTED_TRANSITION_BINDINGS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "production_cross_venue_normalization_authority_count": 0,
+  "stage1_venue_count": 3,
+  "transition_binding_count": 24
+}

@@ -1,0 +1,8 @@
+{
+  "apparent_price_gap_arbitrage_claim_allowed": false,
+  "arbitrage_precondition_count": 3,
+  "execution": "DISABLED",
+  "fixture_id": "PR128_EXPECTED_ARBITRAGE_COMPARABILITY_PRECONDITIONS_FIXTURE_V1",
+  "mode": "SOURCE_REQUIRED",
+  "production_arbitrage_comparability_authority_count": 0
+}

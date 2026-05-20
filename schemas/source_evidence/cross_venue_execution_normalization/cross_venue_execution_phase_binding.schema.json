@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-source-evidence-cross-venue-execution-phase-binding-v1",
+  "title": "Cross-Venue Execution Phase Binding",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "cross_venue_phase_binding_id",
+    "fixture_authority_class",
+    "taxonomy_authority_class",
+    "production_cross_venue_normalization_authority",
+    "venue_id",
+    "per_venue_execution_lifecycle_model_id",
+    "source_execution_phase_id",
+    "normalized_execution_phase_family",
+    "normalization_dimension",
+    "accepted_source_evidence_required_flag",
+    "production_value_populated",
+    "phase_binding_state",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "taxonomy_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "production_cross_venue_normalization_authority": { "const": false },
+    "normalization_dimension": { "const": "execution_phase_taxonomy" },
+    "production_value_populated": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}

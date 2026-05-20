@@ -207,6 +207,15 @@ REQUIRED_PR126_NOTE_PARTS = (
     "owner explicitly authorized Roadmap PR108 for Repo PR126",
     "state evidence records, not veto authority",
 )
+REQUIRED_PR127_NOTE_PARTS = (
+    "repo-canonical PR127",
+    "per-venue execution lifecycle model builder",
+    "Repo PR127 does not imply Roadmap PR #127",
+    "owner explicitly authorized Roadmap PR109 for Repo PR127",
+    "state evidence records, not veto authority",
+    "Repo PR128 does not imply Roadmap PR #128",
+    "owner explicitly authorized Roadmap PR110 for Repo PR128",
+)
 
 
 @dataclass(frozen=True)
@@ -887,6 +896,57 @@ def _validate_pr126_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
     return failures
 
 
+def _validate_pr127_self_entry(entries: Sequence[dict[str, Any]]) -> list[str]:
+    failures: list[str] = []
+    pr127 = _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY")
+    if pr127 is None:
+        return ["missing PR127 repo-canonical self-entry"]
+    expected = {
+        "repo_canonical_pr_label": "PR127",
+        "roadmap_pr_label": None,
+        "blueprint_pr_label": None,
+        "github_pr_number": 127,
+        "repo_title": "Per-venue execution lifecycle model builder",
+        "roadmap_title": None,
+        "blueprint_title": None,
+        "github_title": "PR127 implement per-venue execution lifecycle model builder",
+        "branch_name": "pr127-per-venue-execution-lifecycle-model-builder",
+        "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+        "authority_scope": "CONTROL_PLANE_ONLY",
+        "current_status": "MERGED",
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/127",
+        "identity_relation_class": "REPO_CANONICAL_ONLY",
+        "same_number_mismatch_recorded": True,
+        "github_pr_state": "MERGED",
+        "github_pr_mergedAt": "2026-05-19T23:11:19Z",
+        "github_pr_mergeCommit_oid": "84848c0bbe2fb17ca02b76acd6cca45150ac59f9",
+        "github_headRefName": "pr127-per-venue-execution-lifecycle-model-builder",
+        "github_baseRefName": "main",
+        "owner_authorized_roadmap_pr": "PR109",
+        "owner_authorized_next_capability": "PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER",
+        "controller_used_as_record_not_veto": True,
+    }
+    for field, expected_value in expected.items():
+        if pr127.get(field) != expected_value:
+            failures.append(f"PR127 self-entry {field} must be {expected_value!r}")
+    if "PR126_REPO_CANONICAL_SELF_ENTRY" not in pr127.get(
+        "depends_on_roster_entries", []
+    ):
+        failures.append("PR127 self-entry must depend on PR126_REPO_CANONICAL_SELF_ENTRY")
+    for marker in (
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_PER_VENUE_EXECUTION_LIFECYCLE_MODEL_BUILDER_OK",
+    ):
+        if marker not in pr127.get("validator_markers", []):
+            failures.append(f"PR127 self-entry must reference {marker}")
+    if "GITHUB_AUDIT_NUMBER" not in pr127.get("reference_types", []):
+        failures.append("PR127 self-entry reference_types must include GITHUB_AUDIT_NUMBER")
+    missing_notes = _notes_contain(pr127, REQUIRED_PR127_NOTE_PARTS)
+    if missing_notes:
+        failures.append(f"PR127 self-entry notes missing: {', '.join(missing_notes)}")
+    return failures
+
+
 def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]]) -> list[str]:
     failures: list[str] = []
     summary = roster.get("mismatch_summary")
@@ -922,7 +982,7 @@ def _validate_mismatches(roster: Mapping[str, Any], entries: Sequence[dict[str, 
         if pr117_self.get("identity_relation_class") == "EXACT_SAME_SYSTEM_REFERENCE":
             failures.append("repo-canonical PR117 must not be treated as roadmap PR #117")
 
-    for number in range(117, 127):
+    for number in range(117, 128):
         self_entry = _entry_by_id(entries, f"PR{number}_REPO_CANONICAL_SELF_ENTRY")
         if self_entry is None:
             continue
@@ -1219,8 +1279,30 @@ def _build_report(roster: Mapping[str, Any], entries: Sequence[dict[str, Any]], 
         "repo_pr126_owner_authorized_roadmap_pr108": True,
         "controller_used_as_record_not_veto_for_pr126": True,
         "repo_pr127_assumed_roadmap_pr127": False,
+        "pr127_self_entry_present": _entry_by_id(
+            entries, "PR127_REPO_CANONICAL_SELF_ENTRY"
+        )
+        is not None,
+        "pr127_github_audit_number": (
+            _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_number"),
+        "pr127_github_audit_url": (
+            _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_audit_url"),
+        "pr127_github_pr_state": (
+            _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_state"),
+        "pr127_github_pr_mergedAt": (
+            _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_mergedAt"),
+        "pr127_github_pr_mergeCommit_oid": (
+            _entry_by_id(entries, "PR127_REPO_CANONICAL_SELF_ENTRY") or {}
+        ).get("github_pr_mergeCommit_oid"),
         "repo_pr127_owner_authorized_roadmap_pr109": True,
         "controller_used_as_record_not_veto_for_pr127": True,
+        "repo_pr128_assumed_roadmap_pr128": False,
+        "repo_pr128_owner_authorized_roadmap_pr110": True,
+        "controller_used_as_record_not_veto_for_pr128": True,
         "repo_pr123_assumed_roadmap_pr123": False,
         "repo_pr123_owner_authorized_roadmap_pr106": True,
         "controller_used_as_record_not_veto_for_pr123": True,
@@ -1278,6 +1360,7 @@ def validate(
     failures.extend(_validate_pr124_self_entry(entries))
     failures.extend(_validate_pr125_self_entry(entries))
     failures.extend(_validate_pr126_self_entry(entries))
+    failures.extend(_validate_pr127_self_entry(entries))
     failures.extend(_validate_mismatches(roster, entries))
     failures.extend(_validate_gate_and_authority_boundaries(repo_root, roster))
 

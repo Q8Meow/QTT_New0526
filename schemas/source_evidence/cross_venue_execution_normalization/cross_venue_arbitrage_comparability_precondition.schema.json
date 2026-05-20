@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qtt-source-evidence-cross-venue-arbitrage-comparability-precondition-v1",
+  "title": "Cross-Venue Arbitrage Comparability Precondition",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "arbitrage_comparability_precondition_id",
+    "fixture_authority_class",
+    "precondition_authority_class",
+    "production_arbitrage_comparability_authority",
+    "production_cross_venue_normalization_authority",
+    "venue_ids_compared",
+    "normalized_phase_binding_ids",
+    "normalized_transition_binding_ids",
+    "unresolved_placeholder_dimensions",
+    "required_future_receipts",
+    "required_future_prs",
+    "apparent_price_gap_arbitrage_claim_allowed",
+    "production_order_authority_allowed",
+    "future_production_launch_path_preserved"
+  ],
+  "properties": {
+    "fixture_authority_class": { "const": "TEST_FIXTURE_NOT_EXTERNAL_FACT" },
+    "precondition_authority_class": { "const": "NOT_ARBITRAGE_AUTHORITY" },
+    "production_arbitrage_comparability_authority": { "const": false },
+    "production_cross_venue_normalization_authority": { "const": false },
+    "apparent_price_gap_arbitrage_claim_allowed": { "const": false },
+    "production_order_authority_allowed": { "const": false },
+    "future_production_launch_path_preserved": { "const": true }
+  }
+}
