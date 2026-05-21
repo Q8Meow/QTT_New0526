@@ -1,0 +1,2713 @@
+{
+  "agent_dependency_states": [
+    {
+      "agent_id": "research_source_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR137",
+        "PR143K",
+        "PR143P",
+        "PR143F",
+        "PR143"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "source_evidence_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR143K",
+        "PR143P",
+        "PR143F",
+        "PR143"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "connector_semantic_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR143",
+        "PR144"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "credential_private_state_cash_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR145"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "market_data_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR137L",
+        "PR143",
+        "PR157",
+        "PR162"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "runtime_resolver_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR137L",
+        "PR145",
+        "PR146"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "historical_dataset_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR138",
+        "PR146"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "atomicrows_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR138",
+        "PR139",
+        "PR140",
+        "PR141",
+        "PR142"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "quantum_optimizer_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR150",
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "FUTURE_REF_ONLY"
+    },
+    {
+      "agent_id": "classical_optimizer_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR150",
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "parameter_stack_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR150",
+        "PR152",
+        "PR153"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "replay_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR146",
+        "PR147",
+        "PR149"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "paper_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR146",
+        "PR148",
+        "PR149"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "risk_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR160"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "owner_approval_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR154",
+        "PR156",
+        "PR164"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "dashboard_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR155",
+        "PR156"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "canary_execution_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR160"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "post_trade_reconciliation_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR159",
+        "PR160"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    },
+    {
+      "agent_id": "launch_runbook_agent",
+      "allowed_current_pr137_inputs": [
+        "PR136_SELECTOR_ARTIFACTS",
+        "PR136_MARKET_READINESS_INDEX",
+        "PR136_AGENT_ORCHESTRATION_MAP"
+      ],
+      "allowed_current_pr137_outputs": [
+        "STATIC_DEPENDENCY_REPORTS",
+        "VALIDATION_GATE_RECEIPTS"
+      ],
+      "atomicrows_scope": "NONE",
+      "current_authority_state": "STATIC_DEPENDENCY_CONTROLLER_ONLY",
+      "forbidden_current_authority": [
+        "auto_authorizes_later_pr",
+        "auto_authorizes_pr137l",
+        "auto_authorizes_pr138",
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_materialization_authority",
+        "creates_atomicrows_rows",
+        "creates_canary_execution",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_command",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_owner_approval_receipt",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_backend_call",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_simulator_execution",
+        "creates_quantum_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "future_dependency_prs": [
+        "PR162",
+        "PR163",
+        "PR164"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE"
+    }
+  ],
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "dependency_edge_count": 31,
+  "dependency_edges": [
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR137_TO_PR137L",
+      "from_node_id": "PR137",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR137L"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR137L_TO_PR138",
+      "from_node_id": "PR137L",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR138"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR138_TO_PR139",
+      "from_node_id": "PR138",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR139"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR139_TO_PR140",
+      "from_node_id": "PR139",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR140"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR140_TO_PR141",
+      "from_node_id": "PR140",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR141"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR141_TO_PR142",
+      "from_node_id": "PR141",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR142"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR142_TO_PR143K",
+      "from_node_id": "PR142",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR143K"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR143K_TO_PR143P",
+      "from_node_id": "PR143K",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR143P"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR143P_TO_PR143F",
+      "from_node_id": "PR143P",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR143F"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR143F_TO_PR143",
+      "from_node_id": "PR143F",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR143"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR143_TO_PR144",
+      "from_node_id": "PR143",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR144"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR144_TO_PR145",
+      "from_node_id": "PR144",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR145"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR145_TO_PR146",
+      "from_node_id": "PR145",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR146"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR146_TO_PR147",
+      "from_node_id": "PR146",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR147"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR147_TO_PR148",
+      "from_node_id": "PR147",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR148"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR148_TO_PR149",
+      "from_node_id": "PR148",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR149"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR149_TO_PR150",
+      "from_node_id": "PR149",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR150"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR150_TO_PR151",
+      "from_node_id": "PR150",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR151"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR151_TO_PR152",
+      "from_node_id": "PR151",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR152"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR152_TO_PR153",
+      "from_node_id": "PR152",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR153"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR153_TO_PR154",
+      "from_node_id": "PR153",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR154"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR154_TO_PR155",
+      "from_node_id": "PR154",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR155"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR155_TO_PR156",
+      "from_node_id": "PR155",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR156"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR156_TO_PR157",
+      "from_node_id": "PR156",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR157"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR157_TO_PR158",
+      "from_node_id": "PR157",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR158"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR158_TO_PR159",
+      "from_node_id": "PR158",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR159"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR159_TO_PR160",
+      "from_node_id": "PR159",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR160"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR160_TO_PR161",
+      "from_node_id": "PR160",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR161"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR161_TO_PR162",
+      "from_node_id": "PR161",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR162"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR162_TO_PR163",
+      "from_node_id": "PR162",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR163"
+    },
+    {
+      "dependency_type": "REQUIRED_SEQUENCE_EDGE",
+      "edge_id": "PR163_TO_PR164",
+      "from_node_id": "PR163",
+      "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "to_node_id": "PR164"
+    }
+  ],
+  "dependency_node_count": 32,
+  "dependency_nodes": [
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+        "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+        "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR137L"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR137",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "STATIC_CONTRACT_READY",
+      "required_upstream_ids": [
+        "PR135"
+      ],
+      "scope_class": "ROADMAP_MAPPING",
+      "title": "Launch-roadmap validator and readiness dependency controller"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR138"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR137L",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "STATIC_CONTRACT_READY",
+      "required_upstream_ids": [
+        "PR137"
+      ],
+      "scope_class": "ROADMAP_MAPPING",
+      "title": "Latency hot-path snapshot boundary insertion"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "downstream_dependency_ids": [
+        "PR139"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR138",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR137L"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "title": "AtomicRows historical dataset bridge readiness gate"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "downstream_dependency_ids": [
+        "PR140"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR139",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR138"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "title": "AtomicRows row-family source manifest currentization"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "downstream_dependency_ids": [
+        "PR141"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR140",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR139"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "title": "AtomicRows bundle builder dry-run and diff validator"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "downstream_dependency_ids": [
+        "PR142"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR141",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR140"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "title": "AtomicRows bundle materialization owner-authorized only"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "downstream_dependency_ids": [
+        "PR143K"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR142",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR141"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "title": "AtomicRows structural integrity policy gate owner-authorized only"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR143P"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR143K",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "required_upstream_ids": [
+        "PR142"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "title": "Kalshi official source-evidence finalization"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR143F"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR143P",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "required_upstream_ids": [
+        "PR143K"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "title": "Polymarket official source-evidence finalization"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR143"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR143F",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "required_upstream_ids": [
+        "PR143P"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "title": "FORECASTEX_IBKR official source-evidence finalization"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR144"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR143",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "required_upstream_ids": [
+        "PR143F"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "title": "Per-venue official source-evidence aggregate review"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+      ],
+      "downstream_dependency_ids": [
+        "PR145"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR144",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CONNECTOR_BINDING_READY",
+      "required_upstream_ids": [
+        "PR143"
+      ],
+      "scope_class": "CONNECTOR_BINDING_READINESS",
+      "title": "Connector semantic binding live-unlock gate"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR146"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR145",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CREDENTIAL_PRIVATE_STATE_CASH_READY",
+      "required_upstream_ids": [
+        "PR144"
+      ],
+      "scope_class": "CREDENTIAL_PRIVATE_STATE_CASH_READINESS",
+      "title": "Runtime cash, private-state, and credential live-readiness gate"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "downstream_dependency_ids": [
+        "PR147"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR146",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "required_upstream_ids": [
+        "PR145"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "title": "Real historical dataset availability and accepted-source bridge"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "downstream_dependency_ids": [
+        "PR148"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR147",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "required_upstream_ids": [
+        "PR146"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "title": "Replay execution engine on locked historical inputs"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "downstream_dependency_ids": [
+        "PR149"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR148",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "required_upstream_ids": [
+        "PR147"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "title": "Paper execution engine on separate lane"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "downstream_dependency_ids": [
+        "PR150"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR149",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "required_upstream_ids": [
+        "PR148"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "title": "Replay/paper result immutability and dual-result review"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR151"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR150",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR149"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "title": "Replay/paper evidence to optimizer and quantum comparator"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR152"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR151",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR150"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "title": "Quantum/classical optimizer execution-readiness gate"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR153"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR152",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "required_upstream_ids": [
+        "PR151"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "title": "Classical baseline vs quantum challenger comparison"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR154"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR153",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "OWNER_REVIEW_READY",
+      "required_upstream_ids": [
+        "PR152"
+      ],
+      "scope_class": "PARAMETER_STACK_SELECTION_READINESS",
+      "title": "Final parameter-stack selection and owner override packet"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR155"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR154",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "OWNER_REVIEW_READY",
+      "required_upstream_ids": [
+        "PR153"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "title": "Owner approval queue and launch decision packet"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR156"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR155",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "OWNER_REVIEW_READY",
+      "required_upstream_ids": [
+        "PR154"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "title": "Owner dashboard launch-control readiness"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR157"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR156",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR155"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "title": "Live-promotion review closure"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR158"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR157",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR156"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "title": "Three-venue live canary eligibility gate"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR159"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR158",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR157"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "title": "Limited live canary command packet"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR160"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR159",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR158"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "title": "Post-trade reconciliation and kill-switch gate"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR161"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR160",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR159"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "title": "Triggered live concurrent comparison"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR162"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR161",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR160"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "title": "Limited-live arbitrage and scaled-live eligibility"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR163"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR162",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR161"
+      ],
+      "scope_class": "DAY1_LAUNCH_READINESS",
+      "title": "Full Day-1 launch preflight matrix"
+    },
+    {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "PR164"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR163",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": false,
+      "readiness_state": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "required_upstream_ids": [
+        "PR162"
+      ],
+      "scope_class": "DAY1_LAUNCH_READINESS",
+      "title": "Day-1 launch runbook and rollback command packet"
+    },
+    {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "current_authority_created": false,
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "downstream_dependency_ids": [
+        "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY"
+      ],
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "node_id": "PR164",
+      "node_type": "PR136_SEQUENCE_ENTRY",
+      "owner_authorization_required": true,
+      "readiness_state": "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY",
+      "required_upstream_ids": [
+        "PR163"
+      ],
+      "scope_class": "OWNER_AUTHORIZED_EXECUTION_ONLY",
+      "title": "Official Day-1 live trading start command owner-authorized only"
+    }
+  ],
+  "downstream_sequence_preview": [
+    {
+      "sequence_id": "PR137",
+      "title": "Launch-roadmap validator and readiness dependency controller"
+    },
+    {
+      "sequence_id": "PR137L",
+      "title": "Latency hot-path snapshot boundary insertion"
+    },
+    {
+      "sequence_id": "PR138",
+      "title": "AtomicRows historical dataset bridge readiness gate"
+    },
+    {
+      "sequence_id": "PR139",
+      "title": "AtomicRows row-family source manifest currentization"
+    },
+    {
+      "sequence_id": "PR164",
+      "title": "Official Day-1 live trading start command owner-authorized only"
+    }
+  ],
+  "first_next_pr_id": "PR137",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "generated_integrity_authority_boundary": {
+    "boundary_state": "PR137_GENERATED_INTEGRITY_AUTHORITY_BLOCKED",
+    "exact_blocker_assertions_owned_by": "tools/validate_pr137_generated_integrity_authority_boundary.py",
+    "forbidden_field_group_present": false,
+    "generated_integrity_authority_created": false,
+    "pr137_artifact_scan_scope": [
+      "docs/master_plan/generated/PR137LaunchReadinessDependencyController.report.json",
+      "docs/master_plan/generated/PR137DependencyGateStateMatrix.report.json",
+      "docs/master_plan/generated/PR137MarketReadinessDependencyMatrix.report.json",
+      "docs/master_plan/generated/PR137AgentDependencyController.report.json",
+      "docs/master_plan/generated/PR137QuantumAtomicRowsDependencyBoundary.report.json",
+      "docs/master_plan/generated/PR137GeneratedIntegrityAuthorityBoundary.report.json",
+      "docs/master_plan/generated/PR137ValidationGateIntegration.report.json",
+      "docs/roadmap/QTT_PR137_Launch_Readiness_Dependency_Controller_v1_0.md",
+      "schemas/roadmap/pr137_launch_readiness_dependency_controller.schema.json",
+      "schemas/roadmap/pr137_launch_readiness_dependency_node.schema.json",
+      "schemas/roadmap/pr137_launch_readiness_dependency_edge.schema.json",
+      "schemas/roadmap/pr137_market_dependency_state.schema.json",
+      "schemas/roadmap/pr137_generated_integrity_authority_boundary.schema.json",
+      "docs/roadmap/generated/CODEX_PR137_MANDATORY_READ_RECEIPT.json",
+      "docs/roadmap/generated/CODEX_PR137_ROUTE_TRIAGE_RECEIPT.json",
+      "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_controller.py",
+      "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_policy.py",
+      "tools/validate_pr137_launch_readiness_dependency_controller.py",
+      "tools/validate_pr137_generated_integrity_authority_boundary.py",
+      "tests/roadmap/test_pr137_launch_readiness_dependency_controller.py"
+    ],
+    "structural_evidence_only": true,
+    "validation_marker": "QTT_PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY_OK"
+  },
+  "latency_dependency_boundary": {
+    "control_plane_only": true,
+    "future_live_hot_path_allowed_inputs": [
+      "precomputed_source_change_snapshot",
+      "precomputed_connector_semantic_binding_snapshot",
+      "precomputed_runtime_cash_private_state_snapshot",
+      "precomputed_risk_limits",
+      "precomputed_approved_parameter_stack",
+      "precomputed_execution_policy",
+      "owner_authorized_live_command"
+    ],
+    "live_hot_path_call_created": false,
+    "no_atomicrows_generation_in_live_hot_path": true,
+    "no_llm_reasoning_in_live_hot_path": true,
+    "no_quantum_backend_call_in_live_hot_path": true,
+    "no_source_retrieval_in_live_hot_path": true,
+    "pr137_latency_state": "CONTROL_PLANE_ONLY",
+    "source_selector_ref": "docs/master_plan/generated/PR136LatencyControlPlaneVsLivePathMap.report.json"
+  },
+  "market_dependency_states": [
+    {
+      "canonical_venue_id": "PREDICTION_MARKETS_GENERAL",
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "pr137_current_state": "PREREQUISITE_GATED",
+      "readiness_gated": true,
+      "source_market_scope_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"
+    },
+    {
+      "canonical_venue_id": "KALSHI",
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "pr137_current_state": "PREREQUISITE_GATED",
+      "readiness_gated": true,
+      "source_market_scope_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"
+    },
+    {
+      "canonical_venue_id": "POLYMARKET",
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "pr137_current_state": "PREREQUISITE_GATED",
+      "readiness_gated": true,
+      "source_market_scope_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"
+    },
+    {
+      "canonical_venue_id": "FORECASTEX_IBKR",
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "pr137_current_state": "PREREQUISITE_GATED",
+      "readiness_gated": true,
+      "source_market_scope_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"
+    }
+  ],
+  "no_authority_flags": {
+    "auto_authorizes_later_pr": false,
+    "auto_authorizes_pr137l": false,
+    "auto_authorizes_pr138": false,
+    "creates_alpha_evidence": false,
+    "creates_atomicrows_bundle": false,
+    "creates_atomicrows_materialization_authority": false,
+    "creates_atomicrows_rows": false,
+    "creates_canary_execution": false,
+    "creates_connector_binding": false,
+    "creates_credential_resolution": false,
+    "creates_day1_live_launch": false,
+    "creates_execution_superiority_evidence": false,
+    "creates_fill_receipt": false,
+    "creates_latency_superiority_evidence": false,
+    "creates_live_command": false,
+    "creates_live_data": false,
+    "creates_order_authority": false,
+    "creates_order_execution": false,
+    "creates_owner_approval_receipt": false,
+    "creates_paper_execution": false,
+    "creates_paper_result": false,
+    "creates_private_state_fetch": false,
+    "creates_profit_evidence": false,
+    "creates_quantum_advantage_claim": false,
+    "creates_quantum_backend_call": false,
+    "creates_quantum_execution": false,
+    "creates_quantum_optimizer_input": false,
+    "creates_quantum_simulator_execution": false,
+    "creates_quantum_trading_signal": false,
+    "creates_ranking_scoring_arbitration_output": false,
+    "creates_replay_execution": false,
+    "creates_replay_result": false,
+    "creates_runtime_cash_authority": false,
+    "creates_source_acceptance": false,
+    "creates_source_retrieval": false,
+    "creates_trading_signal": false
+  },
+  "owner_authorization_boundary": {
+    "live_command_created": false,
+    "owner_approval_receipt_created": false,
+    "pr137_auto_authorizes_later_pr": false,
+    "pr137_auto_authorizes_pr137l": false,
+    "pr137_auto_authorizes_pr138": false,
+    "pr164_final_live_start_requires_explicit_owner_command": true,
+    "source_selector_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json"
+  },
+  "pr136_selector_refs": [
+    {
+      "artifact_ref": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_Index_v1_0.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136FuturePRCardRegistry.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136ReadinessDomainTaxonomy.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136AgentLaunchOrchestrationMap.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136LatencyControlPlaneVsLivePathMap.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136PolicyManifest.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136ValidationGateIntegration.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    },
+    {
+      "artifact_ref": "docs/master_plan/generated/PR136PathDecision.report.json",
+      "selector_role": "PR136_CANONICAL_INPUT"
+    }
+  ],
+  "quantum_atomicrows_dependency_boundary": {
+    "atomicrows_bridge_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+    "atomicrows_bundle_created": false,
+    "atomicrows_materialization_authority_created": false,
+    "atomicrows_rows_created": false,
+    "boundary_state": "QUANTUM_AND_ATOMICROWS_FUTURE_REF_ONLY",
+    "compatibility_states": {
+      "ising_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "qaoa_qubo_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_annealing_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_classical_comparator": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_kernel_feature_map": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_optimizer_arbitration_readiness": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "vqe_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY"
+    },
+    "no_optimizer_input_packet": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_call": true,
+    "no_quantum_trading_signal": true,
+    "no_simulator_execution": true,
+    "quantum_metadata_only": true,
+    "source_selector_ref": "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json"
+  },
+  "receipt_type": "PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER",
+  "report_version": "PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_V1",
+  "sequence_entry_ids": [
+    "PR137",
+    "PR137L",
+    "PR138",
+    "PR139",
+    "PR140",
+    "PR141",
+    "PR142",
+    "PR143K",
+    "PR143P",
+    "PR143F",
+    "PR143",
+    "PR144",
+    "PR145",
+    "PR146",
+    "PR147",
+    "PR148",
+    "PR149",
+    "PR150",
+    "PR151",
+    "PR152",
+    "PR153",
+    "PR154",
+    "PR155",
+    "PR156",
+    "PR157",
+    "PR158",
+    "PR159",
+    "PR160",
+    "PR161",
+    "PR162",
+    "PR163",
+    "PR164"
+  ],
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}

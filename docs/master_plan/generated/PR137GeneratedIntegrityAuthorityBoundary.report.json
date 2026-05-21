@@ -1,0 +1,40 @@
+{
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "generated_integrity_authority_boundary": {
+    "boundary_state": "PR137_GENERATED_INTEGRITY_AUTHORITY_BLOCKED",
+    "exact_blocker_assertions_owned_by": "tools/validate_pr137_generated_integrity_authority_boundary.py",
+    "forbidden_field_group_present": false,
+    "generated_integrity_authority_created": false,
+    "pr137_artifact_scan_scope": [
+      "docs/master_plan/generated/PR137LaunchReadinessDependencyController.report.json",
+      "docs/master_plan/generated/PR137DependencyGateStateMatrix.report.json",
+      "docs/master_plan/generated/PR137MarketReadinessDependencyMatrix.report.json",
+      "docs/master_plan/generated/PR137AgentDependencyController.report.json",
+      "docs/master_plan/generated/PR137QuantumAtomicRowsDependencyBoundary.report.json",
+      "docs/master_plan/generated/PR137GeneratedIntegrityAuthorityBoundary.report.json",
+      "docs/master_plan/generated/PR137ValidationGateIntegration.report.json",
+      "docs/roadmap/QTT_PR137_Launch_Readiness_Dependency_Controller_v1_0.md",
+      "schemas/roadmap/pr137_launch_readiness_dependency_controller.schema.json",
+      "schemas/roadmap/pr137_launch_readiness_dependency_node.schema.json",
+      "schemas/roadmap/pr137_launch_readiness_dependency_edge.schema.json",
+      "schemas/roadmap/pr137_market_dependency_state.schema.json",
+      "schemas/roadmap/pr137_generated_integrity_authority_boundary.schema.json",
+      "docs/roadmap/generated/CODEX_PR137_MANDATORY_READ_RECEIPT.json",
+      "docs/roadmap/generated/CODEX_PR137_ROUTE_TRIAGE_RECEIPT.json",
+      "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_controller.py",
+      "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_policy.py",
+      "tools/validate_pr137_launch_readiness_dependency_controller.py",
+      "tools/validate_pr137_generated_integrity_authority_boundary.py",
+      "tests/roadmap/test_pr137_launch_readiness_dependency_controller.py"
+    ],
+    "structural_evidence_only": true,
+    "validation_marker": "QTT_PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY_OK"
+  },
+  "receipt_type": "PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY",
+  "report_version": "PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY_V1",
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}

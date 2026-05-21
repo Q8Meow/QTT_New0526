@@ -338,6 +338,18 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_pr137_generated_integrity_authority_boundary.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr137_launch_readiness_dependency_controller.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

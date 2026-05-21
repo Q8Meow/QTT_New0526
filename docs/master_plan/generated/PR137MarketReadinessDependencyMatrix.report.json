@@ -1,0 +1,112 @@
+{
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "market_dependency_matrix": {
+    "FORECASTEX_IBKR": {
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "readiness_gated": true
+    },
+    "KALSHI": {
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "readiness_gated": true
+    },
+    "POLYMARKET": {
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "readiness_gated": true
+    },
+    "PREDICTION_MARKETS_GENERAL": {
+      "future_pr_refs": [
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR157",
+        "PR162",
+        "PR164"
+      ],
+      "missing_prerequisite_classes": [
+        "accepted_source_evidence",
+        "connector_semantic_binding",
+        "credential_private_state_cash_readiness",
+        "market_data_live_readiness",
+        "order_lifecycle_readiness",
+        "replay_paper_evidence",
+        "owner_approval",
+        "canary_preflight",
+        "day1_launch_preflight",
+        "risk_readiness",
+        "latency_boundary_readiness"
+      ],
+      "owner_authorization_state": "REQUIRED_BEFORE_CANARY_OR_LIVE",
+      "readiness_gated": true
+    }
+  },
+  "receipt_type": "PR137_MARKET_READINESS_DEPENDENCY_MATRIX",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_MARKET_READINESS_DEPENDENCY_MATRIX",
+  "report_version": "PR137_MARKET_READINESS_DEPENDENCY_MATRIX_V1",
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}

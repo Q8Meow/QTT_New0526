@@ -1,0 +1,17 @@
+{
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "cumulative_gate_commands_required": [
+    "tools/validate_pr136_roadmap_policy_literal_drift.py",
+    "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+    "tools/validate_pr137_generated_integrity_authority_boundary.py",
+    "tools/validate_pr137_launch_readiness_dependency_controller.py"
+  ],
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "pr137_validators_ordered_after_pr136": true,
+  "receipt_type": "PR137_VALIDATION_GATE_INTEGRATION",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_VALIDATION_GATE_INTEGRATION",
+  "report_version": "PR137_VALIDATION_GATE_INTEGRATION_V1",
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}
