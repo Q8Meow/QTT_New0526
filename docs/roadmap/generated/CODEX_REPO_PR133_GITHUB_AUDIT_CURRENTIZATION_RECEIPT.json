@@ -1,0 +1,20 @@
+{
+  "controller_used_as_record_not_veto": true,
+  "currentized_prior_repo_pr_label": "PR133",
+  "github_baseRefName": "main",
+  "github_headRefName": "pr133-orderbook-event-state-snapshot-builder",
+  "github_pr_mergeCommit_oid": "78542c7be9dd8598a9142407cca66d0098d4a32f",
+  "github_pr_mergedAt": "2026-05-20T23:36:50Z",
+  "github_pr_number": 133,
+  "github_pr_state": "MERGED",
+  "github_pr_title": "PR133 implement orderbook event-state snapshot builder contracts",
+  "github_url": "https://github.com/Q8Meow/QTT_New0526/pull/133",
+  "identity_doctrine_preserved": true,
+  "next_implementation_scope": "ROADMAP_PR116_RUNTIME_RESOLVER_SNAPSHOT_EXECUTOR_CONTRACTS",
+  "next_owner_authorized_roadmap_pr": "PR116",
+  "next_repo_pr_label": "PR134",
+  "owner_authorized_next_capability": "ORDERBOOK_AND_EVENT_STATE_SNAPSHOT_BUILDER_CONTRACTS",
+  "owner_authorized_roadmap_pr": "PR115",
+  "repo_pr_label": "PR134",
+  "same_number_inference_used": false
+}

@@ -1,0 +1,509 @@
+{
+  "$id": "https://qtt.local/schemas/pr134/RUNTIME_RESOLVER_INPUT_LOCK.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted_source_dependency_refs": {
+      "type": "array"
+    },
+    "atomicrows_4183_completion_claim_created": {
+      "type": "boolean"
+    },
+    "atomicrows_authority_created": {
+      "type": "boolean"
+    },
+    "atomicrows_bridge_authority_created": {
+      "type": "boolean"
+    },
+    "atomicrows_bundle_consumed": {
+      "type": "boolean"
+    },
+    "atomicrows_bundle_created": {
+      "type": "boolean"
+    },
+    "atomicrows_bundle_edited": {
+      "type": "boolean"
+    },
+    "atomicrows_full_materialization_authorized": {
+      "type": "boolean"
+    },
+    "atomicrows_pre_bridge_compatibility_metadata_created": {
+      "type": "boolean"
+    },
+    "atomicrows_row_records_created_count": {
+      "type": "integer"
+    },
+    "atomicrows_sha_created": {
+      "type": "boolean"
+    },
+    "authority_class": {
+      "const": "FIXTURE_BACKED_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_RUNTIME_AUTHORITY",
+      "type": "string"
+    },
+    "candidate_scope_lock_ref": {
+      "type": "string"
+    },
+    "candidate_set_snapshot_allows_future_candidate_additions": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_allows_future_versions": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_created_from_fixture": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_immutable_for_replay_audit_only": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_is_global_permanent_freeze": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_lock_metadata_created": {
+      "type": "boolean"
+    },
+    "candidate_set_snapshot_parent_version_id": {
+      "type": "string"
+    },
+    "candidate_set_snapshot_version_id": {
+      "type": "string"
+    },
+    "canonical_input_identity_ref": {
+      "type": "string"
+    },
+    "comparability_scope_dependency_ref": {
+      "type": "string"
+    },
+    "connector_semantic_binding_created": {
+      "type": "boolean"
+    },
+    "connector_semantic_dependency_refs": {
+      "type": "array"
+    },
+    "contract_normalization_dependency_ref": {
+      "type": "string"
+    },
+    "created_by": {
+      "const": "CODEX_PR134_FIXTURE_OR_VALIDATOR",
+      "type": "string"
+    },
+    "credential_provider_called": {
+      "type": "boolean"
+    },
+    "credential_readiness_dependency_refs": {
+      "type": "array"
+    },
+    "deterministic_sequence_id": {
+      "type": "integer"
+    },
+    "event_state_snapshot_refs": {
+      "type": "array"
+    },
+    "exact_live_contract_id_created": {
+      "type": "boolean"
+    },
+    "fixture_runtime_resolver_snapshot_allowed": {
+      "type": "boolean"
+    },
+    "future_atomicrows_bridge_after_pr135_ref": {
+      "type": "string"
+    },
+    "future_atomicrows_bridge_candidate_repo_pr": {
+      "const": "PR136",
+      "type": "string"
+    },
+    "future_atomicrows_bridge_recommended_after_repo_pr": {
+      "const": "PR135",
+      "type": "string"
+    },
+    "future_atomicrows_candidate_set_snapshot_lock_family_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_family_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_market_data_feature_row_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_parameter_row_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_quantum_runtime_feature_family_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_replay_paper_input_identity_family_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_runtime_resolver_snapshot_row_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_runtime_state_feature_family_refs": {
+      "type": "array"
+    },
+    "future_atomicrows_snapshot_feature_row_refs": {
+      "type": "array"
+    },
+    "future_qaoa_qubo_candidate_set_constraint_ref": {
+      "type": "string"
+    },
+    "future_qaoa_qubo_runtime_constraint_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_amplitude_runtime_snapshot_ref": {
+      "type": "string"
+    },
+    "future_quantum_annealing_runtime_constraint_ref": {
+      "type": "string"
+    },
+    "future_quantum_dependency_graph_encoding_ref": {
+      "type": "string"
+    },
+    "future_quantum_kernel_runtime_regime_ref": {
+      "type": "string"
+    },
+    "future_quantum_microstructure_runtime_graph_ref": {
+      "type": "string"
+    },
+    "future_quantum_runtime_state_encoding_ref": {
+      "type": "string"
+    },
+    "future_replay_paper_input_identity_ref": {
+      "type": "string"
+    },
+    "future_replay_paper_owner_policy_snapshot_ref": {
+      "type": "string"
+    },
+    "future_replay_paper_same_candidate_set_snapshot_version_required": {
+      "type": "boolean"
+    },
+    "future_replay_paper_same_input_lock_required": {
+      "type": "boolean"
+    },
+    "future_replay_paper_same_runtime_resolver_snapshot_required": {
+      "type": "boolean"
+    },
+    "historical_dataset_digest_allowed": {
+      "type": "boolean"
+    },
+    "historical_dataset_digest_created": {
+      "type": "boolean"
+    },
+    "input_contains_exact_live_contract_ids": {
+      "type": "boolean"
+    },
+    "input_contains_live_market_data": {
+      "type": "boolean"
+    },
+    "input_contains_order_authority": {
+      "type": "boolean"
+    },
+    "input_contains_private_state_payload": {
+      "type": "boolean"
+    },
+    "input_lock_id": {
+      "type": "string"
+    },
+    "input_payload_is_synthetic": {
+      "type": "boolean"
+    },
+    "liquidity_scope_dependency_ref": {
+      "type": "string"
+    },
+    "live_candidate_discovery_allowed": {
+      "type": "boolean"
+    },
+    "live_candidate_discovery_created": {
+      "type": "boolean"
+    },
+    "live_candidate_import_created": {
+      "type": "boolean"
+    },
+    "live_contract_selection_allowed": {
+      "type": "boolean"
+    },
+    "live_contract_selection_created": {
+      "type": "boolean"
+    },
+    "live_credential_resolution_performed": {
+      "type": "boolean"
+    },
+    "live_market_data_fetch_created": {
+      "type": "boolean"
+    },
+    "live_runtime_execution_allowed": {
+      "type": "boolean"
+    },
+    "live_runtime_resolver_authority_created": {
+      "type": "boolean"
+    },
+    "live_trading_created": {
+      "type": "boolean"
+    },
+    "market_data_feature_vector_created": {
+      "type": "boolean"
+    },
+    "market_data_ingest_dependency_refs": {
+      "type": "array"
+    },
+    "network_io_created": {
+      "type": "boolean"
+    },
+    "neural_inference_created": {
+      "type": "boolean"
+    },
+    "neural_training_created": {
+      "type": "boolean"
+    },
+    "official_venue_semantics_fabricated": {
+      "type": "boolean"
+    },
+    "order_authority_created": {
+      "type": "boolean"
+    },
+    "order_execution_allowed": {
+      "type": "boolean"
+    },
+    "order_execution_created": {
+      "type": "boolean"
+    },
+    "orderbook_event_state_snapshot_handoff_ref": {
+      "type": "string"
+    },
+    "orderbook_snapshot_refs": {
+      "type": "array"
+    },
+    "paper_execution_allowed": {
+      "type": "boolean"
+    },
+    "paper_execution_created": {
+      "type": "boolean"
+    },
+    "paper_result_created": {
+      "type": "boolean"
+    },
+    "private_state_fetch_created": {
+      "type": "boolean"
+    },
+    "producer_pr": {
+      "const": "PR134",
+      "type": "string"
+    },
+    "producer_roadmap_pr": {
+      "const": "PR116",
+      "type": "string"
+    },
+    "production_connector_authority_created": {
+      "type": "boolean"
+    },
+    "profit_evidence_created": {
+      "type": "boolean"
+    },
+    "quantum_advantage_claim_created": {
+      "type": "boolean"
+    },
+    "quantum_backend_called": {
+      "type": "boolean"
+    },
+    "quantum_execution_created": {
+      "type": "boolean"
+    },
+    "quantum_optimizer_called": {
+      "type": "boolean"
+    },
+    "quantum_optimizer_input_created": {
+      "type": "boolean"
+    },
+    "quantum_ready_runtime_resolver_snapshot_contract": {
+      "type": "boolean"
+    },
+    "quantum_runtime_feature_computation_created": {
+      "type": "boolean"
+    },
+    "quantum_simulator_called": {
+      "type": "boolean"
+    },
+    "quantum_trading_signal_created": {
+      "type": "boolean"
+    },
+    "ranking_output_created": {
+      "type": "boolean"
+    },
+    "raw_secret_capture_created": {
+      "type": "boolean"
+    },
+    "record_type": {
+      "const": "RUNTIME_RESOLVER_INPUT_LOCK",
+      "type": "string"
+    },
+    "replay_execution_allowed": {
+      "type": "boolean"
+    },
+    "replay_execution_created": {
+      "type": "boolean"
+    },
+    "replay_result_created": {
+      "type": "boolean"
+    },
+    "rest_client_created": {
+      "type": "boolean"
+    },
+    "runtime_cash_authority_created": {
+      "type": "boolean"
+    },
+    "runtime_feature_vector_created": {
+      "type": "boolean"
+    },
+    "runtime_resolver_input_class": {
+      "enum": [
+        "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_HANDOFF_INPUT",
+        "SYNTHETIC_FIXTURE_RUNTIME_RESOLVER_INPUT",
+        "ACCEPTED_SOURCE_GATED_RUNTIME_RESOLVER_INPUT_METADATA",
+        "SOURCE_REQUIRED_RUNTIME_RESOLVER_INPUT_PLACEHOLDER",
+        "CONNECTOR_SEMANTIC_REQUIRED_RUNTIME_RESOLVER_INPUT_PLACEHOLDER",
+        "CREDENTIAL_READINESS_REQUIRED_RUNTIME_RESOLVER_INPUT_PLACEHOLDER"
+      ],
+      "type": "string"
+    },
+    "runtime_resolver_input_lock_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "PR134_RUNTIME_RESOLVER_SNAPSHOT_EXECUTOR_SCHEMA_V1",
+      "type": "string"
+    },
+    "scope_id": {
+      "enum": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "type": "string"
+    },
+    "scoring_ranking_arbitration_output_created": {
+      "type": "boolean"
+    },
+    "source_acceptance_created": {
+      "type": "boolean"
+    },
+    "source_retrieval_created": {
+      "type": "boolean"
+    },
+    "synthetic_candidate_set_ref": {
+      "type": "string"
+    },
+    "trading_signal_created": {
+      "type": "boolean"
+    },
+    "venue_api_call_created": {
+      "type": "boolean"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "websocket_client_created": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "accepted_source_dependency_refs",
+    "atomicrows_4183_completion_claim_created",
+    "atomicrows_authority_created",
+    "atomicrows_bridge_authority_created",
+    "atomicrows_bundle_consumed",
+    "atomicrows_bundle_created",
+    "atomicrows_bundle_edited",
+    "atomicrows_full_materialization_authorized",
+    "atomicrows_pre_bridge_compatibility_metadata_created",
+    "atomicrows_row_records_created_count",
+    "atomicrows_sha_created",
+    "authority_class",
+    "candidate_scope_lock_ref",
+    "candidate_set_snapshot_parent_version_id",
+    "candidate_set_snapshot_version_id",
+    "canonical_input_identity_ref",
+    "comparability_scope_dependency_ref",
+    "connector_semantic_binding_created",
+    "connector_semantic_dependency_refs",
+    "contract_normalization_dependency_ref",
+    "created_by",
+    "credential_provider_called",
+    "credential_readiness_dependency_refs",
+    "deterministic_sequence_id",
+    "event_state_snapshot_refs",
+    "exact_live_contract_id_created",
+    "fixture_runtime_resolver_snapshot_allowed",
+    "future_atomicrows_bridge_after_pr135_ref",
+    "future_atomicrows_bridge_candidate_repo_pr",
+    "future_atomicrows_bridge_recommended_after_repo_pr",
+    "future_atomicrows_candidate_set_snapshot_lock_family_refs",
+    "future_atomicrows_family_refs",
+    "future_atomicrows_market_data_feature_row_refs",
+    "future_atomicrows_parameter_row_refs",
+    "future_atomicrows_quantum_runtime_feature_family_refs",
+    "future_atomicrows_replay_paper_input_identity_family_refs",
+    "future_atomicrows_runtime_resolver_snapshot_row_refs",
+    "future_atomicrows_runtime_state_feature_family_refs",
+    "future_atomicrows_snapshot_feature_row_refs",
+    "future_qaoa_qubo_candidate_set_constraint_ref",
+    "future_qaoa_qubo_runtime_constraint_encoding_ref",
+    "future_quantum_amplitude_runtime_snapshot_ref",
+    "future_quantum_annealing_runtime_constraint_ref",
+    "future_quantum_dependency_graph_encoding_ref",
+    "future_quantum_kernel_runtime_regime_ref",
+    "future_quantum_microstructure_runtime_graph_ref",
+    "future_quantum_runtime_state_encoding_ref",
+    "future_replay_paper_input_identity_ref",
+    "historical_dataset_digest_created",
+    "input_lock_id",
+    "input_payload_is_synthetic",
+    "liquidity_scope_dependency_ref",
+    "live_candidate_discovery_created",
+    "live_candidate_import_created",
+    "live_contract_selection_created",
+    "live_credential_resolution_performed",
+    "live_market_data_fetch_created",
+    "live_runtime_execution_allowed",
+    "live_runtime_resolver_authority_created",
+    "live_trading_created",
+    "market_data_feature_vector_created",
+    "market_data_ingest_dependency_refs",
+    "network_io_created",
+    "neural_inference_created",
+    "neural_training_created",
+    "official_venue_semantics_fabricated",
+    "order_authority_created",
+    "order_execution_created",
+    "orderbook_event_state_snapshot_handoff_ref",
+    "orderbook_snapshot_refs",
+    "paper_execution_created",
+    "paper_result_created",
+    "private_state_fetch_created",
+    "production_connector_authority_created",
+    "profit_evidence_created",
+    "quantum_advantage_claim_created",
+    "quantum_backend_called",
+    "quantum_execution_created",
+    "quantum_optimizer_called",
+    "quantum_optimizer_input_created",
+    "quantum_ready_runtime_resolver_snapshot_contract",
+    "quantum_runtime_feature_computation_created",
+    "quantum_simulator_called",
+    "quantum_trading_signal_created",
+    "ranking_output_created",
+    "raw_secret_capture_created",
+    "record_type",
+    "replay_execution_created",
+    "replay_result_created",
+    "rest_client_created",
+    "runtime_cash_authority_created",
+    "runtime_feature_vector_created",
+    "runtime_resolver_input_lock_id",
+    "schema_version",
+    "scoring_ranking_arbitration_output_created",
+    "source_acceptance_created",
+    "source_retrieval_created",
+    "synthetic_candidate_set_ref",
+    "trading_signal_created",
+    "venue_api_call_created",
+    "websocket_client_created"
+  ],
+  "title": "RUNTIME_RESOLVER_INPUT_LOCK",
+  "type": "object"
+}
