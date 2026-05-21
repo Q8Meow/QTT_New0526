@@ -3,7 +3,7 @@
   "domain_derivation_method": "Sort current coverage entries by entry_index, derive a launch-readiness subdomain from each coverage entry, then group into evidence-backed parent lanes.",
   "domain_evidence_summary": {
     "coverage_entry_count": 24,
-    "coverage_report_digest_sha256": "f4e90658a67d5dbe280c74507d0744f7a17ad0a5f6e478dc51c9b33d5d3c9a42",
+    "coverage_report_digest_sha256": "d45a5ff06a95c697a608afef26b90da6827f4a9ffc9f58ce8275f36ab85e09df",
     "evidence_classes_used": [
       "GENERATED_REPORT",
       "ROADMAP",

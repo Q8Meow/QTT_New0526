@@ -1,8 +1,8 @@
 {
   "arbitrary_domain_count_forced": false,
   "coverage_entry_count": 24,
-  "coverage_report_digest_sha256": "f4e90658a67d5dbe280c74507d0744f7a17ad0a5f6e478dc51c9b33d5d3c9a42",
-  "coverage_report_mtime_or_git_blob_ref_if_available": "mtime_epoch_seconds:1779338414",
+  "coverage_report_digest_sha256": "d45a5ff06a95c697a608afef26b90da6827f4a9ffc9f58ce8275f36ab85e09df",
+  "coverage_report_mtime_or_git_blob_ref_if_available": "mtime_epoch_seconds:1779349628",
   "coverage_report_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
   "coverage_report_value_source": "GENERATED_REPORT_OR_REPO_CURRENT",
   "deferred_entries": [],
