@@ -424,6 +424,18 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_historical_dataset_policy_literal_drift.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_historical_dataset_digest_and_loader.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -1791,9 +1803,22 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
     runtime_resolver_index = command_names.index(
         "runtime_resolver_snapshot_executor_validate.py"
     )
+    policy_drift_index = command_names.index(
+        "validate_historical_dataset_policy_literal_drift.py"
+    )
+    historical_dataset_index = command_names.index(
+        "validate_historical_dataset_digest_and_loader.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
-    assert market_data_index < snapshot_index < runtime_resolver_index < connector_index
+    assert (
+        market_data_index
+        < snapshot_index
+        < runtime_resolver_index
+        < policy_drift_index
+        < historical_dataset_index
+        < connector_index
+    )
     assert commands[snapshot_index] == [
         python_executable,
         str(Path("tools") / "orderbook_event_state_snapshot_builder_validate.py"),
@@ -1806,6 +1831,142 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
         "--repo-root",
         ".",
     ]
+    assert commands[policy_drift_index] == [
+        python_executable,
+        str(Path("tools") / "validate_historical_dataset_policy_literal_drift.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[historical_dataset_index] == [
+        python_executable,
+        str(Path("tools") / "validate_historical_dataset_digest_and_loader.py"),
+        "--repo-root",
+        ".",
+    ]
+
+
+def test_cumulative_gate_calls_validate_historical_dataset_digest_and_loader(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
+
+    assert "validate_historical_dataset_digest_and_loader.py" in command_names
+
+
+def test_cumulative_gate_calls_policy_literal_drift_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
+
+    assert "validate_historical_dataset_policy_literal_drift.py" in command_names
+
+
+def _assert_pr135_gate_failure_stops(monkeypatch, capsys, failing_name: str) -> None:
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_historical_dataset_policy_literal_drift.py"],
+        ["python", "validate_historical_dataset_digest_and_loader.py"],
+        ["python", "later_gate.py"],
+    ]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(51 if command[1] == failing_name else 0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 51
+    assert seen == commands[: len(seen)]
+    assert seen[-1][1] == failing_name
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_cumulative_gate_fails_when_pr135_report_missing(monkeypatch, capsys):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_pr135_schema_invalid(monkeypatch, capsys):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_pr135_marker_absent(monkeypatch, capsys):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_validator_emits_marker_with_forbidden_authority_flag(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_owner_verified_placeholders_remain(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_policy_literal_drift_exists(monkeypatch, capsys):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_policy_literal_drift.py"
+    )
+
+
+def test_cumulative_gate_fails_when_atomicrows_bundle_or_sha_diff_exists(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_master_plan_diff_exists_for_unauthorized_edit(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_repo_pr135_maps_to_roadmap_pr135(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_source_acceptance_or_connector_binding_appears(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def test_cumulative_gate_fails_when_quantum_execution_or_optimizer_input_appears(
+    monkeypatch, capsys
+):
+    _assert_pr135_gate_failure_stops(
+        monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
 
 
 def test_runner_fails_closed_if_pr134_runtime_resolver_snapshot_executor_fails(

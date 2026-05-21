@@ -1,0 +1,296 @@
+{
+  "market_scope_count": 4,
+  "market_scopes": [
+    {
+      "allowed_fixture_classes": [
+        "FIXTURE_ONLY",
+        "CONTRACT_METADATA_ONLY",
+        "SOURCE_GATED_REFERENCE_ONLY"
+      ],
+      "atomicrows_pre_bridge_metadata_fields_required": [
+        "atomicrows_bundle_created_flag",
+        "atomicrows_bundle_edited_flag",
+        "atomicrows_bundle_sha_created_flag",
+        "atomicrows_rows_created_flag"
+      ],
+      "blueprint_anchor_terms_inspected": [
+        "Dataset identity, source lineage, schema, and immutability are explicit",
+        "Load and digest historical prediction-market datasets for replay lanes"
+      ],
+      "candidate_set_snapshot_lock_requirement": "VERSIONED_CANDIDATE_SET_SNAPSHOT_LOCK",
+      "canonical_venue_id": "PREDICTION_MARKETS_GENERAL",
+      "dataset_digest_contract_applicability": true,
+      "downstream_consumers": [
+        "PR118_REPLAY_ENGINE_EXECUTOR",
+        "FUTURE_PAPER_ENGINE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_OPTIMIZER_PRECOMPUTE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_ATOMICROWS_BRIDGE_AFTER_OWNER_AUTHORIZATION"
+      ],
+      "fixture_shape_only_not_venue_fact_truth_boundary": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+      "forbidden_live_or_real_data_classes": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING"
+      ],
+      "loader_manifest_contract_applicability": true,
+      "market_scope_id": "PR135_PREDICTION_MARKETS_GENERAL_HISTORICAL_DATASET_SCOPE",
+      "master_plan_anchor_terms_inspected": [
+        "concurrent replay and paper",
+        "shared input lock",
+        "result immutability",
+        "dual-result review",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK",
+        "Stage 1 prediction markets",
+        "Kalshi",
+        "Polymarket",
+        "FORECASTEX_IBKR",
+        "versioned candidate-set snapshot-lock",
+        "replay/paper input identity",
+        "AtomicRows pre-bridge compatibility",
+        "quantum state encoding",
+        "quantum optimizer",
+        "source evidence owner definitions packet"
+      ],
+      "no_authority_flags_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "policy_block_code_refs": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_NONCANONICAL_FORECASTEX_IBKR_IDENTITY"
+      ],
+      "policy_manifest_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "quantum_metadata_fields_required": [
+        "classical_comparator_required_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_advantage_claim_flag"
+      ],
+      "replay_paper_input_identity_requirement": "PR134_REPLAY_PAPER_INPUT_IDENTITY_METADATA",
+      "roadmap_anchor_terms_inspected": [
+        "Stage 1 prediction markets",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+      ],
+      "source_lineage_requirement": "SOURCE_REQUIRED_REFERENCE_ONLY"
+    },
+    {
+      "allowed_fixture_classes": [
+        "FIXTURE_ONLY",
+        "CONTRACT_METADATA_ONLY",
+        "SOURCE_GATED_REFERENCE_ONLY"
+      ],
+      "atomicrows_pre_bridge_metadata_fields_required": [
+        "atomicrows_bundle_created_flag",
+        "atomicrows_bundle_edited_flag",
+        "atomicrows_bundle_sha_created_flag",
+        "atomicrows_rows_created_flag"
+      ],
+      "blueprint_anchor_terms_inspected": [
+        "Dataset identity, source lineage, schema, and immutability are explicit",
+        "Load and digest historical prediction-market datasets for replay lanes"
+      ],
+      "candidate_set_snapshot_lock_requirement": "VERSIONED_CANDIDATE_SET_SNAPSHOT_LOCK",
+      "canonical_venue_id": "KALSHI",
+      "dataset_digest_contract_applicability": true,
+      "downstream_consumers": [
+        "PR118_REPLAY_ENGINE_EXECUTOR",
+        "FUTURE_PAPER_ENGINE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_OPTIMIZER_PRECOMPUTE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_ATOMICROWS_BRIDGE_AFTER_OWNER_AUTHORIZATION"
+      ],
+      "fixture_shape_only_not_venue_fact_truth_boundary": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+      "forbidden_live_or_real_data_classes": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING"
+      ],
+      "loader_manifest_contract_applicability": true,
+      "market_scope_id": "PR135_KALSHI_HISTORICAL_DATASET_SCOPE",
+      "master_plan_anchor_terms_inspected": [
+        "concurrent replay and paper",
+        "shared input lock",
+        "result immutability",
+        "dual-result review",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK",
+        "Stage 1 prediction markets",
+        "Kalshi",
+        "Polymarket",
+        "FORECASTEX_IBKR",
+        "versioned candidate-set snapshot-lock",
+        "replay/paper input identity",
+        "AtomicRows pre-bridge compatibility",
+        "quantum state encoding",
+        "quantum optimizer",
+        "source evidence owner definitions packet"
+      ],
+      "no_authority_flags_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "policy_block_code_refs": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_NONCANONICAL_FORECASTEX_IBKR_IDENTITY"
+      ],
+      "policy_manifest_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "quantum_metadata_fields_required": [
+        "classical_comparator_required_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_advantage_claim_flag"
+      ],
+      "replay_paper_input_identity_requirement": "PR134_REPLAY_PAPER_INPUT_IDENTITY_METADATA",
+      "roadmap_anchor_terms_inspected": [
+        "Stage 1 prediction markets",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+      ],
+      "source_lineage_requirement": "SOURCE_REQUIRED_REFERENCE_ONLY"
+    },
+    {
+      "allowed_fixture_classes": [
+        "FIXTURE_ONLY",
+        "CONTRACT_METADATA_ONLY",
+        "SOURCE_GATED_REFERENCE_ONLY"
+      ],
+      "atomicrows_pre_bridge_metadata_fields_required": [
+        "atomicrows_bundle_created_flag",
+        "atomicrows_bundle_edited_flag",
+        "atomicrows_bundle_sha_created_flag",
+        "atomicrows_rows_created_flag"
+      ],
+      "blueprint_anchor_terms_inspected": [
+        "Dataset identity, source lineage, schema, and immutability are explicit",
+        "Load and digest historical prediction-market datasets for replay lanes"
+      ],
+      "candidate_set_snapshot_lock_requirement": "VERSIONED_CANDIDATE_SET_SNAPSHOT_LOCK",
+      "canonical_venue_id": "POLYMARKET",
+      "dataset_digest_contract_applicability": true,
+      "downstream_consumers": [
+        "PR118_REPLAY_ENGINE_EXECUTOR",
+        "FUTURE_PAPER_ENGINE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_OPTIMIZER_PRECOMPUTE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_ATOMICROWS_BRIDGE_AFTER_OWNER_AUTHORIZATION"
+      ],
+      "fixture_shape_only_not_venue_fact_truth_boundary": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+      "forbidden_live_or_real_data_classes": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING"
+      ],
+      "loader_manifest_contract_applicability": true,
+      "market_scope_id": "PR135_POLYMARKET_HISTORICAL_DATASET_SCOPE",
+      "master_plan_anchor_terms_inspected": [
+        "concurrent replay and paper",
+        "shared input lock",
+        "result immutability",
+        "dual-result review",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK",
+        "Stage 1 prediction markets",
+        "Kalshi",
+        "Polymarket",
+        "FORECASTEX_IBKR",
+        "versioned candidate-set snapshot-lock",
+        "replay/paper input identity",
+        "AtomicRows pre-bridge compatibility",
+        "quantum state encoding",
+        "quantum optimizer",
+        "source evidence owner definitions packet"
+      ],
+      "no_authority_flags_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "policy_block_code_refs": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_NONCANONICAL_FORECASTEX_IBKR_IDENTITY"
+      ],
+      "policy_manifest_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "quantum_metadata_fields_required": [
+        "classical_comparator_required_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_advantage_claim_flag"
+      ],
+      "replay_paper_input_identity_requirement": "PR134_REPLAY_PAPER_INPUT_IDENTITY_METADATA",
+      "roadmap_anchor_terms_inspected": [
+        "Stage 1 prediction markets",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+      ],
+      "source_lineage_requirement": "SOURCE_REQUIRED_REFERENCE_ONLY"
+    },
+    {
+      "allowed_fixture_classes": [
+        "FIXTURE_ONLY",
+        "CONTRACT_METADATA_ONLY",
+        "SOURCE_GATED_REFERENCE_ONLY"
+      ],
+      "atomicrows_pre_bridge_metadata_fields_required": [
+        "atomicrows_bundle_created_flag",
+        "atomicrows_bundle_edited_flag",
+        "atomicrows_bundle_sha_created_flag",
+        "atomicrows_rows_created_flag"
+      ],
+      "blueprint_anchor_terms_inspected": [
+        "Dataset identity, source lineage, schema, and immutability are explicit",
+        "Load and digest historical prediction-market datasets for replay lanes"
+      ],
+      "candidate_set_snapshot_lock_requirement": "VERSIONED_CANDIDATE_SET_SNAPSHOT_LOCK",
+      "canonical_venue_id": "FORECASTEX_IBKR",
+      "dataset_digest_contract_applicability": true,
+      "downstream_consumers": [
+        "PR118_REPLAY_ENGINE_EXECUTOR",
+        "FUTURE_PAPER_ENGINE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_OPTIMIZER_PRECOMPUTE_AFTER_OWNER_AUTHORIZATION",
+        "FUTURE_ATOMICROWS_BRIDGE_AFTER_OWNER_AUTHORIZATION"
+      ],
+      "fixture_shape_only_not_venue_fact_truth_boundary": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+      "forbidden_live_or_real_data_classes": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING"
+      ],
+      "loader_manifest_contract_applicability": true,
+      "market_scope_id": "PR135_FORECASTEX_IBKR_HISTORICAL_DATASET_SCOPE",
+      "master_plan_anchor_terms_inspected": [
+        "concurrent replay and paper",
+        "shared input lock",
+        "result immutability",
+        "dual-result review",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK",
+        "Stage 1 prediction markets",
+        "Kalshi",
+        "Polymarket",
+        "FORECASTEX_IBKR",
+        "versioned candidate-set snapshot-lock",
+        "replay/paper input identity",
+        "AtomicRows pre-bridge compatibility",
+        "quantum state encoding",
+        "quantum optimizer",
+        "source evidence owner definitions packet"
+      ],
+      "no_authority_flags_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "policy_block_code_refs": [
+        "BLOCKED_LIVE_DATA_ATTEMPT",
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_NONCANONICAL_FORECASTEX_IBKR_IDENTITY"
+      ],
+      "policy_manifest_ref": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+      "quantum_metadata_fields_required": [
+        "classical_comparator_required_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_advantage_claim_flag"
+      ],
+      "replay_paper_input_identity_requirement": "PR134_REPLAY_PAPER_INPUT_IDENTITY_METADATA",
+      "roadmap_anchor_terms_inspected": [
+        "Stage 1 prediction markets",
+        "Historical dataset digest and loader",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+      ],
+      "source_lineage_requirement": "SOURCE_REQUIRED_REFERENCE_ONLY"
+    }
+  ],
+  "receipt_type": "PR135_MARKET_SPECIFIC_SECTION_INDEX",
+  "repo_pr_number": 135,
+  "roadmap_pr_number": 117
+}

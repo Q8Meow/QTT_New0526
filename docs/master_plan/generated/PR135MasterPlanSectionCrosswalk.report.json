@@ -1,0 +1,439 @@
+{
+  "receipt_type": "PR135_MASTER_PLAN_SECTION_CROSSWALK",
+  "repo_pr_number": 135,
+  "roadmap_pr_number": 117,
+  "rows": [
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4K",
+      "section_title_or_anchor": "0X.4K Stage-1 packet schemas and contract boundaries",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4S",
+      "section_title_or_anchor": "0X.4S runtime resolver snapshot / handoff / input lock",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4T",
+      "section_title_or_anchor": "0X.4T concurrent replay/paper shared input identity and lane separation",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4Q",
+      "section_title_or_anchor": "0X.4Q source-evidence retrieval/acceptance boundary",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4R",
+      "section_title_or_anchor": "0X.4R connector semantic binding boundary",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.4Z",
+      "section_title_or_anchor": "0X.4Z live path exclusion / low latency boundary",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.5C",
+      "section_title_or_anchor": "0X.5C owner authority and external fact boundary",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.5F",
+      "section_title_or_anchor": "0X.5F AtomicRows bundle/hash authority gate",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "0X.5L",
+      "section_title_or_anchor": "0X.5L Codex handoff / validation workflow / no deletion boundary",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "8.1C",
+      "section_title_or_anchor": "8.1C / QT sections for quantum metadata only",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "Roadmap",
+      "section_title_or_anchor": "Roadmap PR117 / historical dataset digest and loader anchors",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    },
+    {
+      "action_for_PR135": "create deterministic fixture-backed contract artifacts only",
+      "allowed_artifacts": [
+        "schemas",
+        "fixtures",
+        "metadata reports",
+        "validators"
+      ],
+      "atomicrows_boundary": "PRE_BRIDGE_METADATA_ONLY_NO_BUNDLE_SHA_ROWS",
+      "forbidden_artifacts": [
+        "live data",
+        "source acceptance",
+        "connector binding",
+        "replay or paper execution",
+        "order authority",
+        "profit evidence",
+        "quantum execution",
+        "AtomicRows materialization"
+      ],
+      "live_authority_boundary": "NO_LIVE_AUTHORITY_CREATED",
+      "policy_block_code_refs": [
+        "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_SEMANTIC_BINDING",
+        "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT"
+      ],
+      "quantum_boundary": "METADATA_ONLY_NO_QUANTUM_EXECUTION",
+      "relevance_to_PR135": "historical dataset digest/loader boundary and downstream metadata",
+      "section_id": "Blueprint",
+      "section_title_or_anchor": "Blueprint PR117 / historical dataset digest and loader anchors",
+      "source_authority_boundary": "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+      "validation_hooks_to_add_or_preserve": [
+        "tools/validate_historical_dataset_digest_and_loader.py",
+        "tools/validate_historical_dataset_policy_literal_drift.py",
+        "tools/run_validation_gates.py"
+      ]
+    }
+  ]
+}

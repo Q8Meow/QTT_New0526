@@ -1,0 +1,19 @@
+{
+  "blockers": [],
+  "branch_expected": "pr135-historical-dataset-digest-loader",
+  "currentization_first_subtask_completed": true,
+  "explicit_non_scope_roadmap_pr135": true,
+  "implement_only_owner_authorized_scope": true,
+  "non_scope_reason": "SAME_NUMBER_INFERENCE_FORBIDDEN",
+  "owner_authorized_roadmap_pr": 117,
+  "policy_registry_ref": "PR135HistoricalDatasetPolicyManifest.report.json",
+  "previous_repo_pr_number": 134,
+  "previous_roadmap_pr_number": 116,
+  "receipt_type": "PR135_ROUTE_TRIAGE_RECEIPT",
+  "repo_pr_number": 135,
+  "repo_task": "historical dataset digest and loader contracts",
+  "roadmap_blueprint_extraction_receipt_ref": "PR135RoadmapBlueprintExtraction.report.json",
+  "roadmap_pr_number": 117,
+  "route_resolution_basis": "OWNER_AUTHORIZED_ROADMAP_PR117_HISTORICAL_DATASET_DIGEST_AND_LOADER",
+  "same_number_inference_used": false
+}

@@ -1,0 +1,47 @@
+{
+  "blueprint_files_consulted": [
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+  ],
+  "blueprint_task_title_extracted": "Historical dataset digest and loader",
+  "execution_state_controller_consulted": true,
+  "extracted_forbidden_authority_refs": [
+    "no live data",
+    "no source acceptance",
+    "no connector binding",
+    "no credential resolution",
+    "no private-state fetch",
+    "no runtime cash authority",
+    "no replay execution",
+    "no paper execution",
+    "no feature vector",
+    "no trading signal",
+    "no ranking/scoring/arbitration output",
+    "no order authority",
+    "no profit evidence",
+    "no quantum execution",
+    "no AtomicRows materialization"
+  ],
+  "extracted_required_inputs": [
+    "PR134 runtime resolver snapshot downstream handoff",
+    "PR134 versioned candidate-set snapshot-lock metadata",
+    "PR134 replay/paper input identity metadata",
+    "PR133 orderbook/event-state snapshot contracts",
+    "PR132 market-data ingest adapter contracts",
+    "PR131 credential alias / secret no-capture readiness metadata"
+  ],
+  "extraction_conflicts": [],
+  "identity_roster_consulted": true,
+  "receipt_type": "PR135_ROADMAP_BLUEPRINT_EXTRACTION_RECEIPT",
+  "repo_pr_number": 135,
+  "roadmap_files_consulted": [
+    "docs/roadmap/README.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json"
+  ],
+  "roadmap_pr117_found": true,
+  "roadmap_pr135_explicitly_not_used": true,
+  "roadmap_pr_number": 117,
+  "roadmap_task_title_extracted": "historical dataset digest and loader contracts",
+  "same_number_inference_used": false
+}
