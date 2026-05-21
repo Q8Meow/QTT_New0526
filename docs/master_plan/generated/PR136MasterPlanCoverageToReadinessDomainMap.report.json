@@ -1,11 +1,10 @@
 {
   "arbitrary_domain_count_forced": false,
   "coverage_entry_count": 24,
-  "coverage_report_digest_sha256": "d45a5ff06a95c697a608afef26b90da6827f4a9ffc9f58ce8275f36ab85e09df",
-  "coverage_report_mtime_or_git_blob_ref_if_available": "mtime_epoch_seconds:1779349628",
   "coverage_report_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
-  "coverage_report_value_source": "GENERATED_REPORT_OR_REPO_CURRENT",
+  "coverage_report_value_source": "GENERATED_REPORT_STRUCTURAL_VALUES_OR_REPO_CURRENT",
   "deferred_entries": [],
+  "deterministic_output": true,
   "domain_map_complete": true,
   "domain_records": [
     {
@@ -71,7 +70,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -169,7 +167,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -264,7 +261,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -363,7 +359,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -464,7 +459,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -565,7 +559,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -664,7 +657,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -762,7 +754,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -862,7 +853,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -965,7 +955,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1066,7 +1055,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1171,7 +1159,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1275,7 +1262,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1379,7 +1365,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1480,7 +1465,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1576,7 +1560,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1680,7 +1663,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1783,7 +1765,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1885,7 +1866,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1986,7 +1966,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2084,7 +2063,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2184,7 +2162,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2285,7 +2262,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2385,7 +2361,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2423,6 +2398,8 @@
     }
   ],
   "fixed_13_domain_model_used": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "tools/build_master_plan_section_coverage_report.py",
   "master_plan_section_count": 3006,
   "multi_domain_entries": [
     {
@@ -2440,9 +2417,25 @@
       "primary_domain_id": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
     }
   ],
+  "parser_visible_section_count": 3006,
   "readiness_domain_count": 24,
   "readiness_domain_count_source": "DERIVED_FROM_MASTER_PLAN_COVERAGE_ROADMAP_BLUEPRINTS_AND_REPO_CONVENTIONS",
   "receipt_type": "PR136_MASTER_PLAN_COVERAGE_TO_READINESS_DOMAIN_MAP",
+  "registry_entry_count": 24,
   "repo_pr_number": 136,
+  "report_type": "MASTER_PLAN_SECTION_COVERAGE_REPORT",
+  "report_version": "MASTER_PLAN_SECTION_COVERAGE_REPORT_V1",
+  "required_structural_keys_missing": [],
+  "required_structural_keys_present": {
+    "coverage_entries": true,
+    "coverage_summary": true,
+    "deterministic_output": true,
+    "generated_at_utc": true,
+    "generated_by": true,
+    "registry": true,
+    "report_type": true,
+    "report_version": true,
+    "section_coverage": true
+  },
   "unmapped_entries": []
 }

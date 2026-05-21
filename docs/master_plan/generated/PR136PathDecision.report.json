@@ -33,8 +33,7 @@
   ],
   "protected_files_not_edited": [
     "docs/master_plan/QTT_MasterPlan_Current.md",
-    "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
-    "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
   ],
   "receipt_type": "PR136_PATH_DECISION_RECEIPT",
   "repo_pr_number": 136,

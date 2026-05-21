@@ -74,7 +74,7 @@ Coverage entry count: 24
 - PR139: AtomicRows row-family source manifest currentization
 - PR140: AtomicRows bundle builder dry-run and diff validator
 - PR141: AtomicRows bundle materialization owner-authorized only
-- PR142: AtomicRows SHA/freeze authority owner-authorized only
+- PR142: AtomicRows structural integrity policy gate owner-authorized only
 - PR143K: Kalshi official source-evidence finalization
 - PR143P: Polymarket official source-evidence finalization
 - PR143F: FORECASTEX_IBKR official source-evidence finalization
@@ -103,7 +103,7 @@ Coverage entry count: 24
 
 ## Owner Authorization Gates
 
-Live trading, AtomicRows materialization/SHA, connector binding, runtime cash/private-state, replay/paper execution, quantum execution, limited live canary, and official Day-1 live start remain owner-authorized future scopes only.
+Live trading, AtomicRows materialization, connector binding, runtime cash/private-state, replay/paper execution, quantum execution, limited live canary, and official Day-1 live start remain owner-authorized future scopes only.
 
 ## Market-Specific Readiness
 
@@ -111,7 +111,7 @@ The canonical scopes are PREDICTION_MARKETS_GENERAL, KALSHI, POLYMARKET, and FOR
 
 ## Quantum and AtomicRows
 
-Quantum and AtomicRows entries are metadata-only future references. PR136 creates no quantum execution, optimizer input, trading signal, advantage claim, AtomicRows bundle, AtomicRows SHA, or AtomicRows rows.
+Quantum and AtomicRows entries are metadata-only future references. PR136 creates no quantum execution, optimizer input, trading signal, advantage claim, AtomicRows bundle, AtomicRows structural integrity authority, or AtomicRows rows.
 
 ## Agent and Latency Boundary
 

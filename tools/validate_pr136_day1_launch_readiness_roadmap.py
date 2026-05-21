@@ -20,6 +20,46 @@ from src.qtt.stage1_prediction_markets.launch_readiness import (  # noqa: E402
     day1_launch_readiness_roadmap_policy as policy,
 )
 
+COVERAGE_STRUCTURAL_METADATA_FIELDS = (
+    "coverage_report_ref",
+    "coverage_report_value_source",
+    "master_plan_section_count",
+    "coverage_entry_count",
+    "report_type",
+    "report_version",
+    "deterministic_output",
+    "generated_by",
+    "generated_at_utc",
+    "registry_entry_count",
+    "parser_visible_section_count",
+    "required_structural_keys_present",
+    "required_structural_keys_missing",
+)
+
+FORBIDDEN_PR136_DIGEST_AUTHORITY_KEYS = {
+    "atomicrows_bundle_sha_path",
+    "atomicrows_sha_created_flag",
+    "creates_atomicrows_sha",
+    "coverage_report_digest_sha256",
+    "file_digests_or_sizes",
+    "sha256",
+}
+
+FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT = {
+    "ATOMICROWS_BUNDLE_SHA_PATH",
+    "AtomicRows SHA",
+    "AtomicRows.bundle.sha256",
+    "SHA/freeze",
+    "atomicrows_bundle_sha_path",
+    "atomicrows_sha_created_flag",
+    "coverage_report_digest_sha256",
+    "creates_atomicrows_sha",
+    "file_digests_or_sizes",
+    "hashlib",
+    "sha256",
+    "sha256_file",
+}
+
 
 @dataclass(frozen=True)
 class ValidationFailure:
@@ -53,6 +93,29 @@ def _all_reports(repo_root: Path) -> dict[str, dict[str, Any]]:
         if isinstance(value, dict):
             reports[Path(rel_path).name] = value
     return reports
+
+
+def _scan_forbidden_pr136_digest_authority_keys(value: Any, path: str = "$") -> list[str]:
+    failures: list[str] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            next_path = f"{path}.{key}"
+            if key in FORBIDDEN_PR136_DIGEST_AUTHORITY_KEYS or any(
+                term in key for term in FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT
+            ):
+                failures.append(next_path)
+            failures.extend(_scan_forbidden_pr136_digest_authority_keys(item, next_path))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            failures.extend(
+                _scan_forbidden_pr136_digest_authority_keys(item, f"{path}[{index}]")
+            )
+    elif isinstance(value, str):
+        for term in FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT:
+            if term in value:
+                failures.append(path)
+                break
+    return failures
 
 
 def _validate_required_files(repo_root: Path) -> list[ValidationFailure]:
@@ -164,12 +227,8 @@ def _validate_route_read_path(repo_root: Path) -> list[ValidationFailure]:
             )
         )
     meta = roadmap.coverage_metadata(repo_root)
-    for field in (
-        "master_plan_section_count",
-        "coverage_report_digest_sha256",
-        "coverage_report_value_source",
-    ):
-        expected = meta[field] if field != "coverage_report_digest_sha256" else meta[field]
+    for field in COVERAGE_STRUCTURAL_METADATA_FIELDS:
+        expected = meta[field]
         if read.get(field) != expected:
             failures.append(
                 _failure(
@@ -178,11 +237,20 @@ def _validate_route_read_path(repo_root: Path) -> list[ValidationFailure]:
                     "PR136ReadReceipt.report.json",
                 )
             )
-    if read.get("master_plan_coverage_entry_count") != meta["coverage_entry_count"]:
+    if read.get("required_structural_keys_missing") != []:
         failures.append(
             _failure(
                 "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
-                "read receipt coverage entry count drift",
+                "read receipt coverage report structural keys missing",
+                "PR136ReadReceipt.report.json",
+            )
+        )
+    file_sizes = read.get("file_sizes_and_line_counts")
+    if not isinstance(file_sizes, dict) or not file_sizes:
+        failures.append(
+            _failure(
+                "BLOCKED_MISSING_READ_INPUT",
+                "read receipt must record file sizes and line counts",
                 "PR136ReadReceipt.report.json",
             )
         )
@@ -280,6 +348,34 @@ def _validate_domain_mapping(repo_root: Path) -> list[ValidationFailure]:
                 "PR136MasterPlanCoverageToReadinessDomainMap.report.json",
             )
         )
+    for field in COVERAGE_STRUCTURAL_METADATA_FIELDS:
+        if domain_map.get(field) != meta[field]:
+            failures.append(
+                _failure(
+                    "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
+                    f"domain map coverage structural field {field} drift",
+                    "PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+                )
+            )
+    evidence_summary = taxonomy.get("domain_evidence_summary")
+    if not isinstance(evidence_summary, dict):
+        failures.append(
+            _failure(
+                "BLOCKED_EVIDENCELESS_CLASSIFICATION",
+                "taxonomy missing domain_evidence_summary",
+                "PR136ReadinessDomainTaxonomy.report.json",
+            )
+        )
+    else:
+        for field in COVERAGE_STRUCTURAL_METADATA_FIELDS:
+            if evidence_summary.get(field) != meta[field]:
+                failures.append(
+                    _failure(
+                        "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
+                        f"taxonomy coverage structural field {field} drift",
+                        "PR136ReadinessDomainTaxonomy.report.json",
+                    )
+                )
     for artifact_name, payload in (
         ("PR136MasterPlanCoverageToReadinessDomainMap.report.json", domain_map),
         ("PR136ReadinessDomainTaxonomy.report.json", taxonomy),
@@ -555,18 +651,28 @@ def _validate_graph_market_quantum_agent_latency(repo_root: Path) -> list[Valida
     for field in (
         "atomicrows_bundle_created_flag",
         "atomicrows_bundle_edited_flag",
-        "atomicrows_sha_created_flag",
         "atomicrows_rows_created_flag",
         "atomicrows_materialization_authority_created_flag",
     ):
         if quantum.get(field) is not False:
             failures.append(
                 _failure(
-                    "BLOCKED_ATOMICROWS_BUNDLE_SHA_ROW_MATERIALIZATION_ATTEMPT",
+                    "BLOCKED_ATOMICROWS_BUNDLE_ROW_MATERIALIZATION_ATTEMPT",
                     f"{field} must be false",
                     "PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
                 )
             )
+    if (
+        quantum.get("atomicrows_bundle_integrity_authority_status")
+        != "OWNER_DISABLED_NO_QTT_SHA"
+    ):
+        failures.append(
+            _failure(
+                "BLOCKED_ATOMICROWS_BUNDLE_ROW_MATERIALIZATION_ATTEMPT",
+                "AtomicRows bundle integrity authority must remain owner-disabled",
+                "PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
+            )
+        )
     agents = _load_report(repo_root, "PR136AgentLaunchOrchestrationMap.report.json")
     for agent in agents.get("agent_domains", []):
         if agent.get("latency_hot_path_allowed") is not False or agent.get("live_order_authority_allowed") is not False:
@@ -651,12 +757,61 @@ def _validate_authority_boundaries(repo_root: Path) -> list[ValidationFailure]:
     return failures
 
 
+def _validate_no_pr136_digest_authority(repo_root: Path) -> list[ValidationFailure]:
+    failures: list[ValidationFailure] = []
+    json_paths = (
+        *policy.PR136_REPORT_PATHS,
+        *policy.PR136_ROADMAP_RECEIPT_PATHS,
+        *policy.PR136_SCHEMA_PATHS,
+        "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_Index_v1_0.json",
+    )
+    for rel_path in json_paths:
+        path = repo_root / rel_path
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            failures.append(
+                _failure(
+                    "BLOCKED_SCATTERED_POLICY_LITERAL_DRIFT",
+                    f"JSON load failed while checking digest authority: {exc}",
+                    rel_path,
+                )
+            )
+            continue
+        for field_path in _scan_forbidden_pr136_digest_authority_keys(payload):
+            failures.append(
+                _failure(
+                    "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
+                    f"PR136 digest authority field is forbidden: {field_path}",
+                    rel_path,
+                )
+            )
+    text_paths = ("docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",)
+    for rel_path in text_paths:
+        text = (repo_root / rel_path).read_text(encoding="utf-8")
+        for forbidden in FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT:
+            if forbidden in text:
+                failures.append(
+                    _failure(
+                        "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
+                        f"PR136 digest authority text is forbidden: {forbidden}",
+                        rel_path,
+                    )
+                )
+    return failures
+
+
 def _validate_protected_diffs(repo_root: Path) -> list[ValidationFailure]:
     failures: list[ValidationFailure] = []
     protected = (
         ("docs/master_plan/QTT_MasterPlan_Current.md", "BLOCKED_MASTER_PLAN_EDIT_ATTEMPT"),
-        (roadmap.ATOMICROWS_BUNDLE_PATH.as_posix(), "BLOCKED_ATOMICROWS_BUNDLE_SHA_ROW_MATERIALIZATION_ATTEMPT"),
-        (roadmap.ATOMICROWS_BUNDLE_SHA_PATH.as_posix(), "BLOCKED_ATOMICROWS_BUNDLE_SHA_ROW_MATERIALIZATION_ATTEMPT"),
+        (roadmap.ATOMICROWS_BUNDLE_PATH.as_posix(), "BLOCKED_ATOMICROWS_BUNDLE_ROW_MATERIALIZATION_ATTEMPT"),
+        (
+            "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+            "BLOCKED_ATOMICROWS_BUNDLE_ROW_MATERIALIZATION_ATTEMPT",
+        ),
     )
     for rel_path, block_code in protected:
         completed = subprocess.run(
@@ -686,6 +841,7 @@ def validate_all(repo_root: Path = _REPO_ROOT) -> list[ValidationFailure]:
     failures.extend(_validate_classification_sequence(repo_root))
     failures.extend(_validate_graph_market_quantum_agent_latency(repo_root))
     failures.extend(_validate_authority_boundaries(repo_root))
+    failures.extend(_validate_no_pr136_digest_authority(repo_root))
     failures.extend(_validate_protected_diffs(repo_root))
     return failures
 

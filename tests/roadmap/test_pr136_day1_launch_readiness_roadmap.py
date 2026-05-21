@@ -39,6 +39,34 @@ def _classification_records() -> list[dict]:
     ]
 
 
+def _json_key_paths(value, path: str = "$") -> list[tuple[str, str]]:
+    paths: list[tuple[str, str]] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            next_path = f"{path}.{key}"
+            paths.append((key, next_path))
+            paths.extend(_json_key_paths(item, next_path))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            paths.extend(_json_key_paths(item, f"{path}[{index}]"))
+    return paths
+
+
+def _pr136_text_artifact_paths() -> tuple[str, ...]:
+    return (
+        "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    )
+
+
+def _pr136_json_artifact_paths() -> tuple[str, ...]:
+    return (
+        *policy.PR136_REPORT_PATHS,
+        *policy.PR136_ROADMAP_RECEIPT_PATHS,
+        *policy.PR136_SCHEMA_PATHS,
+        "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_Index_v1_0.json",
+    )
+
+
 def test_pr136_validator_emits_marker(capsys):
     assert validator.main(["--repo-root", str(ROOT)]) == 0
     assert capsys.readouterr().out.strip() == policy.VALIDATOR_MARKER
@@ -103,10 +131,24 @@ def test_no_scattered_classification_or_block_code_definitions():
     assert drift.validate_policy_literal_drift(repo_root=ROOT, write_report=False) == []
 
 
-def test_master_plan_coverage_report_consumed_with_digest():
+def test_master_plan_coverage_report_consumed_with_structural_evidence():
     domain_map = _domain_map()
-    assert domain_map["coverage_report_digest_sha256"]
+    coverage = json.loads(
+        (ROOT / "docs/master_plan/generated/MasterPlanSectionCoverageReport.json").read_text()
+    )
+    assert "coverage_report_digest_sha256" not in domain_map
     assert domain_map["coverage_report_ref"].endswith("MasterPlanSectionCoverageReport.json")
+    assert domain_map["report_type"] == coverage["report_type"]
+    assert domain_map["report_version"] == coverage["report_version"]
+    assert domain_map["deterministic_output"] is True
+    assert domain_map["generated_by"] == coverage["generated_by"]
+    assert domain_map["generated_at_utc"] == coverage["generated_at_utc"]
+    assert domain_map["registry_entry_count"] == coverage["registry"]["entry_count"]
+    assert domain_map["parser_visible_section_count"] == coverage["coverage_summary"][
+        "parser_visible_section_count"
+    ]
+    assert all(domain_map["required_structural_keys_present"].values())
+    assert domain_map["required_structural_keys_missing"] == []
 
 
 def test_master_plan_coverage_values_not_guessed():
@@ -116,6 +158,46 @@ def test_master_plan_coverage_values_not_guessed():
     )
     assert domain_map["master_plan_section_count"] == len(coverage["section_coverage"])
     assert domain_map["coverage_entry_count"] == len(coverage["coverage_entries"])
+
+
+def test_pr136_read_receipts_use_sizes_not_digests():
+    for receipt in (
+        _report("PR136ReadReceipt.report.json"),
+        _roadmap_generated("CODEX_PR136_MANDATORY_READ_RECEIPT.json"),
+    ):
+        assert "file_digests_or_sizes" not in receipt
+        assert "coverage_report_digest_sha256" not in receipt
+        assert receipt["file_sizes_and_line_counts"]
+        assert all(
+            "sha256" not in metadata
+            for metadata in receipt["file_sizes_and_line_counts"].values()
+        )
+        assert receipt["coverage_entry_count"] == _domain_map()["coverage_entry_count"]
+
+
+def test_no_pr136_sha_digest_authority_fields_are_generated():
+    required_forbidden_terms = {
+        "AtomicRows.bundle.sha256",
+        "atomicrows_bundle_sha_path",
+        "ATOMICROWS_BUNDLE_SHA_PATH",
+        "sha256",
+    }
+    assert required_forbidden_terms.issubset(
+        validator.FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT
+    )
+    failures: list[str] = []
+    for rel_path in _pr136_json_artifact_paths():
+        payload = json.loads((ROOT / rel_path).read_text())
+        failures.extend(
+            f"{rel_path}:{field_path}"
+            for field_path in validator._scan_forbidden_pr136_digest_authority_keys(payload)
+        )
+    for rel_path in _pr136_text_artifact_paths():
+        text = (ROOT / rel_path).read_text()
+        for forbidden in validator.FORBIDDEN_PR136_DIGEST_AUTHORITY_TEXT:
+            if forbidden in text:
+                failures.append(f"{rel_path}:{forbidden}")
+    assert failures == []
 
 
 def test_readiness_domain_taxonomy_is_coverage_derived():
@@ -231,7 +313,12 @@ def test_atomicrows_materialization_remains_blocked():
 def test_atomicrows_bundle_sha_paths_not_created_or_edited():
     qmap = _report("PR136QuantumAtomicRowsOptimizationReadinessMap.report.json")
     assert qmap["atomicrows_bundle_created_flag"] is False
-    assert qmap["atomicrows_sha_created_flag"] is False
+    assert qmap["atomicrows_bundle_integrity_authority_status"] == (
+        "OWNER_DISABLED_NO_QTT_SHA"
+    )
+    assert "atomicrows_bundle_sha_path" not in qmap
+    assert "atomicrows_sha_created_flag" not in qmap
+    assert "AtomicRows.bundle.sha256" not in json.dumps(qmap)
 
 
 def test_quantum_readiness_is_metadata_only():

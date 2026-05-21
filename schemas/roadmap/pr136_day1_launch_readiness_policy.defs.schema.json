@@ -15,10 +15,6 @@
           "const": false,
           "type": "boolean"
         },
-        "creates_atomicrows_sha": {
-          "const": false,
-          "type": "boolean"
-        },
         "creates_connector_binding": {
           "const": false,
           "type": "boolean"
@@ -116,7 +112,6 @@
         "creates_alpha_evidence",
         "creates_atomicrows_bundle",
         "creates_atomicrows_rows",
-        "creates_atomicrows_sha",
         "creates_connector_binding",
         "creates_credential_resolution",
         "creates_day1_live_launch",
@@ -148,7 +143,7 @@
         "BLOCKED_SAME_NUMBER_ROADMAP_INFERENCE",
         "BLOCKED_MISSING_PR135_CURRENTIZATION",
         "BLOCKED_MASTER_PLAN_EDIT_ATTEMPT",
-        "BLOCKED_ATOMICROWS_BUNDLE_SHA_ROW_MATERIALIZATION_ATTEMPT",
+        "BLOCKED_ATOMICROWS_BUNDLE_ROW_MATERIALIZATION_ATTEMPT",
         "BLOCKED_SOURCE_RETRIEVAL_OR_ACCEPTANCE_ATTEMPT",
         "BLOCKED_CONNECTOR_BINDING_ATTEMPT",
         "BLOCKED_CREDENTIAL_PRIVATE_STATE_CASH_AUTHORITY_ATTEMPT",

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -22,7 +21,18 @@ ROADMAP_INDEX_PATH = Path(
 )
 COVERAGE_REPORT_PATH = Path("docs/master_plan/generated/MasterPlanSectionCoverageReport.json")
 ATOMICROWS_BUNDLE_PATH = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl")
-ATOMICROWS_BUNDLE_SHA_PATH = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.sha256")
+
+COVERAGE_REPORT_REQUIRED_STRUCTURAL_KEYS = (
+    "report_type",
+    "report_version",
+    "deterministic_output",
+    "generated_by",
+    "generated_at_utc",
+    "registry",
+    "coverage_summary",
+    "coverage_entries",
+    "section_coverage",
+)
 
 
 PR135_OWNER_VERIFIED_FIELDS = {
@@ -46,7 +56,7 @@ PROVISIONAL_SKELETON = (
     (139, "AtomicRows row-family source manifest currentization"),
     (140, "AtomicRows bundle builder dry-run and diff validator"),
     (141, "AtomicRows bundle materialization PR, owner-authorized only"),
-    (142, "AtomicRows SHA/freeze authority PR, owner-authorized only"),
+    (142, "AtomicRows structural integrity policy gate, owner-authorized only"),
     (
         143,
         "Per-venue official source-evidence finalization for Kalshi / Polymarket / FORECASTEX_IBKR",
@@ -88,20 +98,11 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def file_metadata(path: Path) -> dict[str, Any]:
+def file_size_and_line_metadata(path: Path) -> dict[str, Any]:
     data = path.read_bytes()
     return {
         "bytes": len(data),
         "lines": data.count(b"\n") + (0 if data.endswith(b"\n") else 1),
-        "sha256": hashlib.sha256(data).hexdigest(),
     }
 
 
@@ -110,18 +111,40 @@ def _coverage(repo_root: Path) -> dict[str, Any]:
 
 
 def coverage_metadata(repo_root: Path) -> dict[str, Any]:
-    path = repo_root / COVERAGE_REPORT_PATH
     payload = _coverage(repo_root)
-    stat = path.stat()
+    coverage_entries = payload.get("coverage_entries", [])
+    section_coverage = payload.get("section_coverage", [])
+    coverage_summary = payload.get("coverage_summary")
+    registry = payload.get("registry")
+    if not isinstance(coverage_entries, list):
+        coverage_entries = []
+    if not isinstance(section_coverage, list):
+        section_coverage = []
+    if not isinstance(coverage_summary, Mapping):
+        coverage_summary = {}
+    if not isinstance(registry, Mapping):
+        registry = {}
+    structural_keys_present = {
+        key: key in payload for key in COVERAGE_REPORT_REQUIRED_STRUCTURAL_KEYS
+    }
     return {
         "coverage_report_ref": COVERAGE_REPORT_PATH.as_posix(),
-        "coverage_report_digest_sha256": sha256_file(path),
-        "coverage_report_value_source": "GENERATED_REPORT_OR_REPO_CURRENT",
-        "master_plan_section_count": len(payload.get("section_coverage", [])),
-        "coverage_entry_count": len(payload.get("coverage_entries", [])),
-        "coverage_report_mtime_or_git_blob_ref_if_available": (
-            f"mtime_epoch_seconds:{int(stat.st_mtime)}"
+        "coverage_report_value_source": "GENERATED_REPORT_STRUCTURAL_VALUES_OR_REPO_CURRENT",
+        "master_plan_section_count": len(section_coverage),
+        "coverage_entry_count": len(coverage_entries),
+        "report_type": payload.get("report_type"),
+        "report_version": payload.get("report_version"),
+        "deterministic_output": payload.get("deterministic_output"),
+        "generated_by": payload.get("generated_by"),
+        "generated_at_utc": payload.get("generated_at_utc"),
+        "registry_entry_count": registry.get("entry_count"),
+        "parser_visible_section_count": coverage_summary.get(
+            "parser_visible_section_count"
         ),
+        "required_structural_keys_present": structural_keys_present,
+        "required_structural_keys_missing": [
+            key for key, present in structural_keys_present.items() if not present
+        ],
     }
 
 
@@ -204,7 +227,9 @@ def read_receipt(repo_root: Path) -> dict[str, Any]:
         for path in (*policy.REQUIRED_READ_FILES, *policy.OPTIONAL_CURRENT_STATE_FILES)
         if (repo_root / path).exists()
     ]
-    metadata = {path: file_metadata(repo_root / path) for path in required_read}
+    metadata = {
+        path: file_size_and_line_metadata(repo_root / path) for path in required_read
+    }
     coverage = coverage_metadata(repo_root)
     return {
         "receipt_type": "PR136_DAY1_LAUNCH_READINESS_ROADMAP_READ_RECEIPT",
@@ -217,19 +242,28 @@ def read_receipt(repo_root: Path) -> dict[str, Any]:
         "master_plan_section_coverage_report_found": (
             repo_root / COVERAGE_REPORT_PATH
         ).exists(),
-        "master_plan_section_count": coverage["master_plan_section_count"],
-        "master_plan_coverage_entry_count": coverage["coverage_entry_count"],
-        "coverage_report_path": COVERAGE_REPORT_PATH.as_posix(),
-        "coverage_report_digest_sha256": coverage["coverage_report_digest_sha256"],
-        "coverage_report_mtime_or_git_blob_ref_if_available": coverage[
-            "coverage_report_mtime_or_git_blob_ref_if_available"
-        ],
+        "coverage_report_ref": coverage["coverage_report_ref"],
         "coverage_report_value_source": coverage["coverage_report_value_source"],
+        "master_plan_section_count": coverage["master_plan_section_count"],
+        "coverage_entry_count": coverage["coverage_entry_count"],
+        "report_type": coverage["report_type"],
+        "report_version": coverage["report_version"],
+        "deterministic_output": coverage["deterministic_output"],
+        "generated_by": coverage["generated_by"],
+        "generated_at_utc": coverage["generated_at_utc"],
+        "registry_entry_count": coverage["registry_entry_count"],
+        "parser_visible_section_count": coverage["parser_visible_section_count"],
+        "required_structural_keys_present": coverage[
+            "required_structural_keys_present"
+        ],
+        "required_structural_keys_missing": coverage[
+            "required_structural_keys_missing"
+        ],
         "arbitrary_domain_count_forced": False,
         "fixed_13_domain_model_used": False,
         "readiness_domain_taxonomy_derivation_required": True,
         "anchors_inspected": list(policy.ANCHORS_INSPECTED),
-        "file_digests_or_sizes": metadata,
+        "file_sizes_and_line_counts": metadata,
         "repo_convention_files_inspected": [
             "git ls-files",
             "git ls-files docs/roadmap",
@@ -272,7 +306,6 @@ def path_decision_report() -> dict[str, Any]:
         "protected_files_not_edited": [
             "docs/master_plan/QTT_MasterPlan_Current.md",
             ATOMICROWS_BUNDLE_PATH.as_posix(),
-            ATOMICROWS_BUNDLE_SHA_PATH.as_posix(),
         ],
     }
 
@@ -537,8 +570,23 @@ def build_domain_artifacts(repo_root: Path) -> tuple[dict[str, Any], dict[str, A
             "No domain count was supplied by owner memory or fixed to 13.",
         ],
         "domain_evidence_summary": {
+            "coverage_report_ref": meta["coverage_report_ref"],
+            "coverage_report_value_source": meta["coverage_report_value_source"],
             "coverage_entry_count": meta["coverage_entry_count"],
-            "coverage_report_digest_sha256": meta["coverage_report_digest_sha256"],
+            "master_plan_section_count": meta["master_plan_section_count"],
+            "parser_visible_section_count": meta["parser_visible_section_count"],
+            "registry_entry_count": meta["registry_entry_count"],
+            "report_type": meta["report_type"],
+            "report_version": meta["report_version"],
+            "deterministic_output": meta["deterministic_output"],
+            "generated_by": meta["generated_by"],
+            "generated_at_utc": meta["generated_at_utc"],
+            "required_structural_keys_present": meta[
+                "required_structural_keys_present"
+            ],
+            "required_structural_keys_missing": meta[
+                "required_structural_keys_missing"
+            ],
             "evidence_classes_used": [
                 "GENERATED_REPORT",
                 "ROADMAP",
@@ -683,7 +731,7 @@ def _sequence_plan(domain_records: Sequence[Mapping[str, Any]]) -> list[tuple[st
         ("PR139", "pr139-atomicrows-row-family-source-manifest-currentization", "AtomicRows row-family source manifest currentization", "ATOMICROWS_READINESS", False, ["ATOMICROWS"], "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"),
         ("PR140", "pr140-atomicrows-bundle-builder-dry-run-diff-validator", "AtomicRows bundle builder dry-run and diff validator", "ATOMICROWS_READINESS", False, ["ATOMICROWS"], "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"),
         ("PR141", "pr141-atomicrows-bundle-materialization-owner-authorized", "AtomicRows bundle materialization owner-authorized only", "ATOMICROWS_READINESS", True, ["ATOMICROWS"], "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"),
-        ("PR142", "pr142-atomicrows-sha-freeze-owner-authorized", "AtomicRows SHA/freeze authority owner-authorized only", "ATOMICROWS_READINESS", True, ["ATOMICROWS"], "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"),
+        ("PR142", "pr142-atomicrows-structural-integrity-policy-gate", "AtomicRows structural integrity policy gate owner-authorized only", "ATOMICROWS_READINESS", True, ["ATOMICROWS"], "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"),
         ("PR143K", "pr143k-kalshi-source-evidence-finalization", "Kalshi official source-evidence finalization", "SOURCE_EVIDENCE_READINESS", True, ["SOURCE", "MARKET"], "SOURCE_EVIDENCE_READY"),
         ("PR143P", "pr143p-polymarket-source-evidence-finalization", "Polymarket official source-evidence finalization", "SOURCE_EVIDENCE_READINESS", True, ["SOURCE", "MARKET"], "SOURCE_EVIDENCE_READY"),
         ("PR143F", "pr143f-forecastex-ibkr-source-evidence-finalization", "FORECASTEX_IBKR official source-evidence finalization", "SOURCE_EVIDENCE_READINESS", True, ["SOURCE", "MARKET"], "SOURCE_EVIDENCE_READY"),
@@ -1025,7 +1073,7 @@ def quantum_atomicrows_map() -> dict[str, Any]:
             "PRE_BRIDGE_METADATA",
             "BRIDGE_READY",
             "MATERIALIZATION_READY_OWNER_BLOCKED",
-            "BUNDLE_SHA_OWNER_AUTHORIZED_ONLY",
+            "BUNDLE_INTEGRITY_POLICY_OWNER_DISABLED",
         ],
         "future_atomicrows_historical_dataset_digest_row_refs": ["FUTURE_ATOMICROWS_HISTORICAL_DATASET_DIGEST_ROWS"],
         "future_atomicrows_loader_manifest_row_refs": ["FUTURE_ATOMICROWS_LOADER_MANIFEST_ROWS"],
@@ -1036,10 +1084,9 @@ def quantum_atomicrows_map() -> dict[str, Any]:
         "future_atomicrows_quantum_optimizer_row_refs": ["FUTURE_ATOMICROWS_QUANTUM_OPTIMIZER_ROWS"],
         "future_atomicrows_day1_launch_readiness_row_refs": ["FUTURE_ATOMICROWS_DAY1_LAUNCH_READINESS_ROWS"],
         "atomicrows_bundle_path": ATOMICROWS_BUNDLE_PATH.as_posix(),
-        "atomicrows_bundle_sha_path": ATOMICROWS_BUNDLE_SHA_PATH.as_posix(),
+        "atomicrows_bundle_integrity_authority_status": "OWNER_DISABLED_NO_QTT_SHA",
         "atomicrows_bundle_created_flag": False,
         "atomicrows_bundle_edited_flag": False,
-        "atomicrows_sha_created_flag": False,
         "atomicrows_rows_created_flag": False,
         "atomicrows_materialization_authority_created_flag": False,
         "future_owner_authorization_required_for_materialization_flag": True,
@@ -1364,7 +1411,7 @@ Coverage entry count: {domain_map['coverage_entry_count']}
 
 ## Owner Authorization Gates
 
-Live trading, AtomicRows materialization/SHA, connector binding, runtime cash/private-state, replay/paper execution, quantum execution, limited live canary, and official Day-1 live start remain owner-authorized future scopes only.
+Live trading, AtomicRows materialization, connector binding, runtime cash/private-state, replay/paper execution, quantum execution, limited live canary, and official Day-1 live start remain owner-authorized future scopes only.
 
 ## Market-Specific Readiness
 
@@ -1372,7 +1419,7 @@ The canonical scopes are PREDICTION_MARKETS_GENERAL, KALSHI, POLYMARKET, and FOR
 
 ## Quantum and AtomicRows
 
-Quantum and AtomicRows entries are metadata-only future references. PR136 creates no quantum execution, optimizer input, trading signal, advantage claim, AtomicRows bundle, AtomicRows SHA, or AtomicRows rows.
+Quantum and AtomicRows entries are metadata-only future references. PR136 creates no quantum execution, optimizer input, trading signal, advantage claim, AtomicRows bundle, AtomicRows structural integrity authority, or AtomicRows rows.
 
 ## Agent and Latency Boundary
 

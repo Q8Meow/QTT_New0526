@@ -1,17 +1,16 @@
 {
   "atomicrows_bundle_created_flag": false,
   "atomicrows_bundle_edited_flag": false,
+  "atomicrows_bundle_integrity_authority_status": "OWNER_DISABLED_NO_QTT_SHA",
   "atomicrows_bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
-  "atomicrows_bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
   "atomicrows_materialization_authority_created_flag": false,
   "atomicrows_readiness_ladder": [
     "PRE_BRIDGE_METADATA",
     "BRIDGE_READY",
     "MATERIALIZATION_READY_OWNER_BLOCKED",
-    "BUNDLE_SHA_OWNER_AUTHORIZED_ONLY"
+    "BUNDLE_INTEGRITY_POLICY_OWNER_DISABLED"
   ],
   "atomicrows_rows_created_flag": false,
-  "atomicrows_sha_created_flag": false,
   "future_amplitude_encoding_refs": [
     "FUTURE_AMPLITUDE_ENCODING_REF"
   ],

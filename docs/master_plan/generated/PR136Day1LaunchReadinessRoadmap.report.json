@@ -17,7 +17,6 @@
     "creates_alpha_evidence": false,
     "creates_atomicrows_bundle": false,
     "creates_atomicrows_rows": false,
-    "creates_atomicrows_sha": false,
     "creates_connector_binding": false,
     "creates_credential_resolution": false,
     "creates_day1_live_launch": false,

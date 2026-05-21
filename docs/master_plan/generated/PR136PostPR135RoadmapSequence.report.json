@@ -106,7 +106,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -225,7 +224,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -332,7 +330,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -439,7 +436,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -546,7 +542,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -653,7 +648,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -760,7 +754,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -779,7 +772,7 @@
       "owner_authorization_required": true,
       "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
       "profit_claim_boundary": "NO_PROFIT_EVIDENCE_OR_ALPHA_CLAIM",
-      "proposed_branch_name": "pr142-atomicrows-sha-freeze-owner-authorized",
+      "proposed_branch_name": "pr142-atomicrows-structural-integrity-policy-gate",
       "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
       "quantum_scope": "NONE",
       "readiness_state_target": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
@@ -799,7 +792,7 @@
       "subdomain_ids": [
         "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
       ],
-      "title": "AtomicRows SHA/freeze authority owner-authorized only",
+      "title": "AtomicRows structural integrity policy gate owner-authorized only",
       "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
       "why_this_pr_after_previous": "It depends on the prior gate's validated output.",
       "why_this_pr_before_next": "It produces the next gate's static or receipt-backed input."
@@ -870,7 +863,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -986,7 +978,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1102,7 +1093,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1218,7 +1208,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1332,7 +1321,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1441,7 +1429,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1549,7 +1536,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1659,7 +1645,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1769,7 +1754,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1879,7 +1863,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -1992,7 +1975,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2109,7 +2091,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2222,7 +2203,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2337,7 +2317,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2453,7 +2432,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2564,7 +2542,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2676,7 +2653,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2787,7 +2763,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -2899,7 +2874,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3009,7 +2983,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3119,7 +3092,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3229,7 +3201,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3340,7 +3311,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3452,7 +3422,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
@@ -3562,7 +3531,6 @@
         "creates_quantum_optimizer_input",
         "creates_quantum_advantage_claim",
         "creates_atomicrows_bundle",
-        "creates_atomicrows_sha",
         "creates_atomicrows_rows",
         "creates_day1_live_launch"
       ],
