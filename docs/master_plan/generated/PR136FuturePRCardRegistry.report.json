@@ -1,0 +1,3691 @@
+{
+  "cards": [
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+        "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+        "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR137",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr137-launch-roadmap-validator-readiness-controller",
+      "proposed_pr_number_or_placeholder": "PR137",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR135"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ROADMAP_MAPPING",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+        "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+        "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Launch-roadmap validator and readiness dependency controller",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR137L",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr137l-latency-hot-path-snapshot-boundary",
+      "proposed_pr_number_or_placeholder": "PR137L",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR137"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ROADMAP_MAPPING",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Latency hot-path snapshot boundary insertion",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR138",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr138-atomicrows-historical-dataset-bridge",
+      "proposed_pr_number_or_placeholder": "PR138",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR137L"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "AtomicRows historical dataset bridge readiness gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR139",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr139-atomicrows-row-family-source-manifest-currentization",
+      "proposed_pr_number_or_placeholder": "PR139",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR138"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "AtomicRows row-family source manifest currentization",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR140",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr140-atomicrows-bundle-builder-dry-run-diff-validator",
+      "proposed_pr_number_or_placeholder": "PR140",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR139"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "AtomicRows bundle builder dry-run and diff validator",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR141",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr141-atomicrows-bundle-materialization-owner-authorized",
+      "proposed_pr_number_or_placeholder": "PR141",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR140"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "AtomicRows bundle materialization owner-authorized only",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR142",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr142-atomicrows-structural-integrity-policy-gate",
+      "proposed_pr_number_or_placeholder": "PR142",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR141"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "ATOMICROWS_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "AtomicRows structural integrity policy gate owner-authorized only",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR143K",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr143k-kalshi-source-evidence-finalization",
+      "proposed_pr_number_or_placeholder": "PR143K",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR142"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Kalshi official source-evidence finalization",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR143P",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr143p-polymarket-source-evidence-finalization",
+      "proposed_pr_number_or_placeholder": "PR143P",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR143K"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Polymarket official source-evidence finalization",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR143F",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr143f-forecastex-ibkr-source-evidence-finalization",
+      "proposed_pr_number_or_placeholder": "PR143F",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR143P"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "FORECASTEX_IBKR official source-evidence finalization",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR143",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr143-per-venue-source-evidence-aggregate",
+      "proposed_pr_number_or_placeholder": "PR143",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR143F"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "SOURCE_EVIDENCE_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Per-venue official source-evidence aggregate review",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "BLOCKED_UNTIL_SOURCE_EVIDENCE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR144",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr144-connector-semantic-binding-live-unlock-gate",
+      "proposed_pr_number_or_placeholder": "PR144",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR143"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CONNECTOR_BINDING_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Connector semantic binding live-unlock gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "FUTURE_RECEIPT_REQUIRED",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR145",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr145-runtime-cash-private-state-credential-readiness",
+      "proposed_pr_number_or_placeholder": "PR145",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR144"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CREDENTIAL_PRIVATE_STATE_CASH_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Runtime cash, private-state, and credential live-readiness gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR146",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr146-real-historical-dataset-availability-accepted-source-bridge",
+      "proposed_pr_number_or_placeholder": "PR146",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR145"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "source_evidence_scope": "REQUIRED_BEFORE_CONNECTOR",
+      "subdomain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Real historical dataset availability and accepted-source bridge",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR147",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr147-replay-engine-locked-historical-inputs",
+      "proposed_pr_number_or_placeholder": "PR147",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "FUTURE_NONLIVE_EXECUTION_REQUIRED",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR146"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Replay execution engine on locked historical inputs",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR148",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr148-paper-execution-engine-separate-lane",
+      "proposed_pr_number_or_placeholder": "PR148",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "FUTURE_NONLIVE_EXECUTION_REQUIRED",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR147"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Paper execution engine on separate lane",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR149",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr149-replay-paper-result-immutability-dual-review",
+      "proposed_pr_number_or_placeholder": "PR149",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "FUTURE_NONLIVE_EXECUTION_REQUIRED",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR148"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DATASET_REPLAY_PAPER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Replay/paper result immutability and dual-result review",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR150",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr150-replay-paper-evidence-optimizer-quantum-comparator",
+      "proposed_pr_number_or_placeholder": "PR150",
+      "quantum_scope": "FUTURE_REF_ONLY",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "FUTURE_NONLIVE_EXECUTION_REQUIRED",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR149"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Replay/paper evidence to optimizer and quantum comparator",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR151",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr151-quantum-classical-optimizer-execution-readiness",
+      "proposed_pr_number_or_placeholder": "PR151",
+      "quantum_scope": "FUTURE_REF_ONLY",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR150"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Quantum/classical optimizer execution-readiness gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR152",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr152-classical-baseline-quantum-challenger-comparison",
+      "proposed_pr_number_or_placeholder": "PR152",
+      "quantum_scope": "FUTURE_REF_ONLY",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR151"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "QUANTUM_OPTIMIZER_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Classical baseline vs quantum challenger comparison",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR153",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr153-final-parameter-stack-selection-owner-override",
+      "proposed_pr_number_or_placeholder": "PR153",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR152"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "PARAMETER_STACK_SELECTION_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Final parameter-stack selection and owner override packet",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR154",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr154-owner-approval-queue-launch-decision",
+      "proposed_pr_number_or_placeholder": "PR154",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR153"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Owner approval queue and launch decision packet",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR155",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr155-owner-dashboard-launch-control-readiness",
+      "proposed_pr_number_or_placeholder": "PR155",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR154"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Owner dashboard launch-control readiness",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR156",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr156-live-promotion-review-closure",
+      "proposed_pr_number_or_placeholder": "PR156",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR155"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Live-promotion review closure",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR157",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr157-three-venue-live-canary-eligibility",
+      "proposed_pr_number_or_placeholder": "PR157",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR156"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Three-venue live canary eligibility gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR158",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr158-limited-live-canary-command-packet",
+      "proposed_pr_number_or_placeholder": "PR158",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR157"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Limited live canary command packet",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR159",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr159-post-trade-reconciliation-kill-switch",
+      "proposed_pr_number_or_placeholder": "PR159",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR158"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Post-trade reconciliation and kill-switch gate",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR160",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr160-triggered-live-concurrent-comparison",
+      "proposed_pr_number_or_placeholder": "PR160",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR159"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Triggered live concurrent comparison",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR161",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr161-limited-live-arbitrage-scaled-live-eligibility",
+      "proposed_pr_number_or_placeholder": "PR161",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR160"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "CANARY_LIVE_COMPARISON_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Limited-live arbitrage and scaled-live eligibility",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR162",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr162-full-day1-launch-preflight-matrix",
+      "proposed_pr_number_or_placeholder": "PR162",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR161"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DAY1_LAUNCH_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Full Day-1 launch preflight matrix",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR163",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "proposed_branch_name": "pr163-day1-launch-runbook-rollback-command-packet",
+      "proposed_pr_number_or_placeholder": "PR163",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR162"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "DAY1_LAUNCH_READINESS",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Day-1 launch runbook and rollback command packet",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    },
+    {
+      "agent_consumers": [
+        "roadmap_compiler_agent",
+        "owner_approval_agent"
+      ],
+      "agent_producers": [
+        "future_owner_authorized_agent_for_scope"
+      ],
+      "atomicrows_scope": "NONE",
+      "business_purpose": "Advance Day-1 launch readiness without current execution authority.",
+      "cash_private_state_scope": "NONE",
+      "command_action_matrix_refs": [
+        "PR136CommandActionMatrix.report.json"
+      ],
+      "connector_scope": "NONE",
+      "definition_of_done": [
+        "focused validator passes",
+        "cumulative validation gate includes this PR gate",
+        "no protected artifact diff",
+        "owner authorization recorded where required"
+      ],
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+        }
+      ],
+      "expected_outputs": [
+        "future receipt-backed validation artifacts"
+      ],
+      "future_owner_decision_points": [
+        "authorize implementation",
+        "authorize materialization or live execution only where applicable"
+      ],
+      "future_pr_id": "PR164",
+      "known_risks": [
+        "hidden source/connector/cash/live prerequisite remains red"
+      ],
+      "live_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "proposed_branch_name": "pr164-official-day1-live-trading-start-command",
+      "proposed_pr_number_or_placeholder": "PR164",
+      "quantum_scope": "NONE",
+      "repair_churn_risk": "LOW_IF_UPSTREAM_RECEIPTS_ARE_VALIDATED",
+      "replay_paper_scope": "NONE",
+      "reports_to_create_or_update": [
+        "scope-specific generated reports"
+      ],
+      "required_inputs": [
+        "PR163"
+      ],
+      "schemas_to_create_or_update": [
+        "scope-specific schema family"
+      ],
+      "scope_class": "OWNER_AUTHORIZED_EXECUTION_ONLY",
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "subdomain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "technical_purpose": "Produce validated future artifacts for the next launch-readiness gate.",
+      "tests_to_create_or_update": [
+        "scope-specific focused and fail-closed tests"
+      ],
+      "title": "Official Day-1 live trading start command owner-authorized only",
+      "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "validators_to_create_or_update": [
+        "scope-specific validator"
+      ]
+    }
+  ],
+  "current_authority_created": false,
+  "future_pr_card_count": 32,
+  "missing_definition_of_done_entries": [],
+  "receipt_type": "PR136_FUTURE_PR_CARD_REGISTRY",
+  "repo_pr_number": 136
+}

@@ -2839,7 +2839,7 @@ def serialize_report(report: dict[str, Any]) -> str:
 
 def write_report(report: dict[str, Any], output: pathlib.Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(serialize_report(report), encoding="utf-8")
+    output.write_text(serialize_report(report), encoding="utf-8", newline="\n")
 
 
 def main(argv: Sequence[str] | None = None) -> int:

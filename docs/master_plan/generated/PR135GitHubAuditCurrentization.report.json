@@ -1,0 +1,22 @@
+{
+  "baseRefName": "main",
+  "branch_commit_short": "f87167f",
+  "codex_network_access_used": false,
+  "currentized_in_identity_roster": true,
+  "gh_command_used_by_codex": false,
+  "headRefName": "pr135-historical-dataset-digest-loader",
+  "mergeCommit_full": "c0aa723a5c46d86ba93a007d5b50d7f64438b03d",
+  "mergeCommit_short": "c0aa723",
+  "mergedAt": "2026-05-21T04:31:43Z",
+  "missing_owner_verified_fields": [],
+  "owner_verified_source": true,
+  "placeholder_values_detected": [],
+  "receipt_type": "PR135_GITHUB_AUDIT_CURRENTIZATION_RECEIPT",
+  "repo_pr_number": 135,
+  "repo_pr_state": "MERGED",
+  "repo_pr_title": "PR135 historical dataset digest loader contracts",
+  "repo_pr_url": "https://github.com/Q8Meow/QTT_New0526/pull/135",
+  "roadmap_pr_number": 117,
+  "source_of_truth_note": "owner-side gh pr view 135 verification; Codex did not verify via network",
+  "stop_if_missing_required_fields": true
+}

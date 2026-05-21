@@ -2376,6 +2376,49 @@
       "owner_authorized_next_capability": "RUNTIME_RESOLVER_SNAPSHOT_EXECUTOR_CONTRACTS",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #134 is the audit number assigned to the merged pull request for repo-canonical PR134. Repo-canonical PR134 is the implementation-truth label for runtime resolver snapshot executor contracts. Repo PR134 does not imply Roadmap PR #134 or Blueprint PR #134. The owner explicitly authorized Roadmap PR116 for Repo PR134. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR135 does not imply Roadmap PR #135; the owner explicitly authorized Roadmap PR117 for Repo PR135."
+    },
+    {
+      "roster_entry_id": "PR135_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR135",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 135,
+      "repo_title": "Historical dataset digest loader contracts",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR135 historical dataset digest loader contracts",
+      "branch_name": "pr135-historical-dataset-digest-loader",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR134_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/135",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-21T04:31:43Z",
+      "github_pr_mergeCommit_oid": "c0aa723a5c46d86ba93a007d5b50d7f64438b03d",
+      "github_headRefName": "pr135-historical-dataset-digest-loader",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR117",
+      "owner_authorized_next_capability": "HISTORICAL_DATASET_DIGEST_LOADER_CONTRACTS",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #135 is the audit number assigned to the merged pull request for repo-canonical PR135. Repo-canonical PR135 is the implementation-truth label for historical dataset digest loader contracts. Repo PR135 does not imply Roadmap PR #135 or Blueprint PR #135. The owner explicitly authorized Roadmap PR117 for Repo PR135. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR136 does not imply Roadmap PR #136; the owner explicitly authorized PR136 as post-PR135 Day-1 launch-readiness roadmap currentization."
     }
   ],
   "mismatch_summary": {

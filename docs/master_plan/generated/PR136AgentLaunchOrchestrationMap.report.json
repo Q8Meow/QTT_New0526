@@ -1,0 +1,1204 @@
+{
+  "agent_domains": [
+    {
+      "agent_domain_id": "research_source_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "source_evidence_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "connector_semantic_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "credential_private_state_cash_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "market_data_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "runtime_resolver_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "historical_dataset_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "atomicrows_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "FUTURE_REF_ONLY",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "quantum_optimizer_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "FUTURE_REF_ONLY",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "classical_optimizer_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "parameter_stack_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "replay_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "paper_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "risk_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "owner_approval_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "dashboard_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "canary_execution_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "post_trade_reconciliation_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "agent_domain_id": "launch_runbook_agent",
+      "allowed_future_inputs": [
+        "validated upstream receipts",
+        "precomputed snapshots"
+      ],
+      "allowed_future_outputs": [
+        "scope-specific readiness reports"
+      ],
+      "atomicrows_scope": "NONE",
+      "evidence_basis": [
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Agent domain maps to launch-readiness roadmap gates."
+        }
+      ],
+      "final_order_submission_authority": "EXECUTION_ROUTER_AFTER_OWNER_AUTHORIZED_LIVE_COMMAND_ONLY",
+      "forbidden_current_authority": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_owner_authorization_required": true,
+      "latency_hot_path_allowed": false,
+      "live_order_authority_allowed": false,
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "quantum_scope": "NONE",
+      "required_upstream_prs": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    }
+  ],
+  "current_agent_authority_escalation_created": false,
+  "receipt_type": "PR136_AGENT_LAUNCH_ORCHESTRATION_MAP",
+  "repo_pr_number": 136
+}

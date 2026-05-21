@@ -1,0 +1,41 @@
+{
+  "$id": "https://qtt.local/schemas/roadmap/pr136_readiness_domain_taxonomy.schema.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "arbitrary_domain_count_forced": {
+      "const": false,
+      "type": "boolean"
+    },
+    "fixed_13_domain_model_used": {
+      "const": false,
+      "type": "boolean"
+    },
+    "no_authority_flags": {
+      "$ref": "pr136_day1_launch_readiness_policy.defs.schema.json#/$defs/authority_flags"
+    },
+    "readiness_domain_count": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "repo_pr_number": {
+      "const": 136
+    },
+    "same_number_inference_used": {
+      "const": false,
+      "type": "boolean"
+    },
+    "sequence_authority_class": {
+      "$ref": "pr136_day1_launch_readiness_policy.defs.schema.json#/$defs/sequence_authority_class"
+    },
+    "validator_marker": {
+      "$ref": "pr136_day1_launch_readiness_policy.defs.schema.json#/$defs/validator_marker"
+    }
+  },
+  "required": [
+    "receipt_type",
+    "repo_pr_number"
+  ],
+  "title": "pr136_readiness_domain_taxonomy.schema",
+  "type": "object"
+}

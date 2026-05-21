@@ -1,0 +1,41 @@
+{
+  "control_plane_allowed_future_work": [
+    "source retrieval",
+    "source acceptance",
+    "source revalidation",
+    "master-plan compilation",
+    "roadmap compilation",
+    "AtomicRows generation",
+    "replay execution",
+    "paper execution",
+    "optimizer comparison",
+    "quantum backend execution if future owner-authorized",
+    "dashboard review",
+    "owner approval"
+  ],
+  "current_pr136_hot_path_authority_created": false,
+  "latency_superiority_claim_created": false,
+  "live_hot_path_allowed_future_inputs": [
+    "precomputed source-change snapshot",
+    "precomputed connector semantic binding snapshot",
+    "precomputed runtime cash/private-state snapshot",
+    "precomputed risk limits",
+    "precomputed approved parameter stack",
+    "precomputed execution policy",
+    "owner-authorized live command"
+  ],
+  "live_hot_path_forbidden_current_and_future_runtime_calls": [
+    "document retrieval",
+    "source acceptance",
+    "LLM reasoning",
+    "roadmap compilation",
+    "master-plan parsing",
+    "replay execution",
+    "paper execution",
+    "dashboard dependency",
+    "quantum backend call",
+    "AtomicRows generation"
+  ],
+  "receipt_type": "PR136_LATENCY_CONTROL_PLANE_VS_LIVE_PATH_MAP",
+  "repo_pr_number": 136
+}

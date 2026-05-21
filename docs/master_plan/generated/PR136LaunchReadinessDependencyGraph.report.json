@@ -1,0 +1,1155 @@
+{
+  "acyclic": true,
+  "arbitrary_domain_count_forced": false,
+  "blocked_execution_edges": [
+    "LIVE_TRADING_BLOCKED_UNTIL_OWNER_COMMAND",
+    "ORDER_AUTHORITY_BLOCKED_UNTIL_SOURCE_CONNECTOR_CASH_RISK_GATES",
+    "QUANTUM_EXECUTION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR",
+    "ATOMICROWS_MATERIALIZATION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR"
+  ],
+  "blocked_hot_path_control_plane_edges": [
+    "NO_SOURCE_RETRIEVAL_IN_LIVE_HOT_PATH",
+    "NO_LLM_REASONING_IN_LIVE_HOT_PATH",
+    "NO_QUANTUM_BACKEND_CALL_IN_LIVE_HOT_PATH",
+    "NO_ATOMICROWS_GENERATION_IN_LIVE_HOT_PATH"
+  ],
+  "derived_domain_count": 24,
+  "edges": [
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+    },
+    {
+      "edge_type": "COVERAGE_DERIVES_DOMAIN",
+      "from": "PR135_MERGED",
+      "to": "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR135_MERGED",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE",
+      "to": "PR137"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR137",
+      "to": "PR137L"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE",
+      "to": "PR137L"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR137L",
+      "to": "PR138"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "to": "PR138"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR138",
+      "to": "PR139"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "to": "PR139"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR139",
+      "to": "PR140"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "to": "PR140"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR140",
+      "to": "PR141"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "to": "PR141"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR141",
+      "to": "PR142"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "to": "PR142"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR142",
+      "to": "PR143K"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR143K"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "to": "PR143K"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "to": "PR143K"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "to": "PR143K"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR143K",
+      "to": "PR143P"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR143P"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "to": "PR143P"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "to": "PR143P"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "to": "PR143P"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR143P",
+      "to": "PR143F"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR143F"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "to": "PR143F"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "to": "PR143F"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "to": "PR143F"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR143F",
+      "to": "PR143"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR143"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "to": "PR143"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "to": "PR143"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "to": "PR143"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR143",
+      "to": "PR144"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR144"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT",
+      "to": "PR144"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR144",
+      "to": "PR145"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE",
+      "to": "PR145"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR145",
+      "to": "PR146"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "to": "PR146"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "to": "PR146"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR146",
+      "to": "PR147"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "to": "PR147"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "to": "PR147"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR147",
+      "to": "PR148"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "to": "PR148"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "to": "PR148"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR148",
+      "to": "PR149"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "to": "PR149"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "to": "PR149"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR149",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "to": "PR150"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR150",
+      "to": "PR151"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "to": "PR151"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "to": "PR151"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "to": "PR151"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR151",
+      "to": "PR152"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "to": "PR152"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "to": "PR152"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "to": "PR152"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR152",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "to": "PR153"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR153",
+      "to": "PR154"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "to": "PR154"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "to": "PR154"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR154",
+      "to": "PR155"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+      "to": "PR155"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "to": "PR155"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "to": "PR155"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR155",
+      "to": "PR156"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "to": "PR156"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "to": "PR156"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR156",
+      "to": "PR157"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "to": "PR157"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR157"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR157"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR157",
+      "to": "PR158"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR158"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR158"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR158",
+      "to": "PR159"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR159"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR159"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR159",
+      "to": "PR160"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR160"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR160"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR160",
+      "to": "PR161"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR161"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR161"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR161",
+      "to": "PR162"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR162"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR162"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE",
+      "to": "PR162"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR162",
+      "to": "PR163"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR163"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR163"
+    },
+    {
+      "edge_type": "SEQUENCE_DEPENDS_ON",
+      "from": "PR163",
+      "to": "PR164"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "to": "PR164"
+    },
+    {
+      "edge_type": "DOMAIN_ROUTES_TO_PR",
+      "from": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "to": "PR164"
+    },
+    {
+      "edge_type": "TERMINAL_READINESS",
+      "from": "PR163",
+      "to": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED"
+    },
+    {
+      "edge_type": "OWNER_COMMAND_REQUIRED",
+      "from": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "to": "PR164"
+    },
+    {
+      "edge_type": "OWNER_AUTHORIZED_ONLY",
+      "from": "PR164",
+      "to": "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY"
+    }
+  ],
+  "fixed_13_domain_model_used": false,
+  "graph_id": "PR136_LAUNCH_READINESS_DAG",
+  "nodes": [
+    {
+      "node_id": "PR135_MERGED",
+      "node_type": "ROOT"
+    },
+    {
+      "node_id": "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "node_id": "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE",
+      "node_type": "READINESS_DOMAIN"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+        "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+        "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+      ],
+      "node_id": "PR137",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "node_id": "PR137L",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "node_id": "PR138",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "node_id": "PR139",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "node_id": "PR140",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "node_id": "PR141",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "node_id": "PR142",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "node_id": "PR143K",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "node_id": "PR143P",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "node_id": "PR143F",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "node_id": "PR143",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+      ],
+      "node_id": "PR144",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+      ],
+      "node_id": "PR145",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "node_id": "PR146",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "node_id": "PR147",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "node_id": "PR148",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "node_id": "PR149",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "node_id": "PR150",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "node_id": "PR151",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "node_id": "PR152",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "node_id": "PR153",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "node_id": "PR154",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "node_id": "PR155",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "node_id": "PR156",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR157",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR158",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR159",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR160",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR161",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "node_id": "PR162",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR163",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "node_id": "PR164",
+      "node_type": "FUTURE_SEQUENCE_ENTRY"
+    },
+    {
+      "node_id": "PREDICTION_MARKETS_GENERAL",
+      "node_type": "MARKET_SCOPE"
+    },
+    {
+      "node_id": "KALSHI",
+      "node_type": "MARKET_SCOPE"
+    },
+    {
+      "node_id": "POLYMARKET",
+      "node_type": "MARKET_SCOPE"
+    },
+    {
+      "node_id": "FORECASTEX_IBKR",
+      "node_type": "MARKET_SCOPE"
+    },
+    {
+      "node_id": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "node_type": "TERMINAL_OR_OWNER_AUTHORIZATION"
+    },
+    {
+      "node_id": "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY",
+      "node_type": "TERMINAL_OR_OWNER_AUTHORIZATION"
+    }
+  ],
+  "owner_authorization_nodes": [
+    "PR141",
+    "PR142",
+    "PR143K",
+    "PR143P",
+    "PR143F",
+    "PR143",
+    "PR144",
+    "PR145",
+    "PR146",
+    "PR147",
+    "PR148",
+    "PR151",
+    "PR154",
+    "PR156",
+    "PR157",
+    "PR158",
+    "PR159",
+    "PR160",
+    "PR161",
+    "PR164"
+  ],
+  "readiness_domain_taxonomy_ref": "PR136ReadinessDomainTaxonomy.report.json",
+  "receipt_type": "PR136_LAUNCH_READINESS_DEPENDENCY_GRAPH",
+  "repo_pr_number": 136,
+  "root_node": "PR135_MERGED",
+  "terminal_nodes": [
+    "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+    "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY"
+  ],
+  "unreachable_domains": [],
+  "unreachable_market_scopes": [],
+  "validation_hooks": [
+    "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+  ]
+}
