@@ -1,0 +1,117 @@
+{
+  "atomicrows_bundle_created_flag": false,
+  "atomicrows_bundle_edited_flag": false,
+  "atomicrows_bundle_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+  "atomicrows_bundle_sha_path": "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256",
+  "atomicrows_materialization_authority_created_flag": false,
+  "atomicrows_readiness_ladder": [
+    "PRE_BRIDGE_METADATA",
+    "BRIDGE_READY",
+    "MATERIALIZATION_READY_OWNER_BLOCKED",
+    "BUNDLE_SHA_OWNER_AUTHORIZED_ONLY"
+  ],
+  "atomicrows_rows_created_flag": false,
+  "atomicrows_sha_created_flag": false,
+  "future_amplitude_encoding_refs": [
+    "FUTURE_AMPLITUDE_ENCODING_REF"
+  ],
+  "future_annealing_schedule_refs": [
+    "FUTURE_ANNEALING_SCHEDULE_REF"
+  ],
+  "future_atomicrows_connector_binding_row_refs": [
+    "FUTURE_ATOMICROWS_CONNECTOR_BINDING_ROWS"
+  ],
+  "future_atomicrows_day1_launch_readiness_row_refs": [
+    "FUTURE_ATOMICROWS_DAY1_LAUNCH_READINESS_ROWS"
+  ],
+  "future_atomicrows_historical_dataset_digest_row_refs": [
+    "FUTURE_ATOMICROWS_HISTORICAL_DATASET_DIGEST_ROWS"
+  ],
+  "future_atomicrows_loader_manifest_row_refs": [
+    "FUTURE_ATOMICROWS_LOADER_MANIFEST_ROWS"
+  ],
+  "future_atomicrows_quantum_optimizer_row_refs": [
+    "FUTURE_ATOMICROWS_QUANTUM_OPTIMIZER_ROWS"
+  ],
+  "future_atomicrows_replay_paper_result_row_refs": [
+    "FUTURE_ATOMICROWS_REPLAY_PAPER_RESULT_ROWS"
+  ],
+  "future_atomicrows_runtime_cash_row_refs": [
+    "FUTURE_ATOMICROWS_RUNTIME_CASH_ROWS"
+  ],
+  "future_atomicrows_source_evidence_row_refs": [
+    "FUTURE_ATOMICROWS_SOURCE_EVIDENCE_ROWS"
+  ],
+  "future_backend_provider_class_refs": [
+    "FUTURE_BACKEND_PROVIDER_CLASS_REF"
+  ],
+  "future_classical_comparator_refs": [
+    "FUTURE_CLASSICAL_COMPARATOR_REF"
+  ],
+  "future_ising_model_refs": [
+    "FUTURE_ISING_MODEL_REF"
+  ],
+  "future_optimizer_arbitration_refs": [
+    "FUTURE_OPTIMIZER_ARBITRATION_REF"
+  ],
+  "future_owner_authorization_required_for_materialization_flag": true,
+  "future_qaoa_depth_p_refs": [
+    "FUTURE_QAOA_DEPTH_P_GRID"
+  ],
+  "future_qaoa_qubo_constraint_refs": [
+    "FUTURE_QAOA_QUBO_CONSTRAINT_MATRIX"
+  ],
+  "future_quantum_annealing_sampling_refs": [
+    "FUTURE_ANNEALING_SAMPLING_REF"
+  ],
+  "future_quantum_dependency_graph_refs": [
+    "FUTURE_QUANTUM_DEPENDENCY_GRAPH_REF"
+  ],
+  "future_quantum_feature_map_refs": [
+    "FUTURE_QUANTUM_FEATURE_MAP_REF"
+  ],
+  "future_quantum_kernel_feature_map_refs": [
+    "FUTURE_QUANTUM_KERNEL_FEATURE_MAP_REF"
+  ],
+  "future_quantum_kernel_regime_refs": [
+    "FUTURE_QUANTUM_KERNEL_REGIME_REF"
+  ],
+  "future_quantum_microstructure_graph_refs": [
+    "FUTURE_MICROSTRUCTURE_GRAPH_REF"
+  ],
+  "future_quantum_state_encoding_refs": [
+    "FUTURE_STATE_ENCODING_BY_MARKET_SCOPE"
+  ],
+  "future_qubo_penalty_scale_refs": [
+    "FUTURE_QUBO_PENALTY_SCALE_GRID"
+  ],
+  "future_seed_control_refs": [
+    "FUTURE_SEED_CONTROL_REF"
+  ],
+  "future_shot_budget_refs": [
+    "FUTURE_SHOT_BUDGET_REF"
+  ],
+  "future_vqe_ansatz_refs": [
+    "FUTURE_VQE_ANSATZ_REF"
+  ],
+  "latency_profit_language_boundary": [
+    "PR136 supports future low-latency readiness by separating control-plane gates from live pretrade path.",
+    "PR136 supports future reproducible optimizer/replay/paper comparison.",
+    "PR136 does not claim live latency, alpha, profit, execution superiority, or quantum advantage evidence."
+  ],
+  "no_quantum_advantage_claim_flag": true,
+  "no_quantum_execution_flag": true,
+  "no_quantum_optimizer_input_flag": true,
+  "no_quantum_signal_creation_flag": true,
+  "quantum_evidence_status": "METADATA_ONLY_NO_EXECUTION",
+  "receipt_type": "PR136_QUANTUM_ATOMICROWS_OPTIMIZATION_READINESS_MAP",
+  "repo_pr_number": 136,
+  "required_owner_authorization_refs": [
+    "PR151",
+    "PR164"
+  ],
+  "required_replay_paper_evidence_refs": [
+    "PR149",
+    "PR150"
+  ]
+}

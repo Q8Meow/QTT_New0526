@@ -1,0 +1,292 @@
+{
+  "$defs": {
+    "authority_flags": {
+      "additionalProperties": false,
+      "properties": {
+        "creates_alpha_evidence": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_atomicrows_bundle": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_atomicrows_rows": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_atomicrows_sha": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_connector_binding": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_credential_resolution": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_day1_live_launch": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_execution_superiority_evidence": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_fill_receipt": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_latency_superiority_evidence": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_live_data": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_order_authority": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_order_execution": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_paper_execution": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_paper_result": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_private_state_fetch": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_profit_evidence": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_quantum_advantage_claim": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_quantum_execution": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_quantum_optimizer_input": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_ranking_scoring_arbitration_output": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_replay_execution": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_replay_result": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_runtime_cash_authority": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_source_acceptance": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_source_retrieval": {
+          "const": false,
+          "type": "boolean"
+        },
+        "creates_trading_signal": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "creates_alpha_evidence",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_atomicrows_sha",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_day1_live_launch",
+        "creates_execution_superiority_evidence",
+        "creates_fill_receipt",
+        "creates_latency_superiority_evidence",
+        "creates_live_data",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_paper_execution",
+        "creates_paper_result",
+        "creates_private_state_fetch",
+        "creates_profit_evidence",
+        "creates_quantum_advantage_claim",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_replay_execution",
+        "creates_replay_result",
+        "creates_runtime_cash_authority",
+        "creates_source_acceptance",
+        "creates_source_retrieval",
+        "creates_trading_signal"
+      ],
+      "type": "object"
+    },
+    "block_code_ref": {
+      "enum": [
+        "BLOCKED_SAME_NUMBER_ROADMAP_INFERENCE",
+        "BLOCKED_MISSING_PR135_CURRENTIZATION",
+        "BLOCKED_MASTER_PLAN_EDIT_ATTEMPT",
+        "BLOCKED_ATOMICROWS_BUNDLE_SHA_ROW_MATERIALIZATION_ATTEMPT",
+        "BLOCKED_SOURCE_RETRIEVAL_OR_ACCEPTANCE_ATTEMPT",
+        "BLOCKED_CONNECTOR_BINDING_ATTEMPT",
+        "BLOCKED_CREDENTIAL_PRIVATE_STATE_CASH_AUTHORITY_ATTEMPT",
+        "BLOCKED_LIVE_DATA_OR_RUNTIME_AUTHORITY_ATTEMPT",
+        "BLOCKED_REPLAY_PAPER_EXECUTION_ATTEMPT",
+        "BLOCKED_TRADING_SIGNAL_ORDER_PROFIT_ATTEMPT",
+        "BLOCKED_QUANTUM_EXECUTION_OR_ADVANTAGE_CLAIM_ATTEMPT",
+        "BLOCKED_DAY1_LAUNCH_EXECUTION_ATTEMPT",
+        "BLOCKED_SCATTERED_POLICY_LITERAL_DRIFT",
+        "BLOCKED_UNMAPPED_MASTER_PLAN_COVERAGE_ENTRY",
+        "BLOCKED_PROVISIONAL_PR_WITHOUT_CLASSIFICATION",
+        "BLOCKED_DUPLICATE_FUTURE_PR_NUMBER",
+        "BLOCKED_CYCLIC_DEPENDENCY_GRAPH",
+        "BLOCKED_MISSING_MARKET_SPECIFIC_READINESS_ROUTE",
+        "BLOCKED_OWNER_AUTHORIZATION_REQUIRED_BUT_NOT_MARKED",
+        "BLOCKED_EVIDENCELESS_CLASSIFICATION",
+        "BLOCKED_LIVE_HOT_PATH_CONTROL_PLANE_CALL",
+        "BLOCKED_AGENT_AUTHORITY_ESCALATION",
+        "BLOCKED_ARBITRARY_DOMAIN_COUNT_FORCED",
+        "BLOCKED_FIXED_13_DOMAIN_MODEL_USED"
+      ],
+      "type": "string"
+    },
+    "canonical_venue_id": {
+      "enum": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "type": "string"
+    },
+    "classification_label": {
+      "enum": [
+        "CONFIRMED",
+        "SPLIT_OR_REPLACED",
+        "MERGED_WITH_OTHER_PR",
+        "NEW_INSERTION_REQUIRED_BEFORE_THIS_PR",
+        "DEFERRED_AFTER_DAY1",
+        "OWNER_AUTHORIZATION_REQUIRED"
+      ],
+      "type": "string"
+    },
+    "domain_type": {
+      "enum": [
+        "PARENT_DOMAIN",
+        "SUBDOMAIN",
+        "MARKET_SPECIFIC_DOMAIN",
+        "OWNER_AUTHORIZATION_DOMAIN",
+        "LATENCY_HOT_PATH_DOMAIN",
+        "AGENT_ORCHESTRATION_DOMAIN"
+      ],
+      "type": "string"
+    },
+    "evidence_class": {
+      "enum": [
+        "DIRECT_MASTER_PLAN",
+        "ROADMAP",
+        "BLUEPRINT",
+        "GENERATED_REPORT",
+        "OWNER_VERIFIED_INPUT",
+        "REPO_CONVENTION",
+        "CODEX_INFERENCE_REQUIRES_OWNER_REVIEW"
+      ],
+      "type": "string"
+    },
+    "future_pr_number_status": {
+      "enum": [
+        "FIXED_IF_OWNER_APPROVES",
+        "PLACEHOLDER",
+        "INSERTION_BEFORE",
+        "SPLIT_CHILD",
+        "MERGED_CHILD",
+        "DEFERRED_AFTER_DAY1",
+        "OWNER_AUTHORIZATION_BLOCKED"
+      ],
+      "type": "string"
+    },
+    "future_pr_scope_class": {
+      "enum": [
+        "ROADMAP_MAPPING",
+        "ATOMICROWS_READINESS",
+        "SOURCE_EVIDENCE_READINESS",
+        "CONNECTOR_BINDING_READINESS",
+        "CREDENTIAL_PRIVATE_STATE_CASH_READINESS",
+        "DATASET_REPLAY_PAPER_READINESS",
+        "QUANTUM_OPTIMIZER_READINESS",
+        "PARAMETER_STACK_SELECTION_READINESS",
+        "OWNER_APPROVAL_DASHBOARD_READINESS",
+        "CANARY_LIVE_COMPARISON_READINESS",
+        "DAY1_LAUNCH_READINESS",
+        "OWNER_AUTHORIZED_EXECUTION_ONLY"
+      ],
+      "type": "string"
+    },
+    "readiness_state_class": {
+      "enum": [
+        "STATIC_CONTRACT_READY",
+        "SOURCE_EVIDENCE_READY",
+        "CONNECTOR_BINDING_READY",
+        "CREDENTIAL_PRIVATE_STATE_CASH_READY",
+        "NONLIVE_REPLAY_PAPER_READY",
+        "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+        "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+        "OWNER_REVIEW_READY",
+        "CANARY_READY_OWNER_COMMAND_REQUIRED",
+        "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+        "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY"
+      ],
+      "type": "string"
+    },
+    "sequence_authority_class": {
+      "enum": [
+        "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+        "OWNER_AUTHORIZATION_REQUIRED_BEFORE_MATERIALIZATION",
+        "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION"
+      ],
+      "type": "string"
+    },
+    "taxonomy_rule": {
+      "enum": [
+        "READINESS_DOMAIN_TAXONOMY_MUST_BE_COVERAGE_DERIVED",
+        "ARBITRARY_DOMAIN_COUNT_FORCED_FORBIDDEN",
+        "FIXED_13_DOMAIN_MODEL_FORBIDDEN",
+        "DOMAIN_COUNT_MUST_BE_COMPUTED_FROM_EVIDENCE",
+        "EVERY_DOMAIN_REQUIRES_EVIDENCE_BASIS",
+        "PARENT_DOMAIN_AND_SUBDOMAIN_HIERARCHY_ALLOWED",
+        "UNMAPPED_COVERAGE_ENTRY_BLOCKS_VALIDATION_UNLESS_EXPLICITLY_DEFERRED_WITH_EVIDENCE"
+      ],
+      "type": "string"
+    },
+    "validator_marker": {
+      "const": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+      "type": "string"
+    }
+  },
+  "$id": "https://qtt.local/schemas/roadmap/pr136_day1_launch_readiness_policy.defs.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR136 Day-1 Launch Readiness Policy Definitions"
+}

@@ -1,0 +1,20 @@
+{
+  "cumulative_gate_commands_required": [
+    "tools/validate_pr136_roadmap_policy_literal_drift.py",
+    "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+  ],
+  "prior_validators_preserved": [
+    "PR131",
+    "PR132",
+    "PR133",
+    "PR134",
+    "PR135",
+    "source_evidence",
+    "connector",
+    "AtomicRows",
+    "roadmap"
+  ],
+  "receipt_type": "PR136_VALIDATION_GATE_INTEGRATION",
+  "repo_pr_number": 136,
+  "validator_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK"
+}

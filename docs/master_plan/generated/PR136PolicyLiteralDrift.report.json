@@ -1,0 +1,17 @@
+{
+  "approved_definition_locations": [
+    "docs/master_plan/generated/PR136PolicyManifest.report.json",
+    "schemas/roadmap/pr136_day1_launch_readiness_policy.defs.schema.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py"
+  ],
+  "failures": [],
+  "instance_prefixes": [
+    "docs/master_plan/generated/PR136",
+    "docs/roadmap/generated/CODEX_PR136",
+    "docs/roadmap/generated/CODEX_REPO_PR135_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap"
+  ],
+  "policy_literal_drift_detected": false,
+  "receipt_type": "PR136_POLICY_LITERAL_DRIFT_REPORT",
+  "repo_pr_number": 136
+}

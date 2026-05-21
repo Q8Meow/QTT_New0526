@@ -1,0 +1,2448 @@
+{
+  "arbitrary_domain_count_forced": false,
+  "coverage_entry_count": 24,
+  "coverage_report_digest_sha256": "f4e90658a67d5dbe280c74507d0744f7a17ad0a5f6e478dc51c9b33d5d3c9a42",
+  "coverage_report_mtime_or_git_blob_ref_if_available": "mtime_epoch_seconds:1779338414",
+  "coverage_report_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+  "coverage_report_value_source": "GENERATED_REPORT_OR_REPO_CURRENT",
+  "deferred_entries": [],
+  "domain_map_complete": true,
+  "domain_records": [
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT",
+      "domain_title": "Parser-visible master-plan section research route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137",
+        "PR162"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry parser_visible_section_research_default is present with class RESEARCH_CANDIDATE."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137",
+        "PR162"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "RESEARCH_QUARANTINE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:parser_visible_section_research_default",
+        "__ALL_PARSER_VISIBLE_SECTIONS__"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:RESEARCH_CANDIDATE"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION",
+      "domain_title": "Master-plan section coverage report and validation foundation",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry master_plan_section_coverage_foundation is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "MASTER_PLAN_COVERAGE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:master_plan_section_coverage_foundation",
+        "0X.4O"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT",
+      "domain_title": "Generated-derivative bootstrap and AtomicRows absence gate",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry generated_derivative_bootstrap_static_contract is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "MASTER_PLAN_COVERAGE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:generated_derivative_bootstrap_static_contract",
+        "0X.0AL"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "METADATA_ONLY",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+      "domain_title": "AtomicRows bundle creation remains blocked",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR138",
+        "PR139",
+        "PR140",
+        "PR141",
+        "PR142"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry atomicrows_bundle_creation_blocked is present with class QUARANTINE_REQUIRED."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR138",
+        "PR139",
+        "PR140",
+        "PR141",
+        "PR142"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "ATOMICROWS_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:atomicrows_bundle_creation_blocked",
+        "0X.0AL"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:QUARANTINE_REQUIRED"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "BLOCKED_UNTIL_SOURCE_EVIDENCE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+      "domain_title": "Venue-neutral prediction adapter static contract",
+      "domain_type": "MARKET_SPECIFIC_DOMAIN",
+      "downstream_dependencies": [
+        "PR143",
+        "PR144",
+        "PR157"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry venue_neutral_prediction_adapter_static_contract is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR143",
+        "PR144",
+        "PR157"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "MARKET_SPECIFIC_VENUE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:venue_neutral_prediction_adapter_static_contract",
+        "0X.4L"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT",
+      "domain_title": "Stage-1 runtime orchestration scaffold static contract",
+      "domain_type": "AGENT_ORCHESTRATION_DOMAIN",
+      "downstream_dependencies": [
+        "PR137",
+        "PR155"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry runtime_orchestration_static_contract is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137",
+        "PR155"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "AGENT_ORCHESTRATION_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:runtime_orchestration_static_contract",
+        "0X.4N"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+      "domain_title": "Source evidence acceptance route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry source_evidence_acceptance_route is present with class SOURCE_EVIDENCE_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "SOURCE_EVIDENCE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REQUIRED",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:source_evidence_acceptance_route",
+        "0X.4Q"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:SOURCE_EVIDENCE_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT",
+      "domain_title": "Source-fact binding readiness static contract",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR144"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry source_fact_binding_readiness_static_contract is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR144"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "CONNECTOR_BINDING_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REQUIRED",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:source_fact_binding_readiness_static_contract",
+        "0X.4P"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "BLOCKED_UNTIL_SOURCE_EVIDENCE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+      "domain_title": "Connector semantic binding source-evidence route",
+      "domain_type": "MARKET_SPECIFIC_DOMAIN",
+      "downstream_dependencies": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry connector_semantic_binding_source_evidence_route is present with class SOURCE_EVIDENCE_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1ConnectorSemanticBindingLedgerCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "SOURCE_EVIDENCE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REQUIRED",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:connector_semantic_binding_source_evidence_route",
+        "0X.4R"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:SOURCE_EVIDENCE_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE",
+      "domain_title": "Runtime resolver snapshot source-dependent route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry runtime_resolver_snapshot_source_dependent_route is present with class SOURCE_EVIDENCE_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1RuntimeResolverSnapshotContractCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "MASTER_PLAN_COVERAGE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REQUIRED",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:runtime_resolver_snapshot_source_dependent_route",
+        "0X.4S"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:SOURCE_EVIDENCE_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY",
+      "domain_title": "Concurrent replay and paper execution static boundary",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR146",
+        "PR147",
+        "PR148",
+        "PR149",
+        "PR150"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry replay_paper_execution_static_boundary is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1ConcurrentReplayPaperContractCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR146",
+        "PR147",
+        "PR148",
+        "PR149",
+        "PR150"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "REPLAY_PAPER_DATASET_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "FUTURE_NONLIVE_EXECUTION_REQUIRED",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:replay_paper_execution_static_boundary",
+        "0X.4T"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY",
+      "domain_title": "Dual-result review static boundary",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR146",
+        "PR147",
+        "PR148",
+        "PR149",
+        "PR150"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry dual_result_review_static_boundary is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1DualResultReviewContractCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR146",
+        "PR147",
+        "PR148",
+        "PR149",
+        "PR150"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "REPLAY_PAPER_DATASET_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:dual_result_review_static_boundary",
+        "0X.4U"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE",
+      "domain_title": "Owner live-promotion review and three-venue eligibility owner-approval route",
+      "domain_type": "OWNER_AUTHORIZATION_DOMAIN",
+      "downstream_dependencies": [
+        "PR154",
+        "PR155",
+        "PR156"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry owner_live_promotion_review_owner_approval_route is present with class OWNER_APPROVAL_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1OwnerLivePromotionReviewContractCheck.report.json",
+        "docs/master_plan/generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR154",
+        "PR155",
+        "PR156"
+      ],
+      "live_readiness_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:owner_live_promotion_review_owner_approval_route",
+        "0X.4V"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:OWNER_APPROVAL_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED",
+      "domain_title": "Limited-live canary execution quarantined until future receipts",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR162",
+        "PR163",
+        "PR164"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry limited_live_canary_execution_quarantined is present with class QUARANTINE_REQUIRED."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR162",
+        "PR163",
+        "PR164"
+      ],
+      "live_readiness_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "DAY1_LAUNCH_GATE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:limited_live_canary_execution_quarantined",
+        "0X.4W"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:QUARANTINE_REQUIRED"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE",
+      "domain_title": "External bot-repo intelligence and supply-chain quarantine route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137",
+        "PR162"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry external_bot_repo_supply_chain_quarantine_route is present with class QUARANTINE_REQUIRED."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137",
+        "PR162"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "RESEARCH_QUARANTINE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:external_bot_repo_supply_chain_quarantine_route",
+        "0X.0AF"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:QUARANTINE_REQUIRED"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "FUTURE_RECEIPT_REQUIRED",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE",
+      "domain_title": "Runtime cash component field-map control route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR145"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry runtime_cash_field_map_control_route is present with class RUNTIME_RECEIPT_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR145"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "CREDENTIAL_PRIVATE_STATE_CASH_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:runtime_cash_field_map_control_route",
+        "0X.4B.12"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:RUNTIME_RECEIPT_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE",
+      "domain_title": "Final readiness and live-order boundary controller-referenced route",
+      "domain_type": "OWNER_AUTHORIZATION_DOMAIN",
+      "downstream_dependencies": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR162",
+        "PR163",
+        "PR164"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry final_readiness_controller_referenced_route is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR162",
+        "PR163",
+        "PR164"
+      ],
+      "live_readiness_scope": "OWNER_COMMAND_REQUIRED",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "DAY1_LAUNCH_GATE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:final_readiness_controller_referenced_route",
+        "0X.4Z"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+      "domain_title": "Source-evidence accepted-fact separation and zero-accepted boundary route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry source_evidence_zero_accepted_boundary_route is present with class SOURCE_EVIDENCE_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR143",
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "SOURCE_EVIDENCE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REQUIRED",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:source_evidence_zero_accepted_boundary_route",
+        "0X.5H.2D"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:SOURCE_EVIDENCE_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE",
+      "domain_title": "Owner dashboard value packet and owner review decision route",
+      "domain_type": "OWNER_AUTHORIZATION_DOMAIN",
+      "downstream_dependencies": [
+        "PR154",
+        "PR155",
+        "PR156"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry owner_dashboard_value_packet_owner_route is present with class OWNER_APPROVAL_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR154",
+        "PR155",
+        "PR156"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "OWNER_APPROVAL_DASHBOARD_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:owner_dashboard_value_packet_owner_route",
+        "0X.5H.2M"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:OWNER_APPROVAL_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE",
+      "domain_title": "Owner-selected true-quantum advisory optimization lane route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry true_quantum_advisory_optimizer_arbitration_route is present with class STATIC_CONTRACT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "QUANTUM_OPTIMIZER_READINESS",
+      "quantum_scope": "METADATA_ONLY",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:true_quantum_advisory_optimizer_arbitration_route",
+        "0X.5H.2P"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:STATIC_CONTRACT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE",
+      "domain_title": "Latency telemetry and bottleneck attribution static route",
+      "domain_type": "LATENCY_HOT_PATH_DOMAIN",
+      "downstream_dependencies": [
+        "PR137L",
+        "PR162"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry latency_telemetry_cost_route is present with class RUNTIME_RECEIPT_DEPENDENT."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137L",
+        "PR162"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "LATENCY_HOT_PATH_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:latency_telemetry_cost_route",
+        "0X.5S.8"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:RUNTIME_RECEIPT_DEPENDENT"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE",
+      "domain_title": "Generic QUBO quantum-forward optimization route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry generic_qubo_quantum_forward_route is present with class POLICY_ONLY."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "QUANTUM_OPTIMIZER_READINESS",
+      "quantum_scope": "METADATA_ONLY",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:generic_qubo_quantum_forward_route",
+        "19.8"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:POLICY_ONLY"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE",
+      "domain_title": "Quantum candidate template and owner-dashboard control policy route",
+      "domain_type": "OWNER_AUTHORIZATION_DOMAIN",
+      "downstream_dependencies": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry owner_quantum_candidate_policy_route is present with class POLICY_ONLY."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR151",
+        "PR152",
+        "PR153"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "QUANTUM_OPTIMIZER_READINESS",
+      "quantum_scope": "METADATA_ONLY",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:owner_quantum_candidate_policy_route",
+        "8.1C"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:POLICY_ONLY"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    },
+    {
+      "agent_scope": [
+        "roadmap_compiler_agent"
+      ],
+      "atomicrows_scope": "NONE",
+      "blueprint_refs": [
+        "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      ],
+      "connector_scope": "NONE",
+      "credential_private_state_cash_scope": "NONE",
+      "domain_derivation_basis": "coverage_entry.capability_id plus roadmap/blueprint Stage-1 launch refs",
+      "domain_id": "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE",
+      "domain_title": "Preset retirement and negative-evidence route",
+      "domain_type": "SUBDOMAIN",
+      "downstream_dependencies": [
+        "PR137",
+        "PR162"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry preset_retirement_negative_evidence_route is present with class RETIRED_NOT_USEFUL."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Stage-1 roadmap provides launch-readiness sequencing context."
+        },
+        {
+          "evidence_class": "BLUEPRINT",
+          "evidence_ref": "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+          "evidence_summary": "Blueprint index provides domain and dependency context."
+        }
+      ],
+      "existing_generated_reports": [
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+      ],
+      "forbidden_authority_refs": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "future_pr_candidates": [
+        "PR137",
+        "PR162"
+      ],
+      "live_readiness_scope": "NO_CURRENT_LIVE_AUTHORITY",
+      "market_scope": [
+        "PREDICTION_MARKETS_GENERAL"
+      ],
+      "owner_authorization_points": [
+        "future owner review required before implementation or live/materialization authority"
+      ],
+      "parent_domain_id": "RESEARCH_QUARANTINE_READINESS",
+      "quantum_scope": "NONE",
+      "replay_paper_scope": "NONE",
+      "roadmap_refs": [
+        "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+        "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md"
+      ],
+      "source_evidence_scope": "REFERENCE_ONLY",
+      "source_master_plan_sections_or_anchors": [
+        "coverage_entry:preset_retirement_negative_evidence_route",
+        "8.8"
+      ],
+      "subdomains": [],
+      "upstream_dependencies": [
+        "coverage_class:RETIRED_NOT_USEFUL"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py",
+        "tools/validate_pr136_roadmap_policy_literal_drift.py"
+      ]
+    }
+  ],
+  "fixed_13_domain_model_used": false,
+  "master_plan_section_count": 3006,
+  "multi_domain_entries": [
+    {
+      "additional_parent_domains": [
+        "OWNER_APPROVAL_DASHBOARD_READINESS"
+      ],
+      "coverage_entry_id": "final_readiness_controller_referenced_route",
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+          "evidence_summary": "Coverage entry routes across multiple launch-readiness lanes."
+        }
+      ],
+      "primary_domain_id": "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+    }
+  ],
+  "readiness_domain_count": 24,
+  "readiness_domain_count_source": "DERIVED_FROM_MASTER_PLAN_COVERAGE_ROADMAP_BLUEPRINTS_AND_REPO_CONVENTIONS",
+  "receipt_type": "PR136_MASTER_PLAN_COVERAGE_TO_READINESS_DOMAIN_MAP",
+  "repo_pr_number": 136,
+  "unmapped_entries": []
+}

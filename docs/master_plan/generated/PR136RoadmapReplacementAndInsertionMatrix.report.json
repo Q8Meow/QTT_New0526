@@ -1,0 +1,577 @@
+{
+  "receipt_type": "PR136_ROADMAP_REPLACEMENT_AND_INSERTION_MATRIX",
+  "repo_pr_number": 136,
+  "rows": [
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 137,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "SPLIT_OR_REPLACED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 138,
+      "replacement_prs_if_any": [
+        "PR138A",
+        "PR138B"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 139,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 140,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 141,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 142,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "SPLIT_OR_REPLACED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 143,
+      "replacement_prs_if_any": [
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 144,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 145,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "NEW_INSERTION_REQUIRED_BEFORE_THIS_PR",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 146,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 147,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 148,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 149,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 150,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 151,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 152,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 153,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 154,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 155,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 156,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 157,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 158,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 159,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 160,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "DEFERRED_AFTER_DAY1",
+      "deferred_reason_if_any": "Scaled live arbitrage belongs after Day-1 canary and launch review evidence.",
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 161,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 162,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "CONFIRMED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 163,
+      "replacement_prs_if_any": []
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "deferred_reason_if_any": null,
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "provisional_pr_number": 164,
+      "replacement_prs_if_any": []
+    }
+  ]
+}

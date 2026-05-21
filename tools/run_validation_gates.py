@@ -326,6 +326,18 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "validate_pr136_roadmap_policy_literal_drift.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_pr136_day1_launch_readiness_roadmap.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_connector_capability_static.py"),
             "--schema",
             _path("schemas", "connectors", "connector_capability_registry.schema.json"),

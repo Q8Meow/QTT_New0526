@@ -1,0 +1,2126 @@
+{
+  "classification_counts": {
+    "CONFIRMED": 10,
+    "DEFERRED_AFTER_DAY1": 1,
+    "MERGED_WITH_OTHER_PR": 0,
+    "NEW_INSERTION_REQUIRED_BEFORE_THIS_PR": 1,
+    "OWNER_AUTHORIZATION_REQUIRED": 14,
+    "SPLIT_OR_REPLACED": 2
+  },
+  "classification_records": [
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR135->PR137"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 137,
+      "provisional_title": "PR136 launch-roadmap validator and readiness dependency controller",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR137"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "SPLIT_OR_REPLACED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Scope is too broad to execute as one future PR without hiding material prerequisites.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR137->PR138"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "SPLIT_CHILD",
+      "provisional_pr_number": 138,
+      "provisional_title": "AtomicRows historical dataset bridge/materialization-readiness gate",
+      "replacement_prs_if_any": [
+        "PR138A",
+        "PR138B"
+      ],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR138"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR138->PR139"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 139,
+      "provisional_title": "AtomicRows row-family source manifest currentization",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR139"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR139->PR140"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 140,
+      "provisional_title": "AtomicRows bundle builder dry-run and diff validator",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR140"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR140->PR141"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 141,
+      "provisional_title": "AtomicRows bundle materialization PR, owner-authorized only",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR141"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR141->PR142"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 142,
+      "provisional_title": "AtomicRows SHA/freeze authority PR, owner-authorized only",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_06_RUNTIME_ORCHESTRATION_STATIC_CONTRACT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR142"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "SPLIT_OR_REPLACED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Scope is too broad to execute as one future PR without hiding material prerequisites.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR142->PR143"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "SPLIT_CHILD",
+      "provisional_pr_number": 143,
+      "provisional_title": "Per-venue official source-evidence finalization for Kalshi / Polymarket / FORECASTEX_IBKR",
+      "replacement_prs_if_any": [
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR143"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR143->PR144"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 144,
+      "provisional_title": "Connector semantic binding live-unlock gate",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_08_SOURCE_FACT_BINDING_READINESS_STATIC_CONTRACT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR144"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR144->PR145"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 145,
+      "provisional_title": "Runtime cash / private-state / credential live-readiness gate",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR145"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "NEW_INSERTION_REQUIRED_BEFORE_THIS_PR",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Real historical availability requires accepted source evidence before use.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR145->PR146"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [
+        "PR143K",
+        "PR143P",
+        "PR143F"
+      ],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "INSERTION_BEFORE",
+      "provisional_pr_number": 146,
+      "provisional_title": "Real historical dataset availability and accepted-source bridge",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_10_RUNTIME_RESOLVER_SNAPSHOT_SOURCE_DEPENDENT_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR146"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR146->PR147"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 147,
+      "provisional_title": "Replay execution engine on locked historical inputs",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_11_REPLAY_PAPER_EXECUTION_STATIC_BOUNDARY"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR147"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR147->PR148"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 148,
+      "provisional_title": "Paper execution engine on separate lane",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_12_DUAL_RESULT_REVIEW_STATIC_BOUNDARY"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR148"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR148->PR149"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 149,
+      "provisional_title": "Replay/paper result immutability and dual-result review",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_13_OWNER_LIVE_PROMOTION_REVIEW_OWNER_APPROVAL_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR149"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR149->PR150"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 150,
+      "provisional_title": "Replay/paper evidence to optimizer/quantum comparator",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_14_LIMITED_LIVE_CANARY_EXECUTION_QUARANTINED"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR150"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR150->PR151"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 151,
+      "provisional_title": "Quantum/classical optimizer execution-readiness gate",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_15_EXTERNAL_BOT_REPO_SUPPLY_CHAIN_QUARANTINE_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR151"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR151->PR152"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 152,
+      "provisional_title": "Classical baseline vs quantum challenger comparison",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_16_RUNTIME_CASH_FIELD_MAP_CONTROL_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR152"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR152->PR153"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 153,
+      "provisional_title": "Final parameter-stack selection and owner override packet",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_17_FINAL_READINESS_CONTROLLER_REFERENCED_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR153"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR153->PR154"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 154,
+      "provisional_title": "Owner approval queue and launch decision packet",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR154"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR154->PR155"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 155,
+      "provisional_title": "Owner dashboard launch-control readiness",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_19_OWNER_DASHBOARD_VALUE_PACKET_OWNER_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR155"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR155->PR156"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 156,
+      "provisional_title": "Live-promotion review closure",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_20_TRUE_QUANTUM_ADVISORY_OPTIMIZER_ARBITRATION_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR156"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR156->PR157"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 157,
+      "provisional_title": "Three-venue live canary eligibility gate",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_21_LATENCY_TELEMETRY_COST_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR157"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR157->PR158"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 158,
+      "provisional_title": "Limited live canary command packet",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_22_GENERIC_QUBO_QUANTUM_FORWARD_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR158"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR158->PR159"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 159,
+      "provisional_title": "Post-trade reconciliation and kill-switch gate",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_23_OWNER_QUANTUM_CANDIDATE_POLICY_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR159"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR159->PR160"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 160,
+      "provisional_title": "Triggered live concurrent comparison",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_24_PRESET_RETIREMENT_NEGATIVE_EVIDENCE_ROUTE"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR160"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "DEFERRED_AFTER_DAY1",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Scaled live arbitrage belongs after Day-1 canary and launch review evidence.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": "Scaled live arbitrage belongs after Day-1 canary and launch review evidence.",
+      "dependency_edges": [
+        "PR160->PR161"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "DEFERRED_AFTER_DAY1",
+      "provisional_pr_number": 161,
+      "provisional_title": "Limited-live arbitrage and scaled-live eligibility",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_01_PARSER_VISIBLE_SECTION_RESEARCH_DEFAULT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR161"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR161->PR162"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 162,
+      "provisional_title": "Full Day-1 launch preflight matrix",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_02_MASTER_PLAN_SECTION_COVERAGE_FOUNDATION"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR162"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "CONFIRMED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Planning scope matches evidence-backed readiness sequencing and creates no current authority.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR162->PR163"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": false,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 163,
+      "provisional_title": "Day-1 launch runbook and rollback command packet",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_03_GENERATED_DERIVATIVE_BOOTSTRAP_STATIC_CONTRACT"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR163"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    },
+    {
+      "classification": "OWNER_AUTHORIZATION_REQUIRED",
+      "classification_decision_rationale": "Derived from PR136 coverage-domain map, roadmap/blueprint Stage-1 sequencing, and owner no-authority boundaries.",
+      "classification_reason": "Future step can only proceed under explicit owner authorization and validated upstream gates.",
+      "current_authority_created": false,
+      "deferred_reason_if_any": null,
+      "dependency_edges": [
+        "PR163->PR164"
+      ],
+      "evidence_basis": [
+        {
+          "evidence_class": "GENERATED_REPORT",
+          "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+          "evidence_summary": "Coverage-derived taxonomy maps this future PR to launch-readiness domains."
+        },
+        {
+          "evidence_class": "ROADMAP",
+          "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+          "evidence_summary": "Roadmap supplies Stage-1 launch sequence context."
+        }
+      ],
+      "insertions_before_if_any": [],
+      "merged_with_if_any": [],
+      "must_not_create": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_sha",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ],
+      "owner_authorization_required": true,
+      "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_LIVE_EXECUTION",
+      "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+      "provisional_pr_number": 164,
+      "provisional_title": "Official Day-1 live trading start command, owner-authorized only",
+      "replacement_prs_if_any": [],
+      "required_inputs": [
+        "validated upstream PR outputs",
+        "owner authorization where marked"
+      ],
+      "required_outputs": [
+        "future validation marker and receipt-backed artifacts only"
+      ],
+      "source_domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "suggested_final_pr_numbers": [
+        "PR164"
+      ],
+      "validation_hooks": [
+        "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+      ]
+    }
+  ],
+  "provisional_pr137_pr164_skeleton_used_as": "NON_AUTHORITATIVE_PLANNING_INPUT_ONLY",
+  "receipt_type": "PR136_PROVISIONAL_PR137_TO_PR164_CLASSIFICATION",
+  "repo_pr_number": 136
+}

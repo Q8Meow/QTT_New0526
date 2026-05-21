@@ -436,6 +436,18 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr136_roadmap_policy_literal_drift.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr136_day1_launch_readiness_roadmap.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_connector_capability_static.py"),
             "--schema",
             str(
@@ -1809,6 +1821,12 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
     historical_dataset_index = command_names.index(
         "validate_historical_dataset_digest_and_loader.py"
     )
+    pr136_policy_drift_index = command_names.index(
+        "validate_pr136_roadmap_policy_literal_drift.py"
+    )
+    pr136_roadmap_index = command_names.index(
+        "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert (
@@ -1817,6 +1835,8 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
         < runtime_resolver_index
         < policy_drift_index
         < historical_dataset_index
+        < pr136_policy_drift_index
+        < pr136_roadmap_index
         < connector_index
     )
     assert commands[snapshot_index] == [
@@ -1843,6 +1863,18 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
         "--repo-root",
         ".",
     ]
+    assert commands[pr136_policy_drift_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr136_roadmap_policy_literal_drift.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr136_roadmap_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr136_day1_launch_readiness_roadmap.py"),
+        "--repo-root",
+        ".",
+    ]
 
 
 def test_cumulative_gate_calls_validate_historical_dataset_digest_and_loader(monkeypatch):
@@ -1861,6 +1893,24 @@ def test_cumulative_gate_calls_policy_literal_drift_validator(monkeypatch):
     command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
 
     assert "validate_historical_dataset_policy_literal_drift.py" in command_names
+
+
+def test_cumulative_gate_calls_pr136_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
+
+    assert "validate_pr136_day1_launch_readiness_roadmap.py" in command_names
+
+
+def test_cumulative_gate_calls_pr136_policy_literal_drift_validator(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
+
+    assert "validate_pr136_roadmap_policy_literal_drift.py" in command_names
 
 
 def _assert_pr135_gate_failure_stops(monkeypatch, capsys, failing_name: str) -> None:
@@ -1966,6 +2016,167 @@ def test_cumulative_gate_fails_when_quantum_execution_or_optimizer_input_appears
 ):
     _assert_pr135_gate_failure_stops(
         monkeypatch, capsys, "validate_historical_dataset_digest_and_loader.py"
+    )
+
+
+def _assert_pr136_gate_failure_stops(monkeypatch, capsys, failing_name: str) -> None:
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = [
+        ["python", "validate_pr136_roadmap_policy_literal_drift.py"],
+        ["python", "validate_pr136_day1_launch_readiness_roadmap.py"],
+        ["python", "later_gate.py"],
+    ]
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(61 if command[1] == failing_name else 0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands)
+
+    assert exit_code == 61
+    assert seen[-1][1] == failing_name
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_cumulative_gate_fails_when_pr136_reports_missing(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_pr136_marker_absent(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_pr135_currentization_missing(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_same_number_inference_true(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_domain_count_hardcoded_to_13(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_roadmap_policy_literal_drift.py"
+    )
+
+
+def test_cumulative_gate_fails_when_arbitrary_domain_count_forced(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_fixed_13_domain_model_used(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_roadmap_policy_literal_drift.py"
+    )
+
+
+def test_cumulative_gate_fails_when_derived_domain_evidence_missing(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_provisional_pr_unclassified(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_classification_evidence_missing(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_domain_map_missing_entry(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_dependency_graph_cycle_exists(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_market_scope_missing(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_atomicrows_bundle_sha_diff_exists(
+    monkeypatch, capsys
+):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_master_plan_diff_exists(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_source_or_connector_authority_created(
+    monkeypatch, capsys
+):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_replay_paper_order_profit_live_authority_created(
+    monkeypatch, capsys
+):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_quantum_execution_or_advantage_claim_created(
+    monkeypatch, capsys
+):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_agent_authority_escalates(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_live_hot_path_accepts_control_plane_call(
+    monkeypatch, capsys
+):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+
+
+def test_cumulative_gate_fails_when_day1_launch_marked_started(monkeypatch, capsys):
+    _assert_pr136_gate_failure_stops(
+        monkeypatch, capsys, "validate_pr136_day1_launch_readiness_roadmap.py"
     )
 
 

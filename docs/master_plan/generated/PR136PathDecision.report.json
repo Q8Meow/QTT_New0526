@@ -1,0 +1,42 @@
+{
+  "chosen_paths": {
+    "fail_closed_tests": "tests/fail_closed/test_run_validation_gates.py",
+    "focused_tests": "tests/roadmap/test_pr136_day1_launch_readiness_roadmap.py",
+    "package_init": "src/qtt/stage1_prediction_markets/launch_readiness/__init__.py",
+    "policy_literal_drift_validator": "tools/validate_pr136_roadmap_policy_literal_drift.py",
+    "policy_module": "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "roadmap_doc": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "roadmap_index": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_Index_v1_0.json",
+    "roadmap_module": "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap.py",
+    "schemas": [
+      "schemas/roadmap/pr136_day1_launch_readiness_policy.defs.schema.json",
+      "schemas/roadmap/pr136_day1_launch_readiness_roadmap.schema.json",
+      "schemas/roadmap/pr136_readiness_domain_taxonomy.schema.json",
+      "schemas/roadmap/pr136_post_pr135_sequence.schema.json",
+      "schemas/roadmap/pr136_launch_readiness_dependency_graph.schema.json",
+      "schemas/roadmap/pr136_roadmap_replacement_insertion_matrix.schema.json",
+      "schemas/roadmap/pr136_market_specific_launch_readiness_index.schema.json",
+      "schemas/roadmap/pr136_quantum_atomicrows_optimization_readiness_map.schema.json",
+      "schemas/roadmap/pr136_agent_launch_orchestration_map.schema.json",
+      "schemas/roadmap/pr136_latency_control_plane_vs_live_path_map.schema.json",
+      "schemas/roadmap/pr136_future_pr_card.schema.json",
+      "schemas/roadmap/pr136_receipt.schema.json"
+    ],
+    "validator": "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+  },
+  "conflicting_conventions_detected": [],
+  "owner_authorized_scope": "PR136_MASTER_PLAN_COVERAGE_TO_DAY1_LAUNCH_READINESS_ROADMAP_CURRENTIZATION",
+  "path_selection_precedence_used": [
+    "Reuse current repo conventions from PR131-PR135 when clear",
+    "Reuse closest roadmap/generated report/validator pattern",
+    "Use PR136 default paths where no stronger convention exists"
+  ],
+  "protected_files_not_edited": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+  ],
+  "receipt_type": "PR136_PATH_DECISION_RECEIPT",
+  "repo_pr_number": 136,
+  "safe_canonical_path_inferred": true
+}

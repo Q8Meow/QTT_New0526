@@ -1,0 +1,195 @@
+{
+  "anchors_inspected": [
+    "Stage 1 prediction markets",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR",
+    "PREDICTION_MARKETS_GENERAL",
+    "Day-1 launch",
+    "runtime live-order command",
+    "limited live canary",
+    "three-venue canary eligibility",
+    "owner live-promotion review",
+    "concurrent replay/paper",
+    "dual-result review",
+    "historical dataset digest and loader",
+    "runtime resolver snapshot",
+    "versioned candidate-set snapshot-lock",
+    "source evidence",
+    "connector semantic binding",
+    "credential readiness",
+    "private-state receipts",
+    "runtime cash",
+    "AtomicRows",
+    "bundle",
+    "SHA/freeze",
+    "quantum",
+    "QAOA",
+    "QUBO",
+    "VQE",
+    "annealing",
+    "quantum kernel",
+    "amplitude encoding",
+    "optimizer arbitration",
+    "parameter-stack selection",
+    "owner dashboard",
+    "launch rollback",
+    "latency hot path",
+    "no runtime/no live/no profit boundary"
+  ],
+  "arbitrary_domain_count_forced": false,
+  "coverage_report_digest_sha256": "f4e90658a67d5dbe280c74507d0744f7a17ad0a5f6e478dc51c9b33d5d3c9a42",
+  "coverage_report_mtime_or_git_blob_ref_if_available": "mtime_epoch_seconds:1779338414",
+  "coverage_report_path": "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+  "coverage_report_value_source": "GENERATED_REPORT_OR_REPO_CURRENT",
+  "file_digests_or_sizes": {
+    "docs/master_plan/QTT_MasterPlan_Current.md": {
+      "bytes": 10844447,
+      "lines": 146397,
+      "sha256": "1588c6a2d045605a25967e3568cfa353f64938423a41685ba6aaabce0e2a8f2b"
+    },
+    "docs/master_plan/generated/MasterPlanSectionCoverageReport.json": {
+      "bytes": 39926929,
+      "lines": 850560,
+      "sha256": "f4e90658a67d5dbe280c74507d0744f7a17ad0a5f6e478dc51c9b33d5d3c9a42"
+    },
+    "docs/master_plan/generated/PR134GitHubAuditCurrentization.report.json": {
+      "bytes": 1080,
+      "lines": 23,
+      "sha256": "cdfa94048e4d473c4e57c5550a41faa23b8ecb21be6890e043bd039c5fce21e5"
+    },
+    "docs/master_plan/generated/PR135CommandActionMatrix.report.json": {
+      "bytes": 38050,
+      "lines": 957,
+      "sha256": "787053e3cd45a4c14a7293d8da3f5ca4f6ab88bc1afe1ecb715b3ed51508e97e"
+    },
+    "docs/master_plan/generated/PR135HistoricalDatasetDigestAndLoader.report.json": {
+      "bytes": 2503,
+      "lines": 55,
+      "sha256": "42103862a4c96107813b875979571eb692446fda9657963f481cf38fc0be9fda"
+    },
+    "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json": {
+      "bytes": 6234,
+      "lines": 153,
+      "sha256": "77cc7571acb7d4f06b8a21a58b37a826c8fbf277d995296255dbf110e4f50351"
+    },
+    "docs/master_plan/generated/PR135MarketSpecificSectionIndex.report.json": {
+      "bytes": 13055,
+      "lines": 296,
+      "sha256": "86a07e26bfd51023b7a9df799eab0f14264f15e8e1887ff1dbf868486e259d06"
+    },
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json": {
+      "bytes": 17735,
+      "lines": 439,
+      "sha256": "042d3bc21a45c57f047cb2bbd59eb048e5bac3e01e576dac9b87f12477aa4d7a"
+    },
+    "docs/master_plan/generated/PR135RouteTriage.report.json": {
+      "bytes": 886,
+      "lines": 19,
+      "sha256": "83486c8f08404725634103a368dd19d218db04a51f346cb26d541f3f07b4e66b"
+    },
+    "docs/master_plan/generated/QttPrIdentityRoster.report.json": {
+      "bytes": 5836,
+      "lines": 127,
+      "sha256": "8633fab8e5e447b335b09f30aa062b82d8f3c0654a9568da40fbf1a20e40a426"
+    },
+    "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json": {
+      "bytes": 1456,
+      "lines": 26,
+      "sha256": "b0a144c122fbad5fbedfbb4c6798e6aa4912d200bac3f40db10f87ba9fee6aa2"
+    },
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md": {
+      "bytes": 15747,
+      "lines": 251,
+      "sha256": "24e9325d45bfcac3ad872a591860160e7d999d5de143b913e70cf9eeef7ffca7"
+    },
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json": {
+      "bytes": 630772,
+      "lines": 9685,
+      "sha256": "ce55e09c4da597de46364d1b820a251e453cf10587e162309af8a2b86a3fcddd"
+    },
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md": {
+      "bytes": 1275373,
+      "lines": 19650,
+      "sha256": "6c0dd350014851dae8bea4eb8ebe74fdfa3c7b991ba2e0ebcc285a55b0d846e6"
+    },
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json": {
+      "bytes": 127985,
+      "lines": 2711,
+      "sha256": "6393183e0c290c59a8630bf251cc76cff097826a92eda33264ca2a54358475de"
+    },
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md": {
+      "bytes": 125531,
+      "lines": 1317,
+      "sha256": "8d7d270e39bff05198c09f1563a901cbe82b6c3fe5734034290c3585fdb8cb2e"
+    },
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json": {
+      "bytes": 113992,
+      "lines": 1624,
+      "sha256": "47b99acbaafe13fc082759731eefb09baf29faec084a1f699e41820b37ae8067"
+    },
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json": {
+      "bytes": 26940,
+      "lines": 466,
+      "sha256": "8dba0be9ee2e0d75786784a831baea41f44803693ef824557c8b342241d5723b"
+    },
+    "docs/roadmap/README.md": {
+      "bytes": 3773,
+      "lines": 54,
+      "sha256": "161c10dfe1f8a170b24c979164d706799b4532e6620d63c23e014672c860432e"
+    },
+    "docs/roadmap/generated/CODEX_PR135_MANDATORY_READ_RECEIPT.json": {
+      "bytes": 3723,
+      "lines": 96,
+      "sha256": "31a77773222d335704dcd55bae158a1a20ae8871849e98cd43746382c9fe4904"
+    },
+    "docs/roadmap/generated/CODEX_PR135_ROUTE_TRIAGE_RECEIPT.json": {
+      "bytes": 886,
+      "lines": 19,
+      "sha256": "83486c8f08404725634103a368dd19d218db04a51f346cb26d541f3f07b4e66b"
+    }
+  },
+  "fixed_13_domain_model_used": false,
+  "master_plan_coverage_entry_count": 24,
+  "master_plan_section_count": 3006,
+  "master_plan_section_coverage_report_found": true,
+  "missing_files": [],
+  "owner_authorized_scope": "PR136_MASTER_PLAN_COVERAGE_TO_DAY1_LAUNCH_READINESS_ROADMAP_CURRENTIZATION",
+  "read_before_editing_confirmed": true,
+  "readiness_domain_taxonomy_derivation_required": true,
+  "receipt_type": "PR136_DAY1_LAUNCH_READINESS_ROADMAP_READ_RECEIPT",
+  "repo_convention_files_inspected": [
+    "git ls-files",
+    "git ls-files docs/roadmap",
+    "git ls-files docs/master_plan/generated",
+    "git ls-files schemas",
+    "git ls-files src/qtt",
+    "git ls-files tools",
+    "git ls-files tests"
+  ],
+  "repo_pr_number": 136,
+  "required_files_read": [
+    "docs/roadmap/README.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+    "docs/master_plan/generated/QttPrIdentityRoster.report.json",
+    "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+    "docs/master_plan/generated/PR135HistoricalDatasetDigestAndLoader.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR135MarketSpecificSectionIndex.report.json",
+    "docs/master_plan/generated/PR135CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+    "docs/master_plan/generated/PR135RouteTriage.report.json",
+    "docs/master_plan/generated/PR134GitHubAuditCurrentization.report.json",
+    "docs/roadmap/generated/CODEX_PR135_ROUTE_TRIAGE_RECEIPT.json",
+    "docs/roadmap/generated/CODEX_PR135_MANDATORY_READ_RECEIPT.json"
+  ],
+  "same_number_inference_used": false
+}
