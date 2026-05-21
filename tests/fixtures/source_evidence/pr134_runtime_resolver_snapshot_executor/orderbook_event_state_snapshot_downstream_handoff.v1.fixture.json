@@ -1,0 +1,39 @@
+{
+  "execution": "DISABLED",
+  "fixture_id": "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF.V1.FIXTURE",
+  "fixture_payload_is_synthetic": true,
+  "live_fetch_performed": false,
+  "mode": "SOURCE_REQUIRED",
+  "network_io_created": false,
+  "producer_pr": "PR134",
+  "producer_roadmap_pr": "PR116",
+  "raw_live_payload_stored": false,
+  "records": {
+    "contains_atomicrows_bundle": false,
+    "contains_atomicrows_sha": false,
+    "contains_event_state_snapshot_fixtures": true,
+    "contains_live_market_data": false,
+    "contains_live_runtime_authority": false,
+    "contains_order_authority": false,
+    "contains_orderbook_snapshot_fixtures": true,
+    "contains_profit_evidence": false,
+    "downstream_prs": [
+      "PR116",
+      "PR117"
+    ],
+    "handoff_id": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF_V1",
+    "producer_pr": "PR133",
+    "producer_roadmap_pr": "PR115",
+    "record_type": "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF",
+    "schema_version": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_SCHEMA_V1",
+    "shared_scope": [
+      "PREDICTION_MARKETS_GENERAL"
+    ],
+    "venue_specific_scope": [
+      "KALSHI",
+      "POLYMARKET",
+      "FORECASTEX_IBKR"
+    ]
+  },
+  "schema_version": "PR134_RUNTIME_RESOLVER_SNAPSHOT_EXECUTOR_REPORT_V1"
+}

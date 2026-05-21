@@ -2290,6 +2290,49 @@
       "owner_authorized_next_capability": "VENUE_MARKET_DATA_INGEST_ADAPTER_CONTRACTS",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #132 is the audit number assigned to the merged pull request for repo-canonical PR132. Repo-canonical PR132 is the implementation-truth label for venue market-data ingest adapter contracts. Repo PR132 does not imply Roadmap PR #132 or Blueprint PR #132. The owner explicitly authorized Roadmap PR114 for Repo PR132. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR133 does not imply Roadmap PR #133; the owner explicitly authorized Roadmap PR115 for Repo PR133."
+    },
+    {
+      "roster_entry_id": "PR133_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR133",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 133,
+      "repo_title": "Orderbook and event-state snapshot builder contracts",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR133 implement orderbook event-state snapshot builder contracts",
+      "branch_name": "pr133-orderbook-event-state-snapshot-builder",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_ORDERBOOK_AND_EVENT_STATE_SNAPSHOT_BUILDER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR132_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/133",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-20T23:36:50Z",
+      "github_pr_mergeCommit_oid": "78542c7be9dd8598a9142407cca66d0098d4a32f",
+      "github_headRefName": "pr133-orderbook-event-state-snapshot-builder",
+      "github_baseRefName": "main",
+      "owner_authorized_roadmap_pr": "PR115",
+      "owner_authorized_next_capability": "ORDERBOOK_AND_EVENT_STATE_SNAPSHOT_BUILDER_CONTRACTS",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #133 is the audit number assigned to the merged pull request for repo-canonical PR133. Repo-canonical PR133 is the implementation-truth label for orderbook and event-state snapshot builder contracts. Repo PR133 does not imply Roadmap PR #133 or Blueprint PR #133. The owner explicitly authorized Roadmap PR115 for Repo PR133. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR134 does not imply Roadmap PR #134; the owner explicitly authorized Roadmap PR116 for Repo PR134."
     }
   ],
   "mismatch_summary": {

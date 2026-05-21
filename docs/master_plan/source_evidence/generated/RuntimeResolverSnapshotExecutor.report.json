@@ -1,0 +1,12 @@
+{
+  "authority_class": "FIXTURE_BACKED_RUNTIME_RESOLVER_SNAPSHOT_CONTRACT_ONLY_NOT_LIVE_RUNTIME_AUTHORITY",
+  "fixture_runtime_resolver_snapshot_count": 4,
+  "live_runtime_resolver_authority_created_count": 0,
+  "producer_pr": "PR134",
+  "producer_roadmap_pr": "PR116",
+  "report_id": "RuntimeResolverSnapshotExecutor",
+  "runtime_resolver_binding_count": 4,
+  "runtime_resolver_input_lock_count": 4,
+  "runtime_resolver_snapshot_count": 4,
+  "schema_version": "PR134_RUNTIME_RESOLVER_SNAPSHOT_EXECUTOR_REPORT_V1"
+}
