@@ -1,0 +1,17 @@
+{
+  "approved_definition_locations": [
+    "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+    "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+    "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.py"
+  ],
+  "failures": [],
+  "instance_data_prefixes": [
+    "docs/master_plan/generated/",
+    "docs/roadmap/generated/",
+    "tests/fixtures/replay_paper/"
+  ],
+  "policy_literal_drift_detected": false,
+  "receipt_type": "PR135_POLICY_LITERAL_DRIFT_REPORT",
+  "repo_pr_number": 135,
+  "roadmap_pr_number": 117
+}

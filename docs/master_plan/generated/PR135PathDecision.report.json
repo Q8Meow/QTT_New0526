@@ -1,0 +1,53 @@
+{
+  "chosen_paths": {
+    "fail_closed_tests": "tests/fail_closed/test_run_validation_gates.py",
+    "fixture": "tests/fixtures/replay_paper/historical_dataset_digest_and_loader.fixture.json",
+    "fixture_builder": "tools/build_historical_dataset_digest_and_loader_fixture.py",
+    "focused_tests": "tests/replay_paper/test_historical_dataset_digest_and_loader.py",
+    "implementation_module": "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_digest_and_loader.py",
+    "policy_literal_drift_validator": "tools/validate_historical_dataset_policy_literal_drift.py",
+    "policy_module": "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.py",
+    "policy_schema_defs": "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+    "schemas": [
+      "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+      "schemas/replay_paper/historical_dataset_digest_and_loader.schema.json",
+      "schemas/replay_paper/historical_dataset_digest_and_loader_receipt.schema.json"
+    ],
+    "validator": "tools/validate_historical_dataset_digest_and_loader.py"
+  },
+  "path_decisions": [
+    {
+      "authority_boundary_impact": "metadata-only local fixture contract",
+      "chosen_path": "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.py",
+      "convention_inspected": "src/qtt/stage1_prediction_markets/runtime_resolver_snapshot_executor",
+      "reason": "Stage 1 repo convention keeps replay/paper contracts under src/qtt/stage1_prediction_markets.",
+      "rejected_alternative_paths": [
+        "src/qtt/replay_paper/historical_dataset_policy.py"
+      ],
+      "schema_drift_risk": false
+    },
+    {
+      "authority_boundary_impact": "central policy refs avoid scattered enums",
+      "chosen_path": "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+      "convention_inspected": "schemas/replay_paper_review and Stage 1 package schemas",
+      "reason": "Prompt and blueprint both identify replay_paper schema family for this dataset contract.",
+      "rejected_alternative_paths": [
+        "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.defs.schema.json"
+      ],
+      "schema_drift_risk": false
+    }
+  ],
+  "path_selection_precedence_used": [
+    "Reuse current repo convention from PR131-PR134 when clear",
+    "Reuse closest Stage 1 replay_paper/runtime_resolver path pattern",
+    "Use PR135 default paths where no stronger convention exists"
+  ],
+  "receipt_type": "PR135_PATH_DECISION_RECEIPT",
+  "repo_pr_number": 135,
+  "report_path_mapping": {
+    "currentization_convention": "docs/roadmap/generated/CODEX_REPO_PR134_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json",
+    "read_receipt_convention": "docs/roadmap/generated/CODEX_PR135_MANDATORY_READ_RECEIPT.json",
+    "route_triage_convention": "docs/roadmap/generated/CODEX_PR135_ROUTE_TRIAGE_RECEIPT.json"
+  },
+  "roadmap_pr_number": 117
+}

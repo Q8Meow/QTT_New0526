@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "HistoricalDatasetAtomicRowsPreBridgeMetadata": {
+      "additionalProperties": true,
+      "required": [
+        "atomicrows_metadata_record_type",
+        "dataset_digest_id",
+        "atomicrows_bundle_path",
+        "atomicrows_bundle_sha_path",
+        "atomicrows_bundle_created_flag",
+        "atomicrows_bundle_edited_flag",
+        "atomicrows_bundle_sha_created_flag",
+        "atomicrows_rows_created_flag"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetDownstreamHandoff": {
+      "additionalProperties": true,
+      "properties": {
+        "record_type": {
+          "const": "HISTORICAL_DATASET_DOWNSTREAM_HANDOFF",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "handoff_id",
+        "dataset_digest_id",
+        "loader_manifest_id",
+        "input_lock_id",
+        "integrity_receipt_id",
+        "no_live_authority_flag",
+        "no_order_authority_flag",
+        "no_profit_evidence_flag",
+        "no_quantum_execution_flag",
+        "no_atomicrows_materialization_flag"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetIntegrityReceipt": {
+      "additionalProperties": true,
+      "properties": {
+        "digest_algorithm": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/digest_algorithm"
+        },
+        "policy_block_code_ref": {
+          "anyOf": [
+            {
+              "$ref": "historical_dataset_policy.defs.schema.json#/$defs/policy_block_code_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record_type": {
+          "const": "HISTORICAL_DATASET_INTEGRITY_RECEIPT",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "integrity_receipt_id",
+        "dataset_digest_id",
+        "canonical_content_digest_sha256",
+        "fixture_digest_sha256",
+        "digest_algorithm",
+        "pass_flag"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetQuantumOptimizationMetadata": {
+      "additionalProperties": true,
+      "required": [
+        "quantum_metadata_record_type",
+        "dataset_digest_id",
+        "classical_comparator_required_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_advantage_claim_flag"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetRejectionReceipt": {
+      "additionalProperties": true,
+      "properties": {
+        "policy_block_code_ref": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/policy_block_code_ref"
+        },
+        "record_type": {
+          "const": "HISTORICAL_DATASET_REJECTION_RECEIPT",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "rejection_receipt_id",
+        "dataset_digest_id",
+        "policy_block_code_ref",
+        "blocked_field_path",
+        "blocked_reason",
+        "deterministic_rejection_flag"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://qtt.local/schemas/replay_paper/historical_dataset_digest_and_loader_receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "title": "PR135 Historical Dataset Receipt Records",
+  "type": "object"
+}

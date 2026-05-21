@@ -1,0 +1,153 @@
+{
+  "allowed_future_consumers": [
+    "PR118_REPLAY_ENGINE_EXECUTOR",
+    "FUTURE_PAPER_ENGINE_AFTER_OWNER_AUTHORIZATION",
+    "FUTURE_OPTIMIZER_PRECOMPUTE_AFTER_OWNER_AUTHORIZATION",
+    "FUTURE_ATOMICROWS_BRIDGE_AFTER_OWNER_AUTHORIZATION"
+  ],
+  "candidate_set_constants": [
+    "VERSIONED_CANDIDATE_SET_SNAPSHOT_LOCK",
+    "FUTURE_CANDIDATE_ADDITIONS_ALLOWED_BY_NEW_SNAPSHOT_VERSIONS",
+    "GLOBAL_PERMANENT_CANDIDATE_FREEZE_FORBIDDEN"
+  ],
+  "canonical_venues": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "centralized_block_code_doctrine": true,
+  "codex_network_access_used": false,
+  "dataset_record_scopes": [
+    "FIXTURE_ONLY",
+    "CONTRACT_METADATA_ONLY",
+    "SOURCE_GATED_REFERENCE_ONLY"
+  ],
+  "definition_locations_approved": [
+    "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.py",
+    "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+    "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json"
+  ],
+  "digest_algorithms": [
+    "SHA256"
+  ],
+  "forbidden_consumers": [
+    "LIVE_ORDER_AUTHORITY",
+    "RUNTIME_CASH_AUTHORITY",
+    "DIRECT_SIGNAL_GENERATION",
+    "QUANTUM_BACKEND_EXECUTION",
+    "ATOMICROWS_BUNDLE_MATERIALIZATION"
+  ],
+  "forbidden_venue_identities": [
+    "FORECASTEX",
+    "FORECASTX",
+    "IBKR_FORECASTX",
+    "forecastx"
+  ],
+  "gh_command_used_by_codex": false,
+  "input_lock_states": [
+    "LOCKED_FIXTURE_INPUT",
+    "BLOCKED_MISSING_RUNTIME_RESOLVER_HANDOFF",
+    "BLOCKED_MISSING_CANDIDATE_SET_SNAPSHOT_LOCK",
+    "BLOCKED_MISSING_REPLAY_PAPER_INPUT_IDENTITY",
+    "BLOCKED_MISSING_SOURCE_LINEAGE",
+    "BLOCKED_MUTABLE_DATASET",
+    "BLOCKED_LIVE_DATA_ATTEMPT",
+    "BLOCKED_SOURCE_ACCEPTANCE_ATTEMPT",
+    "BLOCKED_REPLAY_EXECUTION_ATTEMPT",
+    "BLOCKED_PAPER_EXECUTION_ATTEMPT",
+    "BLOCKED_FEATURE_VECTOR_ATTEMPT",
+    "BLOCKED_TRADING_SIGNAL_ATTEMPT",
+    "BLOCKED_RANKING_SCORING_ARBITRATION_ATTEMPT",
+    "BLOCKED_ORDER_AUTHORITY_ATTEMPT",
+    "BLOCKED_RUNTIME_CASH_AUTHORITY_ATTEMPT",
+    "BLOCKED_PROFIT_EVIDENCE_ATTEMPT",
+    "BLOCKED_QUANTUM_EXECUTION_ATTEMPT",
+    "BLOCKED_QUANTUM_OPTIMIZER_INPUT_ATTEMPT",
+    "BLOCKED_QUANTUM_ADVANTAGE_CLAIM_ATTEMPT",
+    "BLOCKED_ATOMICROWS_MATERIALIZATION_ATTEMPT",
+    "BLOCKED_NONCANONICAL_FORECASTEX_IBKR_IDENTITY",
+    "BLOCKED_GLOBAL_PERMANENT_CANDIDATE_FREEZE_LANGUAGE",
+    "BLOCKED_SAME_NUMBER_ROADMAP_INFERENCE",
+    "BLOCKED_MISSING_PR134_CURRENTIZATION",
+    "BLOCKED_POLICY_LITERAL_DRIFT",
+    "BLOCKED_UNAUTHORIZED_MASTER_PLAN_EDIT",
+    "BLOCKED_ATOMICROWS_BUNDLE_OR_SHA_DIFF",
+    "BLOCKED_PLACEHOLDER_OWNER_VERIFIED_INPUT",
+    "BLOCKED_SOURCE_FACT_RETRIEVAL_OR_ACCEPTANCE",
+    "BLOCKED_CONNECTOR_SEMANTIC_BINDING"
+  ],
+  "loader_manifest_modes": [
+    "FIXTURE_MANIFEST_ONLY",
+    "CONTRACT_DECLARATION_ONLY"
+  ],
+  "no_authority_flags": {
+    "creates_alpha_evidence": false,
+    "creates_atomicrows_materialization": false,
+    "creates_connector_binding": false,
+    "creates_credential_resolution": false,
+    "creates_execution_superiority_evidence": false,
+    "creates_feature_vector": false,
+    "creates_latency_superiority_evidence": false,
+    "creates_live_data": false,
+    "creates_order_authority": false,
+    "creates_order_execution": false,
+    "creates_paper_execution": false,
+    "creates_paper_result": false,
+    "creates_private_state_fetch": false,
+    "creates_profit_evidence": false,
+    "creates_quantum_advantage_claim": false,
+    "creates_quantum_execution": false,
+    "creates_quantum_optimizer_input": false,
+    "creates_quantum_trading_signal": false,
+    "creates_ranking_scoring_arbitration": false,
+    "creates_replay_execution": false,
+    "creates_replay_result": false,
+    "creates_runtime_cash_authority": false,
+    "creates_source_acceptance": false,
+    "creates_source_retrieval": false,
+    "creates_trading_signal": false
+  },
+  "policy_literal_drift_validator_path": "tools/validate_historical_dataset_policy_literal_drift.py",
+  "policy_manifest_path": "docs/master_plan/generated/PR135HistoricalDatasetPolicyManifest.report.json",
+  "policy_module_path": "src/qtt/stage1_prediction_markets/replay_paper/historical_dataset_policy.py",
+  "policy_schema_defs_path": "schemas/replay_paper/historical_dataset_policy.defs.schema.json",
+  "receipt_type": "PR135_HISTORICAL_DATASET_POLICY_MANIFEST",
+  "record_no_authority_flags": {
+    "alpha_evidence_created_flag": false,
+    "atomicrows_materialization_created_flag": false,
+    "connector_binding_created_flag": false,
+    "credential_resolution_created_flag": false,
+    "execution_superiority_evidence_created_flag": false,
+    "feature_vector_created_flag": false,
+    "latency_superiority_evidence_created_flag": false,
+    "live_data_used_flag": false,
+    "order_authority_created_flag": false,
+    "order_execution_created_flag": false,
+    "paper_execution_created_flag": false,
+    "paper_result_created_flag": false,
+    "private_state_fetch_created_flag": false,
+    "profit_evidence_created_flag": false,
+    "quantum_advantage_claim_created_flag": false,
+    "quantum_execution_created_flag": false,
+    "quantum_optimizer_input_created_flag": false,
+    "quantum_trading_signal_created_flag": false,
+    "ranking_scoring_arbitration_created_flag": false,
+    "replay_execution_created_flag": false,
+    "replay_result_created_flag": false,
+    "runtime_cash_authority_created_flag": false,
+    "source_acceptance_created_flag": false,
+    "source_retrieval_created_flag": false,
+    "trading_signal_created_flag": false
+  },
+  "repo_pr_number": 135,
+  "roadmap_pr_number": 117,
+  "source_boundary_constants": [
+    "SOURCE_REQUIRED_REFERENCE_ONLY",
+    "ACCEPTED_SOURCE_PACKET_REQUIRED_FOR_REAL_HISTORICAL_AVAILABILITY",
+    "OWNER_DEFINITIONS_PACKET_NOT_EXTERNAL_FACT_AUTHORITY",
+    "FIXTURE_SHAPE_ONLY_NOT_VENUE_FACT_TRUTH"
+  ],
+  "source_boundary_language": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+  "validator_marker": "QTT_HISTORICAL_DATASET_DIGEST_AND_LOADER_OK"
+}

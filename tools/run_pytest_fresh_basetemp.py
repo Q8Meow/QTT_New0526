@@ -38,6 +38,23 @@ def make_fresh_basetemp(
     )
 
 
+def make_local_fresh_basetemp(
+    *, now: datetime | None = None, pid: int | None = None
+) -> pathlib.Path:
+    moment = now or datetime.now(UTC)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    else:
+        moment = moment.astimezone(UTC)
+    timestamp = moment.strftime("%Y%m%d_%H%M%S_%f")
+    process_id = os.getpid() if pid is None else pid
+    return (
+        pathlib.Path(__file__).resolve().parents[1]
+        / ".tmp"
+        / f"pt_{timestamp}_{process_id}"
+    )
+
+
 def find_explicit_basetemp(pytest_args: Sequence[str]) -> str | None:
     for index, arg in enumerate(pytest_args):
         if arg == "--basetemp":
@@ -71,7 +88,10 @@ def build_pytest_invocation(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    invocation = build_pytest_invocation(sys.argv[1:] if argv is None else argv)
+    invocation = build_pytest_invocation(
+        sys.argv[1:] if argv is None else argv,
+        fresh_basetemp=make_local_fresh_basetemp(),
+    )
     if invocation.added_basetemp:
         pathlib.Path(invocation.basetemp).parent.mkdir(parents=True, exist_ok=True)
     try:

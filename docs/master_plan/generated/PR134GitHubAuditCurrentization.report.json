@@ -1,0 +1,23 @@
+{
+  "baseRefName": "main",
+  "codex_network_access_used": false,
+  "currentized_in_identity_roster": true,
+  "equivalent_repo_convention_receipt_path": "docs/roadmap/generated/CODEX_REPO_PR134_GITHUB_AUDIT_CURRENTIZATION_RECEIPT.json",
+  "gh_command_used_by_codex": false,
+  "headRefName": "pr134-runtime-resolver-snapshot-executor",
+  "head_branch_commit": "7db7f7f",
+  "mergeCommit_full": "6d18db0ccb1d4b3d27a9b1ee267b06a269c1c350",
+  "mergeCommit_short": "6d18db0",
+  "mergedAt": "2026-05-21T02:05:49Z",
+  "missing_owner_verified_fields": [],
+  "owner_verified_source": true,
+  "placeholder_values_detected": [],
+  "receipt_type": "PR134_GITHUB_AUDIT_CURRENTIZATION_RECEIPT",
+  "repo_pr_number": 134,
+  "repo_pr_state": "MERGED",
+  "repo_pr_title": "PR134 implement runtime resolver snapshot executor contracts",
+  "repo_pr_url": "https://github.com/Q8Meow/QTT_New0526/pull/134",
+  "roadmap_pr_number": 116,
+  "source_of_truth_note": "owner-side gh pr view 134 verification; Codex did not verify via network",
+  "stop_if_missing_required_fields": true
+}

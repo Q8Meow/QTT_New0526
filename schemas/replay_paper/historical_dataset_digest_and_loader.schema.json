@@ -1,0 +1,185 @@
+{
+  "$defs": {
+    "HistoricalDatasetDigest": {
+      "additionalProperties": true,
+      "properties": {
+        "dataset_scope_class": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/dataset_record_scope"
+        },
+        "market_scope": {
+          "type": "string"
+        },
+        "record_type": {
+          "const": "HISTORICAL_DATASET_DIGEST",
+          "type": "string"
+        },
+        "repo_pr_number": {
+          "const": 135,
+          "type": "integer"
+        },
+        "roadmap_pr_number": {
+          "const": 117,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "PR135_HISTORICAL_DATASET_DIGEST_AND_LOADER_SCHEMA_V1",
+          "type": "string"
+        },
+        "source_boundary_class": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/source_boundary_constant"
+        },
+        "source_boundary_language": {
+          "const": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+          "type": "string"
+        },
+        "validation_marker": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/validator_marker"
+        },
+        "venue_scope": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/canonical_venue_id"
+        }
+      },
+      "required": [
+        "market_scope",
+        "repo_pr_number",
+        "roadmap_pr_number",
+        "schema_version",
+        "source_boundary_class",
+        "source_boundary_language",
+        "venue_scope",
+        "record_type",
+        "dataset_digest_id",
+        "dataset_scope_class",
+        "source_lineage_ref",
+        "fixture_digest_sha256",
+        "canonical_content_digest_sha256",
+        "runtime_resolver_snapshot_handoff_ref",
+        "versioned_candidate_set_snapshot_lock_ref",
+        "replay_paper_input_identity_ref",
+        "immutable_after_creation_flag",
+        "validation_marker"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetInputLock": {
+      "additionalProperties": true,
+      "properties": {
+        "input_lock_state": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/policy_block_code_ref"
+        },
+        "market_scope": {
+          "type": "string"
+        },
+        "record_type": {
+          "const": "HISTORICAL_DATASET_INPUT_LOCK",
+          "type": "string"
+        },
+        "repo_pr_number": {
+          "const": 135,
+          "type": "integer"
+        },
+        "roadmap_pr_number": {
+          "const": 117,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "PR135_HISTORICAL_DATASET_DIGEST_AND_LOADER_SCHEMA_V1",
+          "type": "string"
+        },
+        "source_boundary_class": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/source_boundary_constant"
+        },
+        "source_boundary_language": {
+          "const": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+          "type": "string"
+        },
+        "venue_scope": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/canonical_venue_id"
+        }
+      },
+      "required": [
+        "market_scope",
+        "repo_pr_number",
+        "roadmap_pr_number",
+        "schema_version",
+        "source_boundary_class",
+        "source_boundary_language",
+        "venue_scope",
+        "record_type",
+        "input_lock_id",
+        "runtime_resolver_snapshot_handoff_ref",
+        "versioned_candidate_set_snapshot_lock_ref",
+        "replay_paper_input_identity_ref",
+        "global_candidate_freeze_flag",
+        "future_candidate_additions_allowed_by_new_snapshot_versions",
+        "immutable_input_identity_digest",
+        "input_lock_state"
+      ],
+      "type": "object"
+    },
+    "HistoricalDatasetLoaderManifest": {
+      "additionalProperties": true,
+      "properties": {
+        "allowed_loader_mode": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/loader_manifest_mode"
+        },
+        "digest_algorithm": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/digest_algorithm"
+        },
+        "market_scope": {
+          "type": "string"
+        },
+        "record_type": {
+          "const": "HISTORICAL_DATASET_LOADER_MANIFEST",
+          "type": "string"
+        },
+        "repo_pr_number": {
+          "const": 135,
+          "type": "integer"
+        },
+        "roadmap_pr_number": {
+          "const": 117,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "PR135_HISTORICAL_DATASET_DIGEST_AND_LOADER_SCHEMA_V1",
+          "type": "string"
+        },
+        "source_boundary_class": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/source_boundary_constant"
+        },
+        "source_boundary_language": {
+          "const": "fixture can test schema shape and deterministic digest behavior only, not venue fact truth.",
+          "type": "string"
+        },
+        "venue_scope": {
+          "$ref": "historical_dataset_policy.defs.schema.json#/$defs/canonical_venue_id"
+        }
+      },
+      "required": [
+        "market_scope",
+        "repo_pr_number",
+        "roadmap_pr_number",
+        "schema_version",
+        "source_boundary_class",
+        "source_boundary_language",
+        "venue_scope",
+        "record_type",
+        "loader_manifest_id",
+        "dataset_digest_id",
+        "fixture_backed_flag",
+        "live_loader_flag",
+        "network_io_used_flag",
+        "allowed_loader_mode",
+        "digest_algorithm",
+        "deterministic_ordering_flag"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://qtt.local/schemas/replay_paper/historical_dataset_digest_and_loader.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "title": "PR135 Historical Dataset Digest And Loader",
+  "type": "object"
+}
