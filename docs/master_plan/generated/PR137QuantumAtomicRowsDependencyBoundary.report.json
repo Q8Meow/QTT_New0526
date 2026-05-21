@@ -1,0 +1,33 @@
+{
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "quantum_atomicrows_dependency_boundary": {
+    "atomicrows_bridge_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+    "atomicrows_bundle_created": false,
+    "atomicrows_materialization_authority_created": false,
+    "atomicrows_rows_created": false,
+    "boundary_state": "QUANTUM_AND_ATOMICROWS_FUTURE_REF_ONLY",
+    "compatibility_states": {
+      "ising_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "qaoa_qubo_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_annealing_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_classical_comparator": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_kernel_feature_map": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "quantum_optimizer_arbitration_readiness": "FUTURE_DEPENDENCY_METADATA_ONLY",
+      "vqe_compatibility": "FUTURE_DEPENDENCY_METADATA_ONLY"
+    },
+    "no_optimizer_input_packet": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_call": true,
+    "no_quantum_trading_signal": true,
+    "no_simulator_execution": true,
+    "quantum_metadata_only": true,
+    "source_selector_ref": "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json"
+  },
+  "receipt_type": "PR137_QUANTUM_ATOMICROWS_DEPENDENCY_BOUNDARY",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_QUANTUM_ATOMICROWS_DEPENDENCY_BOUNDARY",
+  "report_version": "PR137_QUANTUM_ATOMICROWS_DEPENDENCY_BOUNDARY_V1",
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY"
+    },
+    "current_authority_created": {
+      "const": false
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "generated_by": {
+      "const": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller"
+    },
+    "node_id": {
+      "type": "string"
+    },
+    "owner_authorization_required": {
+      "type": "boolean"
+    },
+    "readiness_state": {
+      "type": "string"
+    },
+    "receipt_type": {
+      "type": "string"
+    },
+    "repo_pr_number_or_label": {
+      "const": "PR137"
+    },
+    "report_type": {
+      "type": "string"
+    },
+    "report_version": {
+      "type": "string"
+    },
+    "required_upstream_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_marker": {
+      "enum": [
+        "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK",
+        "QTT_PR137_GENERATED_INTEGRITY_AUTHORITY_BOUNDARY_OK"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "authority_class",
+    "generated_at_utc",
+    "generated_by",
+    "receipt_type",
+    "repo_pr_number_or_label",
+    "report_type",
+    "report_version"
+  ],
+  "title": "PR137 Launch Readiness Dependency Node",
+  "type": "object"
+}

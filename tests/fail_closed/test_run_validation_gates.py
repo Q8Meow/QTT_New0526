@@ -151,6 +151,12 @@ from tools import (
     as atomicrows_sha_freeze_final_readiness_state_contract,
 )
 from tools import validate_qtt_agent_algorithm_command_matrix as command_matrix_gate
+from tools import (
+    validate_pr137_generated_integrity_authority_boundary as pr137_integrity_boundary_gate,
+)
+from tools import (
+    validate_pr137_launch_readiness_dependency_controller as pr137_dependency_controller_gate,
+)
 from tools import run_validation_gates as runner
 
 
@@ -443,6 +449,18 @@ def _expected_commands(
         [
             python_executable,
             str(Path("tools") / "validate_pr136_day1_launch_readiness_roadmap.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr137_generated_integrity_authority_boundary.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr137_launch_readiness_dependency_controller.py"),
             "--repo-root",
             ".",
         ],
@@ -1827,6 +1845,12 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
     pr136_roadmap_index = command_names.index(
         "validate_pr136_day1_launch_readiness_roadmap.py"
     )
+    pr137_integrity_index = command_names.index(
+        "validate_pr137_generated_integrity_authority_boundary.py"
+    )
+    pr137_controller_index = command_names.index(
+        "validate_pr137_launch_readiness_dependency_controller.py"
+    )
     connector_index = command_names.index("validate_connector_capability_static.py")
 
     assert (
@@ -1837,6 +1861,8 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
         < historical_dataset_index
         < pr136_policy_drift_index
         < pr136_roadmap_index
+        < pr137_integrity_index
+        < pr137_controller_index
         < connector_index
     )
     assert commands[snapshot_index] == [
@@ -1872,6 +1898,64 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
     assert commands[pr136_roadmap_index] == [
         python_executable,
         str(Path("tools") / "validate_pr136_day1_launch_readiness_roadmap.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr137_integrity_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr137_generated_integrity_authority_boundary.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr137_controller_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr137_launch_readiness_dependency_controller.py"),
+        "--repo-root",
+        ".",
+    ]
+
+
+def test_runner_includes_pr137_validators_after_pr136_and_before_downstream_static_gates(
+    monkeypatch,
+):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr136_policy_drift_index = command_names.index(
+        "validate_pr136_roadmap_policy_literal_drift.py"
+    )
+    pr136_roadmap_index = command_names.index(
+        "validate_pr136_day1_launch_readiness_roadmap.py"
+    )
+    pr137_integrity_index = command_names.index(
+        "validate_pr137_generated_integrity_authority_boundary.py"
+    )
+    pr137_controller_index = command_names.index(
+        "validate_pr137_launch_readiness_dependency_controller.py"
+    )
+    connector_index = command_names.index("validate_connector_capability_static.py")
+
+    assert command_names.count("validate_pr137_generated_integrity_authority_boundary.py") == 1
+    assert command_names.count("validate_pr137_launch_readiness_dependency_controller.py") == 1
+    assert (
+        pr136_policy_drift_index
+        < pr136_roadmap_index
+        < pr137_integrity_index
+        < pr137_controller_index
+        < connector_index
+    )
+    assert commands[pr137_integrity_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr137_generated_integrity_authority_boundary.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr137_controller_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr137_launch_readiness_dependency_controller.py"),
         "--repo-root",
         ".",
     ]

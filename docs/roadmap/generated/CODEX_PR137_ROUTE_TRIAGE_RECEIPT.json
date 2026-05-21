@@ -1,0 +1,15 @@
+{
+  "arbitrary_domain_count_forced": false,
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "fixed_13_domain_model_used": false,
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "no_execution_authority_created": true,
+  "pr137_selected_from_pr136_sequence": true,
+  "receipt_type": "CODEX_PR137_ROUTE_TRIAGE_RECEIPT",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "CODEX_PR137_ROUTE_TRIAGE_RECEIPT",
+  "report_version": "CODEX_PR137_ROUTE_TRIAGE_RECEIPT_V1",
+  "same_number_inference_used": false,
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}

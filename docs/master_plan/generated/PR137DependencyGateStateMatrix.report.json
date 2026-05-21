@@ -1,0 +1,328 @@
+{
+  "authority_class": "CANONICAL_POST_PR136_DEPENDENCY_CONTROLLER_NOT_EXECUTION_AUTHORITY",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.launch_readiness.pr137_launch_readiness_dependency_controller",
+  "receipt_type": "PR137_DEPENDENCY_GATE_STATE_MATRIX",
+  "repo_pr_number_or_label": "PR137",
+  "report_type": "PR137_DEPENDENCY_GATE_STATE_MATRIX",
+  "report_version": "PR137_DEPENDENCY_GATE_STATE_MATRIX_V1",
+  "sequence_gate_matrix": {
+    "PR137": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR137L"
+      ],
+      "readiness_state": "STATIC_CONTRACT_READY",
+      "upstream_dependencies": []
+    },
+    "PR137L": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR138"
+      ],
+      "readiness_state": "STATIC_CONTRACT_READY",
+      "upstream_dependencies": [
+        "PR137"
+      ]
+    },
+    "PR138": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR139"
+      ],
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR137L"
+      ]
+    },
+    "PR139": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR140"
+      ],
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR138"
+      ]
+    },
+    "PR140": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR141"
+      ],
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR139"
+      ]
+    },
+    "PR141": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR142"
+      ],
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR140"
+      ]
+    },
+    "PR142": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR143K"
+      ],
+      "readiness_state": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR141"
+      ]
+    },
+    "PR143": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR144"
+      ],
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "upstream_dependencies": [
+        "PR143F"
+      ]
+    },
+    "PR143F": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR143"
+      ],
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "upstream_dependencies": [
+        "PR143P"
+      ]
+    },
+    "PR143K": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR143P"
+      ],
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "upstream_dependencies": [
+        "PR142"
+      ]
+    },
+    "PR143P": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR143F"
+      ],
+      "readiness_state": "SOURCE_EVIDENCE_READY",
+      "upstream_dependencies": [
+        "PR143K"
+      ]
+    },
+    "PR144": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR145"
+      ],
+      "readiness_state": "CONNECTOR_BINDING_READY",
+      "upstream_dependencies": [
+        "PR143"
+      ]
+    },
+    "PR145": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR146"
+      ],
+      "readiness_state": "CREDENTIAL_PRIVATE_STATE_CASH_READY",
+      "upstream_dependencies": [
+        "PR144"
+      ]
+    },
+    "PR146": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR147"
+      ],
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "upstream_dependencies": [
+        "PR145"
+      ]
+    },
+    "PR147": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR148"
+      ],
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "upstream_dependencies": [
+        "PR146"
+      ]
+    },
+    "PR148": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR149"
+      ],
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "upstream_dependencies": [
+        "PR147"
+      ]
+    },
+    "PR149": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR150"
+      ],
+      "readiness_state": "NONLIVE_REPLAY_PAPER_READY",
+      "upstream_dependencies": [
+        "PR148"
+      ]
+    },
+    "PR150": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR151"
+      ],
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR149"
+      ]
+    },
+    "PR151": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR152"
+      ],
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR150"
+      ]
+    },
+    "PR152": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR153"
+      ],
+      "readiness_state": "QUANTUM_OPTIMIZER_READY_OWNER_BLOCKED",
+      "upstream_dependencies": [
+        "PR151"
+      ]
+    },
+    "PR153": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR154"
+      ],
+      "readiness_state": "OWNER_REVIEW_READY",
+      "upstream_dependencies": [
+        "PR152"
+      ]
+    },
+    "PR154": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR155"
+      ],
+      "readiness_state": "OWNER_REVIEW_READY",
+      "upstream_dependencies": [
+        "PR153"
+      ]
+    },
+    "PR155": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR156"
+      ],
+      "readiness_state": "OWNER_REVIEW_READY",
+      "upstream_dependencies": [
+        "PR154"
+      ]
+    },
+    "PR156": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR157"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR155"
+      ]
+    },
+    "PR157": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR158"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR156"
+      ]
+    },
+    "PR158": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR159"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR157"
+      ]
+    },
+    "PR159": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR160"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR158"
+      ]
+    },
+    "PR160": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR161"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR159"
+      ]
+    },
+    "PR161": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [
+        "PR162"
+      ],
+      "readiness_state": "CANARY_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR160"
+      ]
+    },
+    "PR162": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR163"
+      ],
+      "readiness_state": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR161"
+      ]
+    },
+    "PR163": {
+      "authority_state": "DEPENDENCY_GATED_STATIC_SEQUENCE_ENTRY",
+      "downstream_dependencies": [
+        "PR164"
+      ],
+      "readiness_state": "DAY1_LAUNCH_READY_OWNER_COMMAND_REQUIRED",
+      "upstream_dependencies": [
+        "PR162"
+      ]
+    },
+    "PR164": {
+      "authority_state": "FUTURE_OWNER_AUTHORIZATION_REQUIRED",
+      "downstream_dependencies": [],
+      "readiness_state": "OFFICIAL_DAY1_LIVE_TRADING_STARTED_OWNER_AUTHORIZED_ONLY",
+      "upstream_dependencies": [
+        "PR163"
+      ]
+    }
+  },
+  "validation_marker": "QTT_PR137_LAUNCH_READINESS_DEPENDENCY_CONTROLLER_OK"
+}
