@@ -64,6 +64,7 @@ GITHUB_PR_NUMBER_POLICY = "may differ"
 SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-STATIC-SCREEN"
 BLUEPRINT_SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-APPROVAL-STATIC-SCREEN-CONTRACT"
 TARGET_BRANCH = "pr96-owner-dashboard-approval-static-screen-contract"
+REPAIR_BRANCH_PREFIX = "repair/"
 EXPECTED_BASELINE_ANCESTOR = "ee9bcc3"
 SUCCESS_MARKER = "QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_OK"
 FAILURE_MARKER = "QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_FAILED"
@@ -601,6 +602,8 @@ def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
+    if branch.startswith(REPAIR_BRANCH_PREFIX):
+        return True
     match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
@@ -618,7 +621,7 @@ def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
 
 
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
-    if _main_cumulative_branch_allowed(branch):
+    if _main_cumulative_branch_allowed(branch) or branch.startswith(REPAIR_BRANCH_PREFIX):
         return True
     match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:

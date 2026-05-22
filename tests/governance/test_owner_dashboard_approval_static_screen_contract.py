@@ -9,6 +9,7 @@ REPO_ROOT = Path(".")
 PR97_BRANCH = "pr97-atomicrows-full-bundle-row-expansion-plan"
 PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
 FEATURE_BRANCH = "feature/non-downstream-validation"
+REPAIR_BRANCH = "repair/pr138-main-push-ci-context"
 _REPORT_CACHE: dict | None = None
 
 
@@ -439,6 +440,52 @@ def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_cont
     _write_file(tmp_path, builder_path)
 
     assert gate.validate_filesystem_boundaries(tmp_path) == []
+
+
+
+
+
+def test_pr97_static_plan_files_allowed_on_repair_branch(tmp_path, monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, REPAIR_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    assert failures == []
+
+
+def test_pr99_static_bundle_builder_allowed_on_repair_branch(tmp_path, monkeypatch):
+    builder_path = gate.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, REPAIR_BRANCH)
+    _write_file(tmp_path, builder_path)
+
+    assert gate.validate_filesystem_boundaries(tmp_path) == []
+
+
+def test_atomicrows_bundle_hash_and_runtime_remain_blocked_on_repair_branch(
+    tmp_path,
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, REPAIR_BRANCH)
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        _write_file(tmp_path, path)
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = gate.validate_filesystem_boundaries(tmp_path)
+
+    for path in gate.PR97_STATIC_PLAN_PATHS:
+        assert _pr96_forbidden_failure(path) not in failures
+    for path in gate.PR97_ALWAYS_FORBIDDEN_PATHS:
+        assert _pr96_forbidden_failure(path) in failures
+    for path in gate.FORBIDDEN_RUNTIME_PATHS:
+        assert _runtime_forbidden_failure(path) in failures
 
 
 def test_missing_required_screen_fails_closed(tmp_path):
