@@ -82,6 +82,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr90_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr90_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
+REPAIR_BRANCH_PREFIX = "repair/"
 
 ROLE_ORDER = pr90_gate.ROLE_ORDER
 DEPENDENCY_ORDER = pr90_gate.DEPENDENCY_ORDER + (
@@ -484,7 +485,7 @@ def _github_actions_active() -> bool:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    if branch == "main":
+    if branch == "main" or branch.startswith(REPAIR_BRANCH_PREFIX):
         return True
     match = re.match(r"^pr(?P<number>[0-9]+)[a-z]*-", branch)
     if match is None:

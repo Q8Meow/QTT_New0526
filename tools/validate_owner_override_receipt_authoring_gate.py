@@ -82,6 +82,7 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr93_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
+REPAIR_BRANCH_PREFIX = "repair/"
 
 REQUIRED_MASTER_PLAN_PRINCIPLES = {
     "OWNER_FINAL_INTERNAL_WORKFLOW_AUTHORITY",
@@ -398,7 +399,11 @@ def _github_actions_pull_request_detached_context_active() -> bool:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    if branch == "main" or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX):
+    if (
+        branch == "main"
+        or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX)
+        or branch.startswith(REPAIR_BRANCH_PREFIX)
+    ):
         return True
     match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
