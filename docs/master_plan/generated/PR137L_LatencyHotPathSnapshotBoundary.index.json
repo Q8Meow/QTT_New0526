@@ -1,0 +1,40 @@
+{
+  "authority_class": "CANONICAL_POST_PR137_LATENCY_HOT_PATH_SNAPSHOT_BOUNDARY_NOT_EXECUTION_AUTHORITY",
+  "downstream_dependencies": [
+    "PR138"
+  ],
+  "gate_tool": "tools/stage1_latency_hot_path_snapshot_boundary_gate.py",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "index_type": "QTT_PR137L_LATENCY_HOT_PATH_SNAPSHOT_BOUNDARY_INDEX",
+  "latency_scope": "PRECOMPUTED_SNAPSHOT_BOUNDARY",
+  "market_scopes": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "pr137r_source_report": "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+  "pr_id": "PR137L",
+  "readiness_state": "STATIC_CONTRACT_READY",
+  "report_ref": "docs/master_plan/generated/PR137L_LatencyHotPathSnapshotBoundary.report.json",
+  "required_upstream_prs": [
+    "PR137"
+  ],
+  "schema_version": 1,
+  "static_evidence_dependencies": [
+    "PR137R"
+  ],
+  "validation_receipts": [
+    "QTT_PR137L_LATENCY_HOT_PATH_SNAPSHOT_BOUNDARY_OK",
+    "QTT_PR137L_DEPENDENCY_CHAIN_OK",
+    "QTT_PR137L_PR137R_STATIC_EVIDENCE_CONSUMED_OK",
+    "QTT_PR137L_ATOMICROWS_READ_ONLY_SNAPSHOT_BOUNDARY_OK",
+    "QTT_PR137L_NO_PR138_SCOPE_DRIFT_OK",
+    "QTT_PR137L_ONE_GLOBAL_ROADMAP_MARKET_OVERLAYS_OK",
+    "QTT_PR137L_LIVE_PRETRADE_PRECOMPUTED_SNAPSHOT_ONLY_OK",
+    "QTT_PR137L_NO_RUNTIME_LIVE_SOURCE_CONNECTOR_ORDER_PROFIT_AUTHORITY_OK",
+    "QTT_PR137L_NO_QTT_SHA_DIGEST_AUTHORITY_OK",
+    "QTT_PR137L_QUANTUM_ATOMICROWS_FUTURE_REF_ONLY_OK",
+    "QTT_PR137L_IDEMPOTENT_REPORT_OK"
+  ]
+}
