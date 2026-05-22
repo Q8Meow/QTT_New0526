@@ -377,6 +377,23 @@ def test_pr138_gate_ci_detached_head_relaxes_branch_only(monkeypatch: pytest.Mon
     assert c.PR138_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY in outcome.receipts
 
 
+def test_pr138_gate_ci_detached_head_skips_shallow_fetch_baseline_object_absence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/140/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "140/merge")
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(branch="", branch_rc=0, base_rc=128, ancestor_rc=128),
+    )
+    outcome = validate_report_payload(_report(), repo_root=REPO_ROOT, enforce_environment=True)
+    assert outcome.ok, outcome.failures
+    assert c.PR138_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY in outcome.receipts
+
+
 def test_pr138_gate_local_requires_descendant_of_d1bce40_or_owner_verified_sandbox_fallback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

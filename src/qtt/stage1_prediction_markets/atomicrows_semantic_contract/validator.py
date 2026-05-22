@@ -97,7 +97,8 @@ def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[l
     )
     if ci_merge_ref:
         receipts.append(c.PR138_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY)
-    elif branch_rc != 0 or branch != c.BRANCH:
+        return failures, receipts
+    if branch_rc != 0 or branch != c.BRANCH:
         failures.append(c.PR138_REASON_BRANCH_MISMATCH)
 
     base_rc, _base_out, _base_err = _git_stdout(
