@@ -1,0 +1,380 @@
+{
+  "execution": "DISABLED",
+  "fixture_collection_id": "PR138_ATOMICROWS_SEMANTIC_ROW_CONTRACT_FIXTURES",
+  "fixture_version": "v1",
+  "fixtures": [
+    {
+      "expected_reason_codes": [],
+      "fixture_id": "valid_minimal_semantic_contract_inventory",
+      "fixture_polarity": "VALID_POSITIVE",
+      "mutation": {},
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [],
+      "fixture_id": "valid_report_no_claim_boundary",
+      "fixture_polarity": "VALID_POSITIVE",
+      "mutation": {},
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_REQUIRED_FIELD_MISSING"
+      ],
+      "fixture_id": "invalid_missing_required_field",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "operation": "remove_field"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_REQUIRED_FIELD_GROUP_MISSING"
+      ],
+      "fixture_id": "invalid_missing_field_group",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_group_id": "IDENTITY",
+        "operation": "remove_field_group"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FIELD_DUPLICATE"
+      ],
+      "fixture_id": "invalid_duplicate_field",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "operation": "duplicate_field"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FIELD_GROUP_DUPLICATE"
+      ],
+      "fixture_id": "invalid_duplicate_field_group",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_group_id": "IDENTITY",
+        "operation": "duplicate_field_group"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FORBIDDEN_VENUE_ALIAS"
+      ],
+      "fixture_id": "invalid_forbidden_venue_alias_as_accepted_value",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "accepted_value": "FORECASTX",
+        "field_id": "venue_scope",
+        "operation": "append_accepted_market_scope"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_LIVE_USE_FLAG_TRUE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_live_use_allowed_flag_true",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "live_use_allowed_flag",
+        "operation": "set_default_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_ORDER_AUTHORITY_FLAG_TRUE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_order_authority_created_flag_true",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "order_authority_created_flag",
+        "operation": "set_default_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_PROFIT_EVIDENCE_FLAG_TRUE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_profit_evidence_created_flag_true",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "profit_evidence_created_flag",
+        "operation": "set_default_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QUANTUM_BACKEND_EXECUTION_FLAG_TRUE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_quantum_backend_execution_allowed_flag_true",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "quantum_backend_execution_allowed_flag",
+        "operation": "set_default_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_EXTERNAL_FACT_AUTHORITY_TRUE_FORBIDDEN_WITHOUT_ACCEPTED_SOURCE_PACKET"
+      ],
+      "fixture_id": "invalid_external_fact_authority_flag_true",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "external_fact_authority_flag",
+        "operation": "set_default_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_REASON_CODE_NOT_CENTRALIZED"
+      ],
+      "fixture_id": "invalid_scattered_reason_code_not_present_in_centralized_constants",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "operation": "append_reason_code",
+        "reason_code": "PR138_REASON_SCATTERED_NOT_CENTRALIZED"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FIELD_WITHOUT_AUTHORITY_BOUNDARY"
+      ],
+      "fixture_id": "invalid_missing_authority_boundary_metadata",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "key": "authority_boundary",
+        "operation": "remove_field_key"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FUTURE_PHASE_MISSING"
+      ],
+      "fixture_id": "invalid_missing_future_pr_phase_metadata",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "key": "future_enrichment_phase",
+        "operation": "remove_field_key"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FIELD_WITHOUT_CROSSWALK_TRACE"
+      ],
+      "fixture_id": "invalid_missing_crosswalk_trace_metadata_if_required",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field_id": "row_id",
+        "operation": "set_trace_state",
+        "trace_key": "full_master_plan_section_crosswalk_trace",
+        "trace_state": "TRACE_BLOCKED"
+      },
+      "payload_type": "contract"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_FINAL_READINESS_NOT_CREATED"
+      ],
+      "fixture_id": "invalid_final_readiness_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "final_readiness_claimed_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_DAY1_LIVE_READINESS_NOT_CREATED"
+      ],
+      "fixture_id": "invalid_day1_live_readiness_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "day1_live_readiness_claimed_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_REPORT_CLAIM_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_latency_superiority_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "latency_superiority_claimed_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_REPORT_CLAIM_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_execution_superiority_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "execution_superiority_claimed_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QUANTUM_ADVANTAGE_CLAIM_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_quantum_advantage_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "quantum_advantage_claimed_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QUANTUM_SIMULATOR_EXECUTION_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_quantum_simulator_execution_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "quantum_simulator_execution_created_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QUANTUM_OPTIMIZER_INPUT_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_quantum_optimizer_input_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "quantum_optimizer_input_created_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QUANTUM_OPTIMIZER_INPUT_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_quantum_optimizer_output_claim",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "quantum_optimizer_output_created_by_pr138",
+        "operation": "set_report_flag",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_BUNDLE_MUTATION_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_atomicrows_bundle_mutation_detection",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "operation": "simulate_changed_path",
+        "path": "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+      },
+      "payload_type": "protected_diff"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_ROW_FAMILY_SOURCE_MUTATION_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_row_family_mutation_detection",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "operation": "simulate_changed_path",
+        "path": "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl"
+      },
+      "payload_type": "protected_diff"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_BUILDER_MUTATION_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_bundle_builder_mutation_detection",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "operation": "simulate_changed_path",
+        "path": "tools/build_atomicrows_bundle.py"
+      },
+      "payload_type": "protected_diff"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_NEW_ATOMICROWS_BUNDLE_SHA_SIDECAR_REFERENCE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_new_atomicrows_bundle_sidecar_reference_in_pr138_artifact_or_diff_scope",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "introduced_reference_class": "ATOMICROWS_BUNDLE_FORBIDDEN_SIDECAR_REFERENCE",
+        "operation": "simulate_forbidden_sidecar_reference"
+      },
+      "payload_type": "protected_diff"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_QTT_GENERATED_CRYPTOGRAPHIC_AUTHORITY_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_qtt_generated_cryptographic_authority_field",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "key": "qtt_generated_cryptographic_authority_field",
+        "operation": "add_report_key",
+        "value": true
+      },
+      "payload_type": "report"
+    },
+    {
+      "expected_reason_codes": [
+        "PR138_REASON_OLDER_BASELINE_CHECKPOINT_REFERENCE_FORBIDDEN"
+      ],
+      "fixture_id": "invalid_older_unresolved_baseline_checkpoint_reference",
+      "fixture_polarity": "INVALID_NEGATIVE_EXPECTED_FAIL",
+      "mutation": {
+        "field": "baseline_checkpoint",
+        "operation": "set_report_flag",
+        "value": "STALE_NON_D1BCE40_BASELINE_PLACEHOLDER"
+      },
+      "payload_type": "report"
+    }
+  ],
+  "mode": "SOURCE_REQUIRED",
+  "pr_id": "PR138"
+}
