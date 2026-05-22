@@ -10,10 +10,44 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOLS_DIR = REPO_ROOT / "tools"
 CENTRAL_HELPER = TOOLS_DIR / "ci_branch_context.py"
+STAGE1_SOURCE_DIR = REPO_ROOT / "src" / "qtt" / "stage1_prediction_markets"
+SOURCE_BRANCH_CONTEXT_VALIDATORS = (
+    STAGE1_SOURCE_DIR / "atomicrows_bundle_reconciliation" / "validator.py",
+    STAGE1_SOURCE_DIR / "atomicrows_semantic_contract" / "validator.py",
+    STAGE1_SOURCE_DIR / "latency_hot_path_snapshot_boundary" / "validator.py",
+)
 
 FORBIDDEN_LOCAL_DEFINITIONS = {
     "MAIN_CUMULATIVE_BRANCH_PREFIX",
     "REPAIR_BRANCH_PREFIX",
+}
+BRANCH_CONTEXT_ENV_NAMES = {
+    "GITHUB_ACTIONS",
+    "GITHUB_EVENT_NAME",
+    "GITHUB_HEAD_REF",
+    "GITHUB_REF",
+    "GITHUB_REF_NAME",
+}
+SOURCE_FORBIDDEN_BRANCH_CONTEXT_HELPERS = {
+    "_github_actions_active": "ci_branch_context.github_actions_active",
+    "_github_actions_main_push_active": (
+        "ci_branch_context.github_actions_main_push_context_active"
+    ),
+    "_github_actions_pull_request_merge_ref_active": (
+        "ci_branch_context.github_actions_pull_request_detached_context_active"
+    ),
+}
+SOURCE_REQUIRED_CENTRAL_HELPER_CALLS = {
+    SOURCE_BRANCH_CONTEXT_VALIDATORS[0]: (
+        "github_actions_pull_request_detached_context_active",
+    ),
+    SOURCE_BRANCH_CONTEXT_VALIDATORS[1]: (
+        "github_actions_pull_request_detached_context_active",
+        "github_actions_main_push_context_active",
+    ),
+    SOURCE_BRANCH_CONTEXT_VALIDATORS[2]: (
+        "github_actions_pull_request_detached_context_active",
+    ),
 }
 
 WRAPPER_DELEGATES = {
@@ -37,6 +71,10 @@ ROADMAP_BRANCH_REGEX = re.compile(
 
 def _tool_files() -> tuple[Path, ...]:
     return tuple(sorted(TOOLS_DIR.glob("*.py")))
+
+
+def _stage1_source_files() -> tuple[Path, ...]:
+    return tuple(sorted(STAGE1_SOURCE_DIR.rglob("*.py")))
 
 
 def _validator_files() -> tuple[Path, ...]:
@@ -98,6 +136,53 @@ def _calls_ci_branch_context_function(
         ):
             return True
     return False
+
+
+def _module_calls_ci_branch_context_function(module: ast.Module, name: str) -> bool:
+    return any(
+        isinstance(node, ast.Call) and _ci_branch_context_attr(node.func, name)
+        for node in ast.walk(module)
+    )
+
+
+def _branch_context_env_name_from_get_call(node: ast.Call) -> str | None:
+    if not node.args or not isinstance(node.args[0], ast.Constant):
+        return None
+    env_name = node.args[0].value
+    if not isinstance(env_name, str) or env_name not in BRANCH_CONTEXT_ENV_NAMES:
+        return None
+    func = node.func
+    if (
+        isinstance(func, ast.Attribute)
+        and func.attr == "getenv"
+        and isinstance(func.value, ast.Name)
+        and func.value.id == "os"
+    ):
+        return env_name
+    if (
+        isinstance(func, ast.Attribute)
+        and func.attr == "get"
+        and isinstance(func.value, ast.Attribute)
+        and func.value.attr == "environ"
+        and isinstance(func.value.value, ast.Name)
+        and func.value.value.id == "os"
+    ):
+        return env_name
+    return None
+
+
+def _branch_context_env_name_from_subscript(node: ast.Subscript) -> str | None:
+    if not (
+        isinstance(node.value, ast.Attribute)
+        and node.value.attr == "environ"
+        and isinstance(node.value.value, ast.Name)
+        and node.value.value.id == "os"
+    ):
+        return None
+    env_name = node.slice.value if isinstance(node.slice, ast.Constant) else None
+    if isinstance(env_name, str) and env_name in BRANCH_CONTEXT_ENV_NAMES:
+        return env_name
+    return None
 
 
 def test_branch_context_env_candidates_come_from_central_helper() -> None:
@@ -186,4 +271,67 @@ def test_roadmap_branch_regex_is_not_reimplemented_locally() -> None:
     assert not offenders, (
         "Validator files must not reimplement roadmap branch regex parsing:\n"
         + "\n".join(offenders)
+    )
+
+
+def test_stage1_source_does_not_read_github_branch_context_env_directly() -> None:
+    offenders: list[str] = []
+
+    for path in _stage1_source_files():
+        for node in ast.walk(_parse(path)):
+            env_name = None
+            if isinstance(node, ast.Call):
+                env_name = _branch_context_env_name_from_get_call(node)
+            elif isinstance(node, ast.Subscript):
+                env_name = _branch_context_env_name_from_subscript(node)
+            if env_name is None:
+                continue
+            offenders.append(
+                f"{_relative(path)}:{getattr(node, 'lineno', '?')}: "
+                f"forbidden direct branch-context env read {env_name}; use "
+                "tools.ci_branch_context"
+            )
+
+    assert not offenders, (
+        "Stage 1 source must not parse GitHub branch-context environment "
+        "directly:\n" + "\n".join(offenders)
+    )
+
+
+def test_stage1_source_does_not_define_local_ci_branch_context_helpers() -> None:
+    offenders: list[str] = []
+
+    for path in _stage1_source_files():
+        for node in ast.walk(_parse(path)):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            central_helper = SOURCE_FORBIDDEN_BRANCH_CONTEXT_HELPERS.get(node.name)
+            if central_helper is None:
+                continue
+            offenders.append(
+                f"{_relative(path)}:{node.lineno}: forbidden local branch-context "
+                f"helper {node.name}; use {central_helper}"
+            )
+
+    assert not offenders, (
+        "Stage 1 source must not define local CI branch-context helpers:\n"
+        + "\n".join(offenders)
+    )
+
+
+def test_source_environment_validators_use_central_branch_context_helpers() -> None:
+    offenders: list[str] = []
+
+    for path, required_helpers in SOURCE_REQUIRED_CENTRAL_HELPER_CALLS.items():
+        module = _parse(path)
+        for helper in required_helpers:
+            if _module_calls_ci_branch_context_function(module, helper):
+                continue
+            offenders.append(
+                f"{_relative(path)}: missing ci_branch_context.{helper} call"
+            )
+
+    assert not offenders, (
+        "Source environment validators must delegate branch-context decisions "
+        "to tools.ci_branch_context:\n" + "\n".join(offenders)
     )
