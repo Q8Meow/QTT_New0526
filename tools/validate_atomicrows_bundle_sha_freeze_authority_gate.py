@@ -16,6 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from tools import build_atomicrows_bundle as builder  # noqa: E402
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_atomicrows_bundle_builder_deterministic_assembly_gate as pr99_gate  # noqa: E402
 from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
@@ -78,7 +79,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr97_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr97_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
-BRANCH_CONTEXT_ENV_CANDIDATES = pr97_gate.BRANCH_CONTEXT_ENV_CANDIDATES
+BRANCH_CONTEXT_ENV_CANDIDATES = ci_branch_context.BRANCH_CONTEXT_ENV_CANDIDATES
 
 BLOCKED_REASON_CODES = (
     "ATOMICROWS_SHA_FREEZE_BLOCKED_SHA_SYSTEM_DORMANT_NON_PARTICIPATING_OWNER_CONTROLLED",
@@ -282,20 +283,15 @@ def schema_subset_failures(payload: dict[str, Any], schema: dict[str, Any], labe
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) > 100
+    return ci_branch_context.is_downstream_roadmap_branch(branch, after_pr=100)
 
 
 def _main_cumulative_branch_allowed(branch: str) -> bool:
-    return branch == "main" or branch.startswith("repair/main-cumulative-")
+    return ci_branch_context.is_main_cumulative_branch(branch)
 
 
 def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
-    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
-        branch
-    )
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=100)
 
 
 def _should_skip_default_report_write(

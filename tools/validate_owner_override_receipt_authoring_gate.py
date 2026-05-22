@@ -17,6 +17,7 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_owner_approval_request_queue_registry as pr93_gate  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
@@ -81,8 +82,8 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr93_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr93_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
-MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
-REPAIR_BRANCH_PREFIX = "repair/"
+MAIN_CUMULATIVE_BRANCH_PREFIX = ci_branch_context.MAIN_CUMULATIVE_BRANCH_PREFIX
+REPAIR_BRANCH_PREFIX = ci_branch_context.REPAIR_BRANCH_PREFIX
 
 REQUIRED_MASTER_PLAN_PRINCIPLES = {
     "OWNER_FINAL_INTERNAL_WORKFLOW_AUTHORITY",
@@ -360,55 +361,23 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
 
 
 def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
+    return ci_branch_context.github_actions_active()
 
 
 def _normalize_branch_context(value: str) -> str:
-    branch = value.strip()
-    if not branch or branch == "HEAD":
-        return ""
-    if branch.startswith("refs/pull/"):
-        return ""
-    if re.match(r"^[0-9]+/(head|merge)$", branch):
-        return ""
-    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
-        if branch.startswith(prefix):
-            return branch[len(prefix) :]
-    return branch
+    return ci_branch_context.normalize_branch_context(value)
 
 
 def _github_actions_branch_context() -> str:
-    for env_name in ("GITHUB_HEAD_REF", "GITHUB_REF_NAME", "GITHUB_REF"):
-        branch = _normalize_branch_context(os.getenv(env_name, ""))
-        if branch:
-            return branch
-    return ""
+    return ci_branch_context.github_actions_branch_context()
 
 
 def _github_actions_pull_request_detached_context_active() -> bool:
-    if not _github_actions_active():
-        return False
-    event_name = os.getenv("GITHUB_EVENT_NAME", "")
-    github_ref = os.getenv("GITHUB_REF", "")
-    github_ref_name = os.getenv("GITHUB_REF_NAME", "")
-    return (
-        event_name in {"pull_request", "pull_request_target"}
-        or github_ref.startswith("refs/pull/")
-        or re.match(r"^[0-9]+/(head|merge)$", github_ref_name) is not None
-    )
+    return ci_branch_context.github_actions_pull_request_detached_context_active()
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    if (
-        branch == "main"
-        or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX)
-        or branch.startswith(REPAIR_BRANCH_PREFIX)
-    ):
-        return True
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) > 94
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=94)
 
 
 def _should_skip_default_report_write(

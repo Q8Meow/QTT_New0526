@@ -17,6 +17,7 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     canonical_atomicrows_bundle_presence,
@@ -84,7 +85,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr97_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr97_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
-BRANCH_CONTEXT_ENV_CANDIDATES = pr97_gate.BRANCH_CONTEXT_ENV_CANDIDATES
+BRANCH_CONTEXT_ENV_CANDIDATES = ci_branch_context.BRANCH_CONTEXT_ENV_CANDIDATES
 
 REQUIRED_SOURCE_FILE_CONCEPTS = (
     "ATOMICROWS_BUNDLE_ROW_FAMILY_SOURCE_FILE_SET",
@@ -219,18 +220,14 @@ FORBIDDEN_STATIC_SURFACE_IMPORT_ROOTS = (
 
 
 @dataclass(frozen=True)
-class BranchContext:
-    branch: str
-    source: str
-    git_error: str = ""
-
-
-@dataclass(frozen=True)
 class ValidationResult:
     ok: bool
     failures: tuple[str, ...]
     report: dict[str, Any] | None
     info_lines: tuple[str, ...] = ()
+
+
+BranchContext = ci_branch_context.BranchContext
 
 
 def _resolve(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
@@ -309,53 +306,27 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
 
 
 def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
+    return ci_branch_context.github_actions_active()
 
 
 def _normalize_branch_context(value: str) -> str:
-    branch = value.strip()
-    if not branch or branch == "HEAD":
-        return ""
-    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
-        if branch.startswith(prefix):
-            return branch[len(prefix) :]
-    return branch
+    return ci_branch_context.normalize_branch_context(value)
 
 
 def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
-    for env_name in BRANCH_CONTEXT_ENV_CANDIDATES:
-        branch = _normalize_branch_context(os.getenv(env_name, ""))
-        if branch:
-            return BranchContext(branch=branch, source=env_name)
-
-    git_errors: list[str] = []
-    for args in (["branch", "--show-current"], ["rev-parse", "--abbrev-ref", "HEAD"]):
-        branch_rc, branch_stdout, branch_err = _git_stdout(repo_root, args)
-        if branch_rc != 0:
-            git_errors.append(branch_err or f"git {' '.join(args)} failed")
-            continue
-        branch = _normalize_branch_context(branch_stdout)
-        if branch:
-            return BranchContext(branch=branch, source=f"git {' '.join(args)}")
-
-    return BranchContext(branch="", source="", git_error="; ".join(git_errors))
+    return ci_branch_context.current_branch_context(repo_root, git_stdout=_git_stdout)
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) > 98
+    return ci_branch_context.is_downstream_roadmap_branch(branch, after_pr=98)
 
 
 def _main_cumulative_branch_allowed(branch: str) -> bool:
-    return branch == "main" or branch.startswith("repair/main-cumulative-")
+    return ci_branch_context.is_main_cumulative_branch(branch)
 
 
 def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
-    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
-        branch
-    )
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=98)
 
 
 def _should_skip_default_report_write(

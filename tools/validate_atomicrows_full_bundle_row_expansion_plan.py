@@ -24,6 +24,7 @@ from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     canonical_atomicrows_bundle_presence,
     validate_current_atomicrows_bundle_state,
 )
+from tools import ci_branch_context  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -90,13 +91,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = "CI_SHALLOW_FETCH_ANCESTRY_CHECK_SKIPPED
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     "DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE"
 )
-BRANCH_CONTEXT_ENV_CANDIDATES = (
-    "GITHUB_HEAD_REF",
-    "GITHUB_REF_NAME",
-    "GITHUB_REF",
-    "BRANCH_NAME",
-    "CI_COMMIT_REF_NAME",
-)
+BRANCH_CONTEXT_ENV_CANDIDATES = ci_branch_context.BRANCH_CONTEXT_ENV_CANDIDATES
 
 REQUIRED_PLAN_CONCEPTS = (
     "ATOMICROWS_FULL_BUNDLE_EXPANSION_PLAN",
@@ -256,6 +251,13 @@ ALWAYS_FORBIDDEN_ARTIFACT_PATHS = (
         / "AtomicRowsBundleFreezeAuthority.yaml"
     ),
 )
+FORBIDDEN_RUNTIME_PATHS = (
+    pathlib.Path("src/qtt/dashboard_runtime"),
+    pathlib.Path("src/qtt/telegram_runtime"),
+    pathlib.Path("src/qtt/owner_dashboard_runtime"),
+    pathlib.Path("src/qtt/dashboard_service"),
+    pathlib.Path("src/qtt/web_server"),
+)
 PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
     pathlib.Path("tools") / "build_atomicrows_bundle.py",
 )
@@ -284,18 +286,14 @@ REQUIRED_FIXTURE_CASE_IDS = (
 
 
 @dataclass(frozen=True)
-class BranchContext:
-    branch: str
-    source: str
-    git_error: str = ""
-
-
-@dataclass(frozen=True)
 class ValidationResult:
     ok: bool
     failures: tuple[str, ...]
     report: dict[str, Any] | None
     info_lines: tuple[str, ...] = ()
+
+
+BranchContext = ci_branch_context.BranchContext
 
 
 def repo_root() -> pathlib.Path:
@@ -365,62 +363,31 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
 
 
 def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
+    return ci_branch_context.github_actions_active()
 
 
 def _normalize_branch_context(value: str) -> str:
-    branch = value.strip()
-    if not branch or branch == "HEAD":
-        return ""
-    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
-        if branch.startswith(prefix):
-            return branch[len(prefix) :]
-    return branch
+    return ci_branch_context.normalize_branch_context(value)
 
 
 def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
-    for env_name in BRANCH_CONTEXT_ENV_CANDIDATES:
-        branch = _normalize_branch_context(os.getenv(env_name, ""))
-        if branch:
-            return BranchContext(branch=branch, source=env_name)
-
-    git_errors: list[str] = []
-    for args in (["branch", "--show-current"], ["rev-parse", "--abbrev-ref", "HEAD"]):
-        branch_rc, branch_stdout, branch_err = _git_stdout(repo_root, args)
-        if branch_rc != 0:
-            git_errors.append(branch_err or f"git {' '.join(args)} failed")
-            continue
-        branch = _normalize_branch_context(branch_stdout)
-        if branch:
-            return BranchContext(branch=branch, source=f"git {' '.join(args)}")
-
-    return BranchContext(branch="", source="", git_error="; ".join(git_errors))
+    return ci_branch_context.current_branch_context(repo_root, git_stdout=_git_stdout)
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) > 97
+    return ci_branch_context.is_downstream_roadmap_branch(branch, after_pr=97)
 
 
 def _main_cumulative_branch_allowed(branch: str) -> bool:
-    return branch == "main" or branch.startswith("repair/main-cumulative-")
+    return ci_branch_context.is_main_cumulative_branch(branch)
 
 
 def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
-    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
-        branch
-    )
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=97)
 
 
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
-    if _main_cumulative_branch_allowed(branch):
-        return True
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) >= 99
+    return ci_branch_context.is_pr_or_later_branch(branch, minimum_pr=99)
 
 
 def _should_skip_default_report_write(
@@ -863,6 +830,9 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any
     for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
         if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:
             failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
+    for path in FORBIDDEN_RUNTIME_PATHS:
+        if _resolve(repo_root, path).exists():
+            failures.append(f"forbidden runtime artifact exists: {path.as_posix()}")
     for path in planned_pr98_source_paths(plan):
         if _resolve(repo_root, path).exists():
             if pr98_source_files_allowed:

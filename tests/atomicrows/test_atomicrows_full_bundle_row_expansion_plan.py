@@ -11,6 +11,7 @@ ROOT = Path(".")
 PR98_BRANCH = "pr98-atomicrows-bundle-row-family-source-files"
 PR99_BRANCH = "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
 FEATURE_BRANCH = "feature/non-downstream-validation"
+REPAIR_BRANCH = "repair/pr138-main-push-ci-context"
 _REPORT_CACHE: dict | None = None
 
 
@@ -607,6 +608,58 @@ def test_pr99_static_bundle_builder_allowed_on_main_cumulative_context(
     _write_file(tmp_path, builder_path)
 
     assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_pr98_source_files_and_pr99_static_builder_allowed_on_repair_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    builder_path = validator.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, REPAIR_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+    _write_file(tmp_path, builder_path)
+
+    assert validator.validate_no_forbidden_artifacts(tmp_path, plan) == []
+
+
+def test_bundle_hash_freeze_final_readiness_and_runtime_remain_blocked_on_repair_branch(
+    tmp_path,
+    monkeypatch,
+):
+    plan = _plan()
+    builder_path = validator.PR99_STATIC_BUILDER_ARTIFACT_PATHS[0]
+    _clear_branch_context_env(monkeypatch)
+    _mock_git_branch(monkeypatch, REPAIR_BRANCH)
+    for path in validator.planned_pr98_source_paths(plan):
+        _write_file(tmp_path, path)
+    _write_file(tmp_path, builder_path)
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        _write_file(tmp_path, path)
+    for path in validator.FORBIDDEN_RUNTIME_PATHS:
+        (tmp_path / path).mkdir(parents=True, exist_ok=True)
+
+    failures = validator.validate_no_forbidden_artifacts(tmp_path, plan)
+
+    for path in validator.ALWAYS_FORBIDDEN_ARTIFACT_PATHS:
+        if path in {validator.CANONICAL_BUNDLE_JSONL, validator.CANONICAL_BUNDLE_SHA256}:
+            _assert_failure_contains(failures, "expected_state=PRE_MATERIALIZATION")
+            _assert_failure_contains(failures, path.as_posix())
+        else:
+            _assert_failure_contains(
+                failures,
+                f"forbidden downstream artifact exists: {path.as_posix()}",
+            )
+    for path in validator.FORBIDDEN_RUNTIME_PATHS:
+        _assert_failure_contains(
+            failures,
+            f"forbidden runtime artifact exists: {path.as_posix()}",
+        )
+    assert not any(builder_path.as_posix() in failure for failure in failures)
+    for path in validator.planned_pr98_source_paths(plan):
+        assert not any(path.as_posix() in failure for failure in failures)
 
 
 def test_pr99_static_bundle_builder_allowed_in_github_actions_detached_head_context(

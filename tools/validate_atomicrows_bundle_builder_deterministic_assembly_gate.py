@@ -15,6 +15,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from tools import build_atomicrows_bundle as builder  # noqa: E402
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_atomicrows_bundle_row_family_source_files as pr98_gate  # noqa: E402
 from tools import validate_atomicrows_full_bundle_row_expansion_plan as pr97_gate  # noqa: E402
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
@@ -63,7 +64,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr97_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr97_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
-BRANCH_CONTEXT_ENV_CANDIDATES = pr97_gate.BRANCH_CONTEXT_ENV_CANDIDATES
+BRANCH_CONTEXT_ENV_CANDIDATES = ci_branch_context.BRANCH_CONTEXT_ENV_CANDIDATES
 
 REQUIRED_CONCEPTS = builder.REQUIRED_CONCEPTS
 REQUIRED_FIXTURE_CASE_IDS = (
@@ -166,17 +167,15 @@ def _load_yaml_checked(path: pathlib.Path, label: str) -> tuple[dict[str, Any] |
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    return pr98_gate._downstream_validation_branch_allowed(branch)
+    return ci_branch_context.is_downstream_roadmap_branch(branch, after_pr=98)
 
 
 def _main_cumulative_branch_allowed(branch: str) -> bool:
-    return pr98_gate._main_cumulative_branch_allowed(branch)
+    return ci_branch_context.is_main_cumulative_branch(branch)
 
 
 def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
-    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
-        branch
-    )
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=98)
 
 
 def _should_skip_default_report_write(
