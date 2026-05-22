@@ -1,0 +1,394 @@
+{
+  "active_sequence_repair_target": {
+    "after_if_supported": [
+      "PR137",
+      "PR137R",
+      "PR137L",
+      "PR138"
+    ],
+    "before": [
+      "PR137",
+      "PR137L",
+      "PR138"
+    ]
+  },
+  "atomicrows_artifact_inventory": {
+    "agent_read_only_consumer_found": true,
+    "agent_read_only_consumer_paths": [
+      "tools/validate_atomicrows_parameter_agent_binding_consumer_gate.py",
+      "schemas/atomicrows/atomicrows_parameter_agent_binding_consumer_gate.schema.json",
+      "docs/master_plan/generated/AtomicRowsParameterAgentBindingConsumerGate.report.json"
+    ],
+    "bundle_builder_found": true,
+    "bundle_builder_paths": [
+      "tools/build_atomicrows_bundle.py",
+      "tools/materialize_atomicrows_bundle_from_exact_rows.py"
+    ],
+    "bundle_validator_found": true,
+    "bundle_validator_paths": [
+      "tools/validate_atomicrows_bundle_materialization_manifest.py",
+      "tools/validate_atomicrows_bundle_boundary_state_contract.py",
+      "tools/validate_atomicrows_bundle_schema_checker_static.py",
+      "tools/validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
+    ],
+    "exact_row_source_file_count": 15,
+    "exact_row_source_files_found": true,
+    "functional_bundle_artifact_found": true,
+    "functional_bundle_artifact_paths": [
+      "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl"
+    ],
+    "materialized_row_schema_path": "schemas/atomicrows/atomicrows_materialized_bundle_row.schema.json",
+    "readiness_gate_found": false,
+    "readiness_gate_paths": [],
+    "row_family_source_file_count": 15,
+    "row_family_source_file_paths": [
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl",
+      "docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl"
+    ],
+    "row_family_source_files_found": true
+  },
+  "atomicrows_validation_state": {
+    "agent_consumption_boundary": "READ_ONLY_STATIC_CONSUMER_ONLY_NOT_RUNTIME_NOT_LIVE",
+    "day1_live_trading_ready": false,
+    "functional_bundle_ready_for_agent_consumption": true,
+    "functional_bundle_status": "PRESENT_AND_STATICALLY_VALIDATED",
+    "profit_evidence_created": false,
+    "quantum_advantage_evidence_created": false,
+    "readiness_gate_found": false,
+    "row_contract_field_audit": {
+      "missing_fields": [
+        "row_family",
+        "row_type",
+        "lifecycle_state",
+        "version_state",
+        "deprecation_state",
+        "parameter_family",
+        "algorithm_family",
+        "strategy_family",
+        "signal_family",
+        "scoring_family",
+        "normalization_family",
+        "risk_family",
+        "execution_family",
+        "capital_family",
+        "latency_family",
+        "error_guard_family",
+        "quantum_family",
+        "agent_role",
+        "consumer_class",
+        "allowed_consumers",
+        "blocked_consumers",
+        "command_matrix_binding",
+        "market_scope",
+        "venue_scope",
+        "prediction_market_scope",
+        "expected_net_profit_objective_family",
+        "execution_cost_model_family",
+        "latency_sensitivity_class",
+        "capital_intensity_class",
+        "risk_mode",
+        "drawdown_control_family",
+        "exposure_limit_family",
+        "liquidity_context_family",
+        "replay_required_flag",
+        "paper_required_flag",
+        "owner_review_required_flag",
+        "live_use_allowed_flag",
+        "order_authority_created_flag",
+        "profit_evidence_created_flag",
+        "quantum_applicability_class",
+        "classical_only_flag",
+        "quantum_inspired_flag",
+        "true_quantum_compatible_flag",
+        "qubo_compatible_flag",
+        "ising_compatible_flag",
+        "qaoa_compatible_flag",
+        "vqe_compatible_flag",
+        "annealing_compatible_flag",
+        "quantum_kernel_feature_map_compatible_flag",
+        "quantum_backend_execution_allowed_flag",
+        "source_evidence_required_flag",
+        "accepted_source_packet_required_flag",
+        "research_input_only_flag",
+        "external_fact_authority_flag"
+      ],
+      "supported_fields": [
+        "row_id"
+      ]
+    },
+    "row_count_proven": true,
+    "row_count_value": 4183,
+    "schema_validated": true,
+    "validation_error_count": 0,
+    "validation_errors": []
+  },
+  "authority_class": "CANONICAL_POST_PR137_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_AUDIT_NOT_BUNDLE_CREATION_AUTHORITY",
+  "branch": "pr137r-atomicrows-functional-bundle-reconciliation-audit",
+  "crosswalk_context_artifacts_found": [
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR135MarketSpecificSectionIndex.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/SectionManifest.json",
+    "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+  ],
+  "crosswalk_context_artifacts_missing": [],
+  "current_sequence_routing": {
+    "active_sequence_observed_prefix": [
+      "PR137",
+      "PR137L",
+      "PR138",
+      "PR139",
+      "PR140",
+      "PR141"
+    ],
+    "current_sequence_atomicrows_bundle_implementation_slot_found": true,
+    "current_sequence_atomicrows_bundle_implementation_slots": [
+      "PR138",
+      "PR139",
+      "PR140",
+      "PR141",
+      "PR142"
+    ],
+    "owner_sequence_assignment_required": false,
+    "pr137_required_upstream_preserved": true,
+    "pr137l_preserved_as_latency_boundary_only": true,
+    "pr138_preserved_downstream_of_pr137l": true,
+    "preferred_active_repair_relation_if_supported": [
+      "PR137",
+      "PR137R",
+      "PR137L",
+      "PR138"
+    ],
+    "repair_checkpoint_inserted_before_pr137l": false,
+    "sequence_insertion_reason_code": "PR137R_SEQUENCE_INSERTION_REQUIRES_OWNER_REVIEW",
+    "sequence_insertion_requires_owner_review": true
+  },
+  "dependency_controller_authority_preserved": "PR137",
+  "downstream_dependencies": [
+    "PR137L"
+  ],
+  "expected_atomicrows_row_count": 4183,
+  "forbidden_diff_checks": {
+    "atomicrows_bundle_file_changed_by_pr137r": false,
+    "atomicrows_row_family_source_files_changed_by_pr137r": false,
+    "connector_semantic_binding_files_changed_by_pr137r": false,
+    "master_plan_markdown_text_changed": false,
+    "package_dependency_files_changed_by_pr137r": false,
+    "runtime_live_replay_paper_quantum_backend_files_changed_by_pr137r": false,
+    "source_evidence_accepted_packet_files_changed_by_pr137r": false
+  },
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by": "src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation.report",
+  "implementation_truth_rule": "REPO_ARTIFACTS_VALIDATORS_REPORTS_AUTHORITY_BOUNDARIES_AND_VALIDATION_EVIDENCE_NOT_PR_LABELS",
+  "legacy_roadmap_reconciliation": {
+    "missing_work_requires_current_sequence_route": true,
+    "old_atomicrows_bundle_pr_labels_discovered": [
+      "PR97",
+      "PR98",
+      "PR99",
+      "PR100",
+      "PR101"
+    ],
+    "old_pr_labels_used_as_completion_proof": false,
+    "records": [
+      {
+        "completion_claim_found": true,
+        "completion_claim_supported_by_artifacts": true,
+        "current_truth_status": "STATIC_ARTIFACTS_FOUND_NOT_ROW_COUNT_OR_LIVE_PROOF",
+        "expected_artifact_family": "ROW_EXPANSION_PLAN",
+        "old_label": "PR97",
+        "repo_artifacts_found": [
+          "docs/master_plan/atomicrows/AtomicRowsFullBundleRowExpansionPlan.yaml",
+          "docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json",
+          "tools/validate_atomicrows_full_bundle_row_expansion_plan.py"
+        ],
+        "repo_artifacts_missing": [],
+        "route_required_in_current_sequence": false,
+        "semantic_task_name": "AtomicRows full bundle row expansion plan"
+      },
+      {
+        "completion_claim_found": true,
+        "completion_claim_supported_by_artifacts": true,
+        "current_truth_status": "STATIC_ARTIFACTS_FOUND_NOT_ROW_COUNT_OR_LIVE_PROOF",
+        "expected_artifact_family": "ROW_FAMILY_SOURCE_FILES",
+        "old_label": "PR98",
+        "repo_artifacts_found": [
+          "docs/master_plan/atomicrows/AtomicRowsBundleRowFamilySourceFiles.yaml",
+          "docs/master_plan/generated/AtomicRowsBundleRowFamilySourceFiles.report.json",
+          "tools/validate_atomicrows_bundle_row_family_source_files.py"
+        ],
+        "repo_artifacts_missing": [],
+        "route_required_in_current_sequence": false,
+        "semantic_task_name": "AtomicRows bundle row-family source files"
+      },
+      {
+        "completion_claim_found": true,
+        "completion_claim_supported_by_artifacts": true,
+        "current_truth_status": "STATIC_ARTIFACTS_FOUND_NOT_ROW_COUNT_OR_LIVE_PROOF",
+        "expected_artifact_family": "BUNDLE_BUILDER",
+        "old_label": "PR99",
+        "repo_artifacts_found": [
+          "docs/master_plan/atomicrows/AtomicRowsBundleBuilderDeterministicAssemblyGate.yaml",
+          "docs/master_plan/generated/AtomicRowsBundleBuilderDeterministicAssemblyGate.report.json",
+          "tools/build_atomicrows_bundle.py",
+          "tools/validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
+        ],
+        "repo_artifacts_missing": [],
+        "route_required_in_current_sequence": false,
+        "semantic_task_name": "AtomicRows bundle builder"
+      },
+      {
+        "completion_claim_found": false,
+        "completion_claim_supported_by_artifacts": false,
+        "current_truth_status": "SHA_FREEZE_AUTHORITY_NOT_CREATED",
+        "expected_artifact_family": "SHA_FREEZE_AUTHORITY",
+        "old_label": "PR100",
+        "repo_artifacts_found": [
+          "docs/master_plan/atomicrows/AtomicRowsBundleShaFreezeAuthorityGate.yaml",
+          "docs/master_plan/generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json",
+          "tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py"
+        ],
+        "repo_artifacts_missing": [],
+        "route_required_in_current_sequence": true,
+        "semantic_task_name": "AtomicRows bundle SHA/freeze authority"
+      },
+      {
+        "completion_claim_found": false,
+        "completion_claim_supported_by_artifacts": false,
+        "current_truth_status": "READINESS_GATE_MISSING",
+        "expected_artifact_family": "FINAL_READINESS_GATE",
+        "old_label": "PR101",
+        "repo_artifacts_found": [],
+        "repo_artifacts_missing": [
+          "tools/validate_atomicrows_full_bundle_final_readiness_gate.py",
+          "docs/master_plan/generated/AtomicRowsFullBundleFinalReadinessGate.report.json"
+        ],
+        "route_required_in_current_sequence": true,
+        "semantic_task_name": "AtomicRows full bundle final readiness gate"
+      }
+    ],
+    "unsupported_completion_claims_found": []
+  },
+  "market_scoped_overlays_only": true,
+  "market_scopes": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "no_qtt_sha_summary": {
+    "atomicrows_external_integrity_artifact_reference_created": false,
+    "exact_forbidden_integrity_key_created": false,
+    "integrity_or_file_size_evidence_used_as_qtt_proof": false,
+    "qtt_generated_sha_digest_fields_created": false,
+    "qtt_sha_authority_created": false
+  },
+  "not_created_flags": {
+    "alpha_evidence_created": false,
+    "atomicrows_bundle_builder_created": false,
+    "atomicrows_bundle_created": false,
+    "atomicrows_freeze_authority_created": false,
+    "atomicrows_materialization_authority_created": false,
+    "atomicrows_row_family_sources_created": false,
+    "atomicrows_rows_created": false,
+    "connector_semantic_binding_created": false,
+    "day1_live_launch_authority_created": false,
+    "execution_superiority_claim_created": false,
+    "fill_receipt_created": false,
+    "latency_superiority_claim_created": false,
+    "live_reachability_created": false,
+    "order_authority_created": false,
+    "order_execution_created": false,
+    "paper_execution_created": false,
+    "profit_evidence_created": false,
+    "qtt_generated_sha_digest_fields_created": false,
+    "qtt_sha_authority_created": false,
+    "ranking_scoring_arbitration_output_created": false,
+    "replay_execution_created": false,
+    "replay_paper_result_created": false,
+    "runtime_cash_authority_created": false,
+    "source_acceptance_created": false,
+    "source_retrieval_created": false,
+    "trading_signal_created": false
+  },
+  "one_global_roadmap_preserved": true,
+  "pr136_selector_artifacts_found": [
+    "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+    "docs/master_plan/generated/PR136FuturePRCardRegistry.report.json",
+    "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap.py",
+    "tools/validate_pr136_day1_launch_readiness_roadmap.py"
+  ],
+  "pr136_selector_artifacts_missing": [],
+  "pr137_dependency_controller_artifacts_found": [
+    "docs/master_plan/generated/PR137LaunchReadinessDependencyController.report.json",
+    "docs/master_plan/generated/PR137DependencyGateStateMatrix.report.json",
+    "docs/master_plan/generated/PR137ValidationGateIntegration.report.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_controller.py",
+    "src/qtt/stage1_prediction_markets/launch_readiness/pr137_launch_readiness_dependency_policy.py",
+    "tools/validate_pr137_launch_readiness_dependency_controller.py"
+  ],
+  "pr137_dependency_controller_artifacts_missing": [],
+  "pr_id": "PR137R",
+  "quantum_forward_compatibility_audit": {
+    "annealing_compatibility_metadata_supported": true,
+    "ising_compatibility_metadata_supported": true,
+    "qaoa_compatibility_metadata_supported": true,
+    "quantum_advantage_claim_created": false,
+    "quantum_backend_names_invented": false,
+    "quantum_compatibility_metadata_checked": true,
+    "quantum_execution_created": false,
+    "quantum_kernel_feature_map_metadata_supported": false,
+    "quantum_numeric_defaults_invented": false,
+    "quantum_optimizer_input_created": false,
+    "quantum_provider_capabilities_invented": false,
+    "quantum_schema_support_proven": true,
+    "quantum_trading_signal_created": false,
+    "qubo_compatibility_metadata_supported": true,
+    "vqe_compatibility_metadata_supported": true
+  },
+  "reason_codes": [
+    "PR137R_ATOMICROWS_4183_ROWS_PROVEN",
+    "PR137R_ATOMICROWS_DISCOVERY_OK",
+    "PR137R_ATOMICROWS_FUNCTIONAL_BUNDLE_PRESENT_RECORDED",
+    "PR137R_ATOMICROWS_READINESS_GATE_MISSING",
+    "PR137R_QUANTUM_COMPATIBILITY_SCHEMA_GAP_RECORDED"
+  ],
+  "report_type": "QTT_PR137R_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_REPORT",
+  "required_upstream_prs": [
+    "PR137"
+  ],
+  "route_triage_artifacts_found": [
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/roadmap/generated/CODEX_PR136_ROUTE_TRIAGE_RECEIPT.json",
+    "docs/roadmap/generated/CODEX_PR137_ROUTE_TRIAGE_RECEIPT.json"
+  ],
+  "schema_version": 1,
+  "scope_class": [
+    "REPAIR_AUDIT",
+    "ROADMAP_RECONCILIATION",
+    "STATIC_CONTRACT_READY",
+    "ATOMICROWS_FUNCTIONAL_BUNDLE_TRUTH_RECONCILIATION"
+  ],
+  "selector_authority_preserved": "PR136",
+  "structural_evidence_only": true,
+  "title": "AtomicRows 4,183-row functional bundle reconciliation audit",
+  "validation_state": "STATIC_RECONCILIATION_READY"
+}

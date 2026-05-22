@@ -1,0 +1,32 @@
+{
+  "authority_class": "CANONICAL_POST_PR137_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_AUDIT_NOT_BUNDLE_CREATION_AUTHORITY",
+  "expected_atomicrows_row_count": 4183,
+  "functional_bundle_status": "PRESENT_AND_STATICALLY_VALIDATED",
+  "gate_tool": "tools/stage1_atomicrows_bundle_reconciliation_gate.py",
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "index_type": "QTT_PR137R_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_INDEX",
+  "market_scopes": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "pr_id": "PR137R",
+  "repair_checkpoint_inserted_before_pr137l": false,
+  "report_ref": "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+  "row_count_proven": true,
+  "schema_validated": true,
+  "schema_version": 1,
+  "sequence_insertion_requires_owner_review": true,
+  "validation_receipts": [
+    "QTT_PR137R_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_AUDIT_OK",
+    "QTT_PR137R_NO_FALSE_ATOMICROWS_COMPLETION_CLAIMS_OK",
+    "QTT_PR137R_LEGACY_PR97_PR101_RECONCILIATION_OK",
+    "QTT_PR137R_REPO_ARTIFACT_TRUTH_NOT_PR_LABELS_OK",
+    "QTT_PR137R_NO_ATOMICROWS_BUNDLE_GENERATION_OK",
+    "QTT_PR137R_NO_QTT_SHA_DIGEST_AUTHORITY_OK",
+    "QTT_PR137R_NO_RUNTIME_LIVE_ORDER_PROFIT_AUTHORITY_OK",
+    "QTT_PR137R_QUANTUM_COMPATIBILITY_AUDIT_ONLY_OK",
+    "QTT_PR137R_IDEMPOTENT_REPORT_OK"
+  ]
+}
