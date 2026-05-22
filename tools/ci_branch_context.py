@@ -96,16 +96,39 @@ def github_actions_branch_context() -> str:
     return ""
 
 
-def github_actions_pull_request_detached_context_active() -> bool:
+def github_actions_pull_request_detached_context_active(
+    *,
+    branch_returncode: int | None = None,
+    branch: str = "",
+) -> bool:
     if not github_actions_active():
         return False
     event_name = os.getenv("GITHUB_EVENT_NAME", "")
     github_ref = os.getenv("GITHUB_REF", "")
     github_ref_name = os.getenv("GITHUB_REF_NAME", "")
-    return (
-        event_name in {"pull_request", "pull_request_target"}
-        or github_ref.startswith("refs/pull/")
+    pull_request_event = event_name in {"pull_request", "pull_request_target"}
+    pull_request_ref = (
+        github_ref.startswith("refs/pull/")
         or re.match(r"^[0-9]+/(head|merge)$", github_ref_name) is not None
+    )
+    if branch_returncode is None:
+        return pull_request_event or pull_request_ref
+
+    merge_ref = (
+        re.match(r"^refs/(?:remotes/)?pull/[0-9]+/merge$", github_ref) is not None
+        or re.match(r"^[0-9]+/merge$", github_ref_name) is not None
+    )
+    detached_branch = branch_returncode != 0 or branch.strip() in {"", "HEAD"}
+    return merge_ref or (pull_request_event and detached_branch)
+
+
+def github_actions_main_push_context_active() -> bool:
+    if not github_actions_active():
+        return False
+    return (
+        os.getenv("GITHUB_EVENT_NAME") == "push"
+        and os.getenv("GITHUB_REF") == "refs/heads/main"
+        and os.getenv("GITHUB_REF_NAME") == "main"
     )
 
 

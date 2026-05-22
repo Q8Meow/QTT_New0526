@@ -411,6 +411,27 @@ def test_pr138_gate_ci_main_push_skips_pr_branch_and_shallow_ancestry_requiremen
     assert c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY in outcome.receipts
 
 
+def test_pr138_gate_local_wrong_branch_fails_closed_with_branch_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(branch="wrong-pr138-branch", base_rc=0, ancestor_rc=0),
+    )
+
+    outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert not outcome.ok
+    assert c.PR138_REASON_BRANCH_MISMATCH in outcome.failures
+    assert c.PR138_REASON_LOCAL_BASELINE_NOT_DESCENDANT not in outcome.failures
+    assert outcome.receipts == ()
+
+
 def test_pr138_gate_local_requires_descendant_of_d1bce40_or_owner_verified_sandbox_fallback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

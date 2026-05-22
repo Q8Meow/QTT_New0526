@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
-import os
 from pathlib import Path
 import re
 import subprocess
 from typing import Any, Mapping, Sequence
+
+from tools import ci_branch_context
 
 from . import constants as c
 from .fixtures import build_fixture_collection
@@ -56,40 +57,6 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
     return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
 
 
-def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
-
-
-def _github_actions_pull_request_merge_ref_active(
-    *,
-    branch_returncode: int,
-    branch: str,
-) -> bool:
-    if not _github_actions_active():
-        return False
-    github_ref = os.getenv("GITHUB_REF", "")
-    github_ref_name = os.getenv("GITHUB_REF_NAME", "")
-    event_name = os.getenv("GITHUB_EVENT_NAME", "")
-    merge_ref = (
-        re.match(r"^refs/(?:remotes/)?pull/[0-9]+/merge$", github_ref) is not None
-        or re.match(r"^[0-9]+/merge$", github_ref_name) is not None
-    )
-    detached_branch = branch_returncode != 0 or branch.strip() in {"", "HEAD"}
-    return merge_ref or (
-        event_name in {"pull_request", "pull_request_target"} and detached_branch
-    )
-
-
-def _github_actions_main_push_active() -> bool:
-    if not _github_actions_active():
-        return False
-    return (
-        os.getenv("GITHUB_EVENT_NAME") == "push"
-        and os.getenv("GITHUB_REF") == "refs/heads/main"
-        and os.getenv("GITHUB_REF_NAME") == "main"
-    )
-
-
 def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[list[str], list[str]]:
     failures: list[str] = []
     receipts: list[str] = []
@@ -101,14 +68,14 @@ def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[l
         return failures, receipts
 
     branch_rc, branch, _branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
-    ci_merge_ref = _github_actions_pull_request_merge_ref_active(
+    ci_merge_ref = ci_branch_context.github_actions_pull_request_detached_context_active(
         branch_returncode=branch_rc,
         branch=branch,
     )
     if ci_merge_ref:
         receipts.append(c.PR138_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY)
         return failures, receipts
-    if _github_actions_main_push_active():
+    if ci_branch_context.github_actions_main_push_context_active():
         receipts.append(c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return failures, receipts
     if branch_rc != 0 or branch != c.BRANCH:

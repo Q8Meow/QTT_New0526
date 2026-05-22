@@ -1,6 +1,20 @@
 from tools import ci_branch_context as context
 
 
+GITHUB_BRANCH_CONTEXT_ENV = (
+    "GITHUB_ACTIONS",
+    "GITHUB_EVENT_NAME",
+    "GITHUB_REF",
+    "GITHUB_REF_NAME",
+    "GITHUB_HEAD_REF",
+)
+
+
+def _clear_github_branch_context_env(monkeypatch):
+    for env_name in GITHUB_BRANCH_CONTEXT_ENV:
+        monkeypatch.delenv(env_name, raising=False)
+
+
 def test_repair_and_main_cumulative_branch_classification():
     assert context.is_repair_branch("repair/pr138-main-push-ci-context") is True
     assert context.is_main_cumulative_branch("main") is True
@@ -53,3 +67,53 @@ def test_pr_or_later_branch_respects_repair_opt_in():
     )
     assert context.is_pr_or_later_branch("pr98-anything", minimum_pr=99) is False
     assert context.is_pr_or_later_branch("pr99-anything", minimum_pr=99) is True
+
+
+def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/feature")
+    monkeypatch.setenv("GITHUB_REF_NAME", "feature")
+
+    assert (
+        context.github_actions_pull_request_detached_context_active(
+            branch_returncode=0,
+            branch="feature",
+        )
+        is False
+    )
+    assert (
+        context.github_actions_pull_request_detached_context_active(
+            branch_returncode=0,
+            branch="HEAD",
+        )
+        is True
+    )
+
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/138/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "138/merge")
+    assert (
+        context.github_actions_pull_request_detached_context_active(
+            branch_returncode=0,
+            branch="feature",
+        )
+        is True
+    )
+
+
+def test_main_push_context_requires_exact_github_main_push_env(monkeypatch):
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+
+    assert context.github_actions_main_push_context_active() is True
+
+    monkeypatch.setenv("GITHUB_REF", "main")
+    assert context.github_actions_main_push_context_active() is False
+
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    assert context.github_actions_main_push_context_active() is False
