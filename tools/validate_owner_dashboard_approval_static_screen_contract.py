@@ -16,6 +16,7 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_owner_approval_request_queue_registry as pr93_gate  # noqa: E402
 from tools import validate_owner_override_receipt_authoring_gate as pr94_gate  # noqa: E402
 from tools import validate_owner_dashboard_approval_menu_schema as pr95_gate  # noqa: E402
@@ -64,6 +65,7 @@ GITHUB_PR_NUMBER_POLICY = "may differ"
 SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-STATIC-SCREEN"
 BLUEPRINT_SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-APPROVAL-STATIC-SCREEN-CONTRACT"
 TARGET_BRANCH = "pr96-owner-dashboard-approval-static-screen-contract"
+REPAIR_BRANCH_PREFIX = ci_branch_context.REPAIR_BRANCH_PREFIX
 EXPECTED_BASELINE_ANCESTOR = "ee9bcc3"
 SUCCESS_MARKER = "QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_OK"
 FAILURE_MARKER = "QTT_OWNER_DASHBOARD_APPROVAL_STATIC_SCREEN_CONTRACT_FAILED"
@@ -72,13 +74,7 @@ CI_SHALLOW_FETCH_ANCESTRY_SKIP_MARKER = pr95_gate.CI_SHALLOW_FETCH_ANCESTRY_SKIP
 DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
     pr95_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
 )
-BRANCH_CONTEXT_ENV_CANDIDATES = (
-    "GITHUB_HEAD_REF",
-    "GITHUB_REF_NAME",
-    "GITHUB_REF",
-    "BRANCH_NAME",
-    "CI_COMMIT_REF_NAME",
-)
+BRANCH_CONTEXT_ENV_CANDIDATES = ci_branch_context.BRANCH_CONTEXT_ENV_CANDIDATES
 
 CANONICAL_OPTION_ORDER = pr95_gate.CANONICAL_OPTION_ORDER
 REQUIRED_PROMPT_CONCEPT_ORDER = pr95_gate.REQUIRED_PROMPT_CONCEPT_ORDER
@@ -477,18 +473,14 @@ FORBIDDEN_RUNTIME_PATHS = (
 
 
 @dataclass(frozen=True)
-class BranchContext:
-    branch: str
-    source: str
-    git_error: str = ""
-
-
-@dataclass(frozen=True)
 class ValidationResult:
     ok: bool
     failures: tuple[str, ...]
     report: dict[str, Any] | None
     info_lines: tuple[str, ...] = ()
+
+
+BranchContext = ci_branch_context.BranchContext
 
 
 def _resolve(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
@@ -568,62 +560,31 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
 
 
 def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
+    return ci_branch_context.github_actions_active()
 
 
 def _normalize_branch_context(value: str) -> str:
-    branch = value.strip()
-    if not branch or branch == "HEAD":
-        return ""
-    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
-        if branch.startswith(prefix):
-            return branch[len(prefix) :]
-    return branch
+    return ci_branch_context.normalize_branch_context(value)
 
 
 def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
-    for env_name in BRANCH_CONTEXT_ENV_CANDIDATES:
-        branch = _normalize_branch_context(os.getenv(env_name, ""))
-        if branch:
-            return BranchContext(branch=branch, source=env_name)
-
-    git_errors: list[str] = []
-    for args in (["branch", "--show-current"], ["rev-parse", "--abbrev-ref", "HEAD"]):
-        branch_rc, branch_stdout, branch_err = _git_stdout(repo_root, args)
-        if branch_rc != 0:
-            git_errors.append(branch_err or f"git {' '.join(args)} failed")
-            continue
-        branch = _normalize_branch_context(branch_stdout)
-        if branch:
-            return BranchContext(branch=branch, source=f"git {' '.join(args)}")
-
-    return BranchContext(branch="", source="", git_error="; ".join(git_errors))
+    return ci_branch_context.current_branch_context(repo_root, git_stdout=_git_stdout)
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) > 96
+    return ci_branch_context.is_downstream_roadmap_branch(branch, after_pr=96)
 
 
 def _main_cumulative_branch_allowed(branch: str) -> bool:
-    return branch == "main" or branch.startswith("repair/main-cumulative-")
+    return ci_branch_context.is_main_cumulative_branch(branch)
 
 
 def _downstream_or_main_validation_branch_allowed(branch: str) -> bool:
-    return _main_cumulative_branch_allowed(branch) or _downstream_validation_branch_allowed(
-        branch
-    )
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=96)
 
 
 def _pr99_static_builder_branch_allowed(branch: str) -> bool:
-    if _main_cumulative_branch_allowed(branch):
-        return True
-    match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if not match:
-        return False
-    return int(match.group("number")) >= 99
+    return ci_branch_context.is_pr_or_later_branch(branch, minimum_pr=99)
 
 
 def _should_skip_default_report_write(

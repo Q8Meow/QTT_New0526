@@ -16,6 +16,7 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from tools import ci_branch_context  # noqa: E402
 from tools import validate_candidate_parameter_stack_generation_gate as pr87_gate  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
@@ -418,16 +419,11 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
 
 
 def _github_actions_active() -> bool:
-    return os.getenv("GITHUB_ACTIONS") == "true"
+    return ci_branch_context.github_actions_active()
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
-    if branch == "main":
-        return True
-    match = re.match(r"^pr(?P<number>[0-9]+)[a-z]*-", branch)
-    if match is None:
-        return False
-    return int(match.group("number")) > 88
+    return ci_branch_context.is_downstream_or_main_validation_branch(branch, after_pr=88)
 
 
 def validate_pr88_roadmap_metadata(repo_root: pathlib.Path) -> tuple[list[str], dict[str, Any]]:

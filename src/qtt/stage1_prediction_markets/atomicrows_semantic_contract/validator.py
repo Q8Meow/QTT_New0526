@@ -80,6 +80,16 @@ def _github_actions_pull_request_merge_ref_active(
     )
 
 
+def _github_actions_main_push_active() -> bool:
+    if not _github_actions_active():
+        return False
+    return (
+        os.getenv("GITHUB_EVENT_NAME") == "push"
+        and os.getenv("GITHUB_REF") == "refs/heads/main"
+        and os.getenv("GITHUB_REF_NAME") == "main"
+    )
+
+
 def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[list[str], list[str]]:
     failures: list[str] = []
     receipts: list[str] = []
@@ -97,6 +107,9 @@ def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[l
     )
     if ci_merge_ref:
         receipts.append(c.PR138_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY)
+        return failures, receipts
+    if _github_actions_main_push_active():
+        receipts.append(c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return failures, receipts
     if branch_rc != 0 or branch != c.BRANCH:
         failures.append(c.PR138_REASON_BRANCH_MISMATCH)
