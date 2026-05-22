@@ -1,0 +1,26 @@
+{
+  "authority_class": "ATOMICROWS_SEMANTIC_CONTRACT_ONLY_NOT_BUNDLE_MUTATION_NOT_FINAL_READINESS",
+  "baseline_checkpoint": "d1bce40",
+  "field_inventory_ref": "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json",
+  "gate_tool": "tools/stage1_atomicrows_semantic_row_contract_gate.py",
+  "index_type": "QTT_PR138_ATOMICROWS_SEMANTIC_ROW_CONTRACT_INDEX",
+  "next_required_prs": [
+    "PR139",
+    "PR140",
+    "PR141",
+    "PR142"
+  ],
+  "pr_id": "PR138",
+  "report_ref": "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+  "schema_ref": "schemas/atomicrows/atomicrows_semantic_row_contract.schema.json",
+  "validation_receipts": [
+    "QTT_PR138_ATOMICROWS_SEMANTIC_ROW_CONTRACT_OK",
+    "QTT_PR138_EXACT_8_GROUPS_59_FIELDS_OK",
+    "QTT_PR138_PR137R_PR137L_STATIC_EVIDENCE_CONSUMED_OK",
+    "QTT_PR138_ROUTE_CROSSWALK_MARKET_INDEX_COMMAND_MATRIX_CONSUMED_OK",
+    "QTT_PR138_NO_ATOMICROWS_BUNDLE_OR_ROW_FAMILY_MUTATION_OK",
+    "QTT_PR138_NO_RUNTIME_LIVE_ORDER_PROFIT_QUANTUM_AUTHORITY_OK",
+    "QTT_PR138_FORECASTEX_IBKR_CANONICAL_SCOPE_OK",
+    "QTT_PR138_PRECOMPUTED_HOT_PATH_COMPATIBILITY_METADATA_ONLY_OK"
+  ]
+}

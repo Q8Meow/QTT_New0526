@@ -1574,6 +1574,19 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path("tools", "stage1_atomicrows_semantic_row_contract_gate.py"),
+            "--repo-root",
+            ".",
+            "--write-report",
+            _path(
+                "docs",
+                "master_plan",
+                "generated",
+                "PR138_AtomicRowsSemanticRowContract.report.json",
+            ),
+        ],
+        [
+            sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",

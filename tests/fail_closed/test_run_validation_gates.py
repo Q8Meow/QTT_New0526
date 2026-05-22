@@ -1692,6 +1692,19 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "stage1_atomicrows_semantic_row_contract_gate.py"),
+            "--repo-root",
+            ".",
+            "--write-report",
+            str(
+                Path("docs")
+                / "master_plan"
+                / "generated"
+                / "PR138_AtomicRowsSemanticRowContract.report.json"
+            ),
+        ],
+        [
+            python_executable,
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",
