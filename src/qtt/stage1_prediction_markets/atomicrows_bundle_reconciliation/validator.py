@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from . import constants as c
 from .model import ValidationOutcome
@@ -37,27 +38,65 @@ def _bool_at(report: Mapping[str, Any], section: str, key: str) -> bool | None:
     return item if isinstance(item, bool) else None
 
 
-def _validate_environment(repo_root: Path) -> list[str]:
+def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+
+
+def _github_actions_active() -> bool:
+    return os.getenv("GITHUB_ACTIONS") == "true"
+
+
+def _github_actions_pull_request_merge_ref_active(
+    *,
+    branch_returncode: int,
+    branch: str,
+) -> bool:
+    if not _github_actions_active():
+        return False
+    github_ref = os.getenv("GITHUB_REF", "")
+    github_ref_name = os.getenv("GITHUB_REF_NAME", "")
+    event_name = os.getenv("GITHUB_EVENT_NAME", "")
+    merge_ref = (
+        re.match(r"^refs/(?:remotes/)?pull/[0-9]+/merge$", github_ref) is not None
+        or re.match(r"^[0-9]+/merge$", github_ref_name) is not None
+    )
+    detached_branch = branch_returncode != 0 or branch.strip() in {"", "HEAD"}
+    return merge_ref or (
+        event_name in {"pull_request", "pull_request_target"} and detached_branch
+    )
+
+
+def _validate_environment(repo_root: Path) -> tuple[list[str], list[str]]:
     failures: list[str] = []
-    branch = subprocess.run(
-        ["git", "branch", "--show-current"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if branch.returncode != 0 or branch.stdout.strip() != c.BRANCH:
+    receipts: list[str] = []
+    branch_rc, branch, _branch_err = _git_stdout(repo_root, ["branch", "--show-current"])
+    head_rc, head, _head_err = _git_stdout(repo_root, ["log", "-1", "--oneline"])
+
+    if _github_actions_pull_request_merge_ref_active(
+        branch_returncode=branch_rc,
+        branch=branch,
+    ):
+        receipts.extend(
+            [
+                c.RECEIPT_CI_DETACHED_HEAD_MODE,
+                c.RECEIPT_CI_SHALLOW_FETCH_ANCESTRY_SKIPPED,
+                c.RECEIPT_CI_MERGE_REF_BASELINE_ACCEPTED,
+            ]
+        )
+        return failures, receipts
+
+    if branch_rc != 0 or branch != c.BRANCH:
         failures.append(c.REASON_BASELINE_BRANCH_MISMATCH)
-    head = subprocess.run(
-        ["git", "log", "-1", "--oneline"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if head.returncode != 0 or not head.stdout.strip().startswith(c.BASE_HEAD_PREFIX):
+    if head_rc != 0 or not head.startswith(c.BASE_HEAD_PREFIX):
         failures.append(c.REASON_BASELINE_HEAD_MISMATCH)
-    return failures
+    return failures, receipts
 
 
 def _validate_required_context(report: Mapping[str, Any]) -> list[str]:
@@ -249,6 +288,7 @@ def validate_report_payload(
 ) -> ValidationOutcome:
     root = Path(repo_root).resolve() if repo_root is not None else None
     failures: list[str] = []
+    environment_receipts: list[str] = []
     if report.get("report_type") != c.REPORT_TYPE:
         failures.append(c.REASON_FALSE_COMPLETION_FORBIDDEN)
     if report.get("generated_at_utc") != c.STATIC_TIME:
@@ -258,7 +298,8 @@ def validate_report_payload(
     if report.get("structural_evidence_only") is not True:
         failures.append(c.REASON_NO_QTT_SHA_DIGEST_AUTHORITY)
     if enforce_environment and root is not None:
-        failures.extend(_validate_environment(root))
+        environment_failures, environment_receipts = _validate_environment(root)
+        failures.extend(environment_failures)
     failures.extend(_validate_required_context(report))
     failures.extend(_validate_bundle_truth(report))
     failures.extend(_validate_legacy(report))
@@ -270,5 +311,9 @@ def validate_report_payload(
     return ValidationOutcome(
         ok=not unique_failures,
         failures=unique_failures,
-        receipts=success_receipts_for_report(report) if not unique_failures else (),
+        receipts=(
+            success_receipts_for_report(report) + tuple(environment_receipts)
+            if not unique_failures
+            else ()
+        ),
     )

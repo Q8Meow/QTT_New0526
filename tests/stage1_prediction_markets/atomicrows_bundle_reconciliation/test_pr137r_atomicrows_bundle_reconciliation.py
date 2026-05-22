@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -12,6 +13,9 @@ from src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation import c
 from src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation.report import (
     build_report,
 )
+from src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation import (
+    validator,
+)
 from src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation.validator import (
     success_receipts_for_report,
     validate_report_payload,
@@ -19,6 +23,44 @@ from src.qtt.stage1_prediction_markets.atomicrows_bundle_reconciliation.validato
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _clear_ci_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for env_name in (
+        "GITHUB_ACTIONS",
+        "GITHUB_EVENT_NAME",
+        "GITHUB_REF",
+        "GITHUB_REF_NAME",
+    ):
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _mock_git_stdout(
+    monkeypatch: pytest.MonkeyPatch,
+    responses: dict[tuple[str, ...], tuple[int, str, str]],
+) -> None:
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        key = tuple(args)
+        if key not in responses:
+            raise AssertionError(f"unexpected git command: {args}")
+        return responses[key]
+
+    monkeypatch.setattr(validator, "_git_stdout", fake_git_stdout)
+
+
+def _git_environment_responses(
+    *,
+    branch: str = c.BRANCH,
+    head: str = f"{c.BASE_HEAD_PREFIX} baseline",
+    branch_rc: int = 0,
+    branch_err: str = "",
+    head_rc: int = 0,
+    head_err: str = "",
+) -> dict[tuple[str, ...], tuple[int, str, str]]:
+    return {
+        ("branch", "--show-current"): (branch_rc, branch, branch_err),
+        ("log", "-1", "--oneline"): (head_rc, head, head_err),
+    }
 
 
 def _missing_bundle_report(monkeypatch: pytest.MonkeyPatch) -> dict:
@@ -143,17 +185,81 @@ def test_quantum_compatibility_is_audit_only() -> None:
 
 
 def test_gate_emits_required_success_receipts() -> None:
+    env = os.environ.copy()
+    env.update(
+        {
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_EVENT_NAME": "pull_request",
+            "GITHUB_REF": "refs/pull/138/merge",
+            "GITHUB_REF_NAME": "138/merge",
+        }
+    )
     completed = subprocess.run(
         [sys.executable, "tools/stage1_atomicrows_bundle_reconciliation_gate.py", "--repo-root", "."],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
+        env=env,
         text=True,
     )
 
     assert completed.returncode == 0, completed.stdout + completed.stderr
     for receipt in c.SUCCESS_RECEIPTS:
         assert receipt in completed.stdout
+
+
+def test_local_environment_wrong_branch_and_head_still_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_environment_responses(
+            branch="wrong-pr137r-branch",
+            head="2bec646 Merge 337c32ed53825c3c57e8e9ac00e9faaa819d2595 into f8859359f944462314f9c252ae91026ea52212c7",
+        ),
+    )
+
+    outcome = validate_report_payload(
+        build_report(REPO_ROOT),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert not outcome.ok
+    assert c.REASON_BASELINE_BRANCH_MISMATCH in outcome.failures
+    assert c.REASON_BASELINE_HEAD_MISMATCH in outcome.failures
+    assert outcome.receipts == ()
+
+
+def test_github_actions_detached_merge_ref_accepts_branch_and_head_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/138/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "138/merge")
+    _mock_git_stdout(
+        monkeypatch,
+        _git_environment_responses(
+            branch="",
+            head="2bec646 Merge 337c32ed53825c3c57e8e9ac00e9faaa819d2595 into f8859359f944462314f9c252ae91026ea52212c7",
+        ),
+    )
+
+    outcome = validate_report_payload(
+        build_report(REPO_ROOT),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert outcome.ok, outcome.failures
+    assert c.REASON_BASELINE_BRANCH_MISMATCH not in outcome.failures
+    assert c.REASON_BASELINE_HEAD_MISMATCH not in outcome.failures
+    assert c.RECEIPT_CI_DETACHED_HEAD_MODE in outcome.receipts
+    assert c.RECEIPT_CI_SHALLOW_FETCH_ANCESTRY_SKIPPED in outcome.receipts
+    assert c.RECEIPT_CI_MERGE_REF_BASELINE_ACCEPTED in outcome.receipts
 
 
 @pytest.mark.parametrize(
