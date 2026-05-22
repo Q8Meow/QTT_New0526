@@ -64,6 +64,7 @@ GITHUB_PR_NUMBER_POLICY = "may differ"
 SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-MENU-SCHEMA"
 BLUEPRINT_SEMANTIC_TASK_ID = "ROADMAP-OWNER-DASHBOARD-APPROVAL-MENU-SCHEMA"
 TARGET_BRANCH = "pr95-owner-dashboard-approval-menu-schema"
+REPAIR_BRANCH_PREFIX = "repair/"
 EXPECTED_BASELINE_ANCESTOR = "65eb507"
 MENU_SCOPE = "STATIC_OWNER_DASHBOARD_APPROVAL_MENU_SCHEMA_ONLY"
 MENU_AUTHORITY_CLASS = (
@@ -464,6 +465,8 @@ def _current_branch_context(repo_root: pathlib.Path) -> BranchContext:
 
 
 def _downstream_validation_branch_allowed(branch: str) -> bool:
+    if branch.startswith(REPAIR_BRANCH_PREFIX):
+        return True
     match = re.match(r"pr(?P<number>[0-9]+)[a-z]*-", branch)
     if not match:
         return False
