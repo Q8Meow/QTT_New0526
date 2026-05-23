@@ -1705,6 +1705,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_row_family_source_manifest_currentization.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",

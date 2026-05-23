@@ -1,0 +1,74 @@
+{
+  "authority_class": "STATIC_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_ONLY_NOT_BUNDLE_MUTATION_NOT_SOURCE_MUTATION_NOT_FINAL_READINESS",
+  "canonical_venue_ids": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "deterministic_output": true,
+  "existing_bundle_row_count": 4183,
+  "failure_count": 0,
+  "failures": [],
+  "false_authority_flags": [
+    "roadmap_identity_inference_used",
+    "source_file_mutation_allowed_flag",
+    "bundle_mutation_allowed_flag",
+    "semantic_value_materialization_allowed_flag",
+    "final_readiness_created_flag",
+    "runtime_live_order_authority_created_flag",
+    "source_acceptance_created_flag",
+    "connector_semantic_binding_created_flag",
+    "replay_paper_execution_created_flag",
+    "neural_training_or_inference_created_flag",
+    "quantum_backend_execution_created_flag",
+    "profit_latency_execution_superiority_claim_created_flag",
+    "cryptographic_sidecar_authority_created_flag",
+    "freeze_authority_created_flag"
+  ],
+  "final_ready": false,
+  "fixture_path": "tests/fixtures/atomicrows/synthetic_atomicrows_row_family_source_manifest_currentization.v1.fixture.json",
+  "manifest_path": "docs/master_plan/atomic_rows/AtomicRowsRowFamilySourceManifestCurrentization.yaml",
+  "missing_field_count": 58,
+  "no_mutation_confirmations": {
+    "existing_bundle_not_edited": true,
+    "master_plan_not_edited": true,
+    "row_family_source_files_not_edited": true
+  },
+  "pr136_evidence_consumed": [
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136ReadReceipt.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136AgentLaunchOrchestrationMap.report.json",
+    "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json",
+    "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
+    "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+    "docs/master_plan/generated/PR136FuturePRCardRegistry.report.json",
+    "docs/master_plan/generated/PR136RoadmapReplacementAndInsertionMatrix.report.json",
+    "docs/master_plan/generated/PR136Day1LaunchReadinessRoadmap.report.json",
+    "docs/master_plan/generated/PR136PolicyManifest.report.json",
+    "docs/master_plan/generated/PR136PolicyLiteralDrift.report.json",
+    "docs/master_plan/generated/PR136ValidationGateIntegration.report.json"
+  ],
+  "pr137l_evidence_consumed": [
+    "docs/master_plan/generated/PR137L_LatencyHotPathSnapshotBoundary.report.json",
+    "docs/master_plan/generated/PR137L_LatencyHotPathSnapshotBoundary.index.json"
+  ],
+  "pr137r_evidence_consumed": [
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.index.json"
+  ],
+  "pr138_evidence_consumed": [
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json"
+  ],
+  "remaining_boundary": "Static AtomicRows row-family source manifest currentization only. Future enrichment requirements are explicit; no live, order, source acceptance, connector binding, replay, paper, neural, quantum backend, profit, final readiness, or trading readiness authority is created.",
+  "required_field_count": 59,
+  "required_field_group_count": 8,
+  "row_family_source_file_count": 15,
+  "schema_path": "schemas/atomicrows/atomicrows_row_family_source_manifest_currentization.schema.json",
+  "source_manifest_entry_count": 15,
+  "validation_marker": "QTT_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_OK"
+}
