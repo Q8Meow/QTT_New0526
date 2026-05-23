@@ -12,7 +12,9 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
     constants as c,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (
+    _is_allowed_pr140_changed_path,
     _is_ignored_pr140_changed_path,
+    _is_pr141_downstream_changed_path_for_branch,
     build_json_schema,
     build_plan,
     build_report,
@@ -318,8 +320,85 @@ def test_changed_path_guard_allows_only_narrow_repair_paths() -> None:
     assert allowed_linux_determinism_repairs.issubset(c.ALLOWED_PR140_CHANGED_PATHS)
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(forbidden_pr138_artifacts)
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(forbidden_broad_test_paths)
+    assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(
+        c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS
+    )
     assert c.IGNORED_PR140_CHANGED_PATH_PATTERNS == (".tmp/", ".tmp/**")
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(c.IGNORED_PR140_CHANGED_PATH_PATTERNS)
+
+
+def test_changed_path_guard_allows_exact_pr141_downstream_handoff_files_only() -> None:
+    assert c.PR141_DOWNSTREAM_ALLOWANCE_REASON_CODE == (
+        "PR141_DOWNSTREAM_AUTHORIZATION_GATE_CONSUMES_PR140_HANDOFF"
+    )
+    for path in c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS:
+        assert _is_pr141_downstream_changed_path_for_branch(
+            path,
+            "pr141-atomicrows-semantic-value-materialization-owner-authorization-gate",
+        )
+        assert _is_pr141_downstream_changed_path_for_branch(
+            path,
+            "pr142-future-roadmap-branch",
+        )
+        assert not _is_pr141_downstream_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert _is_allowed_pr140_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_rejects_broad_pr141_like_directories() -> None:
+    broad_paths = {
+        "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/",
+        "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate",
+        "tests/fixtures/atomicrows/",
+        "docs/master_plan/atomic_rows/",
+    }
+    assert c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS.isdisjoint(broad_paths)
+    for path in broad_paths:
+        assert not _is_pr141_downstream_changed_path_for_branch(
+            path,
+            "pr141-atomicrows-semantic-value-materialization-owner-authorization-gate",
+        )
+
+
+def test_changed_path_guard_keeps_generated_evidence_and_protected_paths_disallowed() -> None:
+    disallowed_paths = {
+        "docs/master_plan/generated/AtomicRowsUnexpectedSideEffect.report.json",
+        "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json",
+        "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+        "docs/master_plan/generated/AtomicRowsRowFamilySourceManifestCurrentization.report.json",
+        "docs/master_plan/generated/AtomicRowsSemanticFieldCoverageEnrichmentPlan.report.json.unexpected",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+        "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
+        "src/qtt/stage1_prediction_markets/connector_semantic_binding/validator.py",
+        "src/qtt/stage1_prediction_markets/runtime_resolver/validator.py",
+        "src/qtt/stage1_prediction_markets/replay_paper/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/extra.py",
+        "requirements.txt",
+    }
+    for path in disallowed_paths:
+        assert path not in c.ALLOWED_PR140_CHANGED_PATHS
+        assert not _is_pr141_downstream_changed_path_for_branch(
+            path,
+            "pr141-atomicrows-semantic-value-materialization-owner-authorization-gate",
+        )
+
+
+def test_pr141_downstream_allowance_is_handoff_not_materialization() -> None:
+    plan = _plan()
+    handoff = plan["downstream_handoff_contract"]
+    assert handoff["pr140_creates_downstream_input_for"] == ["PR141", "PR142"]
+    assert handoff["downstream_owner_authorization_required_for_materialization"] is True
+    assert plan["semantic_values_materialized"] is False
+    assert plan["authority_boundaries"]["semantic_values_materialized"] is False
+    assert plan["authority_boundaries"]["bundle_mutation_allowed_flag"] is False
+    assert plan["authority_boundaries"]["source_acceptance_created"] is False
+    assert plan["authority_boundaries"]["connector_semantic_binding_created"] is False
+    assert plan["authority_boundaries"]["runtime_live_order_authority_created"] is False
+    assert plan["authority_boundaries"]["quantum_backend_execution_created"] is False
+    assert plan["final_ready"] is False
 
 
 def test_changed_path_guard_ignores_only_runtime_tmp_directory() -> None:

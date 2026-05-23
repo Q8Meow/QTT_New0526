@@ -196,6 +196,15 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "validate_qtt_owner_global_override_authority.py"),
             "--mode",
             "dev",

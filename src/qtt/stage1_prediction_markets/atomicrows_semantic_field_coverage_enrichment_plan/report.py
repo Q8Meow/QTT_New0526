@@ -12,6 +12,10 @@ from tools.build_master_plan_section_coverage_report import (
     RegistryParseError,
     load_yaml_subset,
 )
+from tools.ci_branch_context import (
+    current_branch_context,
+    is_downstream_roadmap_branch,
+)
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
 from . import constants as c
@@ -1498,7 +1502,10 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
 
 
 def _changed_paths(repo_root: Path) -> list[str]:
-    status_rc, status_out, _status_err = _git_stdout(repo_root, ["status", "--short"])
+    status_rc, status_out, _status_err = _git_stdout(
+        repo_root,
+        ["status", "--short", "--untracked-files=all"],
+    )
     if status_rc != 0:
         return ["<git-status-unavailable>"]
     paths: list[str] = []
@@ -1521,6 +1528,31 @@ def _is_ignored_pr140_changed_path(path: str) -> bool:
     return normalized == tmp_dir or normalized.startswith(tmp_dir)
 
 
+def _branch_allows_pr141_downstream_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(branch, 140, allow_repair=False)
+
+
+def _is_pr141_downstream_changed_path_for_branch(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS
+        and _branch_allows_pr141_downstream_changed_paths(branch)
+    )
+
+
+def _is_pr141_downstream_changed_path(path: str, repo_root: Path) -> bool:
+    branch_context = current_branch_context(repo_root)
+    return _is_pr141_downstream_changed_path_for_branch(path, branch_context.branch)
+
+
+def _is_allowed_pr140_changed_path(path: str, repo_root: Path) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.ALLOWED_PR140_CHANGED_PATHS
+        or _is_pr141_downstream_changed_path(normalized, repo_root)
+    )
+
+
 def _validate_changed_paths(repo_root: Path) -> list[str]:
     failures: list[str] = []
     for path in _changed_paths(repo_root):
@@ -1530,11 +1562,7 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
         normalized = path.replace("\\", "/")
         if _is_ignored_pr140_changed_path(normalized):
             continue
-        if normalized.endswith("/") and any(
-            allowed.startswith(normalized) for allowed in c.ALLOWED_PR140_CHANGED_PATHS
-        ):
-            continue
-        if normalized not in c.ALLOWED_PR140_CHANGED_PATHS:
+        if not _is_allowed_pr140_changed_path(normalized, repo_root):
             failures.append(f"PR140_CHANGED_PATH_OUT_OF_SCOPE: {normalized}")
         if normalized == c.MASTER_PLAN_PATH.as_posix():
             failures.append("PR140_MASTER_PLAN_MUTATION_DETECTED")

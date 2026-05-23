@@ -247,6 +247,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_owner_global_override_authority.py"),
             "--mode",
             "dev",
@@ -1797,11 +1806,14 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
     pr140_index = command_names.index(
         "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
     )
+    pr141_index = command_names.index(
+        "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"
+    )
     owner_override_index = command_names.index(
         "validate_qtt_owner_global_override_authority.py"
     )
 
-    assert scope_index < pr138_index < pr139_index < pr140_index < owner_override_index
+    assert scope_index < pr138_index < pr139_index < pr140_index < pr141_index < owner_override_index
     assert commands[pr139_index][-2:] == [
         "--out",
         str(
@@ -1814,6 +1826,15 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
         str(
             Path("tools")
             / "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr141_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"
         ),
         "--repo-root",
         ".",
