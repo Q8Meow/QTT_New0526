@@ -1,0 +1,141 @@
+{
+  "authority_class": "STATIC_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_ONLY_NOT_BUNDLE_MUTATION_NOT_SOURCE_MUTATION_NOT_FINAL_READINESS",
+  "canonical_stage1_venue_ids": [
+    "PREDICTION_MARKETS_GENERAL",
+    "KALSHI",
+    "POLYMARKET",
+    "FORECASTEX_IBKR"
+  ],
+  "execution": "DISABLED",
+  "fixture_id": "SYNTHETIC_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_V1",
+  "fixture_version": "v1",
+  "forbidden_field_name_fragments": [
+    "sha",
+    "digest",
+    "hash",
+    "checksum"
+  ],
+  "forbidden_venue_aliases": [
+    "FORECASTEX",
+    "FORECASTX",
+    "IBKR_FORECASTX",
+    "forecastx"
+  ],
+  "manifest_entry_count": 15,
+  "manifest_id": "ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION",
+  "mode": "SOURCE_REQUIRED",
+  "negative_case_expectations": [
+    {
+      "case_id": "MISSING_PR136_ROUTE_TRIAGE_EVIDENCE",
+      "expected_reason": "PR139_REASON_PR136_ROUTE_TRIAGE_EVIDENCE_MISSING"
+    },
+    {
+      "case_id": "MISSING_PR136_COVERAGE_DOMAIN_MAP_EVIDENCE",
+      "expected_reason": "PR139_REASON_PR136_COVERAGE_DOMAIN_MAP_EVIDENCE_MISSING"
+    },
+    {
+      "case_id": "MISSING_PR136_QUANTUM_ATOMICROWS_EVIDENCE",
+      "expected_reason": "PR139_REASON_PR136_QUANTUM_ATOMICROWS_EVIDENCE_MISSING"
+    },
+    {
+      "case_id": "PR136_SAME_NUMBER_INFERENCE_TRUE",
+      "expected_reason": "PR139_REASON_SAME_NUMBER_INFERENCE_FORBIDDEN"
+    },
+    {
+      "case_id": "PR136_AUTHORITY_FLAG_DRIFT",
+      "expected_reason": "PR139_REASON_PR136_NO_AUTHORITY_FLAG_DRIFT"
+    },
+    {
+      "case_id": "MISSING_PR137R_EVIDENCE",
+      "expected_reason": "PR139_REASON_PR137R_EVIDENCE_MISSING"
+    },
+    {
+      "case_id": "MISSING_PR138_EVIDENCE",
+      "expected_reason": "PR139_REASON_PR138_EVIDENCE_MISSING"
+    },
+    {
+      "case_id": "MISSING_SOURCE_FILE",
+      "expected_reason": "PR139_REASON_SOURCE_FILE_MISSING"
+    },
+    {
+      "case_id": "DUPLICATE_FAMILY_ID",
+      "expected_reason": "PR139_REASON_DUPLICATE_FAMILY_ID"
+    },
+    {
+      "case_id": "DUPLICATE_SOURCE_FILE_PATH",
+      "expected_reason": "PR139_REASON_DUPLICATE_SOURCE_FILE_PATH"
+    },
+    {
+      "case_id": "MISSING_REQUIRED_FIELD_ID",
+      "expected_reason": "PR139_REASON_REQUIRED_FIELD_ID_MISSING"
+    },
+    {
+      "case_id": "UNKNOWN_FIELD_ID",
+      "expected_reason": "PR139_REASON_UNKNOWN_FIELD_ID"
+    },
+    {
+      "case_id": "MISSING_REQUIRED_FIELD_GROUP_ID",
+      "expected_reason": "PR139_REASON_REQUIRED_FIELD_GROUP_ID_MISSING"
+    },
+    {
+      "case_id": "UNKNOWN_FIELD_GROUP_ID",
+      "expected_reason": "PR139_REASON_UNKNOWN_FIELD_GROUP_ID"
+    },
+    {
+      "case_id": "SOURCE_MUTATION_FLAG_TRUE",
+      "expected_reason": "PR139_REASON_SOURCE_MUTATION_FLAG_TRUE_FORBIDDEN"
+    },
+    {
+      "case_id": "BUNDLE_MUTATION_FLAG_TRUE",
+      "expected_reason": "PR139_REASON_BUNDLE_MUTATION_FLAG_TRUE_FORBIDDEN"
+    },
+    {
+      "case_id": "SEMANTIC_VALUE_MATERIALIZATION_FLAG_TRUE",
+      "expected_reason": "PR139_REASON_SEMANTIC_VALUE_MATERIALIZATION_FLAG_TRUE_FORBIDDEN"
+    },
+    {
+      "case_id": "FINAL_READINESS_CLAIM",
+      "expected_reason": "PR139_REASON_FINAL_READINESS_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "RUNTIME_LIVE_ORDER_AUTHORITY_CLAIM",
+      "expected_reason": "PR139_REASON_RUNTIME_LIVE_ORDER_AUTHORITY_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "SOURCE_ACCEPTANCE_CLAIM",
+      "expected_reason": "PR139_REASON_SOURCE_ACCEPTANCE_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "CONNECTOR_SEMANTIC_BINDING_CLAIM",
+      "expected_reason": "PR139_REASON_CONNECTOR_SEMANTIC_BINDING_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "REPLAY_PAPER_EXECUTION_CLAIM",
+      "expected_reason": "PR139_REASON_REPLAY_PAPER_EXECUTION_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "NEURAL_TRAINING_OR_INFERENCE_CLAIM",
+      "expected_reason": "PR139_REASON_NEURAL_TRAINING_OR_INFERENCE_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "QUANTUM_BACKEND_EXECUTION_CLAIM",
+      "expected_reason": "PR139_REASON_QUANTUM_BACKEND_EXECUTION_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "PROFIT_LATENCY_EXECUTION_SUPERIORITY_CLAIM",
+      "expected_reason": "PR139_REASON_PROFIT_LATENCY_EXECUTION_SUPERIORITY_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "CRYPTOGRAPHIC_FREEZE_SIDECAR_AUTHORITY_CLAIM",
+      "expected_reason": "PR139_REASON_CRYPTOGRAPHIC_FREEZE_SIDECAR_AUTHORITY_CLAIM_FORBIDDEN"
+    },
+    {
+      "case_id": "FORBIDDEN_FIELD_NAME_FRAGMENT",
+      "expected_reason": "PR139_REASON_FORBIDDEN_FIELD_NAME_FRAGMENT"
+    }
+  ],
+  "positive_expected_entry_count": 15,
+  "repo_current_sequence_label": "PR139",
+  "static_only_flag": true,
+  "validator_marker": "QTT_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_OK"
+}

@@ -1587,6 +1587,15 @@ def build_validation_commands(
         ],
         [
             sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_row_family_source_manifest_currentization.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",

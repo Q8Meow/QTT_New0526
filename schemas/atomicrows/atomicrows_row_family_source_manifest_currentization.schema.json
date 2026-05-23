@@ -1,0 +1,738 @@
+{
+  "$defs": {
+    "agent_requirements": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_role": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "allowed_consumers": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "blocked_consumers": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "command_matrix_binding": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "consumer_class": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "execution_allowed_by_pr139_flag": {
+          "type": "boolean"
+        },
+        "live_use_allowed_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "metadata_only_flag": {
+          "type": "boolean"
+        },
+        "order_authority_created_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "owner_review_required_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "paper_required_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "profit_evidence_created_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "replay_required_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "required_field_ids": {
+          "$ref": "#/$defs/string_array"
+        }
+      },
+      "required": [
+        "agent_role",
+        "allowed_consumers",
+        "blocked_consumers",
+        "command_matrix_binding",
+        "consumer_class",
+        "execution_allowed_by_pr139_flag",
+        "live_use_allowed_flag",
+        "metadata_only_flag",
+        "order_authority_created_flag",
+        "owner_review_required_flag",
+        "paper_required_flag",
+        "profit_evidence_created_flag",
+        "replay_required_flag",
+        "required_field_ids"
+      ],
+      "type": "object"
+    },
+    "objective_requirements": {
+      "additionalProperties": false,
+      "properties": {
+        "capital_intensity_class": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "drawdown_control_family": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "execution_cost_model_family": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "expected_net_profit_objective_family": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "exposure_limit_family": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "latency_sensitivity_class": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "liquidity_context_family": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "metadata_only_flag": {
+          "type": "boolean"
+        },
+        "profit_latency_execution_superiority_claim_created_flag": {
+          "type": "boolean"
+        },
+        "required_field_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "risk_mode": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "capital_intensity_class",
+        "drawdown_control_family",
+        "execution_cost_model_family",
+        "expected_net_profit_objective_family",
+        "exposure_limit_family",
+        "latency_sensitivity_class",
+        "liquidity_context_family",
+        "metadata_only_flag",
+        "profit_latency_execution_superiority_claim_created_flag",
+        "required_field_ids",
+        "risk_mode"
+      ],
+      "type": "object"
+    },
+    "quantum_requirements": {
+      "additionalProperties": false,
+      "properties": {
+        "annealing_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "classical_only_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "execution_allowed_by_pr139_flag": {
+          "type": "boolean"
+        },
+        "ising_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "metadata_only_flag": {
+          "type": "boolean"
+        },
+        "qaoa_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "quantum_applicability_class": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "quantum_backend_execution_allowed_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "quantum_inspired_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "quantum_kernel_feature_map_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "qubo_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "required_field_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "true_quantum_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "vqe_compatible_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "annealing_compatible_flag",
+        "classical_only_flag",
+        "execution_allowed_by_pr139_flag",
+        "ising_compatible_flag",
+        "metadata_only_flag",
+        "qaoa_compatible_flag",
+        "quantum_applicability_class",
+        "quantum_backend_execution_allowed_flag",
+        "quantum_inspired_flag",
+        "quantum_kernel_feature_map_compatible_flag",
+        "qubo_compatible_flag",
+        "required_field_ids",
+        "true_quantum_compatible_flag",
+        "vqe_compatible_flag"
+      ],
+      "type": "object"
+    },
+    "row_family_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_selection_replay_paper_requirements": {
+          "$ref": "#/$defs/agent_requirements"
+        },
+        "bundle_mutation_allowed_flag": {
+          "const": false
+        },
+        "canonical_family_order": {
+          "type": "integer"
+        },
+        "currentization_status": {
+          "const": "REQUIRED_STATIC_CURRENTIZATION_PENDING"
+        },
+        "family_id": {
+          "type": "string"
+        },
+        "missing_field_ids_requiring_future_enrichment": {
+          "$ref": "#/$defs/string_array"
+        },
+        "prediction_market_compatibility_requirements": {
+          "additionalProperties": false,
+          "properties": {
+            "FORECASTEX_IBKR": {
+              "type": "string"
+            },
+            "KALSHI": {
+              "type": "string"
+            },
+            "POLYMARKET": {
+              "type": "string"
+            },
+            "PREDICTION_MARKETS_GENERAL": {
+              "type": "string"
+            },
+            "canonical_stage1_venue_ids": {
+              "$ref": "#/$defs/string_array"
+            },
+            "forbidden_venue_aliases": {
+              "$ref": "#/$defs/string_array"
+            },
+            "required_field_ids": {
+              "$ref": "#/$defs/string_array"
+            }
+          },
+          "required": [
+            "canonical_stage1_venue_ids",
+            "forbidden_venue_aliases",
+            "required_field_ids",
+            "PREDICTION_MARKETS_GENERAL",
+            "KALSHI",
+            "POLYMARKET",
+            "FORECASTEX_IBKR"
+          ],
+          "type": "object"
+        },
+        "profit_risk_latency_objective_metadata_requirements": {
+          "$ref": "#/$defs/objective_requirements"
+        },
+        "quantum_metadata_currentization_requirements": {
+          "$ref": "#/$defs/quantum_requirements"
+        },
+        "required_field_group_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "required_field_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "semantic_contract_ref": {
+          "type": "string"
+        },
+        "semantic_value_materialization_allowed_flag": {
+          "const": false
+        },
+        "source_file_exists_flag": {
+          "const": true
+        },
+        "source_file_mutation_allowed_flag": {
+          "const": false
+        },
+        "source_file_path": {
+          "type": "string"
+        },
+        "source_provenance_requirements": {
+          "$ref": "#/$defs/source_requirements"
+        },
+        "supported_field_ids_currently_present_if_known": {
+          "$ref": "#/$defs/string_array"
+        }
+      },
+      "required": [
+        "family_id",
+        "canonical_family_order",
+        "source_file_path",
+        "source_file_exists_flag",
+        "currentization_status",
+        "semantic_contract_ref",
+        "required_field_group_ids",
+        "required_field_ids",
+        "missing_field_ids_requiring_future_enrichment",
+        "supported_field_ids_currently_present_if_known",
+        "semantic_value_materialization_allowed_flag",
+        "source_file_mutation_allowed_flag",
+        "bundle_mutation_allowed_flag",
+        "prediction_market_compatibility_requirements",
+        "quantum_metadata_currentization_requirements",
+        "profit_risk_latency_objective_metadata_requirements",
+        "agent_selection_replay_paper_requirements",
+        "source_provenance_requirements"
+      ],
+      "type": "object"
+    },
+    "row_family_source_manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "existing_bundle_row_count": {
+          "type": "integer"
+        },
+        "manifest_entry_count": {
+          "type": "integer"
+        },
+        "missing_field_count": {
+          "type": "integer"
+        },
+        "required_field_count": {
+          "type": "integer"
+        },
+        "required_field_group_count": {
+          "type": "integer"
+        },
+        "row_family_entries": {
+          "items": {
+            "$ref": "#/$defs/row_family_entry"
+          },
+          "minItems": 15,
+          "type": "array"
+        },
+        "row_family_source_file_count": {
+          "type": "integer"
+        },
+        "stable_ordering_policy": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "manifest_entry_count",
+        "row_family_source_file_count",
+        "existing_bundle_row_count",
+        "required_field_count",
+        "required_field_group_count",
+        "missing_field_count",
+        "stable_ordering_policy",
+        "row_family_entries"
+      ],
+      "type": "object"
+    },
+    "source_requirements": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_source_packet_required_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "external_fact_authority_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "metadata_only_flag": {
+          "type": "boolean"
+        },
+        "required_field_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "research_input_only_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        },
+        "source_acceptance_created_flag": {
+          "type": "boolean"
+        },
+        "source_evidence_required_flag": {
+          "type": [
+            "string",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "accepted_source_packet_required_flag",
+        "external_fact_authority_flag",
+        "metadata_only_flag",
+        "required_field_ids",
+        "research_input_only_flag",
+        "source_acceptance_created_flag",
+        "source_evidence_required_flag"
+      ],
+      "type": "object"
+    },
+    "string_array": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "$id": "qtt-local-schemas-atomicrows-row-family-source-manifest-currentization",
+  "$schema": "json-schema-draft-2020-12",
+  "additionalProperties": false,
+  "description": "Static deterministic PR139 AtomicRows row-family source manifest currentization. This schema validates shape only; policy validation is enforced by the PR139 validator.",
+  "properties": {
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_ONLY_NOT_BUNDLE_MUTATION_NOT_SOURCE_MUTATION_NOT_FINAL_READINESS"
+    },
+    "bundle_mutation_allowed_flag": {
+      "const": false
+    },
+    "connector_semantic_binding_created_flag": {
+      "const": false
+    },
+    "cryptographic_sidecar_authority_created_flag": {
+      "const": false
+    },
+    "deterministic_output_flag": {
+      "const": true
+    },
+    "evidence_references": {
+      "additionalProperties": false,
+      "properties": {
+        "optional_existing_bundle_read_only_ref": {
+          "type": "string"
+        },
+        "pr136_agent_launch_orchestration_map_ref": {
+          "type": "string"
+        },
+        "pr136_command_action_matrix_ref": {
+          "type": "string"
+        },
+        "pr136_day1_launch_readiness_roadmap_ref": {
+          "type": "string"
+        },
+        "pr136_future_pr_card_registry_ref": {
+          "type": "string"
+        },
+        "pr136_launch_readiness_dependency_graph_ref": {
+          "type": "string"
+        },
+        "pr136_market_specific_launch_readiness_index_ref": {
+          "type": "string"
+        },
+        "pr136_master_plan_coverage_to_readiness_domain_map_ref": {
+          "type": "string"
+        },
+        "pr136_policy_literal_drift_ref": {
+          "type": "string"
+        },
+        "pr136_policy_manifest_ref": {
+          "type": "string"
+        },
+        "pr136_post_pr135_roadmap_sequence_ref": {
+          "type": "string"
+        },
+        "pr136_quantum_atomicrows_optimization_readiness_map_ref": {
+          "type": "string"
+        },
+        "pr136_read_receipt_ref": {
+          "type": "string"
+        },
+        "pr136_roadmap_replacement_and_insertion_matrix_ref": {
+          "type": "string"
+        },
+        "pr136_route_triage_ref": {
+          "type": "string"
+        },
+        "pr136_validation_gate_integration_ref": {
+          "type": "string"
+        },
+        "pr137l_index_ref": {
+          "type": "string"
+        },
+        "pr137l_report_ref": {
+          "type": "string"
+        },
+        "pr137r_index_ref": {
+          "type": "string"
+        },
+        "pr137r_report_ref": {
+          "type": "string"
+        },
+        "pr138_field_inventory_ref": {
+          "type": "string"
+        },
+        "pr138_semantic_contract_report_ref": {
+          "type": "string"
+        },
+        "row_family_source_directory_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pr136_route_triage_ref",
+        "pr136_read_receipt_ref",
+        "pr136_master_plan_coverage_to_readiness_domain_map_ref",
+        "pr136_market_specific_launch_readiness_index_ref",
+        "pr136_command_action_matrix_ref",
+        "pr136_agent_launch_orchestration_map_ref",
+        "pr136_launch_readiness_dependency_graph_ref",
+        "pr136_quantum_atomicrows_optimization_readiness_map_ref",
+        "pr136_post_pr135_roadmap_sequence_ref",
+        "pr136_future_pr_card_registry_ref",
+        "pr136_roadmap_replacement_and_insertion_matrix_ref",
+        "pr136_day1_launch_readiness_roadmap_ref",
+        "pr136_policy_manifest_ref",
+        "pr136_policy_literal_drift_ref",
+        "pr136_validation_gate_integration_ref",
+        "pr137r_report_ref",
+        "pr137r_index_ref",
+        "pr137l_report_ref",
+        "pr137l_index_ref",
+        "pr138_semantic_contract_report_ref",
+        "pr138_field_inventory_ref",
+        "row_family_source_directory_ref",
+        "optional_existing_bundle_read_only_ref"
+      ],
+      "type": "object"
+    },
+    "final_readiness_created_flag": {
+      "const": false
+    },
+    "freeze_authority_created_flag": {
+      "const": false
+    },
+    "manifest_id": {
+      "const": "ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION"
+    },
+    "manifest_version": {
+      "const": "v1"
+    },
+    "neural_training_or_inference_created_flag": {
+      "const": false
+    },
+    "pr136_alignment": {
+      "additionalProperties": false,
+      "properties": {
+        "pr136_agent_launch_orchestration_map_consumed": {
+          "const": true
+        },
+        "pr136_canonical_venue_ids_consumed": {
+          "const": true
+        },
+        "pr136_control_plane_consumed_read_only": {
+          "const": true
+        },
+        "pr136_did_not_override_repo_current_atomicrows_scope": {
+          "const": true
+        },
+        "pr136_future_sequence_context_consumed": {
+          "const": true
+        },
+        "pr136_launch_readiness_dependency_graph_consumed": {
+          "const": true
+        },
+        "pr136_master_plan_coverage_to_readiness_domain_map_consumed": {
+          "const": true
+        },
+        "pr136_no_authority_flags_preserved": {
+          "const": true
+        },
+        "pr136_quantum_atomicrows_optimization_readiness_map_consumed": {
+          "const": true
+        },
+        "pr136_same_number_inference_preserved_false": {
+          "const": true
+        }
+      },
+      "required": [
+        "pr136_control_plane_consumed_read_only",
+        "pr136_same_number_inference_preserved_false",
+        "pr136_no_authority_flags_preserved",
+        "pr136_canonical_venue_ids_consumed",
+        "pr136_master_plan_coverage_to_readiness_domain_map_consumed",
+        "pr136_agent_launch_orchestration_map_consumed",
+        "pr136_launch_readiness_dependency_graph_consumed",
+        "pr136_quantum_atomicrows_optimization_readiness_map_consumed",
+        "pr136_future_sequence_context_consumed",
+        "pr136_did_not_override_repo_current_atomicrows_scope"
+      ],
+      "type": "object"
+    },
+    "profit_latency_execution_superiority_claim_created_flag": {
+      "const": false
+    },
+    "quantum_backend_execution_created_flag": {
+      "const": false
+    },
+    "read_only_evidence_only_flag": {
+      "const": true
+    },
+    "replay_paper_execution_created_flag": {
+      "const": false
+    },
+    "repo_current_sequence_label": {
+      "const": "PR139"
+    },
+    "roadmap_identity_inference_used": {
+      "const": false
+    },
+    "row_family_source_manifest": {
+      "$ref": "#/$defs/row_family_source_manifest"
+    },
+    "runtime_live_order_authority_created_flag": {
+      "const": false
+    },
+    "semantic_value_materialization_allowed_flag": {
+      "const": false
+    },
+    "source_acceptance_created_flag": {
+      "const": false
+    },
+    "source_file_mutation_allowed_flag": {
+      "const": false
+    },
+    "static_only_flag": {
+      "const": true
+    },
+    "validator_marker": {
+      "const": "QTT_ATOMICROWS_ROW_FAMILY_SOURCE_MANIFEST_CURRENTIZATION_OK"
+    }
+  },
+  "required": [
+    "manifest_id",
+    "manifest_version",
+    "repo_current_sequence_label",
+    "roadmap_identity_inference_used",
+    "authority_class",
+    "validator_marker",
+    "static_only_flag",
+    "read_only_evidence_only_flag",
+    "deterministic_output_flag",
+    "source_file_mutation_allowed_flag",
+    "bundle_mutation_allowed_flag",
+    "semantic_value_materialization_allowed_flag",
+    "final_readiness_created_flag",
+    "runtime_live_order_authority_created_flag",
+    "source_acceptance_created_flag",
+    "connector_semantic_binding_created_flag",
+    "replay_paper_execution_created_flag",
+    "neural_training_or_inference_created_flag",
+    "quantum_backend_execution_created_flag",
+    "profit_latency_execution_superiority_claim_created_flag",
+    "cryptographic_sidecar_authority_created_flag",
+    "freeze_authority_created_flag",
+    "evidence_references",
+    "pr136_alignment",
+    "row_family_source_manifest"
+  ],
+  "title": "AtomicRows Row-Family Source Manifest Currentization",
+  "type": "object"
+}
