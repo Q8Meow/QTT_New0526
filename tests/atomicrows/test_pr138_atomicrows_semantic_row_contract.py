@@ -9,15 +9,15 @@ import pytest
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract import constants as c
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.fixtures import (
     build_fixture_collection,
-    write_fixture_file,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.report import (
+    build_index,
     build_report,
     evidence_snapshot,
-    write_report_files,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.schema import (
     build_contract,
+    build_json_schema,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract import validator
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.validator import (
@@ -25,6 +25,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.validator im
     validate_fixture_collection,
     validate_report_payload,
 )
+from tools import ci_branch_context
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -34,8 +35,16 @@ _CACHE: dict | None = None
 def _outputs() -> dict:
     global _CACHE
     if _CACHE is None:
-        _CACHE = write_report_files(REPO_ROOT)
-        write_fixture_file(REPO_ROOT)
+        evidence = evidence_snapshot(REPO_ROOT)
+        contract = build_contract(evidence)
+        report = build_report(REPO_ROOT)
+        _CACHE = {
+            "contract": contract,
+            "index": build_index(report),
+            "report": report,
+            "schema": build_json_schema(),
+            "fixture": build_fixture_collection(),
+        }
     return _CACHE
 
 
@@ -430,6 +439,59 @@ def test_pr138_gate_local_wrong_branch_fails_closed_with_branch_mismatch(
     assert c.PR138_REASON_BRANCH_MISMATCH in outcome.failures
     assert c.PR138_REASON_LOCAL_BASELINE_NOT_DESCENDANT not in outcome.failures
     assert outcome.receipts == ()
+
+
+def test_pr138_gate_local_downstream_pr140_branch_context_passes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(
+            branch="pr140-atomicrows-semantic-field-coverage-enrichment-plan",
+            base_rc=0,
+            ancestor_rc=0,
+        ),
+    )
+
+    outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert outcome.ok, outcome.failures
+    assert (
+        ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        in outcome.receipts
+    )
+
+
+def test_pr138_gate_local_repair_branch_is_not_downstream_pr140_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(
+            branch="repair/pr140-atomicrows-semantic-field-coverage-enrichment-plan",
+            base_rc=0,
+            ancestor_rc=0,
+        ),
+    )
+
+    outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert not outcome.ok
+    assert c.PR138_REASON_BRANCH_MISMATCH in outcome.failures
+    assert (
+        ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        not in outcome.receipts
+    )
 
 
 def test_pr138_gate_local_requires_descendant_of_d1bce40_or_owner_verified_sandbox_fallback(

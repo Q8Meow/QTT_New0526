@@ -79,7 +79,16 @@ def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[l
         receipts.append(c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return failures, receipts
     if branch_rc != 0 or branch != c.BRANCH:
-        failures.append(c.PR138_REASON_BRANCH_MISMATCH)
+        if branch_rc == 0 and ci_branch_context.is_downstream_roadmap_branch(
+            branch,
+            after_pr=138,
+            allow_repair=False,
+        ):
+            receipts.append(
+                ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+            )
+        else:
+            failures.append(c.PR138_REASON_BRANCH_MISMATCH)
 
     base_rc, _base_out, _base_err = _git_stdout(
         repo_root,

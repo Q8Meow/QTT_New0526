@@ -170,6 +170,9 @@ def _expected_commands(
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
+    row_family_currentization_report = (
+        validation_dir / "AtomicRowsRowFamilySourceManifestCurrentization.report.json"
+    )
     master_plan = Path("docs") / "master_plan" / "QTT_MasterPlan_Current.md"
 
     return [
@@ -216,6 +219,31 @@ def _expected_commands(
             "--block-neural-inference",
             "--block-external-repo-clone",
             "--block-package-install-scripts",
+        ],
+        [
+            python_executable,
+            "-c",
+            runner.PR138_NON_MUTATING_VALIDATION_SCRIPT,
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_row_family_source_manifest_currentization.py"
+            ),
+            "--repo-root",
+            ".",
+            "--out",
+            str(row_family_currentization_report),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
+            ),
+            "--repo-root",
+            ".",
         ],
         [
             python_executable,
@@ -1692,28 +1720,6 @@ def _expected_commands(
         ],
         [
             python_executable,
-            str(Path("tools") / "stage1_atomicrows_semantic_row_contract_gate.py"),
-            "--repo-root",
-            ".",
-            "--write-report",
-            str(
-                Path("docs")
-                / "master_plan"
-                / "generated"
-                / "PR138_AtomicRowsSemanticRowContract.report.json"
-            ),
-        ],
-        [
-            python_executable,
-            str(
-                Path("tools")
-                / "validate_atomicrows_row_family_source_manifest_currentization.py"
-            ),
-            "--repo-root",
-            ".",
-        ],
-        [
-            python_executable,
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",
@@ -1742,6 +1748,159 @@ def test_runner_commands_use_sys_executable(monkeypatch):
 
     assert commands
     assert all(command[0] == python_executable for command in commands)
+
+
+def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    pr138_mutating_commands = [
+        command
+        for command in commands
+        if command[1] == str(Path("tools") / "stage1_atomicrows_semantic_row_contract_gate.py")
+    ]
+    pr138_non_mutating_commands = [
+        command
+        for command in commands
+        if command[1] == "-c"
+        and command[2] == runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
+    ]
+
+    assert pr138_mutating_commands == []
+    assert pr138_non_mutating_commands == [
+        [
+            python_executable,
+            "-c",
+            runner.PR138_NON_MUTATING_VALIDATION_SCRIPT,
+        ]
+    ]
+    assert "--write-report" not in pr138_non_mutating_commands[0]
+
+
+def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    scope_index = command_names.index("validate_first_pr_scope.py")
+    pr138_index = next(
+        index
+        for index, command in enumerate(commands)
+        if command[1] == "-c"
+        and command[2] == runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
+    )
+    pr139_index = command_names.index(
+        "validate_atomicrows_row_family_source_manifest_currentization.py"
+    )
+    pr140_index = command_names.index(
+        "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
+    )
+    owner_override_index = command_names.index(
+        "validate_qtt_owner_global_override_authority.py"
+    )
+
+    assert scope_index < pr138_index < pr139_index < pr140_index < owner_override_index
+    assert commands[pr139_index][-2:] == [
+        "--out",
+        str(
+            runner._default_validation_dir()
+            / "AtomicRowsRowFamilySourceManifestCurrentization.report.json"
+        ),
+    ]
+    assert commands[pr140_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+
+
+def test_runner_restores_only_runtime_side_effects_immediately_before_final_pytest(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(
+            self,
+            returncode: int = 0,
+            stdout: str = "",
+            stderr: str = "",
+        ) -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    intended_repair_paths = [
+        "tools/run_validation_gates.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+    ]
+    generated_side_effect_paths = [
+        "docs/master_plan/generated/GateSideEffect.report.json",
+        "tests/fixtures/atomicrows/synthetic_gate_side_effect.v1.fixture.json",
+    ]
+    modified_outputs = iter(
+        [
+            "\n".join(intended_repair_paths) + "\n",
+            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
+        ]
+    )
+    events: list[tuple[str, list[str]]] = []
+    commands = runner.build_validation_commands(
+        Path("validation-dir"),
+        Path("pytest-basetemp"),
+    )
+
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        if command[0] == "git":
+            git_args = command[1:]
+            events.append(("git", git_args))
+            if git_args == ["ls-files", "-m"]:
+                return Completed(stdout=next(modified_outputs))
+            if git_args == [
+                "restore",
+                "--source=HEAD",
+                "--worktree",
+                "--",
+                *generated_side_effect_paths,
+            ]:
+                return Completed()
+            raise AssertionError(f"unexpected git command: {git_args}")
+
+        events.append(("gate", command))
+        return Completed()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands, repo_root=Path("repo-root"))
+
+    ls_files_event = ("git", ["ls-files", "-m"])
+    restore_event = (
+        "git",
+        [
+            "restore",
+            "--source=HEAD",
+            "--worktree",
+            "--",
+            *generated_side_effect_paths,
+        ],
+    )
+    assert exit_code == 0
+    assert events[0] == ls_files_event
+    assert events.count(ls_files_event) == 2
+    assert restore_event in events
+    assert "tools/run_validation_gates.py" not in restore_event[1]
+    assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
+    assert events[-3:] == [
+        ls_files_event,
+        restore_event,
+        ("gate", commands[-1]),
+    ]
+    assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
 
 
 def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
@@ -6996,11 +7155,16 @@ def test_runner_does_not_emit_success_marker_if_selection_universe_registry_fail
 
 def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     class Completed:
-        returncode = 0
+        def __init__(self, stdout: str = "", stderr: str = "") -> None:
+            self.returncode = 0
+            self.stdout = stdout
+            self.stderr = stderr
 
     seen: list[list[str]] = []
 
-    def fake_run(command: list[str]) -> Completed:
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        if command[0] == "git":
+            return Completed()
         seen.append(command)
         return Completed()
 
@@ -7018,7 +7182,10 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
 
 def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
     class Completed:
-        returncode = 0
+        def __init__(self, stdout: str = "", stderr: str = "") -> None:
+            self.returncode = 0
+            self.stdout = stdout
+            self.stderr = stderr
 
     repo_root = (Path(".tmp") / "test_run_validation_gates_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
@@ -7026,8 +7193,10 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
     tmp_parent = repo_root / ".tmp"
     seen: list[list[str]] = []
 
-    def fake_run(command: list[str]) -> Completed:
+    def fake_run(command: list[str], **kwargs) -> Completed:
         assert tmp_parent.is_dir()
+        if command[0] == "git":
+            return Completed()
         seen.append(command)
         return Completed()
 
@@ -7057,7 +7226,10 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
     tmp_parent = repo_root / ".tmp"
     pytest_basetemps: list[Path] = []
 
-    def fake_run_commands(commands: list[list[str]]) -> int:
+    def fake_run_commands(
+        commands: list[list[str]],
+        repo_root: Path | None = None,
+    ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert pytest_basetemp.parent == tmp_parent
         assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
@@ -7088,7 +7260,10 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
     sentinel.write_text("do-not-touch", encoding="utf-8")
     pytest_basetemps: list[Path] = []
 
-    def fake_run_commands(commands: list[list[str]]) -> int:
+    def fake_run_commands(
+        commands: list[list[str]],
+        repo_root: Path | None = None,
+    ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert pytest_basetemp != stale_basetemp
         assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
