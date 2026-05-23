@@ -5,10 +5,12 @@ import json
 from pathlib import Path
 
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
+from tools.ci_branch_context import BranchContext
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_owner_authorization_gate import (
     constants as c,
+    report as pr141_report,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_owner_authorization_gate.report import (
     _is_allowed_pr141_changed_path,
@@ -349,7 +351,7 @@ def test_changed_path_guard_ignores_only_runtime_tmp_directory() -> None:
     assert not _is_ignored_pr141_changed_path("tmp/")
 
 
-def test_changed_path_guard_allows_exact_pr140_guard_repair_files_only() -> None:
+def test_changed_path_guard_allows_exact_pr140_guard_repair_files_only(monkeypatch) -> None:
     assert c.PR140_GUARD_REPAIR_ALLOWANCE_REASON_CODE == (
         "PR140_GUARD_REPAIR_REQUIRED_FOR_PR141_DOWNSTREAM_HANDOFF"
     )
@@ -366,7 +368,32 @@ def test_changed_path_guard_allows_exact_pr140_guard_repair_files_only() -> None
             path,
             "pr140-atomicrows-semantic-field-coverage-enrichment-plan",
         )
+        assert not _is_pr140_guard_repair_changed_path_for_branch(path, "main")
+        assert not _is_pr140_guard_repair_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr141_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch=c.BRANCH, source="unit-test"),
+    )
+    for path in c.PR140_GUARD_REPAIR_CHANGED_PATHS:
         assert _is_allowed_pr141_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_rejects_pr140_guard_repair_files_on_main_and_detached_context(
+    monkeypatch,
+) -> None:
+    for branch in ("main", ""):
+        monkeypatch.setattr(
+            pr141_report,
+            "current_branch_context",
+            lambda repo_root, branch=branch: BranchContext(
+                branch=branch,
+                source="unit-test",
+            ),
+        )
+        for path in c.PR140_GUARD_REPAIR_CHANGED_PATHS:
+            assert not _is_allowed_pr141_changed_path(path, REPO_ROOT)
 
 
 def test_changed_path_guard_rejects_broad_pr140_package_directories() -> None:
@@ -421,7 +448,12 @@ def test_pr140_guard_repair_allowance_is_integration_support_not_materialization
     assert gate["final_ready"] is False
 
 
-def test_repository_artifacts_validate_and_report_is_deterministic() -> None:
+def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) -> None:
+    monkeypatch.setattr(
+        pr141_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch=c.BRANCH, source="unit-test"),
+    )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
 

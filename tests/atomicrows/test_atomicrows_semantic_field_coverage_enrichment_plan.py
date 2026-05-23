@@ -6,10 +6,12 @@ from pathlib import Path
 import subprocess
 
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
+from tools.ci_branch_context import BranchContext
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan import (
     constants as c,
+    report as pr140_report,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (
     _is_allowed_pr140_changed_path,
@@ -327,14 +329,17 @@ def test_changed_path_guard_allows_only_narrow_repair_paths() -> None:
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(c.IGNORED_PR140_CHANGED_PATH_PATTERNS)
 
 
-def test_changed_path_guard_allows_exact_pr141_downstream_handoff_files_only() -> None:
+def test_changed_path_guard_allows_exact_pr141_downstream_handoff_files_only(monkeypatch) -> None:
     assert c.PR141_DOWNSTREAM_ALLOWANCE_REASON_CODE == (
         "PR141_DOWNSTREAM_AUTHORIZATION_GATE_CONSUMES_PR140_HANDOFF"
+    )
+    downstream_branch = (
+        "pr141-atomicrows-semantic-value-materialization-owner-authorization-gate"
     )
     for path in c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS:
         assert _is_pr141_downstream_changed_path_for_branch(
             path,
-            "pr141-atomicrows-semantic-value-materialization-owner-authorization-gate",
+            downstream_branch,
         )
         assert _is_pr141_downstream_changed_path_for_branch(
             path,
@@ -344,7 +349,32 @@ def test_changed_path_guard_allows_exact_pr141_downstream_handoff_files_only() -
             path,
             c.BRANCH,
         )
+        assert not _is_pr141_downstream_changed_path_for_branch(path, "main")
+        assert not _is_pr141_downstream_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr140_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch=downstream_branch, source="unit-test"),
+    )
+    for path in c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS:
         assert _is_allowed_pr140_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_rejects_pr141_downstream_handoff_files_on_main_and_detached_context(
+    monkeypatch,
+) -> None:
+    for branch in ("main", ""):
+        monkeypatch.setattr(
+            pr140_report,
+            "current_branch_context",
+            lambda repo_root, branch=branch: BranchContext(
+                branch=branch,
+                source="unit-test",
+            ),
+        )
+        for path in c.PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS:
+            assert not _is_allowed_pr140_changed_path(path, REPO_ROOT)
 
 
 def test_changed_path_guard_rejects_broad_pr141_like_directories() -> None:
@@ -488,9 +518,17 @@ def test_quantum_forward_metadata_plan_has_references_without_execution_or_advan
     assert quantum["quantum_backend_execution_allowed_flag_forced_false"] is True
 
 
-def test_repository_artifacts_validate_and_report_is_deterministic() -> None:
+def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) -> None:
     _outputs()
     _restore_tracked_generated_side_effects()
+    monkeypatch.setattr(
+        pr140_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr141-atomicrows-semantic-value-materialization-owner-authorization-gate",
+            source="unit-test",
+        ),
+    )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
     assert validate_report_payload(_report(), build_report(REPO_ROOT)) == []
