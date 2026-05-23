@@ -288,6 +288,24 @@ FIELD_RATIONALE_BY_DEPENDENCY_CLASS = {
     ),
 }
 
+PR141_DOWNSTREAM_ALLOWANCE_REASON_CODE = (
+    "PR141_DOWNSTREAM_AUTHORIZATION_GATE_CONSUMES_PR140_HANDOFF"
+)
+PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS = {
+    "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.yaml",
+    "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.report.json",
+    "schemas/atomicrows/atomicrows_semantic_value_materialization_owner_authorization_gate.schema.json",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/__init__.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/constants.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
+    "tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    (
+        "tests/fixtures/atomicrows/"
+        "synthetic_atomicrows_semantic_value_materialization_owner_authorization_gate.v1.fixture.json"
+    ),
+}
+
 ALLOWED_PR140_CHANGED_PATHS = {
     PLAN_PATH.as_posix(),
     REPORT_PATH.as_posix(),

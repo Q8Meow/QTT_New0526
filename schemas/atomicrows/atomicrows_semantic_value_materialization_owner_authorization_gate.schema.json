@@ -1,0 +1,1572 @@
+{
+  "$defs": {
+    "agent_orchestration_authorization_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_domain_id": {
+          "enum": [
+            "research_source_agent",
+            "source_evidence_agent",
+            "connector_semantic_agent",
+            "credential_private_state_cash_agent",
+            "market_data_agent",
+            "runtime_resolver_agent",
+            "historical_dataset_agent",
+            "atomicrows_agent",
+            "quantum_optimizer_agent",
+            "classical_optimizer_agent",
+            "parameter_stack_agent",
+            "replay_agent",
+            "paper_agent",
+            "risk_agent",
+            "owner_approval_agent",
+            "dashboard_agent",
+            "canary_execution_agent",
+            "post_trade_reconciliation_agent",
+            "launch_runbook_agent"
+          ]
+        },
+        "final_order_submission_authority_created": {
+          "const": false
+        },
+        "future_owner_authorization_required": {
+          "const": true
+        },
+        "future_pr142_consumer_scope": {
+          "const": "STATIC_AUTHORIZATION_METADATA_ONLY"
+        },
+        "latency_hot_path_allowed": {
+          "const": false
+        },
+        "live_order_authority_allowed": {
+          "const": false
+        },
+        "may_consume_pr141_gate_as_static_metadata": {
+          "const": true
+        },
+        "may_materialize_values_by_pr141": {
+          "const": false
+        }
+      },
+      "required": [
+        "agent_domain_id",
+        "may_consume_pr141_gate_as_static_metadata",
+        "may_materialize_values_by_pr141",
+        "final_order_submission_authority_created",
+        "live_order_authority_allowed",
+        "latency_hot_path_allowed",
+        "future_owner_authorization_required",
+        "future_pr142_consumer_scope"
+      ],
+      "type": "object"
+    },
+    "authority_boundaries": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_source_packet_created": {
+          "const": false
+        },
+        "alpha_evidence_created": {
+          "const": false
+        },
+        "atomicrows_bundle_mutated": {
+          "const": false
+        },
+        "bundle_freeze_authority_created": {
+          "const": false
+        },
+        "bundle_mutation_allowed_flag": {
+          "const": false
+        },
+        "connector_semantic_binding_created": {
+          "const": false
+        },
+        "day1_launch_ready": {
+          "const": false
+        },
+        "execution_superiority_claimed": {
+          "const": false
+        },
+        "fill_receipt_created": {
+          "const": false
+        },
+        "final_ready": {
+          "const": false
+        },
+        "integrity_authority_created": {
+          "const": false
+        },
+        "latency_superiority_claimed": {
+          "const": false
+        },
+        "materialization_permission_created": {
+          "const": false
+        },
+        "order_execution_created": {
+          "const": false
+        },
+        "owner_approval_receipt_created": {
+          "const": false
+        },
+        "paper_execution_created": {
+          "const": false
+        },
+        "paper_result_created": {
+          "const": false
+        },
+        "private_state_fetch_created": {
+          "const": false
+        },
+        "profit_evidence_created": {
+          "const": false
+        },
+        "quantum_advantage_claimed": {
+          "const": false
+        },
+        "quantum_backend_execution_created": {
+          "const": false
+        },
+        "quantum_optimizer_input_created": {
+          "const": false
+        },
+        "quantum_optimizer_output_created": {
+          "const": false
+        },
+        "quantum_simulator_execution_created": {
+          "const": false
+        },
+        "replay_execution_created": {
+          "const": false
+        },
+        "replay_result_created": {
+          "const": false
+        },
+        "row_family_sources_mutated": {
+          "const": false
+        },
+        "runtime_cash_authority_created": {
+          "const": false
+        },
+        "runtime_live_order_authority_created": {
+          "const": false
+        },
+        "scoring_ranking_arbitration_output_created": {
+          "const": false
+        },
+        "semantic_values_materialized": {
+          "const": false
+        },
+        "source_acceptance_created": {
+          "const": false
+        },
+        "source_file_mutation_allowed_flag": {
+          "const": false
+        },
+        "source_retrieval_created": {
+          "const": false
+        },
+        "trading_signal_created": {
+          "const": false
+        }
+      },
+      "required": [
+        "semantic_values_materialized",
+        "materialization_permission_created",
+        "owner_approval_receipt_created",
+        "bundle_mutation_allowed_flag",
+        "source_file_mutation_allowed_flag",
+        "row_family_sources_mutated",
+        "atomicrows_bundle_mutated",
+        "source_retrieval_created",
+        "source_acceptance_created",
+        "accepted_source_packet_created",
+        "connector_semantic_binding_created",
+        "private_state_fetch_created",
+        "runtime_cash_authority_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "replay_result_created",
+        "paper_result_created",
+        "trading_signal_created",
+        "scoring_ranking_arbitration_output_created",
+        "runtime_live_order_authority_created",
+        "order_execution_created",
+        "fill_receipt_created",
+        "profit_evidence_created",
+        "latency_superiority_claimed",
+        "execution_superiority_claimed",
+        "alpha_evidence_created",
+        "quantum_optimizer_input_created",
+        "quantum_optimizer_output_created",
+        "quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "quantum_advantage_claimed",
+        "final_ready",
+        "day1_launch_ready",
+        "integrity_authority_created",
+        "bundle_freeze_authority_created"
+      ],
+      "type": "object"
+    },
+    "crosswalk_alias_resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "alias_exists": {
+          "type": "boolean"
+        },
+        "canonical_crosswalk_used": {
+          "const": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+        },
+        "created_missing_alias": {
+          "const": false
+        },
+        "requested_alias": {
+          "const": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"
+        }
+      },
+      "required": [
+        "requested_alias",
+        "alias_exists",
+        "canonical_crosswalk_used",
+        "created_missing_alias"
+      ],
+      "type": "object"
+    },
+    "downstream_handoff_contract": {
+      "additionalProperties": false,
+      "properties": {
+        "future_owner_authorization_packet_required": {
+          "const": true
+        },
+        "future_owner_authorization_required_for_actual_materialization": {
+          "const": true
+        },
+        "no_same_number_identity_inference": {
+          "const": true
+        },
+        "pr141_authorizes_bundle_mutation": {
+          "const": false
+        },
+        "pr141_authorizes_connector_binding": {
+          "const": false
+        },
+        "pr141_authorizes_final_readiness": {
+          "const": false
+        },
+        "pr141_authorizes_live_order_authority": {
+          "const": false
+        },
+        "pr141_authorizes_materialization": {
+          "const": false
+        },
+        "pr141_authorizes_paper_execution": {
+          "const": false
+        },
+        "pr141_authorizes_quantum_backend_execution": {
+          "const": false
+        },
+        "pr141_authorizes_replay_execution": {
+          "const": false
+        },
+        "pr141_authorizes_row_family_source_mutation": {
+          "const": false
+        },
+        "pr141_authorizes_source_acceptance": {
+          "const": false
+        },
+        "pr141_consumes_downstream_input_from": {
+          "const": [
+            "PR140"
+          ]
+        },
+        "pr141_creates_downstream_input_for": {
+          "const": [
+            "PR142"
+          ]
+        }
+      },
+      "required": [
+        "pr141_consumes_downstream_input_from",
+        "pr141_creates_downstream_input_for",
+        "pr141_authorizes_materialization",
+        "pr141_authorizes_bundle_mutation",
+        "pr141_authorizes_row_family_source_mutation",
+        "pr141_authorizes_source_acceptance",
+        "pr141_authorizes_connector_binding",
+        "pr141_authorizes_replay_execution",
+        "pr141_authorizes_paper_execution",
+        "pr141_authorizes_live_order_authority",
+        "pr141_authorizes_quantum_backend_execution",
+        "pr141_authorizes_final_readiness",
+        "future_owner_authorization_required_for_actual_materialization",
+        "future_owner_authorization_packet_required",
+        "no_same_number_identity_inference"
+      ],
+      "type": "object"
+    },
+    "field_authorization_readiness_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_source_packet_required_before_materialization": {
+          "type": "boolean"
+        },
+        "bundle_mutation_allowed_by_pr141": {
+          "const": false
+        },
+        "connector_binding_created_by_pr141": {
+          "const": false
+        },
+        "downstream_dependency_class": {
+          "enum": [
+            "PR142_CONSUMABLE_STATIC_AUTHORIZATION_INPUT",
+            "ACCEPTED_SOURCE_PACKET_DEPENDENT",
+            "RUNTIME_RECEIPT_DEPENDENT",
+            "REPLAY_PAPER_EVIDENCE_DEPENDENT",
+            "OWNER_SCOPE_DECISION_DEPENDENT",
+            "STATIC_POLICY_ONLY",
+            "QUANTUM_METADATA_STATIC_ONLY",
+            "AUTHORITY_BOUNDARY_FORCED_FALSE",
+            "EXISTING_ROW_ID_ONLY"
+          ]
+        },
+        "eligibility_to_request_owner_authorization": {
+          "type": "boolean"
+        },
+        "field_group_id": {
+          "enum": [
+            "IDENTITY",
+            "PARAMETER_ALGORITHM_CLASSIFICATION",
+            "AGENT_CONSUMER_BINDING",
+            "MARKET_VENUE_SCOPE",
+            "TRADING_OBJECTIVE_SUPPORT",
+            "REPLAY_PAPER_LIVE_BOUNDARY",
+            "QUANTUM_COMPATIBILITY",
+            "SOURCE_PROVENANCE_BOUNDARY"
+          ]
+        },
+        "field_id": {
+          "enum": [
+            "row_id",
+            "row_family",
+            "row_type",
+            "lifecycle_state",
+            "version_state",
+            "deprecation_state",
+            "parameter_family",
+            "algorithm_family",
+            "strategy_family",
+            "signal_family",
+            "scoring_family",
+            "normalization_family",
+            "risk_family",
+            "execution_family",
+            "capital_family",
+            "latency_family",
+            "error_guard_family",
+            "quantum_family",
+            "agent_role",
+            "consumer_class",
+            "allowed_consumers",
+            "blocked_consumers",
+            "command_matrix_binding",
+            "market_scope",
+            "venue_scope",
+            "prediction_market_scope",
+            "prediction_markets_general_compatibility",
+            "kalshi_compatibility",
+            "polymarket_compatibility",
+            "forecastex_ibkr_compatibility",
+            "expected_net_profit_objective_family",
+            "execution_cost_model_family",
+            "latency_sensitivity_class",
+            "capital_intensity_class",
+            "risk_mode",
+            "drawdown_control_family",
+            "exposure_limit_family",
+            "liquidity_context_family",
+            "replay_required_flag",
+            "paper_required_flag",
+            "owner_review_required_flag",
+            "live_use_allowed_flag",
+            "order_authority_created_flag",
+            "profit_evidence_created_flag",
+            "quantum_applicability_class",
+            "classical_only_flag",
+            "quantum_inspired_flag",
+            "true_quantum_compatible_flag",
+            "qubo_compatible_flag",
+            "ising_compatible_flag",
+            "qaoa_compatible_flag",
+            "vqe_compatible_flag",
+            "annealing_compatible_flag",
+            "quantum_kernel_feature_map_compatible_flag",
+            "quantum_backend_execution_allowed_flag",
+            "source_evidence_required_flag",
+            "accepted_source_packet_required_flag",
+            "research_input_only_flag",
+            "external_fact_authority_flag"
+          ]
+        },
+        "final_readiness_created_by_pr141": {
+          "const": false
+        },
+        "forced_false_no_authority_boundary": {
+          "type": "boolean"
+        },
+        "future_pr142_input_created": {
+          "type": "boolean"
+        },
+        "live_use_allowed_by_pr141": {
+          "const": false
+        },
+        "materialization_eligibility_state": {
+          "enum": [
+            "EXISTING_FIELD_ALREADY_SUPPORTED",
+            "ELIGIBLE_FOR_FUTURE_OWNER_AUTHORIZED_MATERIALIZATION",
+            "BLOCKED_BY_SOURCE_EVIDENCE_DEPENDENCY",
+            "BLOCKED_BY_RUNTIME_RECEIPT_DEPENDENCY",
+            "BLOCKED_BY_REPLAY_PAPER_EVIDENCE_DEPENDENCY",
+            "BLOCKED_BY_AUTHORITY_BOUNDARY",
+            "BLOCKED_BY_QUANTUM_BACKEND_EXECUTION_BOUNDARY",
+            "NOT_MATERIALIZED_BY_PR141"
+          ]
+        },
+        "materialization_permitted_now": {
+          "const": false
+        },
+        "order_authority_created_by_pr141": {
+          "const": false
+        },
+        "owner_approval_granted_by_pr141": {
+          "const": false
+        },
+        "owner_authorization_readiness_state": {
+          "enum": [
+            "EXISTING_ROW_ID_ONLY_NO_AUTHORIZATION_NEEDED",
+            "ELIGIBLE_TO_REQUEST_OWNER_AUTHORIZATION_METADATA_ONLY",
+            "OWNER_AUTHORIZATION_REQUIRED_BEFORE_MATERIALIZATION",
+            "BLOCKED_UNTIL_ACCEPTED_SOURCE_EVIDENCE",
+            "BLOCKED_UNTIL_RUNTIME_RECEIPT",
+            "BLOCKED_UNTIL_REPLAY_PAPER_EVIDENCE",
+            "BLOCKED_UNTIL_OWNER_SCOPE_DECISION",
+            "FORCED_FALSE_AUTHORITY_BOUNDARY",
+            "QUANTUM_METADATA_ONLY_NOT_BACKEND_AUTHORIZED"
+          ]
+        },
+        "owner_authorization_required_before_materialization": {
+          "type": "boolean"
+        },
+        "planned_enrichment_locus": {
+          "items": {
+            "enum": [
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl"
+            ]
+          },
+          "type": "array"
+        },
+        "planned_row_family_source_paths": {
+          "items": {
+            "enum": [
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl",
+              "docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl"
+            ]
+          },
+          "type": "array"
+        },
+        "pr138_required_flag": {
+          "const": true
+        },
+        "pr140_coverage_status": {
+          "enum": [
+            "PRESENT_EXISTING_ID_ONLY",
+            "PLANNED_NOT_MATERIALIZED",
+            "BLOCKED_UNTIL_FUTURE_AUTHORIZED_PR"
+          ]
+        },
+        "pr140_dependency_class": {
+          "enum": [
+            "EXISTING_ROW_ID_ONLY",
+            "STATIC_INTERNAL_POLICY",
+            "STATIC_ENUM_OR_TAXONOMY",
+            "SOURCE_EVIDENCE_PACKET_REQUIRED",
+            "FUTURE_RUNTIME_RECEIPT_REQUIRED",
+            "FUTURE_REPLAY_PAPER_EVIDENCE_REQUIRED",
+            "OWNER_AUTHORIZATION_REQUIRED",
+            "QUANTUM_METADATA_ONLY",
+            "AUTHORITY_FLAG_FORCED_FALSE"
+          ]
+        },
+        "pr140_future_pr_dependency_class": {
+          "enum": [
+            "PR141_OR_PR142_OWNER_AUTHORIZATION_DEPENDENT",
+            "ACCEPTED_SOURCE_PACKET_DEPENDENT",
+            "RUNTIME_RECEIPT_DEPENDENT",
+            "REPLAY_PAPER_EVIDENCE_DEPENDENT",
+            "STATIC_POLICY_ONLY",
+            "QUANTUM_METADATA_STATIC_ONLY"
+          ]
+        },
+        "profit_evidence_created_by_pr141": {
+          "const": false
+        },
+        "quantum_backend_execution_allowed": {
+          "const": false
+        },
+        "quantum_metadata_only": {
+          "type": "boolean"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "reason_code": {
+          "enum": [
+            "PR141_BLOCKED_UNTIL_ACCEPTED_SOURCE_EVIDENCE",
+            "PR141_BLOCKED_UNTIL_REPLAY_PAPER_EVIDENCE",
+            "PR141_BLOCKED_UNTIL_RUNTIME_RECEIPT",
+            "PR141_FORCED_FALSE_AUTHORITY_BOUNDARY",
+            "PR141_OWNER_SCOPE_DECISION_REQUIRED",
+            "PR141_QUANTUM_BACKEND_EXECUTION_BOUNDARY_FORCED_FALSE",
+            "PR141_QUANTUM_METADATA_ONLY_NO_BACKEND",
+            "PR141_ROW_ID_ALREADY_SUPPORTED",
+            "PR141_STATIC_POLICY_METADATA_ELIGIBLE",
+            "PR141_STATIC_TAXONOMY_METADATA_ELIGIBLE"
+          ]
+        },
+        "replay_paper_evidence_required_before_materialization": {
+          "type": "boolean"
+        },
+        "row_family_source_mutation_allowed_by_pr141": {
+          "const": false
+        },
+        "runtime_receipt_required_before_materialization": {
+          "type": "boolean"
+        },
+        "semantic_value_materialized_by_pr141": {
+          "const": false
+        },
+        "source_acceptance_created_by_pr141": {
+          "const": false
+        },
+        "source_evidence_required_before_materialization": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field_id",
+        "field_group_id",
+        "pr138_required_flag",
+        "pr140_coverage_status",
+        "pr140_dependency_class",
+        "pr140_future_pr_dependency_class",
+        "owner_authorization_readiness_state",
+        "materialization_eligibility_state",
+        "downstream_dependency_class",
+        "planned_enrichment_locus",
+        "planned_row_family_source_paths",
+        "eligibility_to_request_owner_authorization",
+        "owner_approval_granted_by_pr141",
+        "materialization_permitted_now",
+        "owner_authorization_required_before_materialization",
+        "source_evidence_required_before_materialization",
+        "accepted_source_packet_required_before_materialization",
+        "runtime_receipt_required_before_materialization",
+        "replay_paper_evidence_required_before_materialization",
+        "forced_false_no_authority_boundary",
+        "quantum_metadata_only",
+        "quantum_backend_execution_allowed",
+        "semantic_value_materialized_by_pr141",
+        "bundle_mutation_allowed_by_pr141",
+        "row_family_source_mutation_allowed_by_pr141",
+        "source_acceptance_created_by_pr141",
+        "connector_binding_created_by_pr141",
+        "live_use_allowed_by_pr141",
+        "order_authority_created_by_pr141",
+        "profit_evidence_created_by_pr141",
+        "final_readiness_created_by_pr141",
+        "future_pr142_input_created",
+        "reason_code",
+        "rationale"
+      ],
+      "type": "object"
+    },
+    "field_group_authorization_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "eligible_for_future_materialization_count": {
+          "type": "integer"
+        },
+        "field_authorization_count": {
+          "type": "integer"
+        },
+        "field_group_id": {
+          "enum": [
+            "IDENTITY",
+            "PARAMETER_ALGORITHM_CLASSIFICATION",
+            "AGENT_CONSUMER_BINDING",
+            "MARKET_VENUE_SCOPE",
+            "TRADING_OBJECTIVE_SUPPORT",
+            "REPLAY_PAPER_LIVE_BOUNDARY",
+            "QUANTUM_COMPATIBILITY",
+            "SOURCE_PROVENANCE_BOUNDARY"
+          ]
+        },
+        "forced_false_boundary_count": {
+          "type": "integer"
+        },
+        "group_downstream_dependency_class": {
+          "enum": [
+            "PR142_CONSUMABLE_STATIC_AUTHORIZATION_INPUT",
+            "ACCEPTED_SOURCE_PACKET_DEPENDENT",
+            "RUNTIME_RECEIPT_DEPENDENT",
+            "REPLAY_PAPER_EVIDENCE_DEPENDENT",
+            "OWNER_SCOPE_DECISION_DEPENDENT",
+            "STATIC_POLICY_ONLY",
+            "QUANTUM_METADATA_STATIC_ONLY",
+            "AUTHORITY_BOUNDARY_FORCED_FALSE",
+            "EXISTING_ROW_ID_ONLY"
+          ]
+        },
+        "no_authority_created": {
+          "const": true
+        },
+        "quantum_metadata_only_count": {
+          "type": "integer"
+        },
+        "replay_paper_blocked_count": {
+          "type": "integer"
+        },
+        "required_field_count": {
+          "type": "integer"
+        },
+        "required_field_ids": {
+          "items": {
+            "enum": [
+              "row_id",
+              "row_family",
+              "row_type",
+              "lifecycle_state",
+              "version_state",
+              "deprecation_state",
+              "parameter_family",
+              "algorithm_family",
+              "strategy_family",
+              "signal_family",
+              "scoring_family",
+              "normalization_family",
+              "risk_family",
+              "execution_family",
+              "capital_family",
+              "latency_family",
+              "error_guard_family",
+              "quantum_family",
+              "agent_role",
+              "consumer_class",
+              "allowed_consumers",
+              "blocked_consumers",
+              "command_matrix_binding",
+              "market_scope",
+              "venue_scope",
+              "prediction_market_scope",
+              "prediction_markets_general_compatibility",
+              "kalshi_compatibility",
+              "polymarket_compatibility",
+              "forecastex_ibkr_compatibility",
+              "expected_net_profit_objective_family",
+              "execution_cost_model_family",
+              "latency_sensitivity_class",
+              "capital_intensity_class",
+              "risk_mode",
+              "drawdown_control_family",
+              "exposure_limit_family",
+              "liquidity_context_family",
+              "replay_required_flag",
+              "paper_required_flag",
+              "owner_review_required_flag",
+              "live_use_allowed_flag",
+              "order_authority_created_flag",
+              "profit_evidence_created_flag",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag",
+              "quantum_backend_execution_allowed_flag",
+              "source_evidence_required_flag",
+              "accepted_source_packet_required_flag",
+              "research_input_only_flag",
+              "external_fact_authority_flag"
+            ]
+          },
+          "type": "array"
+        },
+        "runtime_receipt_blocked_count": {
+          "type": "integer"
+        },
+        "semantic_values_materialized": {
+          "const": false
+        },
+        "source_evidence_blocked_count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "field_group_id",
+        "required_field_ids",
+        "required_field_count",
+        "field_authorization_count",
+        "eligible_for_future_materialization_count",
+        "source_evidence_blocked_count",
+        "runtime_receipt_blocked_count",
+        "replay_paper_blocked_count",
+        "forced_false_boundary_count",
+        "quantum_metadata_only_count",
+        "no_authority_created",
+        "semantic_values_materialized",
+        "group_downstream_dependency_class"
+      ],
+      "type": "object"
+    },
+    "latency_hot_path_authorization_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "atomicrows_materialization_in_hot_path_allowed": {
+          "const": false
+        },
+        "connector_binding_in_hot_path_allowed": {
+          "const": false
+        },
+        "dashboard_rendering_in_hot_path_allowed": {
+          "const": false
+        },
+        "file_system_document_fetch_in_hot_path_allowed": {
+          "const": false
+        },
+        "future_live_path_consumption_mode": {
+          "const": "PRECOMPUTED_SNAPSHOT_ONLY_AFTER_FUTURE_AUTHORIZED_PR"
+        },
+        "llm_calls_in_hot_path_allowed": {
+          "const": false
+        },
+        "network_io_in_hot_path_allowed": {
+          "const": false
+        },
+        "paper_execution_in_hot_path_allowed": {
+          "const": false
+        },
+        "private_state_fetch_in_hot_path_allowed": {
+          "const": false
+        },
+        "quantum_backend_calls_in_hot_path_allowed": {
+          "const": false
+        },
+        "quantum_simulator_calls_in_hot_path_allowed": {
+          "const": false
+        },
+        "replay_execution_in_hot_path_allowed": {
+          "const": false
+        },
+        "runtime_resolver_snapshot_creation_in_hot_path_allowed": {
+          "const": false
+        },
+        "source_acceptance_in_hot_path_allowed": {
+          "const": false
+        },
+        "source_retrieval_in_hot_path_allowed": {
+          "const": false
+        },
+        "telegram_calls_in_hot_path_allowed": {
+          "const": false
+        },
+        "unbounded_search_in_hot_path_allowed": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_retrieval_in_hot_path_allowed",
+        "source_acceptance_in_hot_path_allowed",
+        "connector_binding_in_hot_path_allowed",
+        "runtime_resolver_snapshot_creation_in_hot_path_allowed",
+        "private_state_fetch_in_hot_path_allowed",
+        "dashboard_rendering_in_hot_path_allowed",
+        "telegram_calls_in_hot_path_allowed",
+        "llm_calls_in_hot_path_allowed",
+        "replay_execution_in_hot_path_allowed",
+        "paper_execution_in_hot_path_allowed",
+        "quantum_backend_calls_in_hot_path_allowed",
+        "quantum_simulator_calls_in_hot_path_allowed",
+        "atomicrows_materialization_in_hot_path_allowed",
+        "network_io_in_hot_path_allowed",
+        "file_system_document_fetch_in_hot_path_allowed",
+        "unbounded_search_in_hot_path_allowed",
+        "future_live_path_consumption_mode"
+      ],
+      "type": "object"
+    },
+    "market_scope_authorization_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "connector_binding_created": {
+          "const": false
+        },
+        "external_fact_authority_created": {
+          "const": false
+        },
+        "field_ids_relevant_to_scope": {
+          "items": {
+            "enum": [
+              "row_id",
+              "row_family",
+              "row_type",
+              "lifecycle_state",
+              "version_state",
+              "deprecation_state",
+              "parameter_family",
+              "algorithm_family",
+              "strategy_family",
+              "signal_family",
+              "scoring_family",
+              "normalization_family",
+              "risk_family",
+              "execution_family",
+              "capital_family",
+              "latency_family",
+              "error_guard_family",
+              "quantum_family",
+              "agent_role",
+              "consumer_class",
+              "allowed_consumers",
+              "blocked_consumers",
+              "command_matrix_binding",
+              "market_scope",
+              "venue_scope",
+              "prediction_market_scope",
+              "prediction_markets_general_compatibility",
+              "kalshi_compatibility",
+              "polymarket_compatibility",
+              "forecastex_ibkr_compatibility",
+              "expected_net_profit_objective_family",
+              "execution_cost_model_family",
+              "latency_sensitivity_class",
+              "capital_intensity_class",
+              "risk_mode",
+              "drawdown_control_family",
+              "exposure_limit_family",
+              "liquidity_context_family",
+              "replay_required_flag",
+              "paper_required_flag",
+              "owner_review_required_flag",
+              "live_use_allowed_flag",
+              "order_authority_created_flag",
+              "profit_evidence_created_flag",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag",
+              "quantum_backend_execution_allowed_flag",
+              "source_evidence_required_flag",
+              "accepted_source_packet_required_flag",
+              "research_input_only_flag",
+              "external_fact_authority_flag"
+            ]
+          },
+          "type": "array"
+        },
+        "future_pr142_input_created": {
+          "const": true
+        },
+        "future_source_packet_dependency_class": {
+          "const": "ACCEPTED_SOURCE_PACKET_DEPENDENT"
+        },
+        "live_use_allowed_created": {
+          "const": false
+        },
+        "owner_authorization_required_before_materialization": {
+          "const": true
+        },
+        "scope_id": {
+          "enum": [
+            "PREDICTION_MARKETS_GENERAL",
+            "KALSHI",
+            "POLYMARKET",
+            "FORECASTEX_IBKR"
+          ]
+        }
+      },
+      "required": [
+        "scope_id",
+        "field_ids_relevant_to_scope",
+        "owner_authorization_required_before_materialization",
+        "external_fact_authority_created",
+        "connector_binding_created",
+        "live_use_allowed_created",
+        "future_source_packet_dependency_class",
+        "future_pr142_input_created"
+      ],
+      "type": "object"
+    },
+    "owner_authorization_readiness_summary": {
+      "additionalProperties": false,
+      "properties": {
+        "eligible_to_request_owner_authorization_count": {
+          "type": "integer"
+        },
+        "existing_field_count": {
+          "type": "integer"
+        },
+        "forced_false_authority_boundary_count": {
+          "type": "integer"
+        },
+        "future_pr142_static_input_field_count": {
+          "type": "integer"
+        },
+        "materialization_permitted_now": {
+          "const": false
+        },
+        "owner_approval_granted_by_pr141": {
+          "const": false
+        },
+        "quantum_metadata_only_count": {
+          "type": "integer"
+        },
+        "replay_paper_evidence_blocked_count": {
+          "type": "integer"
+        },
+        "runtime_receipt_blocked_count": {
+          "type": "integer"
+        },
+        "source_evidence_blocked_count": {
+          "type": "integer"
+        },
+        "total_required_field_count": {
+          "const": 59
+        }
+      },
+      "required": [
+        "total_required_field_count",
+        "existing_field_count",
+        "eligible_to_request_owner_authorization_count",
+        "source_evidence_blocked_count",
+        "runtime_receipt_blocked_count",
+        "replay_paper_evidence_blocked_count",
+        "forced_false_authority_boundary_count",
+        "quantum_metadata_only_count",
+        "owner_approval_granted_by_pr141",
+        "materialization_permitted_now",
+        "future_pr142_static_input_field_count"
+      ],
+      "type": "object"
+    },
+    "quantum_forward_authorization_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "future_annealing_schedule_ref": {
+          "type": "string"
+        },
+        "future_backend_provider_class_ref": {
+          "type": "string"
+        },
+        "future_classical_comparator_ref": {
+          "type": "string"
+        },
+        "future_ising_model_ref": {
+          "type": "string"
+        },
+        "future_qaoa_depth_p_ref": {
+          "type": "string"
+        },
+        "future_qaoa_qubo_constraint_ref": {
+          "type": "string"
+        },
+        "future_qubo_penalty_scale_ref": {
+          "type": "string"
+        },
+        "future_seed_control_ref": {
+          "type": "string"
+        },
+        "future_shot_budget_ref": {
+          "type": "string"
+        },
+        "future_vqe_ansatz_ref": {
+          "type": "string"
+        },
+        "no_quantum_advantage_claim_flag": {
+          "const": true
+        },
+        "no_quantum_backend_execution_flag": {
+          "const": true
+        },
+        "no_quantum_execution_flag": {
+          "const": true
+        },
+        "no_quantum_optimizer_input_flag": {
+          "const": true
+        },
+        "no_quantum_optimizer_output_flag": {
+          "const": true
+        },
+        "no_quantum_signal_creation_flag": {
+          "const": true
+        },
+        "no_quantum_simulator_execution_flag": {
+          "const": true
+        },
+        "quantum_backend_execution_allowed_flag_forced_false": {
+          "const": true
+        },
+        "quantum_metadata_authorization_scope": {
+          "const": "STATIC_METADATA_ONLY"
+        }
+      },
+      "required": [
+        "quantum_metadata_authorization_scope",
+        "no_quantum_execution_flag",
+        "no_quantum_signal_creation_flag",
+        "no_quantum_optimizer_input_flag",
+        "no_quantum_optimizer_output_flag",
+        "no_quantum_backend_execution_flag",
+        "no_quantum_simulator_execution_flag",
+        "no_quantum_advantage_claim_flag",
+        "quantum_backend_execution_allowed_flag_forced_false",
+        "future_qaoa_depth_p_ref",
+        "future_qaoa_qubo_constraint_ref",
+        "future_qubo_penalty_scale_ref",
+        "future_ising_model_ref",
+        "future_vqe_ansatz_ref",
+        "future_annealing_schedule_ref",
+        "future_shot_budget_ref",
+        "future_seed_control_ref",
+        "future_backend_provider_class_ref",
+        "future_classical_comparator_ref"
+      ],
+      "type": "object"
+    },
+    "row_family_source_authorization_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "blocked_field_ids": {
+          "items": {
+            "enum": [
+              "row_id",
+              "row_family",
+              "row_type",
+              "lifecycle_state",
+              "version_state",
+              "deprecation_state",
+              "parameter_family",
+              "algorithm_family",
+              "strategy_family",
+              "signal_family",
+              "scoring_family",
+              "normalization_family",
+              "risk_family",
+              "execution_family",
+              "capital_family",
+              "latency_family",
+              "error_guard_family",
+              "quantum_family",
+              "agent_role",
+              "consumer_class",
+              "allowed_consumers",
+              "blocked_consumers",
+              "command_matrix_binding",
+              "market_scope",
+              "venue_scope",
+              "prediction_market_scope",
+              "prediction_markets_general_compatibility",
+              "kalshi_compatibility",
+              "polymarket_compatibility",
+              "forecastex_ibkr_compatibility",
+              "expected_net_profit_objective_family",
+              "execution_cost_model_family",
+              "latency_sensitivity_class",
+              "capital_intensity_class",
+              "risk_mode",
+              "drawdown_control_family",
+              "exposure_limit_family",
+              "liquidity_context_family",
+              "replay_required_flag",
+              "paper_required_flag",
+              "owner_review_required_flag",
+              "live_use_allowed_flag",
+              "order_authority_created_flag",
+              "profit_evidence_created_flag",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag",
+              "quantum_backend_execution_allowed_flag",
+              "source_evidence_required_flag",
+              "accepted_source_packet_required_flag",
+              "research_input_only_flag",
+              "external_fact_authority_flag"
+            ]
+          },
+          "type": "array"
+        },
+        "eligible_field_ids_for_future_materialization": {
+          "items": {
+            "enum": [
+              "row_id",
+              "row_family",
+              "row_type",
+              "lifecycle_state",
+              "version_state",
+              "deprecation_state",
+              "parameter_family",
+              "algorithm_family",
+              "strategy_family",
+              "signal_family",
+              "scoring_family",
+              "normalization_family",
+              "risk_family",
+              "execution_family",
+              "capital_family",
+              "latency_family",
+              "error_guard_family",
+              "quantum_family",
+              "agent_role",
+              "consumer_class",
+              "allowed_consumers",
+              "blocked_consumers",
+              "command_matrix_binding",
+              "market_scope",
+              "venue_scope",
+              "prediction_market_scope",
+              "prediction_markets_general_compatibility",
+              "kalshi_compatibility",
+              "polymarket_compatibility",
+              "forecastex_ibkr_compatibility",
+              "expected_net_profit_objective_family",
+              "execution_cost_model_family",
+              "latency_sensitivity_class",
+              "capital_intensity_class",
+              "risk_mode",
+              "drawdown_control_family",
+              "exposure_limit_family",
+              "liquidity_context_family",
+              "replay_required_flag",
+              "paper_required_flag",
+              "owner_review_required_flag",
+              "live_use_allowed_flag",
+              "order_authority_created_flag",
+              "profit_evidence_created_flag",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag",
+              "quantum_backend_execution_allowed_flag",
+              "source_evidence_required_flag",
+              "accepted_source_packet_required_flag",
+              "research_input_only_flag",
+              "external_fact_authority_flag"
+            ]
+          },
+          "type": "array"
+        },
+        "future_owner_authorization_required": {
+          "const": true
+        },
+        "future_pr142_input_created": {
+          "type": "boolean"
+        },
+        "mutation_allowed_by_pr141": {
+          "const": false
+        },
+        "planned_field_ids": {
+          "items": {
+            "enum": [
+              "row_id",
+              "row_family",
+              "row_type",
+              "lifecycle_state",
+              "version_state",
+              "deprecation_state",
+              "parameter_family",
+              "algorithm_family",
+              "strategy_family",
+              "signal_family",
+              "scoring_family",
+              "normalization_family",
+              "risk_family",
+              "execution_family",
+              "capital_family",
+              "latency_family",
+              "error_guard_family",
+              "quantum_family",
+              "agent_role",
+              "consumer_class",
+              "allowed_consumers",
+              "blocked_consumers",
+              "command_matrix_binding",
+              "market_scope",
+              "venue_scope",
+              "prediction_market_scope",
+              "prediction_markets_general_compatibility",
+              "kalshi_compatibility",
+              "polymarket_compatibility",
+              "forecastex_ibkr_compatibility",
+              "expected_net_profit_objective_family",
+              "execution_cost_model_family",
+              "latency_sensitivity_class",
+              "capital_intensity_class",
+              "risk_mode",
+              "drawdown_control_family",
+              "exposure_limit_family",
+              "liquidity_context_family",
+              "replay_required_flag",
+              "paper_required_flag",
+              "owner_review_required_flag",
+              "live_use_allowed_flag",
+              "order_authority_created_flag",
+              "profit_evidence_created_flag",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag",
+              "quantum_backend_execution_allowed_flag",
+              "source_evidence_required_flag",
+              "accepted_source_packet_required_flag",
+              "research_input_only_flag",
+              "external_fact_authority_flag"
+            ]
+          },
+          "type": "array"
+        },
+        "row_family_source_file_path": {
+          "enum": [
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/001_signal_features.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/002_scoring_ranking.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/003_normalization_calibration.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/004_risk_control.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/005_execution_connector_boundary.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/006_capital_sizing_cash.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/007_latency_routing.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/008_error_guard_fail_closed.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/009_lifecycle_agent_binding.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/010_source_evidence_connector_semantic.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/011_replay_paper_validation.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/012_quantum_advisory_optimization.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/013_quantum_qubo_ising_metadata.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/014_quantum_qaoa_vqe_annealing_metadata.source.jsonl",
+            "docs/master_plan/atomic_rows/pr98_row_family_sources/015_quantum_portfolio_hybrid_comparator.source.jsonl"
+          ]
+        },
+        "row_family_source_id": {
+          "type": "string"
+        },
+        "semantic_values_materialized_by_pr141": {
+          "const": false
+        }
+      },
+      "required": [
+        "row_family_source_file_path",
+        "row_family_source_id",
+        "planned_field_ids",
+        "eligible_field_ids_for_future_materialization",
+        "blocked_field_ids",
+        "mutation_allowed_by_pr141",
+        "semantic_values_materialized_by_pr141",
+        "future_owner_authorization_required",
+        "future_pr142_input_created"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "qtt-local-schemas-atomicrows-semantic-value-materialization-owner-authorization-gate-pr141",
+  "$schema": "json-schema-draft-2020-12",
+  "additionalProperties": false,
+  "description": "Static deterministic PR141 AtomicRows owner-authorization-readiness gate. It creates no row values, source acceptance, connector binding, replay, paper, live, order, profit, quantum execution, or final readiness authority.",
+  "properties": {
+    "agent_orchestration_authorization_summary": {
+      "items": {
+        "$ref": "#/$defs/agent_orchestration_authorization_entry"
+      },
+      "type": "array"
+    },
+    "authority_boundaries": {
+      "$ref": "#/$defs/authority_boundaries"
+    },
+    "authority_class": {
+      "const": "STATIC_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_OWNER_AUTHORIZATION_GATE_ONLY_NOT_VALUE_MATERIALIZATION_NOT_BUNDLE_MUTATION_NOT_FINAL_READINESS"
+    },
+    "control_plane_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "crosswalk_alias_resolution": {
+      "$ref": "#/$defs/crosswalk_alias_resolution"
+    },
+    "day1_launch_ready": {
+      "const": false
+    },
+    "deterministic_output": {
+      "const": true
+    },
+    "downstream_handoff_contract": {
+      "$ref": "#/$defs/downstream_handoff_contract"
+    },
+    "execution": {
+      "const": "DISABLED"
+    },
+    "existing_bundle_row_count": {
+      "const": 4183
+    },
+    "existing_supported_field_ids": {
+      "const": [
+        "row_id"
+      ]
+    },
+    "field_authorization_readiness_ledger": {
+      "items": {
+        "$ref": "#/$defs/field_authorization_readiness_entry"
+      },
+      "minItems": 59,
+      "type": "array"
+    },
+    "field_group_authorization_summary": {
+      "items": {
+        "$ref": "#/$defs/field_group_authorization_entry"
+      },
+      "minItems": 8,
+      "type": "array"
+    },
+    "final_ready": {
+      "const": false
+    },
+    "gate_id": {
+      "const": "QTT_PR141_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_OWNER_AUTHORIZATION_GATE"
+    },
+    "gate_version": {
+      "const": "v1"
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+    },
+    "latency_hot_path_authorization_boundary": {
+      "$ref": "#/$defs/latency_hot_path_authorization_boundary"
+    },
+    "market_scope_authorization_summary": {
+      "items": {
+        "$ref": "#/$defs/market_scope_authorization_entry"
+      },
+      "minItems": 4,
+      "type": "array"
+    },
+    "materialization_permission_created": {
+      "const": false
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED"
+    },
+    "owner_approval_receipt_created": {
+      "const": false
+    },
+    "owner_authorization_readiness_summary": {
+      "$ref": "#/$defs/owner_authorization_readiness_summary"
+    },
+    "pr136_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr137l_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr137r_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr138_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr139_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr140_coverage_plan_path": {
+      "const": "docs/master_plan/atomic_rows/AtomicRowsSemanticFieldCoverageEnrichmentPlan.yaml"
+    },
+    "pr140_coverage_report_path": {
+      "const": "docs/master_plan/generated/AtomicRowsSemanticFieldCoverageEnrichmentPlan.report.json"
+    },
+    "pr140_downstream_input_consumed": {
+      "const": true
+    },
+    "pr140_downstream_owner_authorization_required_for_materialization": {
+      "const": true
+    },
+    "pr140_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pr141_authorization_gate_path": {
+      "const": "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.yaml"
+    },
+    "pr_id": {
+      "const": "PR141"
+    },
+    "quantum_forward_authorization_boundary": {
+      "$ref": "#/$defs/quantum_forward_authorization_boundary"
+    },
+    "report_type": {
+      "const": "QTT_PR141_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_OWNER_AUTHORIZATION_GATE_REPORT"
+    },
+    "required_field_count": {
+      "const": 59
+    },
+    "required_field_group_count": {
+      "const": 8
+    },
+    "row_family_source_authorization_summary": {
+      "items": {
+        "$ref": "#/$defs/row_family_source_authorization_entry"
+      },
+      "minItems": 15,
+      "type": "array"
+    },
+    "row_family_source_file_count": {
+      "const": 15
+    },
+    "schema_path": {
+      "const": "schemas/atomicrows/atomicrows_semantic_value_materialization_owner_authorization_gate.schema.json"
+    },
+    "semantic_field_inventory_path": {
+      "const": "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json"
+    },
+    "semantic_values_materialized": {
+      "const": false
+    },
+    "source_manifest_entry_count": {
+      "const": 15
+    },
+    "validation_context_evidence_consumed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_marker": {
+      "const": "QTT_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_OWNER_AUTHORIZATION_GATE_OK"
+    }
+  },
+  "required": [
+    "report_type",
+    "gate_id",
+    "gate_version",
+    "pr_id",
+    "authority_class",
+    "deterministic_output",
+    "generated_at_utc",
+    "existing_bundle_row_count",
+    "row_family_source_file_count",
+    "source_manifest_entry_count",
+    "required_field_count",
+    "required_field_group_count",
+    "existing_supported_field_ids",
+    "pr140_downstream_input_consumed",
+    "pr140_downstream_owner_authorization_required_for_materialization",
+    "semantic_values_materialized",
+    "materialization_permission_created",
+    "owner_approval_receipt_created",
+    "final_ready",
+    "day1_launch_ready",
+    "validation_marker",
+    "semantic_field_inventory_path",
+    "pr140_coverage_plan_path",
+    "pr140_coverage_report_path",
+    "pr141_authorization_gate_path",
+    "schema_path",
+    "control_plane_evidence_consumed",
+    "pr136_evidence_consumed",
+    "pr137l_evidence_consumed",
+    "pr137r_evidence_consumed",
+    "pr138_evidence_consumed",
+    "pr139_evidence_consumed",
+    "pr140_evidence_consumed",
+    "validation_context_evidence_consumed",
+    "crosswalk_alias_resolution",
+    "authority_boundaries",
+    "owner_authorization_readiness_summary",
+    "field_authorization_readiness_ledger",
+    "field_group_authorization_summary",
+    "row_family_source_authorization_summary",
+    "market_scope_authorization_summary",
+    "agent_orchestration_authorization_summary",
+    "quantum_forward_authorization_boundary",
+    "latency_hot_path_authorization_boundary",
+    "downstream_handoff_contract"
+  ],
+  "title": "PR141 AtomicRows Semantic Value Materialization Owner Authorization Gate",
+  "type": "object"
+}
