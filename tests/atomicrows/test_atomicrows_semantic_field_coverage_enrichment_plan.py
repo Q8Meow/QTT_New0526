@@ -12,6 +12,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
     constants as c,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (
+    _is_ignored_pr140_changed_path,
     build_json_schema,
     build_plan,
     build_report,
@@ -292,6 +293,10 @@ def test_changed_path_guard_allows_only_narrow_repair_paths() -> None:
     allowed_pr139_ordering_repair = (
         "tests/atomicrows/test_atomicrows_row_family_source_manifest_currentization.py"
     )
+    allowed_linux_determinism_repairs = {
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/validator.py",
+        "tools/build_master_plan_section_coverage_report.py",
+    }
     forbidden_pr138_artifacts = {
         "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json",
         "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.index.json",
@@ -310,8 +315,22 @@ def test_changed_path_guard_allows_only_narrow_repair_paths() -> None:
 
     assert allowed_pr138_repairs.issubset(c.ALLOWED_PR140_CHANGED_PATHS)
     assert allowed_pr139_ordering_repair in c.ALLOWED_PR140_CHANGED_PATHS
+    assert allowed_linux_determinism_repairs.issubset(c.ALLOWED_PR140_CHANGED_PATHS)
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(forbidden_pr138_artifacts)
     assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(forbidden_broad_test_paths)
+    assert c.IGNORED_PR140_CHANGED_PATH_PATTERNS == (".tmp/", ".tmp/**")
+    assert c.ALLOWED_PR140_CHANGED_PATHS.isdisjoint(c.IGNORED_PR140_CHANGED_PATH_PATTERNS)
+
+
+def test_changed_path_guard_ignores_only_runtime_tmp_directory() -> None:
+    assert _is_ignored_pr140_changed_path(".tmp/")
+    assert _is_ignored_pr140_changed_path(".tmp/pr133_deterministic_report_test")
+    assert _is_ignored_pr140_changed_path(".tmp/nested/output.json")
+    assert not _is_ignored_pr140_changed_path(".tmpfile")
+    assert not _is_ignored_pr140_changed_path("tmp/")
+    assert not _is_ignored_pr140_changed_path(
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json"
+    )
 
 
 def test_pr136_crosswalk_alias_resolution_and_evidence_consumption_are_recorded() -> None:

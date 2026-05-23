@@ -107,6 +107,10 @@ def _dump_json(value: Mapping[str, Any]) -> str:
     return json.dumps(value, indent=2, sort_keys=True) + "\n"
 
 
+def _stable_report_path(path: Path | str) -> str:
+    return str(path).replace("/", "\\")
+
+
 def _jsonable(value: Any) -> Any:
     return json.loads(json.dumps(value, sort_keys=True))
 
@@ -741,7 +745,9 @@ def _main_report(artifacts: Mapping[str, Any]) -> dict[str, object]:
         "repo_pr_label": "PR133",
         "report_id": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_MAIN_REPORT_V1",
         "roadmap_pr_implemented": "PR115",
-        "schema_paths": [str(SCHEMA_DIR / filename) for filename in SCHEMA_FILES],
+        "schema_paths": [
+            _stable_report_path(SCHEMA_DIR / filename) for filename in SCHEMA_FILES
+        ],
         "shared_scope_count": 1,
         "snapshot_builder_binding_count": len(artifacts["snapshot_builder_bindings"]),
         "snapshot_builder_binding_count_by_scope": {

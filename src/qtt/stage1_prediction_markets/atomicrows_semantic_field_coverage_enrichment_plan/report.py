@@ -1515,6 +1515,12 @@ def _changed_paths(repo_root: Path) -> list[str]:
     return paths
 
 
+def _is_ignored_pr140_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    tmp_dir, _tmp_glob = c.IGNORED_PR140_CHANGED_PATH_PATTERNS
+    return normalized == tmp_dir or normalized.startswith(tmp_dir)
+
+
 def _validate_changed_paths(repo_root: Path) -> list[str]:
     failures: list[str] = []
     for path in _changed_paths(repo_root):
@@ -1522,6 +1528,8 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
             failures.append("PR140_GIT_STATUS_UNAVAILABLE")
             continue
         normalized = path.replace("\\", "/")
+        if _is_ignored_pr140_changed_path(normalized):
+            continue
         if normalized.endswith("/") and any(
             allowed.startswith(normalized) for allowed in c.ALLOWED_PR140_CHANGED_PATHS
         ):

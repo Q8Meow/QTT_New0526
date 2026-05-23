@@ -297,6 +297,8 @@ ALLOWED_PR140_CHANGED_PATHS = {
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/constants.py",
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/report.py",
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/validator.py",
+    "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/validator.py",
+    "tools/build_master_plan_section_coverage_report.py",
     "tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py",
     "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
     "tests/atomicrows/test_pr138_atomicrows_semantic_row_contract.py",
@@ -304,6 +306,11 @@ ALLOWED_PR140_CHANGED_PATHS = {
     "tools/run_validation_gates.py",
     "tests/fail_closed/test_run_validation_gates.py",
 }
+
+IGNORED_PR140_CHANGED_PATH_PATTERNS = (
+    ".tmp/",
+    ".tmp/**",
+)
 
 FORBIDDEN_BUNDLE_SIDECAR_FRAGMENTS = (
     "AtomicRows.bundle.sha",
