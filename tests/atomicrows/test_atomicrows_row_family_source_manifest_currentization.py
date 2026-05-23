@@ -10,6 +10,7 @@ import tempfile
 import pytest
 
 from tools import validate_atomicrows_row_family_source_manifest_currentization as validator
+from tools import run_validation_gates as runner
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -441,10 +442,21 @@ def test_authority_claim_flags_true_fail(field: str, expected: str) -> None:
 
 
 def test_run_validation_gates_invokes_pr139_after_pr138_gate() -> None:
-    text = (ROOT / "tools" / "run_validation_gates.py").read_text(encoding="utf-8")
-    pr138_index = text.index("stage1_atomicrows_semantic_row_contract_gate.py")
-    pr139_index = text.index(
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+    pr138_index = next(
+        index
+        for index, command in enumerate(commands)
+        if command[1] == "-c"
+        and command[2] == runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
+    )
+    pr139_index = command_names.index(
         "validate_atomicrows_row_family_source_manifest_currentization.py"
     )
-    pytest_index = text.index("run_pytest_fresh_basetemp.py", pr139_index)
-    assert pr138_index < pr139_index < pytest_index
+    pr140_index = command_names.index(
+        "validate_atomicrows_semantic_field_coverage_enrichment_plan.py"
+    )
+    pytest_index = command_names.index(runner.PYTEST_FRESH_BASETEMP_SCRIPT)
+
+    assert pr138_index < pr139_index < pr140_index < pytest_index
+    assert "stage1_atomicrows_semantic_row_contract_gate.py" not in command_names

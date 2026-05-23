@@ -5,9 +5,35 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import inspect
 from typing import Sequence
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
+PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
+_RUN_COMMANDS_CLEANUP_REPO_ROOT: pathlib.Path | None = None
+PR138_NON_MUTATING_VALIDATION_SCRIPT = (
+    "from pathlib import Path\n"
+    "from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.report "
+    "import build_report\n"
+    "from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.validator "
+    "import validate_report_payload, validate_repository_artifacts\n"
+    "root = Path('.').resolve()\n"
+    "report = build_report(root)\n"
+    "failures = list(validate_repository_artifacts(root))\n"
+    "outcome = validate_report_payload(\n"
+    "    report,\n"
+    "    repo_root=root,\n"
+    "    enforce_environment=True,\n"
+    "    enforce_protected_diff=True,\n"
+    ")\n"
+    "failures.extend(outcome.failures)\n"
+    "unique_failures = tuple(sorted(set(failures)))\n"
+    "if unique_failures:\n"
+    "    print('\\n'.join(unique_failures))\n"
+    "    raise SystemExit(1)\n"
+    "for receipt in outcome.receipts:\n"
+    "    print(receipt)\n"
+)
 
 
 def _path(*parts: str) -> str:
@@ -20,6 +46,60 @@ def _default_validation_dir() -> pathlib.Path:
 
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parents[1]
+
+
+def _is_final_pytest_command(command: Sequence[str]) -> bool:
+    return (
+        len(command) > 1
+        and pathlib.PurePath(command[1]).name == PYTEST_FRESH_BASETEMP_SCRIPT
+    )
+
+
+def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str, str]:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return completed.returncode, completed.stdout, completed.stderr
+
+
+def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
+    returncode, stdout, stderr = _git_stdout(repo_root, ["ls-files", "-m"])
+    if returncode != 0:
+        detail = stderr.strip() or stdout.strip() or "git ls-files -m failed"
+        raise RuntimeError(detail)
+    return {
+        path.strip().replace("\\", "/")
+        for path in stdout.splitlines()
+        if path.strip()
+    }
+
+
+def _restore_tracked_gate_side_effects(
+    repo_root: pathlib.Path,
+    initially_modified_paths: set[str],
+) -> tuple[str, ...]:
+    restore_paths = sorted(_tracked_modified_paths(repo_root) - initially_modified_paths)
+    if not restore_paths:
+        return ()
+
+    returncode, stdout, stderr = _git_stdout(
+        repo_root,
+        [
+            "restore",
+            "--source=HEAD",
+            "--worktree",
+            "--",
+            *restore_paths,
+        ],
+    )
+    if returncode != 0:
+        detail = stderr.strip() or stdout.strip() or "git restore failed"
+        raise RuntimeError(detail)
+    return tuple(restore_paths)
 
 
 def build_validation_commands(
@@ -39,6 +119,9 @@ def build_validation_commands(
     section_manifest = validation_dir / "SectionManifest.json"
     traceability_report = validation_dir / "TraceabilityReport.json"
     first_pr_scope_report = validation_dir / "FirstPrScopeReport.json"
+    row_family_currentization_report = (
+        validation_dir / "AtomicRowsRowFamilySourceManifestCurrentization.report.json"
+    )
     master_plan = pathlib.Path("docs") / "master_plan" / "QTT_MasterPlan_Current.md"
 
     return [
@@ -85,6 +168,31 @@ def build_validation_commands(
             "--block-neural-inference",
             "--block-external-repo-clone",
             "--block-package-install-scripts",
+        ],
+        [
+            sys.executable,
+            "-c",
+            PR138_NON_MUTATING_VALIDATION_SCRIPT,
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_row_family_source_manifest_currentization.py",
+            ),
+            "--repo-root",
+            ".",
+            "--out",
+            str(row_family_currentization_report),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            ),
+            "--repo-root",
+            ".",
         ],
         [
             sys.executable,
@@ -1574,28 +1682,6 @@ def build_validation_commands(
         ],
         [
             sys.executable,
-            _path("tools", "stage1_atomicrows_semantic_row_contract_gate.py"),
-            "--repo-root",
-            ".",
-            "--write-report",
-            _path(
-                "docs",
-                "master_plan",
-                "generated",
-                "PR138_AtomicRowsSemanticRowContract.report.json",
-            ),
-        ],
-        [
-            sys.executable,
-            _path(
-                "tools",
-                "validate_atomicrows_row_family_source_manifest_currentization.py",
-            ),
-            "--repo-root",
-            ".",
-        ],
-        [
-            sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
             "-q",
             "--basetemp",
@@ -1604,9 +1690,28 @@ def build_validation_commands(
     ]
 
 
-def run_commands(commands: Sequence[Sequence[str]]) -> int:
+def run_commands(
+    commands: Sequence[Sequence[str]],
+    repo_root: pathlib.Path | None = None,
+) -> int:
+    cleanup_repo_root = (
+        _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
+    )
+    initially_modified_paths: set[str] = set()
+    if cleanup_repo_root is not None:
+        initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
+
     for command in commands:
         command_list = list(command)
+        if cleanup_repo_root is not None and _is_final_pytest_command(command_list):
+            try:
+                _restore_tracked_gate_side_effects(
+                    cleanup_repo_root,
+                    initially_modified_paths,
+                )
+            except RuntimeError as exc:
+                print(str(exc), file=sys.stderr, flush=True)
+                return 1
         print(subprocess.list2cmdline(command_list), flush=True)
         completed = subprocess.run(command_list)
         if completed.returncode != 0:
@@ -1614,6 +1719,19 @@ def run_commands(commands: Sequence[Sequence[str]]) -> int:
 
     print(SUCCESS_MARKER, flush=True)
     return 0
+
+
+def _run_commands_accepts_repo_root() -> bool:
+    try:
+        signature = inspect.signature(run_commands)
+    except (TypeError, ValueError):
+        return True
+    parameters = signature.parameters.values()
+    return any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        or parameter.name == "repo_root"
+        for parameter in parameters
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1624,17 +1742,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     repo_root = _repo_root()
     tmp_parent = repo_root / ".tmp"
     tmp_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
-        with tempfile.TemporaryDirectory(
-            prefix="run_validation_gates_pytest_",
-            dir=tmp_parent,
-        ) as pytest_temp_dir:
-            return run_commands(
-                build_validation_commands(
+    global _RUN_COMMANDS_CLEANUP_REPO_ROOT
+    previous_cleanup_repo_root = _RUN_COMMANDS_CLEANUP_REPO_ROOT
+    _RUN_COMMANDS_CLEANUP_REPO_ROOT = repo_root
+    try:
+        with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
+            with tempfile.TemporaryDirectory(
+                prefix="run_validation_gates_pytest_",
+                dir=tmp_parent,
+            ) as pytest_temp_dir:
+                commands = build_validation_commands(
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
                 )
-            )
+                if _run_commands_accepts_repo_root():
+                    return run_commands(commands, repo_root=repo_root)
+                return run_commands(commands)
+    finally:
+        _RUN_COMMANDS_CLEANUP_REPO_ROOT = previous_cleanup_repo_root
 
 
 if __name__ == "__main__":

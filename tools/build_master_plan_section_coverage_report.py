@@ -628,8 +628,17 @@ def load_yaml_subset(path: pathlib.Path) -> dict[str, Any]:
     return value
 
 
+def _stable_posix_path(path: str | pathlib.Path) -> str:
+    return str(path).replace("\\", "/")
+
+
 def _as_posix(path: str | pathlib.Path) -> str:
-    return pathlib.Path(path).as_posix()
+    return _stable_posix_path(path)
+
+
+def _canonical_report_file_size_bytes(text: str) -> int:
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    return len(normalized.replace("\n", "\r\n").encode("utf-8"))
 
 
 def _list_value(value: Any) -> list[Any]:
@@ -2662,7 +2671,7 @@ def build_report(
     manifest = build_section_manifest(
         _as_posix(master_plan),
         text,
-        file_size_bytes=master_plan_path.stat().st_size,
+        file_size_bytes=_canonical_report_file_size_bytes(text),
     )
     registry = load_registry(registry_full_path)
     entries = sorted(registry["entries"], key=lambda entry: entry["capability_id"])
