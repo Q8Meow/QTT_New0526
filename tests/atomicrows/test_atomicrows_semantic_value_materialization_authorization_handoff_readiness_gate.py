@@ -23,6 +23,10 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
     validate_repository_artifacts,
 )
 from tools import run_validation_gates as runner
+from tools import (
+    validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate
+    as pr142_cli,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -61,6 +65,33 @@ def _payload_failures(mutator) -> set[str]:
     payload = _report()
     mutator(payload)
     return set(validate_payload(payload, _schema()))
+
+
+def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
+    report_path = REPO_ROOT / c.REPORT_PATH
+    before = report_path.read_bytes()
+
+    assert pr142_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+
+    assert report_path.read_bytes() == before
+    assert c.SUCCESS_MARKER in capsys.readouterr().out
+
+
+def test_cli_write_artifacts_mode_is_explicit_opt_in(monkeypatch, capsys) -> None:
+    calls: list[Path] = []
+    repo_root = REPO_ROOT / ".tmp" / "pr142_write_artifacts_opt_in_unit"
+
+    def fake_write_all_artifacts(repo_root: Path) -> dict:
+        calls.append(repo_root)
+        return {}
+
+    monkeypatch.setattr(pr142_cli, "write_all_artifacts", fake_write_all_artifacts)
+    monkeypatch.setattr(pr142_cli, "validate_repository_artifacts", lambda repo_root: [])
+
+    assert pr142_cli.main(["--repo-root", str(repo_root), "--write-artifacts"]) == 0
+
+    assert calls == [repo_root.resolve()]
+    assert c.SUCCESS_MARKER in capsys.readouterr().out
 
 
 def _walk_strings(value):
@@ -378,9 +409,25 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
 def test_validation_gate_sequence_includes_pr142_after_pr141(monkeypatch) -> None:
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
-    command_names = [Path(command[1]).name for command in runner.build_validation_commands()]
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
     assert command_names.index(
         "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"
     ) < command_names.index(
         "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
     ) < command_names.index("validate_qtt_owner_global_override_authority.py")
+    pr142_command = commands[
+        command_names.index(
+            "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+        )
+    ]
+    assert pr142_command == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-artifacts" not in pr142_command

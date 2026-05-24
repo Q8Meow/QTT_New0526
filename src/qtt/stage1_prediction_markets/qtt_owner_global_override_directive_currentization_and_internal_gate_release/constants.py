@@ -375,6 +375,10 @@ PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS = {
         "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
         "report.py"
     ),
+    (
+        "tools/"
+        "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+    ),
 }
 
 ALLOWED_PR143_CHANGED_PATHS = {

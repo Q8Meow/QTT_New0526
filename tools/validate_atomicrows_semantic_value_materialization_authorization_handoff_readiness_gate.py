@@ -17,7 +17,6 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.report import (  # noqa: E402
     validate_repository_artifacts,
     write_all_artifacts,
-    write_report_file,
 )
 
 
@@ -27,15 +26,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--write-artifacts",
         action="store_true",
-        help="Regenerate the deterministic PR142 schema, YAML gate, report, and fixture.",
+        help=(
+            "Opt-in regeneration of the deterministic PR142 schema, YAML gate, "
+            "tracked report, and fixture."
+        ),
     )
     args = parser.parse_args(argv)
 
     repo_root = args.repo_root.resolve()
     if args.write_artifacts:
         write_all_artifacts(repo_root)
-    else:
-        write_report_file(repo_root)
 
     failures = validate_repository_artifacts(repo_root)
     if failures:
