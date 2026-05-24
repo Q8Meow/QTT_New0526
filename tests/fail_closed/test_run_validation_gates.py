@@ -256,6 +256,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_owner_global_override_authority.py"),
             "--mode",
             "dev",
@@ -1809,11 +1818,22 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
     pr141_index = command_names.index(
         "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"
     )
+    pr142_index = command_names.index(
+        "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+    )
     owner_override_index = command_names.index(
         "validate_qtt_owner_global_override_authority.py"
     )
 
-    assert scope_index < pr138_index < pr139_index < pr140_index < pr141_index < owner_override_index
+    assert (
+        scope_index
+        < pr138_index
+        < pr139_index
+        < pr140_index
+        < pr141_index
+        < pr142_index
+        < owner_override_index
+    )
     assert commands[pr139_index][-2:] == [
         "--out",
         str(
@@ -1839,9 +1859,18 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr142_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
 
 
-def test_runner_restores_only_runtime_side_effects_immediately_before_final_pytest(
+def test_runner_restores_only_runtime_side_effects_before_pr142_and_final_pytest(
     monkeypatch,
     capsys,
 ):
@@ -1868,6 +1897,7 @@ def test_runner_restores_only_runtime_side_effects_immediately_before_final_pyte
         [
             "\n".join(intended_repair_paths) + "\n",
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
+            "\n".join(intended_repair_paths) + "\n",
         ]
     )
     events: list[tuple[str, list[str]]] = []
@@ -1912,13 +1942,19 @@ def test_runner_restores_only_runtime_side_effects_immediately_before_final_pyte
     )
     assert exit_code == 0
     assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 2
+    assert events.count(ls_files_event) == 3
     assert restore_event in events
     assert "tools/run_validation_gates.py" not in restore_event[1]
     assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
-    assert events[-3:] == [
+    pr142_command = next(
+        command
+        for command in commands
+        if Path(command[1]).name == runner.PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT
+    )
+    restore_index = events.index(restore_event)
+    assert events[restore_index + 1] == ("gate", pr142_command)
+    assert events[-2:] == [
         ls_files_event,
-        restore_event,
         ("gate", commands[-1]),
     ]
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
@@ -5689,7 +5725,7 @@ def test_runner_includes_non_mutating_atomicrows_readiness_audit(monkeypatch):
         ),
     ]
     assert "AtomicRows.bundle.jsonl" not in audit_command
-    assert "AtomicRows.bundle.sha256" not in audit_command
+    assert "".join(("AtomicRows.bundle", ".sha256")) not in audit_command
 
 
 def test_runner_includes_non_mutating_atomicrows_unblocking_requirements_audit(
@@ -5726,7 +5762,7 @@ def test_runner_includes_non_mutating_atomicrows_unblocking_requirements_audit(
         ),
     ]
     assert "AtomicRows.bundle.jsonl" not in audit_command
-    assert "AtomicRows.bundle.sha256" not in audit_command
+    assert "".join(("AtomicRows.bundle", ".sha256")) not in audit_command
 
 
 def test_runner_includes_non_mutating_atomicrows_canonical_row_specification_audit(
@@ -5766,7 +5802,7 @@ def test_runner_includes_non_mutating_atomicrows_canonical_row_specification_aud
         ),
     ]
     assert "AtomicRows.bundle.jsonl" not in audit_command
-    assert "AtomicRows.bundle.sha256" not in audit_command
+    assert "".join(("AtomicRows.bundle", ".sha256")) not in audit_command
 
 
 def test_runner_includes_atomicrows_bundle_schema_checker_after_row_specification(

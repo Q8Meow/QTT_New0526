@@ -305,6 +305,41 @@ PR141_DOWNSTREAM_AUTHORIZATION_GATE_CHANGED_PATHS = {
         "synthetic_atomicrows_semantic_value_materialization_owner_authorization_gate.v1.fixture.json"
     ),
 }
+PR142_DOWNSTREAM_HANDOFF_READINESS_GATE_CHANGED_PATHS = {
+    "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.yaml",
+    "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.report.json",
+    "schemas/atomicrows/atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.schema.json",
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/model.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/builder.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/validator.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/report.py"
+    ),
+    "tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    (
+        "tests/fixtures/atomicrows/"
+        "synthetic_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.v1.fixture.json"
+    ),
+}
 
 ALLOWED_PR140_CHANGED_PATHS = {
     PLAN_PATH.as_posix(),
