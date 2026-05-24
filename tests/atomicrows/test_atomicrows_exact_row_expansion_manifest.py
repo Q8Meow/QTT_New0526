@@ -286,8 +286,22 @@ def test_run_validation_gates_includes_manifest_after_bridge_and_before_c0(
             Path("tools")
             / "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py"
         ),
+        "--report-out",
+        str(
+            runner._validation_generated_output(
+                runner._default_validation_dir(),
+                "docs/master_plan/generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json",
+            )
+        ),
     ]
     assert commands[manifest_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_exact_row_expansion_manifest.py"),
+        "--report-out",
+        str(
+            runner._validation_generated_output(
+                runner._default_validation_dir(),
+                "docs/master_plan/generated/AtomicRowsExactRowExpansionManifest.report.json",
+            )
+        ),
     ]

@@ -1,5 +1,6 @@
 import json
 import shutil
+import tempfile
 from pathlib import Path
 
 from tools import (
@@ -160,6 +161,15 @@ from tools import (
 from tools import run_validation_gates as runner
 
 
+def _default_temp_generated_report(filename: str) -> str:
+    return str(
+        runner._validation_generated_output(
+            runner._default_validation_dir(),
+            f"docs/master_plan/generated/{filename}",
+        )
+    )
+
+
 def _expected_commands(
     python_executable: str,
     pytest_basetemp: Path | None = None,
@@ -175,7 +185,7 @@ def _expected_commands(
     )
     master_plan = Path("docs") / "master_plan" / "QTT_MasterPlan_Current.md"
 
-    return [
+    commands = [
         [
             python_executable,
             str(Path("tools") / "master_plan_ingest.py"),
@@ -1753,6 +1763,10 @@ def _expected_commands(
             str(pytest_basetemp),
         ],
     ]
+    return [
+        runner._route_command_generated_outputs_to_temp(command, validation_dir)
+        for command in commands
+    ]
 
 
 def _pytest_basetemp_from_commands(commands: list[list[str]]) -> Path:
@@ -1879,6 +1893,174 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
     ]
 
 
+def test_runner_routes_generated_report_outputs_to_validation_temp(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    validation_dir = Path("validation-dir")
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands(
+        validation_dir,
+        Path("pytest-basetemp"),
+    )
+
+    tracked_prefixes = (
+        "docs/master_plan/generated/",
+        "docs/roadmap/generated/",
+        "docs/master_plan/source_evidence/generated/",
+    )
+    for command in commands:
+        for token in command:
+            normalized = str(token).replace("\\", "/")
+            assert not normalized.startswith(tracked_prefixes)
+
+    command_by_name = {Path(command[1]).name: command for command in commands}
+    owner_override_command = command_by_name[
+        "validate_qtt_owner_global_override_authority.py"
+    ]
+    assert owner_override_command[-2:] == [
+        "--out",
+        str(
+            validation_dir
+            / "master_plan_generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        ),
+    ]
+    assert "--check-only" in command_by_name[
+        "validate_source_evidence_retrieval_executor.py"
+    ]
+    assert "--check-only" in command_by_name["validate_source_evidence_acceptance.py"]
+    assert "--check-only" in command_by_name[
+        "validate_source_revalidation_scheduler.py"
+    ]
+    assert "--check-only" in command_by_name[
+        "validate_connector_semantic_binding_implementation_gate.py"
+    ]
+    assert "--check-only" in command_by_name[
+        "runtime_cash_component_field_map_validate.py"
+    ]
+    assert "--check-only" in command_by_name[
+        "private_state_read_receipt_gate_validate.py"
+    ]
+    assert "--write-artifacts" not in command_by_name[
+        "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+    ]
+
+
+def test_runner_fails_if_routed_temp_generated_report_differs_from_tracked(
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int = 0, stdout: str = "", stderr: str = ""):
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    with tempfile.TemporaryDirectory(prefix="qtt_pr146_runner_test_") as temp_dir:
+        repo_root = Path(temp_dir)
+        tracked_report = (
+            repo_root
+            / "docs"
+            / "master_plan"
+            / "generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        )
+        temp_report = (
+            repo_root
+            / "validation"
+            / "master_plan_generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        )
+        tracked_report.parent.mkdir(parents=True)
+        temp_report.parent.mkdir(parents=True)
+        tracked_report.write_text('{"value": "tracked"}\n', encoding="utf-8")
+        temp_report.write_text('{"value": "expected"}\n', encoding="utf-8")
+
+        def fake_run(command: list[str], **kwargs) -> Completed:
+            return Completed()
+
+        monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+        exit_code = runner.run_commands(
+            [
+                [
+                    "python",
+                    str(
+                        Path("tools")
+                        / "validate_qtt_owner_global_override_authority.py"
+                    ),
+                    "--out",
+                    str(temp_report),
+                ]
+            ],
+            repo_root=repo_root,
+        )
+        tracked_text = tracked_report.read_text(encoding="utf-8")
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "TRACKED_GENERATED_REPORT_STALE" in captured.err
+    assert tracked_text == '{"value": "tracked"}\n'
+
+
+def test_runner_ignores_volatile_branch_context_when_comparing_temp_report(
+    monkeypatch,
+):
+    class Completed:
+        def __init__(self, returncode: int = 0, stdout: str = "", stderr: str = ""):
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    with tempfile.TemporaryDirectory(prefix="qtt_pr146_runner_test_") as temp_dir:
+        repo_root = Path(temp_dir)
+        tracked_report = (
+            repo_root
+            / "docs"
+            / "master_plan"
+            / "generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        )
+        temp_report = (
+            repo_root
+            / "validation"
+            / "master_plan_generated"
+            / "QTTOwnerGlobalOverrideAuthority.report.json"
+        )
+        tracked_report.parent.mkdir(parents=True)
+        temp_report.parent.mkdir(parents=True)
+        tracked_report.write_text(
+            '{"base_head": "old", "branch": "original", "value": "same"}\n',
+            encoding="utf-8",
+        )
+        temp_report.write_text(
+            '{"base_head": "new", "branch": "downstream", "value": "same"}\n',
+            encoding="utf-8",
+        )
+
+        def fake_run(command: list[str], **kwargs) -> Completed:
+            return Completed()
+
+        monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+        exit_code = runner.run_commands(
+            [
+                [
+                    "python",
+                    str(
+                        Path("tools")
+                        / "validate_qtt_owner_global_override_authority.py"
+                    ),
+                    "--out",
+                    str(temp_report),
+                ]
+            ],
+            repo_root=repo_root,
+        )
+
+    assert exit_code == 0
+
+
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
     monkeypatch,
     capsys,
@@ -1908,6 +2090,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join(intended_repair_paths) + "\n",
+            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
         ]
     )
     events: list[tuple[str, list[str]]] = []
@@ -1936,6 +2119,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         return Completed()
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runner,
+        "_routed_generated_output_currentness_failures",
+        lambda command, repo_root: [],
+    )
 
     exit_code = runner.run_commands(commands, repo_root=Path("repo-root"))
 
@@ -1952,9 +2140,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     )
     assert exit_code == 0
     assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 4
+    assert events.count(ls_files_event) == 5
     assert restore_event in events
-    assert events.count(restore_event) == 2
+    assert events.count(restore_event) == 3
     assert "tools/run_validation_gates.py" not in restore_event[1]
     assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
     pr142_command = next(
@@ -1973,9 +2161,10 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     ]
     assert events[restore_indices[0] + 1] == ("gate", pr142_command)
     assert events[restore_indices[1] + 1] == ("gate", pr143_command)
-    assert events[-2:] == [
-        ls_files_event,
+    assert events[-3:] == [
         ("gate", commands[-1]),
+        ls_files_event,
+        restore_event,
     ]
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
 
@@ -2002,6 +2191,8 @@ def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):
     assert commands[roster_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+        "--report-out",
+        _default_temp_generated_report("QttPrIdentityRoster.report.json"),
     ]
 
 
@@ -2022,6 +2213,7 @@ def test_runner_includes_pr130_private_state_receipt_gate_after_runtime_cash(mon
         str(Path("tools") / "private_state_read_receipt_gate_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]
 
 
@@ -2044,6 +2236,7 @@ def test_runner_includes_pr131_credential_readiness_gate_after_private_state(mon
         str(Path("tools") / "credential_alias_secret_no_capture_readiness_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]
 
 
@@ -2070,6 +2263,7 @@ def test_runner_includes_pr132_market_data_ingest_after_pr131_credential_readine
         str(Path("tools") / "venue_market_data_ingest_adapters_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]
 
 
@@ -2128,12 +2322,14 @@ def test_runner_includes_pr133_snapshot_builder_after_pr132_market_data_ingest(
         str(Path("tools") / "orderbook_event_state_snapshot_builder_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]
     assert commands[runtime_resolver_index] == [
         python_executable,
         str(Path("tools") / "runtime_resolver_snapshot_executor_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]
     assert commands[policy_drift_index] == [
         python_executable,
@@ -2696,12 +2892,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTOwnerGlobalOverrideAuthority.report.json"
-        ),
+        _default_temp_generated_report("QTTOwnerGlobalOverrideAuthority.report.json"),
     ]
     assert commands[owner_override_currentization_index] == [
         python_executable,
@@ -2720,12 +2911,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTAgentRoleOperatingCharterReport.json"
-        ),
+        _default_temp_generated_report("QTTAgentRoleOperatingCharterReport.json"),
     ]
     assert commands[algorithm_registry_index] == [
         python_executable,
@@ -2735,12 +2921,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTAlgorithmFormulaFamilyReport.json"
-        ),
+        _default_temp_generated_report("QTTAlgorithmFormulaFamilyReport.json"),
     ]
     assert commands[agent_algorithm_binding_index] == [
         python_executable,
@@ -2750,12 +2931,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTAgentAlgorithmBindingReport.json"
-        ),
+        _default_temp_generated_report("QTTAgentAlgorithmBindingReport.json"),
     ]
     assert commands[agent_algorithm_consumer_gate_index] == [
         python_executable,
@@ -2765,12 +2941,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTAgentAlgorithmConsumerGate.report.json"
-        ),
+        _default_temp_generated_report("QTTAgentAlgorithmConsumerGate.report.json"),
     ]
     assert commands[agent_algorithm_cumulative_readiness_index] == [
         python_executable,
@@ -2780,16 +2951,15 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
+        _default_temp_generated_report(
+            "QTTAgentAlgorithmCumulativeReadinessGate.report.json"
         ),
     ]
     assert commands[agent_algorithm_command_matrix_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_agent_algorithm_command_matrix.py"),
+        "--out",
+        _default_temp_generated_report("QTTAgentAlgorithmCommandMatrix.json"),
     ]
 
 
@@ -3184,12 +3354,20 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
             Path("tools")
             / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsResearchProvenanceEvidenceTierClassification.report.json"
+        ),
     ]
     assert commands[owner_intake_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json"
         ),
     ]
     assert commands[candidate_family_index] == [
@@ -3198,16 +3376,26 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
             Path("tools")
             / "validate_atomicrows_research_source_to_candidate_family_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsResearchSourceToCandidateFamilyGate.report.json"
+        ),
     ]
     assert commands[parameter_stack_role_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_parameter_stack_role_taxonomy.py"),
+        "--out",
+        _default_temp_generated_report("AtomicRowsParameterStackRoleTaxonomy.report.json"),
     ]
     assert commands[parameter_stack_completeness_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompletenessGate.report.json"
         ),
     ]
     assert commands[parameter_stack_compatibility_index] == [
@@ -3216,20 +3404,32 @@ def test_runner_orders_owner_intake_after_pr70_classifier(monkeypatch):
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompatibilityGate.report.json"
+        ),
     ]
     assert commands[edge_packet_index] == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        "--out",
+        _default_temp_generated_report("EDGEParameterStackSelectionPacket.report.json"),
     ]
     assert commands[trade_context_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_trade_context_packet.py"),
+        "--out",
+        _default_temp_generated_report("QTTTradeContextPacket.report.json"),
     ]
     assert commands[selection_universe_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_registry.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterSelectionUniverseRegistry.report.json"
         ),
     ]
 
@@ -3260,6 +3460,10 @@ def test_runner_pr74_completeness_gate_has_no_runtime_source_or_bundle_args(monk
         str(
             Path("tools")
             / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompletenessGate.report.json"
         ),
     ]
     pr74_text = " ".join(commands[pr74_index]).lower()
@@ -3321,10 +3525,16 @@ def test_runner_includes_pr75_compatibility_gate_after_pr74_and_before_generated
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompatibilityGate.report.json"
+        ),
     ]
     assert commands[pr77_index] == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        "--out",
+        _default_temp_generated_report("EDGEParameterStackSelectionPacket.report.json"),
     ]
 
 
@@ -3345,6 +3555,10 @@ def test_runner_pr75_compatibility_gate_has_no_runtime_source_connector_or_futur
         str(
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompatibilityGate.report.json"
         ),
     ]
     pr75_text = " ".join(pr75_command).lower()
@@ -3463,6 +3677,8 @@ def test_runner_includes_pr77_edge_packet_after_pr75_and_before_generated_deriva
     assert commands[pr77_index] == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        "--out",
+        _default_temp_generated_report("EDGEParameterStackSelectionPacket.report.json"),
     ]
 
 
@@ -3515,12 +3731,18 @@ def test_runner_includes_pr78_trade_context_packet_after_pr77_and_before_pr79(
     assert commands[pr78_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_trade_context_packet.py"),
+        "--out",
+        _default_temp_generated_report("QTTTradeContextPacket.report.json"),
     ]
     assert commands[pr79_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_registry.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterSelectionUniverseRegistry.report.json"
         ),
     ]
 
@@ -3540,6 +3762,8 @@ def test_runner_pr77_edge_packet_has_no_runtime_source_connector_or_live_args(
     assert pr77_command == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        "--out",
+        _default_temp_generated_report("EDGEParameterStackSelectionPacket.report.json"),
     ]
     pr77_text = " ".join(pr77_command).lower()
     assert "source-retrieval" not in pr77_text
@@ -3615,6 +3839,8 @@ def test_runner_pr78_trade_context_packet_has_no_runtime_source_connector_or_liv
     assert pr78_command == [
         python_executable,
         str(Path("tools") / "validate_qtt_trade_context_packet.py"),
+        "--out",
+        _default_temp_generated_report("QTTTradeContextPacket.report.json"),
     ]
     pr78_text = " ".join(pr78_command).lower()
     assert "source-retrieval" not in pr78_text
@@ -3696,6 +3922,10 @@ def test_runner_pr79_selection_universe_registry_has_no_runtime_source_connector
         str(
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_registry.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterSelectionUniverseRegistry.report.json"
         ),
     ]
     pr79_text = " ".join(pr79_command).lower()
@@ -3991,12 +4221,20 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterSelectionUniverseConsumerGate.report.json"
+        ),
     ]
     assert commands[pr81_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_trade_context_selection_universe_routing_gate.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json"
         ),
     ]
     assert commands[pr82_index] == [
@@ -4005,42 +4243,72 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_quantum_applicability_classification_registry.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "QuantumApplicabilityClassificationRegistry.report.json"
+        ),
     ]
     assert commands[pr83_index] == [
         python_executable,
         str(Path("tools") / "validate_owner_quantum_priority_policy_registry.py"),
+        "--out",
+        _default_temp_generated_report("OwnerQuantumPriorityPolicyRegistry.report.json"),
     ]
     assert commands[pr84_index] == [
         python_executable,
         str(Path("tools") / "validate_parameter_algorithm_scoring_policy_registry.py"),
+        "--out",
+        _default_temp_generated_report(
+            "ParameterAlgorithmScoringPolicyRegistry.report.json"
+        ),
     ]
     assert commands[pr85_index] == [
         python_executable,
         str(Path("tools") / "validate_parameter_stack_scoring_and_ranking_gate.py"),
+        "--out",
+        _default_temp_generated_report("ParameterStackScoringAndRankingGate.report.json"),
     ]
     assert commands[pr86_index] == [
         python_executable,
         str(Path("tools") / "validate_quantum_classical_optimizer_arbitration_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "QuantumClassicalOptimizerArbitrationGate.report.json"
+        ),
     ]
     assert commands[pr87_index] == [
         python_executable,
         str(Path("tools") / "validate_candidate_parameter_stack_generation_gate.py"),
+        "--out",
+        _default_temp_generated_report("CandidateParameterStackGenerationGate.report.json"),
     ]
     assert commands[pr88_index] == [
         python_executable,
         str(Path("tools") / "validate_trade_context_parameter_stack_selection_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "TradeContextParameterStackSelectionGate.report.json"
+        ),
     ]
     assert commands[pr89_index] == [
         python_executable,
         str(Path("tools") / "validate_selected_parameter_stack_handoff_packet.py"),
+        "--out",
+        _default_temp_generated_report("SelectedParameterStackHandoffPacket.report.json"),
     ]
     assert commands[pr90_index] == [
         python_executable,
         str(Path("tools") / "validate_replay_paper_candidate_stack_competition_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "ReplayPaperCandidateStackCompetitionGate.report.json"
+        ),
     ]
     assert commands[pr91_index] == [
         python_executable,
         str(Path("tools") / "validate_dual_result_review_for_parameter_stacks.py"),
+        "--out",
+        _default_temp_generated_report("DualResultReviewForParameterStacks.report.json"),
     ]
     assert commands[pr92_index] == [
         python_executable,
@@ -4048,18 +4316,28 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_owner_live_promotion_review_for_parameter_stacks.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "OwnerLivePromotionReviewForParameterStacks.report.json"
+        ),
     ]
     assert commands[pr93_index] == [
         python_executable,
         str(Path("tools") / "validate_owner_approval_request_queue_registry.py"),
+        "--out",
+        _default_temp_generated_report("OwnerApprovalRequestQueueRegistry.report.json"),
     ]
     assert commands[pr94_index] == [
         python_executable,
         str(Path("tools") / "validate_owner_override_receipt_authoring_gate.py"),
+        "--out",
+        _default_temp_generated_report("OwnerOverrideReceiptAuthoringGate.report.json"),
     ]
     assert commands[pr95_index] == [
         python_executable,
         str(Path("tools") / "validate_owner_dashboard_approval_menu_schema.py"),
+        "--out",
+        _default_temp_generated_report("OwnerDashboardApprovalMenuSchema.report.json"),
     ]
     assert commands[pr96_index] == [
         python_executable,
@@ -4067,14 +4345,22 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_owner_dashboard_approval_static_screen_contract.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "OwnerDashboardApprovalStaticScreenContract.report.json"
+        ),
     ]
     assert commands[pr97_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_full_bundle_row_expansion_plan.py"),
+        "--out",
+        _default_temp_generated_report("AtomicRowsFullBundleRowExpansionPlan.report.json"),
     ]
     assert commands[pr98_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_row_family_source_files.py"),
+        "--out",
+        _default_temp_generated_report("AtomicRowsBundleRowFamilySourceFiles.report.json"),
     ]
     assert commands[pr99_index] == [
         python_executable,
@@ -4082,10 +4368,18 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_bundle_builder_deterministic_assembly_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsBundleBuilderDeterministicAssemblyGate.report.json"
+        ),
     ]
     assert commands[sha_dormancy_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_sha_system_dormancy_state_contract.py"),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsShaSystemDormancyStateContract.report.json"
+        ),
     ]
     assert commands[final_readiness_dependency_policy_index] == [
         python_executable,
@@ -4093,6 +4387,8 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_qtt_final_readiness_dependency_policy_contract.py"
         ),
+        "--report-out",
+        _default_temp_generated_report("QttFinalReadinessDependencyPolicy.report.json"),
     ]
     assert commands[active_non_sha_gate_registry_index] == [
         python_executable,
@@ -4100,24 +4396,38 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py"
         ),
+        "--report-out",
+        _default_temp_generated_report(
+            "QttActiveNonShaDay1GateStateRegistry.report.json"
+        ),
     ]
     assert commands[pr_identity_roster_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_pr_identity_roster.py"),
+        "--report-out",
+        _default_temp_generated_report("QttPrIdentityRoster.report.json"),
     ]
     assert commands[roadmap_execution_state_controller_index] == [
         python_executable,
         str(Path("tools") / "validate_qtt_roadmap_execution_state_controller.py"),
+        "--report-out",
+        _default_temp_generated_report("QttRoadmapExecutionStateController.report.json"),
     ]
     assert commands[pr100_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_sha_freeze_authority_gate.py"),
+        "--report-out",
+        _default_temp_generated_report("AtomicRowsBundleShaFreezeAuthorityGate.report.json"),
     ]
     assert commands[repair_bridge_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_exact_row_authority_classifier_bridge.py"
+        ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsExactRowAuthorityClassifierBridge.report.json"
         ),
     ]
     assert commands[repair_c0_index] == [
@@ -4126,10 +4436,16 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py"
         ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json"
+        ),
     ]
     assert commands[repair_manifest_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_exact_row_expansion_manifest.py"),
+        "--report-out",
+        _default_temp_generated_report("AtomicRowsExactRowExpansionManifest.report.json"),
     ]
     assert commands[repair_dry_run_index] == [
         python_executable,
@@ -4137,12 +4453,18 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_exact_row_generator_dry_run_manifest.py"
         ),
+        "--report-out",
+        _default_temp_generated_report("AtomicRowsExactRowGeneratorDryRun.report.json"),
     ]
     assert commands[repair_c1_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest.py"
+        ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsRepairChainGrandDebugLogicAudit.report.json"
         ),
     ]
     assert commands[repair_d_index] == [
@@ -4151,6 +4473,10 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_exact_row_source_materialization_manifest.py"
         ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsExactRowSourceMaterialization.report.json"
+        ),
     ]
     assert commands[repair_d2_e0_index] == [
         python_executable,
@@ -4158,20 +4484,32 @@ def test_runner_includes_pr80_pr81_pr82_pr83_pr84_pr85_pr86_pr87_pr88_pr89_pr90_
             Path("tools")
             / "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py"
         ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsExactRowAgentFamilyEligibilityMatrix.report.json"
+        ),
     ]
     assert commands[bundle_materialization_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_materialization_manifest.py"),
+        "--report-out",
+        _default_temp_generated_report("AtomicRowsBundleMaterialization.report.json"),
     ]
     assert commands[bundle_boundary_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_bundle_boundary_state_contract.py"),
+        "--report-out",
+        _default_temp_generated_report("AtomicRowsBundleBoundaryStateContract.report.json"),
     ]
     assert commands[sha_freeze_final_readiness_state_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_sha_freeze_final_readiness_state_contract.py"
+        ),
+        "--report-out",
+        _default_temp_generated_report(
+            "AtomicRowsShaFreezeFinalReadinessStateContract.report.json"
         ),
     ]
 
@@ -4903,6 +5241,10 @@ def test_runner_pr80_consumer_gate_has_no_runtime_source_connector_or_routing_ar
             Path("tools")
             / "validate_atomicrows_parameter_selection_universe_consumer_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterSelectionUniverseConsumerGate.report.json"
+        ),
     ]
     pr80_text = " ".join(pr80_command).lower()
     assert "source-retrieval" not in pr80_text
@@ -5007,6 +5349,10 @@ def test_runner_pr81_routing_gate_has_no_runtime_source_connector_or_live_args(
     assert pr81_command == [
         python_executable,
         str(Path("tools") / "validate_trade_context_selection_universe_routing_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json"
+        ),
     ]
     pr81_text = " ".join(pr81_command).lower()
     assert "source-retrieval" not in pr81_text
@@ -5042,6 +5388,10 @@ def test_runner_pr82_quantum_applicability_gate_has_no_runtime_source_connector_
             Path("tools")
             / "validate_quantum_applicability_classification_registry.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "QuantumApplicabilityClassificationRegistry.report.json"
+        ),
     ]
     pr82_text = " ".join(pr82_command).lower()
     assert "source-retrieval" not in pr82_text
@@ -5074,6 +5424,8 @@ def test_runner_pr83_owner_quantum_priority_gate_has_no_runtime_source_connector
     assert pr83_command == [
         python_executable,
         str(Path("tools") / "validate_owner_quantum_priority_policy_registry.py"),
+        "--out",
+        _default_temp_generated_report("OwnerQuantumPriorityPolicyRegistry.report.json"),
     ]
     pr83_text = " ".join(pr83_command).lower()
     assert "source-retrieval" not in pr83_text
@@ -5111,6 +5463,10 @@ def test_runner_pr84_parameter_algorithm_scoring_policy_gate_has_no_runtime_sour
     assert pr84_command == [
         python_executable,
         str(Path("tools") / "validate_parameter_algorithm_scoring_policy_registry.py"),
+        "--out",
+        _default_temp_generated_report(
+            "ParameterAlgorithmScoringPolicyRegistry.report.json"
+        ),
     ]
     pr84_text = " ".join(pr84_command).lower()
     assert "source-retrieval" not in pr84_text
@@ -5148,6 +5504,8 @@ def test_runner_pr85_parameter_stack_scoring_and_ranking_gate_has_no_runtime_sou
     assert pr85_command == [
         python_executable,
         str(Path("tools") / "validate_parameter_stack_scoring_and_ranking_gate.py"),
+        "--out",
+        _default_temp_generated_report("ParameterStackScoringAndRankingGate.report.json"),
     ]
     pr85_text = " ".join(pr85_command).lower()
     assert "source-retrieval" not in pr85_text
@@ -5182,6 +5540,10 @@ def test_runner_pr86_optimizer_arbitration_gate_has_no_runtime_source_connector_
     assert pr86_command == [
         python_executable,
         str(Path("tools") / "validate_quantum_classical_optimizer_arbitration_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "QuantumClassicalOptimizerArbitrationGate.report.json"
+        ),
     ]
     pr86_text = " ".join(pr86_command).lower()
     assert "source-retrieval" not in pr86_text
@@ -5215,6 +5577,8 @@ def test_runner_pr87_candidate_generation_gate_has_no_runtime_source_connector_o
     assert pr87_command == [
         python_executable,
         str(Path("tools") / "validate_candidate_parameter_stack_generation_gate.py"),
+        "--out",
+        _default_temp_generated_report("CandidateParameterStackGenerationGate.report.json"),
     ]
     pr87_text = " ".join(pr87_command).lower()
     assert "source-retrieval" not in pr87_text
@@ -5248,6 +5612,10 @@ def test_runner_pr88_trade_context_stack_selection_gate_has_no_runtime_source_co
     assert pr88_command == [
         python_executable,
         str(Path("tools") / "validate_trade_context_parameter_stack_selection_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "TradeContextParameterStackSelectionGate.report.json"
+        ),
     ]
     pr88_text = " ".join(pr88_command).lower()
     assert "source-retrieval" not in pr88_text
@@ -5282,6 +5650,8 @@ def test_runner_pr89_selected_stack_handoff_packet_has_no_runtime_source_connect
     assert pr89_command == [
         python_executable,
         str(Path("tools") / "validate_selected_parameter_stack_handoff_packet.py"),
+        "--out",
+        _default_temp_generated_report("SelectedParameterStackHandoffPacket.report.json"),
     ]
     pr89_text = " ".join(pr89_command).lower()
     assert "source-retrieval" not in pr89_text
@@ -5315,6 +5685,10 @@ def test_runner_pr90_replay_paper_competition_gate_has_no_runtime_source_connect
     assert pr90_command == [
         python_executable,
         str(Path("tools") / "validate_replay_paper_candidate_stack_competition_gate.py"),
+        "--out",
+        _default_temp_generated_report(
+            "ReplayPaperCandidateStackCompetitionGate.report.json"
+        ),
     ]
     pr90_text = " ".join(pr90_command).lower()
     assert "source-retrieval" not in pr90_text
@@ -5700,6 +6074,7 @@ def test_runner_includes_per_venue_execution_lifecycle_model_validator(monkeypat
         str(Path("tools") / "validate_per_venue_execution_lifecycle_model.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ] in commands
 
 
@@ -5714,6 +6089,7 @@ def test_runner_includes_cross_venue_execution_normalization_validator(monkeypat
         str(Path("tools") / "validate_cross_venue_execution_normalization_binding.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ] in commands
 
 
@@ -5728,6 +6104,7 @@ def test_runner_includes_runtime_cash_component_field_map_validator(monkeypatch)
         str(Path("tools") / "runtime_cash_component_field_map_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ] in commands
 
 
@@ -5972,6 +6349,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
     assert commands[lifecycle_build_index] == [
         python_executable,
         str(Path("tools") / "build_atomicrows_parameter_lifecycle_report.py"),
+        "--out",
+        _default_temp_generated_report("AtomicRowsParameterLifecycleReport.json"),
     ]
     assert commands[lifecycle_validate_index] == [
         python_executable,
@@ -5986,12 +6365,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsLifecycleConsumerGate.report.json"
-        ),
+        _default_temp_generated_report("AtomicRowsLifecycleConsumerGate.report.json"),
     ]
     assert commands[promotion_receipt_gate_index] == [
         python_executable,
@@ -5999,11 +6373,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsLifecyclePromotionReceiptGate.report.json"
+        _default_temp_generated_report(
+            "AtomicRowsLifecyclePromotionReceiptGate.report.json"
         ),
     ]
     assert commands[mutation_guard_index] == [
@@ -6012,11 +6383,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsLifecycleRegistryMutationGuard.report.json"
+        _default_temp_generated_report(
+            "AtomicRowsLifecycleRegistryMutationGuard.report.json"
         ),
     ]
     assert commands[cumulative_readiness_index] == [
@@ -6028,11 +6396,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsLifecycleCumulativeReadinessGate.report.json"
+        _default_temp_generated_report(
+            "AtomicRowsLifecycleCumulativeReadinessGate.report.json"
         ),
     ]
     assert commands[lifecycle_command_matrix_index] == [
@@ -6041,12 +6406,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsLifecycleGateCommandMatrix.json"
-        ),
+        _default_temp_generated_report("AtomicRowsLifecycleGateCommandMatrix.json"),
     ]
     assert commands[parameter_agent_binding_index] == [
         python_executable,
@@ -6054,12 +6414,7 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsParameterAgentBindingReport.json"
-        ),
+        _default_temp_generated_report("AtomicRowsParameterAgentBindingReport.json"),
     ]
     assert commands[parameter_agent_binding_consumer_gate_index] == [
         python_executable,
@@ -6070,11 +6425,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsParameterAgentBindingConsumerGate.report.json"
+        _default_temp_generated_report(
+            "AtomicRowsParameterAgentBindingConsumerGate.report.json"
         ),
     ]
     assert commands[parameter_agent_binding_cumulative_gate_index] == [
@@ -6086,11 +6438,8 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json"
+        _default_temp_generated_report(
+            "AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json"
         ),
     ]
     assert commands[parameter_agent_binding_command_matrix_index] == [
@@ -6102,18 +6451,17 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
         "--mode",
         "dev",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "AtomicRowsParameterAgentBindingCommandMatrix.json"
-        ),
+        _default_temp_generated_report("AtomicRowsParameterAgentBindingCommandMatrix.json"),
     ]
     assert commands[research_provenance_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_research_provenance_evidence_tier_classification.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsResearchProvenanceEvidenceTierClassification.report.json"
         ),
     ]
     assert commands[owner_intake_index] == [
@@ -6122,6 +6470,10 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             Path("tools")
             / "validate_atomicrows_owner_submitted_research_source_intake_registry.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json"
+        ),
     ]
     assert commands[candidate_family_index] == [
         python_executable,
@@ -6129,16 +6481,26 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             Path("tools")
             / "validate_atomicrows_research_source_to_candidate_family_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsResearchSourceToCandidateFamilyGate.report.json"
+        ),
     ]
     assert commands[parameter_stack_role_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_parameter_stack_role_taxonomy.py"),
+        "--out",
+        _default_temp_generated_report("AtomicRowsParameterStackRoleTaxonomy.report.json"),
     ]
     assert commands[parameter_stack_completeness_index] == [
         python_executable,
         str(
             Path("tools")
             / "validate_atomicrows_parameter_stack_completeness_gate.py"
+        ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompletenessGate.report.json"
         ),
     ]
     assert commands[parameter_stack_compatibility_index] == [
@@ -6147,10 +6509,16 @@ def test_runner_includes_generated_derivative_gate_after_bundle_checker(
             Path("tools")
             / "validate_atomicrows_parameter_stack_compatibility_gate.py"
         ),
+        "--out",
+        _default_temp_generated_report(
+            "AtomicRowsParameterStackCompatibilityGate.report.json"
+        ),
     ]
     assert commands[edge_packet_index] == [
         python_executable,
         str(Path("tools") / "validate_edge_parameter_stack_selection_packet.py"),
+        "--out",
+        _default_temp_generated_report("EDGEParameterStackSelectionPacket.report.json"),
     ]
 
     audit_command = commands[generated_gate_index]
@@ -6364,7 +6732,7 @@ def test_runner_includes_pr37_static_gates_after_stage1_runtime_and_before_no_ru
         ".",
         "--strict-no-claim",
         "--out",
-        str(Path("docs") / "master_plan" / "generated" / "QTTTestGate.report.json"),
+        _default_temp_generated_report("QTTTestGate.report.json"),
     ]
     assert commands[matrix_index] == [
         python_executable,
@@ -6372,7 +6740,7 @@ def test_runner_includes_pr37_static_gates_after_stage1_runtime_and_before_no_ru
         "--repo-root",
         ".",
         "--out",
-        str(Path("docs") / "master_plan" / "generated" / "LocalGateCommandMatrix.json"),
+        _default_temp_generated_report("LocalGateCommandMatrix.json"),
     ]
     assert commands[handoff_index] == [
         python_executable,
@@ -6380,12 +6748,7 @@ def test_runner_includes_pr37_static_gates_after_stage1_runtime_and_before_no_ru
         "--repo-root",
         ".",
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "FirstCodingPRHandoff.packet.json"
-        ),
+        _default_temp_generated_report("FirstCodingPRHandoff.packet.json"),
     ]
 
 
@@ -6450,11 +6813,8 @@ def test_runner_includes_pr41_runtime_resolver_contract_gate_after_pr40_and_befo
             / "synthetic_stage1_runtime_resolver_snapshot_contracts.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1RuntimeResolverSnapshotContractCheck.report.json"
+        _default_temp_generated_report(
+            "Stage1RuntimeResolverSnapshotContractCheck.report.json"
         ),
     ]
 
@@ -6517,11 +6877,8 @@ def test_runner_includes_pr42_runtime_resolver_to_replay_paper_handoff_after_pr4
             / "synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1RuntimeResolverToReplayPaperHandoff.report.json"
+        _default_temp_generated_report(
+            "Stage1RuntimeResolverToReplayPaperHandoff.report.json"
         ),
     ]
 
@@ -6605,11 +6962,8 @@ def test_runner_includes_pr43_concurrent_replay_paper_contract_after_pr42_and_be
             / "synthetic_concurrent_replay_paper_contracts.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1ConcurrentReplayPaperContractCheck.report.json"
+        _default_temp_generated_report(
+            "Stage1ConcurrentReplayPaperContractCheck.report.json"
         ),
     ]
 
@@ -6675,12 +7029,7 @@ def test_runner_includes_pr44_dual_result_review_contract_after_pr43_and_before_
             / "synthetic_stage1_dual_result_review_contracts.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1DualResultReviewContractCheck.report.json"
-        ),
+        _default_temp_generated_report("Stage1DualResultReviewContractCheck.report.json"),
     ]
 
 
@@ -6747,11 +7096,8 @@ def test_runner_includes_pr45_owner_live_promotion_review_contract_after_pr44_an
             / "synthetic_stage1_owner_live_promotion_review_contracts.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1OwnerLivePromotionReviewContractCheck.report.json"
+        _default_temp_generated_report(
+            "Stage1OwnerLivePromotionReviewContractCheck.report.json"
         ),
     ]
 
@@ -6829,11 +7175,8 @@ def test_runner_includes_pr46_three_venue_canary_eligibility_contract_after_pr45
             / "synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json"
         ),
         "--out",
-        str(
-            Path("docs")
-            / "master_plan"
-            / "generated"
-            / "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
+        _default_temp_generated_report(
+            "Stage1ThreeVenueCanaryEligibilityContractCheck.report.json"
         ),
     ]
 
@@ -6870,6 +7213,8 @@ def test_runner_includes_section_coverage_dev_gate_after_three_venue_and_before_
     assert commands[build_index] == [
         python_executable,
         str(Path("tools") / "build_master_plan_section_coverage_report.py"),
+        "--out",
+        _default_temp_generated_report("MasterPlanSectionCoverageReport.json"),
     ]
     assert commands[validate_index] == [
         python_executable,
@@ -7259,6 +7604,11 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
         return Completed()
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runner,
+        "_routed_generated_output_currentness_failures",
+        lambda command, repo_root: [],
+    )
 
     exit_code = runner.main([])
 
@@ -7292,6 +7642,11 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runner,
+        "_routed_generated_output_currentness_failures",
+        lambda command, repo_root: [],
+    )
 
     assert not tmp_parent.exists()
 

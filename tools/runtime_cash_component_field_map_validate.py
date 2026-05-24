@@ -11,6 +11,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from src.qtt.stage1_prediction_markets.capital_risk.validator import (
+    build_runtime_cash_artifacts,
     validate_artifacts,
     write_generated_reports,
 )
@@ -23,13 +24,18 @@ FAILURE_MARKER = "QTT_RUNTIME_CASH_COMPONENT_FIELD_MAP_EXECUTOR_FAILED"
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=_REPO_ROOT)
+    parser.add_argument("--check-only", action="store_true")
     return parser.parse_args(argv)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     try:
-        artifacts = write_generated_reports(args.repo_root)
+        artifacts = (
+            build_runtime_cash_artifacts(args.repo_root)
+            if args.check_only
+            else write_generated_reports(args.repo_root)
+        )
         failures = validate_artifacts(artifacts)
     except Exception as exc:
         print(f"{FAILURE_MARKER}: {exc}", file=sys.stderr)

@@ -991,6 +991,7 @@ def validate(
     schema_path: pathlib.Path = DEFAULT_SCHEMA,
     row_schema_path: pathlib.Path = DEFAULT_ROW_SCHEMA,
     report_out: pathlib.Path = DEFAULT_REPORT,
+    write_report: bool = False,
 ) -> ValidationResult:
     repo_root = repo_root.resolve()
     failures: list[str] = []
@@ -1035,8 +1036,9 @@ def validate(
         return ValidationResult(False, report_failures, report)
 
     report_path = _resolve(repo_root, report_out)
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(serialize_report(report), encoding="utf-8", newline="\n")
+    if write_report or report_path != _resolve(repo_root, DEFAULT_REPORT):
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(serialize_report(report), encoding="utf-8", newline="\n")
     return ValidationResult(True, [], report)
 
 
@@ -1047,6 +1049,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--schema", type=pathlib.Path, default=DEFAULT_SCHEMA)
     parser.add_argument("--row-schema", type=pathlib.Path, default=DEFAULT_ROW_SCHEMA)
     parser.add_argument("--report-out", type=pathlib.Path, default=DEFAULT_REPORT)
+    parser.add_argument("--write-report", action="store_true")
     return parser.parse_args(argv)
 
 
@@ -1058,6 +1061,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         schema_path=args.schema,
         row_schema_path=args.row_schema,
         report_out=args.report_out,
+        write_report=args.write_report,
     )
     if not result.ok:
         for failure in result.failures:

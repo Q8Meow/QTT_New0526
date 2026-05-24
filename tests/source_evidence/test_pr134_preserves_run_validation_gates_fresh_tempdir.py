@@ -19,4 +19,5 @@ def test_pr134_preserves_run_validation_gates_fresh_tempdir(monkeypatch, tmp_pat
         str(Path("tools") / "runtime_resolver_snapshot_executor_validate.py"),
         "--repo-root",
         ".",
+        "--check-only",
     ]

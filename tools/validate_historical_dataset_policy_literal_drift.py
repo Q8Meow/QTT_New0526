@@ -131,7 +131,7 @@ def validate_policy_literal_drift(
     *,
     repo_root: Path = _REPO_ROOT,
     extra_paths: Sequence[Path] = (),
-    write_report: bool = True,
+    write_report: bool = False,
 ) -> list[str]:
     repo_root = repo_root.resolve()
     failures: list[str] = []
@@ -176,10 +176,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=_REPO_ROOT)
     parser.add_argument("--extra-file", action="append", default=[], type=Path)
+    parser.add_argument(
+        "--write-report",
+        action="store_true",
+        help="Opt-in regeneration of the tracked PR135 policy literal drift report.",
+    )
     args = parser.parse_args(argv)
     failures = validate_policy_literal_drift(
         repo_root=args.repo_root,
         extra_paths=tuple(args.extra_file),
+        write_report=args.write_report,
     )
     if failures:
         for failure in failures:

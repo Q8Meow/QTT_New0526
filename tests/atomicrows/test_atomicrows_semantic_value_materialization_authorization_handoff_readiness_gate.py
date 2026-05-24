@@ -17,6 +17,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
     _is_allowed_pr142_changed_path,
     _is_allowed_pr142_changed_path_for_branch,
     _is_pr138_mainline_context_repair_changed_path_for_branch,
+    _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch,
     build_json_schema,
     build_report,
     validate_payload,
@@ -338,7 +339,7 @@ def test_changed_path_guard_allows_exact_pr138_mainline_context_repair_files_onl
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr144-pr138-mainline-branch-context-normalization",
+            branch="pr146-generated-report-nonmutating-validation-mode-audit",
             source="unit-test",
         ),
     )
@@ -377,6 +378,29 @@ def test_changed_path_guard_allows_pr143_owner_override_currentization_files() -
         assert not _is_allowed_pr142_changed_path_for_branch(path, "main")
 
 
+def test_changed_path_guard_allows_exact_pr146_tooling_hygiene_files_only() -> None:
+    assert c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_ALLOWANCE_REASON_CODE == (
+        "PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_REQUIRED"
+    )
+    for path in c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_CHANGED_PATHS:
+        assert _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "pr146-generated-report-nonmutating-validation-mode-audit",
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "main",
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "",
+        )
+
+
 def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
     disallowed_paths = {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -398,7 +422,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr144-pr138-mainline-branch-context-normalization",
+            branch="pr146-generated-report-nonmutating-validation-mode-audit",
             source="unit-test",
         ),
     )

@@ -574,6 +574,7 @@ def validate(
     contract_path: pathlib.Path = DEFAULT_CONTRACT,
     schema_path: pathlib.Path = DEFAULT_SCHEMA,
     report_out: pathlib.Path = DEFAULT_REPORT,
+    write_report: bool = False,
 ) -> ValidationResult:
     repo_root = repo_root.resolve()
     failures: list[str] = []
@@ -653,7 +654,9 @@ def validate(
     if report_failures:
         return ValidationResult(False, tuple(report_failures), report)
 
-    write_json_report(report, _resolve(repo_root, report_out))
+    report_path = _resolve(repo_root, report_out)
+    if write_report or report_path != _resolve(repo_root, DEFAULT_REPORT):
+        write_json_report(report, report_path)
     return ValidationResult(True, tuple(), report)
 
 
@@ -663,6 +666,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--contract", type=pathlib.Path, default=DEFAULT_CONTRACT)
     parser.add_argument("--schema", type=pathlib.Path, default=DEFAULT_SCHEMA)
     parser.add_argument("--report-out", type=pathlib.Path, default=DEFAULT_REPORT)
+    parser.add_argument("--write-report", action="store_true")
     return parser.parse_args(argv)
 
 
@@ -673,6 +677,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         contract_path=args.contract,
         schema_path=args.schema,
         report_out=args.report_out,
+        write_report=args.write_report,
     )
     if not result.ok:
         for failure in result.failures:

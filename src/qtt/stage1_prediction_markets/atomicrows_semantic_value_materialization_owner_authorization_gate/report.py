@@ -1872,6 +1872,30 @@ def _is_pr143_owner_override_currentization_changed_path_for_branch(
     )
 
 
+def _branch_allows_pr146_generated_report_nonmutating_validation_repair_changed_paths(
+    branch: str,
+) -> bool:
+    return is_downstream_roadmap_branch(
+        branch,
+        c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_DOWNSTREAM_AFTER_PR,
+        allow_repair=False,
+    )
+
+
+def _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized
+        in c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_CHANGED_PATHS
+        and _branch_allows_pr146_generated_report_nonmutating_validation_repair_changed_paths(
+            branch
+        )
+    )
+
+
 def _is_pr142_handoff_changed_path(path: str, repo_root: Path) -> bool:
     branch_context = current_branch_context(repo_root)
     return _is_pr142_handoff_changed_path_for_branch(
@@ -1885,11 +1909,16 @@ def _is_pr142_handoff_changed_path(path: str, repo_root: Path) -> bool:
 
 def _is_allowed_pr141_changed_path(path: str, repo_root: Path) -> bool:
     normalized = path.replace("\\", "/")
+    branch_context = current_branch_context(repo_root)
     return (
         normalized in c.ALLOWED_PR141_CHANGED_PATHS
         or _is_pr138_mainline_context_repair_changed_path(normalized, repo_root)
         or _is_pr140_guard_repair_changed_path(normalized, repo_root)
         or _is_pr142_handoff_changed_path(normalized, repo_root)
+        or _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            normalized,
+            branch_context.branch,
+        )
     )
 
 
