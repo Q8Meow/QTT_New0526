@@ -1,0 +1,911 @@
+{
+  "artifact_stem": "AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate",
+  "atomicrows_compatibility": {
+    "enrichment_order": [
+      "PR137R AtomicRows bundle reconciliation",
+      "PR137L latency hot-path snapshot boundary",
+      "PR138 semantic row contract and semantic field inventory",
+      "PR139 row-family source manifest currentization",
+      "PR140 semantic field coverage/enrichment plan",
+      "PR141 semantic value materialization owner-authorization-readiness gate",
+      "PR142 static downstream handoff-readiness gate",
+      "Future owner-authorized approval/materialization planning only after explicit evidence and owner approval"
+    ],
+    "enrichment_order_preserved": true,
+    "field_coverage_plan_preserved": true,
+    "no_bundle_authority_created": true,
+    "no_bundle_freeze_authority_created": true,
+    "no_bundle_mutation": true,
+    "no_row_family_source_mutation": true,
+    "owner_authorization_readiness_gate_preserved": true,
+    "pr141_blocked_counts": {
+      "replay_paper_evidence_blocked_count": 3,
+      "runtime_receipt_blocked_count": 4,
+      "source_evidence_blocked_count": 8
+    },
+    "row_family_source_manifest_preserved": true,
+    "semantic_row_contract_preserved": true,
+    "value_materialization_still_blocked": true
+  },
+  "authority_class": "STATIC_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_ONLY_NOT_VALUE_MATERIALIZATION_NOT_OWNER_APPROVAL_NOT_BUNDLE_MUTATION_NOT_FINAL_READINESS",
+  "classical_optimizer_forward_compatibility": {
+    "arbitration_execution_created": false,
+    "classical_optimizer_execution_created": false,
+    "deterministic_field_identity_ready": true,
+    "metadata_only_fields": [
+      "deterministic_field_identity_ready",
+      "missing_value_materialization_blocks_optimizer_use",
+      "missing_external_fact_evidence_blocks_runtime_use",
+      "missing_owner_approval_blocks_materialization",
+      "missing_replay_paper_results_blocks_live_promotion",
+      "missing_runtime_cash_receipt_blocks_exposure"
+    ],
+    "missing_external_fact_evidence_blocks_runtime_use": true,
+    "missing_owner_approval_blocks_materialization": true,
+    "missing_replay_paper_results_blocks_live_promotion": true,
+    "missing_runtime_cash_receipt_blocks_exposure": true,
+    "missing_value_materialization_blocks_optimizer_use": true,
+    "ranking_execution_created": false,
+    "scoring_execution_created": false,
+    "strategy_selection_created": false
+  },
+  "execution": "DISABLED",
+  "forbidden_authority_output_boundary": {
+    "atomicrows_bundle_mutation_created": false,
+    "bundle_authority_created": false,
+    "bundle_freeze_authority_created": false,
+    "connector_semantic_binding_created": false,
+    "day1_launch_readiness_created": false,
+    "execution_superiority_evidence_created": false,
+    "final_readiness_created": false,
+    "latency_superiority_evidence_created": false,
+    "live_reachability_created": false,
+    "materialization_permission_created": false,
+    "order_authority_created": false,
+    "order_intent_execution_created": false,
+    "owner_approval_created": false,
+    "owner_approval_receipt_created": false,
+    "paper_execution_created": false,
+    "profit_evidence_created": false,
+    "quantum_advantage_claim_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_optimizer_input_output_created": false,
+    "quantum_simulator_execution_created": false,
+    "replay_execution_created": false,
+    "row_family_source_mutation_created": false,
+    "runtime_cash_receipt_created": false,
+    "runtime_resolver_execution_created": false,
+    "semantic_values_materialized": false,
+    "source_acceptance_created": false
+  },
+  "forbidden_payload_boundary": {
+    "atomicrows_forbidden_bundle_reference_created": false,
+    "bundle_mutation_payloads_allowed": false,
+    "connector_semantic_binding_payloads_allowed": false,
+    "live_order_execution_payloads_allowed": false,
+    "optimizer_result_payloads_allowed": false,
+    "qtt_generated_integrity_authority_payloads_allowed": false,
+    "row_family_source_mutation_payloads_allowed": false,
+    "semantic_value_payloads_allowed": false,
+    "source_accepted_external_fact_payloads_allowed": false
+  },
+  "generated_at_utc": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+  "generated_by_validator_tool": true,
+  "generated_from_static_evidence_only": true,
+  "latency_hot_path_boundary": {
+    "control_plane_only": true,
+    "live_path_import_created": false,
+    "live_pretrade_dependency_created": false,
+    "no_doc_retrieval_in_live_path": true,
+    "no_live_path_runtime_call": true,
+    "no_optimizer_call_in_live_path": true,
+    "no_quantum_call_in_live_path": true,
+    "order_router_dependency_created": false,
+    "runtime_service_created": false
+  },
+  "mode": "SOURCE_REQUIRED",
+  "no_claim_boundary": {
+    "connector_binding_created": false,
+    "day1_launch_created": false,
+    "execution_superiority_evidence_created": false,
+    "final_readiness_created": false,
+    "latency_superiority_evidence_created": false,
+    "live_reachability_created": false,
+    "order_authority_created": false,
+    "owner_approval_created": false,
+    "owner_approval_receipt_created": false,
+    "paper_execution_created": false,
+    "profit_evidence_created": false,
+    "replay_execution_created": false,
+    "runtime_cash_receipt_created": false,
+    "source_acceptance_created": false
+  },
+  "path_conflict_resolution": {
+    "conflicts_detected": false,
+    "path_conflict_resolution": "NO_EXISTING_PR142_FALLBACK_PATH_CONFLICTS_DETECTED"
+  },
+  "pr136_orchestration_preflight": {
+    "agent_launch_orchestration_alignment": {
+      "agent_domain_count": 19,
+      "selected_agent_domains": {
+        "atomicrows_agent": {
+          "atomicrows_scope": "FUTURE_REF_ONLY",
+          "forbidden_current_authority": [
+            "creates_live_data",
+            "creates_source_retrieval",
+            "creates_source_acceptance",
+            "creates_connector_binding",
+            "creates_credential_resolution",
+            "creates_private_state_fetch",
+            "creates_runtime_cash_authority",
+            "creates_replay_execution",
+            "creates_paper_execution",
+            "creates_replay_result",
+            "creates_paper_result",
+            "creates_trading_signal",
+            "creates_ranking_scoring_arbitration_output",
+            "creates_order_authority",
+            "creates_order_execution",
+            "creates_fill_receipt",
+            "creates_profit_evidence",
+            "creates_latency_superiority_evidence",
+            "creates_execution_superiority_evidence",
+            "creates_alpha_evidence",
+            "creates_quantum_execution",
+            "creates_quantum_optimizer_input",
+            "creates_quantum_advantage_claim",
+            "creates_atomicrows_bundle",
+            "creates_atomicrows_rows",
+            "creates_day1_live_launch"
+          ],
+          "future_owner_authorization_required": true,
+          "latency_hot_path_allowed": false,
+          "live_order_authority_allowed": false,
+          "quantum_scope": "NONE"
+        },
+        "classical_optimizer_agent": {
+          "atomicrows_scope": "NONE",
+          "forbidden_current_authority": [
+            "creates_live_data",
+            "creates_source_retrieval",
+            "creates_source_acceptance",
+            "creates_connector_binding",
+            "creates_credential_resolution",
+            "creates_private_state_fetch",
+            "creates_runtime_cash_authority",
+            "creates_replay_execution",
+            "creates_paper_execution",
+            "creates_replay_result",
+            "creates_paper_result",
+            "creates_trading_signal",
+            "creates_ranking_scoring_arbitration_output",
+            "creates_order_authority",
+            "creates_order_execution",
+            "creates_fill_receipt",
+            "creates_profit_evidence",
+            "creates_latency_superiority_evidence",
+            "creates_execution_superiority_evidence",
+            "creates_alpha_evidence",
+            "creates_quantum_execution",
+            "creates_quantum_optimizer_input",
+            "creates_quantum_advantage_claim",
+            "creates_atomicrows_bundle",
+            "creates_atomicrows_rows",
+            "creates_day1_live_launch"
+          ],
+          "future_owner_authorization_required": true,
+          "latency_hot_path_allowed": false,
+          "live_order_authority_allowed": false,
+          "quantum_scope": "NONE"
+        },
+        "quantum_optimizer_agent": {
+          "atomicrows_scope": "NONE",
+          "forbidden_current_authority": [
+            "creates_live_data",
+            "creates_source_retrieval",
+            "creates_source_acceptance",
+            "creates_connector_binding",
+            "creates_credential_resolution",
+            "creates_private_state_fetch",
+            "creates_runtime_cash_authority",
+            "creates_replay_execution",
+            "creates_paper_execution",
+            "creates_replay_result",
+            "creates_paper_result",
+            "creates_trading_signal",
+            "creates_ranking_scoring_arbitration_output",
+            "creates_order_authority",
+            "creates_order_execution",
+            "creates_fill_receipt",
+            "creates_profit_evidence",
+            "creates_latency_superiority_evidence",
+            "creates_execution_superiority_evidence",
+            "creates_alpha_evidence",
+            "creates_quantum_execution",
+            "creates_quantum_optimizer_input",
+            "creates_quantum_advantage_claim",
+            "creates_atomicrows_bundle",
+            "creates_atomicrows_rows",
+            "creates_day1_live_launch"
+          ],
+          "future_owner_authorization_required": true,
+          "latency_hot_path_allowed": false,
+          "live_order_authority_allowed": false,
+          "quantum_scope": "FUTURE_REF_ONLY"
+        }
+      }
+    },
+    "alias_resolution": {
+      "alias_exists": false,
+      "canonical_crosswalk_used": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "conflict_detected": false,
+      "created_missing_alias": false,
+      "requested_alias": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"
+    },
+    "command_action_alignment": [
+      {
+        "action_id": "validate_pr136_roadmap_policy_literal_drift",
+        "authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_rows": false,
+        "creates_connector_binding": false,
+        "creates_order_authority": false,
+        "creates_order_execution": false,
+        "creates_paper_execution": false,
+        "creates_profit_evidence": false,
+        "creates_quantum_execution": false,
+        "creates_quantum_optimizer_input": false,
+        "creates_replay_execution": false,
+        "creates_source_acceptance": false,
+        "github_allowed": false,
+        "network_allowed": false
+      },
+      {
+        "action_id": "validate_pr136_day1_launch_readiness_roadmap",
+        "authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_rows": false,
+        "creates_connector_binding": false,
+        "creates_order_authority": false,
+        "creates_order_execution": false,
+        "creates_paper_execution": false,
+        "creates_profit_evidence": false,
+        "creates_quantum_execution": false,
+        "creates_quantum_optimizer_input": false,
+        "creates_replay_execution": false,
+        "creates_source_acceptance": false,
+        "github_allowed": false,
+        "network_allowed": false
+      },
+      {
+        "action_id": "pytest_pr136_roadmap",
+        "authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_rows": false,
+        "creates_connector_binding": false,
+        "creates_order_authority": false,
+        "creates_order_execution": false,
+        "creates_paper_execution": false,
+        "creates_profit_evidence": false,
+        "creates_quantum_execution": false,
+        "creates_quantum_optimizer_input": false,
+        "creates_replay_execution": false,
+        "creates_source_acceptance": false,
+        "github_allowed": false,
+        "network_allowed": false
+      },
+      {
+        "action_id": "run_validation_gates",
+        "authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "creates_atomicrows_bundle": false,
+        "creates_atomicrows_rows": false,
+        "creates_connector_binding": false,
+        "creates_order_authority": false,
+        "creates_order_execution": false,
+        "creates_paper_execution": false,
+        "creates_profit_evidence": false,
+        "creates_quantum_execution": false,
+        "creates_quantum_optimizer_input": false,
+        "creates_replay_execution": false,
+        "creates_source_acceptance": false,
+        "github_allowed": false,
+        "network_allowed": false
+      }
+    ],
+    "consumed_files": [
+      "docs/master_plan/generated/PR136RouteTriage.report.json",
+      "docs/master_plan/generated/PR136ReadReceipt.report.json",
+      "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+      "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+      "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "docs/master_plan/generated/PR136AgentLaunchOrchestrationMap.report.json",
+      "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json",
+      "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
+      "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json",
+      "docs/master_plan/generated/PR136FuturePRCardRegistry.report.json",
+      "docs/master_plan/generated/PR136RoadmapReplacementAndInsertionMatrix.report.json",
+      "docs/master_plan/generated/PR136Day1LaunchReadinessRoadmap.report.json",
+      "docs/master_plan/generated/PR136PolicyManifest.report.json",
+      "docs/master_plan/generated/PR136PolicyLiteralDrift.report.json",
+      "docs/master_plan/generated/PR136ValidationGateIntegration.report.json"
+    ],
+    "dependency_alignment": {
+      "edges": [
+        {
+          "edge_type": "SEQUENCE_DEPENDS_ON",
+          "from": "PR140",
+          "to": "PR141"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+          "to": "PR141"
+        },
+        {
+          "edge_type": "SEQUENCE_DEPENDS_ON",
+          "from": "PR141",
+          "to": "PR142"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED",
+          "to": "PR142"
+        },
+        {
+          "edge_type": "SEQUENCE_DEPENDS_ON",
+          "from": "PR142",
+          "to": "PR143K"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT",
+          "to": "PR143K"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE",
+          "to": "PR143K"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE",
+          "to": "PR143K"
+        },
+        {
+          "edge_type": "DOMAIN_ROUTES_TO_PR",
+          "from": "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE",
+          "to": "PR143K"
+        }
+      ],
+      "owner_authorization_nodes": [
+        "PR141",
+        "PR142",
+        "PR143K",
+        "PR143P",
+        "PR143F",
+        "PR143",
+        "PR144",
+        "PR145",
+        "PR146",
+        "PR147",
+        "PR148",
+        "PR151",
+        "PR154",
+        "PR156",
+        "PR157",
+        "PR158",
+        "PR159",
+        "PR160",
+        "PR161",
+        "PR164"
+      ]
+    },
+    "launch_readiness_domain_alignment": {
+      "domain_ids": [
+        "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      ],
+      "owner_authorization_required": true,
+      "readiness_state_target": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+      "scope_class": "ATOMICROWS_READINESS"
+    },
+    "market_specific_alignment": {
+      "canonical_venue_ids": [
+        "PREDICTION_MARKETS_GENERAL",
+        "KALSHI",
+        "POLYMARKET",
+        "FORECASTEX_IBKR"
+      ],
+      "missing_accepted_source_evidence_classes": [
+        "venue_api_semantics",
+        "order_fields",
+        "fee_rules",
+        "tick_rules",
+        "payout_rules",
+        "settlement_rules",
+        "market_data_semantics",
+        "historical_data_availability",
+        "account_balance_semantics",
+        "private_state_cash_semantics",
+        "execution_lifecycle_semantics",
+        "fill_integrity_semantics",
+        "cashflow_pnl_semantics",
+        "latency_component_semantics",
+        "settlement_finality_semantics",
+        "reconciliation_semantics",
+        "cross_venue_normalization_semantics"
+      ],
+      "missing_connector_semantic_bindings": true,
+      "missing_day1_launch_preflight": true,
+      "missing_replay_paper_evidence": true,
+      "missing_runtime_cash_private_state_receipts": true,
+      "owner_authorization_required": true
+    },
+    "pr136_does_not_authorize_day1_launch": true,
+    "pr136_does_not_authorize_live_trading": true,
+    "pr136_does_not_authorize_materialization": true,
+    "pr136_does_not_authorize_quantum_execution": true,
+    "pr136_planning_authority_only": true,
+    "quantum_atomicrows_optimization_readiness_alignment": {
+      "atomicrows_readiness_ladder": [
+        "PRE_BRIDGE_METADATA",
+        "BRIDGE_READY",
+        "MATERIALIZATION_READY_OWNER_BLOCKED",
+        "BUNDLE_INTEGRITY_POLICY_OWNER_DISABLED"
+      ],
+      "future_owner_authorization_required_for_materialization_flag": true,
+      "no_quantum_advantage_claim_flag": true,
+      "no_quantum_execution_flag": true,
+      "no_quantum_optimizer_input_flag": true,
+      "no_quantum_signal_creation_flag": true,
+      "quantum_evidence_status": "METADATA_ONLY_NO_EXECUTION"
+    },
+    "replay_paper_live_transition_boundary": {
+      "blocked_execution_edges": [
+        "LIVE_TRADING_BLOCKED_UNTIL_OWNER_COMMAND",
+        "ORDER_AUTHORITY_BLOCKED_UNTIL_SOURCE_CONNECTOR_CASH_RISK_GATES",
+        "QUANTUM_EXECUTION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR",
+        "ATOMICROWS_MATERIALIZATION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR"
+      ],
+      "blocked_hot_path_control_plane_edges": [
+        "NO_SOURCE_RETRIEVAL_IN_LIVE_HOT_PATH",
+        "NO_LLM_REASONING_IN_LIVE_HOT_PATH",
+        "NO_QUANTUM_BACKEND_CALL_IN_LIVE_HOT_PATH",
+        "NO_ATOMICROWS_GENERATION_IN_LIVE_HOT_PATH"
+      ],
+      "pr142_forbidden_artifacts": [
+        "creates_live_data",
+        "creates_source_retrieval",
+        "creates_source_acceptance",
+        "creates_connector_binding",
+        "creates_credential_resolution",
+        "creates_private_state_fetch",
+        "creates_runtime_cash_authority",
+        "creates_replay_execution",
+        "creates_paper_execution",
+        "creates_replay_result",
+        "creates_paper_result",
+        "creates_trading_signal",
+        "creates_ranking_scoring_arbitration_output",
+        "creates_order_authority",
+        "creates_order_execution",
+        "creates_fill_receipt",
+        "creates_profit_evidence",
+        "creates_latency_superiority_evidence",
+        "creates_execution_superiority_evidence",
+        "creates_alpha_evidence",
+        "creates_quantum_execution",
+        "creates_quantum_optimizer_input",
+        "creates_quantum_advantage_claim",
+        "creates_atomicrows_bundle",
+        "creates_atomicrows_rows",
+        "creates_day1_live_launch"
+      ]
+    },
+    "route_triage_alignment": {
+      "future_pr_sequence_auto_authorizes_atomicrows_materialization": false,
+      "future_pr_sequence_auto_authorizes_implementation": false,
+      "future_pr_sequence_auto_authorizes_live_trading": false,
+      "future_pr_sequence_auto_authorizes_quantum_execution": false,
+      "receipt_type": "PR136_ROUTE_TRIAGE_RECEIPT",
+      "sequence_authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+    },
+    "sequence_alignment": {
+      "pr141_entry": {
+        "agent_scope": [
+          "QTT_AGENT_ORCHESTRATION_METADATA_ONLY"
+        ],
+        "allowed_artifacts": [
+          "schemas",
+          "validators",
+          "reports",
+          "tests",
+          "roadmap docs"
+        ],
+        "atomicrows_scope": "FUTURE_REF_ONLY",
+        "classification_from_provisional_skeleton": "PR136_CLASSIFICATION_MATRIX",
+        "connector_scope": "NONE",
+        "credential_private_state_cash_scope": "NONE",
+        "current_authority_created": false,
+        "domain_ids": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "downstream_dependencies": [
+          "PR142"
+        ],
+        "evidence_basis": [
+          {
+            "evidence_class": "GENERATED_REPORT",
+            "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+            "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+          },
+          {
+            "evidence_class": "ROADMAP",
+            "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+            "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+          }
+        ],
+        "expected_outputs": [
+          "future receipt-backed validation artifacts"
+        ],
+        "final_sequence_pr_number_or_placeholder": "PR141",
+        "forbidden_artifacts": [
+          "creates_live_data",
+          "creates_source_retrieval",
+          "creates_source_acceptance",
+          "creates_connector_binding",
+          "creates_credential_resolution",
+          "creates_private_state_fetch",
+          "creates_runtime_cash_authority",
+          "creates_replay_execution",
+          "creates_paper_execution",
+          "creates_replay_result",
+          "creates_paper_result",
+          "creates_trading_signal",
+          "creates_ranking_scoring_arbitration_output",
+          "creates_order_authority",
+          "creates_order_execution",
+          "creates_fill_receipt",
+          "creates_profit_evidence",
+          "creates_latency_superiority_evidence",
+          "creates_execution_superiority_evidence",
+          "creates_alpha_evidence",
+          "creates_quantum_execution",
+          "creates_quantum_optimizer_input",
+          "creates_quantum_advantage_claim",
+          "creates_atomicrows_bundle",
+          "creates_atomicrows_rows",
+          "creates_day1_live_launch"
+        ],
+        "hidden_dependency_resolution_notes": [
+          "Source evidence precedes connector binding.",
+          "Owner authorization remains explicit for materialization, quantum execution, replay/paper execution, canary, and Day-1 live start."
+        ],
+        "latency_scope": "NONE",
+        "live_scope": "OWNER_COMMAND_REQUIRED",
+        "market_scope": [
+          "PREDICTION_MARKETS_GENERAL",
+          "KALSHI",
+          "POLYMARKET",
+          "FORECASTEX_IBKR"
+        ],
+        "owner_authorization_required": true,
+        "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+        "profit_claim_boundary": "NO_PROFIT_EVIDENCE_OR_ALPHA_CLAIM",
+        "proposed_branch_name": "pr141-atomicrows-bundle-materialization-owner-authorized",
+        "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+        "quantum_scope": "NONE",
+        "readiness_state_target": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+        "replay_paper_scope": "NONE",
+        "required_upstream_prs": [
+          "PR140"
+        ],
+        "route_from_master_plan_sections": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "route_from_roadmap_blueprints": [
+          "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+        ],
+        "scope_class": "ATOMICROWS_READINESS",
+        "sequence_authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "source_evidence_scope": "REFERENCE_ONLY",
+        "subdomain_ids": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "title": "AtomicRows bundle materialization owner-authorized only",
+        "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+        "why_this_pr_after_previous": "It depends on the prior gate's validated output.",
+        "why_this_pr_before_next": "It produces the next gate's static or receipt-backed input."
+      },
+      "pr142_entry": {
+        "agent_scope": [
+          "QTT_AGENT_ORCHESTRATION_METADATA_ONLY"
+        ],
+        "allowed_artifacts": [
+          "schemas",
+          "validators",
+          "reports",
+          "tests",
+          "roadmap docs"
+        ],
+        "atomicrows_scope": "FUTURE_REF_ONLY",
+        "classification_from_provisional_skeleton": "PR136_CLASSIFICATION_MATRIX",
+        "connector_scope": "NONE",
+        "credential_private_state_cash_scope": "NONE",
+        "current_authority_created": false,
+        "domain_ids": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "downstream_dependencies": [
+          "PR143K"
+        ],
+        "evidence_basis": [
+          {
+            "evidence_class": "GENERATED_REPORT",
+            "evidence_ref": "PR136ReadinessDomainTaxonomy.report.json",
+            "evidence_summary": "Sequence entry is mapped to coverage-derived domains."
+          },
+          {
+            "evidence_class": "ROADMAP",
+            "evidence_ref": "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+            "evidence_summary": "Roadmap supplies Stage-1 launch-readiness path context."
+          }
+        ],
+        "expected_outputs": [
+          "future receipt-backed validation artifacts"
+        ],
+        "final_sequence_pr_number_or_placeholder": "PR142",
+        "forbidden_artifacts": [
+          "creates_live_data",
+          "creates_source_retrieval",
+          "creates_source_acceptance",
+          "creates_connector_binding",
+          "creates_credential_resolution",
+          "creates_private_state_fetch",
+          "creates_runtime_cash_authority",
+          "creates_replay_execution",
+          "creates_paper_execution",
+          "creates_replay_result",
+          "creates_paper_result",
+          "creates_trading_signal",
+          "creates_ranking_scoring_arbitration_output",
+          "creates_order_authority",
+          "creates_order_execution",
+          "creates_fill_receipt",
+          "creates_profit_evidence",
+          "creates_latency_superiority_evidence",
+          "creates_execution_superiority_evidence",
+          "creates_alpha_evidence",
+          "creates_quantum_execution",
+          "creates_quantum_optimizer_input",
+          "creates_quantum_advantage_claim",
+          "creates_atomicrows_bundle",
+          "creates_atomicrows_rows",
+          "creates_day1_live_launch"
+        ],
+        "hidden_dependency_resolution_notes": [
+          "Source evidence precedes connector binding.",
+          "Owner authorization remains explicit for materialization, quantum execution, replay/paper execution, canary, and Day-1 live start."
+        ],
+        "latency_scope": "NONE",
+        "live_scope": "OWNER_COMMAND_REQUIRED",
+        "market_scope": [
+          "PREDICTION_MARKETS_GENERAL",
+          "KALSHI",
+          "POLYMARKET",
+          "FORECASTEX_IBKR"
+        ],
+        "owner_authorization_required": true,
+        "planned_future_authority_class": "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+        "profit_claim_boundary": "NO_PROFIT_EVIDENCE_OR_ALPHA_CLAIM",
+        "proposed_branch_name": "pr142-atomicrows-structural-integrity-policy-gate",
+        "proposed_number_status": "FIXED_IF_OWNER_APPROVES",
+        "quantum_scope": "NONE",
+        "readiness_state_target": "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED",
+        "replay_paper_scope": "NONE",
+        "required_upstream_prs": [
+          "PR141"
+        ],
+        "route_from_master_plan_sections": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "route_from_roadmap_blueprints": [
+          "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+        ],
+        "scope_class": "ATOMICROWS_READINESS",
+        "sequence_authority_class": "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY",
+        "source_evidence_scope": "REFERENCE_ONLY",
+        "subdomain_ids": [
+          "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+        ],
+        "title": "AtomicRows structural integrity policy gate owner-authorized only",
+        "validation_marker": "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK",
+        "why_this_pr_after_previous": "It depends on the prior gate's validated output.",
+        "why_this_pr_before_next": "It produces the next gate's static or receipt-backed input."
+      }
+    }
+  },
+  "pr141_downstream_handoff_consumption": {
+    "bundle_mutation_created": false,
+    "downstream_handoff_allowed_for_this_pr": true,
+    "downstream_handoff_contract": {
+      "future_owner_authorization_packet_required": true,
+      "future_owner_authorization_required_for_actual_materialization": true,
+      "no_same_number_identity_inference": true,
+      "pr141_authorizes_bundle_mutation": false,
+      "pr141_authorizes_connector_binding": false,
+      "pr141_authorizes_final_readiness": false,
+      "pr141_authorizes_live_order_authority": false,
+      "pr141_authorizes_materialization": false,
+      "pr141_authorizes_paper_execution": false,
+      "pr141_authorizes_quantum_backend_execution": false,
+      "pr141_authorizes_replay_execution": false,
+      "pr141_authorizes_row_family_source_mutation": false,
+      "pr141_authorizes_source_acceptance": false,
+      "pr141_consumes_downstream_input_from": [
+        "PR140"
+      ],
+      "pr141_creates_downstream_input_for": [
+        "PR142"
+      ]
+    },
+    "downstream_handoff_contract_detected": true,
+    "downstream_handoff_scope": "STATIC_AUTHORIZATION_METADATA_ONLY",
+    "exact_future_step_prepared": "future owner-review/materialization-planning readiness request only",
+    "materialization_permission_created": false,
+    "owner_approval_inferred": false,
+    "owner_approval_receipt_created": false,
+    "row_family_source_mutation_created": false,
+    "semantic_values_materialized": false,
+    "upstream_report_path": "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.report.json",
+    "upstream_yaml_path": "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.yaml",
+    "yaml_downstream_handoff_contract": {
+      "future_owner_authorization_packet_required": true,
+      "future_owner_authorization_required_for_actual_materialization": true,
+      "no_same_number_identity_inference": true,
+      "pr141_authorizes_bundle_mutation": false,
+      "pr141_authorizes_connector_binding": false,
+      "pr141_authorizes_final_readiness": false,
+      "pr141_authorizes_live_order_authority": false,
+      "pr141_authorizes_materialization": false,
+      "pr141_authorizes_paper_execution": false,
+      "pr141_authorizes_quantum_backend_execution": false,
+      "pr141_authorizes_replay_execution": false,
+      "pr141_authorizes_row_family_source_mutation": false,
+      "pr141_authorizes_source_acceptance": false,
+      "pr141_consumes_downstream_input_from": [
+        "PR140"
+      ],
+      "pr141_creates_downstream_input_for": [
+        "PR142"
+      ]
+    }
+  },
+  "pr_identity_resolution": {
+    "evidence_derived_name_used": false,
+    "fallback_name_used": true,
+    "github_pr_number": "OWNER_TO_ASSIGN_OR_UNKNOWN",
+    "implementation_truth": "canonical_repo_artifacts_validators_schemas_reports_authority_boundaries_validation_evidence_owner_instructions",
+    "name_derivation_notes": "PR141 downstream_handoff_contract creates static input for PR142 but does not define a more specific artifact stem, package name, or validation marker; owner-provided PR142 fallback names are used.",
+    "repo_current_pr": "PR142",
+    "roadmap_identity_inference_used": false
+  },
+  "quantum_forward_compatibility": {
+    "annealing_execution_created": false,
+    "compatible_future_problem_forms": "UNKNOWN_PENDING_EVIDENCE",
+    "future_optimizer_compatibility_notes": [
+      "QAOA/VQE/annealing/QUBO/Ising references remain static metadata only.",
+      "No optimizer inputs, outputs, parameter values, or backend calls are created."
+    ],
+    "ising_solving_created": false,
+    "metadata_only_fields": [
+      "quantum_family",
+      "quantum_applicability_class",
+      "classical_only_flag",
+      "quantum_inspired_flag",
+      "true_quantum_compatible_flag",
+      "qubo_compatible_flag",
+      "ising_compatible_flag",
+      "qaoa_compatible_flag",
+      "vqe_compatible_flag",
+      "annealing_compatible_flag",
+      "quantum_kernel_feature_map_compatible_flag"
+    ],
+    "missing_optimizer_default_policy_route": "BLOCK_UNTIL_ACCEPTED_EVIDENCE_OR_OWNER_POLICY",
+    "optimizer_defaults_invented": false,
+    "optimizer_parameter_value_source_status": "NOT_MATERIALIZED_OR_NOT_ACCEPTED",
+    "parameter_ranges_invented": false,
+    "qaoa_execution_created": false,
+    "quantum_advantage_claim_created": false,
+    "quantum_applicability_source": [
+      "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json",
+      "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.report.json"
+    ],
+    "quantum_forward_metadata_only": true,
+    "quantum_optimizer_input_output_created": false,
+    "quantum_simulator_execution_created": false,
+    "qubo_solving_created": false,
+    "true_quantum_backend_execution_created": false,
+    "vqe_execution_created": false
+  },
+  "repo_status_preflight": {
+    "branch_created_after_scope_receipt": true,
+    "github_main_validation_status": "SUCCESS",
+    "github_status_claimed": true,
+    "local_main_clean": true,
+    "local_main_verified": true,
+    "main_head_short_sha_as_vcs_metadata_only": "0715a3c"
+  },
+  "report_type": "QTT_PR142_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_REPORT",
+  "report_version": "v1",
+  "source_evidence_boundary": {
+    "connector_semantic_binding_created": false,
+    "missing_accepted_source_packets_block_runtime_use": true,
+    "owner_policy_may_authorize_external_fact_value": false,
+    "owner_policy_may_authorize_retrieval_scope": true,
+    "runtime_cash_receipt_created": false,
+    "source_acceptance_created": false,
+    "source_evidence_packet_consumed_if_present": true,
+    "source_evidence_packet_path": "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "source_evidence_packet_repo_path_present": true
+  },
+  "static_handoff_readiness_contract": {
+    "blocked_reason_codes": [
+      "MISSING_OWNER_APPROVAL",
+      "MISSING_OWNER_APPROVAL_RECEIPT",
+      "MISSING_MATERIALIZATION_PERMISSION",
+      "MISSING_ACCEPTED_SOURCE_PACKETS",
+      "MISSING_RUNTIME_RECEIPTS",
+      "MISSING_REPLAY_PAPER_RESULTS",
+      "MISSING_OPTIMIZER_DEFAULT_POLICY_OR_ACCEPTED_EVIDENCE",
+      "VALUE_MATERIALIZATION_STILL_BLOCKED"
+    ],
+    "future_materialization_still_requires_explicit_owner_approval": true,
+    "next_pr_static_input_created": true,
+    "readiness_state": "STATIC_MATERIALIZATION_PLAN_INPUT_READY_OWNER_ACTION_REQUIRED",
+    "ready_to_prepare_future_materialization_plan": true,
+    "ready_to_request_owner_review": true,
+    "required_future_accepted_source_or_runtime_receipt_dependencies": [
+      "ACCEPTED_SOURCE_PACKETS",
+      "RUNTIME_RECEIPTS",
+      "REPLAY_PAPER_RESULTS",
+      "OPTIMIZER_DEFAULT_POLICY_OR_ACCEPTED_EVIDENCE"
+    ],
+    "required_future_owner_action": "EXPLICIT_OWNER_APPROVAL_PACKET_REQUIRED_BEFORE_MATERIALIZATION"
+  },
+  "upstream_atomicrows_evidence": {
+    "consumed_files": [
+      "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+      "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.index.json",
+      "docs/master_plan/generated/PR137L_LatencyHotPathSnapshotBoundary.report.json",
+      "docs/master_plan/generated/PR137L_LatencyHotPathSnapshotBoundary.index.json",
+      "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+      "docs/master_plan/generated/PR138_AtomicRowsSemanticFieldInventory.json",
+      "docs/master_plan/generated/AtomicRowsRowFamilySourceManifestCurrentization.report.json",
+      "docs/master_plan/generated/AtomicRowsSemanticFieldCoverageEnrichmentPlan.report.json",
+      "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.yaml",
+      "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationOwnerAuthorizationGate.report.json"
+    ],
+    "pr137l_latency_hot_path_boundary_consumed": true,
+    "pr137r_bundle_reconciliation_consumed": true,
+    "pr138_semantic_field_inventory_consumed": true,
+    "pr138_semantic_row_contract_consumed": true,
+    "pr139_row_family_source_manifest_currentization_consumed": true,
+    "pr140_semantic_field_coverage_enrichment_plan_consumed": true,
+    "pr141_owner_authorization_readiness_gate_consumed": true
+  },
+  "validation_marker": "QTT_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_OK",
+  "validation_summary": {
+    "branch_context_tests_use_monkeypatch_or_explicit_simulation": true,
+    "changed_path_guard_validated": true,
+    "constants_schema_report_alignment_validated": true,
+    "fixture_validated": true,
+    "forbidden_authority_terms_checked_without_scattered_blockers": true,
+    "full_gate_result": "NOT_CLAIMED_IN_STATIC_REPORT",
+    "full_gate_run": "NOT_RUN_BY_STATIC_REPORT_GENERATION",
+    "generated_report_validated": true,
+    "generated_side_effects_restored": "NOT_CLAIMED_IN_STATIC_REPORT",
+    "os_stable_paths": true,
+    "schema_validated": true,
+    "yaml_validated": true
+  }
+}

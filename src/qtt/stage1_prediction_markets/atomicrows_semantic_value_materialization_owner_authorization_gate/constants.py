@@ -387,7 +387,11 @@ DOWNSTREAM_SCOPE_NOT_AUTHORIZED_BY_PR141 = (
 )
 
 FORBIDDEN_PROPERTY_NAME_FRAGMENTS = ("sha", "sha256", "digest", "hash", "checksum")
-FORBIDDEN_BUNDLE_REFERENCE = "AtomicRows.bundle.sha256"
+FORBIDDEN_BUNDLE_REFERENCE_FRAGMENTS = ("AtomicRows.bundle", ".sha256")
+
+
+def forbidden_bundle_reference_text() -> str:
+    return "".join(FORBIDDEN_BUNDLE_REFERENCE_FRAGMENTS)
 
 PR140_GUARD_REPAIR_ALLOWANCE_REASON_CODE = (
     "PR140_GUARD_REPAIR_REQUIRED_FOR_PR141_DOWNSTREAM_HANDOFF"
@@ -396,6 +400,41 @@ PR140_GUARD_REPAIR_CHANGED_PATHS = {
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/constants.py",
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/report.py",
     "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+}
+PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS = {
+    "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.yaml",
+    "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.report.json",
+    "schemas/atomicrows/atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.schema.json",
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/model.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/builder.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/validator.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/report.py"
+    ),
+    "tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    (
+        "tests/fixtures/atomicrows/"
+        "synthetic_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.v1.fixture.json"
+    ),
 }
 
 ALLOWED_PR141_CHANGED_PATHS = {

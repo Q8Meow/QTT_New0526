@@ -1,0 +1,1200 @@
+{
+  "$id": "https://qtt.local/schemas/atomicrows/atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_stem": {
+      "const": "AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate",
+      "type": "string"
+    },
+    "atomicrows_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "enrichment_order": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "enrichment_order_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "field_coverage_plan_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_authority_created": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_freeze_authority_created": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_mutation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_row_family_source_mutation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_authorization_readiness_gate_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr141_blocked_counts": {
+          "additionalProperties": false,
+          "properties": {
+            "replay_paper_evidence_blocked_count": {
+              "type": "integer"
+            },
+            "runtime_receipt_blocked_count": {
+              "type": "integer"
+            },
+            "source_evidence_blocked_count": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "source_evidence_blocked_count",
+            "runtime_receipt_blocked_count",
+            "replay_paper_evidence_blocked_count"
+          ],
+          "type": "object"
+        },
+        "row_family_source_manifest_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "semantic_row_contract_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "value_materialization_still_blocked": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enrichment_order_preserved",
+        "enrichment_order",
+        "semantic_row_contract_preserved",
+        "row_family_source_manifest_preserved",
+        "field_coverage_plan_preserved",
+        "owner_authorization_readiness_gate_preserved",
+        "value_materialization_still_blocked",
+        "no_bundle_mutation",
+        "no_row_family_source_mutation",
+        "no_bundle_authority_created",
+        "no_bundle_freeze_authority_created",
+        "pr141_blocked_counts"
+      ],
+      "type": "object"
+    },
+    "authority_class": {
+      "enum": [
+        "STATIC_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_ONLY_NOT_VALUE_MATERIALIZATION_NOT_OWNER_APPROVAL_NOT_BUNDLE_MUTATION_NOT_FINAL_READINESS"
+      ],
+      "type": "string"
+    },
+    "classical_optimizer_forward_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "arbitration_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "classical_optimizer_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "deterministic_field_identity_ready": {
+          "const": true,
+          "type": "boolean"
+        },
+        "metadata_only_fields": {
+          "items": {
+            "enum": [
+              "deterministic_field_identity_ready",
+              "missing_value_materialization_blocks_optimizer_use",
+              "missing_external_fact_evidence_blocks_runtime_use",
+              "missing_owner_approval_blocks_materialization",
+              "missing_replay_paper_results_blocks_live_promotion",
+              "missing_runtime_cash_receipt_blocks_exposure"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "missing_external_fact_evidence_blocks_runtime_use": {
+          "const": true,
+          "type": "boolean"
+        },
+        "missing_owner_approval_blocks_materialization": {
+          "const": true,
+          "type": "boolean"
+        },
+        "missing_replay_paper_results_blocks_live_promotion": {
+          "const": true,
+          "type": "boolean"
+        },
+        "missing_runtime_cash_receipt_blocks_exposure": {
+          "const": true,
+          "type": "boolean"
+        },
+        "missing_value_materialization_blocks_optimizer_use": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ranking_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "scoring_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "strategy_selection_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "classical_optimizer_execution_created",
+        "scoring_execution_created",
+        "ranking_execution_created",
+        "arbitration_execution_created",
+        "strategy_selection_created",
+        "deterministic_field_identity_ready",
+        "missing_value_materialization_blocks_optimizer_use",
+        "missing_external_fact_evidence_blocks_runtime_use",
+        "missing_owner_approval_blocks_materialization",
+        "missing_replay_paper_results_blocks_live_promotion",
+        "missing_runtime_cash_receipt_blocks_exposure",
+        "metadata_only_fields"
+      ],
+      "type": "object"
+    },
+    "execution": {
+      "const": "DISABLED",
+      "type": "string"
+    },
+    "forbidden_authority_output_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "atomicrows_bundle_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "bundle_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "bundle_freeze_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "connector_semantic_binding_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "day1_launch_readiness_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "execution_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "final_readiness_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "latency_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_reachability_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "materialization_permission_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "order_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "order_intent_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "profit_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_advantage_claim_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_backend_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_optimizer_input_output_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_simulator_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "replay_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "row_family_source_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "runtime_cash_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "runtime_resolver_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_values_materialized": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_acceptance_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "semantic_values_materialized",
+        "materialization_permission_created",
+        "owner_approval_created",
+        "owner_approval_receipt_created",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_resolver_execution_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "live_reachability_created",
+        "order_authority_created",
+        "order_intent_execution_created",
+        "runtime_cash_receipt_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "execution_superiority_evidence_created",
+        "final_readiness_created",
+        "day1_launch_readiness_created",
+        "quantum_optimizer_input_output_created",
+        "quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "quantum_advantage_claim_created",
+        "atomicrows_bundle_mutation_created",
+        "row_family_source_mutation_created",
+        "bundle_authority_created",
+        "bundle_freeze_authority_created"
+      ],
+      "type": "object"
+    },
+    "forbidden_payload_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "atomicrows_forbidden_bundle_reference_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "bundle_mutation_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "connector_semantic_binding_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_order_execution_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "optimizer_result_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qtt_generated_integrity_authority_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "row_family_source_mutation_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_value_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_accepted_external_fact_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "semantic_value_payloads_allowed",
+        "bundle_mutation_payloads_allowed",
+        "row_family_source_mutation_payloads_allowed",
+        "optimizer_result_payloads_allowed",
+        "source_accepted_external_fact_payloads_allowed",
+        "connector_semantic_binding_payloads_allowed",
+        "live_order_execution_payloads_allowed",
+        "qtt_generated_integrity_authority_payloads_allowed",
+        "atomicrows_forbidden_bundle_reference_created"
+      ],
+      "type": "object"
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+      "type": "string"
+    },
+    "generated_by_validator_tool": {
+      "const": true,
+      "type": "boolean"
+    },
+    "generated_from_static_evidence_only": {
+      "const": true,
+      "type": "boolean"
+    },
+    "latency_hot_path_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "control_plane_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "live_path_import_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_pretrade_dependency_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "no_doc_retrieval_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_live_path_runtime_call": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_optimizer_call_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_quantum_call_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "order_router_dependency_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "runtime_service_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "control_plane_only",
+        "live_pretrade_dependency_created",
+        "live_path_import_created",
+        "runtime_service_created",
+        "order_router_dependency_created",
+        "no_live_path_runtime_call",
+        "no_doc_retrieval_in_live_path",
+        "no_quantum_call_in_live_path",
+        "no_optimizer_call_in_live_path"
+      ],
+      "type": "object"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED",
+      "type": "string"
+    },
+    "no_claim_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "connector_binding_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "day1_launch_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "execution_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "final_readiness_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "latency_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_reachability_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "order_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "profit_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "replay_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "runtime_cash_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_acceptance_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_acceptance_created",
+        "connector_binding_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "live_reachability_created",
+        "order_authority_created",
+        "runtime_cash_receipt_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "execution_superiority_evidence_created",
+        "final_readiness_created",
+        "day1_launch_created",
+        "owner_approval_created",
+        "owner_approval_receipt_created"
+      ],
+      "type": "object"
+    },
+    "path_conflict_resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "conflicts_detected": {
+          "const": false,
+          "type": "boolean"
+        },
+        "path_conflict_resolution": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "conflicts_detected",
+        "path_conflict_resolution"
+      ],
+      "type": "object"
+    },
+    "pr136_orchestration_preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_launch_orchestration_alignment": {
+          "type": "object"
+        },
+        "alias_resolution": {
+          "additionalProperties": false,
+          "properties": {
+            "alias_exists": {
+              "type": "boolean"
+            },
+            "canonical_crosswalk_used": {
+              "type": "string"
+            },
+            "conflict_detected": {
+              "const": false,
+              "type": "boolean"
+            },
+            "created_missing_alias": {
+              "const": false,
+              "type": "boolean"
+            },
+            "requested_alias": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "requested_alias",
+            "alias_exists",
+            "canonical_crosswalk_used",
+            "created_missing_alias",
+            "conflict_detected"
+          ],
+          "type": "object"
+        },
+        "command_action_alignment": {
+          "minItems": 1,
+          "type": "array"
+        },
+        "consumed_files": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "dependency_alignment": {
+          "type": "object"
+        },
+        "launch_readiness_domain_alignment": {
+          "type": "object"
+        },
+        "market_specific_alignment": {
+          "type": "object"
+        },
+        "pr136_does_not_authorize_day1_launch": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_live_trading": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_materialization": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_quantum_execution": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_planning_authority_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_atomicrows_optimization_readiness_alignment": {
+          "type": "object"
+        },
+        "replay_paper_live_transition_boundary": {
+          "type": "object"
+        },
+        "route_triage_alignment": {
+          "type": "object"
+        },
+        "sequence_alignment": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "consumed_files",
+        "alias_resolution",
+        "route_triage_alignment",
+        "sequence_alignment",
+        "dependency_alignment",
+        "launch_readiness_domain_alignment",
+        "market_specific_alignment",
+        "command_action_alignment",
+        "quantum_atomicrows_optimization_readiness_alignment",
+        "agent_launch_orchestration_alignment",
+        "replay_paper_live_transition_boundary",
+        "pr136_planning_authority_only",
+        "pr136_does_not_authorize_materialization",
+        "pr136_does_not_authorize_live_trading",
+        "pr136_does_not_authorize_quantum_execution",
+        "pr136_does_not_authorize_day1_launch"
+      ],
+      "type": "object"
+    },
+    "pr141_downstream_handoff_consumption": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "downstream_handoff_allowed_for_this_pr": {
+          "const": true,
+          "type": "boolean"
+        },
+        "downstream_handoff_contract": {
+          "type": "object"
+        },
+        "downstream_handoff_contract_detected": {
+          "const": true,
+          "type": "boolean"
+        },
+        "downstream_handoff_scope": {
+          "type": "string"
+        },
+        "exact_future_step_prepared": {
+          "type": "string"
+        },
+        "materialization_permission_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_inferred": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_approval_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "row_family_source_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_values_materialized": {
+          "const": false,
+          "type": "boolean"
+        },
+        "upstream_report_path": {
+          "type": "string"
+        },
+        "upstream_yaml_path": {
+          "type": "string"
+        },
+        "yaml_downstream_handoff_contract": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "upstream_report_path",
+        "upstream_yaml_path",
+        "downstream_handoff_contract_detected",
+        "downstream_handoff_contract",
+        "yaml_downstream_handoff_contract",
+        "downstream_handoff_scope",
+        "downstream_handoff_allowed_for_this_pr",
+        "exact_future_step_prepared",
+        "owner_approval_inferred",
+        "owner_approval_receipt_created",
+        "materialization_permission_created",
+        "semantic_values_materialized",
+        "bundle_mutation_created",
+        "row_family_source_mutation_created"
+      ],
+      "type": "object"
+    },
+    "pr_identity_resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_derived_name_used": {
+          "type": "boolean"
+        },
+        "fallback_name_used": {
+          "type": "boolean"
+        },
+        "github_pr_number": {
+          "const": "OWNER_TO_ASSIGN_OR_UNKNOWN",
+          "type": "string"
+        },
+        "implementation_truth": {
+          "type": "string"
+        },
+        "name_derivation_notes": {
+          "type": "string"
+        },
+        "repo_current_pr": {
+          "const": "PR142",
+          "type": "string"
+        },
+        "roadmap_identity_inference_used": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "repo_current_pr",
+        "github_pr_number",
+        "roadmap_identity_inference_used",
+        "implementation_truth",
+        "evidence_derived_name_used",
+        "fallback_name_used",
+        "name_derivation_notes"
+      ],
+      "type": "object"
+    },
+    "quantum_forward_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "annealing_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "compatible_future_problem_forms": {
+          "const": "UNKNOWN_PENDING_EVIDENCE",
+          "type": "string"
+        },
+        "future_optimizer_compatibility_notes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "ising_solving_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "metadata_only_fields": {
+          "items": {
+            "enum": [
+              "quantum_family",
+              "quantum_applicability_class",
+              "classical_only_flag",
+              "quantum_inspired_flag",
+              "true_quantum_compatible_flag",
+              "qubo_compatible_flag",
+              "ising_compatible_flag",
+              "qaoa_compatible_flag",
+              "vqe_compatible_flag",
+              "annealing_compatible_flag",
+              "quantum_kernel_feature_map_compatible_flag"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "missing_optimizer_default_policy_route": {
+          "const": "BLOCK_UNTIL_ACCEPTED_EVIDENCE_OR_OWNER_POLICY",
+          "type": "string"
+        },
+        "optimizer_defaults_invented": {
+          "const": false,
+          "type": "boolean"
+        },
+        "optimizer_parameter_value_source_status": {
+          "const": "NOT_MATERIALIZED_OR_NOT_ACCEPTED",
+          "type": "string"
+        },
+        "parameter_ranges_invented": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qaoa_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_advantage_claim_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_applicability_source": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "quantum_forward_metadata_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_optimizer_input_output_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_simulator_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qubo_solving_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "true_quantum_backend_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "vqe_execution_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "quantum_forward_metadata_only",
+        "quantum_applicability_source",
+        "true_quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "qaoa_execution_created",
+        "vqe_execution_created",
+        "annealing_execution_created",
+        "qubo_solving_created",
+        "ising_solving_created",
+        "quantum_optimizer_input_output_created",
+        "quantum_advantage_claim_created",
+        "parameter_ranges_invented",
+        "optimizer_defaults_invented",
+        "optimizer_parameter_value_source_status",
+        "compatible_future_problem_forms",
+        "future_optimizer_compatibility_notes",
+        "missing_optimizer_default_policy_route",
+        "metadata_only_fields"
+      ],
+      "type": "object"
+    },
+    "repo_status_preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_created_after_scope_receipt": {
+          "const": true,
+          "type": "boolean"
+        },
+        "github_main_validation_status": {
+          "enum": [
+            "SUCCESS",
+            "FAILED",
+            "UNVERIFIED_NOT_CLAIMED"
+          ],
+          "type": "string"
+        },
+        "github_status_claimed": {
+          "type": "boolean"
+        },
+        "local_main_clean": {
+          "const": true,
+          "type": "boolean"
+        },
+        "local_main_verified": {
+          "const": true,
+          "type": "boolean"
+        },
+        "main_head_short_sha_as_vcs_metadata_only": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "local_main_verified",
+        "local_main_clean",
+        "main_head_short_sha_as_vcs_metadata_only",
+        "github_main_validation_status",
+        "github_status_claimed",
+        "branch_created_after_scope_receipt"
+      ],
+      "type": "object"
+    },
+    "report_type": {
+      "const": "QTT_PR142_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_REPORT",
+      "type": "string"
+    },
+    "report_version": {
+      "const": "v1",
+      "type": "string"
+    },
+    "source_evidence_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "connector_semantic_binding_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "missing_accepted_source_packets_block_runtime_use": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_policy_may_authorize_external_fact_value": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_policy_may_authorize_retrieval_scope": {
+          "enum": [
+            true,
+            "unknown"
+          ],
+          "type": [
+            "boolean",
+            "string"
+          ]
+        },
+        "runtime_cash_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_acceptance_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_evidence_packet_consumed_if_present": {
+          "type": "boolean"
+        },
+        "source_evidence_packet_path": {
+          "type": "string"
+        },
+        "source_evidence_packet_repo_path_present": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_evidence_packet_consumed_if_present",
+        "source_evidence_packet_repo_path_present",
+        "source_evidence_packet_path",
+        "owner_policy_may_authorize_retrieval_scope",
+        "owner_policy_may_authorize_external_fact_value",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_cash_receipt_created",
+        "missing_accepted_source_packets_block_runtime_use"
+      ],
+      "type": "object"
+    },
+    "static_handoff_readiness_contract": {
+      "additionalProperties": false,
+      "properties": {
+        "blocked_reason_codes": {
+          "items": {
+            "enum": [
+              "MISSING_OWNER_APPROVAL",
+              "MISSING_OWNER_APPROVAL_RECEIPT",
+              "MISSING_MATERIALIZATION_PERMISSION",
+              "MISSING_ACCEPTED_SOURCE_PACKETS",
+              "MISSING_RUNTIME_RECEIPTS",
+              "MISSING_REPLAY_PAPER_RESULTS",
+              "MISSING_OPTIMIZER_DEFAULT_POLICY_OR_ACCEPTED_EVIDENCE",
+              "VALUE_MATERIALIZATION_STILL_BLOCKED"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "future_materialization_still_requires_explicit_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "next_pr_static_input_created": {
+          "const": true,
+          "type": "boolean"
+        },
+        "readiness_state": {
+          "enum": [
+            "STATIC_HANDOFF_READY_FOR_OWNER_REVIEW_REQUEST",
+            "STATIC_MATERIALIZATION_PLAN_INPUT_READY_OWNER_ACTION_REQUIRED",
+            "BLOCKED_FOR_MATERIALIZATION_UNTIL_OWNER_APPROVAL_AND_EVIDENCE"
+          ],
+          "type": "string"
+        },
+        "ready_to_prepare_future_materialization_plan": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ready_to_request_owner_review": {
+          "const": true,
+          "type": "boolean"
+        },
+        "required_future_accepted_source_or_runtime_receipt_dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "required_future_owner_action": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ready_to_request_owner_review",
+        "ready_to_prepare_future_materialization_plan",
+        "readiness_state",
+        "blocked_reason_codes",
+        "required_future_owner_action",
+        "required_future_accepted_source_or_runtime_receipt_dependencies",
+        "next_pr_static_input_created",
+        "future_materialization_still_requires_explicit_owner_approval"
+      ],
+      "type": "object"
+    },
+    "upstream_atomicrows_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "consumed_files": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "pr137l_latency_hot_path_boundary_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr137r_bundle_reconciliation_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr138_semantic_field_inventory_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr138_semantic_row_contract_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr139_row_family_source_manifest_currentization_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr140_semantic_field_coverage_enrichment_plan_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr141_owner_authorization_readiness_gate_consumed": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "consumed_files",
+        "pr137r_bundle_reconciliation_consumed",
+        "pr137l_latency_hot_path_boundary_consumed",
+        "pr138_semantic_row_contract_consumed",
+        "pr138_semantic_field_inventory_consumed",
+        "pr139_row_family_source_manifest_currentization_consumed",
+        "pr140_semantic_field_coverage_enrichment_plan_consumed",
+        "pr141_owner_authorization_readiness_gate_consumed"
+      ],
+      "type": "object"
+    },
+    "validation_marker": {
+      "const": "QTT_ATOMICROWS_SEMANTIC_VALUE_MATERIALIZATION_AUTHORIZATION_HANDOFF_READINESS_GATE_OK",
+      "type": "string"
+    },
+    "validation_summary": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_context_tests_use_monkeypatch_or_explicit_simulation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "changed_path_guard_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "constants_schema_report_alignment_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "fixture_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "forbidden_authority_terms_checked_without_scattered_blockers": {
+          "const": true,
+          "type": "boolean"
+        },
+        "full_gate_result": {
+          "type": "string"
+        },
+        "full_gate_run": {
+          "type": "string"
+        },
+        "generated_report_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "generated_side_effects_restored": {
+          "type": "string"
+        },
+        "os_stable_paths": {
+          "const": true,
+          "type": "boolean"
+        },
+        "schema_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "yaml_validated": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_validated",
+        "yaml_validated",
+        "fixture_validated",
+        "generated_report_validated",
+        "constants_schema_report_alignment_validated",
+        "forbidden_authority_terms_checked_without_scattered_blockers",
+        "changed_path_guard_validated",
+        "branch_context_tests_use_monkeypatch_or_explicit_simulation",
+        "os_stable_paths",
+        "full_gate_run",
+        "full_gate_result",
+        "generated_side_effects_restored"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "artifact_stem",
+    "authority_class",
+    "generated_at_utc",
+    "generated_by_validator_tool",
+    "generated_from_static_evidence_only",
+    "pr_identity_resolution",
+    "repo_status_preflight",
+    "pr136_orchestration_preflight",
+    "upstream_atomicrows_evidence",
+    "pr141_downstream_handoff_consumption",
+    "static_handoff_readiness_contract",
+    "source_evidence_boundary",
+    "atomicrows_compatibility",
+    "quantum_forward_compatibility",
+    "classical_optimizer_forward_compatibility",
+    "latency_hot_path_boundary",
+    "no_claim_boundary",
+    "forbidden_authority_output_boundary",
+    "forbidden_payload_boundary",
+    "path_conflict_resolution",
+    "validation_summary",
+    "validation_marker"
+  ],
+  "type": "object"
+}

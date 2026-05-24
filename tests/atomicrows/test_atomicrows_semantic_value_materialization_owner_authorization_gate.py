@@ -16,6 +16,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
     _is_allowed_pr141_changed_path,
     _is_ignored_pr141_changed_path,
     _is_pr140_guard_repair_changed_path_for_branch,
+    _is_pr142_handoff_changed_path_for_branch,
     build_gate,
     build_json_schema,
     build_report,
@@ -340,7 +341,7 @@ def test_no_forbidden_property_names_or_bundle_reference_are_emitted() -> None:
         for key in lowered_keys:
             assert not any(fragment in key for fragment in c.FORBIDDEN_PROPERTY_NAME_FRAGMENTS)
         serialized = json.dumps(payload, sort_keys=True)
-        assert c.FORBIDDEN_BUNDLE_REFERENCE not in serialized
+        assert c.forbidden_bundle_reference_text() not in serialized
 
 
 def test_changed_path_guard_ignores_only_runtime_tmp_directory() -> None:
@@ -380,6 +381,29 @@ def test_changed_path_guard_allows_exact_pr140_guard_repair_files_only(monkeypat
         assert _is_allowed_pr141_changed_path(path, REPO_ROOT)
 
 
+def test_changed_path_guard_allows_exact_pr142_handoff_files_only(monkeypatch) -> None:
+    downstream_branch = (
+        "pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate"
+    )
+    for path in c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS:
+        assert _is_pr142_handoff_changed_path_for_branch(path, downstream_branch)
+        assert _is_pr142_handoff_changed_path_for_branch(
+            path,
+            "pr143k-future-roadmap-branch",
+        )
+        assert not _is_pr142_handoff_changed_path_for_branch(path, c.BRANCH)
+        assert not _is_pr142_handoff_changed_path_for_branch(path, "main")
+        assert not _is_pr142_handoff_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr141_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch=downstream_branch, source="unit-test"),
+    )
+    for path in c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS:
+        assert _is_allowed_pr141_changed_path(path, REPO_ROOT)
+
+
 def test_changed_path_guard_rejects_pr140_guard_repair_files_on_main_and_detached_context(
     monkeypatch,
 ) -> None:
@@ -394,6 +418,8 @@ def test_changed_path_guard_rejects_pr140_guard_repair_files_on_main_and_detache
         )
         for path in c.PR140_GUARD_REPAIR_CHANGED_PATHS:
             assert not _is_allowed_pr141_changed_path(path, REPO_ROOT)
+        for path in c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS:
+            assert not _is_allowed_pr141_changed_path(path, REPO_ROOT)
 
 
 def test_changed_path_guard_rejects_broad_pr140_package_directories() -> None:
@@ -404,8 +430,13 @@ def test_changed_path_guard_rejects_broad_pr140_package_directories() -> None:
         "tests/atomicrows",
     }
     assert c.PR140_GUARD_REPAIR_CHANGED_PATHS.isdisjoint(broad_paths)
+    assert c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS.isdisjoint(broad_paths)
     for path in broad_paths:
         assert not _is_pr140_guard_repair_changed_path_for_branch(path, c.BRANCH)
+        assert not _is_pr142_handoff_changed_path_for_branch(
+            path,
+            "pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+        )
 
 
 def test_changed_path_guard_keeps_pr140_generated_and_protected_paths_disallowed() -> None:
@@ -429,6 +460,10 @@ def test_changed_path_guard_keeps_pr140_generated_and_protected_paths_disallowed
     for path in disallowed_paths:
         assert path not in c.ALLOWED_PR141_CHANGED_PATHS
         assert not _is_pr140_guard_repair_changed_path_for_branch(path, c.BRANCH)
+        assert not _is_pr142_handoff_changed_path_for_branch(
+            path,
+            "pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+        )
 
 
 def test_pr140_guard_repair_allowance_is_integration_support_not_materialization() -> None:
@@ -452,7 +487,10 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
     monkeypatch.setattr(
         pr141_report,
         "current_branch_context",
-        lambda repo_root: BranchContext(branch=c.BRANCH, source="unit-test"),
+        lambda repo_root: BranchContext(
+            branch="pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+            source="unit-test",
+        ),
     )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)

@@ -1449,7 +1449,7 @@ def _validate_no_forbidden_property_names_or_bundle_reference(payload: Mapping[s
         for fragment in c.FORBIDDEN_PROPERTY_NAME_FRAGMENTS:
             if fragment in lowered_key:
                 failures.append(f"PR141_FORBIDDEN_PROPERTY_NAME: {path}")
-        if isinstance(item, str) and c.FORBIDDEN_BUNDLE_REFERENCE in item:
+        if isinstance(item, str) and c.forbidden_bundle_reference_text() in item:
             failures.append(f"PR141_FORBIDDEN_BUNDLE_REFERENCE: {path}")
     return failures
 
@@ -1822,11 +1822,29 @@ def _is_pr140_guard_repair_changed_path(path: str, repo_root: Path) -> bool:
     return _is_pr140_guard_repair_changed_path_for_branch(path, branch_context.branch)
 
 
+def _branch_allows_pr142_handoff_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(branch, 141, allow_repair=False)
+
+
+def _is_pr142_handoff_changed_path_for_branch(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS
+        and _branch_allows_pr142_handoff_changed_paths(branch)
+    )
+
+
+def _is_pr142_handoff_changed_path(path: str, repo_root: Path) -> bool:
+    branch_context = current_branch_context(repo_root)
+    return _is_pr142_handoff_changed_path_for_branch(path, branch_context.branch)
+
+
 def _is_allowed_pr141_changed_path(path: str, repo_root: Path) -> bool:
     normalized = path.replace("\\", "/")
     return (
         normalized in c.ALLOWED_PR141_CHANGED_PATHS
         or _is_pr140_guard_repair_changed_path(normalized, repo_root)
+        or _is_pr142_handoff_changed_path(normalized, repo_root)
     )
 
 
