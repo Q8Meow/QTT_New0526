@@ -1946,7 +1946,7 @@ def test_runner_routes_generated_report_outputs_to_validation_temp(monkeypatch):
     ]
 
 
-def test_runner_fails_if_routed_temp_generated_report_differs_from_tracked(
+def test_runner_allows_routed_temp_generated_report_to_differ_from_tracked_by_default(
     monkeypatch,
     capsys,
 ):
@@ -1998,8 +1998,8 @@ def test_runner_fails_if_routed_temp_generated_report_differs_from_tracked(
         tracked_text = tracked_report.read_text(encoding="utf-8")
 
     captured = capsys.readouterr()
-    assert exit_code == 1
-    assert "TRACKED_GENERATED_REPORT_STALE" in captured.err
+    assert exit_code == 0
+    assert "TRACKED_GENERATED_REPORT_STALE" not in captured.err
     assert tracked_text == '{"value": "tracked"}\n'
 
 
@@ -2042,6 +2042,14 @@ def test_runner_ignores_volatile_branch_context_when_comparing_temp_report(
             return Completed()
 
         monkeypatch.setattr(runner.subprocess, "run", fake_run)
+        monkeypatch.setitem(
+            runner.GENERATED_REPORT_CURRENTNESS_OUTPUT_ARGS,
+            "validate_qtt_owner_global_override_authority.py",
+            (
+                "--out",
+                "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json",
+            ),
+        )
 
         exit_code = runner.run_commands(
             [

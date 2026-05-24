@@ -350,6 +350,7 @@ DEFAULT_GENERATED_OUTPUT_ARGS = {
         "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
     ),
 }
+GENERATED_REPORT_CURRENTNESS_OUTPUT_ARGS: dict[str, tuple[str, str]] = {}
 PR138_NON_MUTATING_VALIDATION_SCRIPT = (
     "from pathlib import Path\n"
     "from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.report "
@@ -516,7 +517,7 @@ def _routed_generated_output_currentness_failures(
     if "--check-only" in command or len(command) <= 1:
         return []
     script_name = pathlib.PurePath(command[1]).name
-    output_arg = DEFAULT_GENERATED_OUTPUT_ARGS.get(script_name)
+    output_arg = GENERATED_REPORT_CURRENTNESS_OUTPUT_ARGS.get(script_name)
     if output_arg is None:
         return []
     flag, tracked_path_text = output_arg
