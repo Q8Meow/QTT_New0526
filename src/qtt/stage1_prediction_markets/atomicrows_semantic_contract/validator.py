@@ -57,6 +57,13 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
     return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
 
 
+def _same_pr_repair_branch_allowed(branch: str) -> bool:
+    if not ci_branch_context.is_repair_branch(branch):
+        return False
+    repair_target = branch[len(ci_branch_context.REPAIR_BRANCH_PREFIX) :]
+    return ci_branch_context.roadmap_pr_number(repair_target) == 138
+
+
 def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[list[str], list[str]]:
     failures: list[str] = []
     receipts: list[str] = []
@@ -79,14 +86,22 @@ def _validate_environment(report: Mapping[str, Any], repo_root: Path) -> tuple[l
         receipts.append(c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return failures, receipts
     if branch_rc != 0 or branch != c.BRANCH:
-        if branch_rc == 0 and ci_branch_context.is_downstream_roadmap_branch(
-            branch,
-            after_pr=138,
-            allow_repair=False,
-        ):
-            receipts.append(
-                ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        if branch_rc == 0 and (
+            _same_pr_repair_branch_allowed(branch)
+            or ci_branch_context.is_downstream_or_main_validation_branch(
+                branch,
+                after_pr=138,
+                allow_repair=False,
             )
+        ):
+            if ci_branch_context.is_downstream_roadmap_branch(
+                branch,
+                after_pr=138,
+                allow_repair=False,
+            ):
+                receipts.append(
+                    ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+                )
         else:
             failures.append(c.PR138_REASON_BRANCH_MISMATCH)
 

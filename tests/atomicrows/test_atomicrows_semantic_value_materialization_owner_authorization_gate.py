@@ -15,6 +15,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_owner_authorization_gate.report import (
     _is_allowed_pr141_changed_path,
     _is_ignored_pr141_changed_path,
+    _is_pr138_mainline_context_repair_changed_path_for_branch,
     _is_pr140_guard_repair_changed_path_for_branch,
     _is_pr142_handoff_changed_path_for_branch,
     _is_pr143_owner_override_currentization_changed_path_for_branch,
@@ -353,6 +354,48 @@ def test_changed_path_guard_ignores_only_runtime_tmp_directory() -> None:
     assert not _is_ignored_pr141_changed_path("tmp/")
 
 
+def test_changed_path_guard_allows_exact_pr138_mainline_context_repair_files_only(
+    monkeypatch,
+) -> None:
+    assert c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_ALLOWANCE_REASON_CODE == (
+        "PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_REQUIRED_FOR_PR144_DOWNSTREAM_VALIDATION"
+    )
+    for path in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS:
+        assert _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr144-pr138-mainline-branch-context-normalization",
+        )
+        assert _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr145-future-roadmap-branch",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr143-qtt-owner-global-override-directive-currentization-internal-gate-release",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr138-atomicrows-semantic-row-contract",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(path, "main")
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr141_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr144-pr138-mainline-branch-context-normalization",
+            source="unit-test",
+        ),
+    )
+    for path in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS:
+        assert _is_allowed_pr141_changed_path(path, REPO_ROOT)
+
+
 def test_changed_path_guard_allows_exact_pr140_guard_repair_files_only(monkeypatch) -> None:
     assert c.PR140_GUARD_REPAIR_ALLOWANCE_REASON_CODE == (
         "PR140_GUARD_REPAIR_REQUIRED_FOR_PR141_DOWNSTREAM_HANDOFF"
@@ -464,8 +507,13 @@ def test_changed_path_guard_rejects_broad_pr140_package_directories() -> None:
         "tests/atomicrows",
     }
     assert c.PR140_GUARD_REPAIR_CHANGED_PATHS.isdisjoint(broad_paths)
+    assert c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS.isdisjoint(broad_paths)
     assert c.PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS.isdisjoint(broad_paths)
     for path in broad_paths:
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr144-pr138-mainline-branch-context-normalization",
+        )
         assert not _is_pr140_guard_repair_changed_path_for_branch(path, c.BRANCH)
         assert not _is_pr142_handoff_changed_path_for_branch(
             path,
@@ -493,6 +541,10 @@ def test_changed_path_guard_keeps_pr140_generated_and_protected_paths_disallowed
     }
     for path in disallowed_paths:
         assert path not in c.ALLOWED_PR141_CHANGED_PATHS
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr144-pr138-mainline-branch-context-normalization",
+        )
         assert not _is_pr140_guard_repair_changed_path_for_branch(path, c.BRANCH)
         assert not _is_pr142_handoff_changed_path_for_branch(
             path,
@@ -522,7 +574,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr141_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+            branch="pr144-pr138-mainline-branch-context-normalization",
             source="unit-test",
         ),
     )

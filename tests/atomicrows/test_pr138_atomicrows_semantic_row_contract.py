@@ -420,6 +420,71 @@ def test_pr138_gate_ci_main_push_skips_pr_branch_and_shallow_ancestry_requiremen
     assert c.PR138_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY in outcome.receipts
 
 
+def test_pr138_gate_local_mainline_continuation_preserves_baseline_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(branch="main", branch_rc=0, base_rc=0, ancestor_rc=0),
+    )
+
+    outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert outcome.ok, outcome.failures
+    assert c.PR138_REASON_BRANCH_MISMATCH not in outcome.failures
+    assert (
+        ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        not in outcome.receipts
+    )
+
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(branch="main", branch_rc=0, base_rc=0, ancestor_rc=1),
+    )
+    stale_outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert not stale_outcome.ok
+    assert c.PR138_REASON_BRANCH_MISMATCH not in stale_outcome.failures
+    assert c.PR138_REASON_LOCAL_BASELINE_NOT_DESCENDANT in stale_outcome.failures
+
+
+def test_pr138_gate_same_pr_repair_branch_preserves_baseline_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_ci_env(monkeypatch)
+    _mock_git_stdout(
+        monkeypatch,
+        _git_responses(
+            branch="repair/pr138-branch-context-mainline-normalization",
+            branch_rc=0,
+            base_rc=0,
+            ancestor_rc=0,
+        ),
+    )
+
+    outcome = validate_report_payload(
+        _report(),
+        repo_root=REPO_ROOT,
+        enforce_environment=True,
+    )
+
+    assert outcome.ok, outcome.failures
+    assert c.PR138_REASON_BRANCH_MISMATCH not in outcome.failures
+    assert (
+        ci_branch_context.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        not in outcome.receipts
+    )
+
+
 def test_pr138_gate_local_wrong_branch_fails_closed_with_branch_mismatch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
