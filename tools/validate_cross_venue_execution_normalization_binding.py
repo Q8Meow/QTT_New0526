@@ -13,6 +13,7 @@ if str(_REPO_ROOT) not in sys.path:
 from src.qtt.source_evidence.cross_venue_execution_normalization.validator import (  # noqa: E402
     FAILURE_MARKER,
     SUCCESS_MARKER,
+    validate,
     write_generated_reports,
 )
 
@@ -20,12 +21,16 @@ from src.qtt.source_evidence.cross_venue_execution_normalization.validator impor
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--check-only", action="store_true")
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    ok, failures, _artifacts = write_generated_reports(Path(args.repo_root))
+    repo_root = Path(args.repo_root)
+    ok, failures, _artifacts = (
+        validate(repo_root) if args.check_only else write_generated_reports(repo_root)
+    )
     if not ok:
         print(FAILURE_MARKER)
         for failure in failures:

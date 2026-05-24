@@ -260,18 +260,32 @@ def test_pr137_reports_are_deterministic_and_idempotent() -> None:
     second = controller.build_reports(REPO_ROOT)
     assert first == second
 
+    artifact_paths = (
+        *policy.report_paths(),
+        *policy.receipt_paths(),
+        *policy.schema_paths(),
+        policy.ROADMAP_DOC_PATH,
+    )
+    before_bytes = {
+        rel_path: (REPO_ROOT / rel_path).read_bytes()
+        for rel_path in artifact_paths
+    }
     before = {
         rel_path: (REPO_ROOT / rel_path).read_text(encoding="utf-8")
         for rel_path in (*policy.report_paths(), *policy.receipt_paths())
     }
-    controller.write_artifacts(REPO_ROOT)
-    after_first_write = {
-        rel_path: (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        for rel_path in (*policy.report_paths(), *policy.receipt_paths())
-    }
-    controller.write_artifacts(REPO_ROOT)
-    after_second_write = {
-        rel_path: (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        for rel_path in (*policy.report_paths(), *policy.receipt_paths())
-    }
+    try:
+        controller.write_artifacts(REPO_ROOT)
+        after_first_write = {
+            rel_path: (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+            for rel_path in (*policy.report_paths(), *policy.receipt_paths())
+        }
+        controller.write_artifacts(REPO_ROOT)
+        after_second_write = {
+            rel_path: (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+            for rel_path in (*policy.report_paths(), *policy.receipt_paths())
+        }
+    finally:
+        for rel_path, content in before_bytes.items():
+            (REPO_ROOT / rel_path).write_bytes(content)
     assert before == after_first_write == after_second_write

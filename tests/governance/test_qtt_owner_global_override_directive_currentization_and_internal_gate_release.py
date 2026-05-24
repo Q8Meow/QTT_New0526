@@ -3,10 +3,15 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
 
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
 from tools.ci_branch_context import BranchContext
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
+from tools import (
+    validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release
+    as pr143_cli,
+)
 
 from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_currentization_and_internal_gate_release import (
     builder as pr143_builder,
@@ -18,6 +23,7 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
     _is_allowed_pr143_changed_path_for_branch,
     _is_pr138_mainline_context_repair_changed_path_for_branch,
     _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch,
+    _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch,
     build_json_schema,
     build_report,
     validate_payload,
@@ -27,7 +33,28 @@ from tools import run_validation_gates as runner
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_OWNER_APPROVAL_QUEUE_REPORT_PATH = Path(
+    "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+)
 _CACHE: dict[str, dict] | None = None
+
+
+def _restore_owner_approval_queue_report_from_head() -> None:
+    completed = subprocess.run(
+        [
+            "git",
+            "restore",
+            "--source=HEAD",
+            "--worktree",
+            "--",
+            _OWNER_APPROVAL_QUEUE_REPORT_PATH.as_posix(),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
 
 
 def _outputs() -> dict[str, dict]:
@@ -62,6 +89,37 @@ def _payload_failures(mutator) -> set[str]:
     payload = _report()
     mutator(payload)
     return set(validate_payload(payload, _schema()))
+
+
+def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
+    report_path = REPO_ROOT / c.REPORT_PATH
+    _restore_owner_approval_queue_report_from_head()
+    before = report_path.read_bytes()
+
+    try:
+        assert pr143_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+
+        assert report_path.read_bytes() == before
+        assert c.SUCCESS_MARKER in capsys.readouterr().out
+    finally:
+        _restore_owner_approval_queue_report_from_head()
+
+
+def test_cli_write_artifacts_mode_is_explicit_opt_in(monkeypatch, capsys) -> None:
+    calls: list[Path] = []
+    repo_root = REPO_ROOT / ".tmp" / "pr143_write_artifacts_opt_in_unit"
+
+    def fake_write_all_artifacts(repo_root: Path) -> dict:
+        calls.append(repo_root)
+        return {}
+
+    monkeypatch.setattr(pr143_cli, "write_all_artifacts", fake_write_all_artifacts)
+    monkeypatch.setattr(pr143_cli, "validate_repository_artifacts", lambda repo_root: [])
+
+    assert pr143_cli.main(["--repo-root", str(repo_root), "--write-artifacts"]) == 0
+
+    assert calls == [repo_root.resolve()]
+    assert c.SUCCESS_MARKER in capsys.readouterr().out
 
 
 def _walk_strings(value):
@@ -429,6 +487,29 @@ def test_changed_path_guard_allows_exact_pr142_guard_compatibility_files_only(
     )
     for path in c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS:
         assert _is_allowed_pr143_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_allows_exact_pr146_tooling_hygiene_files_only() -> None:
+    assert c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_ALLOWANCE_REASON_CODE == (
+        "PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_REQUIRED"
+    )
+    for path in c.PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_CHANGED_PATHS:
+        assert _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "pr146-generated-report-nonmutating-validation-mode-audit",
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "main",
+        )
+        assert not _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+            path,
+            "",
+        )
 
 
 def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:

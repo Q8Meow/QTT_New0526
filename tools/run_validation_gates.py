@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import inspect
+import json
 from typing import Sequence
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
@@ -17,6 +18,339 @@ PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT = (
     "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
 )
 _RUN_COMMANDS_CLEANUP_REPO_ROOT: pathlib.Path | None = None
+TRACKED_GENERATED_PATH_PREFIXES = (
+    "docs/master_plan/generated/",
+    "docs/master_plan/source_evidence/generated/",
+    "docs/roadmap/generated/",
+)
+VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS = frozenset(
+    {
+        "branch",
+        "base_head",
+    }
+)
+GENERATED_REPORT_CURRENTNESS_IGNORED_FIELDS = (
+    VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS | {"report_path"}
+)
+CHECK_ONLY_VALIDATOR_SCRIPTS = frozenset(
+    {
+        "validate_source_evidence_retrieval_executor.py",
+        "validate_source_evidence_acceptance.py",
+        "validate_source_revalidation_scheduler.py",
+        "validate_connector_semantic_binding_implementation_gate.py",
+        "validate_per_venue_execution_lifecycle_model.py",
+        "validate_cross_venue_execution_normalization_binding.py",
+        "runtime_cash_component_field_map_validate.py",
+        "private_state_read_receipt_gate_validate.py",
+        "credential_alias_secret_no_capture_readiness_validate.py",
+        "venue_market_data_ingest_adapters_validate.py",
+        "orderbook_event_state_snapshot_builder_validate.py",
+        "runtime_resolver_snapshot_executor_validate.py",
+    }
+)
+DEFAULT_GENERATED_OUTPUT_ARGS = {
+    "validate_qtt_owner_global_override_authority.py": (
+        "--out",
+        "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json",
+    ),
+    "validate_qtt_agent_role_operating_charter_registry.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json",
+    ),
+    "validate_qtt_algorithm_formula_family_registry.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json",
+    ),
+    "validate_qtt_agent_algorithm_binding_registry.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+    ),
+    "validate_qtt_agent_algorithm_consumer_gate.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json",
+    ),
+    "validate_qtt_agent_algorithm_cumulative_readiness_gate.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAgentAlgorithmCumulativeReadinessGate.report.json",
+    ),
+    "validate_accepted_source_to_connector_semantic_binding.py": (
+        "--out",
+        "docs/master_plan/source_evidence/generated/CODEX_PR124_ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE_REPORT.json",
+    ),
+    "validate_source_revalidation_scheduler.py": (
+        "--out",
+        "docs/master_plan/source_evidence/generated/CODEX_PR125_SOURCE_REVALIDATION_SUPERSESSION_MATERIALITY_SCHEDULER_REPORT.json",
+    ),
+    "validate_qtt_agent_algorithm_command_matrix.py": (
+        "--out",
+        "docs/master_plan/generated/QTTAgentAlgorithmCommandMatrix.json",
+    ),
+    "build_atomicrows_parameter_lifecycle_report.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterLifecycleReport.json",
+    ),
+    "validate_atomicrows_lifecycle_consumer_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsLifecycleConsumerGate.report.json",
+    ),
+    "validate_atomicrows_lifecycle_promotion_receipt_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsLifecyclePromotionReceiptGate.report.json",
+    ),
+    "validate_atomicrows_lifecycle_registry_mutation_guard.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsLifecycleRegistryMutationGuard.report.json",
+    ),
+    "validate_atomicrows_lifecycle_cumulative_readiness_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsLifecycleCumulativeReadinessGate.report.json",
+    ),
+    "validate_atomicrows_lifecycle_gate_command_matrix.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsLifecycleGateCommandMatrix.json",
+    ),
+    "validate_atomicrows_parameter_agent_binding_registry.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterAgentBindingReport.json",
+    ),
+    "validate_atomicrows_parameter_agent_binding_consumer_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterAgentBindingConsumerGate.report.json",
+    ),
+    "validate_atomicrows_parameter_agent_binding_cumulative_readiness_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json",
+    ),
+    "validate_atomicrows_parameter_agent_binding_command_matrix.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterAgentBindingCommandMatrix.json",
+    ),
+    "validate_atomicrows_research_provenance_evidence_tier_classification.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsResearchProvenanceEvidenceTierClassification.report.json",
+    ),
+    "validate_atomicrows_owner_submitted_research_source_intake_registry.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json",
+    ),
+    "validate_atomicrows_research_source_to_candidate_family_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json",
+    ),
+    "validate_atomicrows_parameter_stack_role_taxonomy.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json",
+    ),
+    "validate_atomicrows_parameter_stack_completeness_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json",
+    ),
+    "validate_atomicrows_parameter_stack_compatibility_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json",
+    ),
+    "validate_edge_parameter_stack_selection_packet.py": (
+        "--out",
+        "docs/master_plan/generated/EDGEParameterStackSelectionPacket.report.json",
+    ),
+    "validate_qtt_trade_context_packet.py": (
+        "--out",
+        "docs/master_plan/generated/QTTTradeContextPacket.report.json",
+    ),
+    "validate_atomicrows_parameter_selection_universe_registry.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json",
+    ),
+    "validate_atomicrows_parameter_selection_universe_consumer_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json",
+    ),
+    "validate_trade_context_selection_universe_routing_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json",
+    ),
+    "validate_quantum_applicability_classification_registry.py": (
+        "--out",
+        "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json",
+    ),
+    "validate_owner_quantum_priority_policy_registry.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json",
+    ),
+    "validate_parameter_algorithm_scoring_policy_registry.py": (
+        "--out",
+        "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json",
+    ),
+    "validate_parameter_stack_scoring_and_ranking_gate.py": (
+        "--out",
+        "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json",
+    ),
+    "validate_quantum_classical_optimizer_arbitration_gate.py": (
+        "--out",
+        "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json",
+    ),
+    "validate_candidate_parameter_stack_generation_gate.py": (
+        "--out",
+        "docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json",
+    ),
+    "validate_trade_context_parameter_stack_selection_gate.py": (
+        "--out",
+        "docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json",
+    ),
+    "validate_selected_parameter_stack_handoff_packet.py": (
+        "--out",
+        "docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json",
+    ),
+    "validate_replay_paper_candidate_stack_competition_gate.py": (
+        "--out",
+        "docs/master_plan/generated/ReplayPaperCandidateStackCompetitionGate.report.json",
+    ),
+    "validate_dual_result_review_for_parameter_stacks.py": (
+        "--out",
+        "docs/master_plan/generated/DualResultReviewForParameterStacks.report.json",
+    ),
+    "validate_owner_live_promotion_review_for_parameter_stacks.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerLivePromotionReviewForParameterStacks.report.json",
+    ),
+    "validate_owner_approval_request_queue_registry.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json",
+    ),
+    "validate_owner_override_receipt_authoring_gate.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerOverrideReceiptAuthoringGate.report.json",
+    ),
+    "validate_owner_dashboard_approval_menu_schema.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerDashboardApprovalMenuSchema.report.json",
+    ),
+    "validate_owner_dashboard_approval_static_screen_contract.py": (
+        "--out",
+        "docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json",
+    ),
+    "validate_atomicrows_full_bundle_row_expansion_plan.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json",
+    ),
+    "validate_atomicrows_bundle_row_family_source_files.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsBundleRowFamilySourceFiles.report.json",
+    ),
+    "validate_atomicrows_bundle_builder_deterministic_assembly_gate.py": (
+        "--out",
+        "docs/master_plan/generated/AtomicRowsBundleBuilderDeterministicAssemblyGate.report.json",
+    ),
+    "validate_atomicrows_sha_system_dormancy_state_contract.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsShaSystemDormancyStateContract.report.json",
+    ),
+    "validate_qtt_final_readiness_dependency_policy_contract.py": (
+        "--report-out",
+        "docs/master_plan/generated/QttFinalReadinessDependencyPolicy.report.json",
+    ),
+    "validate_qtt_active_non_sha_day1_gate_state_registry_contract.py": (
+        "--report-out",
+        "docs/master_plan/generated/QttActiveNonShaDay1GateStateRegistry.report.json",
+    ),
+    "validate_qtt_pr_identity_roster.py": (
+        "--report-out",
+        "docs/master_plan/generated/QttPrIdentityRoster.report.json",
+    ),
+    "validate_qtt_roadmap_execution_state_controller.py": (
+        "--report-out",
+        "docs/master_plan/generated/QttRoadmapExecutionStateController.report.json",
+    ),
+    "validate_atomicrows_bundle_sha_freeze_authority_gate.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json",
+    ),
+    "validate_atomicrows_exact_row_authority_classifier_bridge.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsExactRowAuthorityClassifierBridge.report.json",
+    ),
+    "validate_atomicrows_exact_row_expansion_manifest.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsExactRowExpansionManifest.report.json",
+    ),
+    "validate_atomicrows_owner_approved_exact_15_family_count_distribution.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json",
+    ),
+    "validate_atomicrows_exact_row_generator_dry_run_manifest.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsExactRowGeneratorDryRun.report.json",
+    ),
+    "validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsRepairChainGrandDebugLogicAudit.report.json",
+    ),
+    "validate_atomicrows_exact_row_source_materialization_manifest.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsExactRowSourceMaterialization.report.json",
+    ),
+    "validate_atomicrows_exact_row_agent_family_eligibility_matrix.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsExactRowAgentFamilyEligibilityMatrix.report.json",
+    ),
+    "validate_atomicrows_bundle_materialization_manifest.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsBundleMaterialization.report.json",
+    ),
+    "validate_atomicrows_bundle_boundary_state_contract.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsBundleBoundaryStateContract.report.json",
+    ),
+    "validate_atomicrows_sha_freeze_final_readiness_state_contract.py": (
+        "--report-out",
+        "docs/master_plan/generated/AtomicRowsShaFreezeFinalReadinessStateContract.report.json",
+    ),
+    "stage1_connector_semantic_binding_ledger_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1ConnectorSemanticBindingLedgerCheck.report.json",
+    ),
+    "stage1_runtime_resolver_snapshot_contract_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1RuntimeResolverSnapshotContractCheck.report.json",
+    ),
+    "stage1_runtime_resolver_to_replay_paper_handoff_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1RuntimeResolverToReplayPaperHandoff.report.json",
+    ),
+    "stage1_concurrent_replay_paper_contract_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1ConcurrentReplayPaperContractCheck.report.json",
+    ),
+    "stage1_dual_result_review_contract_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1DualResultReviewContractCheck.report.json",
+    ),
+    "stage1_owner_live_promotion_review_contract_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1OwnerLivePromotionReviewContractCheck.report.json",
+    ),
+    "stage1_three_venue_canary_eligibility_contract_check.py": (
+        "--out",
+        "docs/master_plan/generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json",
+    ),
+    "qtt_test_gate.py": (
+        "--out",
+        "docs/master_plan/generated/QTTTestGate.report.json",
+    ),
+    "local_gate_command_matrix.py": (
+        "--out",
+        "docs/master_plan/generated/LocalGateCommandMatrix.json",
+    ),
+    "pr_handoff_check.py": (
+        "--out",
+        "docs/master_plan/generated/FirstCodingPRHandoff.packet.json",
+    ),
+    "build_master_plan_section_coverage_report.py": (
+        "--out",
+        "docs/master_plan/generated/MasterPlanSectionCoverageReport.json",
+    ),
+}
+GENERATED_REPORT_CURRENTNESS_OUTPUT_ARGS: dict[str, tuple[str, str]] = {}
 PR138_NON_MUTATING_VALIDATION_SCRIPT = (
     "from pathlib import Path\n"
     "from src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.report "
@@ -76,6 +410,149 @@ def _is_pr143_owner_override_currentization_validator_command(
         and pathlib.PurePath(command[1]).name
         == PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT
     )
+
+
+def _normal_path_text(value: pathlib.Path | str) -> str:
+    return str(value).replace("\\", "/")
+
+
+def _is_tracked_generated_output_path(value: pathlib.Path | str) -> bool:
+    normalized = _normal_path_text(value)
+    return any(
+        normalized.startswith(prefix) for prefix in TRACKED_GENERATED_PATH_PREFIXES
+    )
+
+
+def _validation_generated_output(
+    validation_dir: pathlib.Path,
+    tracked_path: pathlib.Path | str,
+) -> pathlib.Path:
+    normalized = _normal_path_text(tracked_path)
+    bucket = (
+        "roadmap_generated"
+        if normalized.startswith("docs/roadmap/generated/")
+        else "master_plan_generated"
+    )
+    return validation_dir / bucket / pathlib.PurePosixPath(normalized).name
+
+
+def _route_command_generated_outputs_to_temp(
+    command: Sequence[str],
+    validation_dir: pathlib.Path,
+) -> list[str]:
+    routed = [str(part) for part in command]
+    for index, token in enumerate(routed[:-1]):
+        if (
+            token in {"--out", "--report-out"}
+            or token.endswith("-out")
+        ) and _is_tracked_generated_output_path(routed[index + 1]):
+            routed[index + 1] = str(
+                _validation_generated_output(validation_dir, routed[index + 1])
+            )
+
+    if len(routed) > 1:
+        script_name = pathlib.PurePath(routed[1]).name
+        if script_name in CHECK_ONLY_VALIDATOR_SCRIPTS and "--check-only" not in routed:
+            routed.append("--check-only")
+        if script_name in DEFAULT_GENERATED_OUTPUT_ARGS:
+            flag, tracked_path = DEFAULT_GENERATED_OUTPUT_ARGS[script_name]
+            if flag not in routed:
+                routed.extend(
+                    [
+                        flag,
+                        str(_validation_generated_output(validation_dir, tracked_path)),
+                    ]
+                )
+    return routed
+
+
+def _resolved_repo_path(repo_root: pathlib.Path, path_text: str) -> pathlib.Path:
+    path = pathlib.Path(path_text)
+    return path if path.is_absolute() else repo_root / path
+
+
+def _json_currentness_payload(path: pathlib.Path) -> object:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        return {
+            key: value
+            for key, value in payload.items()
+            if key not in GENERATED_REPORT_CURRENTNESS_IGNORED_FIELDS
+        }
+    return payload
+
+
+def _tracked_report_has_volatile_currentness_context(path: pathlib.Path) -> bool:
+    if path.suffix.lower() != ".json":
+        return False
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return isinstance(payload, dict) and any(
+        key in payload for key in VOLATILE_GENERATED_REPORT_CURRENTNESS_FIELDS
+    )
+
+
+def _generated_reports_match_for_currentness(
+    output_path: pathlib.Path,
+    tracked_path: pathlib.Path,
+) -> bool:
+    if output_path.read_bytes() == tracked_path.read_bytes():
+        return True
+    if output_path.suffix.lower() != ".json" or tracked_path.suffix.lower() != ".json":
+        return False
+    try:
+        return _json_currentness_payload(output_path) == _json_currentness_payload(
+            tracked_path
+        )
+    except (OSError, json.JSONDecodeError):
+        return False
+
+
+def _routed_generated_output_currentness_failures(
+    command: Sequence[str],
+    repo_root: pathlib.Path,
+) -> list[str]:
+    if "--check-only" in command or len(command) <= 1:
+        return []
+    script_name = pathlib.PurePath(command[1]).name
+    output_arg = GENERATED_REPORT_CURRENTNESS_OUTPUT_ARGS.get(script_name)
+    if output_arg is None:
+        return []
+    flag, tracked_path_text = output_arg
+    command_list = [str(part) for part in command]
+    if flag not in command_list:
+        return []
+    output_index = command_list.index(flag) + 1
+    if output_index >= len(command_list):
+        return [f"TRACKED_GENERATED_REPORT_OUTPUT_ARG_MISSING: {script_name} {flag}"]
+
+    output_text = command_list[output_index]
+    if _is_tracked_generated_output_path(output_text):
+        return []
+
+    output_path = _resolved_repo_path(repo_root, output_text)
+    tracked_path = _resolved_repo_path(repo_root, tracked_path_text)
+    if not output_path.exists():
+        return [
+            "TRACKED_GENERATED_REPORT_TEMP_OUTPUT_MISSING: "
+            f"{_normal_path_text(output_path)}"
+        ]
+    if not tracked_path.exists():
+        return [
+            "TRACKED_GENERATED_REPORT_MISSING: "
+            f"{_normal_path_text(tracked_path_text)}"
+        ]
+    if _tracked_report_has_volatile_currentness_context(tracked_path):
+        return []
+    if not _generated_reports_match_for_currentness(output_path, tracked_path):
+        return [
+            "TRACKED_GENERATED_REPORT_STALE: "
+            f"{_normal_path_text(tracked_path_text)} differs from validation temp output "
+            f"{_normal_path_text(output_path)}"
+        ]
+    return []
 
 
 def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str, str]:
@@ -147,7 +624,7 @@ def build_validation_commands(
     )
     master_plan = pathlib.Path("docs") / "master_plan" / "QTT_MasterPlan_Current.md"
 
-    return [
+    commands = [
         [
             sys.executable,
             _path("tools", "master_plan_ingest.py"),
@@ -1738,6 +2215,10 @@ def build_validation_commands(
             str(pytest_basetemp),
         ],
     ]
+    return [
+        _route_command_generated_outputs_to_temp(command, pathlib.Path(validation_dir))
+        for command in commands
+    ]
 
 
 def run_commands(
@@ -1769,7 +2250,35 @@ def run_commands(
         print(subprocess.list2cmdline(command_list), flush=True)
         completed = subprocess.run(command_list)
         if completed.returncode != 0:
+            if cleanup_repo_root is not None and _is_final_pytest_command(
+                command_list
+            ):
+                try:
+                    _restore_tracked_gate_side_effects(
+                        cleanup_repo_root,
+                        initially_modified_paths,
+                    )
+                except RuntimeError as exc:
+                    print(str(exc), file=sys.stderr, flush=True)
             return completed.returncode
+        if cleanup_repo_root is not None and _is_final_pytest_command(command_list):
+            try:
+                _restore_tracked_gate_side_effects(
+                    cleanup_repo_root,
+                    initially_modified_paths,
+                )
+            except RuntimeError as exc:
+                print(str(exc), file=sys.stderr, flush=True)
+                return 1
+        if cleanup_repo_root is not None:
+            currentness_failures = _routed_generated_output_currentness_failures(
+                command_list,
+                cleanup_repo_root,
+            )
+            if currentness_failures:
+                for failure in currentness_failures:
+                    print(failure, file=sys.stderr, flush=True)
+                return 1
 
     print(SUCCESS_MARKER, flush=True)
     return 0

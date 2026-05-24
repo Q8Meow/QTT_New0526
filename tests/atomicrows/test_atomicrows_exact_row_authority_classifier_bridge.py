@@ -320,4 +320,11 @@ def test_run_validation_gates_includes_bridge_after_pr100_and_before_terminal_ga
     assert commands[bridge_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_exact_row_authority_classifier_bridge.py"),
+        "--report-out",
+        str(
+            runner._validation_generated_output(
+                runner._default_validation_dir(),
+                "docs/master_plan/generated/AtomicRowsExactRowAuthorityClassifierBridge.report.json",
+            )
+        ),
     ]

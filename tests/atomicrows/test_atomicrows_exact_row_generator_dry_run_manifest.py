@@ -274,6 +274,13 @@ def test_run_validation_gates_includes_dry_run_gate(monkeypatch):
     assert commands[dry_run_index] == [
         python_executable,
         str(Path("tools") / "validate_atomicrows_exact_row_generator_dry_run_manifest.py"),
+        "--report-out",
+        str(
+            runner._validation_generated_output(
+                runner._default_validation_dir(),
+                "docs/master_plan/generated/AtomicRowsExactRowGeneratorDryRun.report.json",
+            )
+        ),
     ]
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/exact_row_sources").is_dir()
     assert (REPO_ROOT / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").exists()

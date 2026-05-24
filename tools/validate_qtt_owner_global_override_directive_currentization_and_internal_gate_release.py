@@ -17,7 +17,6 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
 from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_currentization_and_internal_gate_release.report import (  # noqa: E402
     validate_repository_artifacts,
     write_all_artifacts,
-    write_report_file,
 )
 
 
@@ -34,8 +33,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     if args.write_artifacts:
         write_all_artifacts(repo_root)
-    else:
-        write_report_file(repo_root)
 
     failures = validate_repository_artifacts(repo_root)
     if failures:

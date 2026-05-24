@@ -388,7 +388,7 @@ def test_changed_path_guard_allows_exact_pr138_mainline_context_repair_files_onl
         pr141_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr144-pr138-mainline-branch-context-normalization",
+            branch="pr146-generated-report-nonmutating-validation-mode-audit",
             source="unit-test",
         ),
     )
@@ -574,7 +574,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr141_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr144-pr138-mainline-branch-context-normalization",
+            branch="pr146-generated-report-nonmutating-validation-mode-audit",
             source="unit-test",
         ),
     )

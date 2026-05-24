@@ -27,6 +27,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--out", default=str(PR125_REPORT_PATH))
+    parser.add_argument("--check-only", action="store_true")
     return parser
 
 
@@ -34,9 +35,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     repo_root = Path(args.repo_root)
     pr125_report, scheduler_report, snapshot_report, failures = build_report_artifacts(repo_root)
-    write_json_object(repo_root / Path(args.out), pr125_report)
-    write_json_object(repo_root / SCHEDULER_REPORT_PATH, scheduler_report)
-    write_json_object(repo_root / SOURCE_CHANGE_SNAPSHOT_REPORT_PATH, snapshot_report)
+    if not args.check_only:
+        write_json_object(repo_root / Path(args.out), pr125_report)
+        write_json_object(repo_root / SCHEDULER_REPORT_PATH, scheduler_report)
+        write_json_object(repo_root / SOURCE_CHANGE_SNAPSHOT_REPORT_PATH, snapshot_report)
     if failures:
         print(FAILURE_MARKER)
         for failure in failures:

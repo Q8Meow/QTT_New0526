@@ -17,7 +17,6 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (  # noqa: E402
     validate_repository_artifacts,
     write_all_artifacts,
-    write_report_file,
 )
 
 
@@ -34,8 +33,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     if args.write_artifacts:
         write_all_artifacts(repo_root)
-    else:
-        write_report_file(repo_root)
 
     failures = validate_repository_artifacts(repo_root)
     if failures:

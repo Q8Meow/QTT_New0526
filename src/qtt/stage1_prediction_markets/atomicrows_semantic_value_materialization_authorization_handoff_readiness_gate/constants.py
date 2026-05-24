@@ -281,6 +281,64 @@ PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS = {
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/validator.py",
     "tests/atomicrows/test_pr138_atomicrows_semantic_row_contract.py",
 }
+PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_ALLOWANCE_REASON_CODE = (
+    "PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_REQUIRED"
+)
+PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_DOWNSTREAM_AFTER_PR = 145
+PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_CHANGED_PATHS = {
+    "tools/run_validation_gates.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/atomicrows/test_atomicrows_exact_row_authority_classifier_bridge.py",
+    "tests/atomicrows/test_atomicrows_exact_row_expansion_manifest.py",
+    "tests/atomicrows/test_atomicrows_exact_row_generator_dry_run_manifest.py",
+    "tests/atomicrows/test_atomicrows_owner_approved_exact_15_family_count_distribution.py",
+    "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    "tests/roadmap/test_pr137_launch_readiness_dependency_controller.py",
+    "tests/source_evidence/test_pr134_preserves_run_validation_gates_fresh_tempdir.py",
+    "tools/validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    "tests/governance/test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    "tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    "tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    "tools/validate_historical_dataset_policy_literal_drift.py",
+    "tools/validate_pr136_roadmap_policy_literal_drift.py",
+    "tools/validate_source_revalidation_scheduler.py",
+    "tools/validate_connector_semantic_binding_implementation_gate.py",
+    "tools/validate_per_venue_execution_lifecycle_model.py",
+    "tools/validate_cross_venue_execution_normalization_binding.py",
+    "tools/runtime_cash_component_field_map_validate.py",
+    "tools/private_state_read_receipt_gate_validate.py",
+    "tools/validate_atomicrows_bundle_materialization_manifest.py",
+    "tools/validate_atomicrows_exact_row_agent_family_eligibility_matrix.py",
+    "tools/validate_atomicrows_exact_row_source_materialization_manifest.py",
+    "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+    "tools/validate_atomicrows_sha_system_dormancy_state_contract.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/constants.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_field_coverage_enrichment_plan/report.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/constants.py",
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
+        "constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
+        "report.py"
+    ),
+    "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/"
+        "constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/"
+        "report.py"
+    ),
+}
 
 ALLOWED_PR142_CHANGED_PATHS = {
     YAML_PATH.as_posix(),
