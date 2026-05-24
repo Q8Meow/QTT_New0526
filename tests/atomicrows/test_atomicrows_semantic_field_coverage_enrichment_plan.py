@@ -18,6 +18,7 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
     _is_ignored_pr140_changed_path,
     _is_pr141_downstream_changed_path_for_branch,
     _is_pr142_downstream_changed_path_for_branch,
+    _is_pr143_owner_override_currentization_changed_path_for_branch,
     build_json_schema,
     build_plan,
     build_report,
@@ -385,6 +386,39 @@ def test_changed_path_guard_allows_exact_pr142_downstream_handoff_files_only(mon
         lambda repo_root: BranchContext(branch=downstream_branch, source="unit-test"),
     )
     for path in c.PR142_DOWNSTREAM_HANDOFF_READINESS_GATE_CHANGED_PATHS:
+        assert _is_allowed_pr140_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_allows_exact_pr143_owner_override_files_only(monkeypatch) -> None:
+    downstream_branch = (
+        "pr143-qtt-owner-global-override-directive-currentization-internal-gate-release"
+    )
+    for path in c.PR143_OWNER_GLOBAL_OVERRIDE_CURRENTIZATION_CHANGED_PATHS:
+        assert _is_pr143_owner_override_currentization_changed_path_for_branch(
+            path,
+            downstream_branch,
+        )
+        assert _is_pr143_owner_override_currentization_changed_path_for_branch(
+            path,
+            "pr143k-future-roadmap-branch",
+        )
+        assert _is_pr143_owner_override_currentization_changed_path_for_branch(
+            path,
+            "pr144-future-roadmap-branch",
+        )
+        assert not _is_pr143_owner_override_currentization_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr143_owner_override_currentization_changed_path_for_branch(path, "main")
+        assert not _is_pr143_owner_override_currentization_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr140_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch=downstream_branch, source="unit-test"),
+    )
+    for path in c.PR143_OWNER_GLOBAL_OVERRIDE_CURRENTIZATION_CHANGED_PATHS:
         assert _is_allowed_pr140_changed_path(path, REPO_ROOT)
 
 

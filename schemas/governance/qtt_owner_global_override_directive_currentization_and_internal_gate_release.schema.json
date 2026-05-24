@@ -1,0 +1,1246 @@
+{
+  "$id": "https://qtt.local/schemas/governance/qtt_owner_global_override_directive_currentization_and_internal_gate_release.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_stem": {
+      "const": "QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease",
+      "type": "string"
+    },
+    "atomicrows_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "enrichment_order": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enrichment_order_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "field_coverage_plan_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_authority_created": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_freeze_authority_created": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_bundle_mutation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_row_family_source_mutation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "row_family_source_manifest_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "semantic_row_contract_preserved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "value_materialization_still_not_performed_by_this_pr": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "authority_class": {
+      "enum": [
+        "STATIC_QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_INTERNAL_GATE_RELEASE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY_NOT_MATERIALIZATION_NOT_RUNTIME_NOT_QUANTUM_EXECUTION"
+      ],
+      "type": "string"
+    },
+    "classical_optimizer_forward_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "arbitration_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "classical_optimizer_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "deterministic_field_identity_ready": {
+          "const": true,
+          "type": "boolean"
+        },
+        "external_fact_evidence_pending_not_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_internal_permission_for_optimizer_planning_satisfied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ranking_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "replay_paper_results_pending_not_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "runtime_cash_receipt_pending_not_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "scoring_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "strategy_selection_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "owner_internal_permission_for_optimizer_planning_satisfied",
+        "classical_optimizer_execution_created",
+        "scoring_execution_created",
+        "ranking_execution_created",
+        "arbitration_execution_created",
+        "strategy_selection_created",
+        "deterministic_field_identity_ready",
+        "external_fact_evidence_pending_not_owner_approval",
+        "replay_paper_results_pending_not_owner_approval",
+        "runtime_cash_receipt_pending_not_owner_approval"
+      ],
+      "type": "object"
+    },
+    "execution": {
+      "const": "DISABLED",
+      "type": "string"
+    },
+    "existing_owner_global_override_authority_consumption": {
+      "additionalProperties": false,
+      "properties": {
+        "owner_global_override_authority": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_all_qtt_internal_requirements": {
+          "const": true,
+          "type": "boolean"
+        },
+        "report_path": {
+          "type": "string"
+        },
+        "report_present": {
+          "const": true,
+          "type": "boolean"
+        },
+        "report_type": {
+          "const": "QTT_OWNER_GLOBAL_OVERRIDE_AUTHORITY_REPORT",
+          "type": "string"
+        },
+        "tool_consumed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "tool_path": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "forbidden_payload_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle_mutation_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "connector_semantic_binding_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_order_execution_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "optimizer_result_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qtt_generated_integrity_authority_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_execution_result_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "row_family_source_mutation_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_value_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_accepted_external_fact_payloads_allowed": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "semantic_value_payloads_allowed",
+        "bundle_mutation_payloads_allowed",
+        "row_family_source_mutation_payloads_allowed",
+        "optimizer_result_payloads_allowed",
+        "quantum_execution_result_payloads_allowed",
+        "source_accepted_external_fact_payloads_allowed",
+        "connector_semantic_binding_payloads_allowed",
+        "live_order_execution_payloads_allowed",
+        "qtt_generated_integrity_authority_payloads_allowed"
+      ],
+      "type": "object"
+    },
+    "generated_at_utc": {
+      "const": "STATIC_DETERMINISTIC_NO_WALL_CLOCK",
+      "type": "string"
+    },
+    "generated_by_validator_tool": {
+      "const": true,
+      "type": "boolean"
+    },
+    "generated_from_static_evidence_only": {
+      "const": true,
+      "type": "boolean"
+    },
+    "internal_gate_release_contract": {
+      "additionalProperties": false,
+      "properties": {
+        "active_owner_approval_blockers_after_pr143": {
+          "maxItems": 0,
+          "type": "array"
+        },
+        "future_reports_must_use_owner_global_override_satisfied_state": {
+          "const": true,
+          "type": "boolean"
+        },
+        "internal_owner_permission_state_after_pr143": {
+          "const": "OWNER_GLOBAL_OVERRIDE_SATISFIED",
+          "type": "string"
+        },
+        "released_internal_gate_classes": {
+          "items": {
+            "enum": [
+              "OWNER_APPROVAL",
+              "OWNER_APPROVAL_RECEIPT",
+              "OWNER_PERMISSION",
+              "OWNER_ACTION_REQUIRED",
+              "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION",
+              "OWNER_PERMISSION_REQUIRED_FOR_INTERNAL_GATE_TRANSITION",
+              "OWNER_PERMISSION_REQUIRED_FOR_QUANTUM_PLANNING",
+              "OWNER_PERMISSION_REQUIRED_FOR_QUANTUM_OPTIMIZATION_ARCHITECTURE",
+              "OWNER_PERMISSION_REQUIRED_FOR_TRUE_QUANTUM_BACKEND_INTEGRATION_PLANNING",
+              "OWNER_PERMISSION_REQUIRED_FOR_OPTIMIZER_PLANNING",
+              "OWNER_PERMISSION_REQUIRED_FOR_ATOMICROWS_INTERNAL_PLANNING",
+              "OWNER_PERMISSION_REQUIRED_FOR_AGENT_ORCHESTRATION_PLANNING",
+              "OWNER_PERMISSION_REQUIRED_FOR_DASHBOARD_OR_APPROVAL_UX_PLANNING"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "released_pr142_blocked_reason_codes": {
+          "items": {
+            "enum": [
+              "MISSING_OWNER_APPROVAL",
+              "MISSING_OWNER_APPROVAL_RECEIPT",
+              "MISSING_MATERIALIZATION_PERMISSION"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "released_internal_gate_classes",
+        "released_pr142_blocked_reason_codes",
+        "active_owner_approval_blockers_after_pr143",
+        "internal_owner_permission_state_after_pr143",
+        "future_reports_must_use_owner_global_override_satisfied_state"
+      ],
+      "type": "object"
+    },
+    "latency_hot_path_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "control_plane_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_live_path_must_consume_precomputed_owner_override_snapshot_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_live_path_must_consume_precomputed_quantum_decision_snapshot_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "live_path_import_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_pretrade_dependency_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "no_doc_retrieval_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_live_path_runtime_call": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_optimizer_call_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_quantum_backend_call_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "no_quantum_simulator_call_in_live_path": {
+          "const": true,
+          "type": "boolean"
+        },
+        "order_router_dependency_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_global_override_validation_not_live_hot_path_dependency": {
+          "const": true,
+          "type": "boolean"
+        },
+        "runtime_service_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "control_plane_only",
+        "live_pretrade_dependency_created",
+        "live_path_import_created",
+        "runtime_service_created",
+        "order_router_dependency_created",
+        "no_live_path_runtime_call",
+        "no_doc_retrieval_in_live_path",
+        "no_quantum_backend_call_in_live_path",
+        "no_quantum_simulator_call_in_live_path",
+        "no_optimizer_call_in_live_path",
+        "owner_global_override_validation_not_live_hot_path_dependency",
+        "future_live_path_must_consume_precomputed_owner_override_snapshot_only",
+        "future_live_path_must_consume_precomputed_quantum_decision_snapshot_only"
+      ],
+      "type": "object"
+    },
+    "mode": {
+      "const": "SOURCE_REQUIRED",
+      "type": "string"
+    },
+    "no_claim_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "atomicrows_bundle_sha_path_reference_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "connector_binding_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "day1_launch_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "execution_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "final_readiness_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "latency_superiority_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "live_reachability_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "materialization_permission_for_actual_value_writes_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "order_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "paper_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "profit_evidence_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qtt_generated_integrity_authority_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "replay_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "runtime_cash_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_values_materialized": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_acceptance_created": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_acceptance_created",
+        "connector_binding_created",
+        "replay_execution_created",
+        "paper_execution_created",
+        "live_reachability_created",
+        "order_authority_created",
+        "runtime_cash_receipt_created",
+        "profit_evidence_created",
+        "latency_superiority_evidence_created",
+        "execution_superiority_evidence_created",
+        "final_readiness_created",
+        "day1_launch_created",
+        "semantic_values_materialized",
+        "materialization_permission_for_actual_value_writes_created",
+        "qtt_generated_integrity_authority_created",
+        "atomicrows_bundle_sha_path_reference_created"
+      ],
+      "type": "object"
+    },
+    "non_owner_evidence_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "non_owner_evidence_state_label": {
+          "const": "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL",
+          "type": "string"
+        },
+        "owner_override_does_not_fabricate_connector_semantics": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_external_facts": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_live_order_authority": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_optimizer_results": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_order_or_fill_receipts": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_profit_evidence": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_quantum_backend_results": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_quantum_simulator_results": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_replay_paper_results": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_runtime_cash": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_does_not_fabricate_source_acceptance": {
+          "const": true,
+          "type": "boolean"
+        },
+        "preserved_non_owner_evidence_classes": {
+          "items": {
+            "enum": [
+              "ACCEPTED_SOURCE_EVIDENCE",
+              "CONNECTOR_SEMANTIC_BINDING",
+              "RUNTIME_CASH_RECEIPT",
+              "ORDER_RECEIPT",
+              "FILL_RECEIPT",
+              "REPLAY_RESULT",
+              "PAPER_RESULT",
+              "OPTIMIZER_RESULT",
+              "QUANTUM_BACKEND_RESULT",
+              "QUANTUM_SIMULATOR_RESULT",
+              "LIVE_EXECUTION_EVIDENCE",
+              "PROFIT_EVIDENCE"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "preserved_non_owner_evidence_classes",
+        "non_owner_evidence_state_label",
+        "owner_override_does_not_fabricate_external_facts",
+        "owner_override_does_not_fabricate_source_acceptance",
+        "owner_override_does_not_fabricate_connector_semantics",
+        "owner_override_does_not_fabricate_runtime_cash",
+        "owner_override_does_not_fabricate_order_or_fill_receipts",
+        "owner_override_does_not_fabricate_replay_paper_results",
+        "owner_override_does_not_fabricate_optimizer_results",
+        "owner_override_does_not_fabricate_quantum_backend_results",
+        "owner_override_does_not_fabricate_quantum_simulator_results",
+        "owner_override_does_not_fabricate_live_order_authority",
+        "owner_override_does_not_fabricate_profit_evidence"
+      ],
+      "type": "object"
+    },
+    "owner_global_override_directive": {
+      "additionalProperties": false,
+      "properties": {
+        "future_prompts_must_not_ask_owner_again_for_internal_qtt_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_qtt_agents_must_treat_owner_internal_override_as_satisfied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_validators_must_not_reblock_on_owner_approval_for_internal_qtt_workflow": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_directive_scope": {
+          "const": "GLOBAL_INTERNAL_QTT_WORKFLOW_GATES_AND_PERMISSIONS",
+          "type": "string"
+        },
+        "owner_directive_status": {
+          "const": "ACTIVE_FOR_GLOBAL_INTERNAL_QTT_WORKFLOW_UNBLOCKING",
+          "type": "string"
+        },
+        "owner_global_override_declared": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_agent_orchestration_planning_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_materialization_planning_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_optimizer_planning_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_owner_action_required": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_owner_approval_receipt": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_owner_authorization_required_before_implementation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_owner_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_quantum_optimization_architecture_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_quantum_planning_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_override_satisfies_internal_true_quantum_backend_integration_planning_permission": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_says_do_not_ask_again": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_statement_recorded_normalized": {
+          "const": "OWNER_APPROVES_AND_OVERRIDES_ALL_QTT_INTERNAL_GATES_BLOCKS_RULES_PERMISSIONS_NOW",
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner_global_override_declared",
+        "owner_statement_recorded_normalized",
+        "owner_says_do_not_ask_again",
+        "owner_directive_status",
+        "owner_directive_scope",
+        "owner_override_satisfies_internal_owner_approval",
+        "owner_override_satisfies_internal_owner_approval_receipt",
+        "owner_override_satisfies_internal_owner_permission",
+        "owner_override_satisfies_internal_materialization_planning_permission",
+        "owner_override_satisfies_internal_owner_action_required",
+        "owner_override_satisfies_internal_owner_authorization_required_before_implementation",
+        "owner_override_satisfies_internal_quantum_planning_permission",
+        "owner_override_satisfies_internal_quantum_optimization_architecture_permission",
+        "owner_override_satisfies_internal_true_quantum_backend_integration_planning_permission",
+        "owner_override_satisfies_internal_optimizer_planning_permission",
+        "owner_override_satisfies_internal_agent_orchestration_planning_permission",
+        "future_prompts_must_not_ask_owner_again_for_internal_qtt_approval",
+        "future_validators_must_not_reblock_on_owner_approval_for_internal_qtt_workflow",
+        "future_qtt_agents_must_treat_owner_internal_override_as_satisfied"
+      ],
+      "type": "object"
+    },
+    "path_derivation_basis": {
+      "type": "object"
+    },
+    "pr136_orchestration_preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_launch_orchestration_alignment": {
+          "type": "object"
+        },
+        "alias_resolution": {
+          "additionalProperties": false,
+          "properties": {
+            "alias_exists": {
+              "type": "boolean"
+            },
+            "canonical_crosswalk_used": {
+              "const": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+              "type": "string"
+            },
+            "conflict_detected": {
+              "const": false,
+              "type": "boolean"
+            },
+            "created_missing_alias": {
+              "const": false,
+              "type": "boolean"
+            },
+            "requested_alias": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "command_action_alignment": {
+          "type": "array"
+        },
+        "consumed_files": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dependency_alignment": {
+          "type": "object"
+        },
+        "launch_readiness_domain_alignment": {
+          "type": "object"
+        },
+        "market_specific_alignment": {
+          "type": "object"
+        },
+        "pr136_does_not_authorize_day1_launch": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_live_trading": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_materialization": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_does_not_authorize_quantum_execution": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr136_planning_authority_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_relationship": {
+          "type": "string"
+        },
+        "quantum_atomicrows_optimization_readiness_alignment": {
+          "type": "object"
+        },
+        "replay_paper_live_transition_boundary": {
+          "type": "object"
+        },
+        "route_triage_alignment": {
+          "type": "object"
+        },
+        "sequence_alignment": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "pr142_handoff_consumption": {
+      "additionalProperties": false,
+      "properties": {
+        "blocked_reason_codes_before_pr143": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "bundle_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "materialization_permission_for_actual_value_writes_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "materialization_permission_for_planning_released": {
+          "const": true,
+          "type": "boolean"
+        },
+        "non_owner_evidence_codes_preserved_by_pr143": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "owner_gate_codes_released_by_pr143": {
+          "items": {
+            "enum": [
+              "MISSING_OWNER_APPROVAL",
+              "MISSING_OWNER_APPROVAL_RECEIPT",
+              "MISSING_MATERIALIZATION_PERMISSION"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "readiness_state_after_pr143": {
+          "const": "OWNER_GLOBAL_OVERRIDE_SATISFIED_NON_OWNER_EVIDENCE_PENDING",
+          "type": "string"
+        },
+        "readiness_state_before_pr143": {
+          "type": "string"
+        },
+        "ready_to_prepare_future_materialization_plan": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ready_to_request_owner_review": {
+          "const": true,
+          "type": "boolean"
+        },
+        "required_future_owner_action": {
+          "const": "EXPLICIT_OWNER_APPROVAL_PACKET_REQUIRED_BEFORE_MATERIALIZATION",
+          "type": "string"
+        },
+        "row_family_source_mutation_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "semantic_values_materialized": {
+          "const": false,
+          "type": "boolean"
+        },
+        "upstream_report_path": {
+          "const": "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.report.json",
+          "type": "string"
+        },
+        "upstream_yaml_path": {
+          "const": "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.yaml",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upstream_report_path",
+        "upstream_yaml_path",
+        "ready_to_request_owner_review",
+        "ready_to_prepare_future_materialization_plan",
+        "required_future_owner_action",
+        "readiness_state_before_pr143",
+        "blocked_reason_codes_before_pr143",
+        "owner_gate_codes_released_by_pr143",
+        "non_owner_evidence_codes_preserved_by_pr143",
+        "readiness_state_after_pr143",
+        "materialization_permission_for_planning_released",
+        "materialization_permission_for_actual_value_writes_created",
+        "semantic_values_materialized",
+        "bundle_mutation_created",
+        "row_family_source_mutation_created"
+      ],
+      "type": "object"
+    },
+    "pr143k_forward_handoff": {
+      "additionalProperties": false,
+      "properties": {
+        "pr143_does_not_replace_pr143k": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_may_not_create_connector_binding_unless separately scoped and evidence-backed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_may_not_create_source_acceptance_unless separately scoped and evidence-backed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_may_not_materialize_values_by_default": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_must_consume_owner_global_override_directive": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_must_not_ask_owner_again_for_internal_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_must_preserve_non_owner_evidence_boundaries": {
+          "const": true,
+          "type": "boolean"
+        },
+        "pr143k_static_input_created": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pr143_does_not_replace_pr143k",
+        "pr143k_static_input_created",
+        "pr143k_must_consume_owner_global_override_directive",
+        "pr143k_must_not_ask_owner_again_for_internal_owner_approval",
+        "pr143k_must_preserve_non_owner_evidence_boundaries",
+        "pr143k_may_not_materialize_values_by_default",
+        "pr143k_may_not_create_source_acceptance_unless separately scoped and evidence-backed",
+        "pr143k_may_not_create_connector_binding_unless separately scoped and evidence-backed"
+      ],
+      "type": "object"
+    },
+    "pr_identity_resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "does_not_replace_pr143k": {
+          "const": true,
+          "type": "boolean"
+        },
+        "github_pr_number": {
+          "const": "OWNER_TO_ASSIGN_OR_UNKNOWN",
+          "type": "string"
+        },
+        "global_internal_qtt_override": {
+          "const": true,
+          "type": "boolean"
+        },
+        "immediate_atomicrows_consumer": {
+          "const": true,
+          "type": "boolean"
+        },
+        "implementation_truth": {
+          "type": "string"
+        },
+        "owner_scope_basis": {
+          "const": "OWNER_GLOBAL_OVERRIDE_DECLARED_BY_OWNER_IN_CURRENT_PROMPT",
+          "type": "string"
+        },
+        "pr143k_pr143p_pr143f_remain_downstream_evidence_lanes": {
+          "const": true,
+          "type": "boolean"
+        },
+        "repo_current_pr": {
+          "const": "PR143",
+          "type": "string"
+        },
+        "roadmap_identity_inference_used": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "quantum_forward_compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "annealing_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "annealing_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "atomicrows_to_quantum_feature_compatibility_metadata_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_backend_adapter_architecture_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "future_optimizer_compatibility_notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hybrid_classical_quantum_arbitration_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ising_problem_form_mapping_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "ising_solving_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "optimizer_defaults_invented": {
+          "const": false,
+          "type": "boolean"
+        },
+        "optimizer_parameter_value_source_status": {
+          "const": "NOT_MATERIALIZED_OR_NOT_ACCEPTED",
+          "type": "string"
+        },
+        "owner_internal_permission_for_quantum_optimization_architecture_satisfied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_internal_permission_for_quantum_planning_satisfied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_internal_permission_for_true_quantum_backend_integration_planning_satisfied": {
+          "const": true,
+          "type": "boolean"
+        },
+        "parameter_ranges_invented": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qaoa_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "qaoa_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_advantage_claim_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_backend_result_status": {
+          "const": "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL",
+          "type": "string"
+        },
+        "quantum_forward_metadata_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_inspired_optimizer_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_optimizer_configuration_placeholders_allowed_if_marked_pending_evidence_or_backend": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_optimizer_input_output_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_parameter_schema_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_planning_state": {
+          "const": "OWNER_APPROVED_QUANTUM_PLANNING_RELEASED_EXECUTION_EVIDENCE_PENDING",
+          "type": "string"
+        },
+        "quantum_priority_policy_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "quantum_simulator_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "quantum_simulator_result_status": {
+          "const": "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL",
+          "type": "string"
+        },
+        "qubo_problem_form_mapping_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        },
+        "qubo_solving_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "true_quantum_backend_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "vqe_execution_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "vqe_planning_allowed": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "owner_internal_permission_for_quantum_planning_satisfied",
+        "owner_internal_permission_for_quantum_optimization_architecture_satisfied",
+        "owner_internal_permission_for_true_quantum_backend_integration_planning_satisfied",
+        "quantum_planning_state",
+        "quantum_forward_metadata_only",
+        "qaoa_planning_allowed",
+        "vqe_planning_allowed",
+        "annealing_planning_allowed",
+        "qubo_problem_form_mapping_planning_allowed",
+        "ising_problem_form_mapping_planning_allowed",
+        "quantum_inspired_optimizer_planning_allowed",
+        "hybrid_classical_quantum_arbitration_planning_allowed",
+        "quantum_priority_policy_planning_allowed",
+        "future_backend_adapter_architecture_planning_allowed",
+        "quantum_parameter_schema_planning_allowed",
+        "atomicrows_to_quantum_feature_compatibility_metadata_allowed",
+        "quantum_optimizer_configuration_placeholders_allowed_if_marked_pending_evidence_or_backend",
+        "true_quantum_backend_execution_created",
+        "quantum_simulator_execution_created",
+        "qaoa_execution_created",
+        "vqe_execution_created",
+        "annealing_execution_created",
+        "qubo_solving_created",
+        "ising_solving_created",
+        "quantum_optimizer_input_output_created",
+        "quantum_advantage_claim_created",
+        "optimizer_parameter_value_source_status",
+        "quantum_backend_result_status",
+        "quantum_simulator_result_status",
+        "parameter_ranges_invented",
+        "optimizer_defaults_invented",
+        "future_optimizer_compatibility_notes"
+      ],
+      "type": "object"
+    },
+    "repo_status_preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_created_after_scope_receipt": {
+          "const": true,
+          "type": "boolean"
+        },
+        "github_main_validation_status": {
+          "enum": [
+            "SUCCESS",
+            "FAILED",
+            "UNVERIFIED_NOT_CLAIMED"
+          ],
+          "type": "string"
+        },
+        "github_status_claimed": {
+          "type": "boolean"
+        },
+        "local_main_clean": {
+          "const": true,
+          "type": "boolean"
+        },
+        "local_main_verified": {
+          "const": true,
+          "type": "boolean"
+        },
+        "main_head_short_sha_as_vcs_metadata_only": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "report_type": {
+      "const": "QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE_REPORT",
+      "type": "string"
+    },
+    "report_version": {
+      "const": "v1",
+      "type": "string"
+    },
+    "source_evidence_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "connector_semantic_binding_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "missing_accepted_source_packets_are_evidence_pending_not_owner_approval": {
+          "const": true,
+          "type": "boolean"
+        },
+        "owner_policy_may_authorize_external_fact_value": {
+          "const": false,
+          "type": "boolean"
+        },
+        "owner_policy_may_authorize_retrieval_scope": {
+          "const": true,
+          "type": "boolean"
+        },
+        "runtime_cash_receipt_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_acceptance_created": {
+          "const": false,
+          "type": "boolean"
+        },
+        "source_evidence_packet_consumed_if_present": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_evidence_packet_consumed_if_present",
+        "owner_policy_may_authorize_retrieval_scope",
+        "owner_policy_may_authorize_external_fact_value",
+        "source_acceptance_created",
+        "connector_semantic_binding_created",
+        "runtime_cash_receipt_created",
+        "missing_accepted_source_packets_are_evidence_pending_not_owner_approval"
+      ],
+      "type": "object"
+    },
+    "validation_marker": {
+      "const": "QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE_OK",
+      "type": "string"
+    },
+    "validation_summary": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_context_tests_use_monkeypatch_or_explicit_simulation": {
+          "const": true,
+          "type": "boolean"
+        },
+        "changed_path_guard_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "constants_schema_report_alignment_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "fixture_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "forbidden_authority_terms_checked_without_scattered_blockers": {
+          "const": true,
+          "type": "boolean"
+        },
+        "full_gate_result": {
+          "type": "string"
+        },
+        "full_gate_run": {
+          "type": "string"
+        },
+        "generated_report_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "generated_side_effects_restored": {
+          "type": "string"
+        },
+        "os_stable_paths": {
+          "const": true,
+          "type": "boolean"
+        },
+        "schema_validated": {
+          "const": true,
+          "type": "boolean"
+        },
+        "yaml_validated": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "report_type",
+    "report_version",
+    "artifact_stem",
+    "authority_class",
+    "generated_at_utc",
+    "generated_by_validator_tool",
+    "generated_from_static_evidence_only",
+    "pr_identity_resolution",
+    "repo_status_preflight",
+    "path_derivation_basis",
+    "owner_global_override_directive",
+    "internal_gate_release_contract",
+    "non_owner_evidence_boundary",
+    "pr142_handoff_consumption",
+    "pr136_orchestration_preflight",
+    "pr143k_forward_handoff",
+    "source_evidence_boundary",
+    "atomicrows_compatibility",
+    "quantum_forward_compatibility",
+    "classical_optimizer_forward_compatibility",
+    "latency_hot_path_boundary",
+    "no_claim_boundary",
+    "forbidden_payload_boundary",
+    "existing_owner_global_override_authority_consumption",
+    "validation_summary",
+    "validation_marker"
+  ],
+  "type": "object"
+}

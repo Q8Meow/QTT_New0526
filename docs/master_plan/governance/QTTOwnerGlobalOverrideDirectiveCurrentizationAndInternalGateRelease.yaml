@@ -1,0 +1,811 @@
+report_type: "QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE_REPORT"
+report_version: "v1"
+artifact_stem: "QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease"
+authority_class: "STATIC_QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_INTERNAL_GATE_RELEASE_ONLY_NOT_EXTERNAL_FACT_AUTHORITY_NOT_MATERIALIZATION_NOT_RUNTIME_NOT_QUANTUM_EXECUTION"
+generated_at_utc: "STATIC_DETERMINISTIC_NO_WALL_CLOCK"
+generated_by_validator_tool: true
+generated_from_static_evidence_only: true
+pr_identity_resolution:
+  repo_current_pr: "PR143"
+  github_pr_number: "OWNER_TO_ASSIGN_OR_UNKNOWN"
+  roadmap_identity_inference_used: false
+  implementation_truth: "canonical_repo_artifacts_validators_schemas_reports_authority_boundaries_validation_evidence_owner_instructions"
+  owner_scope_basis: "OWNER_GLOBAL_OVERRIDE_DECLARED_BY_OWNER_IN_CURRENT_PROMPT"
+  global_internal_qtt_override: true
+  immediate_atomicrows_consumer: true
+  does_not_replace_pr143k: true
+  pr143k_pr143p_pr143f_remain_downstream_evidence_lanes: true
+repo_status_preflight:
+  local_main_verified: true
+  local_main_clean: true
+  main_head_short_sha_as_vcs_metadata_only: "4f2bf35"
+  github_main_validation_status: "SUCCESS"
+  github_status_claimed: true
+  branch_created_after_scope_receipt: true
+path_derivation_basis:
+  existing_owner_authority_location: "governance"
+  used_existing_governance_paths: true
+  path_conflict_resolution: "NO_EXISTING_PR143_GOVERNANCE_PATH_CONFLICTS_DETECTED"
+owner_global_override_directive:
+  owner_global_override_declared: true
+  owner_statement_recorded_normalized: "OWNER_APPROVES_AND_OVERRIDES_ALL_QTT_INTERNAL_GATES_BLOCKS_RULES_PERMISSIONS_NOW"
+  owner_says_do_not_ask_again: true
+  owner_directive_status: "ACTIVE_FOR_GLOBAL_INTERNAL_QTT_WORKFLOW_UNBLOCKING"
+  owner_directive_scope: "GLOBAL_INTERNAL_QTT_WORKFLOW_GATES_AND_PERMISSIONS"
+  owner_override_satisfies_internal_owner_approval: true
+  owner_override_satisfies_internal_owner_approval_receipt: true
+  owner_override_satisfies_internal_owner_permission: true
+  owner_override_satisfies_internal_materialization_planning_permission: true
+  owner_override_satisfies_internal_owner_action_required: true
+  owner_override_satisfies_internal_owner_authorization_required_before_implementation: true
+  owner_override_satisfies_internal_quantum_planning_permission: true
+  owner_override_satisfies_internal_quantum_optimization_architecture_permission: true
+  owner_override_satisfies_internal_true_quantum_backend_integration_planning_permission: true
+  owner_override_satisfies_internal_optimizer_planning_permission: true
+  owner_override_satisfies_internal_agent_orchestration_planning_permission: true
+  future_prompts_must_not_ask_owner_again_for_internal_qtt_approval: true
+  future_validators_must_not_reblock_on_owner_approval_for_internal_qtt_workflow: true
+  future_qtt_agents_must_treat_owner_internal_override_as_satisfied: true
+internal_gate_release_contract:
+  released_internal_gate_classes:
+    - "OWNER_APPROVAL"
+    - "OWNER_APPROVAL_RECEIPT"
+    - "OWNER_PERMISSION"
+    - "OWNER_ACTION_REQUIRED"
+    - "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION"
+    - "OWNER_PERMISSION_REQUIRED_FOR_INTERNAL_GATE_TRANSITION"
+    - "OWNER_PERMISSION_REQUIRED_FOR_QUANTUM_PLANNING"
+    - "OWNER_PERMISSION_REQUIRED_FOR_QUANTUM_OPTIMIZATION_ARCHITECTURE"
+    - "OWNER_PERMISSION_REQUIRED_FOR_TRUE_QUANTUM_BACKEND_INTEGRATION_PLANNING"
+    - "OWNER_PERMISSION_REQUIRED_FOR_OPTIMIZER_PLANNING"
+    - "OWNER_PERMISSION_REQUIRED_FOR_ATOMICROWS_INTERNAL_PLANNING"
+    - "OWNER_PERMISSION_REQUIRED_FOR_AGENT_ORCHESTRATION_PLANNING"
+    - "OWNER_PERMISSION_REQUIRED_FOR_DASHBOARD_OR_APPROVAL_UX_PLANNING"
+  released_pr142_blocked_reason_codes:
+    - "MISSING_OWNER_APPROVAL"
+    - "MISSING_OWNER_APPROVAL_RECEIPT"
+    - "MISSING_MATERIALIZATION_PERMISSION"
+  active_owner_approval_blockers_after_pr143: []
+  internal_owner_permission_state_after_pr143: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+  future_reports_must_use_owner_global_override_satisfied_state: true
+non_owner_evidence_boundary:
+  preserved_non_owner_evidence_classes:
+    - "ACCEPTED_SOURCE_EVIDENCE"
+    - "CONNECTOR_SEMANTIC_BINDING"
+    - "RUNTIME_CASH_RECEIPT"
+    - "ORDER_RECEIPT"
+    - "FILL_RECEIPT"
+    - "REPLAY_RESULT"
+    - "PAPER_RESULT"
+    - "OPTIMIZER_RESULT"
+    - "QUANTUM_BACKEND_RESULT"
+    - "QUANTUM_SIMULATOR_RESULT"
+    - "LIVE_EXECUTION_EVIDENCE"
+    - "PROFIT_EVIDENCE"
+  non_owner_evidence_state_label: "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL"
+  owner_override_does_not_fabricate_external_facts: true
+  owner_override_does_not_fabricate_source_acceptance: true
+  owner_override_does_not_fabricate_connector_semantics: true
+  owner_override_does_not_fabricate_runtime_cash: true
+  owner_override_does_not_fabricate_order_or_fill_receipts: true
+  owner_override_does_not_fabricate_replay_paper_results: true
+  owner_override_does_not_fabricate_optimizer_results: true
+  owner_override_does_not_fabricate_quantum_backend_results: true
+  owner_override_does_not_fabricate_quantum_simulator_results: true
+  owner_override_does_not_fabricate_live_order_authority: true
+  owner_override_does_not_fabricate_profit_evidence: true
+pr142_handoff_consumption:
+  upstream_report_path: "docs/master_plan/generated/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.report.json"
+  upstream_yaml_path: "docs/master_plan/atomic_rows/AtomicRowsSemanticValueMaterializationAuthorizationHandoffReadinessGate.yaml"
+  ready_to_request_owner_review: true
+  ready_to_prepare_future_materialization_plan: true
+  required_future_owner_action: "EXPLICIT_OWNER_APPROVAL_PACKET_REQUIRED_BEFORE_MATERIALIZATION"
+  readiness_state_before_pr143: "STATIC_MATERIALIZATION_PLAN_INPUT_READY_OWNER_ACTION_REQUIRED"
+  blocked_reason_codes_before_pr143:
+    - "MISSING_OWNER_APPROVAL"
+    - "MISSING_OWNER_APPROVAL_RECEIPT"
+    - "MISSING_MATERIALIZATION_PERMISSION"
+    - "MISSING_ACCEPTED_SOURCE_PACKETS"
+    - "MISSING_RUNTIME_RECEIPTS"
+    - "MISSING_REPLAY_PAPER_RESULTS"
+    - "MISSING_OPTIMIZER_DEFAULT_POLICY_OR_ACCEPTED_EVIDENCE"
+    - "VALUE_MATERIALIZATION_STILL_BLOCKED"
+  owner_gate_codes_released_by_pr143:
+    - "MISSING_OWNER_APPROVAL"
+    - "MISSING_OWNER_APPROVAL_RECEIPT"
+    - "MISSING_MATERIALIZATION_PERMISSION"
+  non_owner_evidence_codes_preserved_by_pr143:
+    - "MISSING_ACCEPTED_SOURCE_PACKETS"
+    - "MISSING_RUNTIME_RECEIPTS"
+    - "MISSING_REPLAY_PAPER_RESULTS"
+    - "MISSING_OPTIMIZER_DEFAULT_POLICY_OR_ACCEPTED_EVIDENCE"
+    - "VALUE_MATERIALIZATION_STILL_BLOCKED"
+  readiness_state_after_pr143: "OWNER_GLOBAL_OVERRIDE_SATISFIED_NON_OWNER_EVIDENCE_PENDING"
+  materialization_permission_for_planning_released: true
+  materialization_permission_for_actual_value_writes_created: false
+  semantic_values_materialized: false
+  bundle_mutation_created: false
+  row_family_source_mutation_created: false
+pr136_orchestration_preflight:
+  consumed_files:
+    - "docs/master_plan/generated/PR136RouteTriage.report.json"
+    - "docs/master_plan/generated/PR136ReadReceipt.report.json"
+    - "docs/master_plan/generated/PR136CommandActionMatrix.report.json"
+    - "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"
+    - "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+    - "docs/master_plan/generated/PR136AgentLaunchOrchestrationMap.report.json"
+    - "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json"
+    - "docs/master_plan/generated/PR136QuantumAtomicRowsOptimizationReadinessMap.report.json"
+    - "docs/master_plan/generated/PR136PostPR135RoadmapSequence.report.json"
+    - "docs/master_plan/generated/PR136FuturePRCardRegistry.report.json"
+    - "docs/master_plan/generated/PR136RoadmapReplacementAndInsertionMatrix.report.json"
+    - "docs/master_plan/generated/PR136Day1LaunchReadinessRoadmap.report.json"
+    - "docs/master_plan/generated/PR136PolicyManifest.report.json"
+    - "docs/master_plan/generated/PR136PolicyLiteralDrift.report.json"
+    - "docs/master_plan/generated/PR136ValidationGateIntegration.report.json"
+  alias_resolution:
+    requested_alias: "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"
+    alias_exists: false
+    canonical_crosswalk_used: "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+    created_missing_alias: false
+    conflict_detected: false
+  route_triage_alignment:
+    receipt_type: "PR136_ROUTE_TRIAGE_RECEIPT"
+    sequence_authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+    future_pr_sequence_auto_authorizes_implementation: false
+    future_pr_sequence_auto_authorizes_atomicrows_materialization: false
+    future_pr_sequence_auto_authorizes_live_trading: false
+    future_pr_sequence_auto_authorizes_quantum_execution: false
+  sequence_alignment:
+    pr142_entry:
+      agent_scope:
+        - "QTT_AGENT_ORCHESTRATION_METADATA_ONLY"
+      allowed_artifacts:
+        - "schemas"
+        - "validators"
+        - "reports"
+        - "tests"
+        - "roadmap docs"
+      atomicrows_scope: "FUTURE_REF_ONLY"
+      classification_from_provisional_skeleton: "PR136_CLASSIFICATION_MATRIX"
+      connector_scope: "NONE"
+      credential_private_state_cash_scope: "NONE"
+      current_authority_created: false
+      domain_ids:
+        - "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      downstream_dependencies:
+        - "PR143K"
+      evidence_basis:
+        - evidence_class: "GENERATED_REPORT"
+          evidence_ref: "PR136ReadinessDomainTaxonomy.report.json"
+          evidence_summary: "Sequence entry is mapped to coverage-derived domains."
+        - evidence_class: "ROADMAP"
+          evidence_ref: "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json"
+          evidence_summary: "Roadmap supplies Stage-1 launch-readiness path context."
+      expected_outputs:
+        - "future receipt-backed validation artifacts"
+      final_sequence_pr_number_or_placeholder: "PR142"
+      forbidden_artifacts:
+        - "creates_live_data"
+        - "creates_source_retrieval"
+        - "creates_source_acceptance"
+        - "creates_connector_binding"
+        - "creates_credential_resolution"
+        - "creates_private_state_fetch"
+        - "creates_runtime_cash_authority"
+        - "creates_replay_execution"
+        - "creates_paper_execution"
+        - "creates_replay_result"
+        - "creates_paper_result"
+        - "creates_trading_signal"
+        - "creates_ranking_scoring_arbitration_output"
+        - "creates_order_authority"
+        - "creates_order_execution"
+        - "creates_fill_receipt"
+        - "creates_profit_evidence"
+        - "creates_latency_superiority_evidence"
+        - "creates_execution_superiority_evidence"
+        - "creates_alpha_evidence"
+        - "creates_quantum_execution"
+        - "creates_quantum_optimizer_input"
+        - "creates_quantum_advantage_claim"
+        - "creates_atomicrows_bundle"
+        - "creates_atomicrows_rows"
+        - "creates_day1_live_launch"
+      hidden_dependency_resolution_notes:
+        - "Source evidence precedes connector binding."
+        - "Owner authorization remains explicit for materialization, quantum execution, replay/paper execution, canary, and Day-1 live start."
+      latency_scope: "NONE"
+      live_scope: "OWNER_COMMAND_REQUIRED"
+      market_scope:
+        - "PREDICTION_MARKETS_GENERAL"
+        - "KALSHI"
+        - "POLYMARKET"
+        - "FORECASTEX_IBKR"
+      owner_authorization_required: true
+      planned_future_authority_class: "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION"
+      profit_claim_boundary: "NO_PROFIT_EVIDENCE_OR_ALPHA_CLAIM"
+      proposed_branch_name: "pr142-atomicrows-structural-integrity-policy-gate"
+      proposed_number_status: "FIXED_IF_OWNER_APPROVES"
+      quantum_scope: "NONE"
+      readiness_state_target: "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"
+      replay_paper_scope: "NONE"
+      required_upstream_prs:
+        - "PR141"
+      route_from_master_plan_sections:
+        - "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      route_from_roadmap_blueprints:
+        - "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      scope_class: "ATOMICROWS_READINESS"
+      sequence_authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      source_evidence_scope: "REFERENCE_ONLY"
+      subdomain_ids:
+        - "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+      title: "AtomicRows structural integrity policy gate owner-authorized only"
+      validation_marker: "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK"
+      why_this_pr_after_previous: "It depends on the prior gate's validated output."
+      why_this_pr_before_next: "It produces the next gate's static or receipt-backed input."
+    pr143_entry:
+      agent_scope:
+        - "QTT_AGENT_ORCHESTRATION_METADATA_ONLY"
+      allowed_artifacts:
+        - "schemas"
+        - "validators"
+        - "reports"
+        - "tests"
+        - "roadmap docs"
+      atomicrows_scope: "NONE"
+      classification_from_provisional_skeleton: "PR136_CLASSIFICATION_MATRIX"
+      connector_scope: "NONE"
+      credential_private_state_cash_scope: "NONE"
+      current_authority_created: false
+      domain_ids:
+        - "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        - "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        - "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        - "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      downstream_dependencies:
+        - "PR144"
+      evidence_basis:
+        - evidence_class: "GENERATED_REPORT"
+          evidence_ref: "PR136ReadinessDomainTaxonomy.report.json"
+          evidence_summary: "Sequence entry is mapped to coverage-derived domains."
+        - evidence_class: "ROADMAP"
+          evidence_ref: "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json"
+          evidence_summary: "Roadmap supplies Stage-1 launch-readiness path context."
+      expected_outputs:
+        - "future receipt-backed validation artifacts"
+      final_sequence_pr_number_or_placeholder: "PR143"
+      forbidden_artifacts:
+        - "creates_live_data"
+        - "creates_source_retrieval"
+        - "creates_source_acceptance"
+        - "creates_connector_binding"
+        - "creates_credential_resolution"
+        - "creates_private_state_fetch"
+        - "creates_runtime_cash_authority"
+        - "creates_replay_execution"
+        - "creates_paper_execution"
+        - "creates_replay_result"
+        - "creates_paper_result"
+        - "creates_trading_signal"
+        - "creates_ranking_scoring_arbitration_output"
+        - "creates_order_authority"
+        - "creates_order_execution"
+        - "creates_fill_receipt"
+        - "creates_profit_evidence"
+        - "creates_latency_superiority_evidence"
+        - "creates_execution_superiority_evidence"
+        - "creates_alpha_evidence"
+        - "creates_quantum_execution"
+        - "creates_quantum_optimizer_input"
+        - "creates_quantum_advantage_claim"
+        - "creates_atomicrows_bundle"
+        - "creates_atomicrows_rows"
+        - "creates_day1_live_launch"
+      hidden_dependency_resolution_notes:
+        - "Source evidence precedes connector binding."
+        - "Owner authorization remains explicit for materialization, quantum execution, replay/paper execution, canary, and Day-1 live start."
+      latency_scope: "NONE"
+      live_scope: "OWNER_COMMAND_REQUIRED"
+      market_scope:
+        - "PREDICTION_MARKETS_GENERAL"
+        - "KALSHI"
+        - "POLYMARKET"
+        - "FORECASTEX_IBKR"
+      owner_authorization_required: true
+      planned_future_authority_class: "OWNER_AUTHORIZATION_REQUIRED_BEFORE_IMPLEMENTATION"
+      profit_claim_boundary: "NO_PROFIT_EVIDENCE_OR_ALPHA_CLAIM"
+      proposed_branch_name: "pr143-per-venue-source-evidence-aggregate"
+      proposed_number_status: "FIXED_IF_OWNER_APPROVES"
+      quantum_scope: "NONE"
+      readiness_state_target: "SOURCE_EVIDENCE_READY"
+      replay_paper_scope: "NONE"
+      required_upstream_prs:
+        - "PR143F"
+      route_from_master_plan_sections:
+        - "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        - "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        - "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        - "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      route_from_roadmap_blueprints:
+        - "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json"
+      scope_class: "SOURCE_EVIDENCE_READINESS"
+      sequence_authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      source_evidence_scope: "REQUIRED_BEFORE_CONNECTOR"
+      subdomain_ids:
+        - "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        - "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        - "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        - "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+      title: "Per-venue official source-evidence aggregate review"
+      validation_marker: "QTT_PR136_DAY1_LAUNCH_READINESS_ROADMAP_OK"
+      why_this_pr_after_previous: "It depends on the prior gate's validated output."
+      why_this_pr_before_next: "It produces the next gate's static or receipt-backed input."
+  dependency_alignment:
+    edges:
+      - edge_type: "SEQUENCE_DEPENDS_ON"
+        from: "PR142"
+        to: "PR143K"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        to: "PR143K"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        to: "PR143K"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        to: "PR143K"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+        to: "PR143K"
+      - edge_type: "SEQUENCE_DEPENDS_ON"
+        from: "PR143K"
+        to: "PR143P"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        to: "PR143P"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        to: "PR143P"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        to: "PR143P"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+        to: "PR143P"
+      - edge_type: "SEQUENCE_DEPENDS_ON"
+        from: "PR143P"
+        to: "PR143F"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        to: "PR143F"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        to: "PR143F"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        to: "PR143F"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+        to: "PR143F"
+      - edge_type: "SEQUENCE_DEPENDS_ON"
+        from: "PR143F"
+        to: "PR143"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_05_VENUE_NEUTRAL_PREDICTION_ADAPTER_STATIC_CONTRACT"
+        to: "PR143"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_07_SOURCE_EVIDENCE_ACCEPTANCE_ROUTE"
+        to: "PR143"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_09_CONNECTOR_SEMANTIC_BINDING_SOURCE_EVIDENCE_ROUTE"
+        to: "PR143"
+      - edge_type: "DOMAIN_ROUTES_TO_PR"
+        from: "PR136_DOMAIN_18_SOURCE_EVIDENCE_ZERO_ACCEPTED_BOUNDARY_ROUTE"
+        to: "PR143"
+      - edge_type: "SEQUENCE_DEPENDS_ON"
+        from: "PR143"
+        to: "PR144"
+    owner_authorization_nodes_before_pr143:
+      - "PR141"
+      - "PR142"
+      - "PR143K"
+      - "PR143P"
+      - "PR143F"
+      - "PR143"
+      - "PR144"
+      - "PR145"
+      - "PR146"
+      - "PR147"
+      - "PR148"
+      - "PR151"
+      - "PR154"
+      - "PR156"
+      - "PR157"
+      - "PR158"
+      - "PR159"
+      - "PR160"
+      - "PR161"
+      - "PR164"
+    owner_authorization_nodes_after_pr143_internal_state: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+  launch_readiness_domain_alignment:
+    scope_class: "ATOMICROWS_READINESS"
+    domain_ids:
+      - "PR136_DOMAIN_04_ATOMICROWS_BUNDLE_CREATION_BLOCKED"
+    readiness_state_target_before_pr143: "ATOMICROWS_BRIDGE_READY_OWNER_BLOCKED"
+    internal_owner_authorization_state_after_pr143: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+  market_specific_alignment:
+    canonical_venue_ids:
+      - "PREDICTION_MARKETS_GENERAL"
+      - "KALSHI"
+      - "POLYMARKET"
+      - "FORECASTEX_IBKR"
+    owner_authorization_required_before_pr143: true
+    internal_owner_authorization_state_after_pr143: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+    missing_accepted_source_evidence_classes:
+      - "venue_api_semantics"
+      - "order_fields"
+      - "fee_rules"
+      - "tick_rules"
+      - "payout_rules"
+      - "settlement_rules"
+      - "market_data_semantics"
+      - "historical_data_availability"
+      - "account_balance_semantics"
+      - "private_state_cash_semantics"
+      - "execution_lifecycle_semantics"
+      - "fill_integrity_semantics"
+      - "cashflow_pnl_semantics"
+      - "latency_component_semantics"
+      - "settlement_finality_semantics"
+      - "reconciliation_semantics"
+      - "cross_venue_normalization_semantics"
+    missing_connector_semantic_bindings: true
+    missing_runtime_cash_private_state_receipts: true
+    missing_replay_paper_evidence: true
+    missing_day1_launch_preflight: true
+  command_action_alignment:
+    - action_id: "validate_pr136_roadmap_policy_literal_drift"
+      authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      creates_atomicrows_bundle: false
+      creates_atomicrows_rows: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_replay_execution: false
+      creates_paper_execution: false
+      creates_order_authority: false
+      creates_order_execution: false
+      creates_profit_evidence: false
+      creates_quantum_execution: false
+      creates_quantum_optimizer_input: false
+      network_allowed: false
+      github_allowed: false
+    - action_id: "validate_pr136_day1_launch_readiness_roadmap"
+      authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      creates_atomicrows_bundle: false
+      creates_atomicrows_rows: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_replay_execution: false
+      creates_paper_execution: false
+      creates_order_authority: false
+      creates_order_execution: false
+      creates_profit_evidence: false
+      creates_quantum_execution: false
+      creates_quantum_optimizer_input: false
+      network_allowed: false
+      github_allowed: false
+    - action_id: "pytest_pr136_roadmap"
+      authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      creates_atomicrows_bundle: false
+      creates_atomicrows_rows: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_replay_execution: false
+      creates_paper_execution: false
+      creates_order_authority: false
+      creates_order_execution: false
+      creates_profit_evidence: false
+      creates_quantum_execution: false
+      creates_quantum_optimizer_input: false
+      network_allowed: false
+      github_allowed: false
+    - action_id: "run_validation_gates"
+      authority_class: "CANONICAL_POST_PR135_PLANNING_AUTHORITY_NOT_EXECUTION_AUTHORITY"
+      creates_atomicrows_bundle: false
+      creates_atomicrows_rows: false
+      creates_source_acceptance: false
+      creates_connector_binding: false
+      creates_replay_execution: false
+      creates_paper_execution: false
+      creates_order_authority: false
+      creates_order_execution: false
+      creates_profit_evidence: false
+      creates_quantum_execution: false
+      creates_quantum_optimizer_input: false
+      network_allowed: false
+      github_allowed: false
+  quantum_atomicrows_optimization_readiness_alignment:
+    atomicrows_readiness_ladder:
+      - "PRE_BRIDGE_METADATA"
+      - "BRIDGE_READY"
+      - "MATERIALIZATION_READY_OWNER_BLOCKED"
+      - "BUNDLE_INTEGRITY_POLICY_OWNER_DISABLED"
+    quantum_evidence_status_before_pr143: "METADATA_ONLY_NO_EXECUTION"
+    owner_internal_permission_after_pr143: "OWNER_APPROVED_QUANTUM_PLANNING_RELEASED_EXECUTION_EVIDENCE_PENDING"
+    no_quantum_execution_flag: true
+    no_quantum_optimizer_input_flag: true
+    no_quantum_signal_creation_flag: true
+    no_quantum_advantage_claim_flag: true
+  agent_launch_orchestration_alignment:
+    agent_domain_count: 19
+    selected_agent_domains:
+      atomicrows_agent:
+        atomicrows_scope: "FUTURE_REF_ONLY"
+        quantum_scope: "NONE"
+        future_owner_authorization_required_before_pr143: true
+        owner_authorization_after_pr143_for_internal_planning: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+        latency_hot_path_allowed: false
+        live_order_authority_allowed: false
+        forbidden_current_authority:
+          - "creates_live_data"
+          - "creates_source_retrieval"
+          - "creates_source_acceptance"
+          - "creates_connector_binding"
+          - "creates_credential_resolution"
+          - "creates_private_state_fetch"
+          - "creates_runtime_cash_authority"
+          - "creates_replay_execution"
+          - "creates_paper_execution"
+          - "creates_replay_result"
+          - "creates_paper_result"
+          - "creates_trading_signal"
+          - "creates_ranking_scoring_arbitration_output"
+          - "creates_order_authority"
+          - "creates_order_execution"
+          - "creates_fill_receipt"
+          - "creates_profit_evidence"
+          - "creates_latency_superiority_evidence"
+          - "creates_execution_superiority_evidence"
+          - "creates_alpha_evidence"
+          - "creates_quantum_execution"
+          - "creates_quantum_optimizer_input"
+          - "creates_quantum_advantage_claim"
+          - "creates_atomicrows_bundle"
+          - "creates_atomicrows_rows"
+          - "creates_day1_live_launch"
+      quantum_optimizer_agent:
+        atomicrows_scope: "NONE"
+        quantum_scope: "FUTURE_REF_ONLY"
+        future_owner_authorization_required_before_pr143: true
+        owner_authorization_after_pr143_for_internal_planning: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+        latency_hot_path_allowed: false
+        live_order_authority_allowed: false
+        forbidden_current_authority:
+          - "creates_live_data"
+          - "creates_source_retrieval"
+          - "creates_source_acceptance"
+          - "creates_connector_binding"
+          - "creates_credential_resolution"
+          - "creates_private_state_fetch"
+          - "creates_runtime_cash_authority"
+          - "creates_replay_execution"
+          - "creates_paper_execution"
+          - "creates_replay_result"
+          - "creates_paper_result"
+          - "creates_trading_signal"
+          - "creates_ranking_scoring_arbitration_output"
+          - "creates_order_authority"
+          - "creates_order_execution"
+          - "creates_fill_receipt"
+          - "creates_profit_evidence"
+          - "creates_latency_superiority_evidence"
+          - "creates_execution_superiority_evidence"
+          - "creates_alpha_evidence"
+          - "creates_quantum_execution"
+          - "creates_quantum_optimizer_input"
+          - "creates_quantum_advantage_claim"
+          - "creates_atomicrows_bundle"
+          - "creates_atomicrows_rows"
+          - "creates_day1_live_launch"
+      classical_optimizer_agent:
+        atomicrows_scope: "NONE"
+        quantum_scope: "NONE"
+        future_owner_authorization_required_before_pr143: true
+        owner_authorization_after_pr143_for_internal_planning: "OWNER_GLOBAL_OVERRIDE_SATISFIED"
+        latency_hot_path_allowed: false
+        live_order_authority_allowed: false
+        forbidden_current_authority:
+          - "creates_live_data"
+          - "creates_source_retrieval"
+          - "creates_source_acceptance"
+          - "creates_connector_binding"
+          - "creates_credential_resolution"
+          - "creates_private_state_fetch"
+          - "creates_runtime_cash_authority"
+          - "creates_replay_execution"
+          - "creates_paper_execution"
+          - "creates_replay_result"
+          - "creates_paper_result"
+          - "creates_trading_signal"
+          - "creates_ranking_scoring_arbitration_output"
+          - "creates_order_authority"
+          - "creates_order_execution"
+          - "creates_fill_receipt"
+          - "creates_profit_evidence"
+          - "creates_latency_superiority_evidence"
+          - "creates_execution_superiority_evidence"
+          - "creates_alpha_evidence"
+          - "creates_quantum_execution"
+          - "creates_quantum_optimizer_input"
+          - "creates_quantum_advantage_claim"
+          - "creates_atomicrows_bundle"
+          - "creates_atomicrows_rows"
+          - "creates_day1_live_launch"
+  replay_paper_live_transition_boundary:
+    blocked_execution_edges:
+      - "LIVE_TRADING_BLOCKED_UNTIL_OWNER_COMMAND"
+      - "ORDER_AUTHORITY_BLOCKED_UNTIL_SOURCE_CONNECTOR_CASH_RISK_GATES"
+      - "QUANTUM_EXECUTION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR"
+      - "ATOMICROWS_MATERIALIZATION_BLOCKED_UNTIL_OWNER_AUTHORIZED_FUTURE_PR"
+    blocked_hot_path_control_plane_edges:
+      - "NO_SOURCE_RETRIEVAL_IN_LIVE_HOT_PATH"
+      - "NO_LLM_REASONING_IN_LIVE_HOT_PATH"
+      - "NO_QUANTUM_BACKEND_CALL_IN_LIVE_HOT_PATH"
+      - "NO_ATOMICROWS_GENERATION_IN_LIVE_HOT_PATH"
+    non_owner_execution_edges_remain_blocked_by_evidence_not_owner_approval: true
+  pr136_planning_authority_only: true
+  pr136_does_not_authorize_materialization: true
+  pr136_does_not_authorize_live_trading: true
+  pr136_does_not_authorize_quantum_execution: true
+  pr136_does_not_authorize_day1_launch: true
+  pr143k_relationship: "PR143K_REMAINS_DOWNSTREAM_EVIDENCE_LANE_NOT_IMPLEMENTED_BY_PR143"
+pr143k_forward_handoff:
+  pr143_does_not_replace_pr143k: true
+  pr143k_static_input_created: true
+  pr143k_must_consume_owner_global_override_directive: true
+  pr143k_must_not_ask_owner_again_for_internal_owner_approval: true
+  pr143k_must_preserve_non_owner_evidence_boundaries: true
+  pr143k_may_not_materialize_values_by_default: true
+  pr143k_may_not_create_source_acceptance_unless separately scoped and evidence-backed: true
+  pr143k_may_not_create_connector_binding_unless separately scoped and evidence-backed: true
+source_evidence_boundary:
+  source_evidence_packet_consumed_if_present: true
+  owner_policy_may_authorize_retrieval_scope: true
+  owner_policy_may_authorize_external_fact_value: false
+  source_acceptance_created: false
+  connector_semantic_binding_created: false
+  runtime_cash_receipt_created: false
+  missing_accepted_source_packets_are_evidence_pending_not_owner_approval: true
+atomicrows_compatibility:
+  enrichment_order_preserved: true
+  enrichment_order:
+    - "PR137R AtomicRows bundle reconciliation"
+    - "PR137L latency hot-path snapshot boundary"
+    - "PR138 semantic row contract and semantic field inventory"
+    - "PR139 row-family source manifest currentization"
+    - "PR140 semantic field coverage/enrichment plan"
+    - "PR141 semantic value materialization owner-authorization-readiness gate"
+    - "PR142 static downstream handoff-readiness gate"
+    - "PR143 QTT owner global override directive currentization and internal gate release"
+    - "PR143K/PR143P/PR143F venue/source/connector lanes"
+    - "Future materialization implementation only after non-owner evidence gates are satisfied or explicitly scoped without fabricating facts"
+  semantic_row_contract_preserved: true
+  row_family_source_manifest_preserved: true
+  field_coverage_plan_preserved: true
+  value_materialization_still_not_performed_by_this_pr: true
+  no_bundle_mutation: true
+  no_row_family_source_mutation: true
+  no_bundle_authority_created: true
+  no_bundle_freeze_authority_created: true
+quantum_forward_compatibility:
+  owner_internal_permission_for_quantum_planning_satisfied: true
+  owner_internal_permission_for_quantum_optimization_architecture_satisfied: true
+  owner_internal_permission_for_true_quantum_backend_integration_planning_satisfied: true
+  quantum_planning_state: "OWNER_APPROVED_QUANTUM_PLANNING_RELEASED_EXECUTION_EVIDENCE_PENDING"
+  quantum_forward_metadata_only: true
+  qaoa_planning_allowed: true
+  vqe_planning_allowed: true
+  annealing_planning_allowed: true
+  qubo_problem_form_mapping_planning_allowed: true
+  ising_problem_form_mapping_planning_allowed: true
+  quantum_inspired_optimizer_planning_allowed: true
+  hybrid_classical_quantum_arbitration_planning_allowed: true
+  quantum_priority_policy_planning_allowed: true
+  future_backend_adapter_architecture_planning_allowed: true
+  quantum_parameter_schema_planning_allowed: true
+  atomicrows_to_quantum_feature_compatibility_metadata_allowed: true
+  quantum_optimizer_configuration_placeholders_allowed_if_marked_pending_evidence_or_backend: true
+  true_quantum_backend_execution_created: false
+  quantum_simulator_execution_created: false
+  qaoa_execution_created: false
+  vqe_execution_created: false
+  annealing_execution_created: false
+  qubo_solving_created: false
+  ising_solving_created: false
+  quantum_optimizer_input_output_created: false
+  quantum_advantage_claim_created: false
+  optimizer_parameter_value_source_status: "NOT_MATERIALIZED_OR_NOT_ACCEPTED"
+  quantum_backend_result_status: "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL"
+  quantum_simulator_result_status: "PENDING_EVIDENCE_OR_RUNTIME_RECEIPT_NOT_OWNER_APPROVAL"
+  parameter_ranges_invented: false
+  optimizer_defaults_invented: false
+  future_optimizer_compatibility_notes:
+    - "Owner internal permission for quantum planning and architecture is released."
+    - "Execution results and advantage claims remain evidence/receipt gated."
+    - "QAOA/VQE/annealing/QUBO/Ising are planning-compatible but not executed in this PR."
+classical_optimizer_forward_compatibility:
+  owner_internal_permission_for_optimizer_planning_satisfied: true
+  classical_optimizer_execution_created: false
+  scoring_execution_created: false
+  ranking_execution_created: false
+  arbitration_execution_created: false
+  strategy_selection_created: false
+  deterministic_field_identity_ready: true
+  external_fact_evidence_pending_not_owner_approval: true
+  replay_paper_results_pending_not_owner_approval: true
+  runtime_cash_receipt_pending_not_owner_approval: true
+latency_hot_path_boundary:
+  control_plane_only: true
+  live_pretrade_dependency_created: false
+  live_path_import_created: false
+  runtime_service_created: false
+  order_router_dependency_created: false
+  no_live_path_runtime_call: true
+  no_doc_retrieval_in_live_path: true
+  no_quantum_backend_call_in_live_path: true
+  no_quantum_simulator_call_in_live_path: true
+  no_optimizer_call_in_live_path: true
+  owner_global_override_validation_not_live_hot_path_dependency: true
+  future_live_path_must_consume_precomputed_owner_override_snapshot_only: true
+  future_live_path_must_consume_precomputed_quantum_decision_snapshot_only: true
+no_claim_boundary:
+  source_acceptance_created: false
+  connector_binding_created: false
+  replay_execution_created: false
+  paper_execution_created: false
+  live_reachability_created: false
+  order_authority_created: false
+  runtime_cash_receipt_created: false
+  profit_evidence_created: false
+  latency_superiority_evidence_created: false
+  execution_superiority_evidence_created: false
+  final_readiness_created: false
+  day1_launch_created: false
+  semantic_values_materialized: false
+  materialization_permission_for_actual_value_writes_created: false
+  qtt_generated_integrity_authority_created: false
+  atomicrows_bundle_sha_path_reference_created: false
+forbidden_payload_boundary:
+  semantic_value_payloads_allowed: false
+  bundle_mutation_payloads_allowed: false
+  row_family_source_mutation_payloads_allowed: false
+  optimizer_result_payloads_allowed: false
+  quantum_execution_result_payloads_allowed: false
+  source_accepted_external_fact_payloads_allowed: false
+  connector_semantic_binding_payloads_allowed: false
+  live_order_execution_payloads_allowed: false
+  qtt_generated_integrity_authority_payloads_allowed: false
+existing_owner_global_override_authority_consumption:
+  tool_path: "tools/validate_qtt_owner_global_override_authority.py"
+  report_path: "docs/master_plan/generated/QTTOwnerGlobalOverrideAuthority.report.json"
+  tool_consumed: true
+  report_present: true
+  report_type: "QTT_OWNER_GLOBAL_OVERRIDE_AUTHORITY_REPORT"
+  owner_global_override_authority: true
+  owner_override_satisfies_all_qtt_internal_requirements: true
+validation_summary:
+  schema_validated: true
+  yaml_validated: true
+  fixture_validated: true
+  generated_report_validated: true
+  constants_schema_report_alignment_validated: true
+  forbidden_authority_terms_checked_without_scattered_blockers: true
+  changed_path_guard_validated: true
+  branch_context_tests_use_monkeypatch_or_explicit_simulation: true
+  os_stable_paths: true
+  full_gate_run: "NOT_RUN_BY_STATIC_REPORT_GENERATION"
+  full_gate_result: "NOT_CLAIMED_IN_STATIC_REPORT"
+  generated_side_effects_restored: "NOT_CLAIMED_IN_STATIC_REPORT"
+validation_marker: "QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE_OK"

@@ -300,6 +300,45 @@ ALLOWED_PR142_CHANGED_PATHS = {
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/constants.py",
     "src/qtt/stage1_prediction_markets/atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
     "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    "docs/master_plan/governance/QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.yaml",
+    (
+        "docs/master_plan/generated/"
+        "QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.report.json"
+    ),
+    (
+        "schemas/governance/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release.schema.json"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/model.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/builder.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/validator.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py"
+    ),
+    "tools/validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    "tests/governance/test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    (
+        "tests/fixtures/governance/"
+        "synthetic_qtt_owner_global_override_directive_currentization_and_internal_gate_release.v1.fixture.json"
+    ),
 }
 IGNORED_PR142_CHANGED_PATH_PATTERNS = (".tmp/", ".tmp/**")
 

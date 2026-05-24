@@ -1834,9 +1834,26 @@ def _is_pr142_handoff_changed_path_for_branch(path: str, branch: str) -> bool:
     )
 
 
+def _is_pr143_owner_override_currentization_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR143_OWNER_GLOBAL_OVERRIDE_CURRENTIZATION_CHANGED_PATHS
+        and _branch_allows_pr142_handoff_changed_paths(branch)
+    )
+
+
 def _is_pr142_handoff_changed_path(path: str, repo_root: Path) -> bool:
     branch_context = current_branch_context(repo_root)
-    return _is_pr142_handoff_changed_path_for_branch(path, branch_context.branch)
+    return _is_pr142_handoff_changed_path_for_branch(
+        path,
+        branch_context.branch,
+    ) or _is_pr143_owner_override_currentization_changed_path_for_branch(
+        path,
+        branch_context.branch,
+    )
 
 
 def _is_allowed_pr141_changed_path(path: str, repo_root: Path) -> bool:
