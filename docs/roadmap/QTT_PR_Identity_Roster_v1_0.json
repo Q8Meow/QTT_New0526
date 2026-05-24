@@ -2419,6 +2419,249 @@
       "owner_authorized_next_capability": "HISTORICAL_DATASET_DIGEST_LOADER_CONTRACTS",
       "controller_used_as_record_not_veto": true,
       "notes": "GitHub #135 is the audit number assigned to the merged pull request for repo-canonical PR135. Repo-canonical PR135 is the implementation-truth label for historical dataset digest loader contracts. Repo PR135 does not imply Roadmap PR #135 or Blueprint PR #135. The owner explicitly authorized Roadmap PR117 for Repo PR135. Roadmap/controller artifacts are state evidence records, not veto authority over owner direction. Repo PR136 does not imply Roadmap PR #136; the owner explicitly authorized PR136 as post-PR135 Day-1 launch-readiness roadmap currentization."
+    },
+    {
+      "roster_entry_id": "PR143_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR143",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 149,
+      "repo_title": "Owner global override directive currentization and internal gate release",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR143 owner global override directive currentization",
+      "branch_name": "pr143-qtt-owner-global-override-directive-currentization-internal-gate-release",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR135_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/149",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-24T08:07:03Z",
+      "github_pr_mergeCommit_oid": "1de44a19b102a54e8484cd519955ce725d687503",
+      "github_headRefName": "pr143-qtt-owner-global-override-directive-currentization-internal-gate-release",
+      "github_baseRefName": "main",
+      "owner_authorized_next_capability": "OWNER_GLOBAL_OVERRIDE_DIRECTIVE_CURRENTIZATION_AND_INTERNAL_GATE_RELEASE",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #149 is the audit number assigned to the merged pull request for repo-canonical PR143. Repo-canonical PR143 completed owner global override directive currentization and internal QTT gate release. Repo PR143 does not imply Roadmap PR #143 or Blueprint PR #143. The owner override releases internal blockers only; external evidence remains evidence-bound."
+    },
+    {
+      "roster_entry_id": "PR144_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR144",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 150,
+      "repo_title": "PR138 mainline branch-context normalization and downstream guard compatibility",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR144 normalize PR138 mainline branch context guards",
+      "branch_name": "pr144-pr138-mainline-branch-context-normalization",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR143_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/150",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-24T09:17:06Z",
+      "github_pr_mergeCommit_oid": "d4e525cbeca2485e6da999798a1431ae283c0969",
+      "github_headRefName": "pr144-pr138-mainline-branch-context-normalization",
+      "github_baseRefName": "main",
+      "owner_authorized_next_capability": "PR138_MAINLINE_BRANCH_CONTEXT_NORMALIZATION_AND_DOWNSTREAM_GUARD_COMPATIBILITY",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #150 is the audit number assigned to the merged pull request for repo-canonical PR144. Repo-canonical PR144 completed PR138 mainline branch-context normalization and downstream guard compatibility. Repo PR144 does not imply Roadmap PR #144 or Blueprint PR #144."
+    },
+    {
+      "roster_entry_id": "PR145_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR145",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 151,
+      "repo_title": "PR142 validator generated-report self-mutation guard",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR145 prevent PR142 validator generated report self-mutation",
+      "branch_name": "pr145-pr142-generated-report-self-mutation-guard",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR144_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/151",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-24T10:09:15Z",
+      "github_pr_mergeCommit_oid": "b23ba8b5ec35cb9c2ba6143c057715d90b6f2e39",
+      "github_headRefName": "pr145-pr142-generated-report-self-mutation-guard",
+      "github_baseRefName": "main",
+      "owner_authorized_next_capability": "PR142_VALIDATOR_GENERATED_REPORT_SELF_MUTATION_GUARD",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #151 is the audit number assigned to the merged pull request for repo-canonical PR145. Repo-canonical PR145 completed the PR142 validator generated-report self-mutation guard. Repo PR145 does not imply Roadmap PR #145 or Blueprint PR #145."
+    },
+    {
+      "roster_entry_id": "PR146_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR146",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 152,
+      "repo_title": "Generated-report non-mutating validation mode audit and repair",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR146 generated-report nonmutating validation mode audit",
+      "branch_name": "pr146-generated-report-nonmutating-validation-mode-audit",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR145_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/152",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-24T12:58:47Z",
+      "github_pr_mergeCommit_oid": "9c652a40da093eb6613d8d7e304c9ccaa40e6bd4",
+      "github_headRefName": "pr146-generated-report-nonmutating-validation-mode-audit",
+      "github_baseRefName": "main",
+      "owner_authorized_next_capability": "GENERATED_REPORT_NON_MUTATING_VALIDATION_MODE_AUDIT_AND_REPAIR",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #152 is the audit number assigned to the merged pull request for repo-canonical PR146. Repo-canonical PR146 completed the generated-report non-mutating validation mode audit and repair, then became main-stabilized after PR147 validation. Repo PR146 does not imply Roadmap PR #146 or Blueprint PR #146."
+    },
+    {
+      "roster_entry_id": "PR147_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR147",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": 153,
+      "repo_title": "PR143 read-only CLI generated side-effect test isolation",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": "PR147 isolate PR143 read-only CLI generated side effects",
+      "branch_name": "pr147-pr143-readonly-cli-test-generated-side-effect-isolation",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_VALIDATION_GATES_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE",
+        "GITHUB_AUDIT_NUMBER"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "MERGED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR146_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/153",
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "github_pr_state": "MERGED",
+      "github_pr_mergedAt": "2026-05-24T13:35:58Z",
+      "github_pr_mergeCommit_oid": "a04a641e0223b603fe8a0c87004ea93b9d5cf035",
+      "github_headRefName": "pr147-pr143-readonly-cli-test-generated-side-effect-isolation",
+      "github_baseRefName": "main",
+      "owner_authorized_next_capability": "PR143_READ_ONLY_CLI_GENERATED_SIDE_EFFECT_TEST_ISOLATION",
+      "controller_used_as_record_not_veto": true,
+      "notes": "GitHub #153 is the audit number assigned to the merged pull request for repo-canonical PR147. Repo-canonical PR147 completed PR143 read-only CLI generated side-effect test isolation and post-merge main validation. Repo PR147 does not imply Roadmap PR #147 or Blueprint PR #147."
+    },
+    {
+      "roster_entry_id": "PR148_REPO_CANONICAL_SELF_ENTRY",
+      "repo_canonical_pr_label": "PR148",
+      "roadmap_pr_label": null,
+      "blueprint_pr_label": null,
+      "github_pr_number": null,
+      "repo_title": "Post-PR147 validation-stable checkpoint currentization",
+      "roadmap_title": null,
+      "blueprint_title": null,
+      "github_title": null,
+      "branch_name": "pr148-post-pr147-validation-stable-checkpoint-currentization",
+      "validator_markers": [
+        "QTT_PR_IDENTITY_ROSTER_OK",
+        "QTT_VALIDATION_GATES_OK"
+      ],
+      "reference_types": [
+        "REPO_CANONICAL_LABEL",
+        "VALIDATOR_MARKER_REFERENCE",
+        "BRANCH_REFERENCE"
+      ],
+      "corrective_overlay": false,
+      "repair_chain": [],
+      "current_status": "PLANNED",
+      "semantic_role": "CONTROL_PLANE_RECONCILIATION",
+      "authority_scope": "CONTROL_PLANE_ONLY",
+      "superseded_by": null,
+      "depends_on_roster_entries": [
+        "PR147_REPO_CANONICAL_SELF_ENTRY"
+      ],
+      "github_audit_url": null,
+      "identity_relation_class": "REPO_CANONICAL_ONLY",
+      "same_number_mismatch_recorded": true,
+      "owner_authorized_next_capability": "POST_PR147_VALIDATION_STABLE_CHECKPOINT_CURRENTIZATION",
+      "controller_used_as_record_not_veto": true,
+      "notes": "Repo-canonical PR148 is the current checkpoint currentization on branch pr148-post-pr147-validation-stable-checkpoint-currentization. It records the owner-provided post-PR147 stable validation checkpoint: QTT_VALIDATION_GATES_OK, nested pytest 3669 passed, and clean worktree after validation. Repo PR148 does not imply Roadmap PR #148 or Blueprint PR #148, and it creates no new functional authority."
     }
   ],
   "mismatch_summary": {

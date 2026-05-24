@@ -461,6 +461,8 @@
     "FINAL_READINESS_CONTROLLED_BY_ACTIVE_NON_SHA_GATES derives from the PR116A active non-SHA gate registry plus the final-readiness dependency policy.",
     "Roadmap and blueprint PR labels in roadmap_range_currentization are metadata only and do not override repo-canonical delivery labels or GitHub audit numbers.",
     "The active non-SHA Day-1 gate list is not duplicated here; the PR116A registry remains the source of truth.",
-    "Future QUBO, Ising, portfolio/candidate-set, QAOA, VQE, annealing, quantum-inspired, hybrid, and true-quantum support must route through the controller and explicit future repo PRs before materialization."
+    "Future QUBO, Ising, portfolio/candidate-set, QAOA, VQE, annealing, quantum-inspired, hybrid, and true-quantum support must route through the controller and explicit future repo PRs before materialization.",
+    "Post-PR147 main validation is recorded as stable for PR148 checkpoint currentization: QTT_VALIDATION_GATES_OK, nested pytest 3669 passed, and clean worktree after validation are checkpoint evidence only.",
+    "Quantum planning state is OWNER_APPROVED_QUANTUM_PLANNING_RELEASED_EXECUTION_EVIDENCE_PENDING; the controller remains metadata-only until evidence-bearing future work."
   ]
 }
