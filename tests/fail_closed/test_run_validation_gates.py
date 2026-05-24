@@ -280,6 +280,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -1870,7 +1879,7 @@ def test_runner_runs_pr140_gate_before_tracked_generated_report_writers(monkeypa
     ]
 
 
-def test_runner_restores_only_runtime_side_effects_before_pr142_and_final_pytest(
+def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
     monkeypatch,
     capsys,
 ):
@@ -1896,6 +1905,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_and_final_pytest
     modified_outputs = iter(
         [
             "\n".join(intended_repair_paths) + "\n",
+            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join(intended_repair_paths) + "\n",
         ]
@@ -1942,8 +1952,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_and_final_pytest
     )
     assert exit_code == 0
     assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 3
+    assert events.count(ls_files_event) == 4
     assert restore_event in events
+    assert events.count(restore_event) == 2
     assert "tools/run_validation_gates.py" not in restore_event[1]
     assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
     pr142_command = next(
@@ -1951,8 +1962,17 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_and_final_pytest
         for command in commands
         if Path(command[1]).name == runner.PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT
     )
-    restore_index = events.index(restore_event)
-    assert events[restore_index + 1] == ("gate", pr142_command)
+    pr143_command = next(
+        command
+        for command in commands
+        if Path(command[1]).name
+        == runner.PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT
+    )
+    restore_indices = [
+        index for index, event in enumerate(events) if event == restore_event
+    ]
+    assert events[restore_indices[0] + 1] == ("gate", pr142_command)
+    assert events[restore_indices[1] + 1] == ("gate", pr143_command)
     assert events[-2:] == [
         ls_files_event,
         ("gate", commands[-1]),
@@ -2633,6 +2653,9 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
     owner_override_index = command_names.index(
         "validate_qtt_owner_global_override_authority.py"
     )
+    owner_override_currentization_index = command_names.index(
+        "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+    )
     agent_charter_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2656,6 +2679,7 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
     assert (
         scope_index
         < owner_override_index
+        < owner_override_currentization_index
         < agent_charter_index
         < algorithm_registry_index
         < agent_algorithm_binding_index
@@ -2678,6 +2702,15 @@ def test_runner_includes_owner_global_override_authority_dev_gate(monkeypatch):
             / "generated"
             / "QTTOwnerGlobalOverrideAuthority.report.json"
         ),
+    ]
+    assert commands[owner_override_currentization_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+        ),
+        "--repo-root",
+        ".",
     ]
     assert commands[agent_charter_index] == [
         python_executable,

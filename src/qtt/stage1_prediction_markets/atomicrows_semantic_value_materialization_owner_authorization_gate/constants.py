@@ -436,6 +436,47 @@ PR142_HANDOFF_READINESS_GATE_CHANGED_PATHS = {
         "synthetic_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.v1.fixture.json"
     ),
 }
+PR143_OWNER_GLOBAL_OVERRIDE_CURRENTIZATION_CHANGED_PATHS = {
+    "docs/master_plan/governance/QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.yaml",
+    (
+        "docs/master_plan/generated/"
+        "QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.report.json"
+    ),
+    (
+        "schemas/governance/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release.schema.json"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/model.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/builder.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/validator.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py"
+    ),
+    "tools/validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    "tests/governance/test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+    (
+        "tests/fixtures/governance/"
+        "synthetic_qtt_owner_global_override_directive_currentization_and_internal_gate_release.v1.fixture.json"
+    ),
+}
 
 ALLOWED_PR141_CHANGED_PATHS = {
     GATE_PATH.as_posix(),

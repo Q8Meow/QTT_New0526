@@ -271,6 +271,37 @@ def test_changed_path_guard_uses_explicit_branch_context_simulation(monkeypatch)
     assert _is_allowed_pr142_changed_path(allowed_path, REPO_ROOT)
 
 
+def test_changed_path_guard_allows_pr143_owner_override_currentization_files() -> None:
+    pr143_paths = {
+        "docs/master_plan/governance/QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.yaml",
+        (
+            "docs/master_plan/generated/"
+            "QTTOwnerGlobalOverrideDirectiveCurrentizationAndInternalGateRelease.report.json"
+        ),
+        (
+            "schemas/governance/"
+            "qtt_owner_global_override_directive_currentization_and_internal_gate_release.schema.json"
+        ),
+        (
+            "src/qtt/stage1_prediction_markets/"
+            "qtt_owner_global_override_directive_currentization_and_internal_gate_release/constants.py"
+        ),
+        (
+            "tools/"
+            "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+        ),
+        (
+            "tests/governance/"
+            "test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+        ),
+    }
+    assert pr143_paths.issubset(c.ALLOWED_PR142_CHANGED_PATHS)
+    for path in pr143_paths:
+        assert _is_allowed_pr142_changed_path_for_branch(path, "pr143-future")
+        assert _is_allowed_pr142_changed_path_for_branch(path, "pr143k-future")
+        assert not _is_allowed_pr142_changed_path_for_branch(path, "main")
+
+
 def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
     disallowed_paths = {
         "docs/master_plan/QTT_MasterPlan_Current.md",

@@ -13,6 +13,9 @@ PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
 PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT = (
     "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
 )
+PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT = (
+    "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py"
+)
 _RUN_COMMANDS_CLEANUP_REPO_ROOT: pathlib.Path | None = None
 PR138_NON_MUTATING_VALIDATION_SCRIPT = (
     "from pathlib import Path\n"
@@ -62,6 +65,16 @@ def _is_pr142_handoff_readiness_validator_command(command: Sequence[str]) -> boo
     return (
         len(command) > 1
         and pathlib.PurePath(command[1]).name == PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT
+    )
+
+
+def _is_pr143_owner_override_currentization_validator_command(
+    command: Sequence[str],
+) -> bool:
+    return (
+        len(command) > 1
+        and pathlib.PurePath(command[1]).name
+        == PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT
     )
 
 
@@ -236,6 +249,15 @@ def build_validation_commands(
                 "generated",
                 "QTTOwnerGlobalOverrideAuthority.report.json",
             ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py",
+            ),
+            "--repo-root",
+            ".",
         ],
         [
             sys.executable,
@@ -1733,6 +1755,7 @@ def run_commands(
         command_list = list(command)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
+            or _is_pr143_owner_override_currentization_validator_command(command_list)
             or _is_final_pytest_command(command_list)
         ):
             try:
