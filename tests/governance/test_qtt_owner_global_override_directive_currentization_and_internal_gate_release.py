@@ -33,28 +33,45 @@ from tools import run_validation_gates as runner
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-_OWNER_APPROVAL_QUEUE_REPORT_PATH = Path(
-    "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+_TRACKED_GENERATED_SIDE_EFFECT_ROOTS = (
+    "docs/master_plan/generated/",
+    "docs/master_plan/source_evidence/generated/",
+    "docs/roadmap/generated/",
 )
 _CACHE: dict[str, dict] | None = None
 
 
-def _restore_owner_approval_queue_report_from_head() -> None:
+def _tracked_modified_generated_side_effect_paths() -> list[str]:
     completed = subprocess.run(
-        [
-            "git",
-            "restore",
-            "--source=HEAD",
-            "--worktree",
-            "--",
-            _OWNER_APPROVAL_QUEUE_REPORT_PATH.as_posix(),
-        ],
+        ["git", "ls-files", "-m"],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
         text=True,
     )
     assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
+    paths: list[str] = []
+    for line in completed.stdout.splitlines():
+        normalized = line.strip().replace("\\", "/")
+        if normalized.startswith(_TRACKED_GENERATED_SIDE_EFFECT_ROOTS):
+            paths.append(normalized)
+    return paths
+
+
+def _restore_tracked_generated_side_effects_from_head() -> list[str]:
+    paths = _tracked_modified_generated_side_effect_paths()
+    if not paths:
+        return []
+
+    completed = subprocess.run(
+        ["git", "restore", "--source=HEAD", "--worktree", "--", *paths],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
+    return paths
 
 
 def _outputs() -> dict[str, dict]:
@@ -93,7 +110,7 @@ def _payload_failures(mutator) -> set[str]:
 
 def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
     report_path = REPO_ROOT / c.REPORT_PATH
-    _restore_owner_approval_queue_report_from_head()
+    _restore_tracked_generated_side_effects_from_head()
     before = report_path.read_bytes()
 
     try:
@@ -102,7 +119,7 @@ def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
         assert report_path.read_bytes() == before
         assert c.SUCCESS_MARKER in capsys.readouterr().out
     finally:
-        _restore_owner_approval_queue_report_from_head()
+        _restore_tracked_generated_side_effects_from_head()
 
 
 def test_cli_write_artifacts_mode_is_explicit_opt_in(monkeypatch, capsys) -> None:
