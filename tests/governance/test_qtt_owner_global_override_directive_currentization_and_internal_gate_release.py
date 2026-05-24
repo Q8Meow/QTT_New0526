@@ -386,7 +386,7 @@ def test_changed_path_guard_allows_exact_pr138_mainline_context_repair_files_onl
         assert _is_allowed_pr143_changed_path(path, REPO_ROOT)
 
 
-def test_changed_path_guard_allows_exact_pr142_guard_compatibility_file_only(
+def test_changed_path_guard_allows_exact_pr142_guard_compatibility_files_only(
     monkeypatch,
 ) -> None:
     assert c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_ALLOWANCE_REASON_CODE == (
