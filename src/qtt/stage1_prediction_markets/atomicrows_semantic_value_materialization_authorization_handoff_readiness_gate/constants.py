@@ -339,6 +339,12 @@ PR146_GENERATED_REPORT_NONMUTATING_VALIDATION_REPAIR_CHANGED_PATHS = {
         "report.py"
     ),
 }
+PR148_POST_PR147_VALIDATION_STABLE_CHECKPOINT_CURRENTIZATION_DOWNSTREAM_AFTER_PR = 147
+PR148_POST_PR147_VALIDATION_STABLE_CHECKPOINT_CURRENTIZATION_CHANGED_PATHS = {
+    "docs/master_plan/generated/QttPrIdentityRoster.report.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+}
 
 ALLOWED_PR142_CHANGED_PATHS = {
     YAML_PATH.as_posix(),

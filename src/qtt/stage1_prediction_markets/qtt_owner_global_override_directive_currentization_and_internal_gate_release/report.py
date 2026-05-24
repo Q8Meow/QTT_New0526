@@ -856,6 +856,26 @@ def _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_br
     )
 
 
+def _branch_allows_pr148_checkpoint_currentization_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(
+        branch,
+        c.PR148_POST_PR147_VALIDATION_STABLE_CHECKPOINT_CURRENTIZATION_DOWNSTREAM_AFTER_PR,
+        allow_repair=False,
+    )
+
+
+def _is_pr148_checkpoint_currentization_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized
+        in c.PR148_POST_PR147_VALIDATION_STABLE_CHECKPOINT_CURRENTIZATION_CHANGED_PATHS
+        and _branch_allows_pr148_checkpoint_currentization_changed_paths(branch)
+    )
+
+
 def _is_allowed_pr143_changed_path_for_branch(path: str, branch: str) -> bool:
     normalized = path.replace("\\", "/")
     return (
@@ -868,6 +888,9 @@ def _is_allowed_pr143_changed_path_for_branch(path: str, branch: str) -> bool:
         normalized,
         branch,
     ) or _is_pr146_generated_report_nonmutating_validation_repair_changed_path_for_branch(
+        normalized,
+        branch,
+    ) or _is_pr148_checkpoint_currentization_changed_path_for_branch(
         normalized,
         branch,
     )
