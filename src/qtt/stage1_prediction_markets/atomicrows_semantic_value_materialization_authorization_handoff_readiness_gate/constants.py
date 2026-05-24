@@ -273,6 +273,15 @@ LATENCY_HOT_PATH_BOUNDARY = {
     "no_optimizer_call_in_live_path": True,
 }
 
+PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_ALLOWANCE_REASON_CODE = (
+    "PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_REQUIRED_FOR_PR144_DOWNSTREAM_VALIDATION"
+)
+PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_DOWNSTREAM_AFTER_PR = 143
+PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS = {
+    "src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/validator.py",
+    "tests/atomicrows/test_pr138_atomicrows_semantic_row_contract.py",
+}
+
 ALLOWED_PR142_CHANGED_PATHS = {
     YAML_PATH.as_posix(),
     REPORT_PATH.as_posix(),

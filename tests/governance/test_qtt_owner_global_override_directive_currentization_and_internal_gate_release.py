@@ -16,6 +16,8 @@ from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_curre
 from src.qtt.stage1_prediction_markets.qtt_owner_global_override_directive_currentization_and_internal_gate_release.report import (
     _is_allowed_pr143_changed_path,
     _is_allowed_pr143_changed_path_for_branch,
+    _is_pr138_mainline_context_repair_changed_path_for_branch,
+    _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch,
     build_json_schema,
     build_report,
     validate_payload,
@@ -341,6 +343,94 @@ def test_changed_path_guard_uses_explicit_branch_context_simulation(monkeypatch)
     assert _is_allowed_pr143_changed_path(allowed_path, REPO_ROOT)
 
 
+def test_changed_path_guard_allows_exact_pr138_mainline_context_repair_files_only(
+    monkeypatch,
+) -> None:
+    assert c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_ALLOWANCE_REASON_CODE == (
+        "PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_REQUIRED_FOR_PR144_DOWNSTREAM_VALIDATION"
+    )
+    for path in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS:
+        assert path not in c.ALLOWED_PR143_CHANGED_PATHS
+        assert _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr144-pr138-mainline-branch-context-normalization",
+        )
+        assert _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr145-future-roadmap-branch",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr143-qtt-owner-global-override-directive-currentization-internal-gate-release",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(
+            path,
+            "pr138-atomicrows-semantic-row-contract",
+        )
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(path, "main")
+        assert not _is_pr138_mainline_context_repair_changed_path_for_branch(path, "")
+
+    monkeypatch.setattr(
+        pr143_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr144-pr138-mainline-branch-context-normalization",
+            source="unit-test",
+        ),
+    )
+    for path in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS:
+        assert _is_allowed_pr143_changed_path(path, REPO_ROOT)
+
+
+def test_changed_path_guard_allows_exact_pr142_guard_compatibility_file_only(
+    monkeypatch,
+) -> None:
+    assert c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_ALLOWANCE_REASON_CODE == (
+        "PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REQUIRED_FOR_PR144_DOWNSTREAM_VALIDATION"
+    )
+    for path in c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS:
+        assert path not in c.ALLOWED_PR143_CHANGED_PATHS
+        assert _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            "pr144-pr138-mainline-branch-context-normalization",
+        )
+        assert _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            "pr145-future-roadmap-branch",
+        )
+        assert not _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            c.BRANCH,
+        )
+        assert not _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            "pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+        )
+        assert not _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            "main",
+        )
+        assert not _is_pr142_changed_path_guard_compatibility_repair_changed_path_for_branch(
+            path,
+            "",
+        )
+
+    monkeypatch.setattr(
+        pr143_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr144-pr138-mainline-branch-context-normalization",
+            source="unit-test",
+        ),
+    )
+    for path in c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS:
+        assert _is_allowed_pr143_changed_path(path, REPO_ROOT)
+
+
 def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
     disallowed_paths = {
         "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -350,6 +440,11 @@ def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
     }
     for path in disallowed_paths:
         assert path not in c.ALLOWED_PR143_CHANGED_PATHS
+        assert path not in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS
+        assert (
+            path
+            not in c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS
+        )
         assert not _is_allowed_pr143_changed_path_for_branch(path, c.BRANCH)
 
 
@@ -371,6 +466,31 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
     )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
+
+
+def test_repository_artifacts_validate_pr144_repair_branch_changed_paths(monkeypatch) -> None:
+    monkeypatch.setattr(
+        pr143_report,
+        "_changed_paths",
+        lambda repo_root: [
+            *sorted(c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS),
+            *sorted(c.PR142_CHANGED_PATH_GUARD_COMPATIBILITY_REPAIR_CHANGED_PATHS),
+            "src/qtt/stage1_prediction_markets/"
+            "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
+            "constants.py",
+            "tests/atomicrows/"
+            "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        ],
+    )
+    monkeypatch.setattr(
+        pr143_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr144-pr138-mainline-branch-context-normalization",
+            source="unit-test",
+        ),
+    )
+    assert validate_repository_artifacts(REPO_ROOT) == []
 
 
 def test_validation_gate_sequence_includes_pr143_after_owner_global_override(monkeypatch) -> None:

@@ -1805,6 +1805,33 @@ def _is_ignored_pr141_changed_path(path: str) -> bool:
     return normalized == tmp_dir or normalized.startswith(tmp_dir)
 
 
+def _branch_allows_pr138_mainline_context_repair_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(
+        branch,
+        c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_DOWNSTREAM_AFTER_PR,
+        allow_repair=False,
+    )
+
+
+def _is_pr138_mainline_context_repair_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR138_MAINLINE_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS
+        and _branch_allows_pr138_mainline_context_repair_changed_paths(branch)
+    )
+
+
+def _is_pr138_mainline_context_repair_changed_path(path: str, repo_root: Path) -> bool:
+    branch_context = current_branch_context(repo_root)
+    return _is_pr138_mainline_context_repair_changed_path_for_branch(
+        path,
+        branch_context.branch,
+    )
+
+
 def _branch_allows_pr140_guard_repair_changed_paths(branch: str) -> bool:
     return is_downstream_roadmap_branch(branch, 140, allow_repair=False)
 
@@ -1860,6 +1887,7 @@ def _is_allowed_pr141_changed_path(path: str, repo_root: Path) -> bool:
     normalized = path.replace("\\", "/")
     return (
         normalized in c.ALLOWED_PR141_CHANGED_PATHS
+        or _is_pr138_mainline_context_repair_changed_path(normalized, repo_root)
         or _is_pr140_guard_repair_changed_path(normalized, repo_root)
         or _is_pr142_handoff_changed_path(normalized, repo_root)
     )
