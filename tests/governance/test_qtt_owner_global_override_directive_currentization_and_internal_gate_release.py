@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
 
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
 from tools.ci_branch_context import BranchContext
@@ -32,7 +33,28 @@ from tools import run_validation_gates as runner
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_OWNER_APPROVAL_QUEUE_REPORT_PATH = Path(
+    "docs/master_plan/generated/OwnerApprovalRequestQueueRegistry.report.json"
+)
 _CACHE: dict[str, dict] | None = None
+
+
+def _restore_owner_approval_queue_report_from_head() -> None:
+    completed = subprocess.run(
+        [
+            "git",
+            "restore",
+            "--source=HEAD",
+            "--worktree",
+            "--",
+            _OWNER_APPROVAL_QUEUE_REPORT_PATH.as_posix(),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
 
 
 def _outputs() -> dict[str, dict]:
@@ -71,12 +93,16 @@ def _payload_failures(mutator) -> set[str]:
 
 def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
     report_path = REPO_ROOT / c.REPORT_PATH
+    _restore_owner_approval_queue_report_from_head()
     before = report_path.read_bytes()
 
-    assert pr143_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+    try:
+        assert pr143_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
 
-    assert report_path.read_bytes() == before
-    assert c.SUCCESS_MARKER in capsys.readouterr().out
+        assert report_path.read_bytes() == before
+        assert c.SUCCESS_MARKER in capsys.readouterr().out
+    finally:
+        _restore_owner_approval_queue_report_from_head()
 
 
 def test_cli_write_artifacts_mode_is_explicit_opt_in(monkeypatch, capsys) -> None:
