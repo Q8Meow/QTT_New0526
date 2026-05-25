@@ -107,7 +107,7 @@ def test_validation_default_does_not_mutate_tracked_report(capsys) -> None:
     report_path = REPO_ROOT / c.REPORT_PATH
     before = report_path.read_bytes()
 
-    assert pr149_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+    assert pr149_cli.main(["--repo-root", REPO_ROOT.as_posix()]) == 0
 
     assert report_path.read_bytes() == before
     assert c.SUCCESS_MARKER in capsys.readouterr().out
@@ -118,11 +118,17 @@ def test_output_path_and_tracked_write_modes_are_explicit(capsys, tmp_path) -> N
     before = report_path.read_bytes()
     output_path = tmp_path / "pr149.report.json"
 
-    assert pr149_cli.main(["--repo-root", str(REPO_ROOT), "--output", str(output_path)]) == 0
+    assert pr149_cli.main(["--repo-root", REPO_ROOT.as_posix(), "--output", output_path.as_posix()]) == 0
     assert output_path.exists()
+    assert json.loads(output_path.read_text(encoding="utf-8")) == _report()
+    assert sorted(
+        path.relative_to(tmp_path).as_posix()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    ) == ["pr149.report.json"]
     assert report_path.read_bytes() == before
 
-    assert pr149_cli.main(["--repo-root", str(REPO_ROOT), "--write-report"]) == 0
+    assert pr149_cli.main(["--repo-root", REPO_ROOT.as_posix(), "--write-report"]) == 0
     assert report_path.read_bytes() == before
     assert c.SUCCESS_MARKER in capsys.readouterr().out
 
@@ -312,6 +318,33 @@ def test_report_validator_rejects_forbidden_claim_mutations() -> None:
     report["hidden_default_guard"]["hidden_default_created"] = True
     failures = pr149_report.validate_report_payload(report)
     assert any("PR149_NO_HIDDEN_DEFAULTS" in failure for failure in failures)
+
+
+def test_report_validator_rejects_forbidden_bundle_authority_payload() -> None:
+    report = _report()
+    report["atomicrows_compatibility_surface"]["bundle_mutation_created"] = True
+    failures = pr149_report.validate_report_payload(report)
+    assert "PR149_NO_BUNDLE_MUTATION_AUTHORITY" in failures
+
+    report = _report()
+    report["validation_summary"]["tracked_report_path"] = c.ATOMICROWS_BUNDLE_PATH.with_suffix(
+        "." + "sha" + "256"
+    ).as_posix()
+    failures = pr149_report.validate_report_payload(report)
+    assert "PR149_NO_BUNDLE_MUTATION_AUTHORITY" in failures
+
+
+def test_valid_no_mutation_boundary_metadata_does_not_fail() -> None:
+    report = _report()
+    report["canonical_boundary_metadata"] = {
+        "bundle_boundary_ref": c.ATOMICROWS_BUNDLE_PATH.as_posix(),
+        "no_mutation_boundary": {
+            "atomicrows_bundle_mutated": False,
+            "bundle_mutation_created": False,
+        },
+    }
+    failures = pr149_report.validate_report_payload(report)
+    assert "PR149_NO_BUNDLE_MUTATION_AUTHORITY" not in failures
 
 
 def test_no_repair_or_test_bypass_markers_in_pr149_files() -> None:

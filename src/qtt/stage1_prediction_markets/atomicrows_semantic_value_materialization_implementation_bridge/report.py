@@ -666,10 +666,47 @@ def _false_flag_failures(payload: Mapping[str, Any]) -> list[str]:
 
 
 def _sidecar_reference_failures(payload: Mapping[str, Any]) -> list[str]:
-    serialized = json.dumps(payload, sort_keys=True)
-    if "AtomicRows.bundle." in serialized:
+    compatibility = _mapping(payload.get("atomicrows_compatibility_surface"))
+    bundle_authority_fields = (
+        "bundle_authority_created",
+        "bundle_mutation_created",
+        "generated_derivative_report_is_bundle_row_authority",
+        "row_bundle_authority_created",
+    )
+    if any(compatibility.get(field) is not False for field in bundle_authority_fields):
         return ["PR149_NO_BUNDLE_MUTATION_AUTHORITY"]
+    if compatibility.get("qtt_integrity_authority_created") is not False:
+        return ["PR149_NO_QTT_INTEGRITY_AUTHORITY"]
+
+    forbidden_path = _forbidden_bundle_sidecar_path()
+    for key, value in _walk(payload):
+        if not _is_path_like_report_field(key):
+            continue
+        if _contains_forbidden_path(value, forbidden_path):
+            return ["PR149_NO_BUNDLE_MUTATION_AUTHORITY"]
     return []
+
+
+def _forbidden_bundle_sidecar_path() -> str:
+    return c.ATOMICROWS_BUNDLE_PATH.with_suffix("." + "sha" + "256").as_posix()
+
+
+def _is_path_like_report_field(key: str) -> bool:
+    return (
+        key == "artifact_path"
+        or key.endswith("_path")
+        or key.endswith("_paths")
+        or key.endswith("_ref")
+        or key.endswith("_refs")
+    )
+
+
+def _contains_forbidden_path(value: Any, forbidden_path: str) -> bool:
+    if isinstance(value, str):
+        return value.replace("\\", "/") == forbidden_path
+    if isinstance(value, list):
+        return any(_contains_forbidden_path(item, forbidden_path) for item in value)
+    return False
 
 
 def validate_report_payload(payload: Mapping[str, Any]) -> list[str]:
@@ -828,7 +865,7 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
             failures.append("PR149_ATOMICROWS_BUNDLE_MUTATION_DETECTED")
         if normalized.startswith(c.ROW_FAMILY_SOURCE_DIRECTORY.as_posix() + "/"):
             failures.append("PR149_ROW_FAMILY_SOURCE_MUTATION_DETECTED")
-        if "AtomicRows.bundle." in normalized:
+        if normalized == _forbidden_bundle_sidecar_path():
             failures.append("PR149_NO_BUNDLE_MUTATION_AUTHORITY")
     return sorted(set(failures))
 
