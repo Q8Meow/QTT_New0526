@@ -8,6 +8,7 @@ from tools import (
     validate_atomicrows_semantic_value_materialization_implementation_bridge
     as pr149_cli,
 )
+from tools.ci_branch_context import BranchContext
 
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan import (
     constants as pr140_constants,
@@ -131,6 +132,42 @@ def test_output_path_and_tracked_write_modes_are_explicit(capsys, tmp_path) -> N
     assert pr149_cli.main(["--repo-root", REPO_ROOT.as_posix(), "--write-report"]) == 0
     assert report_path.read_bytes() == before
     assert c.SUCCESS_MARKER in capsys.readouterr().out
+
+
+def test_explicit_tracked_write_guard_allows_only_pr149_report_on_main(monkeypatch) -> None:
+    report_path = c.REPORT_PATH.as_posix()
+    unrelated_path = "docs/master_plan/generated/PR149_unrelated.report.json"
+    expected_report_failure = f"PR149_CHANGED_PATH_OUT_OF_SCOPE: {report_path}"
+    expected_unrelated_failure = f"PR149_CHANGED_PATH_OUT_OF_SCOPE: {unrelated_path}"
+
+    monkeypatch.setattr(
+        pr149_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch="main", source="unit-test"),
+    )
+    monkeypatch.setattr(pr149_report, "_changed_paths", lambda repo_root: [report_path])
+
+    assert pr149_report.validate_repository_artifacts(REPO_ROOT) == [
+        expected_report_failure
+    ]
+    assert (
+        pr149_report.validate_repository_artifacts(
+            REPO_ROOT,
+            tracked_report_write_allowed=True,
+        )
+        == []
+    )
+
+    monkeypatch.setattr(
+        pr149_report,
+        "_changed_paths",
+        lambda repo_root: [report_path, unrelated_path],
+    )
+
+    assert pr149_report.validate_repository_artifacts(
+        REPO_ROOT,
+        tracked_report_write_allowed=True,
+    ) == [expected_unrelated_failure]
 
 
 def test_missing_and_malformed_upstream_fail_closed(tmp_path) -> None:

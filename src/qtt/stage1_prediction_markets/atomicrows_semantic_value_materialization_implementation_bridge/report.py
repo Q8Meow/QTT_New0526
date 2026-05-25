@@ -839,9 +839,56 @@ def _branch_allows_pr149_changed_paths(branch: str) -> bool:
     )
 
 
-def _is_allowed_pr149_changed_path_for_branch(path: str, branch: str) -> bool:
+def _is_pr149_main_write_report_guard_repair_path(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        branch == "repair-pr149-main-write-report-guard"
+        and normalized != c.REPORT_PATH.as_posix()
+        and normalized in c.CHANGED_PATH_EXACT_ALLOWANCE_CANDIDATES
+    )
+
+
+def _branch_allows_explicit_pr149_tracked_report_write(branch: str) -> bool:
+    return branch in {
+        c.BRANCH,
+        "repair-pr149-main-write-report-guard",
+    } or is_pr_or_later_branch(
+        branch,
+        149,
+        allow_main=True,
+        allow_repair=False,
+    )
+
+
+def _is_explicit_pr149_tracked_report_write_path_for_branch(
+    path: str,
+    branch: str,
+    tracked_report_write_allowed: bool,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        tracked_report_write_allowed
+        and normalized == c.REPORT_PATH.as_posix()
+        and _branch_allows_explicit_pr149_tracked_report_write(branch)
+    )
+
+
+def _is_allowed_pr149_changed_path_for_branch(
+    path: str,
+    branch: str,
+    *,
+    tracked_report_write_allowed: bool = False,
+) -> bool:
     normalized = path.replace("\\", "/")
     if normalized == ".tmp" or normalized.startswith(".tmp/"):
+        return True
+    if _is_pr149_main_write_report_guard_repair_path(normalized, branch):
+        return True
+    if _is_explicit_pr149_tracked_report_write_path_for_branch(
+        normalized,
+        branch,
+        tracked_report_write_allowed,
+    ):
         return True
     return (
         normalized in c.CHANGED_PATH_EXACT_ALLOWANCE_CANDIDATES
@@ -849,7 +896,11 @@ def _is_allowed_pr149_changed_path_for_branch(path: str, branch: str) -> bool:
     )
 
 
-def _validate_changed_paths(repo_root: Path) -> list[str]:
+def _validate_changed_paths(
+    repo_root: Path,
+    *,
+    tracked_report_write_allowed: bool = False,
+) -> list[str]:
     branch = current_branch_context(repo_root).branch
     failures: list[str] = []
     for path in _changed_paths(repo_root):
@@ -857,7 +908,11 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
             failures.append("PR149_GIT_STATUS_UNAVAILABLE")
             continue
         normalized = path.replace("\\", "/")
-        if not _is_allowed_pr149_changed_path_for_branch(normalized, branch):
+        if not _is_allowed_pr149_changed_path_for_branch(
+            normalized,
+            branch,
+            tracked_report_write_allowed=tracked_report_write_allowed,
+        ):
             failures.append(f"PR149_CHANGED_PATH_OUT_OF_SCOPE: {normalized}")
         if normalized == c.MASTER_PLAN_PATH.as_posix():
             failures.append("PR149_MASTER_PLAN_MUTATION_DETECTED")
@@ -874,6 +929,7 @@ def validate_repository_artifacts(
     repo_root: Path | str,
     *,
     report_output_path: Path | str | None = None,
+    tracked_report_write_allowed: bool = False,
 ) -> list[str]:
     root = Path(repo_root).resolve()
     try:
@@ -901,7 +957,12 @@ def validate_repository_artifacts(
     if actual_report:
         failures.extend(validate_report_payload(actual_report))
 
-    failures.extend(_validate_changed_paths(root))
+    failures.extend(
+        _validate_changed_paths(
+            root,
+            tracked_report_write_allowed=tracked_report_write_allowed,
+        )
+    )
     return sorted(set(failures))
 
 
@@ -909,6 +970,15 @@ def write_report_file(repo_root: Path | str) -> dict[str, Any]:
     root = Path(repo_root).resolve()
     report = build_report(root)
     path = root / c.REPORT_PATH
+    serialized_report = json_dump(report)
+    serialized_bytes = serialized_report.encode("utf-8")
+    if path.exists():
+        current_bytes = path.read_bytes()
+        if (
+            current_bytes == serialized_bytes
+            or current_bytes.replace(b"\r\n", b"\n") == serialized_bytes
+        ):
+            return report
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json_dump(report), encoding="utf-8", newline="\n")
+    path.write_text(serialized_report, encoding="utf-8", newline="\n")
     return report
