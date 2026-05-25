@@ -856,6 +856,18 @@ def _is_pr150_target_matrix_changed_path_for_branch(path: str, branch: str) -> b
     )
 
 
+def _branch_allows_pr151_retrieval_target_pack_changed_paths(branch: str) -> bool:
+    return is_pr_or_later_branch(branch, 151, allow_main=False, allow_repair=False)
+
+
+def _is_pr151_retrieval_target_pack_changed_path_for_branch(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR151_RETRIEVAL_TARGET_PACK_CHANGED_PATHS
+        and _branch_allows_pr151_retrieval_target_pack_changed_paths(branch)
+    )
+
+
 def _is_pr149_main_write_report_guard_repair_path(path: str, branch: str) -> bool:
     normalized = path.replace("\\", "/")
     return (
@@ -908,6 +920,8 @@ def _is_allowed_pr149_changed_path_for_branch(
     ):
         return True
     if _is_pr150_target_matrix_changed_path_for_branch(normalized, branch):
+        return True
+    if _is_pr151_retrieval_target_pack_changed_path_for_branch(normalized, branch):
         return True
     return (
         normalized in c.CHANGED_PATH_EXACT_ALLOWANCE_CANDIDATES
