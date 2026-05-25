@@ -61,6 +61,186 @@ def _stable_sorted_repo_paths(values: Sequence[Path | str]) -> list[str]:
     return sorted(normalized, key=_stable_path_key)
 
 
+def _json_type_name(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if isinstance(value, list):
+        return "list"
+    if isinstance(value, Mapping):
+        return "dict"
+    return type(value).__name__
+
+
+_JSON_PATH_SAFE_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _json_path_child(path: str, key: str) -> str:
+    if _JSON_PATH_SAFE_KEY.match(key):
+        return f"{path}.{key}"
+    return f"{path}[{json.dumps(key, ensure_ascii=True, sort_keys=True)}]"
+
+
+def _json_path_index(path: str, index: int) -> str:
+    return f"{path}[{index}]"
+
+
+def _add_report_mismatch_value_details(
+    diagnostic: dict[str, Any],
+    *,
+    label: str,
+    value: Any,
+) -> None:
+    if isinstance(value, (bool, int, float)) or value is None:
+        diagnostic[f"{label}_value"] = value
+    elif isinstance(value, str):
+        diagnostic[f"{label}_text_length"] = len(value)
+    elif isinstance(value, (list, Mapping)):
+        diagnostic[f"{label}_length"] = len(value)
+
+
+def _report_payload_mismatch_diagnostic(
+    *,
+    path: str,
+    mismatch_kind: str,
+    tracked_value: Any,
+    rebuilt_value: Any,
+) -> dict[str, Any]:
+    diagnostic: dict[str, Any] = {
+        "json_path": path,
+        "mismatch_kind": mismatch_kind,
+        "tracked_type": _json_type_name(tracked_value),
+        "rebuilt_type": _json_type_name(rebuilt_value),
+    }
+    _add_report_mismatch_value_details(
+        diagnostic,
+        label="tracked",
+        value=tracked_value,
+    )
+    _add_report_mismatch_value_details(
+        diagnostic,
+        label="rebuilt",
+        value=rebuilt_value,
+    )
+    return diagnostic
+
+
+def report_payload_mismatch_diagnostics(
+    tracked_payload: Any,
+    rebuilt_payload: Any,
+    *,
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    diagnostics: list[dict[str, Any]] = []
+
+    def compare(tracked_value: Any, rebuilt_value: Any, path: str) -> None:
+        if len(diagnostics) >= limit:
+            return
+        if type(tracked_value) is not type(rebuilt_value):
+            diagnostics.append(
+                _report_payload_mismatch_diagnostic(
+                    path=path,
+                    mismatch_kind="type_mismatch",
+                    tracked_value=tracked_value,
+                    rebuilt_value=rebuilt_value,
+                )
+            )
+            return
+        if isinstance(tracked_value, Mapping):
+            keys = sorted(set(tracked_value) | set(rebuilt_value), key=str)
+            for key in keys:
+                if len(diagnostics) >= limit:
+                    return
+                child_path = _json_path_child(path, str(key))
+                if key not in tracked_value:
+                    diagnostics.append(
+                        _report_payload_mismatch_diagnostic(
+                            path=child_path,
+                            mismatch_kind="tracked_key_missing",
+                            tracked_value=None,
+                            rebuilt_value=rebuilt_value[key],
+                        )
+                    )
+                    continue
+                if key not in rebuilt_value:
+                    diagnostics.append(
+                        _report_payload_mismatch_diagnostic(
+                            path=child_path,
+                            mismatch_kind="rebuilt_key_missing",
+                            tracked_value=tracked_value[key],
+                            rebuilt_value=None,
+                        )
+                    )
+                    continue
+                compare(tracked_value[key], rebuilt_value[key], child_path)
+            return
+        if isinstance(tracked_value, list):
+            if len(tracked_value) != len(rebuilt_value):
+                diagnostics.append(
+                    _report_payload_mismatch_diagnostic(
+                        path=path,
+                        mismatch_kind="list_length_mismatch",
+                        tracked_value=tracked_value,
+                        rebuilt_value=rebuilt_value,
+                    )
+                )
+                return
+            for index, (tracked_item, rebuilt_item) in enumerate(
+                zip(tracked_value, rebuilt_value)
+            ):
+                if len(diagnostics) >= limit:
+                    return
+                compare(tracked_item, rebuilt_item, _json_path_index(path, index))
+            return
+        if tracked_value != rebuilt_value:
+            diagnostics.append(
+                _report_payload_mismatch_diagnostic(
+                    path=path,
+                    mismatch_kind="value_mismatch",
+                    tracked_value=tracked_value,
+                    rebuilt_value=rebuilt_value,
+                )
+            )
+
+    compare(tracked_payload, rebuilt_payload, "$")
+    return diagnostics
+
+
+def _format_report_mismatch_diagnostic(diagnostic: Mapping[str, Any]) -> str:
+    ordered_keys = (
+        "json_path",
+        "mismatch_kind",
+        "tracked_type",
+        "rebuilt_type",
+        "tracked_value",
+        "rebuilt_value",
+        "tracked_length",
+        "rebuilt_length",
+        "tracked_text_length",
+        "rebuilt_text_length",
+    )
+    parts = []
+    for key in ordered_keys:
+        if key not in diagnostic:
+            continue
+        value = diagnostic[key]
+        if isinstance(value, bool):
+            value_text = "true" if value else "false"
+        elif value is None:
+            value_text = "null"
+        else:
+            value_text = str(value)
+        parts.append(f"{key}={value_text}")
+    return " ".join(parts)
+
+
 def _read_required_text(
     root: Path,
     key: str,
@@ -159,12 +339,12 @@ def _crosswalk_payload(root: Path, failures: list[str]) -> tuple[dict[str, Any],
     }
 
 
-def _path_records(paths: Sequence[Path], present: set[str], required: bool) -> list[dict[str, Any]]:
+def _path_records(paths: Sequence[Path | str], present: set[str], required: bool) -> list[dict[str, Any]]:
     return sorted(
         (
             {
-                "artifact_path": path.as_posix(),
-                "consumed": path.as_posix() in present,
+                "artifact_path": _normalize_repo_relative_path(path),
+                "consumed": _normalize_repo_relative_path(path) in present,
                 "required": required,
             }
             for path in paths
@@ -1295,6 +1475,12 @@ def validate_repository_artifacts(
         failures.append(f"PR152_REPORT_INVALID: {c.REPORT_PATH.as_posix()}: {exc}")
     if actual_report and actual_report != expected_report:
         failures.append("PR152_REPORT_STALE_OR_NONDETERMINISTIC")
+        diagnostics = report_payload_mismatch_diagnostics(actual_report, expected_report)
+        for diagnostic in diagnostics:
+            failures.append(
+                "PR152_REPORT_STALE_OR_NONDETERMINISTIC_DETAIL: "
+                f"{_format_report_mismatch_diagnostic(diagnostic)}"
+            )
     if actual_report:
         failures.extend(validate_report_payload(actual_report))
 

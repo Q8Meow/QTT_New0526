@@ -578,6 +578,37 @@ def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
     }
 
 
+def _modified_file_snapshots(
+    repo_root: pathlib.Path,
+    paths: set[str],
+) -> dict[str, bytes | None]:
+    snapshots: dict[str, bytes | None] = {}
+    for path_text in sorted(paths):
+        path = repo_root / path_text
+        snapshots[path_text] = path.read_bytes() if path.exists() else None
+    return snapshots
+
+
+def _restore_modified_file_snapshots(
+    repo_root: pathlib.Path,
+    snapshots: dict[str, bytes | None],
+) -> tuple[str, ...]:
+    restored: list[str] = []
+    for path_text, content in sorted(snapshots.items()):
+        path = repo_root / path_text
+        if content is None:
+            if path.exists() and path.is_file():
+                path.unlink()
+                restored.append(path_text)
+            continue
+        if path.exists() and path.read_bytes() == content:
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        restored.append(path_text)
+    return tuple(restored)
+
+
 def _restore_tracked_gate_side_effects(
     repo_root: pathlib.Path,
     initially_modified_paths: set[str],
@@ -2265,8 +2296,25 @@ def run_commands(
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
     initially_modified_paths: set[str] = set()
+    initially_modified_snapshots: dict[str, bytes | None] = {}
     if cleanup_repo_root is not None:
         initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
+        initially_modified_snapshots = _modified_file_snapshots(
+            cleanup_repo_root,
+            initially_modified_paths,
+        )
+
+    def restore_gate_side_effects() -> None:
+        if cleanup_repo_root is None:
+            return
+        _restore_tracked_gate_side_effects(
+            cleanup_repo_root,
+            initially_modified_paths,
+        )
+        _restore_modified_file_snapshots(
+            cleanup_repo_root,
+            initially_modified_snapshots,
+        )
 
     for command in commands:
         command_list = list(command)
@@ -2276,10 +2324,7 @@ def run_commands(
             or _is_final_pytest_command(command_list)
         ):
             try:
-                _restore_tracked_gate_side_effects(
-                    cleanup_repo_root,
-                    initially_modified_paths,
-                )
+                restore_gate_side_effects()
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
                 return 1
@@ -2290,19 +2335,13 @@ def run_commands(
                 command_list
             ):
                 try:
-                    _restore_tracked_gate_side_effects(
-                        cleanup_repo_root,
-                        initially_modified_paths,
-                    )
+                    restore_gate_side_effects()
                 except RuntimeError as exc:
                     print(str(exc), file=sys.stderr, flush=True)
             return completed.returncode
         if cleanup_repo_root is not None and _is_final_pytest_command(command_list):
             try:
-                _restore_tracked_gate_side_effects(
-                    cleanup_repo_root,
-                    initially_modified_paths,
-                )
+                restore_gate_side_effects()
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
                 return 1

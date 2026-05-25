@@ -857,13 +857,13 @@
   },
   "completed_pr_artifact_audit": {
     "completed_pr_surface_count": 44,
-    "generated_report_count": 131,
+    "generated_report_count": 132,
     "missing_expected_surface_findings": [],
     "pr_identity_roster_consumed": true,
     "roadmap_controller_consumed": true,
     "schema_file_count": 192,
-    "test_file_count": 456,
-    "validator_tool_count": 106,
+    "test_file_count": 457,
+    "validator_tool_count": 107,
     "visible_recent_pr_reports": [
       "docs/master_plan/generated/PR149_AtomicRowsSemanticValueMaterializationImplementationBridge.report.json",
       "docs/master_plan/generated/PR150_SourceBackedClassicalQuantumParameterDefaultTargetMatrix.report.json",
@@ -887,7 +887,7 @@
   },
   "generated_report_consistency_audit": {
     "deterministic_consistency_status": "PASS",
-    "generated_report_count": 131,
+    "generated_report_count": 132,
     "json_parse_failure_count": 0,
     "json_parse_failure_paths": []
   },
@@ -970,12 +970,12 @@
   },
   "optional_context_inputs": [
     {
-      "artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "artifact_path": "docs/master_plan/generated",
       "consumed": true,
       "required": false
     },
     {
-      "artifact_path": "docs/master_plan/generated",
+      "artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
       "consumed": true,
       "required": false
     },
@@ -1058,7 +1058,7 @@
     "pr149_report_consumed": true,
     "pr150_report_consumed": true,
     "pr151_report_consumed": true,
-    "whole_repo_inventory_source": "git ls-files"
+    "whole_repo_inventory_source": "git ls-files -z"
   },
   "pr149_pr150_pr151_deep_chain_audit": {
     "accepted_value_absence_status": "PASS",
@@ -1183,7 +1183,7 @@
     "fixture_file_count": 245,
     "schema_file_count": 192,
     "status": "PASS",
-    "test_file_count": 456
+    "test_file_count": 457
   },
   "source_evidence_boundary_audit": {
     "audit_domain": "SOURCE_EVIDENCE_BOUNDARY",
@@ -1274,12 +1274,12 @@
       "required": true
     },
     {
-      "artifact_path": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+      "artifact_path": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
       "consumed": true,
       "required": true
     },
     {
-      "artifact_path": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+      "artifact_path": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
       "consumed": true,
       "required": true
     },
@@ -1312,7 +1312,7 @@
       "network_surface_findings": [],
       "network_surface_status": "PASS"
     },
-    "validator_tool_count": 106
+    "validator_tool_count": 107
   },
   "warning_findings": [],
   "whole_repo_inventory_audit": {
@@ -1328,24 +1328,24 @@
       "tests",
       "tools"
     ],
-    "audited_text_file_count": 1594,
+    "audited_text_file_count": 1601,
     "category_counts": {
       "ATOMICROWS": 61,
       "CONFIG": 1,
-      "GENERATED_REPORT": 131,
+      "GENERATED_REPORT": 132,
       "MASTER_PLAN": 30,
       "NON_TEXT": 1,
       "OTHER": 2,
       "ROADMAP": 42,
       "SCHEMA": 272,
-      "SOURCE": 144,
+      "SOURCE": 148,
       "SOURCE_EVIDENCE": 56,
-      "TEST": 701,
+      "TEST": 702,
       "TOOL": 47,
-      "VALIDATOR_TOOL": 106,
+      "VALIDATOR_TOOL": 107,
       "WORKFLOW": 1
     },
-    "deterministic_inventory_policy": "tracked files from git with local traversal fallback",
+    "deterministic_inventory_policy": "tracked files from git ls-files -z with normalized POSIX ordering",
     "excluded_local_runtime_patterns": [
       ".git",
       ".venv",
@@ -1354,6 +1354,6 @@
       ".pytest_cache"
     ],
     "sk\u0069pped_local_runtime_path_count": 0,
-    "tracked_file_count": 1595
+    "tracked_file_count": 1602
   }
 }

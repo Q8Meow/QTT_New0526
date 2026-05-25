@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
@@ -21,6 +22,23 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 def _report() -> dict:
     return pr152_report.build_report(REPO_ROOT)
+
+
+def _string_values(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from _string_values(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _string_values(item)
+
+
+def _path_like_values(payload: dict):
+    for key, value in pr152_report._walk(payload):
+        if pr152_report._is_path_like_key(key):
+            yield from _string_values(value)
 
 
 def _copy_inputs(tmp_path: Path) -> Path:
@@ -150,9 +168,61 @@ def test_report_is_deterministic_and_has_no_local_paths() -> None:
     assert pr152_report.json_dump(first) == pr152_report.json_dump(second)
     serialized = pr152_report.json_dump(first)
     assert "C:\\Users\\" not in serialized
+    assert str(REPO_ROOT) not in serialized
+    assert REPO_ROOT.as_posix() not in serialized
     assert "AtomicRows.bundle." not in serialized
     assert ("AtomicRows.bundle." + "sha" + "256") not in serialized
     assert '"sk\\u0069pped_local_runtime_path_count"' in serialized
+
+
+def test_pr152_path_fields_are_repo_relative_posix() -> None:
+    payload = _report()
+    path_values = list(_path_like_values(payload))
+    assert path_values
+    for value in path_values:
+        assert "\\" not in value
+        assert not value.startswith("/")
+        assert re.match(r"^[A-Za-z]:/", value) is None
+
+
+def test_pr152_nested_audit_arrays_are_sorted() -> None:
+    payload = _report()
+    upstream_paths = [row["artifact_path"] for row in payload["upstream_artifact_inputs"]]
+    optional_paths = [row["artifact_path"] for row in payload["optional_context_inputs"]]
+    finding_ids = [row["finding_id"] for row in payload["audit_findings"]]
+    assert upstream_paths == sorted(upstream_paths, key=pr152_report._stable_path_key)
+    assert optional_paths == sorted(optional_paths, key=pr152_report._stable_path_key)
+    assert finding_ids == sorted(finding_ids)
+    for key in (
+        "source_evidence_boundary_audit",
+        "atomicrows_boundary_audit",
+        "runtime_replay_paper_live_boundary_audit",
+        "quantum_forward_boundary_audit",
+    ):
+        paths = payload[key]["audited_artifacts"]
+        assert paths == sorted(paths, key=pr152_report._stable_path_key)
+
+
+def test_pr152_synthetic_unordered_inputs_are_canonicalized() -> None:
+    paths_a = ["B\\z.py", "./a/B.py", "A/x.py"]
+    paths_b = list(reversed(paths_a))
+    present = {"B/z.py", "a/B.py", "A/x.py"}
+    assert pr152_report._path_records(paths_a, present, True) == pr152_report._path_records(
+        paths_b,
+        present,
+        True,
+    )
+    assert pr152_report._simple_boundary_audit(
+        domain="WHOLE_REPO_INVENTORY",
+        status="PASS",
+        reason_code="PR152_READY",
+        audited_artifacts=paths_a,
+    ) == pr152_report._simple_boundary_audit(
+        domain="WHOLE_REPO_INVENTORY",
+        status="PASS",
+        reason_code="PR152_READY",
+        audited_artifacts=paths_b,
+    )
 
 
 def test_pr152_repo_paths_are_posix_and_case_stable() -> None:
@@ -210,6 +280,7 @@ def test_validation_default_output_and_write_modes(capsys, tmp_path) -> None:
     assert report_path.read_bytes() == before_report
 
     assert pr152_cli.main(["--repo-root", REPO_ROOT.as_posix(), "--write-report"]) == 0
+    assert json.loads(report_path.read_text(encoding="utf-8")) == _report()
     after_diff = subprocess.run(
         ["git", "diff", "--name-only"],
         cwd=REPO_ROOT,
@@ -220,6 +291,52 @@ def test_validation_default_output_and_write_modes(capsys, tmp_path) -> None:
     assert report_path.read_bytes() == before_report
     assert after_diff == before_diff
     assert c.SUCCESS_MARKER in capsys.readouterr().out
+
+
+def test_stale_report_comparator_reports_deterministic_path() -> None:
+    tracked = {"completed_pr_artifact_audit": {"generated_report_count": 131}}
+    rebuilt = {"completed_pr_artifact_audit": {"generated_report_count": 132}}
+    diagnostics = pr152_report.report_payload_mismatch_diagnostics(tracked, rebuilt)
+    assert diagnostics == [
+        {
+            "json_path": "$.completed_pr_artifact_audit.generated_report_count",
+            "mismatch_kind": "value_mismatch",
+            "tracked_type": "int",
+            "rebuilt_type": "int",
+            "tracked_value": 131,
+            "rebuilt_value": 132,
+        }
+    ]
+
+
+def test_stale_report_comparator_keeps_repository_validation_fail_closed(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    tracked = {"completed_pr_artifact_audit": {"generated_report_count": 131}}
+    rebuilt = {"completed_pr_artifact_audit": {"generated_report_count": 132}}
+    monkeypatch.setattr(pr152_report, "build_report", lambda repo_root: rebuilt)
+    monkeypatch.setattr(pr152_report, "validate_report_payload", lambda payload: [])
+    monkeypatch.setattr(pr152_report, "_read_json", lambda path: tracked)
+    monkeypatch.setattr(
+        pr152_report,
+        "_validate_changed_paths",
+        lambda repo_root, tracked_report_write_allowed=False: [],
+    )
+
+    failures = pr152_report.validate_repository_artifacts(tmp_path)
+    assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+    details = [
+        failure
+        for failure in failures
+        if failure.startswith("PR152_REPORT_STALE_OR_NONDETERMINISTIC_DETAIL:")
+    ]
+    assert details == [
+        "PR152_REPORT_STALE_OR_NONDETERMINISTIC_DETAIL: "
+        "json_path=$.completed_pr_artifact_audit.generated_report_count "
+        "mismatch_kind=value_mismatch tracked_type=int rebuilt_type=int "
+        "tracked_value=131 rebuilt_value=132"
+    ]
 
 
 def test_explicit_tracked_write_guard_allows_only_pr152_report_on_main(monkeypatch) -> None:
