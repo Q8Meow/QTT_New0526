@@ -326,6 +326,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_grand_global_debug_logical_consistency_audit.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
