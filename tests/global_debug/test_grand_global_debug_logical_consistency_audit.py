@@ -155,6 +155,33 @@ def test_report_is_deterministic_and_has_no_local_paths() -> None:
     assert '"sk\\u0069pped_local_runtime_path_count"' in serialized
 
 
+def test_pr152_repo_paths_are_posix_and_case_stable() -> None:
+    normalized = pr152_report._stable_sorted_repo_paths(
+        ["B\\z.py", "./a/B.py", "A/x.py", "b/a.py"]
+    )
+    assert normalized == ["a/B.py", "A/x.py", "b/a.py", "B/z.py"]
+    assert all("\\" not in path for path in normalized)
+
+
+def test_pr152_git_inventory_uses_normalized_nul_paths(tmp_path, monkeypatch) -> None:
+    for rel_path in ("B/z.py", "a/B.py", "A/x.py"):
+        path = tmp_path / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("value\n", encoding="utf-8")
+
+    def fake_git_stdout(repo_root: Path, args: list[str]) -> tuple[int, str, str]:
+        assert repo_root == tmp_path
+        assert args == ["ls-files", "-z"]
+        return 0, "B\\z.py\0./a/B.py\0A/x.py\0", ""
+
+    monkeypatch.setattr(pr152_report, "_git_stdout", fake_git_stdout)
+    inventory = pr152_report._repo_inventory(tmp_path)
+    assert inventory["inventory_source"] == "git ls-files -z"
+    assert inventory["tracked_files"] == ["a/B.py", "A/x.py", "B/z.py"]
+    assert inventory["audit"]["tracked_file_count"] == 3
+    assert inventory["audit"]["audited_root_directories"] == ["A", "a", "B"]
+
+
 def test_validation_default_output_and_write_modes(capsys, tmp_path) -> None:
     report_path = REPO_ROOT / c.REPORT_PATH
     before_report = report_path.read_bytes()

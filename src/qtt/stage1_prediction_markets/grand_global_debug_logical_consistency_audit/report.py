@@ -40,6 +40,27 @@ def _list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _normalize_repo_relative_path(value: Path | str) -> str:
+    normalized = str(value).replace("\\", "/").strip()
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized
+
+
+def _stable_path_key(value: Path | str) -> tuple[str, str]:
+    normalized = _normalize_repo_relative_path(value)
+    return normalized.casefold(), normalized
+
+
+def _stable_sorted_repo_paths(values: Sequence[Path | str]) -> list[str]:
+    normalized = {
+        _normalize_repo_relative_path(value)
+        for value in values
+        if _normalize_repo_relative_path(value)
+    }
+    return sorted(normalized, key=_stable_path_key)
+
+
 def _read_required_text(
     root: Path,
     key: str,
@@ -148,7 +169,7 @@ def _path_records(paths: Sequence[Path], present: set[str], required: bool) -> l
             }
             for path in paths
         ),
-        key=lambda row: row["artifact_path"],
+        key=lambda row: _stable_path_key(row["artifact_path"]),
     )
 
 
@@ -160,19 +181,22 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
         capture_output=True,
         text=True,
     )
-    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+    return completed.returncode, completed.stdout, completed.stderr
 
 
 def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
     if not repo_root.exists():
         return [], "deterministic path traversal", 0
-    rc, stdout, _stderr = _git_stdout(repo_root, ["ls-files"])
+    rc, stdout, _stderr = _git_stdout(repo_root, ["ls-files", "-z"])
     if rc == 0 and stdout:
-        return sorted(path.replace("\\", "/") for path in stdout.splitlines()), "git ls-files", 0
+        return _stable_sorted_repo_paths(stdout.split("\0")), "git ls-files -z", 0
 
     excluded_count = 0
     paths: list[str] = []
-    for path in sorted(repo_root.rglob("*")):
+    for path in sorted(
+        repo_root.rglob("*"),
+        key=lambda item: _stable_path_key(item.relative_to(repo_root)),
+    ):
         rel = path.relative_to(repo_root).as_posix()
         parts = set(rel.split("/"))
         if parts.intersection(c.INVENTORY_EXCLUDED_LOCAL_RUNTIME_PATTERNS):
@@ -180,7 +204,7 @@ def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
             continue
         if path.is_file():
             paths.append(rel)
-    return paths, "deterministic path traversal", excluded_count
+    return _stable_sorted_repo_paths(paths), "deterministic path traversal", excluded_count
 
 
 def _is_text_file(path: Path) -> bool:
@@ -200,7 +224,7 @@ def _is_text_file(path: Path) -> bool:
 def _category_for_path(rel_path: str, *, text_file: bool) -> str:
     if not text_file:
         return "NON_TEXT"
-    path = rel_path.replace("\\", "/")
+    path = _normalize_repo_relative_path(rel_path)
     name = Path(path).name
     if path.startswith("docs/master_plan/generated/"):
         return "GENERATED_REPORT"
@@ -244,7 +268,7 @@ def _repo_inventory(root: Path) -> dict[str, Any]:
             non_text_count += 1
         category = _category_for_path(rel_path, text_file=is_text)
         category_counts[category] = category_counts.get(category, 0) + 1
-    roots = sorted({path.split("/", 1)[0] for path in tracked if path})
+    roots = _stable_sorted_repo_paths(path.split("/", 1)[0] for path in tracked if path)
     return {
         "tracked_files": tracked,
         "inventory_source": source,
@@ -258,7 +282,7 @@ def _repo_inventory(root: Path) -> dict[str, Any]:
             },
             "audited_root_directories": roots,
             "excluded_local_runtime_patterns": list(c.INVENTORY_EXCLUDED_LOCAL_RUNTIME_PATTERNS),
-            "deterministic_inventory_policy": "tracked files from git with local traversal fallback",
+            "deterministic_inventory_policy": "tracked files from git ls-files -z with normalized POSIX ordering",
         },
     }
 
@@ -623,7 +647,9 @@ def _deep_chain_audit(evidence: Mapping[str, Any]) -> tuple[dict[str, Any], list
 
 
 def _generated_report_audit(root: Path, tracked: Sequence[str]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    report_paths = sorted(path for path in tracked if path.startswith("docs/master_plan/generated/"))
+    report_paths = _stable_sorted_repo_paths(
+        path for path in tracked if path.startswith("docs/master_plan/generated/")
+    )
     parse_failures: list[str] = []
     for rel_path in report_paths:
         path = root / rel_path
@@ -731,7 +757,7 @@ def _scan_pr152_files(root: Path) -> dict[str, Any]:
                 findings.append(rel_path)
     return {
         "inspected_pr152_file_count": len(inspected),
-        "network_surface_findings": sorted(set(findings)),
+        "network_surface_findings": _stable_sorted_repo_paths(findings),
         "network_surface_status": "PASS" if not findings else "FAIL_CLOSED",
         "bypass_marker_status": "PASS" if not findings else "FAIL_CLOSED",
     }
@@ -746,7 +772,7 @@ def _simple_boundary_audit(
 ) -> dict[str, Any]:
     return {
         "audit_domain": domain,
-        "audited_artifacts": sorted(audited_artifacts),
+        "audited_artifacts": _stable_sorted_repo_paths(audited_artifacts),
         "authority_boundary_status": status,
         "reason_code": reason_code,
         "no_claim_flags": dict(c.NO_CLAIM_FLAGS),
@@ -992,7 +1018,7 @@ def _forbidden_bundle_sidecar_path() -> str:
 
 def _contains_exact(value: Any, needle: str) -> bool:
     if isinstance(value, str):
-        return value.replace("\\", "/") == needle
+        return _normalize_repo_relative_path(value) == needle
     if isinstance(value, list):
         return any(_contains_exact(item, needle) for item in value)
     return False
@@ -1008,8 +1034,14 @@ def _path_and_authority_failures(payload: Mapping[str, Any]) -> list[str]:
         if "integrity_authority" in lowered and value is not False:
             if key != "qtt_integrity_authority_created":
                 failures.append("PR152_QTT_INTEGRITY_AUTHORITY_DRIFT_DETECTED")
-        if _is_path_like_key(key) and _contains_exact(value, sidecar):
-            failures.append("PR152_ATOMICROWS_MUTATION_DRIFT_DETECTED")
+        if _is_path_like_key(key):
+            path_values = value if isinstance(value, list) else [value]
+            if any(isinstance(item, str) and "\\" in item for item in path_values):
+                failures.append("PR152_LOCAL_PATH_FORBIDDEN")
+            if any(isinstance(item, str) and item.startswith("/") for item in path_values):
+                failures.append("PR152_LOCAL_PATH_FORBIDDEN")
+            if _contains_exact(value, sidecar):
+                failures.append("PR152_ATOMICROWS_MUTATION_DRIFT_DETECTED")
         if isinstance(value, str) and re.search(r"[A-Za-z]:[\\/]", value):
             failures.append("PR152_LOCAL_PATH_FORBIDDEN")
     return sorted(set(failures))
@@ -1151,22 +1183,23 @@ def validate_report_payload(payload: Mapping[str, Any]) -> list[str]:
 def _changed_paths(repo_root: Path) -> list[str]:
     status_rc, status_out, _status_err = _git_stdout(
         repo_root,
-        ["status", "--short", "--untracked-files=all"],
+        ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
     )
     if status_rc != 0:
         return ["<git-status-unavailable>"]
     paths: list[str] = []
-    for line in status_out.splitlines():
+    records = [record for record in status_out.split("\0") if record]
+    index = 0
+    while index < len(records):
+        line = records[index]
         if not line.strip():
+            index += 1
             continue
-        if len(line) > 2 and line[2] == " ":
-            path = line[3:]
-        elif len(line) > 1 and line[1] == " ":
-            path = line[2:]
-        else:
-            path = line[3:] if len(line) > 3 else line
-        paths.append(path.strip().replace("\\", "/"))
-    return sorted(set(paths))
+        code = line[:2]
+        path = line[3:] if len(line) > 3 and line[2] == " " else line[2:].strip()
+        paths.append(_normalize_repo_relative_path(path))
+        index += 2 if code[:1] in {"R", "C"} or code[1:] in {"R", "C"} else 1
+    return _stable_sorted_repo_paths(paths)
 
 
 def _branch_allows_pr152_changed_paths(branch: str) -> bool:
@@ -1193,7 +1226,7 @@ def _is_allowed_pr152_changed_path_for_branch(
     *,
     tracked_report_write_allowed: bool = False,
 ) -> bool:
-    normalized = path.replace("\\", "/")
+    normalized = _normalize_repo_relative_path(path)
     if normalized == ".tmp" or normalized.startswith(".tmp/"):
         return True
     if (
@@ -1219,7 +1252,7 @@ def _validate_changed_paths(
         if path == "<git-status-unavailable>":
             failures.append("PR152_GIT_STATUS_UNAVAILABLE")
             continue
-        normalized = path.replace("\\", "/")
+        normalized = _normalize_repo_relative_path(path)
         if not _is_allowed_pr152_changed_path_for_branch(
             normalized,
             branch,
