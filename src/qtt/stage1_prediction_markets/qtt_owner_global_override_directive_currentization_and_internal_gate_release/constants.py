@@ -582,6 +582,87 @@ PR150_TARGET_MATRIX_CHANGED_PATHS = {
         "atomicrows_semantic_value_materialization_implementation_bridge/report.py"
     ),
 }
+PR151_RETRIEVAL_TARGET_PACK_CHANGED_PATHS = {
+    (
+        "docs/master_plan/generated/"
+        "PR151_OfficialSourceRetrievalTargetPackForParameterDefaults.report.json"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "official_source_retrieval_target_pack_parameter_defaults/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "official_source_retrieval_target_pack_parameter_defaults/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "official_source_retrieval_target_pack_parameter_defaults/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "official_source_retrieval_target_pack_parameter_defaults/validator.py"
+    ),
+    "tools/validate_official_source_retrieval_target_pack_parameter_defaults.py",
+    (
+        "tests/source_evidence/"
+        "test_official_source_retrieval_target_pack_parameter_defaults.py"
+    ),
+    "tools/run_validation_gates.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_owner_authorization_gate/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_owner_authorization_gate/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
+        "constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/"
+        "report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/"
+        "constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/"
+        "report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_implementation_bridge/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_implementation_bridge/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "source_backed_classical_quantum_parameter_default_target_matrix/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "source_backed_classical_quantum_parameter_default_target_matrix/report.py"
+    ),
+}
 
 ALLOWED_PR143_CHANGED_PATHS = {
     YAML_PATH.as_posix(),
