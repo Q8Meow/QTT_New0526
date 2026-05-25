@@ -43,6 +43,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     failures = validate_repository_artifacts(
         repo_root,
         report_output_path=args.output,
+        tracked_report_write_allowed=args.write_report,
     )
     if failures:
         for failure in failures:
