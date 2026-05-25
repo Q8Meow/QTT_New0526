@@ -826,6 +826,21 @@ def _is_pr148_checkpoint_currentization_changed_path_for_branch(
     )
 
 
+def _branch_allows_pr149_implementation_bridge_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(branch, 147, allow_repair=False)
+
+
+def _is_pr149_implementation_bridge_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in c.PR149_IMPLEMENTATION_BRIDGE_CHANGED_PATHS
+        and _branch_allows_pr149_implementation_bridge_changed_paths(branch)
+    )
+
+
 def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
     normalized = path.replace("\\", "/")
     return (
@@ -838,6 +853,9 @@ def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
         normalized,
         branch,
     ) or _is_pr148_checkpoint_currentization_changed_path_for_branch(
+        normalized,
+        branch,
+    ) or _is_pr149_implementation_bridge_changed_path_for_branch(
         normalized,
         branch,
     )
