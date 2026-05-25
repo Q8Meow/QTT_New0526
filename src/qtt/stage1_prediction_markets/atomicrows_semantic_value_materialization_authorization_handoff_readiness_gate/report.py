@@ -15,6 +15,10 @@ from tools.ci_branch_context import (
 )
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
+from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (
+    constants as pr152_constants,
+)
+
 from . import constants as c
 from .builder import build_fixture, build_gate, build_report, json_dump, yaml_dump
 
@@ -871,6 +875,18 @@ def _is_pr151_retrieval_target_pack_changed_path_for_branch(
     )
 
 
+def _branch_allows_pr152_audit_changed_paths(branch: str) -> bool:
+    return is_downstream_roadmap_branch(branch, 147, allow_repair=False)
+
+
+def _is_pr152_audit_changed_path_for_branch(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in pr152_constants.PR152_AUDIT_CHANGED_PATHS
+        and _branch_allows_pr152_audit_changed_paths(branch)
+    )
+
+
 def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
     normalized = path.replace("\\", "/")
     return (
@@ -892,6 +908,9 @@ def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
         normalized,
         branch,
     ) or _is_pr151_retrieval_target_pack_changed_path_for_branch(
+        normalized,
+        branch,
+    ) or _is_pr152_audit_changed_path_for_branch(
         normalized,
         branch,
     )

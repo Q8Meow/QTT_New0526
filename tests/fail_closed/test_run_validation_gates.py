@@ -326,6 +326,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_grand_global_debug_logical_consistency_audit.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2202,6 +2208,45 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         restore_event,
     ]
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+
+
+def test_runner_preserves_initially_modified_files_after_final_pytest(
+    monkeypatch,
+    tmp_path,
+):
+    class Completed:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    repo_root = tmp_path
+    report_rel = (
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+    )
+    report_path = repo_root / report_rel
+    report_path.parent.mkdir(parents=True)
+    report_path.write_text("updated\n", encoding="utf-8")
+    modified_sets = iter([{report_rel}, {report_rel}, set()])
+
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        report_path.write_text("head\n", encoding="utf-8")
+        return Completed()
+
+    monkeypatch.setattr(runner, "_tracked_modified_paths", lambda repo_root: next(modified_sets))
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runner,
+        "_routed_generated_output_currentness_failures",
+        lambda command, repo_root: [],
+    )
+
+    command = [
+        runner.sys.executable,
+        str(Path("tools") / runner.PYTEST_FRESH_BASETEMP_SCRIPT),
+    ]
+    assert runner.run_commands([command], repo_root=repo_root) == 0
+    assert report_path.read_text(encoding="utf-8") == "updated\n"
 
 
 def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):

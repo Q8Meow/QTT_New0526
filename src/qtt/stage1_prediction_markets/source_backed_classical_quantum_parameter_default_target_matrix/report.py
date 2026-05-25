@@ -10,6 +10,10 @@ from typing import Any, Mapping, Sequence
 
 from tools.ci_branch_context import current_branch_context, is_pr_or_later_branch
 
+from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (
+    constants as pr152_constants,
+)
+
 from . import constants as c
 
 
@@ -1518,6 +1522,23 @@ def _is_pr151_retrieval_target_pack_changed_path_for_branch(path: str, branch: s
     )
 
 
+def _branch_allows_pr152_audit_changed_paths(branch: str) -> bool:
+    return is_pr_or_later_branch(
+        branch,
+        152,
+        allow_main=False,
+        allow_repair=False,
+    )
+
+
+def _is_pr152_audit_changed_path_for_branch(path: str, branch: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return (
+        normalized in pr152_constants.PR152_AUDIT_CHANGED_PATHS
+        and _branch_allows_pr152_audit_changed_paths(branch)
+    )
+
+
 def _is_allowed_pr150_changed_path_for_branch(
     path: str,
     branch: str,
@@ -1534,6 +1555,8 @@ def _is_allowed_pr150_changed_path_for_branch(
     ):
         return True
     if _is_pr151_retrieval_target_pack_changed_path_for_branch(normalized, branch):
+        return True
+    if _is_pr152_audit_changed_path_for_branch(normalized, branch):
         return True
     return normalized in c.EXACT_CHANGED_PATH_CANDIDATES and _branch_allows_pr150_changed_paths(
         branch
