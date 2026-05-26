@@ -7,7 +7,11 @@ from pathlib import Path
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from tools.ci_branch_context import current_branch_context, is_pr_or_later_branch
+from tools.ci_branch_context import (
+    current_branch_context,
+    is_explicit_downstream_repair_changed_path,
+    is_pr_or_later_branch,
+)
 
 from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (
     constants as pr152_constants,
@@ -948,6 +952,8 @@ def _is_allowed_pr149_changed_path_for_branch(
     if _is_pr151_retrieval_target_pack_changed_path_for_branch(normalized, branch):
         return True
     if _is_pr152_audit_changed_path_for_branch(normalized, branch):
+        return True
+    if is_explicit_downstream_repair_changed_path(branch, normalized):
         return True
     return (
         normalized in c.CHANGED_PATH_EXACT_ALLOWANCE_CANDIDATES

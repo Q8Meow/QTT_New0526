@@ -9,7 +9,11 @@ import re
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from tools.ci_branch_context import current_branch_context, is_pr_or_later_branch
+from tools.ci_branch_context import (
+    current_branch_context,
+    is_explicit_downstream_repair_changed_path,
+    is_pr_or_later_branch,
+)
 
 from . import constants as c
 
@@ -1414,6 +1418,8 @@ def _is_allowed_pr152_changed_path_for_branch(
         and normalized == c.REPORT_PATH.as_posix()
         and _branch_allows_explicit_pr152_tracked_report_write(branch)
     ):
+        return True
+    if is_explicit_downstream_repair_changed_path(branch, normalized):
         return True
     return normalized in c.EXACT_CHANGED_PATH_CANDIDATES and _branch_allows_pr152_changed_paths(
         branch

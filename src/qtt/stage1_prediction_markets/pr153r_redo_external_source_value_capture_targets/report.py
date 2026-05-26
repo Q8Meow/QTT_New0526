@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import Counter
 import json
 from pathlib import Path
-import subprocess
 from typing import Any, Mapping
 
 from . import accepted_packet
@@ -15,6 +14,13 @@ from . import seed_map
 from . import source_retrieval
 from . import taxonomy as tx
 
+DETERMINISTIC_BRANCH_VALUE = (
+    "CURRENT_BRANCH_OMITTED_FOR_DETERMINISTIC_REPORT_REBUILD"
+)
+DETERMINISTIC_VCS_METADATA_POLICY = (
+    "CURRENT_GIT_METADATA_OMITTED_FOR_DETERMINISTIC_REPORT_REBUILD"
+)
+
 
 def json_dump(value: Any) -> str:
     return json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
@@ -22,20 +28,6 @@ def json_dump(value: Any) -> str:
 
 def _read_json(path: Path) -> dict[str, Any]:
     return extraction.read_json_object(path)
-
-
-def _git_output(repo_root: Path, *args: str) -> str | None:
-    try:
-        completed = subprocess.run(
-            ["git", *args],
-            cwd=repo_root,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return None
-    return completed.stdout.strip()
 
 
 def _control_plane_records(repo_root: Path) -> list[dict[str, Any]]:
@@ -221,8 +213,6 @@ def build_report(repo_root: Path | str) -> dict[str, Any]:
         for item in per_target
         if not accepted_packet.digest_metadata_policy_failures(item)
     )
-    branch = _git_output(root, "branch", "--show-current")
-    head = _git_output(root, "rev-parse", "--short", "HEAD")
     platform_counts = extraction.platform_counts(raw_targets)
     final_status = (
         tx.PR153R_REDO_FULL_CAPTURE_OK
@@ -237,9 +227,10 @@ def build_report(repo_root: Path | str) -> dict[str, Any]:
         "report_id": tx.PR153R_REDO_EXTERNAL_SOURCE_VALUE_CAPTURE_TARGETS,
         "report_authority_class": c.REPORT_AUTHORITY_CLASS,
         "controller_version": c.CONTROLLER_VERSION,
-        "branch": branch,
+        "branch": DETERMINISTIC_BRANCH_VALUE,
         "baseline_head_short_sha": {
-            "value": head,
+            "value": None,
+            "determinism_policy": DETERMINISTIC_VCS_METADATA_POLICY,
             "authority_status": "VCS_METADATA_ONLY_NOT_QTT_SHA_FREEZE_CHECKSUM_AUTHORITY",
         },
         "taxonomy_module_path": (

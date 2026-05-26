@@ -15,6 +15,7 @@ from tools.build_master_plan_section_coverage_report import (
 from tools.ci_branch_context import (
     current_branch_context,
     is_downstream_roadmap_branch,
+    is_explicit_downstream_repair_changed_path,
 )
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
@@ -1667,6 +1668,14 @@ def _is_pr152_audit_changed_path_for_branch(path: str, branch: str) -> bool:
     )
 
 
+def _is_pr153r_repair_branch_context_changed_path_for_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return is_explicit_downstream_repair_changed_path(branch, normalized)
+
+
 def _is_pr141_downstream_changed_path(path: str, repo_root: Path) -> bool:
     branch_context = current_branch_context(repo_root)
     return _is_pr141_downstream_changed_path_for_branch(
@@ -1722,6 +1731,10 @@ def _is_allowed_pr140_changed_path(path: str, repo_root: Path) -> bool:
             normalized,
             branch_context.branch,
         )
+        or _is_pr153r_repair_branch_context_changed_path_for_branch(
+            normalized,
+            branch_context.branch,
+        )
     )
 
 
@@ -1742,7 +1755,13 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
             failures.append("PR140_ATOMICROWS_BUNDLE_MUTATION_DETECTED")
         if normalized.startswith(c.ROW_FAMILY_SOURCE_DIRECTORY.as_posix() + "/"):
             failures.append("PR140_ROW_FAMILY_SOURCE_MUTATION_DETECTED")
-        if normalized in {path.as_posix() for path in c.BRANCH_CONTEXT_EVIDENCE_PATHS}:
+        branch_context = current_branch_context(repo_root)
+        if normalized in {
+            path.as_posix() for path in c.BRANCH_CONTEXT_EVIDENCE_PATHS
+        } and not _is_pr153r_repair_branch_context_changed_path_for_branch(
+            normalized,
+            branch_context.branch,
+        ):
             failures.append("PR140_BRANCH_CONTEXT_HARDENING_MUTATION_DETECTED")
     return sorted(set(failures))
 
