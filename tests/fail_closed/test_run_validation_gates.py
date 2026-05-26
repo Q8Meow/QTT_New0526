@@ -332,6 +332,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_controlled_official_source_capture_candidate_packets.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -1791,7 +1797,26 @@ def _expected_commands(
         [
             python_executable,
             str(Path("tools") / "run_pytest_fresh_basetemp.py"),
+            str(
+                Path("tests")
+                / "source_evidence"
+                / "test_controlled_official_source_capture_candidate_packets.py"
+            ),
             "-q",
+            "--basetemp",
+            str(pytest_basetemp),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "run_pytest_fresh_basetemp.py"),
+            "tests",
+            "-q",
+            "--ignore",
+            str(
+                Path("tests")
+                / "source_evidence"
+                / "test_controlled_official_source_capture_candidate_packets.py"
+            ),
             "--basetemp",
             str(pytest_basetemp),
         ],
@@ -1822,6 +1847,40 @@ def test_runner_commands_use_sys_executable(monkeypatch):
 
     assert commands
     assert all(command[0] == python_executable for command in commands)
+
+
+def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr152_index = command_names.index(
+        "validate_grand_global_debug_logical_consistency_audit.py"
+    )
+    pr153_index = command_names.index(
+        "validate_controlled_official_source_capture_candidate_packets.py"
+    )
+    next_gate_index = command_names.index(
+        "validate_qtt_agent_role_operating_charter_registry.py"
+    )
+
+    assert (
+        command_names.count(
+            "validate_controlled_official_source_capture_candidate_packets.py"
+        )
+        == 1
+    )
+    assert pr152_index < pr153_index < next_gate_index
+    assert commands[pr153_index] == [
+        python_executable,
+        str(Path("tools") / "validate_controlled_official_source_capture_candidate_packets.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr153_index]
+    assert "--output" not in commands[pr153_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
@@ -2132,6 +2191,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
             "\n".join(intended_repair_paths) + "\n",
             "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
+            "\n".join(intended_repair_paths) + "\n",
+            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
         ]
     )
     events: list[tuple[str, list[str]]] = []
@@ -2181,9 +2242,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     )
     assert exit_code == 0
     assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 5
+    assert events.count(ls_files_event) == 7
     assert restore_event in events
-    assert events.count(restore_event) == 3
+    assert events.count(restore_event) == 4
     assert "tools/run_validation_gates.py" not in restore_event[1]
     assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
     pr142_command = next(
@@ -2202,6 +2263,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     ]
     assert events[restore_indices[0] + 1] == ("gate", pr142_command)
     assert events[restore_indices[1] + 1] == ("gate", pr143_command)
+    assert events[restore_indices[2] - 2] == ("gate", commands[-2])
     assert events[-3:] == [
         ("gate", commands[-1]),
         ls_files_event,
@@ -2913,7 +2975,14 @@ def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
     assert commands[-1] == [
         python_executable,
         str(Path("tools") / "run_pytest_fresh_basetemp.py"),
+        "tests",
         "-q",
+        "--ignore",
+        str(
+            Path("tests")
+            / "source_evidence"
+            / "test_controlled_official_source_capture_candidate_packets.py"
+        ),
         "--basetemp",
         str(pytest_basetemp),
     ]

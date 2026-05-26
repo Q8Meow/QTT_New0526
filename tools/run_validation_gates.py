@@ -807,6 +807,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_controlled_official_source_capture_candidate_packets.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",
@@ -2277,7 +2286,26 @@ def build_validation_commands(
         [
             sys.executable,
             _path("tools", "run_pytest_fresh_basetemp.py"),
+            _path(
+                "tests",
+                "source_evidence",
+                "test_controlled_official_source_capture_candidate_packets.py",
+            ),
             "-q",
+            "--basetemp",
+            str(pytest_basetemp),
+        ],
+        [
+            sys.executable,
+            _path("tools", "run_pytest_fresh_basetemp.py"),
+            "tests",
+            "-q",
+            "--ignore",
+            _path(
+                "tests",
+                "source_evidence",
+                "test_controlled_official_source_capture_candidate_packets.py",
+            ),
             "--basetemp",
             str(pytest_basetemp),
         ],
