@@ -2,7 +2,8 @@ name: QTT Validation
 
 on:
   pull_request:
-  workflow_dispatch:`n  push:
+  workflow_dispatch:
+  push:
     branches:
       - main
 
