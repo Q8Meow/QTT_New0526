@@ -25,6 +25,7 @@ REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
+    "repair/pr153s-source-value-capture-closure-classifier": 153,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
@@ -33,6 +34,25 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
             "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
             "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        }
+    ),
+    "repair/pr153s-source-value-capture-closure-classifier": frozenset(
+        {
+            "docs/master_plan/generated/PR153S_SourceValueCaptureClosureClassifier.report.json",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/__init__.py",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/classifier.py",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/inputs.py",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/report.py",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/taxonomy.py",
+            "src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/validator.py",
+            "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/source_evidence/test_pr153s_source_value_capture_closure_classifier.py",
+            "tools/ci_branch_context.py",
+            "tools/run_validation_gates.py",
+            "tools/validate_pr153s_source_value_capture_closure_classifier.py",
         }
     ),
 }

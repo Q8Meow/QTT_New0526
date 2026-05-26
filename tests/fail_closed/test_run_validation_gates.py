@@ -163,6 +163,7 @@ from tools import run_validation_gates as runner
 
 
 PR153R_REPAIR_BRANCH = "repair-pr153r-redo-report-determinism"
+PR153S_REPAIR_BRANCH = "repair/pr153s-source-value-capture-closure-classifier"
 BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -379,6 +380,12 @@ def _expected_commands(
         [
             python_executable,
             str(Path("tools") / "validate_pr153r_redo_external_source_value_capture_targets.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr153s_source_value_capture_closure_classifier.py"),
             "--repo-root",
             ".",
         ],
@@ -1895,7 +1902,7 @@ def test_runner_commands_use_sys_executable(monkeypatch):
     assert all(command[0] == python_executable for command in commands)
 
 
-def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch):
+def test_runner_includes_pr153_family_validators_after_pr152(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
@@ -1910,6 +1917,9 @@ def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch)
     )
     pr153r_index = command_names.index(
         "validate_pr153r_redo_external_source_value_capture_targets.py"
+    )
+    pr153s_index = command_names.index(
+        "validate_pr153s_source_value_capture_closure_classifier.py"
     )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
@@ -1927,7 +1937,13 @@ def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch)
         )
         == 1
     )
-    assert pr152_index < pr153_index < pr153r_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_pr153s_source_value_capture_closure_classifier.py"
+        )
+        == 1
+    )
+    assert pr152_index < pr153_index < pr153r_index < pr153s_index < next_gate_index
     assert commands[pr153_index] == [
         python_executable,
         str(Path("tools") / "validate_controlled_official_source_capture_candidate_packets.py"),
@@ -1940,10 +1956,18 @@ def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch)
         "--repo-root",
         ".",
     ]
+    assert commands[pr153s_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr153s_source_value_capture_closure_classifier.py"),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr153_index]
     assert "--output" not in commands[pr153_index]
     assert "--write-report" not in commands[pr153r_index]
     assert "--output" not in commands[pr153r_index]
+    assert "--write-report" not in commands[pr153s_index]
+    assert "--output" not in commands[pr153s_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
@@ -3376,6 +3400,56 @@ def test_pr153r_repair_branch_is_explicit_downstream_validation_branch():
         ci_branch_context.is_explicit_downstream_repair_changed_path(
             PR153R_REPAIR_BRANCH,
             "tools/run_validation_gates.py",
+        )
+        is False
+    )
+
+
+def test_pr153s_repair_branch_is_narrow_explicit_downstream_validation_branch():
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR153S_REPAIR_BRANCH,
+            after_pr=152,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR153S_REPAIR_BRANCH,
+            after_pr=153,
+            allow_repair=False,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            "repair/pr999-unapproved",
+            after_pr=152,
+            allow_repair=False,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR153S_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "pr153s_source_value_capture_closure_classifier/report.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR153S_REPAIR_BRANCH,
+            "tests/atomicrows/"
+            "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR153S_REPAIR_BRANCH,
+            "docs/master_plan/QTT_MasterPlan_Current.md",
         )
         is False
     )

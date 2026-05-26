@@ -422,7 +422,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="repair-pr153r-redo-report-determinism",
+            branch="repair/pr153s-source-value-capture-closure-classifier",
             source="unit-test",
         ),
     )
