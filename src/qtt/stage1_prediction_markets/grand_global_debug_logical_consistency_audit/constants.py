@@ -281,6 +281,64 @@ NETWORK_CODE_FORBIDDEN_TOKENS_FOR_STRUCTURAL_TESTS = (
     "Start-BitsTransfer",
 )
 
+PR153R_REDO_CHANGED_PATHS = (
+    "PR153R_source_evidence_failure_after_tmp_cleanup.txt",
+    (
+        "docs/master_plan/generated/"
+        "PR153R_RedoExternalSourceValueCaptureTargets.report.json"
+    ),
+    (
+        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "PR153R_34_retry_targets_official_source_seed_map.csv"
+    ),
+    (
+        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "PR153R_34_retry_targets_official_source_seed_map.json"
+    ),
+    (
+        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "PR153R_extracted_external_lane_from_zip.json"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/accepted_packet.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/extraction.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/seed_map.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/source_retrieval.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/taxonomy.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "pr153r_redo_external_source_value_capture_targets/validator.py"
+    ),
+    "tests/source_evidence/test_pr153r_redo_external_source_value_capture_targets.py",
+    "tools/validate_pr153r_redo_external_source_value_capture_targets.py",
+)
+
 PR152_AUDIT_CHANGED_PATHS = (
     REPORT_PATH.as_posix(),
     (
@@ -393,6 +451,7 @@ PR152_AUDIT_CHANGED_PATHS = (
     ),
     "tools/validate_controlled_official_source_capture_candidate_packets.py",
     "tests/source_evidence/test_controlled_official_source_capture_candidate_packets.py",
+    *PR153R_REDO_CHANGED_PATHS,
 )
 
 EXACT_CHANGED_PATH_CANDIDATES = PR152_AUDIT_CHANGED_PATHS
