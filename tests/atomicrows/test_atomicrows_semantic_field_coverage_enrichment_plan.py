@@ -593,7 +593,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="repair-pr153r-redo-report-determinism",
+            branch="repair/pr153s-source-value-capture-closure-classifier",
             source="unit-test",
         ),
     )
