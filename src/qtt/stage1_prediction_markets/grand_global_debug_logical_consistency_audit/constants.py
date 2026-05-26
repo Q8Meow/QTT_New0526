@@ -363,6 +363,36 @@ PR152_AUDIT_CHANGED_PATHS = (
         "src/qtt/stage1_prediction_markets/"
         "official_source_retrieval_target_pack_parameter_defaults/report.py"
     ),
+    (
+        "docs/master_plan/generated/"
+        "PR153_ControlledOfficialSourceCaptureCandidatePackets.report.json"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/__init__.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/constants.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/models.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/reason_codes.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/report.py"
+    ),
+    (
+        "src/qtt/stage1_prediction_markets/"
+        "controlled_official_source_capture_candidate_packets/validator.py"
+    ),
+    "tools/validate_controlled_official_source_capture_candidate_packets.py",
+    "tests/source_evidence/test_controlled_official_source_capture_candidate_packets.py",
 )
 
 EXACT_CHANGED_PATH_CANDIDATES = PR152_AUDIT_CHANGED_PATHS
