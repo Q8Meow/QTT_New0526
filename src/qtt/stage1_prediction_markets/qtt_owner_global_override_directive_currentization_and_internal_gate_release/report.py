@@ -11,6 +11,7 @@ from tools.ci_branch_context import (
     BranchContext,
     current_branch_context,
     is_downstream_roadmap_branch,
+    is_explicit_downstream_repair_changed_path,
     is_pr_or_later_branch,
 )
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
@@ -969,6 +970,9 @@ def _is_allowed_pr143_changed_path_for_branch(path: str, branch: str) -> bool:
     ) or _is_pr152_audit_changed_path_for_branch(
         normalized,
         branch,
+    ) or is_explicit_downstream_repair_changed_path(
+        branch,
+        normalized,
     )
 
 

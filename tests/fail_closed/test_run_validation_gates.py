@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
+from tools import ci_branch_context
 from tools import (
     validate_atomicrows_research_provenance_evidence_tier_classification as research_provenance_gate,
 )
@@ -159,6 +160,45 @@ from tools import (
     validate_pr137_launch_readiness_dependency_controller as pr137_dependency_controller_gate,
 )
 from tools import run_validation_gates as runner
+
+
+PR153R_REPAIR_BRANCH = "repair-pr153r-redo-report-determinism"
+BRANCH_CONTEXT_ENV = (
+    "GITHUB_ACTIONS",
+    "GITHUB_EVENT_NAME",
+    "GITHUB_REF",
+    "GITHUB_REF_NAME",
+    "GITHUB_HEAD_REF",
+)
+
+
+def _clear_branch_context_env(monkeypatch):
+    for env_name in BRANCH_CONTEXT_ENV:
+        monkeypatch.delenv(env_name, raising=False)
+
+
+def _owner_gate_git_metadata_responses(branch: str):
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, branch, ""
+        if command == ("rev-parse", "--short", "HEAD"):
+            return 0, "abcdef0", ""
+        if (
+            len(command) == 3
+            and command[:2] == ("cat-file", "-e")
+            and command[2].endswith("^{commit}")
+        ):
+            return 0, "", ""
+        if (
+            len(command) == 4
+            and command[:2] == ("merge-base", "--is-ancestor")
+            and command[3] == "HEAD"
+        ):
+            return 0, "", ""
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    return fake_git_stdout
 
 
 def _default_temp_generated_report(filename: str) -> str:
@@ -3292,6 +3332,106 @@ def test_runner_exposes_owner_override_receipt_authoring_gate_success_marker():
         owner_override_receipt_authoring_gate.SUCCESS_MARKER
         == "QTT_OWNER_OVERRIDE_RECEIPT_AUTHORING_GATE_OK"
     )
+
+
+def test_pr153r_repair_branch_is_explicit_downstream_validation_branch():
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR153R_REPAIR_BRANCH,
+            after_pr=138,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR153R_REPAIR_BRANCH,
+            after_pr=153,
+            allow_repair=False,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            "repair-pr999-unapproved",
+            after_pr=138,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            "feature/non-downstream-validation",
+            after_pr=138,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR153R_REPAIR_BRANCH,
+            "tools/ci_branch_context.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR153R_REPAIR_BRANCH,
+            "tools/run_validation_gates.py",
+        )
+        is False
+    )
+
+
+def test_pr93_pr94_metadata_allow_pr153r_repair_downstream_branch(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    fake_git_stdout = _owner_gate_git_metadata_responses(PR153R_REPAIR_BRANCH)
+    monkeypatch.setattr(owner_approval_request_queue_gate, "_git_stdout", fake_git_stdout)
+    monkeypatch.setattr(owner_override_receipt_authoring_gate, "_git_stdout", fake_git_stdout)
+
+    pr93_failures, pr93_metadata = (
+        owner_approval_request_queue_gate.validate_pr93_roadmap_metadata(Path("."))
+    )
+    pr94_failures, pr94_metadata = (
+        owner_override_receipt_authoring_gate.validate_pr94_roadmap_metadata(Path("."))
+    )
+
+    assert pr93_failures == []
+    assert pr94_failures == []
+    assert pr93_metadata["branch"] == PR153R_REPAIR_BRANCH
+    assert pr94_metadata["branch"] == PR153R_REPAIR_BRANCH
+    assert (
+        owner_approval_request_queue_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        in pr93_metadata["ci_info_lines"]
+    )
+    assert (
+        owner_override_receipt_authoring_gate.DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER
+        in pr94_metadata["ci_info_lines"]
+    )
+
+
+def test_pr93_pr94_metadata_still_reject_arbitrary_branch(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    branch = "feature/non-downstream-validation"
+    fake_git_stdout = _owner_gate_git_metadata_responses(branch)
+    monkeypatch.setattr(owner_approval_request_queue_gate, "_git_stdout", fake_git_stdout)
+    monkeypatch.setattr(owner_override_receipt_authoring_gate, "_git_stdout", fake_git_stdout)
+
+    pr93_failures, pr93_metadata = (
+        owner_approval_request_queue_gate.validate_pr93_roadmap_metadata(Path("."))
+    )
+    pr94_failures, pr94_metadata = (
+        owner_override_receipt_authoring_gate.validate_pr94_roadmap_metadata(Path("."))
+    )
+
+    assert (
+        f"current branch must be {owner_approval_request_queue_gate.TARGET_BRANCH}, "
+        f"got {branch}"
+    ) in pr93_failures
+    assert (
+        f"current branch must be {owner_override_receipt_authoring_gate.TARGET_BRANCH}, "
+        f"got {branch}"
+    ) in pr94_failures
+    assert pr93_metadata["branch"] == branch
+    assert pr94_metadata["branch"] == branch
 
 
 def test_runner_exposes_owner_dashboard_approval_menu_schema_success_marker():

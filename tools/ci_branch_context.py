@@ -23,6 +23,19 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 )
 REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
+EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
+    "repair-pr153r-redo-report-determinism": 153,
+}
+EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    "repair-pr153r-redo-report-determinism": frozenset(
+        {
+            "tools/ci_branch_context.py",
+            "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        }
+    ),
+}
 
 GitStdout = Callable[[pathlib.Path, Sequence[str]], tuple[int, str, str]]
 
@@ -147,12 +160,27 @@ def roadmap_pr_number(branch: str) -> int | None:
     return int(match.group("number"))
 
 
+def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
+    return EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS.get(branch)
+
+
+def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.get(
+        branch,
+        frozenset(),
+    )
+
+
 def is_downstream_roadmap_branch(
     branch: str,
     after_pr: int,
     *,
     allow_repair: bool = True,
 ) -> bool:
+    explicit_repair_pr = _explicit_downstream_repair_branch_pr_number(branch)
+    if explicit_repair_pr is not None:
+        return explicit_repair_pr > after_pr
     if allow_repair and is_repair_branch(branch):
         return True
     pr_number = roadmap_pr_number(branch)
@@ -181,6 +209,9 @@ def is_pr_or_later_branch(
 ) -> bool:
     if allow_main and is_main_cumulative_branch(branch):
         return True
+    explicit_repair_pr = _explicit_downstream_repair_branch_pr_number(branch)
+    if explicit_repair_pr is not None:
+        return explicit_repair_pr >= minimum_pr
     if allow_repair and is_repair_branch(branch):
         return True
     pr_number = roadmap_pr_number(branch)

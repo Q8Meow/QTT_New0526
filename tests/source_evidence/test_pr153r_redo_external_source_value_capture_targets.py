@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 
 from src.qtt.stage1_prediction_markets.pr153r_redo_external_source_value_capture_targets import (
     accepted_packet,
@@ -201,10 +202,51 @@ def test_taxonomy_constants_are_centralized_and_report_uses_known_block_codes():
 def test_report_generation_is_deterministic_across_repeated_runs():
     first = report_builder.json_dump(report_builder.build_report(REPO_ROOT))
     second = report_builder.json_dump(report_builder.build_report(REPO_ROOT))
-    tracked = (REPO_ROOT / c.REPORT_PATH).read_text(encoding="utf-8")
+    payload = json.loads(first)
 
     assert first == second
-    assert first == tracked
+    assert payload["branch"] == report_builder.DETERMINISTIC_BRANCH_VALUE
+    assert payload["baseline_head_short_sha"]["value"] is None
+    assert (
+        payload["baseline_head_short_sha"]["determinism_policy"]
+        == report_builder.DETERMINISTIC_VCS_METADATA_POLICY
+    )
+
+
+def test_report_generation_omits_runtime_git_metadata(monkeypatch):
+    git_outputs = iter(
+        [
+            "branch-from-first-build\n",
+            "head-from-first-build\n",
+            "branch-from-second-build\n",
+            "head-from-second-build\n",
+        ]
+    )
+    git_calls: list[tuple[str, ...]] = []
+
+    class Completed:
+        def __init__(self, stdout: str):
+            self.stdout = stdout
+
+    def fake_run(cmd, *args, **kwargs):
+        if isinstance(cmd, list) and cmd and cmd[0] == "git":
+            git_calls.append(tuple(cmd))
+            return Completed(next(git_outputs))
+        raise AssertionError(f"unexpected subprocess.run call: {cmd!r}")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    first = report_builder.build_report(REPO_ROOT)
+    second = report_builder.build_report(REPO_ROOT)
+
+    assert report_builder.json_dump(first) == report_builder.json_dump(second)
+    assert git_calls == []
+    assert first["branch"] == report_builder.DETERMINISTIC_BRANCH_VALUE
+    assert first["baseline_head_short_sha"]["value"] is None
+    assert (
+        first["baseline_head_short_sha"]["determinism_policy"]
+        == report_builder.DETERMINISTIC_VCS_METADATA_POLICY
+    )
 
 
 def test_validation_gate_integration_includes_pr153r_redo_if_touched():

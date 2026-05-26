@@ -422,7 +422,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr148-post-pr147-validation-stable-checkpoint-currentization",
+            branch="repair-pr153r-redo-report-determinism",
             source="unit-test",
         ),
     )
