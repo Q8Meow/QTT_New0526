@@ -338,6 +338,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr153r_redo_external_source_value_capture_targets.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -1862,6 +1868,9 @@ def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch)
     pr153_index = command_names.index(
         "validate_controlled_official_source_capture_candidate_packets.py"
     )
+    pr153r_index = command_names.index(
+        "validate_pr153r_redo_external_source_value_capture_targets.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -1872,15 +1881,29 @@ def test_runner_includes_pr153_blocker_triage_validator_after_pr152(monkeypatch)
         )
         == 1
     )
-    assert pr152_index < pr153_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_pr153r_redo_external_source_value_capture_targets.py"
+        )
+        == 1
+    )
+    assert pr152_index < pr153_index < pr153r_index < next_gate_index
     assert commands[pr153_index] == [
         python_executable,
         str(Path("tools") / "validate_controlled_official_source_capture_candidate_packets.py"),
         "--repo-root",
         ".",
     ]
+    assert commands[pr153r_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr153r_redo_external_source_value_capture_targets.py"),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr153_index]
     assert "--output" not in commands[pr153_index]
+    assert "--write-report" not in commands[pr153r_index]
+    assert "--output" not in commands[pr153r_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):

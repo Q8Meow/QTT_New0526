@@ -1,0 +1,580 @@
+[
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_LIMIT_PRICE_TARGET_FIELDS_LIMIT_PRICE_FIELD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_LIMIT_PRICE_FIELD",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.limit_price_target_fields.limit_price_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_MINIMUM_ORDER_SIZE_TARGET_FIELDS_MINIMUM_ORDER_SIZE_FIELD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_MINIMUM_ORDER_SIZE_FIELD",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.minimum_order_size_target_fields.minimum_order_size_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_MINIMUM_ORDER_SIZE_TARGET_FIELDS_MINIMUM_ORDER_SIZE_FIELD_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_MINIMUM_ORDER_SIZE_FIELD",
+    "target_field_path": "pr151.target_fields.kalshi.execution_latency.minimum_order_size_target_fields.minimum_order_size_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_ORDERBOOK_SNAPSHOT_FRESHNESS_TARGETS_ORDERBOOK_SNAPSHOT_FRESHNESS_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_ORDERBOOK_SNAPSHOT_FRESHNESS",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.orderbook_snapshot_freshness_targets.orderbook_snapshot_freshness"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_RATE_LIMIT_TARGET_FIELDS_RATE_LIMIT_FIELD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_RATE_LIMIT_FIELD",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.rate_limit_target_fields.rate_limit_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P2",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_RETRY_BACKOFF_ERROR_ROUTING_TARGETS_RETRY_BACKOFF_ERROR_ROUTING_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_RETRY_BACKOFF_ERROR_ROUTING",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.retry_backoff_error_routing_targets.retry_backoff_error_routing"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P2",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_RETRY_BACKOFF_ERROR_ROUTING_TARGETS_RETRY_BACKOFF_ERROR_ROUTING_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_RETRY_BACKOFF_ERROR_ROUTING",
+    "target_field_path": "pr151.target_fields.kalshi.execution_latency.retry_backoff_error_routing_targets.retry_backoff_error_routing"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P2",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_RETRY_BACKOFF_ERROR_ROUTING_TARGETS_RETRY_BACKOFF_ERROR_ROUTING_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_RETRY_BACKOFF_ERROR_ROUTING",
+    "target_field_path": "pr151.target_fields.polymarket.execution_latency.retry_backoff_error_routing_targets.retry_backoff_error_routing"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_TICK_SIZE_TARGET_FIELDS_TICK_SIZE_FIELD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_TICK_SIZE_FIELD",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.tick_size_target_fields.tick_size_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_TICK_SIZE_TARGET_FIELDS_TICK_SIZE_FIELD_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_TICK_SIZE_FIELD",
+    "target_field_path": "pr151.target_fields.kalshi.execution_latency.tick_size_target_fields.tick_size_field"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_EXECUTION_LATENCY_WEBSOCKET_ORDERBOOK_EVENT_SEQUENCING_TARGETS_WEBSOCKET_ORDERBOOK_EVENT_SEQUENCING_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_WEBSOCKET_ORDERBOOK_EVENT_SEQUENCING",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.execution_latency.websocket_orderbook_event_sequencing_targets.websocket_orderbook_event_sequencing"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_RISK_CAPITAL_CONTROL_MAX_ORDER_NOTIONAL_TARGETS_MAX_ORDER_NOTIONAL_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_MAX_ORDER_NOTIONAL",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.risk_capital_control.max_order_notional_targets.max_order_notional"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_RISK_CAPITAL_CONTROL_MAX_ORDER_NOTIONAL_TARGETS_MAX_ORDER_NOTIONAL_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_MAX_ORDER_NOTIONAL",
+    "target_field_path": "pr151.target_fields.kalshi.risk_capital_control.max_order_notional_targets.max_order_notional"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_RISK_CAPITAL_CONTROL_MAX_ORDER_NOTIONAL_TARGETS_MAX_ORDER_NOTIONAL_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_MAX_ORDER_NOTIONAL",
+    "target_field_path": "pr151.target_fields.polymarket.risk_capital_control.max_order_notional_targets.max_order_notional"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_EXECUTION_LIFECYCLE_EXECUTION_LIFECYCLE_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_API_DOCS_EXECUTION_LIFECYCLE",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_execution_lifecycle.execution_lifecycle"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_EXECUTION_LIFECYCLE_EXECUTION_LIFECYCLE_POLYMARKET_POLYMARKET_OFFICIAL_API_DOCS_EXECUTION_LIFECYCLE",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_execution_lifecycle.execution_lifecycle"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_FILL_INTEGRITY_FILL_INTEGRITY_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_API_DOCS_FILL_INTEGRITY",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_fill_integrity.fill_integrity"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_FILL_INTEGRITY_FILL_INTEGRITY_KALSHI_KALSHI_OFFICIAL_API_DOCS_FILL_INTEGRITY",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_fill_integrity.fill_integrity"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_FILL_INTEGRITY_FILL_INTEGRITY_POLYMARKET_POLYMARKET_OFFICIAL_API_DOCS_FILL_INTEGRITY",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_fill_integrity.fill_integrity"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_LATENCY_COMPONENT_SEMANTICS_LATENCY_COMPONENT_SEMANTICS_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_API_DOCS_LATENCY_COMPONENT_SEMANTICS",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_latency_component_semantics.latency_component_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_LATENCY_COMPONENT_SEMANTICS_LATENCY_COMPONENT_SEMANTICS_KALSHI_KALSHI_OFFICIAL_API_DOCS_LATENCY_COMPONENT_SEMANTICS",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_latency_component_semantics.latency_component_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_LATENCY_COMPONENT_SEMANTICS_LATENCY_COMPONENT_SEMANTICS_POLYMARKET_POLYMARKET_OFFICIAL_API_DOCS_LATENCY_COMPONENT_SEMANTICS",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_latency_component_semantics.latency_component_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_PAYOUT_RULES_PAYOUT_RULES_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_RULEBOOKS_PAYOUT_RULES",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_payout_rules.payout_rules"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_PAYOUT_RULES_PAYOUT_RULES_KALSHI_KALSHI_OFFICIAL_RULEBOOKS_PAYOUT_RULES",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_payout_rules.payout_rules"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_RATE_LIMITS_RATE_LIMITS_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_API_DOCS_RATE_LIMITS",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_rate_limits.rate_limits"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_RECONCILIATION_SEMANTICS_RECONCILIATION_SEMANTICS_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_API_DOCS_RECONCILIATION_SEMANTICS",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_reconciliation_semantics.reconciliation_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_RECONCILIATION_SEMANTICS_RECONCILIATION_SEMANTICS_KALSHI_KALSHI_OFFICIAL_API_DOCS_RECONCILIATION_SEMANTICS",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_reconciliation_semantics.reconciliation_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P1",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_RECONCILIATION_SEMANTICS_RECONCILIATION_SEMANTICS_POLYMARKET_POLYMARKET_OFFICIAL_API_DOCS_RECONCILIATION_SEMANTICS",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_reconciliation_semantics.reconciliation_semantics"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SDK_BEHAVIOR_SDK_BEHAVIOR_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_SDK_DOCS_SDK_BEHAVIOR",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_sdk_behavior.sdk_behavior"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SDK_BEHAVIOR_SDK_BEHAVIOR_POLYMARKET_POLYMARKET_OFFICIAL_SDK_DOCS_SDK_BEHAVIOR",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_sdk_behavior.sdk_behavior"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SETTLEMENT_RULES_SETTLEMENT_RULES_KALSHI_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_SETTLEMENT_RULES",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_settlement_rules.settlement_rules"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "POLYMARKET",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SETTLEMENT_RULES_SETTLEMENT_RULES_POLYMARKET_POLYMARKET_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_SETTLEMENT_RULES",
+    "target_field_path": "pr151.target_fields.polymarket.venue_source_required.venue_settlement_rules.settlement_rules"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "FORECASTEX_IBKR",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_TICK_RULES_TICK_RULES_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_TICK_RULES",
+    "target_field_path": "pr151.target_fields.forecastex_ibkr.venue_source_required.venue_tick_rules.tick_rules"
+  },
+  {
+    "blocker_primary_category": "EXACT_VALUE_NOT_VISIBLE",
+    "can_owner_override_external_fact_truth_as_source_backed": false,
+    "next_required_action": "BROADER_PUBLIC_OFFICIAL_SOURCE_SEARCH_OR_OWNER_LOCATOR_REQUIRED",
+    "owner_decision_options": [
+      "OWNER_OVERRIDE_BLOCKER",
+      "OWNER_APPROVE_BLOCKER_OR_CANDIDATE_FOR_NEXT_REVIEW",
+      "OWNER_PROVIDE_VALUE",
+      "OWNER_DISAPPROVE"
+    ],
+    "owner_route": "PR153R_RETRY_CAPTURE",
+    "platform_scope": "KALSHI",
+    "priority_class": "P0",
+    "recommended_primary_eligibility_lane": "EXTERNAL_SOURCE_VALUE_CAPTURE_TARGET",
+    "retrieval_target_id": "PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_TICK_RULES_TICK_RULES_KALSHI_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_TICK_RULES",
+    "target_field_path": "pr151.target_fields.kalshi.venue_source_required.venue_tick_rules.tick_rules"
+  }
+]
