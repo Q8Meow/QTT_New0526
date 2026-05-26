@@ -16,7 +16,7 @@
   },
   "baseline_head_short_sha": {
     "authority_status": "VCS_METADATA_ONLY_NOT_QTT_SHA_FREEZE_CHECKSUM_AUTHORITY",
-    "value": "27b5c73"
+    "value": "5ecc902"
   },
   "blocked_candidate_count": 34,
   "branch": "pr153r-redo-external-source-value-capture-targets",
@@ -187,19 +187,19 @@
       "consumed": true,
       "consumption_mode": "READ_ONLY_CONTEXT",
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.json"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.json"
     },
     {
       "consumed": true,
       "consumption_mode": "READ_ONLY_CONTEXT",
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.csv"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.csv"
     },
     {
       "consumed": true,
       "consumption_mode": "READ_ONLY_CONTEXT",
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_extracted_external_lane_from_zip.json"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_extracted_external_lane_from_zip.json"
     }
   ],
   "no_broadening_to_126": true,
@@ -238,19 +238,19 @@
       "authority_status": "OWNER_SUPPLIED_RETRIEVAL_CANDIDATE_SEED_ONLY",
       "consumed": true,
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.json"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.json"
     },
     {
       "authority_status": "OWNER_SUPPLIED_RETRIEVAL_CANDIDATE_SEED_ONLY",
       "consumed": true,
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.csv"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_34_retry_targets_official_source_seed_map.csv"
     },
     {
       "authority_status": "OWNER_SUPPLIED_RETRIEVAL_CANDIDATE_SEED_ONLY",
       "consumed": true,
       "exists": true,
-      "path": "docs/master_plan/generated/owner_supplied_pr153r_redo/PR153R_extracted_external_lane_from_zip.json"
+      "path": "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/PR153R_extracted_external_lane_from_zip.json"
     }
   ],
   "owner_supplied_seed_cross_validation_status": {

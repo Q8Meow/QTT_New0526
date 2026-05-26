@@ -33,7 +33,7 @@ PR153_REPORT_PATH = Path(
 PR151_REPORT_PATH = Path(
     "docs/master_plan/generated/PR151_OfficialSourceRetrievalTargetPackForParameterDefaults.report.json"
 )
-OWNER_SUPPLIED_DIR = Path("docs/master_plan/generated/owner_supplied_pr153r_redo")
+OWNER_SUPPLIED_DIR = Path("docs/master_plan/source_evidence/owner_supplied_pr153r_redo")
 OWNER_SEED_JSON_PATH = (
     OWNER_SUPPLIED_DIR / "PR153R_34_retry_targets_official_source_seed_map.json"
 )

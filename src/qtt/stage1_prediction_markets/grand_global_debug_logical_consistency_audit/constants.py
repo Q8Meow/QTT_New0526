@@ -288,15 +288,15 @@ PR153R_REDO_CHANGED_PATHS = (
         "PR153R_RedoExternalSourceValueCaptureTargets.report.json"
     ),
     (
-        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/"
         "PR153R_34_retry_targets_official_source_seed_map.csv"
     ),
     (
-        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/"
         "PR153R_34_retry_targets_official_source_seed_map.json"
     ),
     (
-        "docs/master_plan/generated/owner_supplied_pr153r_redo/"
+        "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/"
         "PR153R_extracted_external_lane_from_zip.json"
     ),
     (

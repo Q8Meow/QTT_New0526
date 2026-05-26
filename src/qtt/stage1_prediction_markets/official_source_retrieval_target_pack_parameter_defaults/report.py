@@ -1146,7 +1146,10 @@ def _changed_paths(repo_root: Path) -> list[str]:
             path = line[2:]
         else:
             path = line[3:] if len(line) > 3 else line
-        paths.append(path.strip().replace("\\", "/"))
+        normalized = path.strip().replace("\\", "/")
+        if " -> " in normalized:
+            normalized = normalized.rsplit(" -> ", 1)[1]
+        paths.append(normalized)
     return sorted(set(paths))
 
 
