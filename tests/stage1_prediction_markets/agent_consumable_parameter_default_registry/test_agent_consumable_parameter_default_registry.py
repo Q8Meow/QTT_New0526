@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 from pathlib import Path
 
@@ -244,6 +245,24 @@ def test_schema_projection_and_validator_use_central_constants():
         c.ATOMICROWS_COMPATIBILITY_STATES
     )
     assert validator.validate_payloads(_registry(), _report()) == []
+
+
+def test_branch_volatility_check_ignores_main_substrings_but_blocks_branch_tokens(monkeypatch):
+    monkeypatch.setattr(
+        validator,
+        "_git_stdout",
+        lambda _repo_root, _args: (0, "main\n", ""),
+    )
+
+    registry = _registry()
+    report = _report()
+    assert validator.validate_payloads(registry, report) == []
+
+    poisoned = deepcopy(registry)
+    poisoned["determinism_metadata_without_runtime_git_volatility"] = {
+        "branch_probe": "refs/heads/main"
+    }
+    assert c.PR155_RECORD_SCHEMA_INVALID in validator.validate_payloads(poisoned, report)
 
 
 def test_cli_check_only_accepts_tracked_artifacts_after_generation(capsys):
