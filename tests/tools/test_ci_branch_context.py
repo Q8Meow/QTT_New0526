@@ -71,8 +71,25 @@ def test_pr_or_later_branch_respects_repair_opt_in():
 
 def test_pr154_explicit_changed_path_allowance_is_narrow():
     branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
+    repair_branch = "repair/pr154-post-merge-pytest-context-hygiene"
 
     assert context.is_pr_or_later_branch(branch, minimum_pr=154) is True
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            repair_branch,
+            after_pr=153,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            repair_branch,
+            after_pr=154,
+            allow_repair=False,
+        )
+        is False
+    )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/report.py",
@@ -92,6 +109,22 @@ def test_pr154_explicit_changed_path_allowance_is_narrow():
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/generated/unrelated.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/atomicrows/test_atomicrows_parameter_default_value_materialization_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/tools/test_ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json",
     )
 
 

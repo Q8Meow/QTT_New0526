@@ -27,6 +27,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
     "repair/pr153s-source-value-capture-closure-classifier": 153,
     "pr154-atomicrows-parameter-default-value-materialization-gate": 154,
+    "repair/pr154-post-merge-pytest-context-hygiene": 154,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
@@ -54,6 +55,13 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tools/ci_branch_context.py",
             "tools/run_validation_gates.py",
             "tools/validate_pr153s_source_value_capture_closure_classifier.py",
+        }
+    ),
+    "repair/pr154-post-merge-pytest-context-hygiene": frozenset(
+        {
+            "tests/atomicrows/test_atomicrows_parameter_default_value_materialization_gate.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tools/ci_branch_context.py",
         }
     ),
     "pr154-atomicrows-parameter-default-value-materialization-gate": frozenset(
