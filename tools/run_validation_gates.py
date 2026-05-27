@@ -861,6 +861,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",
