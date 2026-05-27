@@ -26,6 +26,7 @@ MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
     "repair/pr153s-source-value-capture-closure-classifier": 153,
+    "pr154-atomicrows-parameter-default-value-materialization-gate": 154,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
@@ -53,6 +54,27 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tools/ci_branch_context.py",
             "tools/run_validation_gates.py",
             "tools/validate_pr153s_source_value_capture_closure_classifier.py",
+        }
+    ),
+    "pr154-atomicrows-parameter-default-value-materialization-gate": frozenset(
+        {
+            "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+            "docs/master_plan/generated/PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/__init__.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/inputs.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/materializer.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/report.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/taxonomy.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/validator.py",
+            "tests/atomicrows/test_atomicrows_parameter_default_value_materialization_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tools/ci_branch_context.py",
+            "tools/run_validation_gates.py",
+            "tools/validate_atomicrows_parameter_default_value_materialization_gate.py",
         }
     ),
 }
