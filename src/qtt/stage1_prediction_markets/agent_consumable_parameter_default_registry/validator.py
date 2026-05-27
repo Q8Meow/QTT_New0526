@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import subprocess
 from typing import Any, Mapping, Sequence
 
@@ -30,6 +31,34 @@ def _walk(value: Any):
     elif isinstance(value, list):
         for item in value:
             yield from _walk(item)
+
+
+def _string_tokens(value: Any):
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            yield str(key)
+            yield from _string_tokens(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _string_tokens(item)
+    elif isinstance(value, str):
+        yield value
+
+
+def _branch_name_reference_present(
+    branch: str,
+    *payloads: Mapping[str, Any],
+) -> bool:
+    if not branch:
+        return False
+    branch_reference = re.compile(
+        rf"(?<![A-Za-z0-9_-]){re.escape(branch)}(?![A-Za-z0-9_-])"
+    )
+    return any(
+        branch_reference.search(token)
+        for payload in payloads
+        for token in _string_tokens(payload)
+    )
 
 
 def _forbidden_bundle_data_path() -> str:
@@ -322,7 +351,11 @@ def validate_payloads(
     if "C:\\Users\\" in serialized or Path.cwd().as_posix() in serialized:
         failures.append(c.PR155_RECORD_SCHEMA_INVALID)
     branch_rc, branch_out, _branch_err = _git_stdout(Path.cwd(), ["branch", "--show-current"])
-    if branch_rc == 0 and branch_out.strip() and branch_out.strip() in serialized:
+    if branch_rc == 0 and _branch_name_reference_present(
+        branch_out.strip(),
+        registry,
+        report,
+    ):
         failures.append(c.PR155_RECORD_SCHEMA_INVALID)
     return sorted(set(str(failure) for failure in failures if failure))
 
