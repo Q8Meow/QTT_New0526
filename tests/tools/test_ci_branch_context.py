@@ -200,6 +200,40 @@ def test_pr156_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr157_explicit_changed_path_allowance_is_narrow():
+    branch = "pr157-pr154-atomicrows-fillpath-owner-agent-bridge"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=157) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr157_completion_materialization_bridge/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR157_AtomicRows4183CompletionMaterialization.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr157_atomicrows_completion_shards/PR157_AtomicRows4183CompletionMaterialization.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr157_pr154_atomicrows_completion_materialization_bridge.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")

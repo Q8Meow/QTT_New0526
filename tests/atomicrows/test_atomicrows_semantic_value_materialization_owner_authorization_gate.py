@@ -12,8 +12,8 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
     constants as c,
     report as pr141_report,
 )
-from src.qtt.stage1_prediction_markets.agent_default_binding_universal_intake_gate import (
-    constants as pr156_constants,
+from src.qtt.stage1_prediction_markets.pr157_completion_materialization_bridge import (
+    constants as pr157_constants,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_owner_authorization_gate.report import (
     _is_allowed_pr141_changed_path,
@@ -577,7 +577,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr141_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch=pr156_constants.BRANCH,
+            branch=pr157_constants.EXPECTED_BRANCH,
             source="unit-test",
         ),
     )

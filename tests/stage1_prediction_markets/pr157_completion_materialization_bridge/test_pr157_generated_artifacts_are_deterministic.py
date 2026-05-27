@@ -1,0 +1,6 @@
+from src.qtt.stage1_prediction_markets.pr157_completion_materialization_bridge.validator import validate_existing_artifacts
+from tests.stage1_prediction_markets.pr157_completion_materialization_bridge.test_support import ROOT
+
+
+def test_pr157_generated_artifacts_are_deterministic():
+    assert validate_existing_artifacts(ROOT).ok

@@ -409,6 +409,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2006,7 +2015,7 @@ def test_runner_includes_pr153_family_and_pr154_validators_after_pr152(monkeypat
     assert "--output" not in commands[pr154_index]
 
 
-def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(monkeypatch):
+def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
@@ -2021,6 +2030,9 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
     )
     pr156_index = command_names.index(
         "validate_agent_default_binding_universal_intake_gate.py"
+    )
+    pr157_index = command_names.index(
+        "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
     )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
@@ -2038,7 +2050,13 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
         )
         == 1
     )
-    assert pr154_index < pr155_index < pr156_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
+        )
+        == 1
+    )
+    assert pr154_index < pr155_index < pr156_index < pr157_index < next_gate_index
     assert commands[pr155_index] == [
         python_executable,
         str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),
@@ -2055,6 +2073,17 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
     ]
     assert "--write-report" not in commands[pr156_index]
     assert "--output" not in commands[pr156_index]
+    assert commands[pr157_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr157_index]
+    assert "--output" not in commands[pr157_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
