@@ -162,6 +162,44 @@ def test_pr155_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr156_explicit_changed_path_allowance_is_narrow():
+    branch = "pr156-agent-default-binding-universal-intake-gate"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=156) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_agent_default_binding_universal_intake_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/test_ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")

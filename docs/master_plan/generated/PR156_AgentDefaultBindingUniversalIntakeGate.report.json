@@ -1,0 +1,416 @@
+{
+  "agent_binding_summary": {
+    "agent_binding_state_summary": {
+      "BINDING_PENDING_EXPLICIT_AGENT_MAP_MISSING": 230
+    },
+    "agent_name_matching_binding_used": false,
+    "explicit_binding_artifacts_consumed": [
+      "docs/master_plan/generated/AtomicRowsParameterAgentBindingCommandMatrix.json",
+      "docs/master_plan/generated/AtomicRowsParameterAgentBindingConsumerGate.report.json",
+      "docs/master_plan/generated/AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json",
+      "docs/master_plan/generated/AtomicRowsParameterAgentBindingReport.json",
+      "docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json",
+      "docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json",
+      "docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json"
+    ],
+    "live_authority_created_by_binding": false,
+    "semantic_similarity_binding_used": false
+  },
+  "atomicrows_bundle_created": false,
+  "atomicrows_bundle_sha_or_hash_authority_created": false,
+  "atomicrows_ingestion_summary": {
+    "atomicrows_bundle_created": false,
+    "atomicrows_bundle_hash_authority_created": false,
+    "atomicrows_optional_universe_artifacts_consumed": [
+      "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json",
+      "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json",
+      "docs/master_plan/generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json"
+    ],
+    "atomicrows_rows_materialized_by_pr156": 0,
+    "atomicrows_source_artifacts_consumed": [
+      "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json",
+      "docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json",
+      "docs/master_plan/generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json",
+      "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+      "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json"
+    ],
+    "atomicrows_universe_confirmed_count": 4183,
+    "atomicrows_universe_count_state": "ATOMICROWS_UNIVERSE_COUNT_CONFIRMED",
+    "atomicrows_universe_ingestion_lane_count": 1
+  },
+  "atomicrows_universe_confirmed_count": 4183,
+  "atomicrows_universe_count_state": "ATOMICROWS_UNIVERSE_COUNT_CONFIRMED",
+  "atomicrows_universe_ingestion_lane_count": 1,
+  "authority_class": "AGENT_DEFAULT_BINDING_AND_UNIVERSAL_INTAKE_GATE_NOT_RUNTIME_NOT_LIVE_NOT_CONNECTOR_NOT_REPLAY_NOT_PAPER_NOT_SCORING_EXECUTION_NOT_OPTIMIZER_EXECUTION_NOT_QUANTUM_BACKEND_NOT_PROFIT_AUTHORITY",
+  "binding_pending_count": 230,
+  "blocked_completion_path_summary": {
+    "all_blocked_records_have_required_completion_path": true,
+    "blocked_record_count": 112,
+    "completion_path_field_presence_counts": {
+      "codex_actionable_completion_steps": 112,
+      "exact_unblock_condition": 112,
+      "materialization_retry_route": 112,
+      "missing_fields": 112,
+      "required_input_artifact": 112,
+      "required_next_pr_or_phase": 112,
+      "required_next_task": 112,
+      "responsible_authority": 112
+    },
+    "required_next_task_summary": {
+      "COMPLETE_PR153R_RETRY_ACCEPTANCE_REVIEW": 34,
+      "OWNER_PRIVATE_DOC_ATTESTATION_PACKET": 6,
+      "OWNER_ROUTE_LOCATOR_PACKET_COMPLETION": 39,
+      "SPLIT_OR_RECLASSIFY_TARGET": 33
+    }
+  },
+  "connector_semantic_bound_count": 0,
+  "control_plane_preflight": {
+    "alias_resolution_applied": {
+      "alias_exists": false,
+      "alias_resolution_applied": true,
+      "requested_alias": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json",
+      "selected_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_exists": true,
+      "successor_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_used": true
+    },
+    "atomicrows_reconciliation_consumed": true,
+    "atomicrows_semantic_contract_consumed": true,
+    "command_action_matrix_consumed": true,
+    "consumed_control_plane_artifacts": [
+      "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+      "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+      "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "docs/master_plan/generated/PR136RouteTriage.report.json",
+      "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+      "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+      "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+      "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+      "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+      "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py"
+    ],
+    "launch_readiness_policy_consumed": true,
+    "launch_readiness_roadmap_consumed": true,
+    "market_specific_index_consumed": true,
+    "missing_control_plane_artifacts": [
+      "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"
+    ],
+    "orchestration_inputs_used_for_record_enrichment": [
+      "route_triage_domain",
+      "launch_readiness_domain",
+      "market_scope",
+      "platform_scope",
+      "command_action_matrix_refs",
+      "section_crosswalk_refs",
+      "market_specific_index_refs",
+      "atomicrows_reconciliation_refs",
+      "atomicrows_semantic_contract_refs"
+    ],
+    "pr156_allowed_to_continue": true,
+    "pr_identity_roster_consumed": true,
+    "preflight_block_codes": [],
+    "required_input_artifacts": [
+      {
+        "artifact_key": "pr136_command_action_matrix",
+        "artifact_path": "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": "PR136_COMMAND_ACTION_MATRIX",
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr136_market_specific_launch_readiness_index",
+        "artifact_path": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": "PR136_MARKET_SPECIFIC_LAUNCH_READINESS_INDEX",
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr136_section_crosswalk_or_successor",
+        "artifact_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": "PR136_MASTER_PLAN_COVERAGE_TO_READINESS_DOMAIN_MAP",
+        "registry_type": null,
+        "report_id": null,
+        "report_type": "MASTER_PLAN_SECTION_COVERAGE_REPORT",
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr136_route_triage",
+        "artifact_path": "docs/master_plan/generated/PR136RouteTriage.report.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": "PR136_ROUTE_TRIAGE_RECEIPT",
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr137r_atomicrows_reconciliation",
+        "artifact_path": "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+        "consumed": true,
+        "pr_id": "PR137R",
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": "QTT_PR137R_ATOMICROWS_FUNCTIONAL_BUNDLE_RECONCILIATION_REPORT",
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr138_atomicrows_semantic_contract",
+        "artifact_path": "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+        "consumed": true,
+        "pr_id": "PR138",
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": "QTT_PR138_ATOMICROWS_SEMANTIC_ROW_CONTRACT_REPORT",
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "pr_identity_roster",
+        "artifact_path": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "day1_launch_readiness_roadmap",
+        "artifact_path": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "roadmap_execution_state_controller",
+        "artifact_path": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      },
+      {
+        "artifact_key": "day1_launch_readiness_policy",
+        "artifact_path": "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+        "consumed": true,
+        "pr_id": null,
+        "present": true,
+        "receipt_type": null,
+        "registry_type": null,
+        "report_id": null,
+        "report_type": null,
+        "required": true,
+        "semantic_task_id": null
+      }
+    ],
+    "roadmap_execution_state_consumed": true,
+    "route_triage_consumed": true,
+    "section_crosswalk_or_successor_consumed": true
+  },
+  "determinism_metadata_without_runtime_git_volatility": {
+    "branch_name_used": false,
+    "current_commit_sha_used": false,
+    "json_indent": 2,
+    "json_sort_keys": true,
+    "local_path_used": false,
+    "python_hash_used": false,
+    "random_uuid_used": false,
+    "stable_sort_blocked_records_by": "pr156_record_id",
+    "stable_sort_records_by": "pr156_record_id",
+    "username_used": false,
+    "wall_clock_timestamps_used": false
+  },
+  "explicit_agent_bound_count": 0,
+  "explicit_consumer_class_bound_count": 0,
+  "explicit_role_bound_count": 0,
+  "future_classical_intake_template_count": 7,
+  "future_hybrid_intake_template_count": 1,
+  "future_quantum_intake_template_count": 8,
+  "input_pr155_blocked_count": 112,
+  "input_pr155_ready_default_count": 230,
+  "input_pr155_total_records": 342,
+  "live_order_ready_count": 0,
+  "market_specific_readiness_summary": {
+    "connector_unlock_created": false,
+    "launch_readiness_domain_summary": {
+      "PR155_MAPPING_UNKNOWN_NO_EXACT_RECORD_LEVEL_PR136_DOMAIN": 342,
+      "PR156_MAPPING_UNKNOWN_NO_EXACT_RECORD_LEVEL_PR136_DOMAIN": 18
+    },
+    "live_transition_created": false,
+    "market_scope_summary": {
+      "FORECASTEX_IBKR": 114,
+      "KALSHI": 114,
+      "POLYMARKET": 114,
+      "PREDICTION_MARKETS_GENERAL": 18
+    },
+    "platform_scope_summary": {
+      "FORECASTEX_IBKR": 114,
+      "KALSHI": 114,
+      "POLYMARKET": 114,
+      "PREDICTION_MARKETS_GENERAL": 18
+    },
+    "route_triage_domain_summary": {
+      "PR136_ROUTE_TRIAGE_RECEIPT": 360
+    }
+  },
+  "missing_record_ingestion_summary": {
+    "blocked_records_made_consumable_by_pr156": 0,
+    "blocked_records_materialized_by_pr156": 0,
+    "completion_path_summary": {
+      "all_blocked_records_have_required_completion_path": true,
+      "blocked_record_count": 112,
+      "completion_path_field_presence_counts": {
+        "codex_actionable_completion_steps": 112,
+        "exact_unblock_condition": 112,
+        "materialization_retry_route": 112,
+        "missing_fields": 112,
+        "required_input_artifact": 112,
+        "required_next_pr_or_phase": 112,
+        "required_next_task": 112,
+        "responsible_authority": 112
+      },
+      "required_next_task_summary": {
+        "COMPLETE_PR153R_RETRY_ACCEPTANCE_REVIEW": 34,
+        "OWNER_PRIVATE_DOC_ATTESTATION_PACKET": 6,
+        "OWNER_ROUTE_LOCATOR_PACKET_COMPLETION": 39,
+        "SPLIT_OR_RECLASSIFY_TARGET": 33
+      }
+    },
+    "pr154_blocked_ingestion_lane_count": 112
+  },
+  "optimizer_executed_count": 0,
+  "optimizer_replay_paper_future_routing_summary": {
+    "future_routing_hints_only": true,
+    "optimizer_executed": false,
+    "paper_executed": false,
+    "quantum_backend_executed": false,
+    "replay_executed": false,
+    "static_foundation_artifacts_consumed": [
+      "docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json",
+      "docs/master_plan/generated/DualResultReviewForParameterStacks.report.json",
+      "docs/master_plan/generated/OwnerLivePromotionReviewForParameterStacks.report.json",
+      "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json",
+      "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json",
+      "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json",
+      "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json",
+      "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json",
+      "docs/master_plan/generated/ReplayPaperCandidateStackCompetitionGate.report.json",
+      "docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json",
+      "docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json"
+    ]
+  },
+  "orchestration_alignment_summary": {
+    "alias_resolution_applied": {
+      "alias_exists": false,
+      "alias_resolution_applied": true,
+      "requested_alias": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json",
+      "selected_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_exists": true,
+      "successor_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_used": true
+    },
+    "atomicrows_reconciliation_consumed": true,
+    "atomicrows_semantic_contract_consumed": true,
+    "command_action_matrix_consumed": true,
+    "launch_readiness_policy_consumed": true,
+    "launch_readiness_roadmap_consumed": true,
+    "market_specific_index_consumed": true,
+    "pr156_allowed_to_continue": true,
+    "pr_identity_roster_consumed": true,
+    "preflight_block_codes": [],
+    "roadmap_execution_state_consumed": true,
+    "route_triage_consumed": true,
+    "section_crosswalk_or_successor_consumed": true
+  },
+  "paper_executed_count": 0,
+  "pr154_blocked_ingestion_lane_count": 112,
+  "pr156_binding_record_count": 230,
+  "pr_id": "PR156",
+  "profit_evidence_count": 0,
+  "qtt_freeze_checksum_global_digest_authority_created": false,
+  "qtt_generated_sha_created": false,
+  "qtt_sha_authority_created": false,
+  "quantum_backend_executed_count": 0,
+  "quantum_execution_evidence_count": 0,
+  "replay_executed_count": 0,
+  "report_type": "QTT_PR156_AGENT_DEFAULT_BINDING_UNIVERSAL_INTAKE_GATE_REPORT",
+  "runtime_ready_count": 0,
+  "scoring_executed_as_trade_selection_count": 0,
+  "scoring_ranking_future_routing_summary": {
+    "future_routing_hints_only": true,
+    "live_selection_created": false,
+    "scoring_ranking_executed_as_trade_selection": false,
+    "static_foundation_artifacts_consumed": [
+      "docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json",
+      "docs/master_plan/generated/DualResultReviewForParameterStacks.report.json",
+      "docs/master_plan/generated/OwnerLivePromotionReviewForParameterStacks.report.json",
+      "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json",
+      "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json",
+      "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json",
+      "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json",
+      "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json",
+      "docs/master_plan/generated/ReplayPaperCandidateStackCompetitionGate.report.json",
+      "docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json",
+      "docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json"
+    ]
+  },
+  "semantic_task_id": "PR156_AGENT_DEFAULT_BINDING_UNIVERSAL_INTAKE_GATE",
+  "universal_classical_quantum_intake_summary": {
+    "candidate_instances_accepted_by_pr156": 0,
+    "classical_formulas_are_first_class": true,
+    "future_candidate_source_artifacts_consumed": [
+      "docs/master_plan/generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json",
+      "docs/master_plan/generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json",
+      "docs/master_plan/generated/QTTAlgorithmFormulaFamilyReport.json"
+    ],
+    "future_classical_intake_template_count": 7,
+    "future_hybrid_intake_template_count": 1,
+    "future_quantum_intake_template_count": 8,
+    "quantum_templates_are_challenger_lanes_only": true,
+    "template_record_count": 17,
+    "unknown_research_candidate_template_blocks_without_source_evidence": true
+  },
+  "validation_result": {
+    "failures": [],
+    "status": "PASS",
+    "validator_marker": "QTT_PR156_AGENT_DEFAULT_BINDING_UNIVERSAL_INTAKE_GATE_OK"
+  }
+}

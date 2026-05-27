@@ -403,6 +403,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_agent_default_binding_universal_intake_gate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2013,6 +2019,9 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
     pr155_index = command_names.index(
         "validate_agent_consumable_parameter_default_registry.py"
     )
+    pr156_index = command_names.index(
+        "validate_agent_default_binding_universal_intake_gate.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2023,7 +2032,13 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
         )
         == 1
     )
-    assert pr154_index < pr155_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_agent_default_binding_universal_intake_gate.py"
+        )
+        == 1
+    )
+    assert pr154_index < pr155_index < pr156_index < next_gate_index
     assert commands[pr155_index] == [
         python_executable,
         str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),
@@ -2032,6 +2047,14 @@ def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(m
     ]
     assert "--write-report" not in commands[pr155_index]
     assert "--output" not in commands[pr155_index]
+    assert commands[pr156_index] == [
+        python_executable,
+        str(Path("tools") / "validate_agent_default_binding_universal_intake_gate.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr156_index]
+    assert "--output" not in commands[pr156_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
