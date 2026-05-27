@@ -128,6 +128,40 @@ def test_pr154_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr155_explicit_changed_path_allowance_is_narrow():
+    branch = "pr155-agent-consumable-parameter-default-registry"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=155) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_agent_consumable_parameter_default_registry.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
