@@ -28,6 +28,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair/pr153s-source-value-capture-closure-classifier": 153,
     "pr154-atomicrows-parameter-default-value-materialization-gate": 154,
     "repair/pr154-post-merge-pytest-context-hygiene": 154,
+    "pr155-agent-consumable-parameter-default-registry": 155,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
@@ -83,6 +84,32 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tools/ci_branch_context.py",
             "tools/run_validation_gates.py",
             "tools/validate_atomicrows_parameter_default_value_materialization_gate.py",
+        }
+    ),
+    "pr155-agent-consumable-parameter-default-registry": frozenset(
+        {
+            "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.registry.json",
+            "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.report.json",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/__init__.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/builder.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/constants.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/input_discovery.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/io.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/mapper.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/models.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/orchestration_preflight.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/report.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/schema_projection.py",
+            "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/validator.py",
+            "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+            "tests/stage1_prediction_markets/agent_consumable_parameter_default_registry/test_agent_consumable_parameter_default_registry.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tools/ci_branch_context.py",
+            "tools/run_validation_gates.py",
+            "tools/validate_agent_consumable_parameter_default_registry.py",
         }
     ),
 }

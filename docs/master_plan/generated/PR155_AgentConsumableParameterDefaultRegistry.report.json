@@ -1,0 +1,185 @@
+{
+  "agent_assignment_pending_count": 230,
+  "agent_consumable_default_ready_count": 230,
+  "agent_registry_summary": {
+    "agent_assignment_state_summary": {
+      "AGENT_ASSIGNMENT_BLOCKED_MISSING_BINDING": 112,
+      "AGENT_ASSIGNMENT_PENDING_DOWNSTREAM_BINDING": 230
+    },
+    "direct_agent_assignment_invented": false,
+    "direct_agent_assignment_not_required_for_registry_defaults": true,
+    "forbidden_agent_list_invented": false,
+    "registry_consumption_state_summary": {
+      "NON_CONSUMABLE_BLOCKED_PR154_INCOMPLETE": 112,
+      "REGISTRY_DEFAULT_READY_NONLIVE_AGENT_ASSIGNMENT_PENDING": 230
+    }
+  },
+  "atomicrows_bundle_created": false,
+  "atomicrows_bundle_sha_or_hash_authority_created": false,
+  "atomicrows_compatibility_summary": {
+    "ATOMICROWS_BLOCKED_PR154_INCOMPLETE": 112,
+    "ATOMICROWS_COMPATIBLE_PR154_MATERIALIZED_DEFAULT": 230
+  },
+  "authority_class": "AGENT_CONSUMABLE_PARAMETER_DEFAULT_REGISTRY_NOT_RUNTIME_NOT_LIVE_NOT_CONNECTOR_NOT_REPLAY_NOT_PAPER_NOT_QUANTUM_EXECUTION_NOT_PROFIT_AUTHORITY",
+  "blocked_completion_path_summary": {
+    "all_blocked_records_have_required_completion_path": true,
+    "blocked_record_count": 112,
+    "blocked_state_summary": {
+      "NON_CONSUMABLE_BLOCKED_PR154_INCOMPLETE": 112
+    },
+    "completion_path_field_presence_counts": {
+      "codex_actionable_completion_steps": 112,
+      "exact_unblock_condition": 112,
+      "materialization_retry_route": 112,
+      "missing_fields": 112,
+      "required_input_artifact": 112,
+      "required_next_pr_or_phase": 112,
+      "required_next_task": 112,
+      "responsible_authority": 112
+    }
+  },
+  "connector_semantic_bound_count": 0,
+  "control_plane_preflight": {
+    "alias_resolution_applied": {
+      "alias_exists": false,
+      "alias_resolution_applied": true,
+      "requested_alias": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json",
+      "selected_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_exists": true,
+      "successor_path": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "successor_used": true
+    },
+    "atomicrows_reconciliation_consumed": true,
+    "atomicrows_semantic_contract_consumed": true,
+    "command_action_matrix_consumed": true,
+    "consumed_control_plane_artifacts": [
+      "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+      "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+      "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "docs/master_plan/generated/PR136RouteTriage.report.json",
+      "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+      "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+      "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+      "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+      "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+      "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py"
+    ],
+    "launch_readiness_policy_consumed": true,
+    "market_specific_index_consumed": true,
+    "missing_control_plane_artifacts": [
+      "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"
+    ],
+    "orchestration_inputs_used_for_record_enrichment": [
+      "pr_identity_roster",
+      "roadmap_execution_state",
+      "launch_readiness_roadmap",
+      "launch_readiness_policy",
+      "route_triage",
+      "section_crosswalk_or_successor",
+      "market_specific_index",
+      "command_action_matrix",
+      "atomicrows_reconciliation",
+      "atomicrows_semantic_contract"
+    ],
+    "pr155_allowed_to_continue": true,
+    "pr_identity_roster_consumed": true,
+    "preflight_block_codes": [],
+    "roadmap_execution_state_consumed": true,
+    "route_triage_consumed": true,
+    "section_crosswalk_or_successor_consumed": true
+  },
+  "determinism_metadata_without_runtime_git_volatility": {
+    "branch_name_used": false,
+    "current_commit_sha_used": false,
+    "json_indent": 2,
+    "json_sort_keys": true,
+    "local_path_used": false,
+    "python_hash_used": false,
+    "random_uuid_used": false,
+    "stable_sort_records_by": "registry_record_id",
+    "username_used": false,
+    "wall_clock_timestamps_used": false
+  },
+  "direct_agent_assignment_ready_count": 0,
+  "input_pr154_total_records": 342,
+  "live_order_ready_count": 0,
+  "market_specific_readiness_summary": {
+    "future_live_transition_block_reason": "FUTURE_LIVE_TRANSITION_BLOCKED_NO_CONNECTOR_RUNTIME_REPLAY_PAPER_OWNER_LIVE_GATE",
+    "future_replay_paper_placement_hint": "FUTURE_REPLAY_PAPER_PLACEMENT_REQUIRES_PR156_PR157_EVIDENCE",
+    "market_scope_summary": {
+      "FORECASTEX_IBKR": 114,
+      "KALSHI": 114,
+      "POLYMARKET": 114
+    },
+    "platform_scope_summary": {
+      "FORECASTEX_IBKR": 114,
+      "KALSHI": 114,
+      "POLYMARKET": 114
+    }
+  },
+  "non_authority_boundary": {
+    "atomicrows_bundle_created": false,
+    "atomicrows_bundle_sha_or_hash_authority_created": false,
+    "connector_binding_created": false,
+    "execution_superiority_evidence_created": false,
+    "latency_superiority_evidence_created": false,
+    "optimizer_backend_execution_created": false,
+    "paper_result_created": false,
+    "profit_evidence_created": false,
+    "qtt_freeze_checksum_global_digest_authority_created": false,
+    "qtt_generated_sha_created": false,
+    "qtt_sha_authority_created": false,
+    "quantum_advantage_claim_created": false,
+    "replay_result_created": false,
+    "runtime_cash_receipt_created": false,
+    "runtime_private_state_receipt_created": false,
+    "source_acceptance_created": false,
+    "source_retrieval_created": false
+  },
+  "non_consumable_blocked_count": 112,
+  "official_source_materialized_default_count": 92,
+  "orchestration_alignment_summary": {
+    "command_action_matrix_consumed": true,
+    "launch_readiness_policy_consumed": true,
+    "market_specific_index_consumed": true,
+    "pr155_allowed_to_continue": true,
+    "pr_identity_roster_consumed": true,
+    "preflight_block_codes": [],
+    "roadmap_execution_state_consumed": true,
+    "route_triage_consumed": true,
+    "section_crosswalk_or_successor_consumed": true
+  },
+  "owner_internal_control_plane_default_count": 138,
+  "paper_approved_count": 0,
+  "pr_id": "PR155",
+  "profit_evidence_count": 0,
+  "qtt_freeze_checksum_global_digest_authority_created": false,
+  "qtt_generated_sha_created": false,
+  "qtt_sha_authority_created": false,
+  "quantum_execution_evidence_count": 0,
+  "quantum_forward_compatibility_summary": {
+    "missing_quantum_metadata_uses_typed_state": true,
+    "optimizer_backend_execution_created": false,
+    "optimizer_readiness_hint_summary": {
+      "OPTIMIZER_METADATA_MISSING": 246,
+      "OPTIMIZER_METADATA_PARTIAL_NOT_EXECUTION": 18,
+      "OPTIMIZER_METADATA_READY_NOT_EXECUTION": 78
+    },
+    "quantum_execution_created": false,
+    "quantum_strategy_tags_inferred": false,
+    "state_summary": {
+      "QUANTUM_FORWARD_METADATA_PARTIAL_NOT_EXECUTION": 18,
+      "QUANTUM_FORWARD_METADATA_READY_NOT_EXECUTION": 78,
+      "QUANTUM_NOT_APPLICABLE_CLASSICAL_ONLY": 246
+    }
+  },
+  "replay_tested_count": 0,
+  "report_type": "QTT_PR155_AGENT_CONSUMABLE_PARAMETER_DEFAULT_REGISTRY_REPORT",
+  "runtime_ready_count": 0,
+  "semantic_task_id": "PR155_AGENT_CONSUMABLE_PARAMETER_DEFAULT_REGISTRY",
+  "validation_result": {
+    "failures": [],
+    "status": "PASS",
+    "validator_marker": "QTT_PR155_AGENT_CONSUMABLE_PARAMETER_DEFAULT_REGISTRY_OK"
+  }
+}

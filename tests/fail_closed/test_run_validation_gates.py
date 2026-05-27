@@ -397,6 +397,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -1992,6 +1998,40 @@ def test_runner_includes_pr153_family_and_pr154_validators_after_pr152(monkeypat
     assert "--output" not in commands[pr153s_index]
     assert "--write-report" not in commands[pr154_index]
     assert "--output" not in commands[pr154_index]
+
+
+def test_runner_includes_pr155_registry_gate_after_pr154_without_tracked_write(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands]
+
+    pr154_index = command_names.index(
+        "validate_atomicrows_parameter_default_value_materialization_gate.py"
+    )
+    pr155_index = command_names.index(
+        "validate_agent_consumable_parameter_default_registry.py"
+    )
+    next_gate_index = command_names.index(
+        "validate_qtt_agent_role_operating_charter_registry.py"
+    )
+
+    assert (
+        command_names.count(
+            "validate_agent_consumable_parameter_default_registry.py"
+        )
+        == 1
+    )
+    assert pr154_index < pr155_index < next_gate_index
+    assert commands[pr155_index] == [
+        python_executable,
+        str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr155_index]
+    assert "--output" not in commands[pr155_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
