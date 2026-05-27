@@ -88,6 +88,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     ),
     "pr155-agent-consumable-parameter-default-registry": frozenset(
         {
+            "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
             "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.registry.json",
             "docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.report.json",
             "src/qtt/stage1_prediction_markets/agent_consumable_parameter_default_registry/__init__.py",
