@@ -280,9 +280,12 @@ def test_validation_gate_sequence_includes_pr155_without_tracked_write():
     pr155_index = command_names.index(
         "validate_agent_consumable_parameter_default_registry.py"
     )
+    pr156_index = command_names.index(
+        "validate_agent_default_binding_universal_intake_gate.py"
+    )
     next_index = command_names.index("validate_qtt_agent_role_operating_charter_registry.py")
 
-    assert pr154_index < pr155_index < next_index
+    assert pr154_index < pr155_index < pr156_index < next_index
     assert commands[pr155_index] == [
         run_validation_gates.sys.executable,
         str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),

@@ -852,6 +852,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_agent_default_binding_universal_intake_gate.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

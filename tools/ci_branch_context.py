@@ -29,6 +29,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr154-atomicrows-parameter-default-value-materialization-gate": 154,
     "repair/pr154-post-merge-pytest-context-hygiene": 154,
     "pr155-agent-consumable-parameter-default-registry": 155,
+    "pr156-agent-default-binding-universal-intake-gate": 156,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
@@ -111,6 +112,39 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tools/ci_branch_context.py",
             "tools/run_validation_gates.py",
             "tools/validate_agent_consumable_parameter_default_registry.py",
+        }
+    ),
+    "pr156-agent-default-binding-universal-intake-gate": frozenset(
+        {
+            "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+            "docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.registry.json",
+            "docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.report.json",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/__init__.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/agent_binding.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/atomicrows_ingestion.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/builder.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/classical_quantum_applicability.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/constants.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/future_routing.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/input_discovery.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/intake_templates.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/io.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/models.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/orchestration_preflight.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/population_router.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/report.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/schema_projection.py",
+            "src/qtt/stage1_prediction_markets/agent_default_binding_universal_intake_gate/validator.py",
+            "tests/stage1_prediction_markets/agent_default_binding_universal_intake_gate/test_agent_default_binding_universal_intake_gate.py",
+            "tests/stage1_prediction_markets/agent_consumable_parameter_default_registry/test_agent_consumable_parameter_default_registry.py",
+            "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+            "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tools/ci_branch_context.py",
+            "tools/run_validation_gates.py",
+            "tools/validate_agent_default_binding_universal_intake_gate.py",
         }
     ),
 }
