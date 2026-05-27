@@ -330,12 +330,39 @@ def test_low_latency_receipt_excludes_live_hot_path_dynamic_materialization():
     assert latency["order_authority_created"] is False
 
 
-def test_pr154_validator_accepts_tracked_report_and_cli_emits_marker(capsys):
+def test_pr154_validator_accepts_tracked_report_and_cli_emits_marker(
+    capsys,
+    monkeypatch,
+):
+    monkeypatch.setattr(validator, "_changed_paths", lambda repo_root: [])
+
     failures = validator.validate_repository_artifacts(REPO_ROOT)
     assert failures == []
 
     assert pr154_cli.main(["--repo-root", REPO_ROOT.as_posix()]) == 0
     assert capsys.readouterr().out.strip() == tx.VALIDATOR_MARKER
+
+
+def test_pr154_changed_path_guard_still_rejects_atomicrows_generated_gate_reports(
+    monkeypatch,
+):
+    generated_report_paths = [
+        "docs/master_plan/generated/AtomicRowsBundleBuilderDeterministicAssemblyGate.report.json",
+        "docs/master_plan/generated/AtomicRowsBundleRowFamilySourceFiles.report.json",
+        "docs/master_plan/generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json",
+        "docs/master_plan/generated/AtomicRowsFullBundleRowExpansionPlan.report.json",
+    ]
+
+    monkeypatch.setattr(
+        validator,
+        "_changed_paths",
+        lambda repo_root: generated_report_paths,
+    )
+
+    assert validator.validate_repository_artifacts(REPO_ROOT) == sorted(
+        f"PR154_CHANGED_PATH_OUT_OF_SCOPE: {path}"
+        for path in generated_report_paths
+    )
 
 
 def test_run_validation_gates_includes_pr154_after_pr153s_without_tracked_write():
