@@ -13,6 +13,9 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
     constants as c,
     report as pr140_report,
 )
+from src.qtt.stage1_prediction_markets.atomicrows_parameter_default_value_materialization_gate import (
+    taxonomy as pr154_taxonomy,
+)
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (
     _is_allowed_pr140_changed_path,
     _is_ignored_pr140_changed_path,
@@ -593,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="repair/pr153s-source-value-capture-closure-classifier",
+            branch=pr154_taxonomy.PR154_BRANCH,
             source="unit-test",
         ),
     )

@@ -69,6 +69,32 @@ def test_pr_or_later_branch_respects_repair_opt_in():
     assert context.is_pr_or_later_branch("pr99-anything", minimum_pr=99) is True
 
 
+def test_pr154_explicit_changed_path_allowance_is_narrow():
+    branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=154) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/atomicrows_parameter_default_value_materialization_gate/report.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")

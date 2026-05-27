@@ -391,6 +391,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_atomicrows_parameter_default_value_materialization_gate.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -1902,7 +1908,7 @@ def test_runner_commands_use_sys_executable(monkeypatch):
     assert all(command[0] == python_executable for command in commands)
 
 
-def test_runner_includes_pr153_family_validators_after_pr152(monkeypatch):
+def test_runner_includes_pr153_family_and_pr154_validators_after_pr152(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
@@ -1920,6 +1926,9 @@ def test_runner_includes_pr153_family_validators_after_pr152(monkeypatch):
     )
     pr153s_index = command_names.index(
         "validate_pr153s_source_value_capture_closure_classifier.py"
+    )
+    pr154_index = command_names.index(
+        "validate_atomicrows_parameter_default_value_materialization_gate.py"
     )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
@@ -1943,7 +1952,14 @@ def test_runner_includes_pr153_family_validators_after_pr152(monkeypatch):
         )
         == 1
     )
-    assert pr152_index < pr153_index < pr153r_index < pr153s_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_atomicrows_parameter_default_value_materialization_gate.py"
+        )
+        == 1
+    )
+    assert pr152_index < pr153_index < pr153r_index < pr153s_index < pr154_index
+    assert pr154_index < next_gate_index
     assert commands[pr153_index] == [
         python_executable,
         str(Path("tools") / "validate_controlled_official_source_capture_candidate_packets.py"),
@@ -1962,12 +1978,20 @@ def test_runner_includes_pr153_family_validators_after_pr152(monkeypatch):
         "--repo-root",
         ".",
     ]
+    assert commands[pr154_index] == [
+        python_executable,
+        str(Path("tools") / "validate_atomicrows_parameter_default_value_materialization_gate.py"),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr153_index]
     assert "--output" not in commands[pr153_index]
     assert "--write-report" not in commands[pr153r_index]
     assert "--output" not in commands[pr153r_index]
     assert "--write-report" not in commands[pr153s_index]
     assert "--output" not in commands[pr153s_index]
+    assert "--write-report" not in commands[pr154_index]
+    assert "--output" not in commands[pr154_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
