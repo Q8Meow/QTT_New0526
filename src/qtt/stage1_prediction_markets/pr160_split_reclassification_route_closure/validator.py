@@ -17,6 +17,10 @@ from .report import build_artifacts
 _PR159R_DETACHED_HEAD_REPAIR_BRANCH_CONTEXT = (
     "repair/pr159r-detached-head-branch-context"
 )
+_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
+    c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
+    "repair/pr160-main-ancestry-after-pr176",
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -51,31 +55,50 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
     return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
 
 
-def _branch_merged_ancestry_present(root: Path, branch: str) -> bool:
-    return ci_branch_context.pr_branch_merged_ancestry_present(
+def _branch_merged_ancestry_present(
+    root: Path,
+    branch: str,
+    *,
+    refresh_shallow: bool = False,
+) -> bool:
+    helper = (
+        ci_branch_context.pr_branch_merged_ancestry_present_with_shallow_refresh
+        if refresh_shallow
+        else ci_branch_context.pr_branch_merged_ancestry_present
+    )
+    return helper(
         root,
         branch,
         git_stdout=_git_stdout,
     )
 
 
-def _pr160_ancestry_present(root: Path) -> bool:
-    return _branch_merged_ancestry_present(root, c.EXPECTED_BRANCH)
+def _pr160_ancestry_present(root: Path, *, refresh_shallow: bool = False) -> bool:
+    return _branch_merged_ancestry_present(
+        root,
+        c.EXPECTED_BRANCH,
+        refresh_shallow=refresh_shallow,
+    )
 
 
-def _pr160_or_repair_ancestry_present(root: Path, branch_context: str = "") -> bool:
-    if _pr160_ancestry_present(root):
+def _pr160_or_repair_ancestry_present(
+    root: Path,
+    branch_context: str = "",
+    *,
+    refresh_shallow: bool = False,
+) -> bool:
+    if _pr160_ancestry_present(root, refresh_shallow=refresh_shallow):
         return True
-    ancestry_branches = [c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH]
+    ancestry_branches = list(_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES)
     normalized = ci_branch_context.normalize_branch_context(branch_context)
     if (
         normalized
-        and normalized == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH
+        and normalized in _PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
         and normalized not in ancestry_branches
     ):
         ancestry_branches.append(normalized)
     return any(
-        _branch_merged_ancestry_present(root, branch)
+        _branch_merged_ancestry_present(root, branch, refresh_shallow=refresh_shallow)
         for branch in ancestry_branches
     )
 
@@ -85,7 +108,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
     return normalized in {
         c.EXPECTED_BRANCH,
         c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
-        c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
+        *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
 
@@ -111,7 +134,7 @@ def _pr160_detached_ci_context_allowed(root: Path) -> bool:
 def _pr160_repair_branch_allowed(root: Path, branch: str) -> bool:
     return (
         ci_branch_context.normalize_branch_context(branch)
-        == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH
+        in _PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
         and _pr160_or_repair_ancestry_present(root, branch)
     )
 
@@ -132,13 +155,17 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
     branch = context.branch
     if branch in {c.EXPECTED_BRANCH, c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH}:
         return
-    ancestry_present = _pr160_or_repair_ancestry_present(root)
     if ci_branch_context.github_actions_main_push_context_active():
+        ancestry_present = _pr160_or_repair_ancestry_present(
+            root,
+            refresh_shallow=True,
+        )
         if branch == "main" and ancestry_present:
             receipts.append(c.PR160_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
             return
         failures.append(f"PR160_BLOCKED_WRONG_BRANCH:{branch or 'main'}")
         return
+    ancestry_present = _pr160_or_repair_ancestry_present(root)
     if branch == "main" and ancestry_present:
         return
     if _pr160_repair_branch_allowed(root, branch):

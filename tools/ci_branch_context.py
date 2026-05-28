@@ -36,6 +36,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr159r-exact-source-locator-value-unit-capture": 159,
     "repair/pr159r-branch-context-relaxation": 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
+    "repair/pr160-main-ancestry-after-pr176": 160,
     "repair/pr160-main-push-branch-context-relaxation": 160,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
@@ -627,6 +628,61 @@ def pr_branch_merged_ancestry_present(
     return any(
         github_merge_commit_subject_mentions_branch(line, normalized)
         for line in log_out.splitlines()
+    )
+
+
+def _shallow_repository(
+    repo_root: pathlib.Path,
+    *,
+    git_stdout: GitStdout,
+) -> bool:
+    shallow_rc, shallow_out, _shallow_err = git_stdout(
+        repo_root,
+        ["rev-parse", "--is-shallow-repository"],
+    )
+    return shallow_rc == 0 and shallow_out.strip().lower() == "true"
+
+
+def _refresh_shallow_repository_history(
+    repo_root: pathlib.Path,
+    *,
+    git_stdout: GitStdout,
+) -> bool:
+    fetch_attempts = (
+        ["fetch", "--no-tags", "--prune", "--unshallow", "origin"],
+        ["fetch", "--no-tags", "--prune", "--depth=2147483647", "origin"],
+    )
+    for args in fetch_attempts:
+        fetch_rc, _fetch_out, _fetch_err = git_stdout(repo_root, args)
+        if fetch_rc == 0:
+            return True
+    return False
+
+
+def pr_branch_merged_ancestry_present_with_shallow_refresh(
+    repo_root: pathlib.Path,
+    branch: str,
+    *,
+    descendant: str = "HEAD",
+    git_stdout: GitStdout | None = None,
+) -> bool:
+    git_stdout = git_stdout or _git_stdout
+    if pr_branch_merged_ancestry_present(
+        repo_root,
+        branch,
+        descendant=descendant,
+        git_stdout=git_stdout,
+    ):
+        return True
+    if not _shallow_repository(repo_root, git_stdout=git_stdout):
+        return False
+    if not _refresh_shallow_repository_history(repo_root, git_stdout=git_stdout):
+        return False
+    return pr_branch_merged_ancestry_present(
+        repo_root,
+        branch,
+        descendant=descendant,
+        git_stdout=git_stdout,
     )
 
 
