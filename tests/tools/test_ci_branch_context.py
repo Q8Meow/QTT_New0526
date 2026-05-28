@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from tools import ci_branch_context as context
 
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -46,6 +49,14 @@ def test_downstream_or_main_validation_branch_respects_same_pr_boundary():
     )
     assert context.is_downstream_or_main_validation_branch("pr98-anything", after_pr=97) is True
     assert context.is_downstream_or_main_validation_branch("pr97-anything", after_pr=97) is False
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            "repair/pr160-main-push-branch-context-relaxation",
+            after_pr=138,
+            allow_repair=False,
+        )
+        is True
+    )
 
 
 def test_pr_or_later_branch_respects_repair_opt_in():
@@ -67,6 +78,95 @@ def test_pr_or_later_branch_respects_repair_opt_in():
     )
     assert context.is_pr_or_later_branch("pr98-anything", minimum_pr=99) is False
     assert context.is_pr_or_later_branch("pr99-anything", minimum_pr=99) is True
+
+
+def test_same_pr_repair_branch_requires_matching_pr_number():
+    assert context.is_same_pr_repair_branch(
+        "repair/pr160-main-push-branch-context-relaxation",
+        160,
+    )
+    assert not context.is_same_pr_repair_branch(
+        "repair/pr159-official-source-bridge",
+        160,
+    )
+    assert not context.is_same_pr_repair_branch(
+        "pr160-pr154-split-reclassification-route-closure-bridge",
+        160,
+    )
+
+
+def test_pr_branch_ancestry_checks_exact_and_remote_refs():
+    calls: list[tuple[str, ...]] = []
+
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        calls.append(command)
+        if command == (
+            "merge-base",
+            "--is-ancestor",
+            "origin/pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ):
+            return 0, "", ""
+        return 1, "", "not ancestor"
+
+    assert context.pr_branch_ancestry_present(
+        REPO_ROOT,
+        "pr160-pr154-split-reclassification-route-closure-bridge",
+        git_stdout=fake_git_stdout,
+    )
+    assert calls == [
+        (
+            "merge-base",
+            "--is-ancestor",
+            "pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ),
+        (
+            "merge-base",
+            "--is-ancestor",
+            "refs/heads/pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ),
+        (
+            "merge-base",
+            "--is-ancestor",
+            "origin/pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ),
+    ]
+
+
+def test_pr_branch_merged_ancestry_accepts_exact_github_merge_subject():
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        if command[:2] == ("merge-base", "--is-ancestor"):
+            return 1, "", "not ancestor"
+        if command == (
+            "log",
+            "--format=%s",
+            "--fixed-strings",
+            "--grep=/pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ):
+            return (
+                0,
+                "Merge pull request #172 from Q8Meow/"
+                "pr160-pr154-split-reclassification-route-closure-bridge\n",
+                "",
+            )
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    assert context.pr_branch_merged_ancestry_present(
+        REPO_ROOT,
+        "pr160-pr154-split-reclassification-route-closure-bridge",
+        git_stdout=fake_git_stdout,
+    )
+    assert not context.github_merge_commit_subject_mentions_branch(
+        "Merge pull request #172 from Q8Meow/"
+        "pr160-pr154-split-reclassification-route-closure-bridge-extra",
+        "pr160-pr154-split-reclassification-route-closure-bridge",
+    )
 
 
 def test_pr154_explicit_changed_path_allowance_is_narrow():
@@ -303,6 +403,7 @@ def test_pr158_explicit_changed_path_allowance_is_narrow():
 
 def test_pr160_explicit_changed_path_allowance_is_narrow():
     branch = "pr160-pr154-split-reclassification-route-closure-bridge"
+    repair_branch = "repair/pr160-main-push-branch-context-relaxation"
 
     assert context.is_pr_or_later_branch(branch, minimum_pr=160) is True
     assert context.is_explicit_downstream_repair_changed_path(
@@ -325,8 +426,24 @@ def test_pr160_explicit_changed_path_allowance_is_narrow():
         branch,
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure/test_pr160_branch_context_relaxation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tools/ci_branch_context.py",
+    )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
         "docs/master_plan/QTT_MasterPlan_Current.md",
     )
     assert not context.is_explicit_downstream_repair_changed_path(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from tools import ci_branch_context
 
@@ -35,14 +35,99 @@ def _records(payload: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     return [as_mapping(item) for item in as_list(payload.get("records"))]
 
 
-def _validate_branch(root: Path, failures: list[str]) -> None:
-    context = ci_branch_context.current_branch_context(root)
-    if context.branch:
-        _require(
-            context.branch == c.EXPECTED_BRANCH,
-            failures,
-            f"PR160_BLOCKED_WRONG_BRANCH:{context.branch}",
-        )
+def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+
+
+def _branch_merged_ancestry_present(root: Path, branch: str) -> bool:
+    return ci_branch_context.pr_branch_merged_ancestry_present(
+        root,
+        branch,
+        git_stdout=_git_stdout,
+    )
+
+
+def _pr160_ancestry_present(root: Path) -> bool:
+    return _branch_merged_ancestry_present(root, c.EXPECTED_BRANCH)
+
+
+def _pr160_or_repair_ancestry_present(root: Path, branch_context: str = "") -> bool:
+    if _pr160_ancestry_present(root):
+        return True
+    ancestry_branches = [c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH]
+    normalized = ci_branch_context.normalize_branch_context(branch_context)
+    if (
+        normalized
+        and normalized == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH
+        and normalized not in ancestry_branches
+    ):
+        ancestry_branches.append(normalized)
+    return any(
+        _branch_merged_ancestry_present(root, branch)
+        for branch in ancestry_branches
+    )
+
+
+def _pr160_branch_context_allowed(branch_context: str) -> bool:
+    normalized = ci_branch_context.normalize_branch_context(branch_context)
+    return normalized in {
+        c.EXPECTED_BRANCH,
+        c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
+    }
+
+
+def _pr160_detached_ci_context_allowed(root: Path) -> bool:
+    branch_context = ci_branch_context.github_actions_branch_context()
+    if _pr160_branch_context_allowed(branch_context):
+        return True
+    if branch_context:
+        return False
+    return _pr160_or_repair_ancestry_present(root)
+
+
+def _pr160_repair_branch_allowed(root: Path, branch: str) -> bool:
+    return (
+        ci_branch_context.normalize_branch_context(branch)
+        == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH
+        and _pr160_or_repair_ancestry_present(root, branch)
+    )
+
+
+def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> None:
+    branch_rc, git_branch, _branch_err = _git_stdout(root, ["branch", "--show-current"])
+    if ci_branch_context.github_actions_pull_request_detached_context_active(
+        branch_returncode=branch_rc,
+        branch=git_branch,
+    ):
+        if _pr160_detached_ci_context_allowed(root):
+            receipts.append(c.PR160_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY)
+            return
+        failures.append("PR160_BLOCKED_WRONG_BRANCH:DETACHED_HEAD")
+        return
+
+    context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
+    branch = context.branch
+    if branch == c.EXPECTED_BRANCH:
+        return
+    ancestry_present = _pr160_or_repair_ancestry_present(root)
+    if ci_branch_context.github_actions_main_push_context_active():
+        if branch == "main" and ancestry_present:
+            receipts.append(c.PR160_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
+            return
+        failures.append(f"PR160_BLOCKED_WRONG_BRANCH:{branch or 'main'}")
+        return
+    if branch == "main" and ancestry_present:
+        return
+    if _pr160_repair_branch_allowed(root, branch):
+        return
+    failures.append(f"PR160_BLOCKED_WRONG_BRANCH:{branch or 'DETACHED_HEAD'}")
 
 
 def _validate_receipts(master_report: Mapping[str, Any], failures: list[str]) -> None:
@@ -295,7 +380,8 @@ def _validate_online_context(root: Path, failures: list[str]) -> None:
 def validate_existing_artifacts(repo_root: Path | str) -> ValidationResult:
     root = Path(repo_root).resolve()
     failures: list[str] = []
-    _validate_branch(root, failures)
+    receipts: list[str] = []
+    _validate_branch(root, failures, receipts)
     master_report = _load(root, c.MASTER_REPORT_PATH, failures)
     registry = _load(root, c.MASTER_REGISTRY_PATH, failures)
     ledger = _load(root, c.DECISION_LEDGER_REPORT_PATH, failures)
@@ -315,4 +401,6 @@ def validate_existing_artifacts(repo_root: Path | str) -> ValidationResult:
         failures.extend(_placeholder_failures(payload, rel_path.as_posix()))
     _require((root / c.HUMAN_SUMMARY_PATH).exists(), failures, "PR160_HUMAN_SUMMARY_MISSING")
     _validate_deterministic(root, failures)
-    return ValidationResult(tuple(sorted(set(failures))))
+    unique_failures = tuple(sorted(set(failures)))
+    unique_receipts = tuple(dict.fromkeys(receipts)) if not unique_failures else ()
+    return ValidationResult(unique_failures, unique_receipts)

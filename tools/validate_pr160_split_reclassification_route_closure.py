@@ -29,6 +29,8 @@ def main() -> int:
         for failure in result.failures:
             print(failure)
         return 1
+    for receipt in result.receipts:
+        print(receipt)
     print(c.SUCCESS_MARKER)
     return 0
 

@@ -2161,6 +2161,8 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         ".",
     ]
     assert "--write-report" not in commands[pr160_index]
+    assert "--branch" not in commands[pr160_index]
+    assert "--allow-main" not in commands[pr160_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
     assert "--output" not in commands[pr160_index]

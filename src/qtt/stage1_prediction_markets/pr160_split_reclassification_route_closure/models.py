@@ -9,6 +9,7 @@ from typing import Any
 @dataclass(frozen=True)
 class ValidationResult:
     failures: tuple[str, ...] = ()
+    receipts: tuple[str, ...] = ()
 
     @property
     def ok(self) -> bool:
