@@ -565,14 +565,14 @@
     {
       "artifact_role": "optional_owner_input_response",
       "authority_class": "COMPLETION_CLASSIFICATION_FILLPATH_OWNER_EDITABILITY_AGENT_RESPONSIBILITY_BRIDGE_ONLY_NOT_RUNTIME_NOT_LIVE_NOT_CONNECTOR_NOT_SOURCE_RETRIEVAL_NOT_SOURCE_ACCEPTANCE_EXECUTION_NOT_REPLAY_NOT_PAPER_NOT_SCORING_EXECUTION_NOT_OPTIMIZER_EXECUTION_NOT_QUANTUM_BACKEND_NOT_ORDER_FILL_PROFIT_NOT_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_NOT_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY",
-      "consumed": false,
-      "exists": false,
+      "consumed": true,
+      "exists": true,
       "fallback_used": false,
       "no_runtime_execution_confirmation": true,
       "path": "docs/master_plan/owner_inputs/PR157_OwnerCompletionInputResponse.json",
       "record_count_if_available": null,
       "required_or_optional": "optional",
-      "schema_version_if_available": null
+      "schema_version_if_available": "PR157_OWNER_COMPLETION_INPUT_RESPONSE_V1"
     }
   ],
   "no_authority_confirmation": {
