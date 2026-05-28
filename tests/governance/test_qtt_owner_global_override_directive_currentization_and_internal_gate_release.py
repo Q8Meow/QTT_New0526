@@ -58,8 +58,17 @@ def _tracked_modified_generated_side_effect_paths() -> list[str]:
     return paths
 
 
+_INITIAL_MODIFIED_GENERATED_SIDE_EFFECT_PATHS = frozenset(
+    _tracked_modified_generated_side_effect_paths()
+)
+
+
 def _restore_tracked_generated_side_effects_from_head() -> list[str]:
-    paths = _tracked_modified_generated_side_effect_paths()
+    paths = [
+        path
+        for path in _tracked_modified_generated_side_effect_paths()
+        if path not in _INITIAL_MODIFIED_GENERATED_SIDE_EFFECT_PATHS
+    ]
     if not paths:
         return []
 

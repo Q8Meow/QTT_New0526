@@ -418,6 +418,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr158_owner_response_selection_readiness_bridge.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2034,6 +2043,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr157_index = command_names.index(
         "validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
     )
+    pr158_index = command_names.index(
+        "validate_pr158_owner_response_selection_readiness_bridge.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2056,7 +2068,20 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         )
         == 1
     )
-    assert pr154_index < pr155_index < pr156_index < pr157_index < next_gate_index
+    assert (
+        command_names.count(
+            "validate_pr158_owner_response_selection_readiness_bridge.py"
+        )
+        == 1
+    )
+    assert (
+        pr154_index
+        < pr155_index
+        < pr156_index
+        < pr157_index
+        < pr158_index
+        < next_gate_index
+    )
     assert commands[pr155_index] == [
         python_executable,
         str(Path("tools") / "validate_agent_consumable_parameter_default_registry.py"),
@@ -2084,6 +2109,17 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     ]
     assert "--write-report" not in commands[pr157_index]
     assert "--output" not in commands[pr157_index]
+    assert commands[pr158_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr158_owner_response_selection_readiness_bridge.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr158_index]
+    assert "--output" not in commands[pr158_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):

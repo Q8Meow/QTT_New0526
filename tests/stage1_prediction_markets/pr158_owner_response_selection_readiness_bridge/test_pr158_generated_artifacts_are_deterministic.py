@@ -1,0 +1,7 @@
+from src.qtt.stage1_prediction_markets.pr158_owner_response_selection_readiness_bridge.validator import validate_existing_artifacts
+from tests.stage1_prediction_markets.pr158_owner_response_selection_readiness_bridge.pr158_test_support import ROOT
+
+
+def test_pr158_generated_artifacts_are_deterministic():
+    assert validate_existing_artifacts(ROOT).ok
+
