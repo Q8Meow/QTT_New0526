@@ -33,6 +33,8 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr157-pr154-atomicrows-fillpath-owner-agent-bridge": 157,
     "pr158-owner-response-atomicrows-selection-readiness-bridge": 158,
     "pr159-official-source-retry-atomicrows-source-completion-bridge": 159,
+    "pr159r-exact-source-locator-value-unit-capture": 159,
+    "repair/pr159r-branch-context-relaxation": 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
     "repair/pr160-main-push-branch-context-relaxation": 160,
 }
@@ -71,6 +73,27 @@ PR159_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+PR159R_BRANCH = "pr159r-exact-source-locator-value-unit-capture"
+PR159R_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR159R_",
+    "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/",
+    "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/",
+)
+PR159R_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/validate_pr159r_source_locator_value_capture.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/constants.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
@@ -613,6 +636,11 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return normalized in PR159_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR159_ALLOWED_CHANGED_PATH_PREFIXES
+        )
+    if branch == PR159R_BRANCH or is_same_pr_repair_branch(branch, 159):
+        return normalized in PR159R_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR159R_ALLOWED_CHANGED_PATH_PREFIXES
         )
     if branch == PR160_BRANCH or is_same_pr_repair_branch(branch, 160):
         return normalized in PR160_ALLOWED_CHANGED_PATHS or any(
