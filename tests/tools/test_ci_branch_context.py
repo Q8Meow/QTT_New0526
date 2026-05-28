@@ -258,6 +258,7 @@ def test_pr158_explicit_changed_path_allowance_is_narrow():
         branch,
         "tools/validate_pr158_owner_response_selection_readiness_bridge.py",
     )
+
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/pr158_test_support.py",
@@ -289,6 +290,40 @@ def test_pr158_explicit_changed_path_allowance_is_narrow():
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "tools/ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+
+
+def test_pr160_explicit_changed_path_allowance_is_narrow():
+    branch = "pr160-pr154-split-reclassification-route-closure-bridge"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=160) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR160_PR154SplitReclassificationRouteClosure.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure/test_pr160_split_reclassification_count_33.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr160_split_reclassification_route_closure.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
