@@ -1,0 +1,6 @@
+from src.qtt.stage1_prediction_markets.pr160_split_reclassification_route_closure.validator import validate_existing_artifacts
+from tests.stage1_prediction_markets.pr160_split_reclassification_route_closure.pr160_test_support import ROOT
+
+
+def test_pr160_generated_artifacts_are_deterministic():
+    assert validate_existing_artifacts(ROOT).ok

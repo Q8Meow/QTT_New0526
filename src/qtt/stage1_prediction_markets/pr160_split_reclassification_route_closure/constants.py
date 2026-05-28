@@ -1,0 +1,480 @@
+"""Central PR160 vocabulary, paths, and authority boundaries."""
+
+from __future__ import annotations
+
+from enum import StrEnum
+from pathlib import Path
+
+
+PR_ID = "PR160"
+SEMANTIC_TASK_ID = "PR160_PR154_SPLIT_RECLASSIFICATION_ROUTE_CLOSURE_BRIDGE"
+IMPLEMENTATION_CLASS = (
+    "DETERMINISTIC_NONLIVE_PR154_SPLIT_RECLASSIFICATION_FINAL_ROUTE_CLOSURE_"
+    "AND_DOWNSTREAM_READINESS_BRIDGE"
+)
+AUTHORITY_CLASS = (
+    "RECLASSIFICATION_ROUTE_CLOSURE_ONLY_NOT_SOURCE_ACCEPTANCE_NOT_RUNTIME_NOT_LIVE_"
+    "NOT_CONNECTOR_BINDING_NOT_PRIVATE_STATE_NOT_REPLAY_NOT_PAPER_NOT_SCORING_"
+    "EXECUTION_NOT_RANKING_EXECUTION_NOT_SELECTION_EXECUTION_NOT_OPTIMIZER_EXECUTION_"
+    "NOT_QUANTUM_BACKEND_NOT_ORDER_FILL_PROFIT_NOT_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_"
+    "NOT_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY"
+)
+EXPECTED_BRANCH = "pr160-pr154-split-reclassification-route-closure-bridge"
+SUCCESS_MARKER = "QTT_PR160_SPLIT_RECLASSIFICATION_ROUTE_CLOSURE_BRIDGE_OK"
+VALIDATION_MARKER = "QTT_VALIDATION_GATES_OK"
+
+EXPECTED_SPLIT_RECLASSIFICATION_RECORDS = 33
+EXPECTED_PR154_UNIVERSE_COUNT = 342
+EXPECTED_ATOMICROWS_UNIVERSE_COUNT = 4183
+EXPECTED_PR159_UNRESOLVED_SOURCE_TARGET_COUNT = 869
+
+GENERATED_DIR = Path("docs/master_plan/generated")
+MASTER_PLAN_PATH = Path("docs/master_plan/QTT_MasterPlan_Current.md")
+SOURCE_EVIDENCE_PACKET_PATH = Path(
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md"
+)
+OWNER_DECISION_RESPONSE_PATH = Path(
+    "docs/master_plan/owner_inputs/PR160_OwnerReclassificationDecisionResponse.json"
+)
+
+PR150_TARGET_MATRIX_PATH = (
+    GENERATED_DIR / "PR150_SourceBackedClassicalQuantumParameterDefaultTargetMatrix.report.json"
+)
+PR151_TARGET_PACK_PATH = (
+    GENERATED_DIR / "PR151_OfficialSourceRetrievalTargetPackForParameterDefaults.report.json"
+)
+PR154_REPORT_PATH = GENERATED_DIR / "PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json"
+PR157_PR154_REPORT_PATH = GENERATED_DIR / "PR157_PR154BlockedRecordCompletionBridge.report.json"
+PR157_PR154_REGISTRY_PATH = GENERATED_DIR / "PR157_PR154BlockedRecordCompletionBridge.registry.json"
+PR157_ATOMICROWS_REPORT_PATH = GENERATED_DIR / "PR157_AtomicRows4183CompletionMaterialization.report.json"
+PR157_ATOMICROWS_REGISTRY_PATH = GENERATED_DIR / "PR157_AtomicRows4183CompletionMaterialization.registry.json"
+PR157_SHARD_DIR = GENERATED_DIR / "pr157_atomicrows_completion_shards"
+PR157_OWNER_REQUEST_PATH = GENERATED_DIR / "PR157_OwnerCompletionInputRequest.packet.json"
+PR157_OWNER_RESPONSE_PATH = Path("docs/master_plan/owner_inputs/PR157_OwnerCompletionInputResponse.json")
+PR158_MASTER_REPORT_PATH = GENERATED_DIR / "PR158_MasterPlanOwnerResponseSelectionReadinessBridge.report.json"
+PR158_MASTER_REGISTRY_PATH = GENERATED_DIR / "PR158_MasterPlanOwnerResponseSelectionReadinessBridge.registry.json"
+PR158_SPLIT_REPORT_PATH = GENERATED_DIR / "PR158_PR154SplitReclassificationCandidateMap.report.json"
+PR158_SPLIT_REGISTRY_PATH = GENERATED_DIR / "PR158_PR154SplitReclassificationCandidateMap.registry.json"
+PR158_SELECTION_OVERLAY_REPORT_PATH = GENERATED_DIR / "PR158_AtomicRowsSelectionReadinessOverlay.report.json"
+PR158_SELECTION_OVERLAY_REGISTRY_PATH = GENERATED_DIR / "PR158_AtomicRowsSelectionReadinessOverlay.registry.json"
+PR158_TRADE_CONTEXT_SCORING_MAP_PATH = GENERATED_DIR / "PR158_TradeContextScoringFeatureMap.report.json"
+PR158_LOW_LATENCY_INDEX_PATH = GENERATED_DIR / "PR158_PrecomputedLowLatencySelectionReadinessIndex.report.json"
+PR159_PR154_COMPLETION_REPORT_PATH = GENERATED_DIR / "PR159_PR154PublicSourceRetryCompletion.report.json"
+PR159_PR154_COMPLETION_REGISTRY_PATH = GENERATED_DIR / "PR159_PR154PublicSourceRetryCompletion.registry.json"
+PR159_MASTER_REPORT_PATH = GENERATED_DIR / "PR159_OfficialSourceCompletionBridge.report.json"
+PR159_ACCEPTED_PACKET_REGISTRY_PATH = GENERATED_DIR / "PR159_AcceptedSourceEvidencePacketRegistry.report.json"
+PR159_ACCEPTANCE_LEDGER_PATH = GENERATED_DIR / "PR159_TargetFieldAcceptanceLedger.report.json"
+PR159_ATTEMPT_MATRIX_PATH = GENERATED_DIR / "PR159_SourceAcceptanceAttemptMatrix.report.json"
+PR159_UNRESOLVED_FILL_PATH_PATH = GENERATED_DIR / "PR159_UnresolvedOfficialSourceFillPath.report.json"
+PR159_ATOMICROWS_COMPLETION_REPORT_PATH = GENERATED_DIR / "PR159_AtomicRowsSourceRequiredCompletion.report.json"
+PR159_SELECTION_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_AtomicRowsSelectionReadinessSourceUpdate.report.json"
+PR159_LOW_LATENCY_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_LowLatencySourceSnapshotReadinessUpdate.report.json"
+PR159_TRADE_CONTEXT_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_TradeContextSourceReadinessUpdate.report.json"
+PR159_SCORING_RANKING_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_ScoringRankingSourceReadinessUpdate.report.json"
+PR159_HUMAN_SUMMARY_PATH = GENERATED_DIR / "PR159_HumanReadableSourceCompletionSummary.md"
+
+MASTER_REPORT_PATH = GENERATED_DIR / "PR160_PR154SplitReclassificationRouteClosure.report.json"
+MASTER_REGISTRY_PATH = GENERATED_DIR / "PR160_PR154SplitReclassificationRouteClosure.registry.json"
+DECISION_LEDGER_REPORT_PATH = GENERATED_DIR / "PR160_ReclassificationDecisionLedger.report.json"
+DECISION_LEDGER_REGISTRY_PATH = GENERATED_DIR / "PR160_ReclassificationDecisionLedger.registry.json"
+CANDIDATE_ROUTE_MATRIX_PATH = GENERATED_DIR / "PR160_ReclassificationCandidateRouteMatrix.report.json"
+BASIS_AUDIT_PATH = GENERATED_DIR / "PR160_ReclassificationBasisAudit.report.json"
+ROUTE_COLLISION_AUDIT_PATH = GENERATED_DIR / "PR160_RouteCollisionAudit.report.json"
+ARBITRATION_AUDIT_PATH = GENERATED_DIR / "PR160_DeterministicRouteArbitrationAudit.report.json"
+PR159R_SOURCE_REQUEUE_PATH = GENERATED_DIR / "PR160_PR159RSourceTargetRequeue.report.json"
+PR161_MATERIALIZATION_ROUTE_PATH = GENERATED_DIR / "PR160_PR161AtomicRowsMaterializationRouteUpdate.report.json"
+PR163_AGENT_BINDING_ROUTE_PATH = GENERATED_DIR / "PR160_PR163AgentBindingRouteUpdate.report.json"
+PRIVATE_DOC_ROUTE_PATH = GENERATED_DIR / "PR160_PrivateDocAttestationRouteUpdate.report.json"
+OWNER_POLICY_ROUTE_PATH = GENERATED_DIR / "PR160_OwnerPolicyRouteUpdate.report.json"
+CONNECTOR_RUNTIME_ROUTE_PATH = GENERATED_DIR / "PR160_ConnectorRuntimeFutureRouteUpdate.report.json"
+FORMULA_DERIVED_ROUTE_PATH = GENERATED_DIR / "PR160_FormulaDerivedRouteUpdate.report.json"
+SELECTION_UPDATE_PATH = GENERATED_DIR / "PR160_AtomicRowsSelectionReadinessReclassificationUpdate.report.json"
+TRADE_CONTEXT_UPDATE_PATH = GENERATED_DIR / "PR160_TradeContextReclassificationReadinessUpdate.report.json"
+LOW_LATENCY_UPDATE_PATH = GENERATED_DIR / "PR160_LowLatencyReclassificationReadinessUpdate.report.json"
+QUANTUM_COMPAT_UPDATE_PATH = GENERATED_DIR / "PR160_QuantumClassicalReclassificationCompatibilityUpdate.report.json"
+AGENT_RESPONSIBILITY_UPDATE_PATH = GENERATED_DIR / "PR160_AgentResponsibilityReclassificationUpdate.report.json"
+SCORING_RANKING_UPDATE_PATH = GENERATED_DIR / "PR160_ScoringRankingReclassificationReadinessUpdate.report.json"
+BACKLOG_DELTA_PATH = GENERATED_DIR / "PR160_PostReclassificationBacklogDelta.report.json"
+OWNER_DECISION_PACKET_PATH = GENERATED_DIR / "PR160_OwnerReclassificationDecisionRequest.packet.json"
+HUMAN_SUMMARY_PATH = GENERATED_DIR / "PR160_HumanReadableReclassificationSummary.md"
+ONLINE_CONTEXT_RECEIPTS_PATH = GENERATED_DIR / "PR160_OnlineClassificationContextReceipts.report.json"
+
+ALL_JSON_ARTIFACT_PATHS = (
+    MASTER_REPORT_PATH,
+    MASTER_REGISTRY_PATH,
+    DECISION_LEDGER_REPORT_PATH,
+    DECISION_LEDGER_REGISTRY_PATH,
+    CANDIDATE_ROUTE_MATRIX_PATH,
+    BASIS_AUDIT_PATH,
+    ROUTE_COLLISION_AUDIT_PATH,
+    ARBITRATION_AUDIT_PATH,
+    PR159R_SOURCE_REQUEUE_PATH,
+    PR161_MATERIALIZATION_ROUTE_PATH,
+    PR163_AGENT_BINDING_ROUTE_PATH,
+    PRIVATE_DOC_ROUTE_PATH,
+    OWNER_POLICY_ROUTE_PATH,
+    CONNECTOR_RUNTIME_ROUTE_PATH,
+    FORMULA_DERIVED_ROUTE_PATH,
+    SELECTION_UPDATE_PATH,
+    TRADE_CONTEXT_UPDATE_PATH,
+    LOW_LATENCY_UPDATE_PATH,
+    QUANTUM_COMPAT_UPDATE_PATH,
+    AGENT_RESPONSIBILITY_UPDATE_PATH,
+    SCORING_RANKING_UPDATE_PATH,
+    BACKLOG_DELTA_PATH,
+    OWNER_DECISION_PACKET_PATH,
+)
+
+MANDATORY_ORCHESTRATION_INPUTS = (
+    Path("docs/roadmap/QTT_PR_Identity_Roster_v1_0.json"),
+    Path("docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json"),
+    Path("docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md"),
+    Path("src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py"),
+    Path("docs/master_plan/generated/PR136RouteTriage.report.json"),
+    Path("docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"),
+    Path("docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"),
+    Path("docs/master_plan/generated/PR136CommandActionMatrix.report.json"),
+    Path("docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json"),
+    Path("docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json"),
+)
+CROSSWALK_FALLBACK_PATH = GENERATED_DIR / "PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+
+MANDATORY_PR160_INPUTS = (
+    MASTER_PLAN_PATH,
+    SOURCE_EVIDENCE_PACKET_PATH,
+    PR150_TARGET_MATRIX_PATH,
+    PR151_TARGET_PACK_PATH,
+    PR154_REPORT_PATH,
+    PR157_PR154_REPORT_PATH,
+    PR157_PR154_REGISTRY_PATH,
+    PR157_ATOMICROWS_REPORT_PATH,
+    PR157_ATOMICROWS_REGISTRY_PATH,
+    PR157_OWNER_REQUEST_PATH,
+    PR157_OWNER_RESPONSE_PATH,
+    PR158_MASTER_REPORT_PATH,
+    PR158_MASTER_REGISTRY_PATH,
+    PR158_SPLIT_REPORT_PATH,
+    PR158_SPLIT_REGISTRY_PATH,
+    PR158_SELECTION_OVERLAY_REPORT_PATH,
+    PR158_SELECTION_OVERLAY_REGISTRY_PATH,
+    PR158_TRADE_CONTEXT_SCORING_MAP_PATH,
+    PR158_LOW_LATENCY_INDEX_PATH,
+    PR159_PR154_COMPLETION_REPORT_PATH,
+    PR159_PR154_COMPLETION_REGISTRY_PATH,
+    PR159_MASTER_REPORT_PATH,
+    PR159_ACCEPTED_PACKET_REGISTRY_PATH,
+    PR159_ACCEPTANCE_LEDGER_PATH,
+    PR159_ATTEMPT_MATRIX_PATH,
+    PR159_UNRESOLVED_FILL_PATH_PATH,
+    PR159_ATOMICROWS_COMPLETION_REPORT_PATH,
+    PR159_SELECTION_SOURCE_UPDATE_PATH,
+    PR159_LOW_LATENCY_SOURCE_UPDATE_PATH,
+    PR159_TRADE_CONTEXT_SOURCE_UPDATE_PATH,
+    PR159_SCORING_RANKING_SOURCE_UPDATE_PATH,
+    PR159_HUMAN_SUMMARY_PATH,
+)
+
+OPTIONAL_PRIOR_ARTIFACTS = (
+    Path("docs/master_plan/generated/PR153_ControlledOfficialSourceCaptureCandidatePackets.report.json"),
+    Path("docs/master_plan/generated/PR153R_RedoExternalSourceValueCaptureTargets.report.json"),
+    Path("docs/master_plan/generated/PR153S_SourceValueCaptureClosureClassifier.report.json"),
+    Path("docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.report.json"),
+    Path("docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.registry.json"),
+    Path("docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.report.json"),
+    Path("docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.registry.json"),
+    Path("docs/master_plan/generated/QTTAgentRoleOperatingCharterReport.json"),
+    Path("docs/master_plan/generated/QTTAgentAlgorithmBindingReport.json"),
+    Path("docs/master_plan/generated/QTTAgentAlgorithmCommandMatrix.json"),
+    Path("docs/master_plan/generated/QTTAgentAlgorithmConsumerGate.report.json"),
+    Path("docs/master_plan/generated/QTTAgentAlgorithmCumulativeReadinessGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsResearchProvenanceEvidenceTierClassification.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json"),
+    Path("docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"),
+    Path("docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"),
+    Path("docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json"),
+    Path("docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json"),
+    Path("docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"),
+    Path("docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json"),
+    Path("docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json"),
+    Path("docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json"),
+    Path("docs/master_plan/generated/ReplayPaperCandidateStackCompetitionGate.report.json"),
+    Path("docs/master_plan/generated/DualResultReviewForParameterStacks.report.json"),
+    Path("docs/master_plan/generated/OwnerLivePromotionReviewForParameterStacks.report.json"),
+)
+
+
+class PR160TargetPopulation(StrEnum):
+    PR154_SPLIT_RECLASSIFICATION_33 = "PR154_SPLIT_RECLASSIFICATION_33"
+
+
+class RouteClosureDoctrine(StrEnum):
+    ROUTE_CLOSURE_ONLY_NOT_VALUE_MATERIALIZATION = "ROUTE_CLOSURE_ONLY_NOT_VALUE_MATERIALIZATION"
+    NO_SOURCE_ACCEPTANCE_IN_PR160 = "NO_SOURCE_ACCEPTANCE_IN_PR160"
+    OFFICIAL_ONLINE_DOCS_AUTHORITATIVE_FOR_CLASSIFICATION_ONLY = (
+        "OFFICIAL_ONLINE_DOCS_AUTHORITATIVE_FOR_CLASSIFICATION_ONLY"
+    )
+    OFFICIAL_ONLINE_DOCS_NOT_ACCEPTED_VALUE_AUTHORITY_IN_PR160 = (
+        "OFFICIAL_ONLINE_DOCS_NOT_ACCEPTED_VALUE_AUTHORITY_IN_PR160"
+    )
+    NO_OWNER_APPROVAL_FABRICATION = "NO_OWNER_APPROVAL_FABRICATION"
+    NO_PRIVATE_DOC_ATTESTATION_FABRICATION = "NO_PRIVATE_DOC_ATTESTATION_FABRICATION"
+    NO_EXACT_AGENT_ID_FABRICATION = "NO_EXACT_AGENT_ID_FABRICATION"
+
+
+class ReclassificationFinalRouteClass(StrEnum):
+    OFFICIAL_SOURCE_REQUIRED_ROUTE_PR159R = "OFFICIAL_SOURCE_REQUIRED_ROUTE_PR159R"
+    ATOMICROWS_SOURCE_VALUE_MATERIALIZATION_ROUTE_PR161 = (
+        "ATOMICROWS_SOURCE_VALUE_MATERIALIZATION_ROUTE_PR161"
+    )
+    OWNER_INTERNAL_POLICY_ROUTE = "OWNER_INTERNAL_POLICY_ROUTE"
+    OWNER_ROUTE_METADATA_ROUTE = "OWNER_ROUTE_METADATA_ROUTE"
+    PRIVATE_DOC_ATTESTATION_ROUTE = "PRIVATE_DOC_ATTESTATION_ROUTE"
+    EXACT_AGENT_BINDING_ROUTE_PR163 = "EXACT_AGENT_BINDING_ROUTE_PR163"
+    FORMULA_ONLY_DERIVED_ROUTE = "FORMULA_ONLY_DERIVED_ROUTE"
+    GENERATED_DERIVATIVE_FROM_ACCEPTED_INPUTS_ROUTE = (
+        "GENERATED_DERIVATIVE_FROM_ACCEPTED_INPUTS_ROUTE"
+    )
+    QUANTUM_CLASSICAL_METADATA_ONLY_ROUTE = "QUANTUM_CLASSICAL_METADATA_ONLY_ROUTE"
+    CONNECTOR_SEMANTIC_FUTURE_ROUTE = "CONNECTOR_SEMANTIC_FUTURE_ROUTE"
+    RUNTIME_RECEIPT_FUTURE_ROUTE = "RUNTIME_RECEIPT_FUTURE_ROUTE"
+    REPLAY_PAPER_EVALUATION_FUTURE_ROUTE = "REPLAY_PAPER_EVALUATION_FUTURE_ROUTE"
+    SCORING_RANKING_METADATA_ROUTE = "SCORING_RANKING_METADATA_ROUTE"
+    INVALID_OR_UNSUPPORTED_WITH_FILL_PATH = "INVALID_OR_UNSUPPORTED_WITH_FILL_PATH"
+    OWNER_CLASSIFICATION_DECISION_REQUIRED_WITH_CHOICES = (
+        "OWNER_CLASSIFICATION_DECISION_REQUIRED_WITH_CHOICES"
+    )
+
+
+class ReclassificationBasisClass(StrEnum):
+    DETERMINISTIC_FROM_PR136_ROUTE_TRIAGE = "DETERMINISTIC_FROM_PR136_ROUTE_TRIAGE"
+    DETERMINISTIC_FROM_PR136_COMMAND_ACTION_MATRIX = "DETERMINISTIC_FROM_PR136_COMMAND_ACTION_MATRIX"
+    DETERMINISTIC_FROM_PR137R_ATOMICROWS_RECONCILIATION = (
+        "DETERMINISTIC_FROM_PR137R_ATOMICROWS_RECONCILIATION"
+    )
+    DETERMINISTIC_FROM_PR138_SEMANTIC_ROW_CONTRACT = (
+        "DETERMINISTIC_FROM_PR138_SEMANTIC_ROW_CONTRACT"
+    )
+    DETERMINISTIC_FROM_PR153_SOURCE_STATE = "DETERMINISTIC_FROM_PR153_SOURCE_STATE"
+    DETERMINISTIC_FROM_PR154_MATERIALIZATION = "DETERMINISTIC_FROM_PR154_MATERIALIZATION"
+    DETERMINISTIC_FROM_PR157_BRIDGE = "DETERMINISTIC_FROM_PR157_BRIDGE"
+    DETERMINISTIC_FROM_PR158_OWNER_RESPONSE = "DETERMINISTIC_FROM_PR158_OWNER_RESPONSE"
+    DETERMINISTIC_FROM_PR158_SELECTION_READINESS = (
+        "DETERMINISTIC_FROM_PR158_SELECTION_READINESS"
+    )
+    DETERMINISTIC_FROM_PR159_ACCEPTED_SOURCE_PACKET = (
+        "DETERMINISTIC_FROM_PR159_ACCEPTED_SOURCE_PACKET"
+    )
+    DETERMINISTIC_FROM_PR159_UNRESOLVED_FILL_PATH = (
+        "DETERMINISTIC_FROM_PR159_UNRESOLVED_FILL_PATH"
+    )
+    DETERMINISTIC_FROM_AGENT_ROLE_COMMAND_MATRIX = "DETERMINISTIC_FROM_AGENT_ROLE_COMMAND_MATRIX"
+    DETERMINISTIC_FROM_SCORING_QUANTUM_ARTIFACTS = (
+        "DETERMINISTIC_FROM_SCORING_QUANTUM_ARTIFACTS"
+    )
+    DETERMINISTIC_FROM_MASTER_PLAN_AUTHORITY = "DETERMINISTIC_FROM_MASTER_PLAN_AUTHORITY"
+    AUTHORITATIVE_ONLINE_OFFICIAL_DOC_FOR_CLASSIFICATION_ONLY = (
+        "AUTHORITATIVE_ONLINE_OFFICIAL_DOC_FOR_CLASSIFICATION_ONLY"
+    )
+    OWNER_DECISION_REQUIRED = "OWNER_DECISION_REQUIRED"
+    ONLINE_CONTEXT_USED_NON_VALUE_AUTHORITY = "ONLINE_CONTEXT_USED_NON_VALUE_AUTHORITY"
+    NO_DETERMINISTIC_BASIS_BLOCKED = "NO_DETERMINISTIC_BASIS_BLOCKED"
+
+
+class RouteConfidenceClass(StrEnum):
+    DETERMINISTIC = "DETERMINISTIC"
+    STRONG_BUT_OWNER_CONFIRMATION_RECOMMENDED = "STRONG_BUT_OWNER_CONFIRMATION_RECOMMENDED"
+    AMBIGUOUS_OWNER_CHOICE_REQUIRED = "AMBIGUOUS_OWNER_CHOICE_REQUIRED"
+    BLOCKED_NO_VALID_ROUTE = "BLOCKED_NO_VALID_ROUTE"
+    INVALID_UNSUPPORTED = "INVALID_UNSUPPORTED"
+
+
+class AuthorityClass(StrEnum):
+    INTERNAL_POLICY_OWNER_AUTHORITY = "INTERNAL_POLICY_OWNER_AUTHORITY"
+    INTERNAL_ROUTE_METADATA_AUTHORITY = "INTERNAL_ROUTE_METADATA_AUTHORITY"
+    ACCEPTED_SOURCE_EVIDENCE_REQUIRED = "ACCEPTED_SOURCE_EVIDENCE_REQUIRED"
+    ACCEPTED_SOURCE_EVIDENCE_ALREADY_PRESENT = "ACCEPTED_SOURCE_EVIDENCE_ALREADY_PRESENT"
+    OFFICIAL_DOC_CLASSIFICATION_AUTHORITY_ONLY = "OFFICIAL_DOC_CLASSIFICATION_AUTHORITY_ONLY"
+    PRIVATE_DOC_ATTESTATION_REQUIRED = "PRIVATE_DOC_ATTESTATION_REQUIRED"
+    AGENT_BINDING_REQUIRED = "AGENT_BINDING_REQUIRED"
+    GENERATED_DERIVATIVE_ALLOWED_FROM_ACCEPTED_INPUTS = (
+        "GENERATED_DERIVATIVE_ALLOWED_FROM_ACCEPTED_INPUTS"
+    )
+    FORMULA_ONLY_ALLOWED = "FORMULA_ONLY_ALLOWED"
+    CONNECTOR_SEMANTIC_FUTURE_ONLY = "CONNECTOR_SEMANTIC_FUTURE_ONLY"
+    RUNTIME_RECEIPT_FUTURE_ONLY = "RUNTIME_RECEIPT_FUTURE_ONLY"
+    METADATA_ONLY_NOT_EXECUTION_AUTHORITY = "METADATA_ONLY_NOT_EXECUTION_AUTHORITY"
+    OWNER_CHOICE_REQUIRED_NOT_EXTERNAL_FACT = "OWNER_CHOICE_REQUIRED_NOT_EXTERNAL_FACT"
+
+
+class RecordFinalState(StrEnum):
+    RECLASSIFIED_ROUTE_CLOSED = "RECLASSIFIED_ROUTE_CLOSED"
+    RECLASSIFIED_ROUTE_CLOSED_WITH_DOWNSTREAM_BLOCKER = (
+        "RECLASSIFIED_ROUTE_CLOSED_WITH_DOWNSTREAM_BLOCKER"
+    )
+    OWNER_CHOICE_PACKET_CREATED = "OWNER_CHOICE_PACKET_CREATED"
+    INVALID_OR_UNSUPPORTED_FAIL_CLOSED = "INVALID_OR_UNSUPPORTED_FAIL_CLOSED"
+    BLOCKED_INPUT_MISSING = "BLOCKED_INPUT_MISSING"
+    BLOCKED_SCHEMA_INVALID = "BLOCKED_SCHEMA_INVALID"
+
+
+class BlockerClass(StrEnum):
+    NONE = "NONE"
+    SOURCE_EVIDENCE_REQUIRED = "SOURCE_EVIDENCE_REQUIRED"
+    SOURCE_LOCATOR_VALUE_UNIT_REQUIRED = "SOURCE_LOCATOR_VALUE_UNIT_REQUIRED"
+    OWNER_POLICY_DECISION_REQUIRED = "OWNER_POLICY_DECISION_REQUIRED"
+    PRIVATE_DOC_ATTESTATION_REQUIRED = "PRIVATE_DOC_ATTESTATION_REQUIRED"
+    EXACT_AGENT_BINDING_REQUIRED = "EXACT_AGENT_BINDING_REQUIRED"
+    ACCEPTED_INPUTS_REQUIRED = "ACCEPTED_INPUTS_REQUIRED"
+    CONNECTOR_SEMANTIC_REQUIRED_FUTURE = "CONNECTOR_SEMANTIC_REQUIRED_FUTURE"
+    RUNTIME_RECEIPT_REQUIRED_FUTURE = "RUNTIME_RECEIPT_REQUIRED_FUTURE"
+    MULTIPLE_PLAUSIBLE_ROUTES_OWNER_CHOICE_REQUIRED = (
+        "MULTIPLE_PLAUSIBLE_ROUTES_OWNER_CHOICE_REQUIRED"
+    )
+    INVALID_UNSUPPORTED_RECORD = "INVALID_UNSUPPORTED_RECORD"
+    SCHEMA_INVALID = "SCHEMA_INVALID"
+    INPUT_ARTIFACT_MISSING = "INPUT_ARTIFACT_MISSING"
+    ONLINE_CONTEXT_AMBIGUOUS_NON_VALUE_AUTHORITY = (
+        "ONLINE_CONTEXT_AMBIGUOUS_NON_VALUE_AUTHORITY"
+    )
+
+
+class AuthorityProfile(StrEnum):
+    PR160_RECLASSIFICATION_ROUTE_CLOSURE_ONLY = "PR160_RECLASSIFICATION_ROUTE_CLOSURE_ONLY"
+    PR160_NO_SOURCE_ACCEPTANCE_EXECUTION = "PR160_NO_SOURCE_ACCEPTANCE_EXECUTION"
+    PR160_OFFICIAL_ONLINE_DOCS_CLASSIFICATION_ONLY = (
+        "PR160_OFFICIAL_ONLINE_DOCS_CLASSIFICATION_ONLY"
+    )
+    PR160_NO_RUNTIME_NO_LIVE_NO_CONNECTOR_BINDING = (
+        "PR160_NO_RUNTIME_NO_LIVE_NO_CONNECTOR_BINDING"
+    )
+    PR160_NO_PRIVATE_STATE_FETCH = "PR160_NO_PRIVATE_STATE_FETCH"
+    PR160_NO_REPLAY_NO_PAPER = "PR160_NO_REPLAY_NO_PAPER"
+    PR160_NO_SCORING_RANKING_SELECTION_EXECUTION = (
+        "PR160_NO_SCORING_RANKING_SELECTION_EXECUTION"
+    )
+    PR160_NO_OPTIMIZER_EXECUTION = "PR160_NO_OPTIMIZER_EXECUTION"
+    PR160_NO_QUANTUM_BACKEND_EXECUTION = "PR160_NO_QUANTUM_BACKEND_EXECUTION"
+    PR160_NO_ORDER_FILL_PROFIT_AUTHORITY = "PR160_NO_ORDER_FILL_PROFIT_AUTHORITY"
+    PR160_NO_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_AUTHORITY = (
+        "PR160_NO_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_AUTHORITY"
+    )
+    PR160_NO_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY = (
+        "PR160_NO_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY"
+    )
+    OWNER_EDITABLE_INTERNAL_POLICY_ONLY_NOT_EXTERNAL_FACT = (
+        "OWNER_EDITABLE_INTERNAL_POLICY_ONLY_NOT_EXTERNAL_FACT"
+    )
+    SOURCE_EVIDENCE_PROVENANCE_DIGEST_ONLY = "SOURCE_EVIDENCE_PROVENANCE_DIGEST_ONLY"
+    LOW_LATENCY_PRECOMPUTED_INDEX_METADATA_ONLY = "LOW_LATENCY_PRECOMPUTED_INDEX_METADATA_ONLY"
+
+
+class FutureRoute(StrEnum):
+    PR159R_EXACT_SOURCE_LOCATOR_VALUE_UNIT_CAPTURE = (
+        "PR159R_EXACT_SOURCE_LOCATOR_VALUE_UNIT_CAPTURE"
+    )
+    PR161_ATOMICROWS_SOURCE_VALUE_MATERIALIZATION = (
+        "PR161_ATOMICROWS_SOURCE_VALUE_MATERIALIZATION"
+    )
+    PR162_ATOMICROWS_FINAL_AUDIT = "PR162_ATOMICROWS_FINAL_AUDIT"
+    PR163_EXACT_AGENT_BINDING = "PR163_EXACT_AGENT_BINDING"
+    PR164_SCORING_RANKING_BRIDGE = "PR164_SCORING_RANKING_BRIDGE"
+    PR165_TRADE_CONTEXT_SELECTION = "PR165_TRADE_CONTEXT_SELECTION"
+    PR167_OPTIMIZER_INTERFACE = "PR167_OPTIMIZER_INTERFACE"
+    PR168_CLASSICAL_OPTIMIZER_SANDBOX = "PR168_CLASSICAL_OPTIMIZER_SANDBOX"
+    PR169_QUANTUM_BACKEND_GATED_SANDBOX = "PR169_QUANTUM_BACKEND_GATED_SANDBOX"
+    OWNER_PRIVATE_DOC_ATTESTATION = "OWNER_PRIVATE_DOC_ATTESTATION"
+    OWNER_POLICY_REVIEW = "OWNER_POLICY_REVIEW"
+    CONNECTOR_SEMANTIC_BINDING_FUTURE = "CONNECTOR_SEMANTIC_BINDING_FUTURE"
+    RUNTIME_RECEIPT_FUTURE = "RUNTIME_RECEIPT_FUTURE"
+    REPLAY_AFTER_FUTURE_GATES = "REPLAY_AFTER_FUTURE_GATES"
+    PAPER_AFTER_FUTURE_GATES = "PAPER_AFTER_FUTURE_GATES"
+    OWNER_REVIEW_AFTER_FUTURE_GATES = "OWNER_REVIEW_AFTER_FUTURE_GATES"
+    LIVE_ONLY_AFTER_ALL_FUTURE_GATES = "LIVE_ONLY_AFTER_ALL_FUTURE_GATES"
+
+
+class QuantumClassicalCompatibility(StrEnum):
+    CLASSICAL_FORMULA_COMPATIBLE = "CLASSICAL_FORMULA_COMPATIBLE"
+    CLASSICAL_TRADING_ALGORITHM_COMPATIBLE = "CLASSICAL_TRADING_ALGORITHM_COMPATIBLE"
+    STATISTICAL_EDGE_COMPATIBLE = "STATISTICAL_EDGE_COMPATIBLE"
+    MICROSTRUCTURE_ALPHA_COMPATIBLE = "MICROSTRUCTURE_ALPHA_COMPATIBLE"
+    RISK_CAPITAL_EXECUTION_FORMULA_COMPATIBLE = "RISK_CAPITAL_EXECUTION_FORMULA_COMPATIBLE"
+    QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE = "QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE"
+    TRUE_QUANTUM_CANDIDATE = "TRUE_QUANTUM_CANDIDATE"
+    HYBRID_CLASSICAL_QUANTUM_CANDIDATE = "HYBRID_CLASSICAL_QUANTUM_CANDIDATE"
+    QUBO_COMPATIBLE_METADATA_ONLY = "QUBO_COMPATIBLE_METADATA_ONLY"
+    ISING_COMPATIBLE_METADATA_ONLY = "ISING_COMPATIBLE_METADATA_ONLY"
+    QAOA_COMPATIBLE_METADATA_ONLY = "QAOA_COMPATIBLE_METADATA_ONLY"
+    VQE_COMPATIBLE_METADATA_ONLY = "VQE_COMPATIBLE_METADATA_ONLY"
+    ANNEALING_COMPATIBLE_METADATA_ONLY = "ANNEALING_COMPATIBLE_METADATA_ONLY"
+    QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_METADATA_ONLY = (
+        "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_METADATA_ONLY"
+    )
+    CLASSICAL_ONLY_VALID_BASELINE = "CLASSICAL_ONLY_VALID_BASELINE"
+    UNKNOWN_COMPATIBILITY_BLOCKED = "UNKNOWN_COMPATIBILITY_BLOCKED"
+
+
+DEFAULT_AUTHORITY_PROFILE_IDS = tuple(item.value for item in AuthorityProfile)
+ROUTE_CLOSURE_DOCTRINE_IDS = tuple(item.value for item in RouteClosureDoctrine)
+
+NO_AUTHORITY_CONFIRMATION = {
+    "accepted_source_packet_created": False,
+    "accepted_source_value_materialized": False,
+    "target_field_acceptance_ledger_created": False,
+    "owner_approval_created": False,
+    "private_doc_attestation_created": False,
+    "exact_agent_id_created": False,
+    "connector_semantic_binding_created": False,
+    "runtime_receipt_created": False,
+    "replay_execution_created": False,
+    "paper_execution_created": False,
+    "scoring_execution_created": False,
+    "ranking_execution_created": False,
+    "selection_execution_created": False,
+    "optimizer_execution_created": False,
+    "quantum_backend_execution_created": False,
+    "live_execution_created": False,
+    "order_fill_profit_evidence_created": False,
+    "qtt_checksum_freeze_global_digest_authority_created": False,
+    "atomicrows_bundle_checksum_hash_authority_created": False,
+}
+
+ZERO_EXECUTION_COUNTS = {
+    "invented_external_fact_count": 0,
+    "invented_source_packet_count": 0,
+    "fake_owner_approval_count": 0,
+    "fake_private_doc_attestation_count": 0,
+    "invented_exact_agent_id_count": 0,
+    "runtime_live_order_profit_authority_count": 0,
+    "replay_paper_execution_count": 0,
+    "scoring_ranking_selection_execution_count": 0,
+    "optimizer_execution_count": 0,
+    "quantum_backend_execution_count": 0,
+    "qtt_checksum_freeze_global_digest_authority_count": 0,
+    "atomicrows_bundle_checksum_hash_authority_count": 0,
+}
+
+CENTRAL_ENUM_VALUE_SETS = {
+    "target_population": tuple(item.value for item in PR160TargetPopulation),
+    "route_closure_doctrine": ROUTE_CLOSURE_DOCTRINE_IDS,
+    "final_route_class": tuple(item.value for item in ReclassificationFinalRouteClass),
+    "basis_class": tuple(item.value for item in ReclassificationBasisClass),
+    "route_confidence_class": tuple(item.value for item in RouteConfidenceClass),
+    "authority_class": tuple(item.value for item in AuthorityClass),
+    "record_final_state": tuple(item.value for item in RecordFinalState),
+    "blocker_class": tuple(item.value for item in BlockerClass),
+    "authority_profile": DEFAULT_AUTHORITY_PROFILE_IDS,
+    "future_route": tuple(item.value for item in FutureRoute),
+    "quantum_classical_compatibility": tuple(item.value for item in QuantumClassicalCompatibility),
+}
+
+PR160_VALIDATOR = "tools/validate_pr160_split_reclassification_route_closure.py"
+PR159_VALIDATOR = "tools/validate_pr159_official_source_completion_bridge.py"
+PR157_VALIDATOR = "tools/validate_pr157_pr154_atomicrows_completion_materialization_bridge.py"
+PR158_VALIDATOR = "tools/validate_pr158_owner_response_selection_readiness_bridge.py"

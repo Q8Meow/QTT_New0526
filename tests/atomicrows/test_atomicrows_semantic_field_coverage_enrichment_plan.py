@@ -13,8 +13,8 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrich
     constants as c,
     report as pr140_report,
 )
-from src.qtt.stage1_prediction_markets.pr159_official_source_completion_bridge import (
-    constants as pr159_constants,
+from src.qtt.stage1_prediction_markets.pr160_split_reclassification_route_closure import (
+    constants as pr160_constants,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan.report import (
     _is_allowed_pr140_changed_path,
@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch=pr159_constants.EXPECTED_BRANCH,
+            branch=pr160_constants.EXPECTED_BRANCH,
             source="unit-test",
         ),
     )
