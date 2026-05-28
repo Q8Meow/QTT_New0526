@@ -34,6 +34,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr158-owner-response-atomicrows-selection-readiness-bridge": 158,
     "pr159-official-source-retry-atomicrows-source-completion-bridge": 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
+    "repair/pr160-main-push-branch-context-relaxation": 160,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -515,6 +516,93 @@ def roadmap_pr_number(branch: str) -> int | None:
     return int(match.group("number"))
 
 
+def is_same_pr_repair_branch(branch: str, pr_number: int) -> bool:
+    if not is_repair_branch(branch):
+        return False
+    repair_target = branch[len(REPAIR_BRANCH_PREFIX) :]
+    return roadmap_pr_number(repair_target) == pr_number
+
+
+def pr_branch_ancestry_ref_candidates(branch: str) -> tuple[str, ...]:
+    normalized = normalize_branch_context(branch)
+    if not normalized:
+        return ()
+    return (
+        normalized,
+        f"refs/heads/{normalized}",
+        f"origin/{normalized}",
+        f"refs/remotes/origin/{normalized}",
+    )
+
+
+def pr_branch_ancestry_present(
+    repo_root: pathlib.Path,
+    branch: str,
+    *,
+    descendant: str = "HEAD",
+    git_stdout: GitStdout | None = None,
+) -> bool:
+    git_stdout = git_stdout or _git_stdout
+    for ancestor_ref in pr_branch_ancestry_ref_candidates(branch):
+        ancestor_rc, _ancestor_out, _ancestor_err = git_stdout(
+            repo_root,
+            ["merge-base", "--is-ancestor", ancestor_ref, descendant],
+        )
+        if ancestor_rc == 0:
+            return True
+    return False
+
+
+def github_merge_commit_subject_mentions_branch(subject: str, branch: str) -> bool:
+    normalized = normalize_branch_context(branch)
+    if not normalized:
+        return False
+    return (
+        re.match(
+            rf"^Merge pull request #[0-9]+ from [^\s/]+/{re.escape(normalized)}$",
+            subject.strip(),
+        )
+        is not None
+    )
+
+
+def pr_branch_merged_ancestry_present(
+    repo_root: pathlib.Path,
+    branch: str,
+    *,
+    descendant: str = "HEAD",
+    git_stdout: GitStdout | None = None,
+) -> bool:
+    git_stdout = git_stdout or _git_stdout
+    if pr_branch_ancestry_present(
+        repo_root,
+        branch,
+        descendant=descendant,
+        git_stdout=git_stdout,
+    ):
+        return True
+
+    normalized = normalize_branch_context(branch)
+    if not normalized:
+        return False
+    log_rc, log_out, _log_err = git_stdout(
+        repo_root,
+        [
+            "log",
+            "--format=%s",
+            "--fixed-strings",
+            f"--grep=/{normalized}",
+            descendant,
+        ],
+    )
+    if log_rc != 0:
+        return False
+    return any(
+        github_merge_commit_subject_mentions_branch(line, normalized)
+        for line in log_out.splitlines()
+    )
+
+
 def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
     return EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS.get(branch)
 
@@ -526,7 +614,7 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
             normalized.startswith(prefix)
             for prefix in PR159_ALLOWED_CHANGED_PATH_PREFIXES
         )
-    if branch == PR160_BRANCH:
+    if branch == PR160_BRANCH or is_same_pr_repair_branch(branch, 160):
         return normalized in PR160_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR160_ALLOWED_CHANGED_PATH_PREFIXES
