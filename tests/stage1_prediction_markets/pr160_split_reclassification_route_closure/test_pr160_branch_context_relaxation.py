@@ -18,7 +18,8 @@ BRANCH_CONTEXT_ENV = (
     "GITHUB_HEAD_REF",
 )
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REPAIR_BRANCH = "repair/pr160-main-push-branch-context-relaxation"
+PR160_REPAIR_BRANCH = "repair/pr160-main-push-branch-context-relaxation"
+PR159R_BRANCH_CONTEXT_REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -136,7 +137,7 @@ def test_pr160_detached_head_ci_with_repair_head_ref_emits_branch_only_relaxatio
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setenv("GITHUB_REF", "refs/pull/172/merge")
     monkeypatch.setenv("GITHUB_REF_NAME", "172/merge")
-    monkeypatch.setenv("GITHUB_HEAD_REF", REPAIR_BRANCH)
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR160_REPAIR_BRANCH)
 
     failures, receipts = _branch_outcome(
         monkeypatch,
@@ -146,6 +147,45 @@ def test_pr160_detached_head_ci_with_repair_head_ref_emits_branch_only_relaxatio
 
     assert failures == ()
     assert receipts == (c.PR160_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
+def test_pr160_detached_head_ci_with_pr159r_repair_head_ref_emits_branch_only_relaxation_receipt(
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/172/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "172/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR159R_BRANCH_CONTEXT_REPAIR_BRANCH)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "HEAD",
+        ancestry_present=False,
+    )
+
+    assert failures == ()
+    assert receipts == (c.PR160_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
+def test_pr160_detached_head_ci_pr159r_repair_ref_name_without_head_ref_remains_blocked(
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/172/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", PR159R_BRANCH_CONTEXT_REPAIR_BRANCH)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "HEAD",
+        ancestry_present=False,
+    )
+
+    assert failures == ("PR160_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
 
 
 def test_pr160_detached_head_ci_without_head_ref_or_ancestry_fails_closed(
@@ -179,7 +219,11 @@ def test_pr160_detached_head_ci_unrelated_head_ref_remains_blocked(
     failures, receipts = _branch_outcome(
         monkeypatch,
         "HEAD",
-        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+        ancestry_branches={
+            c.EXPECTED_BRANCH,
+            PR160_REPAIR_BRANCH,
+            PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        },
     )
 
     assert failures == ("PR160_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
@@ -198,7 +242,7 @@ def test_pr160_detached_head_ci_without_head_ref_accepts_valid_repair_ancestry(
     failures, receipts = _branch_outcome(
         monkeypatch,
         "HEAD",
-        ancestry_branches={REPAIR_BRANCH},
+        ancestry_branches={PR160_REPAIR_BRANCH},
     )
 
     assert failures == ()
@@ -245,7 +289,11 @@ def test_pr160_unrelated_branch_remains_blocked_even_with_pr160_ancestry(monkeyp
     failures, receipts = _branch_outcome(
         monkeypatch,
         "feature/unrelated",
-        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+        ancestry_branches={
+            c.EXPECTED_BRANCH,
+            PR160_REPAIR_BRANCH,
+            PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        },
     )
 
     assert failures == ("PR160_BLOCKED_WRONG_BRANCH:feature/unrelated",)
@@ -260,7 +308,11 @@ def test_pr160_unrelated_repair_branch_remains_blocked_even_with_pr160_ancestry(
     failures, receipts = _branch_outcome(
         monkeypatch,
         "repair/pr161-unrelated-future-branch",
-        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+        ancestry_branches={
+            c.EXPECTED_BRANCH,
+            PR160_REPAIR_BRANCH,
+            PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        },
     )
 
     assert failures == ("PR160_BLOCKED_WRONG_BRANCH:repair/pr161-unrelated-future-branch",)
@@ -272,8 +324,8 @@ def test_pr160_same_pr_repair_branch_requires_ancestry(monkeypatch):
 
     failures, receipts = _branch_outcome(
         monkeypatch,
-        REPAIR_BRANCH,
-        ancestry_branches={REPAIR_BRANCH},
+        PR160_REPAIR_BRANCH,
+        ancestry_branches={PR160_REPAIR_BRANCH},
     )
 
     assert failures == ()
@@ -281,10 +333,25 @@ def test_pr160_same_pr_repair_branch_requires_ancestry(monkeypatch):
 
     failures, receipts = _branch_outcome(
         monkeypatch,
-        REPAIR_BRANCH,
+        PR160_REPAIR_BRANCH,
     )
 
     assert failures == (
         "PR160_BLOCKED_WRONG_BRANCH:repair/pr160-main-push-branch-context-relaxation",
+    )
+    assert receipts == ()
+
+
+def test_pr160_pr159r_repair_branch_remains_blocked_as_current_branch(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        ancestry_branches={PR159R_BRANCH_CONTEXT_REPAIR_BRANCH},
+    )
+
+    assert failures == (
+        f"PR160_BLOCKED_WRONG_BRANCH:{PR159R_BRANCH_CONTEXT_REPAIR_BRANCH}",
     )
     assert receipts == ()

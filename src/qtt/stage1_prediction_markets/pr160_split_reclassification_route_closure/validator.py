@@ -14,6 +14,11 @@ from .models import ValidationResult
 from .report import build_artifacts
 
 
+_PR159R_DETACHED_HEAD_REPAIR_BRANCH_CONTEXT = (
+    "repair/pr159r-detached-head-branch-context"
+)
+
+
 def _require(condition: bool, failures: list[str], code: str) -> None:
     if not condition:
         failures.append(code)
@@ -84,9 +89,19 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
     }
 
 
+def _pr159r_detached_head_repair_head_ref_allowed() -> bool:
+    return (
+        ci_branch_context.github_actions_head_ref_branch_context()
+        == _PR159R_DETACHED_HEAD_REPAIR_BRANCH_CONTEXT
+    )
+
+
 def _pr160_detached_ci_context_allowed(root: Path) -> bool:
     branch_context = ci_branch_context.github_actions_branch_context()
-    if _pr160_branch_context_allowed(branch_context):
+    if (
+        _pr160_branch_context_allowed(branch_context)
+        or _pr159r_detached_head_repair_head_ref_allowed()
+    ):
         return True
     if branch_context:
         return False
