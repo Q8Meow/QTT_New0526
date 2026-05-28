@@ -169,6 +169,52 @@ def test_pr_branch_merged_ancestry_accepts_exact_github_merge_subject():
     )
 
 
+def test_pr_branch_merged_ancestry_refreshes_shallow_history_before_retry():
+    calls: list[tuple[str, ...]] = []
+    refreshed = False
+
+    def fake_git_stdout(repo_root, args):
+        nonlocal refreshed
+        command = tuple(args)
+        calls.append(command)
+        if command[:2] == ("merge-base", "--is-ancestor"):
+            return 1, "", "not ancestor"
+        if command == (
+            "log",
+            "--format=%s",
+            "--fixed-strings",
+            "--grep=/pr160-pr154-split-reclassification-route-closure-bridge",
+            "HEAD",
+        ):
+            if refreshed:
+                return (
+                    0,
+                    "Merge pull request #172 from Q8Meow/"
+                    "pr160-pr154-split-reclassification-route-closure-bridge\n",
+                    "",
+                )
+            return 0, "", ""
+        if command == ("rev-parse", "--is-shallow-repository"):
+            return 0, "true", ""
+        if command == ("fetch", "--no-tags", "--prune", "--unshallow", "origin"):
+            refreshed = True
+            return 0, "", ""
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    assert context.pr_branch_merged_ancestry_present_with_shallow_refresh(
+        REPO_ROOT,
+        "pr160-pr154-split-reclassification-route-closure-bridge",
+        git_stdout=fake_git_stdout,
+    )
+    assert (
+        "fetch",
+        "--no-tags",
+        "--prune",
+        "--unshallow",
+        "origin",
+    ) in calls
+
+
 def test_pr154_explicit_changed_path_allowance_is_narrow():
     branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
     repair_branch = "repair/pr154-post-merge-pytest-context-hygiene"
@@ -404,6 +450,7 @@ def test_pr158_explicit_changed_path_allowance_is_narrow():
 def test_pr160_explicit_changed_path_allowance_is_narrow():
     branch = "pr160-pr154-split-reclassification-route-closure-bridge"
     repair_branch = "repair/pr160-main-push-branch-context-relaxation"
+    current_repair_branch = "repair/pr160-main-ancestry-after-pr176"
 
     assert context.is_pr_or_later_branch(branch, minimum_pr=160) is True
     assert context.is_explicit_downstream_repair_changed_path(
@@ -437,6 +484,19 @@ def test_pr160_explicit_changed_path_allowance_is_narrow():
     assert context.is_explicit_downstream_repair_changed_path(
         repair_branch,
         "tools/ci_branch_context.py",
+    )
+    assert context.is_downstream_or_main_validation_branch(
+        current_repair_branch,
+        after_pr=138,
+        allow_repair=False,
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        current_repair_branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        current_repair_branch,
+        "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure/test_pr160_branch_context_relaxation.py",
     )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
