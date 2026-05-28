@@ -79,6 +79,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch_context)
     return normalized in {
         c.EXPECTED_BRANCH,
+        c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
         c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
     }
 
@@ -114,7 +115,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch == c.EXPECTED_BRANCH:
+    if branch in {c.EXPECTED_BRANCH, c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH}:
         return
     ancestry_present = _pr160_or_repair_ancestry_present(root)
     if ci_branch_context.github_actions_main_push_context_active():

@@ -439,6 +439,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr159r_source_locator_value_capture.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2064,6 +2070,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr160_index = command_names.index(
         "validate_pr160_split_reclassification_route_closure.py"
     )
+    pr159r_index = command_names.index(
+        "validate_pr159r_source_locator_value_capture.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2100,6 +2109,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         command_names.count("validate_pr160_split_reclassification_route_closure.py")
         == 1
     )
+    assert command_names.count("validate_pr159r_source_locator_value_capture.py") == 1
     assert (
         pr154_index
         < pr155_index
@@ -2108,6 +2118,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr158_index
         < pr159_index
         < pr160_index
+        < pr159r_index
         < next_gate_index
     )
     assert commands[pr155_index] == [
@@ -2163,9 +2174,19 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr160_index]
     assert "--branch" not in commands[pr160_index]
     assert "--allow-main" not in commands[pr160_index]
+    assert commands[pr159r_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr159r_source_locator_value_capture.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr159r_index]
+    assert "--branch" not in commands[pr159r_index]
+    assert "--allow-main" not in commands[pr159r_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
     assert "--output" not in commands[pr160_index]
+    assert "--output" not in commands[pr159r_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):

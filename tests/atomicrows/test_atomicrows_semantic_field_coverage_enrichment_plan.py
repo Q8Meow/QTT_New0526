@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch=pr160_constants.EXPECTED_BRANCH,
+            branch="pr159r-exact-source-locator-value-unit-capture",
             source="unit-test",
         ),
     )

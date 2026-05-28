@@ -20,6 +20,7 @@ AUTHORITY_CLASS = (
     "NOT_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY"
 )
 EXPECTED_BRANCH = "pr160-pr154-split-reclassification-route-closure-bridge"
+PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH = "pr159r-exact-source-locator-value-unit-capture"
 BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH = (
     "repair/pr160-main-push-branch-context-relaxation"
 )
