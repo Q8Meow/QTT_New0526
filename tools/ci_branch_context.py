@@ -488,6 +488,10 @@ def github_actions_branch_context() -> str:
     return ""
 
 
+def github_actions_head_ref_branch_context() -> str:
+    return normalize_branch_context(os.getenv("GITHUB_HEAD_REF", ""))
+
+
 def github_actions_pull_request_detached_context_active(
     *,
     branch_returncode: int | None = None,

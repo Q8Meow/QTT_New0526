@@ -14,6 +14,12 @@ from .models import ValidationResult
 from .report import build_artifacts
 
 
+_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
+    c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
+    "repair/pr159r-detached-head-branch-context",
+)
+
+
 def _require(condition: bool, failures: list[str], code: str) -> None:
     if not condition:
         failures.append(code)
@@ -61,16 +67,20 @@ def _pr159r_ancestry_present(root: Path) -> bool:
 def _pr159r_or_repair_ancestry_present(root: Path, branch_context: str = "") -> bool:
     if _pr159r_ancestry_present(root):
         return True
-    ancestry_branches = [c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH]
+    ancestry_branches = list(_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES)
     normalized = ci_branch_context.normalize_branch_context(branch_context)
-    if normalized and normalized == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH:
+    if (
+        normalized
+        and normalized in _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
+        and normalized not in ancestry_branches
+    ):
         ancestry_branches.append(normalized)
     return any(_branch_merged_ancestry_present(root, branch) for branch in ancestry_branches)
 
 
 def _pr159r_branch_context_allowed(branch_context: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch_context)
-    return normalized in {c.EXPECTED_BRANCH, c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH}
+    return normalized == c.EXPECTED_BRANCH or normalized in _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
 
 
 def _pr159r_detached_ci_context_allowed(root: Path) -> bool:
@@ -85,7 +95,7 @@ def _pr159r_detached_ci_context_allowed(root: Path) -> bool:
 def _pr159r_repair_branch_allowed(root: Path, branch: str) -> bool:
     return (
         ci_branch_context.normalize_branch_context(branch)
-        == c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH
+        in _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
         and _pr159r_or_repair_ancestry_present(root, branch)
     )
 

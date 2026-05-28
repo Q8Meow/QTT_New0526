@@ -7,6 +7,7 @@ from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture impor
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -21,50 +22,145 @@ def _clear_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
-def _git(branch: str, *, ancestry: bool = False):
+def _branch_ref_candidates(branch: str) -> set[str]:
+    return {
+        branch,
+        f"refs/heads/{branch}",
+        f"origin/{branch}",
+        f"refs/remotes/origin/{branch}",
+    }
+
+
+def _branch_from_ref(ref: str, branches: set[str]) -> str:
+    for branch in branches:
+        if ref in _branch_ref_candidates(branch):
+            return branch
+    return ""
+
+
+def _git(
+    branch: str,
+    *,
+    ancestry_present: bool = False,
+    ancestry_branches: set[str] | None = None,
+):
+    branches = set(ancestry_branches or set())
+    if ancestry_present:
+        branches.add(c.EXPECTED_BRANCH)
+
     def fake_git_stdout(repo_root, args):
         command = tuple(args)
         if command == ("branch", "--show-current"):
             if branch == "DETACHED_HEAD":
-                return 1, "", "detached"
+                return 0, "", ""
             return 0, branch, ""
         if command[:2] == ("merge-base", "--is-ancestor"):
-            return (0, "", "") if ancestry else (1, "", "not ancestor")
+            ancestor_branch = _branch_from_ref(command[2], branches)
+            return (0, "", "") if ancestor_branch else (1, "", "not ancestor")
         if command[:3] == ("log", "--format=%s", "--fixed-strings"):
+            grep = command[3].removeprefix("--grep=/")
+            if grep in branches:
+                return 0, f"Merge pull request #1 from Owner/{grep}\n", ""
             return (
                 0,
-                f"Merge pull request #1 from Owner/{c.EXPECTED_BRANCH}\n" if ancestry else "",
+                "",
                 "",
             )
         if command == ("rev-parse", "--abbrev-ref", "HEAD"):
-            return 0, branch, ""
+            return 0, "HEAD" if branch == "DETACHED_HEAD" else branch, ""
         raise AssertionError(f"unexpected git command: {command!r}")
 
     return fake_git_stdout
 
 
-def test_pr159r_exact_branch_allowed(monkeypatch):
-    _clear_env(monkeypatch)
-    monkeypatch.setattr(validator, "_git_stdout", _git(c.EXPECTED_BRANCH))
+def _branch_outcome(
+    monkeypatch,
+    branch: str,
+    *,
+    ancestry_present: bool = False,
+    ancestry_branches: set[str] | None = None,
+):
+    monkeypatch.setattr(
+        validator,
+        "_git_stdout",
+        _git(
+            branch,
+            ancestry_present=ancestry_present,
+            ancestry_branches=ancestry_branches,
+        ),
+    )
     failures: list[str] = []
     receipts: list[str] = []
     validator._validate_branch(REPO_ROOT, failures, receipts)
-    assert failures == []
-    assert receipts == []
+    return tuple(failures), tuple(receipts)
 
 
-def test_pr159r_detached_head_pr_context_allowed(monkeypatch):
+def _set_pull_request_detached_env(monkeypatch, *, head_ref: str | None = None):
     _clear_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
-    monkeypatch.setenv("GITHUB_HEAD_REF", c.EXPECTED_BRANCH)
     monkeypatch.setenv("GITHUB_REF", "refs/pull/159/merge")
-    monkeypatch.setattr(validator, "_git_stdout", _git("DETACHED_HEAD"))
-    failures: list[str] = []
-    receipts: list[str] = []
-    validator._validate_branch(REPO_ROOT, failures, receipts)
-    assert failures == []
-    assert receipts == [c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY]
+    monkeypatch.setenv("GITHUB_REF_NAME", "159/merge")
+    if head_ref is not None:
+        monkeypatch.setenv("GITHUB_HEAD_REF", head_ref)
+
+
+def test_pr159r_exact_branch_allowed(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, c.EXPECTED_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr159r_detached_head_pr_context_allowed(monkeypatch):
+    _set_pull_request_detached_env(monkeypatch, head_ref=c.EXPECTED_BRANCH)
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
+def test_pr159r_detached_head_current_repair_pr_context_allowed(monkeypatch):
+    _set_pull_request_detached_env(monkeypatch, head_ref=REPAIR_BRANCH)
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
+def test_pr159r_detached_head_without_head_ref_or_ancestry_fails_closed(
+    monkeypatch,
+):
+    _set_pull_request_detached_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
+
+
+def test_pr159r_detached_head_unrelated_head_ref_remains_blocked(monkeypatch):
+    _set_pull_request_detached_env(monkeypatch, head_ref="feature/unrelated")
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "DETACHED_HEAD",
+        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+    )
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
+
+
+def test_pr159r_detached_head_without_head_ref_accepts_valid_ancestry(monkeypatch):
+    _set_pull_request_detached_env(monkeypatch)
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "DETACHED_HEAD",
+        ancestry_present=True,
+    )
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
 
 
 def test_pr159r_main_push_with_ancestry_allowed(monkeypatch):
@@ -73,19 +169,60 @@ def test_pr159r_main_push_with_ancestry_allowed(monkeypatch):
     monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
     monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
-    monkeypatch.setattr(validator, "_git_stdout", _git("main", ancestry=True))
-    failures: list[str] = []
-    receipts: list[str] = []
-    validator._validate_branch(REPO_ROOT, failures, receipts)
-    assert failures == []
-    assert receipts == [c.PR159R_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY]
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "main",
+        ancestry_present=True,
+    )
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY,)
+
+
+def test_pr159r_main_push_without_valid_ancestry_fails_closed(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    failures, receipts = _branch_outcome(monkeypatch, "main")
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:main",)
+    assert receipts == ()
 
 
 def test_pr159r_unrelated_branch_blocked(monkeypatch):
     _clear_env(monkeypatch)
-    monkeypatch.setattr(validator, "_git_stdout", _git("feature/unrelated", ancestry=True))
-    failures: list[str] = []
-    receipts: list[str] = []
-    validator._validate_branch(REPO_ROOT, failures, receipts)
-    assert failures == ["PR159R_BLOCKED_WRONG_BRANCH:feature/unrelated"]
-    assert receipts == []
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "feature/unrelated",
+        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+    )
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:feature/unrelated",)
+    assert receipts == ()
+
+
+def test_pr159r_unrelated_detached_head_commit_blocked(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
+
+
+def test_pr159r_current_repair_branch_requires_ancestry(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        REPAIR_BRANCH,
+        ancestry_branches={REPAIR_BRANCH},
+    )
+
+    assert failures == ()
+    assert receipts == ()
+
+    failures, receipts = _branch_outcome(monkeypatch, REPAIR_BRANCH)
+
+    assert failures == (f"PR159R_BLOCKED_WRONG_BRANCH:{REPAIR_BRANCH}",)
+    assert receipts == ()
