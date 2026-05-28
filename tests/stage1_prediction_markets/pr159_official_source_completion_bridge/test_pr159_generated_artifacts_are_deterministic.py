@@ -1,0 +1,7 @@
+from src.qtt.stage1_prediction_markets.pr159_official_source_completion_bridge.validator import validate_existing_artifacts
+from tests.stage1_prediction_markets.pr159_official_source_completion_bridge.pr159_test_support import ROOT
+
+
+def test_pr159_generated_artifacts_are_deterministic():
+    assert validate_existing_artifacts(ROOT).ok
+

@@ -32,7 +32,27 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr156-agent-default-binding-universal-intake-gate": 156,
     "pr157-pr154-atomicrows-fillpath-owner-agent-bridge": 157,
     "pr158-owner-response-atomicrows-selection-readiness-bridge": 158,
+    "pr159-official-source-retry-atomicrows-source-completion-bridge": 159,
 }
+PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
+PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR159_",
+    "src/qtt/stage1_prediction_markets/pr159_official_source_completion_bridge/",
+    "tests/stage1_prediction_markets/pr159_official_source_completion_bridge/",
+)
+PR159_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/validate_pr159_official_source_completion_bridge.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
     "repair-pr153r-redo-report-determinism": frozenset(
         {
@@ -481,6 +501,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR159_BRANCH:
+        return normalized in PR159_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR159_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     return normalized in EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS.get(
         branch,
         frozenset(),

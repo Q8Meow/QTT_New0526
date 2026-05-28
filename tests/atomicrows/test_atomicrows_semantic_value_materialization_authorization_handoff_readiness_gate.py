@@ -13,8 +13,8 @@ from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization
     constants as c,
     report as pr142_report,
 )
-from src.qtt.stage1_prediction_markets.pr158_owner_response_selection_readiness_bridge import (
-    constants as pr158_constants,
+from src.qtt.stage1_prediction_markets.pr159_official_source_completion_bridge import (
+    constants as pr159_constants,
 )
 from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.report import (
     _is_allowed_pr142_changed_path,
@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch=pr158_constants.EXPECTED_BRANCH,
+            branch=pr159_constants.EXPECTED_BRANCH,
             source="unit-test",
         ),
     )

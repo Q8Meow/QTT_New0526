@@ -427,6 +427,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr159_official_source_completion_bridge.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2046,6 +2052,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr158_index = command_names.index(
         "validate_pr158_owner_response_selection_readiness_bridge.py"
     )
+    pr159_index = command_names.index(
+        "validate_pr159_official_source_completion_bridge.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2075,11 +2084,16 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         == 1
     )
     assert (
+        command_names.count("validate_pr159_official_source_completion_bridge.py")
+        == 1
+    )
+    assert (
         pr154_index
         < pr155_index
         < pr156_index
         < pr157_index
         < pr158_index
+        < pr159_index
         < next_gate_index
     )
     assert commands[pr155_index] == [
@@ -2119,7 +2133,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         ".",
     ]
     assert "--write-report" not in commands[pr158_index]
+    assert commands[pr159_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr159_official_source_completion_bridge.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert "--write-report" not in commands[pr159_index]
     assert "--output" not in commands[pr158_index]
+    assert "--output" not in commands[pr159_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
