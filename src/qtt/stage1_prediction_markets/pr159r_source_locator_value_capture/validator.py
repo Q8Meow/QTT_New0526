@@ -18,6 +18,9 @@ _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
     c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
     "repair/pr159r-detached-head-branch-context",
 )
+_DETACHED_HEAD_REPAIR_HEAD_REF_BRANCHES = (
+    "repair/pr160-main-ancestry-after-pr176",
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -86,6 +89,11 @@ def _pr159r_branch_context_allowed(branch_context: str) -> bool:
 def _pr159r_detached_ci_context_allowed(root: Path) -> bool:
     branch_context = ci_branch_context.github_actions_branch_context()
     if _pr159r_branch_context_allowed(branch_context):
+        return True
+    if (
+        ci_branch_context.github_actions_head_ref_branch_context()
+        in _DETACHED_HEAD_REPAIR_HEAD_REF_BRANCHES
+    ):
         return True
     if branch_context:
         return False

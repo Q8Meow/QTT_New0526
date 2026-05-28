@@ -8,6 +8,7 @@ from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture impor
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
+PR160_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -129,6 +130,14 @@ def test_pr159r_detached_head_current_repair_pr_context_allowed(monkeypatch):
     assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
 
 
+def test_pr159r_detached_head_pr160_repair_pr_context_allowed(monkeypatch):
+    _set_pull_request_detached_env(monkeypatch, head_ref=PR160_REPAIR_BRANCH)
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
 def test_pr159r_detached_head_without_head_ref_or_ancestry_fails_closed(
     monkeypatch,
 ):
@@ -225,4 +234,16 @@ def test_pr159r_current_repair_branch_requires_ancestry(monkeypatch):
     failures, receipts = _branch_outcome(monkeypatch, REPAIR_BRANCH)
 
     assert failures == (f"PR159R_BLOCKED_WRONG_BRANCH:{REPAIR_BRANCH}",)
+    assert receipts == ()
+
+
+def test_pr159r_pr160_repair_branch_not_allowed_as_local_branch(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR160_REPAIR_BRANCH,
+        ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+    )
+
+    assert failures == (f"PR159R_BLOCKED_WRONG_BRANCH:{PR160_REPAIR_BRANCH}",)
     assert receipts == ()
