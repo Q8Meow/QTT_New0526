@@ -1,0 +1,481 @@
+"""Central PR159 vocabulary, paths, counts, and authority boundaries."""
+
+from __future__ import annotations
+
+from enum import StrEnum
+from pathlib import Path
+
+
+PR_ID = "PR159"
+SEMANTIC_TASK_ID = "PR159_OFFICIAL_SOURCE_RETRY_ATOMICROWS_SOURCE_COMPLETION_BRIDGE"
+IMPLEMENTATION_CLASS = (
+    "DETERMINISTIC_CONTROL_PLANE_OFFICIAL_SOURCE_DISCOVERY_CAPTURE_ACCEPTANCE_AND_"
+    "SOURCE_REQUIRED_ATOMICROWS_COMPLETION_BRIDGE"
+)
+AUTHORITY_CLASS = (
+    "OFFICIAL_SOURCE_EVIDENCE_COMPLETION_BRIDGE_ONLY_NOT_RUNTIME_NOT_LIVE_NOT_CONNECTOR_"
+    "BINDING_NOT_PRIVATE_STATE_NOT_REPLAY_NOT_PAPER_NOT_SCORING_EXECUTION_NOT_RANKING_"
+    "EXECUTION_NOT_SELECTION_EXECUTION_NOT_OPTIMIZER_EXECUTION_NOT_QUANTUM_BACKEND_NOT_"
+    "ORDER_FILL_PROFIT_NOT_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_NOT_ATOMICROWS_BUNDLE_"
+    "CHECKSUM_HASH_AUTHORITY"
+)
+EXPECTED_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
+SUCCESS_MARKER = "QTT_PR159_OFFICIAL_SOURCE_RETRY_ATOMICROWS_SOURCE_COMPLETION_BRIDGE_OK"
+VALIDATION_MARKER = "QTT_VALIDATION_GATES_OK"
+
+EXPECTED_PR154_PUBLIC_SOURCE_RETRY_RECORDS = 34
+EXPECTED_ATOMICROWS_PUBLIC_EXTERNAL_SOURCE_REQUIRED = 315
+EXPECTED_ATOMICROWS_PARAMETER_RANGE_SOURCE_REQUIRED = 530
+EXPECTED_ATOMICROWS_SOURCE_REQUIRED_TOTAL = 845
+EXPECTED_TOTAL_SOURCE_TARGET_RECORDS = 879
+EXPECTED_OWNER_POLICY_DEFAULTS_OUT_OF_SCOPE = 600
+EXPECTED_OWNER_PARAMETER_RANGE_POLICY_ROWS_OUT_OF_SCOPE = 535
+EXPECTED_AGENT_BINDING_ROWS_OUT_OF_SCOPE = 270
+EXPECTED_SPLIT_RECLASSIFICATION_RECORDS_OUT_OF_SCOPE = 33
+EXPECTED_PRIVATE_DOC_ATTESTATION_RECORDS_OUT_OF_SCOPE = 6
+
+OFFICIAL_SEARCH_SESSION_ID = "PR159_OFFICIAL_SOURCE_SEARCH_SESSION_2026_05_28"
+OFFICIAL_SEARCH_RETRIEVAL_TIMESTAMP_UTC = "2026-05-28T00:00:00Z"
+OFFICIAL_SEARCH_METHOD = (
+    "web.search_query plus web.open against official documentation pages only; "
+    "no credentials, no venue API calls, no runtime/private-state fetches"
+)
+
+GENERATED_DIR = Path("docs/master_plan/generated")
+MASTER_PLAN_PATH = Path("docs/master_plan/QTT_MasterPlan_Current.md")
+SOURCE_EVIDENCE_PACKET_PATH = Path(
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md"
+)
+PR153R_SEED_MAP_PATH = Path(
+    "docs/master_plan/source_evidence/owner_supplied_pr153r_redo/"
+    "PR153R_34_retry_targets_official_source_seed_map.json"
+)
+
+PR157_PR154_REPORT_PATH = GENERATED_DIR / "PR157_PR154BlockedRecordCompletionBridge.report.json"
+PR157_PR154_REGISTRY_PATH = GENERATED_DIR / "PR157_PR154BlockedRecordCompletionBridge.registry.json"
+PR157_ATOMICROWS_REPORT_PATH = GENERATED_DIR / "PR157_AtomicRows4183CompletionMaterialization.report.json"
+PR157_ATOMICROWS_REGISTRY_PATH = GENERATED_DIR / "PR157_AtomicRows4183CompletionMaterialization.registry.json"
+PR157_SHARD_DIR = GENERATED_DIR / "pr157_atomicrows_completion_shards"
+PR157_OWNER_REQUEST_PATH = GENERATED_DIR / "PR157_OwnerCompletionInputRequest.packet.json"
+PR158_OWNER_RESPONSE_PATH = Path("docs/master_plan/owner_inputs/PR157_OwnerCompletionInputResponse.json")
+PR158_MASTER_REPORT_PATH = GENERATED_DIR / "PR158_MasterPlanOwnerResponseSelectionReadinessBridge.report.json"
+PR158_MASTER_REGISTRY_PATH = GENERATED_DIR / "PR158_MasterPlanOwnerResponseSelectionReadinessBridge.registry.json"
+PR158_SELECTION_OVERLAY_REPORT_PATH = GENERATED_DIR / "PR158_AtomicRowsSelectionReadinessOverlay.report.json"
+PR158_SELECTION_OVERLAY_REGISTRY_PATH = GENERATED_DIR / "PR158_AtomicRowsSelectionReadinessOverlay.registry.json"
+PR158_TRADE_CONTEXT_SCORING_MAP_PATH = GENERATED_DIR / "PR158_TradeContextScoringFeatureMap.report.json"
+PR158_LOW_LATENCY_INDEX_PATH = GENERATED_DIR / "PR158_PrecomputedLowLatencySelectionReadinessIndex.report.json"
+PR158_FUTURE_RESEARCH_PATH = GENERATED_DIR / "PR158_FutureResearchAdditionIntakeCompatibility.report.json"
+
+MASTER_REPORT_PATH = GENERATED_DIR / "PR159_OfficialSourceCompletionBridge.report.json"
+MASTER_REGISTRY_PATH = GENERATED_DIR / "PR159_OfficialSourceCompletionBridge.registry.json"
+TARGET_QUEUE_REPORT_PATH = GENERATED_DIR / "PR159_OfficialSourceRetrievalTargetQueue.report.json"
+TARGET_QUEUE_REGISTRY_PATH = GENERATED_DIR / "PR159_OfficialSourceRetrievalTargetQueue.registry.json"
+DAY1_PRIORITY_INDEX_PATH = GENERATED_DIR / "PR159_Day1SourcePriorityTierIndex.report.json"
+DISCOVERY_RECEIPTS_PATH = GENERATED_DIR / "PR159_OfficialSourceDiscoveryReceipts.report.json"
+OFFICIAL_DOMAIN_DISCOVERY_PATH = GENERATED_DIR / "PR159_OfficialDomainDiscovery.report.json"
+OFFICIAL_CLASSIFIER_AUDIT_PATH = GENERATED_DIR / "PR159_OfficialSourceClassifierAudit.report.json"
+NON_AUTHORITATIVE_REJECTION_PATH = GENERATED_DIR / "PR159_NonAuthoritativeSeedRejectionLedger.report.json"
+CANDIDATE_PACKET_REPORT_PATH = GENERATED_DIR / "PR159_CandidateSourceEvidencePacketRegistry.report.json"
+CANDIDATE_PACKET_REGISTRY_PATH = GENERATED_DIR / "PR159_CandidateSourceEvidencePacketRegistry.registry.json"
+ACCEPTED_PACKET_REPORT_PATH = GENERATED_DIR / "PR159_AcceptedSourceEvidencePacketRegistry.report.json"
+ACCEPTED_PACKET_REGISTRY_PATH = GENERATED_DIR / "PR159_AcceptedSourceEvidencePacketRegistry.registry.json"
+ACCEPTANCE_LEDGER_REPORT_PATH = GENERATED_DIR / "PR159_TargetFieldAcceptanceLedger.report.json"
+ACCEPTANCE_LEDGER_REGISTRY_PATH = GENERATED_DIR / "PR159_TargetFieldAcceptanceLedger.registry.json"
+SOURCE_ACCEPTANCE_ATTEMPT_MATRIX_PATH = GENERATED_DIR / "PR159_SourceAcceptanceAttemptMatrix.report.json"
+PR154_COMPLETION_REPORT_PATH = GENERATED_DIR / "PR159_PR154PublicSourceRetryCompletion.report.json"
+PR154_COMPLETION_REGISTRY_PATH = GENERATED_DIR / "PR159_PR154PublicSourceRetryCompletion.registry.json"
+ATOMICROWS_COMPLETION_REPORT_PATH = GENERATED_DIR / "PR159_AtomicRowsSourceRequiredCompletion.report.json"
+ATOMICROWS_COMPLETION_REGISTRY_PATH = GENERATED_DIR / "PR159_AtomicRowsSourceRequiredCompletion.registry.json"
+CONFLICT_REVIEW_QUEUE_PATH = GENERATED_DIR / "PR159_SourceConflictReviewQueue.report.json"
+UNRESOLVED_FILL_PATH_PATH = GENERATED_DIR / "PR159_UnresolvedOfficialSourceFillPath.report.json"
+REVALIDATION_SCHEDULE_PATH = GENERATED_DIR / "PR159_SourceRevalidationSchedule.report.json"
+FRESHNESS_MATERIALITY_AUDIT_PATH = GENERATED_DIR / "PR159_SourceFreshnessAndMaterialityAudit.report.json"
+SELECTION_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_AtomicRowsSelectionReadinessSourceUpdate.report.json"
+LOW_LATENCY_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_LowLatencySourceSnapshotReadinessUpdate.report.json"
+TRADE_CONTEXT_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_TradeContextSourceReadinessUpdate.report.json"
+SCORING_RANKING_SOURCE_UPDATE_PATH = GENERATED_DIR / "PR159_ScoringRankingSourceReadinessUpdate.report.json"
+QUANTUM_METADATA_PATH = GENERATED_DIR / "PR159_QuantumProviderOfficialSourceMetadata.report.json"
+HUMAN_SUMMARY_PATH = GENERATED_DIR / "PR159_HumanReadableSourceCompletionSummary.md"
+
+ALL_JSON_ARTIFACT_PATHS = (
+    MASTER_REPORT_PATH,
+    MASTER_REGISTRY_PATH,
+    TARGET_QUEUE_REPORT_PATH,
+    TARGET_QUEUE_REGISTRY_PATH,
+    DAY1_PRIORITY_INDEX_PATH,
+    DISCOVERY_RECEIPTS_PATH,
+    OFFICIAL_DOMAIN_DISCOVERY_PATH,
+    OFFICIAL_CLASSIFIER_AUDIT_PATH,
+    NON_AUTHORITATIVE_REJECTION_PATH,
+    CANDIDATE_PACKET_REPORT_PATH,
+    CANDIDATE_PACKET_REGISTRY_PATH,
+    ACCEPTED_PACKET_REPORT_PATH,
+    ACCEPTED_PACKET_REGISTRY_PATH,
+    ACCEPTANCE_LEDGER_REPORT_PATH,
+    ACCEPTANCE_LEDGER_REGISTRY_PATH,
+    SOURCE_ACCEPTANCE_ATTEMPT_MATRIX_PATH,
+    PR154_COMPLETION_REPORT_PATH,
+    PR154_COMPLETION_REGISTRY_PATH,
+    ATOMICROWS_COMPLETION_REPORT_PATH,
+    ATOMICROWS_COMPLETION_REGISTRY_PATH,
+    CONFLICT_REVIEW_QUEUE_PATH,
+    UNRESOLVED_FILL_PATH_PATH,
+    REVALIDATION_SCHEDULE_PATH,
+    FRESHNESS_MATERIALITY_AUDIT_PATH,
+    SELECTION_SOURCE_UPDATE_PATH,
+    LOW_LATENCY_SOURCE_UPDATE_PATH,
+    TRADE_CONTEXT_SOURCE_UPDATE_PATH,
+    SCORING_RANKING_SOURCE_UPDATE_PATH,
+    QUANTUM_METADATA_PATH,
+)
+
+MANDATORY_ORCHESTRATION_INPUTS = (
+    Path("docs/roadmap/QTT_PR_Identity_Roster_v1_0.json"),
+    Path("docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json"),
+    Path("docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md"),
+    Path("src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py"),
+    Path("docs/master_plan/generated/PR136RouteTriage.report.json"),
+    Path("docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json"),
+    Path("docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json"),
+    Path("docs/master_plan/generated/PR136CommandActionMatrix.report.json"),
+    Path("docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json"),
+    Path("docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json"),
+)
+CROSSWALK_FALLBACK_PATH = GENERATED_DIR / "PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+
+MANDATORY_PR159_INPUTS = (
+    MASTER_PLAN_PATH,
+    SOURCE_EVIDENCE_PACKET_PATH,
+    PR153R_SEED_MAP_PATH,
+    PR157_PR154_REPORT_PATH,
+    PR157_PR154_REGISTRY_PATH,
+    PR157_ATOMICROWS_REPORT_PATH,
+    PR157_ATOMICROWS_REGISTRY_PATH,
+    PR157_OWNER_REQUEST_PATH,
+    PR158_OWNER_RESPONSE_PATH,
+    PR158_MASTER_REPORT_PATH,
+    PR158_MASTER_REGISTRY_PATH,
+    PR158_SELECTION_OVERLAY_REPORT_PATH,
+    PR158_SELECTION_OVERLAY_REGISTRY_PATH,
+    PR158_TRADE_CONTEXT_SCORING_MAP_PATH,
+    PR158_LOW_LATENCY_INDEX_PATH,
+    PR158_FUTURE_RESEARCH_PATH,
+)
+
+OPTIONAL_PRIOR_ARTIFACTS = (
+    Path("docs/master_plan/generated/PR153_ControlledOfficialSourceCaptureCandidatePackets.report.json"),
+    Path("docs/master_plan/generated/PR153R_RedoExternalSourceValueCaptureTargets.report.json"),
+    Path("docs/master_plan/generated/PR153S_SourceValueCaptureClosureClassifier.report.json"),
+    Path("docs/master_plan/generated/PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json"),
+    Path("docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.report.json"),
+    Path("docs/master_plan/generated/PR155_AgentConsumableParameterDefaultRegistry.registry.json"),
+    Path("docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.report.json"),
+    Path("docs/master_plan/generated/PR156_AgentDefaultBindingUniversalIntakeGate.registry.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterAgentBindingCommandMatrix.json"),
+    Path("docs/master_plan/generated/AtomicRowsResearchProvenanceEvidenceTierClassification.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackRoleTaxonomy.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackCompletenessGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterStackCompatibilityGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterSelectionUniverseRegistry.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json"),
+    Path("docs/master_plan/generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json"),
+    Path("docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json"),
+    Path("docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"),
+    Path("docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json"),
+    Path("docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json"),
+    Path("docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"),
+    Path("docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json"),
+    Path("docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json"),
+    Path("docs/master_plan/generated/SelectedParameterStackHandoffPacket.report.json"),
+    Path("docs/master_plan/generated/ReplayPaperCandidateStackCompetitionGate.report.json"),
+    Path("docs/master_plan/generated/DualResultReviewForParameterStacks.report.json"),
+    Path("docs/master_plan/generated/OwnerLivePromotionReviewForParameterStacks.report.json"),
+    Path("docs/master_plan/source_evidence/generated/SourceEvidenceRetrievalManifest.report.json"),
+    Path("docs/master_plan/source_evidence/generated/AcceptedSourceEvidenceLedger.report.json"),
+    Path("docs/master_plan/source_evidence/generated/SourceRevalidationScheduler.report.json"),
+)
+
+
+class PR159TargetPopulation(StrEnum):
+    PR154_PUBLIC_SOURCE_RETRY_34 = "PR154_PUBLIC_SOURCE_RETRY_34"
+    ATOMICROWS_PUBLIC_EXTERNAL_SOURCE_REQUIRED_315 = "ATOMICROWS_PUBLIC_EXTERNAL_SOURCE_REQUIRED_315"
+    ATOMICROWS_PARAMETER_RANGE_SOURCE_REQUIRED_530 = "ATOMICROWS_PARAMETER_RANGE_SOURCE_REQUIRED_530"
+    ATOMICROWS_SOURCE_REQUIRED_TOTAL_845 = "ATOMICROWS_SOURCE_REQUIRED_TOTAL_845"
+    TOTAL_SOURCE_TARGET_RECORDS_879 = "TOTAL_SOURCE_TARGET_RECORDS_879"
+
+
+class PR159Mode(StrEnum):
+    DISCOVERY_MODE = "DISCOVERY_MODE"
+    CAPTURE_MODE = "CAPTURE_MODE"
+    ACCEPTANCE_MODE = "ACCEPTANCE_MODE"
+    MATERIALIZATION_MODE = "MATERIALIZATION_MODE"
+    VALIDATION_MODE = "VALIDATION_MODE"
+    REPORT_ONLY_MODE = "REPORT_ONLY_MODE"
+
+
+class SourceTargetState(StrEnum):
+    ACCEPTED_COMPLETED = "ACCEPTED_COMPLETED"
+    CANDIDATE_ONLY = "CANDIDATE_ONLY"
+    UNRESOLVED_WITH_FILL_PATH = "UNRESOLVED_WITH_FILL_PATH"
+    CONFLICT_BLOCKED = "CONFLICT_BLOCKED"
+    STALE_OR_REVALIDATION_BLOCKED = "STALE_OR_REVALIDATION_BLOCKED"
+    RUNTIME_RECEIPT_REQUIRED = "RUNTIME_RECEIPT_REQUIRED"
+    CONNECTOR_SEMANTIC_FUTURE_ROUTE = "CONNECTOR_SEMANTIC_FUTURE_ROUTE"
+    PRIVATE_OR_ACCESS_CONTROLLED_BLOCKED = "PRIVATE_OR_ACCESS_CONTROLLED_BLOCKED"
+    ONLINE_ACCESS_UNAVAILABLE = "ONLINE_ACCESS_UNAVAILABLE"
+    BLOCKED_SCHEMA_INVALID = "BLOCKED_SCHEMA_INVALID"
+    BLOCKED_AMBIGUOUS_SCOPE = "BLOCKED_AMBIGUOUS_SCOPE"
+
+
+class OfficialSourceClass(StrEnum):
+    OFFICIAL_VENUE_DOCS = "OFFICIAL_VENUE_DOCS"
+    OFFICIAL_API_DOCS = "OFFICIAL_API_DOCS"
+    OFFICIAL_SDK_DOCS = "OFFICIAL_SDK_DOCS"
+    OFFICIAL_RULEBOOKS = "OFFICIAL_RULEBOOKS"
+    OFFICIAL_FEE_TICK_SETTLEMENT_DOCS = "OFFICIAL_FEE_TICK_SETTLEMENT_DOCS"
+    OFFICIAL_PROVIDER_DOCS = "OFFICIAL_PROVIDER_DOCS"
+    OFFICIAL_CHANGELOG_OR_RELEASE_DOCS = "OFFICIAL_CHANGELOG_OR_RELEASE_DOCS"
+    OFFICIAL_QUANTUM_PROVIDER_DOCS = "OFFICIAL_QUANTUM_PROVIDER_DOCS"
+
+
+class OfficialSourceConfidence(StrEnum):
+    OFFICIAL_CONFIRMED = "OFFICIAL_CONFIRMED"
+    OFFICIAL_PROBABLE_REQUIRES_VALIDATOR_CONFIRMATION = "OFFICIAL_PROBABLE_REQUIRES_VALIDATOR_CONFIRMATION"
+    OFFICIAL_AMBIGUOUS_BLOCKED = "OFFICIAL_AMBIGUOUS_BLOCKED"
+    NOT_OFFICIAL_REJECTED = "NOT_OFFICIAL_REJECTED"
+
+
+class NonAuthoritativeSourceClass(StrEnum):
+    BLOG = "BLOG"
+    FORUM = "FORUM"
+    SOCIAL_POST = "SOCIAL_POST"
+    CHAT_SUMMARY = "CHAT_SUMMARY"
+    LLM_MEMORY = "LLM_MEMORY"
+    AGENT_SUMMARY = "AGENT_SUMMARY"
+    RESEARCH_NOTE = "RESEARCH_NOTE"
+    UNVERIFIED_SCREENSHOT = "UNVERIFIED_SCREENSHOT"
+    UNKNOWN_NON_OFFICIAL = "UNKNOWN_NON_OFFICIAL"
+
+
+class SourceEvidenceState(StrEnum):
+    RETRIEVAL_TARGET_CREATED = "RETRIEVAL_TARGET_CREATED"
+    OFFICIAL_SOURCE_DISCOVERED = "OFFICIAL_SOURCE_DISCOVERED"
+    CANDIDATE_PACKET_CREATED = "CANDIDATE_PACKET_CREATED"
+    CANDIDATE_PACKET_VALIDATED = "CANDIDATE_PACKET_VALIDATED"
+    ACCEPTED_SOURCE_PACKET_CREATED = "ACCEPTED_SOURCE_PACKET_CREATED"
+    ACCEPTED_LEDGER_RECORDED = "ACCEPTED_LEDGER_RECORDED"
+    TARGET_FIELD_MATERIALIZED = "TARGET_FIELD_MATERIALIZED"
+    BLOCKED_NO_OFFICIAL_SOURCE = "BLOCKED_NO_OFFICIAL_SOURCE"
+    BLOCKED_SOURCE_NOT_OFFICIAL = "BLOCKED_SOURCE_NOT_OFFICIAL"
+    BLOCKED_TARGET_FIELD_SCOPE_MISMATCH = "BLOCKED_TARGET_FIELD_SCOPE_MISMATCH"
+    BLOCKED_QUOTE_OR_LOCATOR_MISSING = "BLOCKED_QUOTE_OR_LOCATOR_MISSING"
+    BLOCKED_MACHINE_FIELD_LOCATOR_MISSING = "BLOCKED_MACHINE_FIELD_LOCATOR_MISSING"
+    BLOCKED_UNIT_SCALE_CANONICALIZATION = "BLOCKED_UNIT_SCALE_CANONICALIZATION"
+    BLOCKED_CONFLICTING_OFFICIAL_SOURCES = "BLOCKED_CONFLICTING_OFFICIAL_SOURCES"
+    BLOCKED_STALE_OR_REVALIDATION_REQUIRED = "BLOCKED_STALE_OR_REVALIDATION_REQUIRED"
+    BLOCKED_PRIVATE_OR_ACCESS_CONTROLLED_SOURCE = "BLOCKED_PRIVATE_OR_ACCESS_CONTROLLED_SOURCE"
+    BLOCKED_RUNTIME_RECEIPT_REQUIRED = "BLOCKED_RUNTIME_RECEIPT_REQUIRED"
+    BLOCKED_CONNECTOR_SEMANTIC_REQUIRED = "BLOCKED_CONNECTOR_SEMANTIC_REQUIRED"
+    BLOCKED_SCHEMA_INVALID = "BLOCKED_SCHEMA_INVALID"
+    BLOCKED_AMBIGUOUS = "BLOCKED_AMBIGUOUS"
+
+
+class SourceAcceptanceDecision(StrEnum):
+    ACCEPTED_TARGET_FIELD_EXACT = "ACCEPTED_TARGET_FIELD_EXACT"
+    ACCEPTED_TARGET_FIELD_WITH_CANONICALIZATION = "ACCEPTED_TARGET_FIELD_WITH_CANONICALIZATION"
+    REJECTED_NOT_OFFICIAL = "REJECTED_NOT_OFFICIAL"
+    REJECTED_SCOPE_MISMATCH = "REJECTED_SCOPE_MISMATCH"
+    REJECTED_LOCATOR_MISSING = "REJECTED_LOCATOR_MISSING"
+    REJECTED_CONFLICT = "REJECTED_CONFLICT"
+    REJECTED_STALE = "REJECTED_STALE"
+    REJECTED_UNIT_SCALE_INVALID = "REJECTED_UNIT_SCALE_INVALID"
+    REJECTED_PRIVATE_ACCESS_UNATTESTED = "REJECTED_PRIVATE_ACCESS_UNATTESTED"
+    REJECTED_RUNTIME_RECEIPT_REQUIRED = "REJECTED_RUNTIME_RECEIPT_REQUIRED"
+    REJECTED_CONNECTOR_SEMANTIC_REQUIRED = "REJECTED_CONNECTOR_SEMANTIC_REQUIRED"
+    DEFERRED_OWNER_REVIEW = "DEFERRED_OWNER_REVIEW"
+    DEFERRED_PR160_RECLASSIFICATION = "DEFERRED_PR160_RECLASSIFICATION"
+    DEFERRED_FUTURE_SOURCE_RETRY = "DEFERRED_FUTURE_SOURCE_RETRY"
+
+
+class LocatorType(StrEnum):
+    URL_SECTION_HEADING = "URL_SECTION_HEADING"
+    URL_QUOTE_SPAN = "URL_QUOTE_SPAN"
+    PDF_PAGE_SECTION = "PDF_PAGE_SECTION"
+    TABLE_ROW_COLUMN = "TABLE_ROW_COLUMN"
+    MACHINE_FIELD_PATH = "MACHINE_FIELD_PATH"
+    API_SCHEMA_FIELD = "API_SCHEMA_FIELD"
+    SDK_REFERENCE_FIELD = "SDK_REFERENCE_FIELD"
+    RULEBOOK_SECTION = "RULEBOOK_SECTION"
+    CHANGELOG_ENTRY = "CHANGELOG_ENTRY"
+    LOCATOR_MISSING_BLOCKED = "LOCATOR_MISSING_BLOCKED"
+
+
+class AuthorityProfile(StrEnum):
+    PR159_OFFICIAL_SOURCE_EVIDENCE_COMPLETION_ONLY = "PR159_OFFICIAL_SOURCE_EVIDENCE_COMPLETION_ONLY"
+    PR159_SOURCE_RETRIEVAL_ALLOWED_CONTROL_PLANE = "PR159_SOURCE_RETRIEVAL_ALLOWED_CONTROL_PLANE"
+    PR159_NO_RUNTIME_NO_LIVE_NO_CONNECTOR_BINDING = "PR159_NO_RUNTIME_NO_LIVE_NO_CONNECTOR_BINDING"
+    PR159_NO_PRIVATE_STATE_FETCH = "PR159_NO_PRIVATE_STATE_FETCH"
+    PR159_NO_REPLAY_NO_PAPER = "PR159_NO_REPLAY_NO_PAPER"
+    PR159_NO_SCORING_RANKING_SELECTION_EXECUTION = "PR159_NO_SCORING_RANKING_SELECTION_EXECUTION"
+    PR159_NO_OPTIMIZER_EXECUTION = "PR159_NO_OPTIMIZER_EXECUTION"
+    PR159_NO_QUANTUM_BACKEND_EXECUTION = "PR159_NO_QUANTUM_BACKEND_EXECUTION"
+    PR159_NO_ORDER_FILL_PROFIT_AUTHORITY = "PR159_NO_ORDER_FILL_PROFIT_AUTHORITY"
+    PR159_NO_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_AUTHORITY = "PR159_NO_QTT_CHECKSUM_FREEZE_GLOBAL_DIGEST_AUTHORITY"
+    PR159_NO_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY = "PR159_NO_ATOMICROWS_BUNDLE_CHECKSUM_HASH_AUTHORITY"
+    SOURCE_EVIDENCE_PROVENANCE_DIGEST_ONLY = "SOURCE_EVIDENCE_PROVENANCE_DIGEST_ONLY"
+    LOW_LATENCY_PRECOMPUTED_INDEX_METADATA_ONLY = "LOW_LATENCY_PRECOMPUTED_INDEX_METADATA_ONLY"
+
+
+class RevalidationClass(StrEnum):
+    LIVE_CRITICAL_P1D = "LIVE_CRITICAL_P1D"
+    LOW_RISK_P7D = "LOW_RISK_P7D"
+    EVENT_TRIGGERED_IMMEDIATE = "EVENT_TRIGGERED_IMMEDIATE"
+    REVALIDATION_REQUIRED_BEFORE_BINDING = "REVALIDATION_REQUIRED_BEFORE_BINDING"
+    NOT_LIVE_BINDING_ELIGIBLE = "NOT_LIVE_BINDING_ELIGIBLE"
+
+
+class SourceMaterialityClass(StrEnum):
+    INFO_ONLY = "INFO_ONLY"
+    LOW_RISK = "LOW_RISK"
+    MEDIUM_RISK = "MEDIUM_RISK"
+    HIGH_RISK = "HIGH_RISK"
+    CONNECTOR_BLOCKING = "CONNECTOR_BLOCKING"
+    LIVE_TRADING_BLOCKING = "LIVE_TRADING_BLOCKING"
+    UNKNOWN_DEFAULT_CONNECTOR_BLOCKING = "UNKNOWN_DEFAULT_CONNECTOR_BLOCKING"
+
+
+class FutureRoute(StrEnum):
+    PR160_SPLIT_RECLASSIFICATION = "PR160_SPLIT_RECLASSIFICATION"
+    PR161_ATOMICROWS_SOURCE_VALUE_MATERIALIZATION = "PR161_ATOMICROWS_SOURCE_VALUE_MATERIALIZATION"
+    PR162_ATOMICROWS_FINAL_AUDIT = "PR162_ATOMICROWS_FINAL_AUDIT"
+    PR163_EXACT_AGENT_BINDING = "PR163_EXACT_AGENT_BINDING"
+    PR164_SCORING_RANKING_BRIDGE = "PR164_SCORING_RANKING_BRIDGE"
+    PR165_TRADE_CONTEXT_SELECTION = "PR165_TRADE_CONTEXT_SELECTION"
+    PR167_OPTIMIZER_INTERFACE = "PR167_OPTIMIZER_INTERFACE"
+    PR168_CLASSICAL_OPTIMIZER_SANDBOX = "PR168_CLASSICAL_OPTIMIZER_SANDBOX"
+    PR169_QUANTUM_BACKEND_GATED_SANDBOX = "PR169_QUANTUM_BACKEND_GATED_SANDBOX"
+    REPLAY_AFTER_FUTURE_GATES = "REPLAY_AFTER_FUTURE_GATES"
+    PAPER_AFTER_FUTURE_GATES = "PAPER_AFTER_FUTURE_GATES"
+    OWNER_REVIEW_AFTER_FUTURE_GATES = "OWNER_REVIEW_AFTER_FUTURE_GATES"
+    LIVE_ONLY_AFTER_ALL_FUTURE_GATES = "LIVE_ONLY_AFTER_ALL_FUTURE_GATES"
+
+
+class QuantumClassicalCompatibility(StrEnum):
+    CLASSICAL_FORMULA_COMPATIBLE = "CLASSICAL_FORMULA_COMPATIBLE"
+    CLASSICAL_TRADING_ALGORITHM_COMPATIBLE = "CLASSICAL_TRADING_ALGORITHM_COMPATIBLE"
+    STATISTICAL_EDGE_COMPATIBLE = "STATISTICAL_EDGE_COMPATIBLE"
+    MICROSTRUCTURE_ALPHA_COMPATIBLE = "MICROSTRUCTURE_ALPHA_COMPATIBLE"
+    RISK_CAPITAL_EXECUTION_FORMULA_COMPATIBLE = "RISK_CAPITAL_EXECUTION_FORMULA_COMPATIBLE"
+    QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE = "QUANTUM_INSPIRED_OPTIMIZER_CANDIDATE"
+    TRUE_QUANTUM_CANDIDATE = "TRUE_QUANTUM_CANDIDATE"
+    HYBRID_CLASSICAL_QUANTUM_CANDIDATE = "HYBRID_CLASSICAL_QUANTUM_CANDIDATE"
+    QUBO_COMPATIBLE_METADATA_ONLY = "QUBO_COMPATIBLE_METADATA_ONLY"
+    ISING_COMPATIBLE_METADATA_ONLY = "ISING_COMPATIBLE_METADATA_ONLY"
+    QAOA_COMPATIBLE_METADATA_ONLY = "QAOA_COMPATIBLE_METADATA_ONLY"
+    VQE_COMPATIBLE_METADATA_ONLY = "VQE_COMPATIBLE_METADATA_ONLY"
+    ANNEALING_COMPATIBLE_METADATA_ONLY = "ANNEALING_COMPATIBLE_METADATA_ONLY"
+    QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_METADATA_ONLY = "QUANTUM_PORTFOLIO_OPTIMIZATION_COMPATIBLE_METADATA_ONLY"
+    CLASSICAL_ONLY_VALID_BASELINE = "CLASSICAL_ONLY_VALID_BASELINE"
+    UNKNOWN_COMPATIBILITY_BLOCKED = "UNKNOWN_COMPATIBILITY_BLOCKED"
+
+
+class FreshnessState(StrEnum):
+    FRESH = "FRESH"
+    STALE = "STALE"
+    SUPERSEDED = "SUPERSEDED"
+    VERSION_UNKNOWN = "VERSION_UNKNOWN"
+    EVENT_REVALIDATION_REQUIRED = "EVENT_REVALIDATION_REQUIRED"
+    REVALIDATION_NOT_APPLICABLE_METADATA_ONLY = "REVALIDATION_NOT_APPLICABLE_METADATA_ONLY"
+
+
+class ConflictStatus(StrEnum):
+    NO_CONFLICT = "NO_CONFLICT"
+    CONFLICT_WITH_PRIOR_ACCEPTED_SOURCE = "CONFLICT_WITH_PRIOR_ACCEPTED_SOURCE"
+    CONFLICT_BETWEEN_OFFICIAL_SOURCES = "CONFLICT_BETWEEN_OFFICIAL_SOURCES"
+    CONFLICT_WITH_TARGET_FIELD_SCOPE = "CONFLICT_WITH_TARGET_FIELD_SCOPE"
+    CONFLICT_REQUIRES_OWNER_OR_RISK_REVIEW = "CONFLICT_REQUIRES_OWNER_OR_RISK_REVIEW"
+    CONFLICT_UNRESOLVED = "CONFLICT_UNRESOLVED"
+
+
+class Day1SourcePriorityTier(StrEnum):
+    P0_LAUNCH_BLOCKING = "P0_LAUNCH_BLOCKING"
+    P1_TRADING_QUALITY_CRITICAL = "P1_TRADING_QUALITY_CRITICAL"
+    P2_SCORING_OPTIMIZATION = "P2_SCORING_OPTIMIZATION"
+    P3_RESEARCH_OR_METADATA = "P3_RESEARCH_OR_METADATA"
+
+
+DEFAULT_AUTHORITY_PROFILE_IDS = tuple(item.value for item in AuthorityProfile)
+
+NO_AUTHORITY_CONFIRMATION = {
+    "runtime_execution_created": False,
+    "live_execution_created": False,
+    "connector_semantic_binding_created": False,
+    "private_state_fetch_created": False,
+    "runtime_cash_receipt_created": False,
+    "replay_execution_created": False,
+    "paper_execution_created": False,
+    "scoring_execution_created": False,
+    "ranking_execution_created": False,
+    "selection_execution_created": False,
+    "optimizer_execution_created": False,
+    "quantum_backend_execution_created": False,
+    "order_authority_created": False,
+    "fill_evidence_created": False,
+    "profit_evidence_created": False,
+    "qtt_checksum_freeze_global_digest_authority_created": False,
+    "atomicrows_bundle_checksum_hash_authority_created": False,
+}
+
+ZERO_AUTHORITY_COUNTS = {
+    "runtime_live_order_profit_authority_count": 0,
+    "scoring_ranking_selection_execution_count": 0,
+    "optimizer_execution_count": 0,
+    "quantum_backend_execution_count": 0,
+    "qtt_checksum_freeze_global_digest_authority_count": 0,
+    "atomicrows_bundle_checksum_hash_authority_count": 0,
+}
+
+FINAL_TARGET_STATES = frozenset(
+    {
+        SourceTargetState.ACCEPTED_COMPLETED.value,
+        SourceTargetState.CANDIDATE_ONLY.value,
+        SourceTargetState.UNRESOLVED_WITH_FILL_PATH.value,
+        SourceTargetState.CONFLICT_BLOCKED.value,
+        SourceTargetState.STALE_OR_REVALIDATION_BLOCKED.value,
+        SourceTargetState.RUNTIME_RECEIPT_REQUIRED.value,
+        SourceTargetState.CONNECTOR_SEMANTIC_FUTURE_ROUTE.value,
+        SourceTargetState.PRIVATE_OR_ACCESS_CONTROLLED_BLOCKED.value,
+        SourceTargetState.ONLINE_ACCESS_UNAVAILABLE.value,
+    }
+)
+
+FORBIDDEN_PLACEHOLDER_VALUES = frozenset(
+    {"TBD", "TODO", "UNKNOWN", "PLACEHOLDER", "FILL_LATER", "OWNER_WILL_PROVIDE"}
+)
+
+
+def enum_values(enum_type: type[StrEnum]) -> set[str]:
+    return {item.value for item in enum_type}
+
+
+CENTRAL_ENUM_VALUE_SETS = {
+    "target_population": enum_values(PR159TargetPopulation),
+    "mode": enum_values(PR159Mode),
+    "source_target_state": enum_values(SourceTargetState),
+    "official_source_class": enum_values(OfficialSourceClass),
+    "official_source_confidence": enum_values(OfficialSourceConfidence),
+    "non_authoritative_source_class": enum_values(NonAuthoritativeSourceClass),
+    "source_evidence_state": enum_values(SourceEvidenceState),
+    "source_acceptance_decision": enum_values(SourceAcceptanceDecision),
+    "locator_type": enum_values(LocatorType),
+    "authority_profile": enum_values(AuthorityProfile),
+    "revalidation_class": enum_values(RevalidationClass),
+    "source_materiality_class": enum_values(SourceMaterialityClass),
+    "future_route": enum_values(FutureRoute),
+    "quantum_classical_compatibility": enum_values(QuantumClassicalCompatibility),
+    "freshness_state": enum_values(FreshnessState),
+    "conflict_status": enum_values(ConflictStatus),
+    "day1_source_priority_tier": enum_values(Day1SourcePriorityTier),
+}
