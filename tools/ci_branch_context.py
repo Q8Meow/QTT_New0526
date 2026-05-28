@@ -36,6 +36,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr159r-exact-source-locator-value-unit-capture": 159,
     "repair/pr159r-branch-context-relaxation": 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
+    "repair/pr160-main-ancestry-after-pr159r": 160,
     "repair/pr160-main-push-branch-context-relaxation": 160,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
@@ -522,6 +523,32 @@ def github_actions_main_push_context_active() -> bool:
         and os.getenv("GITHUB_REF") == "refs/heads/main"
         and os.getenv("GITHUB_REF_NAME") == "main"
     )
+
+
+def refresh_github_actions_main_push_history(
+    repo_root: pathlib.Path,
+    *,
+    git_stdout: GitStdout | None = None,
+) -> bool:
+    if not github_actions_main_push_context_active():
+        return False
+    git_stdout = git_stdout or _git_stdout
+    shallow_rc, shallow_out, _shallow_err = git_stdout(
+        repo_root,
+        ["rev-parse", "--is-shallow-repository"],
+    )
+    if shallow_rc != 0 or shallow_out.strip().lower() != "true":
+        return False
+
+    refspec = "+refs/heads/main:refs/remotes/origin/main"
+    for fetch_args in (
+        ["fetch", "--no-tags", "--prune", "--unshallow", "origin", refspec],
+        ["fetch", "--no-tags", "--prune", "--deepen=512", "origin", refspec],
+    ):
+        fetch_rc, _fetch_out, _fetch_err = git_stdout(repo_root, fetch_args)
+        if fetch_rc == 0:
+            return True
+    return False
 
 
 def is_repair_branch(branch: str) -> bool:

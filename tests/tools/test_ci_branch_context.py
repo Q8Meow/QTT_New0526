@@ -57,6 +57,22 @@ def test_downstream_or_main_validation_branch_respects_same_pr_boundary():
         )
         is True
     )
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            "repair/pr160-main-ancestry-after-pr159r",
+            after_pr=138,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            "repair/pr160-main-ancestry-after-pr159r",
+            after_pr=160,
+            allow_repair=False,
+        )
+        is False
+    )
 
 
 def test_pr_or_later_branch_respects_repair_opt_in():
@@ -573,3 +589,57 @@ def test_main_push_context_requires_exact_github_main_push_env(monkeypatch):
     monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     assert context.github_actions_main_push_context_active() is False
+
+
+def test_main_push_history_refresh_unshallows_only_github_main_push(monkeypatch):
+    _clear_github_branch_context_env(monkeypatch)
+    calls: list[tuple[str, ...]] = []
+
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        calls.append(command)
+        if command == ("rev-parse", "--is-shallow-repository"):
+            return 0, "true", ""
+        if command == (
+            "fetch",
+            "--no-tags",
+            "--prune",
+            "--unshallow",
+            "origin",
+            "+refs/heads/main:refs/remotes/origin/main",
+        ):
+            return 0, "", ""
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    assert (
+        context.refresh_github_actions_main_push_history(
+            REPO_ROOT,
+            git_stdout=fake_git_stdout,
+        )
+        is False
+    )
+    assert calls == []
+
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+
+    assert (
+        context.refresh_github_actions_main_push_history(
+            REPO_ROOT,
+            git_stdout=fake_git_stdout,
+        )
+        is True
+    )
+    assert calls == [
+        ("rev-parse", "--is-shallow-repository"),
+        (
+            "fetch",
+            "--no-tags",
+            "--prune",
+            "--unshallow",
+            "origin",
+            "+refs/heads/main:refs/remotes/origin/main",
+        ),
+    ]
