@@ -116,6 +116,7 @@ PR159S_ALLOWED_CHANGED_PATH_PREFIXES = (
 )
 PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tools/build_pr159s_open_intake_completion.py",
         "tools/validate_pr159s_open_intake_completion.py",
         "tools/run_validation_gates.py",
