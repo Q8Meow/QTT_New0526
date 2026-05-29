@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["quantum_residual_id", "quantum_candidate_family", "coverage_state", "classical_baseline_required_flag", "hybrid_arbitration_required_flag", "live_use_allowed_flag"],
+  "type": "object"
+}

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["residual_candidate_id", "extraction_source_path", "extraction_pass_ids", "normalized_candidate_name", "candidate_type", "coverage_state", "residual_gap_flag"],
+  "type": "object"
+}

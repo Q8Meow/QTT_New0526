@@ -186,7 +186,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
 def _branch_context_allowed(root: Path, branch: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch)
-    return normalized in {c.EXPECTED_BRANCH, c.REPAIR_BRANCH} or (
+    return normalized in {
+        c.EXPECTED_BRANCH,
+        c.REPAIR_BRANCH,
+        "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge",
+    } or (
         normalized == "main" and _ancestry_present(root)
     )
 

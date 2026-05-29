@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["master_plan_candidate_extraction_count", "master_plan_section_count_expected", "master_plan_section_count_observed", "orphan_candidate_workflow_record_count", "pr161c_required_flag"],
+  "type": "object"
+}

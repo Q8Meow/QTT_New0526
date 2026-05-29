@@ -1,0 +1,861 @@
+{
+  "authority_class": "CANDIDATE_COVERAGE_AUDIT_ONLY_NOT_LIVE_AUTHORITY",
+  "central_enum_value_sets": {
+    "agent_consumption_states": [
+      "AGENT_CONSUMABLE_ALREADY_COVERED_BY_PR161A",
+      "AGENT_CONSUMABLE_AFTER_PR161C_ASSIMILATION",
+      "AGENT_CONSUMABLE_RESEARCH_ONLY",
+      "AGENT_CONSUMABLE_REPLAY_PAPER_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_SCORING_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_OPTIMIZER_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_QUANTUM_ADVISORY_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_OWNER_REVIEW_ONLY",
+      "AGENT_CONSUMABLE_DOCTRINE_ONLY",
+      "AGENT_CONSUMABLE_REJECTED_UNSAFE"
+    ],
+    "assimilation_fill_lanes": [
+      "FILL_FROM_PR161A_ALIAS_REPAIR",
+      "FILL_FROM_EXISTING_PR_ARTIFACT",
+      "FILL_FROM_MASTER_PLAN_LITERAL",
+      "FILL_FROM_OFFICIAL_SOURCE_CANDIDATE",
+      "FILL_FROM_OPEN_RESEARCH_CANDIDATE",
+      "FILL_FROM_SOCIAL_WEB_CANDIDATE",
+      "FILL_FROM_GITHUB_RESEARCH_PATTERN",
+      "FILL_FROM_INSTITUTIONAL_DEFAULT",
+      "FILL_FROM_OPTIMIZER_DEFAULT",
+      "FILL_FROM_QUANTUM_READY_DEFAULT",
+      "FILL_FROM_CLASSICAL_BASELINE_DEFAULT",
+      "FILL_FROM_HYBRID_ARBITRATION_DEFAULT",
+      "FILL_FROM_OWNER_INTERNAL_DEFAULT",
+      "FILL_FROM_SOURCE_ATTRIBUTION_INCOMPLETE_CANDIDATE",
+      "FILL_AS_METADATA_ONLY_NO_NUMERIC_REQUIRED",
+      "FILL_REQUIRES_PR161C_ONLINE_RESEARCH",
+      "FILL_REQUIRES_FUTURE_OFFICIAL_SOURCE_ACCEPTANCE",
+      "FILL_REQUIRES_PRIVATE_DOC_ATTESTATION",
+      "FILL_REQUIRES_FUTURE_RUNTIME_RECEIPT",
+      "REJECT_DUPLICATE_ALREADY_COVERED",
+      "REJECT_UNSAFE_OR_SECRET"
+    ],
+    "candidate_types": [
+      "PARAMETER_NAME",
+      "PARAMETER_DEFAULT",
+      "PARAMETER_RANGE",
+      "PARAMETER_SCALE",
+      "PARAMETER_UNIT",
+      "FORMULA_EXPRESSION",
+      "OBJECTIVE_FUNCTION",
+      "CONSTRAINT_EXPRESSION",
+      "OPTIMIZER_SETTING",
+      "RISK_SETTING",
+      "CAPITAL_SETTING",
+      "LATENCY_SETTING",
+      "EXECUTION_SETTING",
+      "MARKET_MICROSTRUCTURE_FEATURE",
+      "STRATEGY_TEMPLATE",
+      "ALGORITHM_NAME",
+      "ALGORITHM_FAMILY",
+      "QUANTUM_ALGORITHM",
+      "QUBO_TEMPLATE",
+      "ISING_TEMPLATE",
+      "QAOA_SETTING",
+      "VQE_SETTING",
+      "ANNEALING_SETTING",
+      "HYBRID_ARBITRATION_SETTING",
+      "CLASSICAL_BASELINE_SETTING",
+      "REPLAY_PAPER_TEST_SETTING",
+      "AGENT_CONSUMPTION_FIELD",
+      "OWNER_POLICY_FIELD",
+      "SOURCE_EVIDENCE_FIELD",
+      "CONNECTOR_FUTURE_FIELD",
+      "LIVE_FUTURE_FIELD",
+      "DOCTRINE_ONLY_REFERENCE"
+    ],
+    "coverage_match_tiers": [
+      "TIER_1_EXACT_ID_MATCH",
+      "TIER_2_CANONICAL_NORMALIZED_NAME_MATCH",
+      "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "TIER_4_WEAK_TEXT_MATCH_POSSIBLE_ONLY",
+      "NO_MATCH"
+    ],
+    "coverage_states": [
+      "COVERED_EXACT",
+      "COVERED_BY_CANONICAL_ALIAS",
+      "COVERED_BY_ATOMICROWS_ROW",
+      "COVERED_BY_PR154_TARGET",
+      "COVERED_BY_PR161A_FIELD_RECORD",
+      "COVERED_BY_PR161A_QUANTUM_PROFILE",
+      "COVERED_BY_PR161A_REPLAY_PAPER_QUEUE",
+      "COVERED_BY_PRIOR_PR_ARTIFACT",
+      "PARTIALLY_COVERED_FIELD_GAP",
+      "RESIDUAL_NOT_IN_PR161A",
+      "RESIDUAL_VALUE_CAPTURED_IN_PR161B",
+      "RESIDUAL_RANGE_CAPTURED_IN_PR161B",
+      "RESIDUAL_FORMULA_CAPTURED_IN_PR161B",
+      "RESIDUAL_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "RESIDUAL_DUPLICATE_OF_CANONICAL_RECORD",
+      "RESIDUAL_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "RESIDUAL_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "downstream_agent_roles": [
+      "QTT_RESEARCH_AGENT",
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "QTT_PARAMETER_STACK_AGENT",
+      "QTT_SCORING_AGENT",
+      "QTT_RANKING_AGENT",
+      "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "QTT_QUANTUM_ADVISORY_AGENT",
+      "QTT_REPLAY_AGENT",
+      "QTT_PAPER_AGENT",
+      "QTT_RISK_AGENT",
+      "QTT_CAPITAL_AGENT",
+      "QTT_LATENCY_AGENT",
+      "QTT_EXECUTION_PREP_AGENT",
+      "QTT_SOURCE_EVIDENCE_AGENT",
+      "QTT_OWNER_REVIEW_AGENT"
+    ],
+    "extraction_pass_ids": [
+      "PASS_1_SECTION_AWARE_EXTRACTION",
+      "PASS_2_CODE_BLOCK_EXTRACTION",
+      "PASS_3_TABLE_LIST_EXTRACTION",
+      "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION",
+      "PASS_5_FORMULA_ALGORITHM_EXTRACTION",
+      "PASS_6_QUANTUM_EXTRACTION",
+      "PASS_7_AGENT_DOWNSTREAM_EXTRACTION",
+      "PASS_8_ONLINE_PUBLIC_SCOUT_ENRICHMENT"
+    ],
+    "quantum_applicability_classes": [
+      "NOT_QUANTUM_APPLICABLE",
+      "QUBO_APPLICABLE",
+      "ISING_APPLICABLE",
+      "QAOA_APPLICABLE",
+      "VQE_APPLICABLE",
+      "ANNEALING_APPLICABLE",
+      "HYBRID_QUANTUM_CLASSICAL_APPLICABLE",
+      "QUANTUM_STRATEGY_APPLICABLE",
+      "GENERAL_QUANTUM_APPLICABLE"
+    ],
+    "quantum_residual_coverage_states": [
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_FORMULA_TEMPLATE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_STRATEGY_CANDIDATE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_REPLAY_PAPER_DESCRIPTOR",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR82_PR86_ARTIFACT",
+      "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "QUANTUM_RESIDUAL_PARTIAL_GAP",
+      "QUANTUM_RESIDUAL_NEW_CANDIDATE_REQUIRED",
+      "QUANTUM_RESIDUAL_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "QUANTUM_RESIDUAL_DUPLICATE_ALREADY_CANONICAL",
+      "QUANTUM_RESIDUAL_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "QUANTUM_RESIDUAL_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "residual_gap_types": [
+      "GAP_NOT_IN_PR161A_FIELD_RECORDS",
+      "GAP_NOT_IN_ATOMICROWS",
+      "GAP_NOT_IN_PR154",
+      "GAP_NOT_IN_QUANTUM_PROFILE",
+      "GAP_NOT_IN_REPLAY_PAPER_QUEUE",
+      "GAP_FIELD_PATH_MISSING",
+      "GAP_DEFAULT_VALUE_MISSING",
+      "GAP_RANGE_MISSING",
+      "GAP_UNIT_OR_SCALE_MISSING",
+      "GAP_FORMULA_EXPRESSION_MISSING",
+      "GAP_ALGORITHM_FAMILY_MISSING",
+      "GAP_OPTIMIZER_SETTING_MISSING",
+      "GAP_QUANTUM_DEFAULT_MISSING",
+      "GAP_CLASSICAL_BASELINE_MISSING",
+      "GAP_HYBRID_ARBITRATION_MISSING",
+      "GAP_AGENT_CONSUMER_MISSING",
+      "GAP_DOWNSTREAM_PR_ROUTE_MISSING",
+      "GAP_SOURCE_PROVENANCE_MISSING",
+      "GAP_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "GAP_DUPLICATE_ALREADY_CANONICAL",
+      "GAP_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "GAP_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "source_intake_states": [
+      "OPEN_CANDIDATE_FIRST",
+      "SOURCE_ATTRIBUTION_INCOMPLETE_CANDIDATE",
+      "SOURCE_INTAKE_ACCEPTED_PRIOR_PR_ARTIFACT",
+      "SOURCE_INTAKE_ACCEPTED_MASTER_PLAN_LITERAL",
+      "SOURCE_INTAKE_ACCEPTED_QUANTUM_RESEARCH",
+      "SOURCE_INTAKE_ACCEPTED_OPEN_RESEARCH_CANDIDATE",
+      "SOURCE_INTAKE_REJECTED_UNSAFE_SECRET_OR_CREDENTIAL"
+    ],
+    "value_authority_classes": [
+      "MASTER_PLAN_DOCTRINE_CANDIDATE_VALUE",
+      "PRIOR_PR_CANDIDATE_VALUE",
+      "OPEN_RESEARCH_CANDIDATE_VALUE",
+      "QUANTUM_READY_DEFAULT_CANDIDATE_VALUE",
+      "CLASSICAL_BASELINE_CANDIDATE_VALUE",
+      "HYBRID_ARBITRATION_CANDIDATE_VALUE",
+      "METADATA_ONLY_NOT_A_NUMERIC_VALUE",
+      "FUTURE_OFFICIAL_SOURCE_ACCEPTANCE_REQUIRED_FOR_PROMOTION",
+      "QUARANTINED_OR_REJECTED_VALUE"
+    ],
+    "workflow_consumption_states": [
+      "WORKFLOW_CONSUMABLE_NOW_BY_RESEARCH_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_ATOMICROWS_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_PARAMETER_STACK_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_SCORING_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_OPTIMIZER_ARBITRATION_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_QUANTUM_ADVISORY_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_REPLAY_PAPER_PREP_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_RISK_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_CAPITAL_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_LATENCY_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_EXECUTION_PREP_AGENT",
+      "WORKFLOW_CONSUMABLE_AFTER_PR161C_ASSIMILATION",
+      "WORKFLOW_CONSUMABLE_AFTER_SOURCE_UPGRADE",
+      "WORKFLOW_CONSUMABLE_AFTER_REPLAY_PAPER_RESULT",
+      "WORKFLOW_CONSUMABLE_AFTER_OWNER_REVIEW",
+      "WORKFLOW_DOCTRINE_ONLY_NO_RUNTIME_CONSUMER",
+      "WORKFLOW_REJECTED_UNSAFE_OR_SECRET",
+      "WORKFLOW_UNMAPPABLE_NEEDS_CANONICAL_OWNER_ROUTE"
+    ]
+  },
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "accepted_official_fact_fabricated": false,
+    "atomicrows_bundle_freeze_authority_created": false,
+    "atomicrows_final_bundle_created": false,
+    "external_repo_code_executed": false,
+    "live_order_authority_created": false,
+    "optimizer_execution_created": false,
+    "private_account_state_or_balance_fetched": false,
+    "profit_evidence_created": false,
+    "qtt_integrity_authority_created": false,
+    "quantum_advantage_evidence_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "real_order_submitted_or_cancelled": false,
+    "replay_or_paper_result_fabricated": false,
+    "scoring_ranking_selection_execution_created": false,
+    "secret_materialized": false,
+    "source_evidence_packet_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "optimizer_execution_performed_flag": false,
+  "pr_id": "PR161B",
+  "profit_evidence_count": 0,
+  "profit_evidence_created_flag": false,
+  "profit_validation_tag": "PROFIT_NOT_TESTED",
+  "quantum_advantage_claim_count": 0,
+  "quantum_advantage_evidence_created_flag": false,
+  "quantum_backend_execution_count": 0,
+  "quantum_backend_execution_performed_flag": false,
+  "quantum_simulator_execution_count": 0,
+  "record_count": 7,
+  "records": [
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000043",
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000044"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- add Hybrid HHL++ factor / stress / linear-system challengers where a classical solver comparator remains present;",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "add_hybrid_hhl_factor_stress_linear_system_challengers_where_a_classical_solver_comparator_remains_present",
+      "objective_terms": [
+        "- add Hybrid HHL++ factor / stress / linear-system challengers where a classical solver comparator remains present;"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_PLATFORM_APPLICABILITY_SCORE_INPUTS_PLATFORM_APPLICABILITY_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_PLATFORM_APPLICABILITY_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_004044",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_004044",
+      "residual_gap_type": null,
+      "scale_if_available": "LINEAR_SCALE",
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 65889,
+      "source_section_id": "UNNUMBERED__1386",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_004044"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000025",
+        "AR_EXACT_004_RISK_CONTROL_000026"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- **Domain:** classical and hybrid quote-driven modeling",
+      "extraction_pass_ids": [
+        "PASS_2_CODE_BLOCK_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "domain_classical_and_hybrid_quote_driven_modeling",
+      "objective_terms": [
+        "- **Domain:** classical and hybrid quote-driven modeling"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_ATOMICROWS_COMPATIBILITY_ATOMICROWS_ROW_FAMILY_REFERENCES_ROW_FAMILY_REFERENCES_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_ROW_FAMILY_REFERENCES"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005628",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005628",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 87683,
+      "source_section_id": "UNNUMBERED__1941",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005628"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000025",
+        "AR_EXACT_004_RISK_CONTROL_000026"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- **Domain:** classical and hybrid quote-driven modeling",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "domain_classical_and_hybrid_quote_driven_modeling",
+      "objective_terms": [
+        "- **Domain:** classical and hybrid quote-driven modeling"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_ATOMICROWS_COMPATIBILITY_ATOMICROWS_ROW_FAMILY_REFERENCES_ROW_FAMILY_REFERENCES_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_ROW_FAMILY_REFERENCES"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005629",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005629",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 87683,
+      "source_section_id": "UNNUMBERED__1941",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005629"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000190",
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000191"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- **Domain:** classical models and hybrid model-combination governance",
+      "extraction_pass_ids": [
+        "PASS_2_CODE_BLOCK_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "domain_classical_models_and_hybrid_model_combination_governance",
+      "objective_terms": [
+        "- **Domain:** classical models and hybrid model-combination governance"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_OPTIMIZER_PARAMETER_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_PROVIDER_DOCS_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005859",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005859",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 90836,
+      "source_section_id": "UNNUMBERED__2018",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005859"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000190",
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000191"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- **Domain:** classical models and hybrid model-combination governance",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "domain_classical_models_and_hybrid_model_combination_governance",
+      "objective_terms": [
+        "- **Domain:** classical models and hybrid model-combination governance"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_OPTIMIZER_PARAMETER_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_PROVIDER_DOCS_CLASSICAL_OPTIMIZER_CANDIDATE_METADATA"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005860",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005860",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 90836,
+      "source_section_id": "UNNUMBERED__2018",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005860"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000237",
+        "AR_EXACT_001_SIGNAL_FEATURES_000238"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "PR158_AtomicRowsSelectionReadinessOverlay.report atomicrows_selection_readiness_total_count authority_class authority_profile_ids classical_only_baseline_count count_invariant_receipt determinism_receipt hybrid_candidate_count implementation_class input_consumption_receipt latency_path_class_counts live_order_authority_allowed_count low_latency_precompute...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "pr158_atomicrowsselectionreadinessoverlay_report_atomicrows_selection_readiness_total_count_authority_class_authority_profile_ids_classical_only_baseline_count_",
+      "objective_terms": [
+        "PR158_AtomicRowsSelectionReadinessOverlay.report atomicrows_selection_readiness_total_count authority_class authority_pr"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_CANDIDATE_COUNT_TARGETS_CANDIDATE_COUNT_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_CANDIDATE_COUNT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_LATENCY_AWARE_ROUTING_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008736",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008736",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/PR158_AtomicRowsSelectionReadinessOverlay.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__PR158_AtomicRowsSelectionReadinessOverlay.report",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008736"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_002_SCORING_RANKING_000033",
+        "AR_EXACT_002_SCORING_RANKING_000034"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "PR161A_HybridArbitrationCandidateDelta report",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "pr161a_hybridarbitrationcandidatedelta_report",
+      "objective_terms": [
+        "PR161A_HybridArbitrationCandidateDelta report"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_QUANTUM_PARAMETER_QUANTUM_PORTFOLIO_SELECTION_METADATA_SLOTS_QUANTUM_PORTFOLIO_SELECTION_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_PROVIDER_DOCS_QUANTUM_PORTFOLIO_SELECTION"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "HYBRID",
+      "quantum_optimizer_family": "HYBRID",
+      "quantum_profile_type": "HYBRID_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008867",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008867",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/PR161A_HybridArbitrationCandidateDelta.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__PR161A_HybridArbitrationCandidateDelta.report",
+      "strategy_candidate_type": "QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0039",
+        "PR161A_QUANTUM_CANDIDATE__0040",
+        "PR161A_QUANTUM_CANDIDATE__0041"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008867"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_OWNER_PRIORITY_TIEBREAKER_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "PARAMETERIZED_CONTINUOUS_OR_BINARY_CANDIDATE"
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_type": "PR161B_HYBRID_QUANTUM_CLASSICAL_RESIDUAL_COVERAGE",
+  "runtime_live_order_profit_authority_count": 0
+}
