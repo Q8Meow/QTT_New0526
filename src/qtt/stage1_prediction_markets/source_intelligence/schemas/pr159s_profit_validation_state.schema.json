@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR159S Profit Validation State",
+  "type": "object",
+  "required": ["report_type", "record_count", "records"],
+  "properties": {
+    "report_type": {"type": "string"},
+    "record_count": {"type": "integer"},
+    "records": {"type": "array"}
+  },
+  "additionalProperties": true
+}

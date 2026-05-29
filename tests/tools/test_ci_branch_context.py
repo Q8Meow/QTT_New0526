@@ -585,6 +585,53 @@ def test_pr159r_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr159s_explicit_changed_path_allowance_is_narrow():
+    branch = "pr159s-open-source-intelligence-candidate-completion"
+    repair_branch = "repair/pr159s-open-intake-branch-context-relaxation"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=159) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/source_intelligence/schemas/pr159s_source_taxonomy.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR159S_TerminalCompletionSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/source_intelligence/test_pr159s_terminal_completion_counts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr159s_open_intake_completion.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/report_builder.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR159R_ExactSourceLocatorValueUnitCapture.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
