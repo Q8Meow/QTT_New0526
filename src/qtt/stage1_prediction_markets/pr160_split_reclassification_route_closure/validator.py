@@ -19,6 +19,7 @@ _PR159R_DETACHED_HEAD_REPAIR_BRANCH_CONTEXT = (
 )
 _PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
     c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,
+    c.PR159S_DOWNSTREAM_OPEN_INTAKE_REPAIR_BRANCH,
     "repair/pr160-main-ancestry-after-pr176",
 )
 
@@ -108,6 +109,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
     return normalized in {
         c.EXPECTED_BRANCH,
         c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
+        c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
@@ -153,7 +155,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch in {c.EXPECTED_BRANCH, c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH}:
+    if branch in {
+        c.EXPECTED_BRANCH,
+        c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
+        c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
+    }:
         return
     if ci_branch_context.github_actions_main_push_context_active():
         ancestry_present = _pr160_or_repair_ancestry_present(

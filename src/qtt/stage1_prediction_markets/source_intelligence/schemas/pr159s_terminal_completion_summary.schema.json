@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR159S Terminal Completion Summary",
+  "type": "object",
+  "required": ["report_type", "record_count", "records", "terminal_completion_partition"],
+  "properties": {
+    "report_type": {"type": "string"},
+    "record_count": {"type": "integer"},
+    "records": {"type": "array"},
+    "terminal_completion_partition": {"type": "object"}
+  },
+  "additionalProperties": true
+}

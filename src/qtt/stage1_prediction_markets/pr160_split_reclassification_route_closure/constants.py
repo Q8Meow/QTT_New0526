@@ -21,6 +21,8 @@ AUTHORITY_CLASS = (
 )
 EXPECTED_BRANCH = "pr160-pr154-split-reclassification-route-closure-bridge"
 PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH = "pr159r-exact-source-locator-value-unit-capture"
+PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH = "pr159s-open-source-intelligence-candidate-completion"
+PR159S_DOWNSTREAM_OPEN_INTAKE_REPAIR_BRANCH = "repair/pr159s-open-intake-branch-context-relaxation"
 BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH = (
     "repair/pr160-main-push-branch-context-relaxation"
 )

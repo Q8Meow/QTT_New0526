@@ -34,7 +34,9 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr158-owner-response-atomicrows-selection-readiness-bridge": 158,
     "pr159-official-source-retry-atomicrows-source-completion-bridge": 159,
     "pr159r-exact-source-locator-value-unit-capture": 159,
+    "pr159s-open-source-intelligence-candidate-completion": 159,
     "repair/pr159r-branch-context-relaxation": 159,
+    "repair/pr159s-open-intake-branch-context-relaxation": 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
     "repair/pr160-main-ancestry-after-pr176": 160,
     "repair/pr160-main-push-branch-context-relaxation": 160,
@@ -80,22 +82,52 @@ PR159_ALLOWED_CHANGED_PATHS = frozenset(
 PR159R_BRANCH = "pr159r-exact-source-locator-value-unit-capture"
 PR159R_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR159R_",
+    "docs/master_plan/generated/PR159S_",
     "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/",
+    "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/",
+    "src/qtt/stage1_prediction_markets/source_intelligence/schemas/",
     "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/",
+    "tests/stage1_prediction_markets/source_intelligence/",
 )
 PR159R_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/validate_pr159r_source_locator_value_capture.py",
+        "tools/build_pr159s_open_intake_completion.py",
+        "tools/validate_pr159s_open_intake_completion.py",
         "tools/run_validation_gates.py",
         "tools/ci_branch_context.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/tools/test_ci_branch_context.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/__init__.py",
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/constants.py",
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+PR159S_BRANCH = "pr159s-open-source-intelligence-candidate-completion"
+PR159S_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR159S_",
+    "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/",
+    "src/qtt/stage1_prediction_markets/source_intelligence/schemas/",
+    "tests/stage1_prediction_markets/source_intelligence/",
+)
+PR159S_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "tools/build_pr159s_open_intake_completion.py",
+        "tools/validate_pr159s_open_intake_completion.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/__init__.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/constants.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/constants.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
@@ -697,6 +729,11 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
             normalized.startswith(prefix)
             for prefix in PR159_ALLOWED_CHANGED_PATH_PREFIXES
         )
+    if branch == PR159S_BRANCH or ci_branch_context_pr159s_repair(branch):
+        return normalized in PR159S_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR159S_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR159R_BRANCH or is_same_pr_repair_branch(branch, 159):
         return normalized in PR159R_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
@@ -711,6 +748,10 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         branch,
         frozenset(),
     )
+
+
+def ci_branch_context_pr159s_repair(branch: str) -> bool:
+    return branch == "repair/pr159s-open-intake-branch-context-relaxation"
 
 
 def is_downstream_roadmap_branch(
