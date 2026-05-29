@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Quantum Replay Paper Experiment Descriptor",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["experiment_descriptor_id", "quantum_candidate_id", "comparison_type", "no_profit_evidence_created_flag"]
+}
+

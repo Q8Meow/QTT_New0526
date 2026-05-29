@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Downstream Agent Consumption Readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["agent_readiness_record_id", "agent_consumable_state", "downstream_agent_ids_or_roles", "live_use_allowed_flag"]
+}
+

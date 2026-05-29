@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Field Value Record",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["record_id", "universe", "field_path", "source_intake_state", "value_materialization_state", "value_authority_class", "attempted_fill_lanes", "live_use_allowed_flag"]
+}
+

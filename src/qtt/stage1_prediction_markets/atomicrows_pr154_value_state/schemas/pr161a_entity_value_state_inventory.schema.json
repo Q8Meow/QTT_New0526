@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Entity Value State Inventory",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["entity_inventory_record_id", "universe", "entity_value_state_classified_flag", "live_use_allowed_flag"]
+}
+

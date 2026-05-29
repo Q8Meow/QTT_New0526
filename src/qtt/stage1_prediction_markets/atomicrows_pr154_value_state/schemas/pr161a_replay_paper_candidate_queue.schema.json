@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Replay Paper Candidate Queue",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["replay_paper_route_id", "replay_paper_candidate_flag", "profit_validation_tag", "live_use_allowed_flag"]
+}
+

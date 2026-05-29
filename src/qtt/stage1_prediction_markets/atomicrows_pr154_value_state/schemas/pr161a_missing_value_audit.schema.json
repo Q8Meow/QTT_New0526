@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Missing Value Audit",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["missing_audit_record_id", "record_id", "field_path", "attempted_fill_lanes"]
+}
+

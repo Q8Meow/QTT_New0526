@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Quantum Formula Template",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["formula_template_id", "formula_family", "mathematical_expression", "classical_baseline_formula_id"]
+}
+

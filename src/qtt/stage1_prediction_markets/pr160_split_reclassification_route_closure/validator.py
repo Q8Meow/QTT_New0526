@@ -22,6 +22,7 @@ _PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
     c.PR159S_DOWNSTREAM_OPEN_INTAKE_REPAIR_BRANCH,
     "repair/pr160-main-ancestry-after-pr176",
 )
+_PR161A_DOWNSTREAM_BRANCH = "pr161a-atomicrows-pr154-value-state-materialization-bridge"
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -110,6 +111,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
         c.EXPECTED_BRANCH,
         c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
         c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
+        _PR161A_DOWNSTREAM_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
@@ -159,6 +161,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         c.EXPECTED_BRANCH,
         c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
         c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
+        _PR161A_DOWNSTREAM_BRANCH,
     }:
         return
     if ci_branch_context.github_actions_main_push_context_active():

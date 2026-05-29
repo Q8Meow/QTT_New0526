@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Final Value State Summary",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["atomicrows_universe_observed_count", "pr154_universe_observed_count", "combined_entity_processed_count", "field_value_record_count"]
+}
+
