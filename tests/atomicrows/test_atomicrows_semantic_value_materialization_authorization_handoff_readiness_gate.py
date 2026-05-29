@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr159r-exact-source-locator-value-unit-capture",
+                branch="pr161a-atomicrows-pr154-value-state-materialization-bridge",
             source="unit-test",
         ),
     )

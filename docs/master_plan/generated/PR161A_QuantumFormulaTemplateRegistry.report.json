@@ -1,0 +1,621 @@
+{
+  "authority_class": "CANDIDATE_MATERIALIZATION_ONLY_NOT_LIVE_AUTHORITY",
+  "central_enum_value_sets": {
+    "agent_consumable_state": [
+      "AGENT_CONSUMABLE_RESEARCH_NOW",
+      "AGENT_CONSUMABLE_SCORING_PREP_NOW",
+      "AGENT_CONSUMABLE_OPTIMIZER_PREP_NOW",
+      "AGENT_CONSUMABLE_QUANTUM_ADVISORY_NOW",
+      "AGENT_CONSUMABLE_REPLAY_PAPER_NOW",
+      "AGENT_CONSUMABLE_OWNER_REVIEW_QUEUE",
+      "AGENT_CONSUMABLE_OFFICIAL_FACT_UPSTREAM",
+      "AGENT_CONSUMABLE_FUTURE_CONNECTOR_ONLY",
+      "AGENT_CONSUMABLE_FUTURE_LIVE_ONLY"
+    ],
+    "atomicrows_aggregate_state": [
+      "ATOMICROW_VALUE_FULLY_MATERIALIZED_OFFICIAL",
+      "ATOMICROW_VALUE_MATERIALIZED_INTERNAL",
+      "ATOMICROW_VALUE_MATERIALIZED_RESEARCH_CANDIDATE",
+      "ATOMICROW_VALUE_MATERIALIZED_OPEN_SOURCE_INTELLIGENCE_CANDIDATE",
+      "ATOMICROW_VALUE_MATERIALIZED_SOCIAL_WEB_CANDIDATE",
+      "ATOMICROW_VALUE_MATERIALIZED_INSTITUTIONAL_DEFAULT",
+      "ATOMICROW_VALUE_MATERIALIZED_OPTIMIZER_DEFAULT",
+      "ATOMICROW_VALUE_MATERIALIZED_CLASSICAL_DEFAULT",
+      "ATOMICROW_VALUE_MATERIALIZED_QUANTUM_READY_DEFAULT",
+      "ATOMICROW_VALUE_MATERIALIZED_HYBRID_DEFAULT",
+      "ATOMICROW_VALUE_MATERIALIZED_REPLAY_PAPER_CANDIDATE",
+      "ATOMICROW_METADATA_ONLY_NO_NUMERIC_VALUE_REQUIRED",
+      "ATOMICROW_STILL_MISSING_AFTER_ALL_CANDIDATE_LANES",
+      "ATOMICROW_QUARANTINED_OR_RETIRED"
+    ],
+    "default_basis": [
+      "PRIOR_REPO_VALUE_REUSE",
+      "ACCEPTED_OFFICIAL_SOURCE_REUSE",
+      "PR159S_RESEARCH_CANDIDATE_REUSE",
+      "PR159S_REPLAY_PAPER_CANDIDATE_REUSE",
+      "PR159S_QUANTUM_CANDIDATE_REUSE",
+      "OFFICIAL_DOC_VALUE_EXTRACTION",
+      "OPEN_RESEARCH_VALUE_EXTRACTION",
+      "ACADEMIC_OR_FORMAL_RESEARCH_DEFAULT",
+      "REPRODUCIBLE_RESEARCH_OR_CODE_DEFAULT",
+      "INSTITUTIONAL_QTT_STARTER_DEFAULT",
+      "OPTIMIZER_LIBRARY_DEFAULT_IF_SOURCE_AVAILABLE",
+      "QTT_OWNER_INTERNAL_DEFAULT",
+      "QTT_NEUTRAL_INITIALIZATION_DEFAULT",
+      "QUANTUM_READY_QTT_CANDIDATE_DEFAULT",
+      "CLASSICAL_BASELINE_QTT_CANDIDATE_DEFAULT",
+      "HYBRID_ARBITRATION_QTT_CANDIDATE_DEFAULT",
+      "METADATA_ONLY_NO_VALUE_REQUIRED",
+      "FUTURE_SOURCE_REQUIRED",
+      "FUTURE_REPLAY_PAPER_REQUIRED"
+    ],
+    "pr154_aggregate_state": [
+      "PR154_VALUE_FULLY_MATERIALIZED_OFFICIAL",
+      "PR154_VALUE_MATERIALIZED_INTERNAL",
+      "PR154_VALUE_MATERIALIZED_RESEARCH_CANDIDATE",
+      "PR154_VALUE_MATERIALIZED_OPEN_SOURCE_INTELLIGENCE_CANDIDATE",
+      "PR154_VALUE_MATERIALIZED_SOCIAL_WEB_CANDIDATE",
+      "PR154_VALUE_MATERIALIZED_INSTITUTIONAL_DEFAULT",
+      "PR154_VALUE_MATERIALIZED_OPTIMIZER_DEFAULT",
+      "PR154_VALUE_MATERIALIZED_CLASSICAL_DEFAULT",
+      "PR154_VALUE_MATERIALIZED_QUANTUM_READY_DEFAULT",
+      "PR154_VALUE_MATERIALIZED_HYBRID_DEFAULT",
+      "PR154_VALUE_MATERIALIZED_REPLAY_PAPER_CANDIDATE",
+      "PR154_METADATA_ONLY_NO_NUMERIC_VALUE_REQUIRED",
+      "PR154_STILL_MISSING_AFTER_ALL_CANDIDATE_LANES",
+      "PR154_QUARANTINED_OR_RETIRED"
+    ],
+    "quantum_optimizer_profile_type": [
+      "QUBO_BINARY_ALLOCATION_CANDIDATE",
+      "QUBO_BINARY_SELECTION_CANDIDATE",
+      "QUBO_PORTFOLIO_SELECTION_CANDIDATE",
+      "QUBO_ORDER_ROUTING_CANDIDATE",
+      "QUBO_MARKET_SELECTION_CANDIDATE",
+      "QUBO_PARAMETER_STACK_SELECTION_CANDIDATE",
+      "QUBO_CAPITAL_ALLOCATION_CANDIDATE",
+      "QUBO_RISK_CONSTRAINT_CANDIDATE",
+      "QUBO_LATENCY_CONSTRAINT_CANDIDATE",
+      "QUBO_ARBITRAGE_CANDIDATE",
+      "ISING_BINARY_ALLOCATION_CANDIDATE",
+      "ISING_PORTFOLIO_SPIN_MODEL_CANDIDATE",
+      "ISING_CONSTRAINT_PENALTY_CANDIDATE",
+      "ISING_RISK_PENALTY_CANDIDATE",
+      "ISING_LATENCY_PENALTY_CANDIDATE",
+      "ISING_ARBITRAGE_SPREAD_CANDIDATE",
+      "QAOA_PARAMETER_STACK_OPTIMIZATION_CANDIDATE",
+      "QAOA_PORTFOLIO_SELECTION_CANDIDATE",
+      "QAOA_MARKET_SELECTION_CANDIDATE",
+      "QAOA_SIGNAL_COMBINATION_CANDIDATE",
+      "QAOA_CAPITAL_ALLOCATION_CANDIDATE",
+      "QAOA_RISK_CONSTRAINED_SELECTION_CANDIDATE",
+      "QAOA_LATENCY_AWARE_SELECTION_CANDIDATE",
+      "QAOA_ARBITRAGE_PATH_SELECTION_CANDIDATE",
+      "VQE_RISK_OBJECTIVE_CANDIDATE",
+      "VQE_PORTFOLIO_OBJECTIVE_CANDIDATE",
+      "VQE_HAMILTONIAN_EXPECTATION_CANDIDATE",
+      "VQE_HYBRID_MODEL_CALIBRATION_CANDIDATE",
+      "VQE_PARAMETERIZED_STRATEGY_STATE_CANDIDATE",
+      "ANNEALING_PORTFOLIO_SELECTION_CANDIDATE",
+      "ANNEALING_PARAMETER_STACK_SELECTION_CANDIDATE",
+      "ANNEALING_MARKET_SELECTION_CANDIDATE",
+      "ANNEALING_CAPITAL_ALLOCATION_CANDIDATE",
+      "ANNEALING_CONSTRAINT_SATISFACTION_CANDIDATE",
+      "ANNEALING_LATENCY_AWARE_ROUTING_CANDIDATE",
+      "QUANTUM_INSPIRED_SIMULATED_ANNEALING_CANDIDATE",
+      "QUANTUM_INSPIRED_TENSOR_SEARCH_CANDIDATE",
+      "QUANTUM_INSPIRED_EVOLUTIONARY_SEARCH_CANDIDATE",
+      "HYBRID_CLASSICAL_QUANTUM_COMPARE_THEN_SELECT_CANDIDATE",
+      "HYBRID_QUANTUM_TIEBREAKER_CANDIDATE",
+      "OWNER_FORCED_QUANTUM_CANDIDATE"
+    ],
+    "source_intake_state": [
+      "SOURCE_INTAKE_ACCEPTED_OFFICIAL",
+      "SOURCE_INTAKE_ACCEPTED_OFFICIAL_CANDIDATE",
+      "SOURCE_INTAKE_ACCEPTED_RESEARCH",
+      "SOURCE_INTAKE_ACCEPTED_OPEN_SOURCE_INTELLIGENCE",
+      "SOURCE_INTAKE_ACCEPTED_SOCIAL_SIGNAL",
+      "SOURCE_INTAKE_ACCEPTED_NEWS_SIGNAL",
+      "SOURCE_INTAKE_ACCEPTED_FORUM_SIGNAL",
+      "SOURCE_INTAKE_ACCEPTED_BLOG_SIGNAL",
+      "SOURCE_INTAKE_ACCEPTED_GITHUB_RESEARCH_PATTERN",
+      "SOURCE_INTAKE_ACCEPTED_INSTITUTIONAL_CONVENTION",
+      "SOURCE_INTAKE_ACCEPTED_OPTIMIZER_DOCUMENTATION",
+      "SOURCE_INTAKE_ACCEPTED_QUANTUM_RESEARCH",
+      "SOURCE_INTAKE_ACCEPTED_OWNER_INTERNAL",
+      "SOURCE_INTAKE_ACCEPTED_PRIOR_PR_ARTIFACT",
+      "SOURCE_INTAKE_REJECTED_DUPLICATE",
+      "SOURCE_INTAKE_REJECTED_IRRELEVANT",
+      "SOURCE_INTAKE_REJECTED_UNSAFE_SECRET_OR_CREDENTIAL",
+      "SOURCE_INTAKE_REJECTED_MALICIOUS_OR_UNTRUSTED_EXECUTION",
+      "SOURCE_INTAKE_REJECTED_UNMAPPABLE"
+    ],
+    "value_authority_class": [
+      "OFFICIAL_ACCEPTED_SOURCE_VALUE",
+      "OFFICIAL_CANDIDATE_VALUE_PENDING_ACCEPTANCE",
+      "OWNER_APPROVED_INTERNAL_VALUE",
+      "OWNER_POLICY_DEFAULT_VALUE",
+      "OPEN_RESEARCH_CANDIDATE_VALUE",
+      "OPEN_SOURCE_INTELLIGENCE_CANDIDATE_VALUE",
+      "SOCIAL_SIGNAL_CANDIDATE_VALUE",
+      "NEWS_SIGNAL_CANDIDATE_VALUE",
+      "FORUM_SIGNAL_CANDIDATE_VALUE",
+      "BLOG_SIGNAL_CANDIDATE_VALUE",
+      "GITHUB_RESEARCH_PATTERN_CANDIDATE_VALUE",
+      "INSTITUTIONAL_DEFAULT_CANDIDATE_VALUE",
+      "OPTIMIZER_DEFAULT_CANDIDATE_VALUE",
+      "CLASSICAL_BASELINE_CANDIDATE_VALUE",
+      "QUANTUM_READY_DEFAULT_CANDIDATE_VALUE",
+      "HYBRID_ARBITRATION_CANDIDATE_VALUE",
+      "REPLAY_PAPER_TEST_CANDIDATE_VALUE",
+      "METADATA_ONLY_NOT_A_NUMERIC_VALUE",
+      "FUTURE_OFFICIAL_SOURCE_ACCEPTANCE_REQUIRED_FOR_PROMOTION",
+      "FUTURE_CONNECTOR_SEMANTIC_REQUIRED_FOR_PROMOTION",
+      "FUTURE_REPLAY_PAPER_RESULT_REQUIRED_FOR_PROMOTION",
+      "QUARANTINED_OR_REJECTED_VALUE"
+    ],
+    "value_materialization_state": [
+      "VALUE_FILLED_PRIOR_REPO_REUSE",
+      "VALUE_FILLED_OFFICIAL_FACT_REUSE",
+      "VALUE_FILLED_OFFICIAL_FACT_CANDIDATE_PENDING_ACCEPTANCE",
+      "VALUE_FILLED_OWNER_INTERNAL_DEFAULT",
+      "VALUE_FILLED_RESEARCH_CANDIDATE",
+      "VALUE_FILLED_OPEN_SOURCE_INTELLIGENCE_CANDIDATE",
+      "VALUE_FILLED_SOCIAL_SIGNAL_CANDIDATE",
+      "VALUE_FILLED_NEWS_SIGNAL_CANDIDATE",
+      "VALUE_FILLED_FORUM_SIGNAL_CANDIDATE",
+      "VALUE_FILLED_BLOG_SIGNAL_CANDIDATE",
+      "VALUE_FILLED_GITHUB_RESEARCH_PATTERN_CANDIDATE",
+      "VALUE_FILLED_INSTITUTIONAL_DEFAULT_CANDIDATE",
+      "VALUE_FILLED_OPTIMIZER_DEFAULT_CANDIDATE",
+      "VALUE_FILLED_CLASSICAL_BASELINE_CANDIDATE",
+      "VALUE_FILLED_QUANTUM_READY_CANDIDATE",
+      "VALUE_FILLED_HYBRID_ARBITRATION_CANDIDATE",
+      "VALUE_FILLED_REPLAY_PAPER_TEST_CANDIDATE",
+      "VALUE_METADATA_ONLY_NO_NUMERIC_REQUIRED",
+      "VALUE_STILL_MISSING_AFTER_ALL_CANDIDATE_LANES_EXHAUSTED"
+    ]
+  },
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "accepted_official_fact_fabricated": false,
+    "atomicrows_bundle_freeze_authority_created": false,
+    "atomicrows_final_bundle_created": false,
+    "external_repo_code_executed": false,
+    "live_order_authority_created": false,
+    "optimizer_execution_created": false,
+    "private_account_state_or_balance_fetched": false,
+    "profit_evidence_created": false,
+    "qtt_integrity_authority_created": false,
+    "quantum_advantage_evidence_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "real_order_submitted_or_cancelled": false,
+    "replay_or_paper_result_fabricated": false,
+    "scoring_ranking_selection_execution_created": false,
+    "secret_materialized": false,
+    "source_evidence_packet_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "optimizer_execution_performed_flag": false,
+  "pr_id": "PR161A",
+  "profit_evidence_count": 0,
+  "profit_validation_tag": "PROFIT_NOT_TESTED",
+  "quantum_advantage_claim_count": 0,
+  "quantum_advantage_evidence_created_flag": false,
+  "quantum_backend_execution_count": 0,
+  "quantum_backend_execution_performed_flag": false,
+  "quantum_candidate_layer": "SUPER_INTENSIFIED_QUANTUM_OPTIMIZER_CANDIDATE_EXPANSION",
+  "quantum_simulator_execution_count": 0,
+  "record_count": 7,
+  "records": [
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__QUBO",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "QUBO_OBJECTIVE_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__QUBO_OBJECTIVE_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "minimize x^T Q x + linear_terms + constant_terms",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__QUBO_OBJECTIVE_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__ISING",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "ISING_OBJECTIVE_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__ISING_OBJECTIVE_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "minimize sum_i h_i z_i + sum_ij J_ij z_i z_j",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__ISING_OBJECTIVE_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "SPIN_MINUS_ONE_PLUS_ONE"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__QAOA",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "QAOA_CANDIDATE_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__QAOA_CANDIDATE_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "minimize <psi(beta,gamma)|C_qubo_or_ising|psi(beta,gamma)>",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__QAOA_CANDIDATE_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__VQE",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "VQE_CANDIDATE_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__VQE_CANDIDATE_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "minimize <psi(theta)|H_objective|psi(theta)>",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__VQE_CANDIDATE_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__ANNEALING",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "ANNEALING_CANDIDATE_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "minimize energy(binary_variables, constraints, schedule)",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__ANNEALING_CANDIDATE_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__HYBRID",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "select argmin(classical_score, quantum_candidate_score) after replay/paper comparison",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__HYBRID_COMPARE_THEN_SELECT_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    },
+    {
+      "candidate_status": "CANDIDATE_READY_FOR_REPLAY_PAPER_DESCRIPTOR",
+      "classical_baseline_formula_id": "PR161A_CLASSICAL_BASELINE_GREEDY_LINEAR_COST",
+      "constraint_terms": [
+        "budget",
+        "exposure",
+        "latency",
+        "liquidity"
+      ],
+      "default_parameter_profile_id": "PR161A_DEFAULT_PROFILE__QUANTUM",
+      "downstream_agent_roles": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "formula_family": "QUANTUM_TIEBREAKER_TEMPLATE",
+      "formula_template_id": "PR161A_FORMULA_TEMPLATE__QUANTUM_TIEBREAKER_TEMPLATE",
+      "mapping_to_atomicrows_roles": [
+        "selection",
+        "risk",
+        "capital",
+        "latency",
+        "optimizer"
+      ],
+      "mapping_to_market_type": "PREDICTION_MARKETS_GENERAL",
+      "mapping_to_platform_scope": "KALSHI_POLYMARKET_FORECASTEX_IBKR_GENERAL",
+      "mapping_to_pr154_targets": [
+        "PR154_VALUE_STATE_TARGETS"
+      ],
+      "mapping_to_strategy_class": "PREDICTION_MARKET_OPTIMIZER_RESEARCH",
+      "mathematical_expression": "apply quantum_priority_policy when classical score delta <= near_tie_threshold",
+      "objective_terms": [
+        "expected_value_candidate",
+        "risk_adjustment_candidate",
+        "cost_candidate"
+      ],
+      "optimizer_arbitration_profile_id": "PR161A_HYBRID_ARBITRATION_PROFILE",
+      "penalty_terms": [
+        "risk_penalty",
+        "transaction_cost_penalty",
+        "latency_penalty"
+      ],
+      "quantum_applicability_class": "QUANTUM_FORWARD_CANDIDATE",
+      "replay_paper_route_id": "PR161A_QUANTUM_REPLAY_ROUTE__QUANTUM_TIEBREAKER_TEMPLATE",
+      "source_or_basis": "QTT_PR161A_OWNER_APPROVED_QUANTUM_CANDIDATE_DEFAULT",
+      "variable_domain": "BINARY_0_1"
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_type": "PR161A_QUANTUM_FORMULA_TEMPLATE_REGISTRY",
+  "runtime_live_order_profit_authority_count": 0
+}

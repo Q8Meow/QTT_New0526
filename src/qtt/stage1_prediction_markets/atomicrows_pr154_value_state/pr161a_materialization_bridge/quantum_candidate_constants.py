@@ -1,0 +1,20 @@
+"""Quantum constants facade for PR161A."""
+
+from __future__ import annotations
+
+from .constants import (
+    PR87_PR92_FLOW,
+    QUANTUM_COMPARISON_TYPES,
+    QUANTUM_FORMULA_TEMPLATE_FAMILIES,
+    QUANTUM_PROFILE_TYPES,
+    QUANTUM_STRATEGY_CANDIDATE_TYPES,
+)
+
+__all__ = [
+    "PR87_PR92_FLOW",
+    "QUANTUM_COMPARISON_TYPES",
+    "QUANTUM_FORMULA_TEMPLATE_FAMILIES",
+    "QUANTUM_PROFILE_TYPES",
+    "QUANTUM_STRATEGY_CANDIDATE_TYPES",
+]
+

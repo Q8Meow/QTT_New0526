@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Quantum Upstream Downstream Traceability",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["traceability_record_id", "quantum_candidate_id", "upstream_pr_labels_consumed", "downstream_pr_targets"]
+}
+

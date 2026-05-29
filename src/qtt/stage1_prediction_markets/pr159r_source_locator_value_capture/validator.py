@@ -22,6 +22,7 @@ _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
 _DETACHED_HEAD_REPAIR_HEAD_REF_BRANCHES = (
     "repair/pr160-main-ancestry-after-pr176",
 )
+_PR161A_DOWNSTREAM_BRANCH = "pr161a-atomicrows-pr154-value-state-materialization-bridge"
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -85,7 +86,8 @@ def _pr159r_or_repair_ancestry_present(root: Path, branch_context: str = "") -> 
 def _pr159r_branch_context_allowed(branch_context: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch_context)
     return (
-        normalized in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH}
+        normalized
+        in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH, _PR161A_DOWNSTREAM_BRANCH}
         or normalized in _BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES
     )
 
@@ -126,7 +128,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH}:
+    if branch in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH, _PR161A_DOWNSTREAM_BRANCH}:
         return
     ancestry_present = _pr159r_or_repair_ancestry_present(root)
     if ci_branch_context.github_actions_main_push_context_active():

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Quantum Agent Consumption Bridge",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["bridge_record_id", "quantum_candidate_id", "downstream_agent_roles", "live_use_allowed_flag"]
+}
+

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Value Completion Delta",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["record_id", "value_materialization_state", "value_authority_class"]
+}
+

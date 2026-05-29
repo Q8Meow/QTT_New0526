@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR161A Quantum Optimizer Candidate Profile",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["quantum_candidate_id", "quantum_profile_type", "classical_baseline_required_flag", "replay_paper_candidate_flag", "live_use_allowed_flag"]
+}
+
