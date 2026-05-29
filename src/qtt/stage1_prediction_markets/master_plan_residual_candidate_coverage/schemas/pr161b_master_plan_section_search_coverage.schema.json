@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["section_id", "searched_flag", "extraction_pass_ids_applied", "candidate_count", "search_error_flag"],
+  "type": "object"
+}

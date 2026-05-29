@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["downstream_workflow_consumer_record_id", "residual_candidate_id", "downstream_pr_ids", "downstream_agent_roles", "workflow_consumption_state"],
+  "type": "object"
+}

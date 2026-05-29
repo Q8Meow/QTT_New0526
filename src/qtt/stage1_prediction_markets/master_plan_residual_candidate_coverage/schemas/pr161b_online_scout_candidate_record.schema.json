@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["online_scout_candidate_id", "source_intake_state", "online_network_fetch_attempted_flag", "ci_dependency_flag"],
+  "type": "object"
+}

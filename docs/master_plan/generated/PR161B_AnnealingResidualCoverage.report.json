@@ -1,0 +1,3837 @@
+{
+  "authority_class": "CANDIDATE_COVERAGE_AUDIT_ONLY_NOT_LIVE_AUTHORITY",
+  "central_enum_value_sets": {
+    "agent_consumption_states": [
+      "AGENT_CONSUMABLE_ALREADY_COVERED_BY_PR161A",
+      "AGENT_CONSUMABLE_AFTER_PR161C_ASSIMILATION",
+      "AGENT_CONSUMABLE_RESEARCH_ONLY",
+      "AGENT_CONSUMABLE_REPLAY_PAPER_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_SCORING_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_OPTIMIZER_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_QUANTUM_ADVISORY_AFTER_ASSIMILATION",
+      "AGENT_CONSUMABLE_OWNER_REVIEW_ONLY",
+      "AGENT_CONSUMABLE_DOCTRINE_ONLY",
+      "AGENT_CONSUMABLE_REJECTED_UNSAFE"
+    ],
+    "assimilation_fill_lanes": [
+      "FILL_FROM_PR161A_ALIAS_REPAIR",
+      "FILL_FROM_EXISTING_PR_ARTIFACT",
+      "FILL_FROM_MASTER_PLAN_LITERAL",
+      "FILL_FROM_OFFICIAL_SOURCE_CANDIDATE",
+      "FILL_FROM_OPEN_RESEARCH_CANDIDATE",
+      "FILL_FROM_SOCIAL_WEB_CANDIDATE",
+      "FILL_FROM_GITHUB_RESEARCH_PATTERN",
+      "FILL_FROM_INSTITUTIONAL_DEFAULT",
+      "FILL_FROM_OPTIMIZER_DEFAULT",
+      "FILL_FROM_QUANTUM_READY_DEFAULT",
+      "FILL_FROM_CLASSICAL_BASELINE_DEFAULT",
+      "FILL_FROM_HYBRID_ARBITRATION_DEFAULT",
+      "FILL_FROM_OWNER_INTERNAL_DEFAULT",
+      "FILL_FROM_SOURCE_ATTRIBUTION_INCOMPLETE_CANDIDATE",
+      "FILL_AS_METADATA_ONLY_NO_NUMERIC_REQUIRED",
+      "FILL_REQUIRES_PR161C_ONLINE_RESEARCH",
+      "FILL_REQUIRES_FUTURE_OFFICIAL_SOURCE_ACCEPTANCE",
+      "FILL_REQUIRES_PRIVATE_DOC_ATTESTATION",
+      "FILL_REQUIRES_FUTURE_RUNTIME_RECEIPT",
+      "REJECT_DUPLICATE_ALREADY_COVERED",
+      "REJECT_UNSAFE_OR_SECRET"
+    ],
+    "candidate_types": [
+      "PARAMETER_NAME",
+      "PARAMETER_DEFAULT",
+      "PARAMETER_RANGE",
+      "PARAMETER_SCALE",
+      "PARAMETER_UNIT",
+      "FORMULA_EXPRESSION",
+      "OBJECTIVE_FUNCTION",
+      "CONSTRAINT_EXPRESSION",
+      "OPTIMIZER_SETTING",
+      "RISK_SETTING",
+      "CAPITAL_SETTING",
+      "LATENCY_SETTING",
+      "EXECUTION_SETTING",
+      "MARKET_MICROSTRUCTURE_FEATURE",
+      "STRATEGY_TEMPLATE",
+      "ALGORITHM_NAME",
+      "ALGORITHM_FAMILY",
+      "QUANTUM_ALGORITHM",
+      "QUBO_TEMPLATE",
+      "ISING_TEMPLATE",
+      "QAOA_SETTING",
+      "VQE_SETTING",
+      "ANNEALING_SETTING",
+      "HYBRID_ARBITRATION_SETTING",
+      "CLASSICAL_BASELINE_SETTING",
+      "REPLAY_PAPER_TEST_SETTING",
+      "AGENT_CONSUMPTION_FIELD",
+      "OWNER_POLICY_FIELD",
+      "SOURCE_EVIDENCE_FIELD",
+      "CONNECTOR_FUTURE_FIELD",
+      "LIVE_FUTURE_FIELD",
+      "DOCTRINE_ONLY_REFERENCE"
+    ],
+    "coverage_match_tiers": [
+      "TIER_1_EXACT_ID_MATCH",
+      "TIER_2_CANONICAL_NORMALIZED_NAME_MATCH",
+      "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "TIER_4_WEAK_TEXT_MATCH_POSSIBLE_ONLY",
+      "NO_MATCH"
+    ],
+    "coverage_states": [
+      "COVERED_EXACT",
+      "COVERED_BY_CANONICAL_ALIAS",
+      "COVERED_BY_ATOMICROWS_ROW",
+      "COVERED_BY_PR154_TARGET",
+      "COVERED_BY_PR161A_FIELD_RECORD",
+      "COVERED_BY_PR161A_QUANTUM_PROFILE",
+      "COVERED_BY_PR161A_REPLAY_PAPER_QUEUE",
+      "COVERED_BY_PRIOR_PR_ARTIFACT",
+      "PARTIALLY_COVERED_FIELD_GAP",
+      "RESIDUAL_NOT_IN_PR161A",
+      "RESIDUAL_VALUE_CAPTURED_IN_PR161B",
+      "RESIDUAL_RANGE_CAPTURED_IN_PR161B",
+      "RESIDUAL_FORMULA_CAPTURED_IN_PR161B",
+      "RESIDUAL_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "RESIDUAL_DUPLICATE_OF_CANONICAL_RECORD",
+      "RESIDUAL_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "RESIDUAL_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "downstream_agent_roles": [
+      "QTT_RESEARCH_AGENT",
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "QTT_PARAMETER_STACK_AGENT",
+      "QTT_SCORING_AGENT",
+      "QTT_RANKING_AGENT",
+      "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "QTT_QUANTUM_ADVISORY_AGENT",
+      "QTT_REPLAY_AGENT",
+      "QTT_PAPER_AGENT",
+      "QTT_RISK_AGENT",
+      "QTT_CAPITAL_AGENT",
+      "QTT_LATENCY_AGENT",
+      "QTT_EXECUTION_PREP_AGENT",
+      "QTT_SOURCE_EVIDENCE_AGENT",
+      "QTT_OWNER_REVIEW_AGENT"
+    ],
+    "extraction_pass_ids": [
+      "PASS_1_SECTION_AWARE_EXTRACTION",
+      "PASS_2_CODE_BLOCK_EXTRACTION",
+      "PASS_3_TABLE_LIST_EXTRACTION",
+      "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION",
+      "PASS_5_FORMULA_ALGORITHM_EXTRACTION",
+      "PASS_6_QUANTUM_EXTRACTION",
+      "PASS_7_AGENT_DOWNSTREAM_EXTRACTION",
+      "PASS_8_ONLINE_PUBLIC_SCOUT_ENRICHMENT"
+    ],
+    "quantum_applicability_classes": [
+      "NOT_QUANTUM_APPLICABLE",
+      "QUBO_APPLICABLE",
+      "ISING_APPLICABLE",
+      "QAOA_APPLICABLE",
+      "VQE_APPLICABLE",
+      "ANNEALING_APPLICABLE",
+      "HYBRID_QUANTUM_CLASSICAL_APPLICABLE",
+      "QUANTUM_STRATEGY_APPLICABLE",
+      "GENERAL_QUANTUM_APPLICABLE"
+    ],
+    "quantum_residual_coverage_states": [
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_FORMULA_TEMPLATE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_STRATEGY_CANDIDATE",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR161A_REPLAY_PAPER_DESCRIPTOR",
+      "QUANTUM_RESIDUAL_COVERED_BY_PR82_PR86_ARTIFACT",
+      "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "QUANTUM_RESIDUAL_PARTIAL_GAP",
+      "QUANTUM_RESIDUAL_NEW_CANDIDATE_REQUIRED",
+      "QUANTUM_RESIDUAL_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "QUANTUM_RESIDUAL_DUPLICATE_ALREADY_CANONICAL",
+      "QUANTUM_RESIDUAL_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "QUANTUM_RESIDUAL_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "residual_gap_types": [
+      "GAP_NOT_IN_PR161A_FIELD_RECORDS",
+      "GAP_NOT_IN_ATOMICROWS",
+      "GAP_NOT_IN_PR154",
+      "GAP_NOT_IN_QUANTUM_PROFILE",
+      "GAP_NOT_IN_REPLAY_PAPER_QUEUE",
+      "GAP_FIELD_PATH_MISSING",
+      "GAP_DEFAULT_VALUE_MISSING",
+      "GAP_RANGE_MISSING",
+      "GAP_UNIT_OR_SCALE_MISSING",
+      "GAP_FORMULA_EXPRESSION_MISSING",
+      "GAP_ALGORITHM_FAMILY_MISSING",
+      "GAP_OPTIMIZER_SETTING_MISSING",
+      "GAP_QUANTUM_DEFAULT_MISSING",
+      "GAP_CLASSICAL_BASELINE_MISSING",
+      "GAP_HYBRID_ARBITRATION_MISSING",
+      "GAP_AGENT_CONSUMER_MISSING",
+      "GAP_DOWNSTREAM_PR_ROUTE_MISSING",
+      "GAP_SOURCE_PROVENANCE_MISSING",
+      "GAP_DOCTRINE_ONLY_NO_VALUE_REQUIRED",
+      "GAP_DUPLICATE_ALREADY_CANONICAL",
+      "GAP_UNMAPPABLE_NEEDS_OWNER_REVIEW",
+      "GAP_UNSAFE_OR_SECRET_REJECTED"
+    ],
+    "source_intake_states": [
+      "OPEN_CANDIDATE_FIRST",
+      "SOURCE_ATTRIBUTION_INCOMPLETE_CANDIDATE",
+      "SOURCE_INTAKE_ACCEPTED_PRIOR_PR_ARTIFACT",
+      "SOURCE_INTAKE_ACCEPTED_MASTER_PLAN_LITERAL",
+      "SOURCE_INTAKE_ACCEPTED_QUANTUM_RESEARCH",
+      "SOURCE_INTAKE_ACCEPTED_OPEN_RESEARCH_CANDIDATE",
+      "SOURCE_INTAKE_REJECTED_UNSAFE_SECRET_OR_CREDENTIAL"
+    ],
+    "value_authority_classes": [
+      "MASTER_PLAN_DOCTRINE_CANDIDATE_VALUE",
+      "PRIOR_PR_CANDIDATE_VALUE",
+      "OPEN_RESEARCH_CANDIDATE_VALUE",
+      "QUANTUM_READY_DEFAULT_CANDIDATE_VALUE",
+      "CLASSICAL_BASELINE_CANDIDATE_VALUE",
+      "HYBRID_ARBITRATION_CANDIDATE_VALUE",
+      "METADATA_ONLY_NOT_A_NUMERIC_VALUE",
+      "FUTURE_OFFICIAL_SOURCE_ACCEPTANCE_REQUIRED_FOR_PROMOTION",
+      "QUARANTINED_OR_REJECTED_VALUE"
+    ],
+    "workflow_consumption_states": [
+      "WORKFLOW_CONSUMABLE_NOW_BY_RESEARCH_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_ATOMICROWS_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_PARAMETER_STACK_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_SCORING_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_OPTIMIZER_ARBITRATION_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_QUANTUM_ADVISORY_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_REPLAY_PAPER_PREP_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_RISK_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_CAPITAL_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_LATENCY_AGENT",
+      "WORKFLOW_CONSUMABLE_NOW_BY_EXECUTION_PREP_AGENT",
+      "WORKFLOW_CONSUMABLE_AFTER_PR161C_ASSIMILATION",
+      "WORKFLOW_CONSUMABLE_AFTER_SOURCE_UPGRADE",
+      "WORKFLOW_CONSUMABLE_AFTER_REPLAY_PAPER_RESULT",
+      "WORKFLOW_CONSUMABLE_AFTER_OWNER_REVIEW",
+      "WORKFLOW_DOCTRINE_ONLY_NO_RUNTIME_CONSUMER",
+      "WORKFLOW_REJECTED_UNSAFE_OR_SECRET",
+      "WORKFLOW_UNMAPPABLE_NEEDS_CANONICAL_OWNER_ROUTE"
+    ]
+  },
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "accepted_official_fact_fabricated": false,
+    "atomicrows_bundle_freeze_authority_created": false,
+    "atomicrows_final_bundle_created": false,
+    "external_repo_code_executed": false,
+    "live_order_authority_created": false,
+    "optimizer_execution_created": false,
+    "private_account_state_or_balance_fetched": false,
+    "profit_evidence_created": false,
+    "qtt_integrity_authority_created": false,
+    "quantum_advantage_evidence_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "real_order_submitted_or_cancelled": false,
+    "replay_or_paper_result_fabricated": false,
+    "scoring_ranking_selection_execution_created": false,
+    "secret_materialized": false,
+    "source_evidence_packet_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "optimizer_execution_performed_flag": false,
+  "pr_id": "PR161B",
+  "profit_evidence_count": 0,
+  "profit_evidence_created_flag": false,
+  "profit_validation_tag": "PROFIT_NOT_TESTED",
+  "quantum_advantage_claim_count": 0,
+  "quantum_advantage_evidence_created_flag": false,
+  "quantum_backend_execution_count": 0,
+  "quantum_backend_execution_performed_flag": false,
+  "quantum_simulator_execution_count": 0,
+  "record_count": 40,
+  "records": [
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000149",
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training / optimizer, and annealing-control families",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "z_twelfth_wave_atomic_parameter_completion_law_for_admitted_quantum_runtime_transpilation_variational_training_optimizer_and_annealing_control_families",
+      "objective_terms": [
+        "5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training / op"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SDK_BEHAVIOR_SDK_BEHAVIOR_POLYMARKET_POLYMARKET_OFFICIAL_SDK_DOCS_SDK_BEHAVIOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005380",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005380",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 83762,
+      "source_section_id": "5.1Z__1857",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005380"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000149",
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### 5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training / optimizer, and annealing-control families",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "z_twelfth_wave_atomic_parameter_completion_law_for_admitted_quantum_runtime_transpilation_variational_training_optimizer_and_annealing_control_families",
+      "objective_terms": [
+        "### 5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training "
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SDK_BEHAVIOR_SDK_BEHAVIOR_POLYMARKET_POLYMARKET_OFFICIAL_SDK_DOCS_SDK_BEHAVIOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005381",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005381",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 83762,
+      "source_section_id": "5.1Z__1857",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005381"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000149",
+        "AR_EXACT_013_QUANTUM_QUBO_ISING_METADATA_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### 5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training / optimizer, and annealing-control families",
+      "extraction_pass_ids": [
+        "PASS_5_FORMULA_ALGORITHM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "z_twelfth_wave_atomic_parameter_completion_law_for_admitted_quantum_runtime_transpilation_variational_training_optimizer_and_annealing_control_families",
+      "objective_terms": [
+        "### 5.1Z Twelfth-wave atomic-parameter completion law for admitted quantum runtime, transpilation, variational training "
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_SDK_BEHAVIOR_SDK_BEHAVIOR_POLYMARKET_POLYMARKET_OFFICIAL_SDK_DOCS_SDK_BEHAVIOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_005382",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_005382",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 83762,
+      "source_section_id": "5.1Z__1857",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_005382"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000225",
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000226"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-05 \u2014 D-Wave annealing profile",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05_d_wave_annealing_profile",
+      "objective_terms": [
+        "QT-05 \u2014 D-Wave annealing profile"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_API_SEMANTICS_VENUE_API_SEMANTICS_KALSHI_KALSHI_OFFICIAL_API_DOCS_VENUE_API_SEMANTICS"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006667",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006667",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107271,
+      "source_section_id": "UNNUMBERED__2290",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006667"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000225",
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000226"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05 \u2014 D-Wave annealing profile",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05_d_wave_annealing_profile",
+      "objective_terms": [
+        "### QT-05 \u2014 D-Wave annealing profile"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_API_SEMANTICS_VENUE_API_SEMANTICS_KALSHI_KALSHI_OFFICIAL_API_DOCS_VENUE_API_SEMANTICS"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006668",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006668",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107271,
+      "source_section_id": "UNNUMBERED__2290",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006668"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000225",
+        "AR_EXACT_011_REPLAY_PAPER_VALIDATION_000226"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05 \u2014 D-Wave annealing profile",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05_d_wave_annealing_profile",
+      "objective_terms": [
+        "### QT-05 \u2014 D-Wave annealing profile"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_API_SEMANTICS_VENUE_API_SEMANTICS_KALSHI_KALSHI_OFFICIAL_API_DOCS_VENUE_API_SEMANTICS"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006669",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006669",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107271,
+      "source_section_id": "UNNUMBERED__2290",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006669"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_012_QUANTUM_ADVISORY_OPTIMIZATION_000080",
+        "AR_EXACT_012_QUANTUM_ADVISORY_OPTIMIZATION_000081"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "- `anneal_time_solver_default_ref`",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "anneal_time_solver_default_ref",
+      "objective_terms": [
+        "- `anneal_time_solver_default_ref`"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_EXECUTION_LATENCY_PRECOMPUTED_HOT_PATH_SNAPSHOT_TARGETS_PRECOMPUTED_HOT_PATH_SNAPSHOT_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_PRECOMPUTED_HOT_PATH_SNAPSHOT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006672",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006672",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107286,
+      "source_section_id": "UNNUMBERED__2291",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006672"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000102",
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000103"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05a1_d_wave_anneal_offset_and_chain_break_atomic_completion",
+      "objective_terms": [
+        "QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_QUANTUM_PARAMETER_ANNEALING_CHAIN_EMBEDDING_TARGET_SLOTS_ANNEALING_CHAIN_EMBEDDING_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_PROVIDER_DOCS_ANNEALING_CHAIN_EMBEDDING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006673",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006673",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107303,
+      "source_section_id": "UNNUMBERED__2292",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006673"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000102",
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000103"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05a1_d_wave_anneal_offset_and_chain_break_atomic_completion",
+      "objective_terms": [
+        "### QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_QUANTUM_PARAMETER_ANNEALING_CHAIN_EMBEDDING_TARGET_SLOTS_ANNEALING_CHAIN_EMBEDDING_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_PROVIDER_DOCS_ANNEALING_CHAIN_EMBEDDING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006674",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006674",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107303,
+      "source_section_id": "UNNUMBERED__2292",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006674"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000102",
+        "AR_EXACT_008_ERROR_GUARD_FAIL_CLOSED_000103"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05a1_d_wave_anneal_offset_and_chain_break_atomic_completion",
+      "objective_terms": [
+        "### QT-05A1 \u2014 D-Wave anneal-offset and chain-break atomic completion"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_QUANTUM_PARAMETER_ANNEALING_CHAIN_EMBEDDING_TARGET_SLOTS_ANNEALING_CHAIN_EMBEDDING_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_PROVIDER_DOCS_ANNEALING_CHAIN_EMBEDDING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006675",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006675",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107303,
+      "source_section_id": "UNNUMBERED__2292",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006675"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000222",
+        "AR_EXACT_004_RISK_CONTROL_000223"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-05B \u2014 D-Wave reverse-anneal local-refinement family",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b_d_wave_reverse_anneal_local_refinement_family",
+      "objective_terms": [
+        "QT-05B \u2014 D-Wave reverse-anneal local-refinement family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_CAPITAL_RESERVE_TARGETS_CAPITAL_RESERVE_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_CAPITAL_RESERVE"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006676",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006676",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107370,
+      "source_section_id": "UNNUMBERED__2293",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006676"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000222",
+        "AR_EXACT_004_RISK_CONTROL_000223"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05B \u2014 D-Wave reverse-anneal local-refinement family",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b_d_wave_reverse_anneal_local_refinement_family",
+      "objective_terms": [
+        "### QT-05B \u2014 D-Wave reverse-anneal local-refinement family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_CAPITAL_RESERVE_TARGETS_CAPITAL_RESERVE_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_CAPITAL_RESERVE"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006677",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006677",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107370,
+      "source_section_id": "UNNUMBERED__2293",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006677"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000222",
+        "AR_EXACT_004_RISK_CONTROL_000223"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05B \u2014 D-Wave reverse-anneal local-refinement family",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b_d_wave_reverse_anneal_local_refinement_family",
+      "objective_terms": [
+        "### QT-05B \u2014 D-Wave reverse-anneal local-refinement family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_CAPITAL_RESERVE_TARGETS_CAPITAL_RESERVE_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_CAPITAL_RESERVE"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006678",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006678",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107370,
+      "source_section_id": "UNNUMBERED__2293",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006678"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000050",
+        "AR_EXACT_004_RISK_CONTROL_000051"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b1_d_wave_reverse_anneal_atomic_parameter_pack",
+      "objective_terms": [
+        "QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MARKET_MAKING_TARGETS_MARKET_MAKING_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MARKET_MAKING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006679",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006679",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107388,
+      "source_section_id": "UNNUMBERED__2294",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006679"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000050",
+        "AR_EXACT_004_RISK_CONTROL_000051"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b1_d_wave_reverse_anneal_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MARKET_MAKING_TARGETS_MARKET_MAKING_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MARKET_MAKING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006680",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006680",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107388,
+      "source_section_id": "UNNUMBERED__2294",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006680"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000050",
+        "AR_EXACT_004_RISK_CONTROL_000051"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_05b1_d_wave_reverse_anneal_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-05B1 \u2014 D-Wave reverse-anneal atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MARKET_MAKING_TARGETS_MARKET_MAKING_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MARKET_MAKING"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006681",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006681",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107388,
+      "source_section_id": "UNNUMBERED__2294",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006681"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000105",
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000106"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_06b_multi_period_optimal_trading_trajectory_annealing_doctrine",
+      "objective_terms": [
+        "QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_RISK_FIT_SCORE_INPUTS_RISK_FIT_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_RISK_FIT_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006700",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006700",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107832,
+      "source_section_id": "UNNUMBERED__2301",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006700"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000105",
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000106"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_06b_multi_period_optimal_trading_trajectory_annealing_doctrine",
+      "objective_terms": [
+        "### QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_RISK_FIT_SCORE_INPUTS_RISK_FIT_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_RISK_FIT_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006701",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006701",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107832,
+      "source_section_id": "UNNUMBERED__2301",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006701"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000105",
+        "AR_EXACT_010_SOURCE_EVIDENCE_CONNECTOR_SEMANTIC_000106"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_06b_multi_period_optimal_trading_trajectory_annealing_doctrine",
+      "objective_terms": [
+        "### QT-06B \u2014 Multi-period optimal trading trajectory annealing doctrine"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_RISK_FIT_SCORE_INPUTS_RISK_FIT_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_RISK_FIT_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_006702",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_006702",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 107832,
+      "source_section_id": "UNNUMBERED__2301",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_006702"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000267",
+        "AR_EXACT_004_RISK_CONTROL_000268"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": "24",
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24_anneal_timing_gauge_and_spin_reversal_registry",
+      "objective_terms": [
+        "QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_EXPECTED_NET_VALUE_SCORE_TARGETS_EXPECTED_NET_VALUE_SCORE_TARGET_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_EXPECTED_NET_VALUE_SCORE_TARGET"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007050",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007050",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115449,
+      "source_section_id": "UNNUMBERED__2418",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007050"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000267",
+        "AR_EXACT_004_RISK_CONTROL_000268"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": "24",
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24_anneal_timing_gauge_and_spin_reversal_registry",
+      "objective_terms": [
+        "### QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_EXPECTED_NET_VALUE_SCORE_TARGETS_EXPECTED_NET_VALUE_SCORE_TARGET_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_EXPECTED_NET_VALUE_SCORE_TARGET"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007051",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007051",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115449,
+      "source_section_id": "UNNUMBERED__2418",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007051"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_004_RISK_CONTROL_000267",
+        "AR_EXACT_004_RISK_CONTROL_000268"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": "24",
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24_anneal_timing_gauge_and_spin_reversal_registry",
+      "objective_terms": [
+        "### QT-24 \u2014 Anneal timing, gauge, and spin-reversal registry"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_EXPECTED_NET_VALUE_SCORE_TARGETS_EXPECTED_NET_VALUE_SCORE_TARGET_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_EXPECTED_NET_VALUE_SCORE_TARGET"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007052",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007052",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115449,
+      "source_section_id": "UNNUMBERED__2418",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007052"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_002_SCORING_RANKING_000149",
+        "AR_EXACT_002_SCORING_RANKING_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-24A \u2014 Annealing-control atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24a_annealing_control_atomic_parameter_pack",
+      "objective_terms": [
+        "QT-24A \u2014 Annealing-control atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_PLATFORM_APPLICABILITY_SCORE_INPUTS_PLATFORM_APPLICABILITY_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_PLATFORM_APPLICABILITY_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007053",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007053",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115462,
+      "source_section_id": "UNNUMBERED__2419",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007053"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_002_SCORING_RANKING_000149",
+        "AR_EXACT_002_SCORING_RANKING_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24A \u2014 Annealing-control atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24a_annealing_control_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-24A \u2014 Annealing-control atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_PLATFORM_APPLICABILITY_SCORE_INPUTS_PLATFORM_APPLICABILITY_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_PLATFORM_APPLICABILITY_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007054",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007054",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115462,
+      "source_section_id": "UNNUMBERED__2419",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007054"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_002_SCORING_RANKING_000149",
+        "AR_EXACT_002_SCORING_RANKING_000150"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24A \u2014 Annealing-control atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24a_annealing_control_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-24A \u2014 Annealing-control atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_PLATFORM_APPLICABILITY_SCORE_INPUTS_PLATFORM_APPLICABILITY_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_API_DOCS_PLATFORM_APPLICABILITY_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007055",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007055",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115462,
+      "source_section_id": "UNNUMBERED__2419",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007055"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000155",
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000156"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b_d_wave_forward_anneal_pause_quench_schedule_family",
+      "objective_terms": [
+        "QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_EXECUTION_LATENCY_FEE_SETTLEMENT_COST_TARGET_FIELDS_FEE_SETTLEMENT_COST_FIELD_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_FEE_SETTLEMENT_COST_FIELD"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007056",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007056",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115632,
+      "source_section_id": "UNNUMBERED__2420",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007056"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000155",
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000156"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b_d_wave_forward_anneal_pause_quench_schedule_family",
+      "objective_terms": [
+        "### QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_EXECUTION_LATENCY_FEE_SETTLEMENT_COST_TARGET_FIELDS_FEE_SETTLEMENT_COST_FIELD_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_FEE_SETTLEMENT_COST_FIELD"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007057",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007057",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115632,
+      "source_section_id": "UNNUMBERED__2420",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007057"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000155",
+        "AR_EXACT_006_CAPITAL_SIZING_CASH_000156"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b_d_wave_forward_anneal_pause_quench_schedule_family",
+      "objective_terms": [
+        "### QT-24B \u2014 D-Wave forward-anneal pause / quench schedule family"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_EXECUTION_LATENCY_FEE_SETTLEMENT_COST_TARGET_FIELDS_FEE_SETTLEMENT_COST_FIELD_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_FEE_TICK_SETTLEMENT_DOCS_FEE_SETTLEMENT_COST_FIELD"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007058",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007058",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115632,
+      "source_section_id": "UNNUMBERED__2420",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007058"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000136",
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000137"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_1_SECTION_AWARE_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b2_d_wave_forward_anneal_pause_quench_atomic_parameter_pack",
+      "objective_terms": [
+        "QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MODEL_FREE_BASELINE_COMPARATOR_TARGETS_MODEL_FREE_BASELINE_COMPARATOR_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MODEL_FREE_BASELINE_COMPARATOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007062",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007062",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115658,
+      "source_section_id": "UNNUMBERED__2422",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007062"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000136",
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000137"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_4_NUMERIC_RANGE_UNIT_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b2_d_wave_forward_anneal_pause_quench_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MODEL_FREE_BASELINE_COMPARATOR_TARGETS_MODEL_FREE_BASELINE_COMPARATOR_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MODEL_FREE_BASELINE_COMPARATOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007063",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007063",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115658,
+      "source_section_id": "UNNUMBERED__2422",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007063"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000136",
+        "AR_EXACT_009_LIFECYCLE_AGENT_BINDING_000137"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "### QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack",
+      "extraction_pass_ids": [
+        "PASS_6_QUANTUM_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "qt_24b2_d_wave_forward_anneal_pause_quench_atomic_parameter_pack",
+      "objective_terms": [
+        "### QT-24B2 \u2014 D-Wave forward-anneal pause / quench atomic parameter pack"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_CLASSICAL_STRATEGY_PARAMETER_MODEL_FREE_BASELINE_COMPARATOR_TARGETS_MODEL_FREE_BASELINE_COMPARATOR_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_VENUE_DOCS_MODEL_FREE_BASELINE_COMPARATOR"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_007064",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_007064",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "source_line_or_locator_if_available": 115658,
+      "source_section_id": "UNNUMBERED__2422",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_007064"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000155",
+        "AR_EXACT_001_SIGNAL_FEATURES_000156"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "CandidateParameterStackGenerationGate.report active_candidate_stack_ids annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created balance_fetch_created base_head blocked_candidate_policy blocked_candidate_stack_ids blocked_reason_cod...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "candidateparameterstackgenerationgate_report_active_candidate_stack_ids_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exis",
+      "objective_terms": [
+        "CandidateParameterStackGenerationGate.report active_candidate_stack_ids annealing_execution_created atomicrows_bundle_js"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_OPTIMIZER_PARAMETER_SCORING_WEIGHT_OPTIMIZATION_TARGETS_SCORING_WEIGHT_OPTIMIZATION_PREDICTION_MARKETS_GENERAL_POLYMARKET_OFFICIAL_PROVIDER_DOCS_SCORING_WEIGHT_OPTIMIZATION"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008716",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008716",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/CandidateParameterStackGenerationGate.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__CandidateParameterStackGenerationGate.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008716"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000259",
+        "AR_EXACT_001_SIGNAL_FEATURES_000260"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "OwnerQuantumPriorityPolicyRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created blocked_policies classical_only_families_valid_as_comparators classical_only_label_validated_from_pr82 connector_semantic_binding_cre...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "ownerquantumprioritypolicyregistry_report_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exists_atomicrows_bundle_sha256_cr",
+      "objective_terms": [
+        "OwnerQuantumPriorityPolicyRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_PER_MARKET_EXPOSURE_TARGETS_PER_MARKET_EXPOSURE_PREDICTION_MARKETS_GENERAL_KALSHI_OFFICIAL_API_DOCS_PER_MARKET_EXPOSURE"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008720",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008720",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__OwnerQuantumPriorityPolicyRegistry.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008720"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000177",
+        "AR_EXACT_001_SIGNAL_FEATURES_000178"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_PR161A_PROFILE",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "PR161A_AnnealingCandidateProfileRegistry.report authority_class central_enum_value_sets live_use_allowed_flag no_authority_confirmation optimizer_execution_count optimizer_execution_performed_flag pr_id profit_evidence_count profit_validation_tag quantum_advantage_claim_count quantum_advantage_evidence_created_flag quantum_backend_execution_count quantum_...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "pr161a_annealingcandidateprofileregistry_report_authority_class_central_enum_value_sets_live_use_allowed_flag_no_authority_confirmation_optimizer_execution_coun",
+      "objective_terms": [
+        "PR161A_AnnealingCandidateProfileRegistry.report authority_class central_enum_value_sets live_use_allowed_flag no_authori"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_QUANTUM_PARAMETER_QAOA_MIXER_ANSATZ_METADATA_SLOTS_QAOA_MIXER_ANSATZ_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_PROVIDER_DOCS_QAOA_MIXER_ANSATZ"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008858",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008858",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/PR161A_AnnealingCandidateProfileRegistry.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__PR161A_AnnealingCandidateProfileRegistry.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [
+        "PR161A_FORMULA_TEMPLATE__ANNEALING_CANDIDATE_TEMPLATE"
+      ],
+      "upstream_pr161a_quantum_candidate_ids": [
+        "PR161A_QUANTUM_CANDIDATE__0030",
+        "PR161A_QUANTUM_CANDIDATE__0031",
+        "PR161A_QUANTUM_CANDIDATE__0032",
+        "PR161A_QUANTUM_CANDIDATE__0033",
+        "PR161A_QUANTUM_CANDIDATE__0034",
+        "PR161A_QUANTUM_CANDIDATE__0035",
+        "PR161A_QUANTUM_CANDIDATE__0036"
+      ],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008858"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [
+        "PR161A_STRATEGY__QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE"
+      ],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_000211",
+        "AR_EXACT_015_QUANTUM_PORTFOLIO_HYBRID_COMPARATOR_000212"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "PR161A_FinalValueStateSummary.report annealing_candidate_profile_count atomicrows_final_bundle_created_flag atomicrows_forbidden_bundle_digest_reference_added_flag atomicrows_universe_observed_count authority_class branch_context_tests_status central_enum_value_sets classical_baseline_candidate_count classical_baseline_required_count combined_entity_proce...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "pr161a_finalvaluestatesummary_report_annealing_candidate_profile_count_atomicrows_final_bundle_created_flag_atomicrows_forbidden_bundle_digest_reference_added_f",
+      "objective_terms": [
+        "PR161A_FinalValueStateSummary.report annealing_candidate_profile_count atomicrows_final_bundle_created_flag atomicrows_f"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_RUNTIME_AVAILABLE_CASH_RECEIPT_TARGETS_RUNTIME_AVAILABLE_CASH_RECEIPT_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_RUNTIME_AVAILABLE_CASH_RECEIPT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008864",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008864",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/PR161A_FinalValueStateSummary.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__PR161A_FinalValueStateSummary.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008864"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000297",
+        "AR_EXACT_001_SIGNAL_FEATURES_000298"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "ParameterAlgorithmScoringPolicyRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created balance_fetch_created blocked_policy_ids candidate_stack_generation_created component_count connector_semantic_binding_created d...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "parameteralgorithmscoringpolicyregistry_report_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exists_atomicrows_bundle_sha2",
+      "objective_terms": [
+        "ParameterAlgorithmScoringPolicyRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bu"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_SCORING_FORMULA_INPUT_OPTIMIZER_SCORE_INPUTS_OPTIMIZER_SCORE_INPUT_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_PROVIDER_DOCS_OPTIMIZER_SCORE_INPUT"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008891",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008891",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__ParameterAlgorithmScoringPolicyRegistry.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008891"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000090",
+        "AR_EXACT_001_SIGNAL_FEATURES_000091"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "ParameterStackScoringAndRankingGate.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created balance_fetch_created blocked_candidate_descriptor_count blocked_candidate_descriptor_ids blocked_candidate_descriptors blocked_reas...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "parameterstackscoringandrankinggate_report_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exists_atomicrows_bundle_sha256_c",
+      "objective_terms": [
+        "ParameterStackScoringAndRankingGate.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_EXECUTION_LATENCY_LIMIT_PRICE_TARGET_FIELDS_LIMIT_PRICE_FIELD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_LIMIT_PRICE_FIELD"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008892",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008892",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__ParameterStackScoringAndRankingGate.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008892"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000351",
+        "AR_EXACT_001_SIGNAL_FEATURES_000352"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QuantumApplicabilityClassificationRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created blocked_classification_count blocked_family_ids canonical_family_count classical_only_families_valid_as_comparators classific...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "quantumapplicabilityclassificationregistry_report_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exists_atomicrows_bundle_s",
+      "objective_terms": [
+        "QuantumApplicabilityClassificationRegistry.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_PAYOUT_RULES_PAYOUT_RULES_FORECASTEX_IBKR_FORECASTEX_IBKR_OFFICIAL_RULEBOOKS_PAYOUT_RULES"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008893",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008893",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/QuantumApplicabilityClassificationRegistry.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__QuantumApplicabilityClassificationRegistry.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008893"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000349",
+        "AR_EXACT_001_SIGNAL_FEATURES_000350"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "QuantumClassicalOptimizerArbitrationGate.report annealing_execution_created arbitration_decisions arbitration_fixture_count arbitration_fixture_ids arbitration_inputs arbitration_modes arbitration_ordered_fixture_ids arbitration_outputs arbitration_policy atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomi...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "quantumclassicaloptimizerarbitrationgate_report_annealing_execution_created_arbitration_decisions_arbitration_fixture_count_arbitration_fixture_ids_arbitration_",
+      "objective_terms": [
+        "QuantumClassicalOptimizerArbitrationGate.report annealing_execution_created arbitration_decisions arbitration_fixture_co"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_VENUE_SOURCE_REQUIRED_VENUE_ORDER_FIELDS_ORDER_FIELDS_KALSHI_KALSHI_OFFICIAL_API_DOCS_ORDER_FIELDS"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008894",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008894",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__QuantumClassicalOptimizerArbitrationGate.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008894"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    },
+    {
+      "atomicrows_row_ids": [
+        "AR_EXACT_001_SIGNAL_FEATURES_000246",
+        "AR_EXACT_001_SIGNAL_FEATURES_000247"
+      ],
+      "classical_baseline_required_flag": true,
+      "constraint_terms": [
+        "budget_constraint",
+        "exposure_constraint"
+      ],
+      "coverage_match_tier": "TIER_3_STRUCTURED_SEMANTIC_MATCH",
+      "coverage_state": "QUANTUM_RESIDUAL_COVERED_BY_CANONICAL_ALIAS",
+      "default_range_if_available": null,
+      "default_value_if_available": null,
+      "downstream_pr87_pr92_route": [
+        "PR87_CANDIDATE_PARAMETER_STACK_GENERATION",
+        "PR88_TRADE_CONTEXT_PARAMETER_STACK_SELECTION",
+        "PR89_SELECTED_PARAMETER_STACK_HANDOFF",
+        "PR90_REPLAY_PAPER_CANDIDATE_STACK_COMPETITION",
+        "PR91_DUAL_RESULT_REVIEW_FOR_PARAMETER_STACKS",
+        "PR92_OWNER_LIVE_PROMOTION_REVIEW_FOR_PARAMETER_STACKS"
+      ],
+      "downstream_qtt_agent_roles": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RESEARCH_AGENT"
+      ],
+      "extracted_text": "TradeContextParameterStackSelectionGate.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bundle_jsonl_exists atomicrows_bundle_sha256_created atomicrows_bundle_sha256_exists backend_execution_created balance_fetch_created base_head blocked_candidate_count blocked_candidate_policy blocked_candidates_cannot_be_selected blocked_r...",
+      "extraction_pass_ids": [
+        "PASS_3_TABLE_LIST_EXTRACTION"
+      ],
+      "formula_template_type": "ANNEALING_CANDIDATE_TEMPLATE",
+      "hybrid_arbitration_required_flag": true,
+      "live_use_allowed_flag": false,
+      "normalized_quantum_name": "tradecontextparameterstackselectiongate_report_annealing_execution_created_atomicrows_bundle_jsonl_created_atomicrows_bundle_jsonl_exists_atomicrows_bundle_sha2",
+      "objective_terms": [
+        "TradeContextParameterStackSelectionGate.report annealing_execution_created atomicrows_bundle_jsonl_created atomicrows_bu"
+      ],
+      "optimizer_execution_evidence_created_flag": false,
+      "parameter_range_if_available": null,
+      "penalty_terms": [
+        "risk_penalty",
+        "latency_penalty",
+        "liquidity_penalty"
+      ],
+      "pr154_target_ids": [
+        "PR154_BRIDGE__PR151_PR150_RISK_CAPITAL_CONTROL_LIQUIDITY_GUARD_TARGETS_LIQUIDITY_GUARD_PREDICTION_MARKETS_GENERAL_FORECASTEX_IBKR_OFFICIAL_API_DOCS_LIQUIDITY_GUARD"
+      ],
+      "pr161c_quantum_assimilation_queue_id_if_needed": null,
+      "pr161c_quantum_assimilation_required_flag": false,
+      "profit_evidence_created_flag": false,
+      "quantum_advantage_evidence_created_flag": false,
+      "quantum_backend_execution_evidence_created_flag": false,
+      "quantum_candidate_family": "ANNEALING",
+      "quantum_optimizer_family": "ANNEALING",
+      "quantum_profile_type": "ANNEALING_GENERAL_CANDIDATE_COVERAGE_RESIDUAL_CANDIDATE",
+      "quantum_residual_id": "PR161B_QUANTUM_RESIDUAL__PR161B_CANDIDATE_008900",
+      "recommended_fill_lane": "REJECT_DUPLICATE_ALREADY_COVERED",
+      "replay_paper_required_flag": true,
+      "residual_candidate_id": "PR161B_CANDIDATE_008900",
+      "residual_gap_type": null,
+      "scale_if_available": null,
+      "source_artifact_path": "docs/master_plan/generated/TradeContextParameterStackSelectionGate.report.json",
+      "source_line_or_locator_if_available": null,
+      "source_section_id": "PRIOR_PR_ARTIFACT__TradeContextParameterStackSelectionGate.report",
+      "strategy_candidate_type": "QUANTUM_GENERAL_CANDIDATE_COVERAGE_CANDIDATE",
+      "unit_if_available": null,
+      "upstream_pr161a_formula_template_ids": [],
+      "upstream_pr161a_quantum_candidate_ids": [],
+      "upstream_pr161a_replay_paper_descriptor_ids": [
+        "PR161B_REPLAY_ROUTE__PR161B_CANDIDATE_008900"
+      ],
+      "upstream_pr161a_strategy_candidate_ids": [],
+      "upstream_pr82_pr86_mapping": [
+        "PR82_PR86_QUANTUM_SCORING_OPTIMIZER_TAXONOMY"
+      ],
+      "variable_domain": "BINARY_ZERO_ONE"
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_type": "PR161B_ANNEALING_RESIDUAL_COVERAGE",
+  "runtime_live_order_profit_authority_count": 0
+}

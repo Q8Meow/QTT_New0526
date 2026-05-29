@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["residual_candidate_id", "coverage_state", "coverage_match_tier", "coverage_proof"],
+  "type": "object"
+}

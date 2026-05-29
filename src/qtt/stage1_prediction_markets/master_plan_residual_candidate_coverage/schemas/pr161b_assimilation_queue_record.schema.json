@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": ["assimilation_queue_id", "residual_candidate_id", "proposed_field_path", "recommended_fill_lane", "live_use_allowed_flag"],
+  "type": "object"
+}
