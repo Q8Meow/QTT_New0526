@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "online_enrichment_coverage_state": {
+      "enum": [
+        "ONLINE_ENRICHED_DIRECT_SOURCE_USED",
+        "ONLINE_ENRICHED_CLUSTER_SOURCE_USED",
+        "ONLINE_ENRICHED_SOURCE_FOUND_NOT_USED",
+        "ONLINE_SCOUT_QUEUED",
+        "ONLINE_SOURCE_NOT_REQUIRED_LOCAL_ARTIFACT_STRONG",
+        "ONLINE_SEARCH_UNAVAILABLE",
+        "ONLINE_SOURCE_REJECTED_UNSAFE",
+        "ONLINE_SOURCE_REJECTED_IRRELEVANT",
+        "ONLINE_SOURCE_REJECTED_UNMAPPABLE"
+      ],
+      "type": "string"
+    },
+    "source_acceptance_state": {
+      "enum": [
+        "SOURCE_ACCEPTED_FOR_QKU_CANDIDATE_SCORING_AND_REPLAY_PAPER_PRIORITIZATION",
+        "SOURCE_REJECTED_UNSAFE",
+        "SOURCE_REJECTED_IRRELEVANT",
+        "SOURCE_REJECTED_UNMAPPABLE",
+        "SOURCE_QUEUED_FOR_OWNER_REVIEW"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

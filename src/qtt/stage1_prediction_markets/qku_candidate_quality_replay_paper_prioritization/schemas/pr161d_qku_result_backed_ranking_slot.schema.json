@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "no_profit_evidence_created_flag": {
+      "const": true,
+      "type": "boolean"
+    },
+    "no_result_fabricated_flag": {
+      "const": true,
+      "type": "boolean"
+    },
+    "profitability_label": {
+      "enum": [
+        "UNOBSERVED",
+        "PROFITABLE_AFTER_COSTS",
+        "NON_PROFITABLE_AFTER_COSTS",
+        "BREAK_EVEN_AFTER_COSTS",
+        "PROFITABLE_BUT_HIGH_DRAWDOWN",
+        "PROFITABLE_BUT_LOW_CONFIDENCE",
+        "NON_PROFITABLE_BUT_DIAGNOSTICALLY_USEFUL",
+        "INSUFFICIENT_SAMPLE",
+        "REGIME_SPECIFIC",
+        "REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    },
+    "result_backed_score": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "result_evidence_weight": {
+      "type": "number"
+    },
+    "result_state": {
+      "enum": [
+        "NO_RESULT_YET",
+        "REPLAY_RESULT_PENDING",
+        "PAPER_RESULT_PENDING",
+        "SHADOW_RESULT_PENDING",
+        "LIVE_RESULT_PENDING",
+        "NOT_TESTABLE_DOCTRINE_ONLY",
+        "FUTURE_MARKET_HOLD",
+        "REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "profitability_label",
+    "result_state",
+    "result_evidence_weight",
+    "result_backed_score",
+    "no_result_fabricated_flag",
+    "no_profit_evidence_created_flag"
+  ],
+  "type": "object"
+}

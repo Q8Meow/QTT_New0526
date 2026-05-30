@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "qku_quantum_priority_subclass": {
+      "enum": [
+        "QUBO_PRIORITY",
+        "ISING_PRIORITY",
+        "QAOA_PRIORITY",
+        "VQE_PRIORITY",
+        "ANNEALING_PRIORITY",
+        "QUANTUM_PORTFOLIO_PRIORITY",
+        "QUANTUM_CAPITAL_ALLOCATION_PRIORITY",
+        "QUANTUM_MARKET_SELECTION_PRIORITY",
+        "QUANTUM_SIGNAL_COMBINATION_PRIORITY",
+        "QUANTUM_LATENCY_ROUTING_PRIORITY",
+        "QUANTUM_ARBITRAGE_PATH_PRIORITY",
+        "HYBRID_QUANTUM_CLASSICAL_PRIORITY",
+        "QUANTUM_INSPIRED_PRIORITY",
+        "QUANTUM_ADVISORY_PRIORITY"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

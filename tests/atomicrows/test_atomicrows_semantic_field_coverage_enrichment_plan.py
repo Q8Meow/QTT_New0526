@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-                branch="pr161c-qku-residual-candidate-assimilation-fill-campaign",
+                branch="pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
             source="unit-test",
         ),
     )

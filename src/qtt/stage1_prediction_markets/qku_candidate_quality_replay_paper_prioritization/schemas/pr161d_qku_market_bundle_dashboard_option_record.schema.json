@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "affects_live_authority_flag": {
+      "const": false,
+      "type": "boolean"
+    },
+    "current_activation_state": {
+      "enum": [
+        "MARKET_BUNDLE_ACTIVE_STAGE1_REPLAY_PAPER",
+        "MARKET_BUNDLE_ACTIVE_STAGE1_AGENT_SCORING",
+        "MARKET_BUNDLE_ACTIVE_RESEARCH_ONLY",
+        "MARKET_BUNDLE_DORMANT_FUTURE_STAGE",
+        "MARKET_BUNDLE_OWNER_REVIEW_REQUIRED",
+        "MARKET_BUNDLE_REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    },
+    "default_activation_state": {
+      "enum": [
+        "MARKET_BUNDLE_ACTIVE_STAGE1_REPLAY_PAPER",
+        "MARKET_BUNDLE_ACTIVE_STAGE1_AGENT_SCORING",
+        "MARKET_BUNDLE_ACTIVE_RESEARCH_ONLY",
+        "MARKET_BUNDLE_DORMANT_FUTURE_STAGE",
+        "MARKET_BUNDLE_OWNER_REVIEW_REQUIRED",
+        "MARKET_BUNDLE_REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "current_activation_state",
+    "default_activation_state",
+    "affects_live_authority_flag"
+  ],
+  "type": "object"
+}

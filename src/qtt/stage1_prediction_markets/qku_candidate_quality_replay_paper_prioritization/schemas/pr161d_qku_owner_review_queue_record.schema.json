@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "quality_lane": {
+      "enum": [
+        "QKU_QUALITY_LANE_A_DAY1_REPLAY_PAPER_PRIORITY",
+        "QKU_QUALITY_LANE_B_STAGE1_AGENT_READY",
+        "QKU_QUALITY_LANE_C_QUANTUM_FORWARD_COMPARE",
+        "QKU_QUALITY_LANE_D_CLASSICAL_BASELINE_COMPARE",
+        "QKU_QUALITY_LANE_E_HYBRID_ARBITRATION_COMPARE",
+        "QKU_QUALITY_LANE_F_ONLINE_ENRICHMENT_NEEDED",
+        "QKU_QUALITY_LANE_G_SOURCE_TRIANGULATION_NEEDED",
+        "QKU_QUALITY_LANE_H_FUTURE_MARKET_HOLD",
+        "QKU_QUALITY_LANE_I_FUTURE_RUNTIME_ONLY",
+        "QKU_QUALITY_LANE_J_REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

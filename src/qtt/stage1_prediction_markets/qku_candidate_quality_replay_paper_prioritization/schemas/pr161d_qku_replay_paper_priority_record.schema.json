@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "replay_paper_priority_lane": {
+      "enum": [
+        "REPLAY_PAPER_PRIORITY_L0_DAY1_CRITICAL",
+        "REPLAY_PAPER_PRIORITY_L1_HIGH",
+        "REPLAY_PAPER_PRIORITY_L2_MEDIUM",
+        "REPLAY_PAPER_PRIORITY_L3_LOW",
+        "REPLAY_PAPER_PRIORITY_L4_ONLINE_ENRICHMENT_FIRST",
+        "REPLAY_PAPER_PRIORITY_L5_FUTURE_MARKET_HOLD",
+        "REPLAY_PAPER_PRIORITY_L6_NOT_TESTABLE_DOCTRINE_ONLY",
+        "REPLAY_PAPER_PRIORITY_L7_REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "assigned_agent_role": {
+      "enum": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_SOURCE_EVIDENCE_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "type": "string"
+    },
+    "task_queue_type": {
+      "enum": [
+        "QKU_AGENT_TASK_REPLAY_PAPER_PREP",
+        "QKU_AGENT_TASK_ONLINE_ENRICHMENT",
+        "QKU_AGENT_TASK_QUANTUM_COMPARE_PREP",
+        "QKU_AGENT_TASK_CLASSICAL_BASELINE_PREP",
+        "QKU_AGENT_TASK_HYBRID_ARBITRATION_PREP",
+        "QKU_AGENT_TASK_RANGE_SENSITIVITY_PREP",
+        "QKU_AGENT_TASK_OPTIMIZER_CONFIG_PREP",
+        "QKU_AGENT_TASK_SOURCE_TRIANGULATION",
+        "QKU_AGENT_TASK_SCENARIO_MATRIX_PREP",
+        "QKU_AGENT_TASK_CATEGORY_RANKING_REVIEW",
+        "QKU_AGENT_TASK_BUNDLE_REPLAY_PAPER_PREP",
+        "QKU_AGENT_TASK_OWNER_REVIEW",
+        "QKU_AGENT_TASK_FUTURE_MARKET_HOLD",
+        "QKU_AGENT_TASK_REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

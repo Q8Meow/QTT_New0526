@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "assigned_agent_role": {
+      "enum": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_SOURCE_EVIDENCE_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
