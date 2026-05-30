@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "qku_market_primary": {
+      "enum": [
+        "PREDICTION_MARKET",
+        "EQUITY_MARKET",
+        "CRYPTO_MARKET",
+        "FX_MARKET",
+        "FUTURES_MARKET",
+        "OPTIONS_MARKET",
+        "FIXED_INCOME_MARKET",
+        "COMMODITIES_MARKET",
+        "MULTI_MARKET",
+        "MARKET_AGNOSTIC",
+        "FUTURE_MARKET_UNSPECIFIED"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [],
+  "title": "pr161c_qku_market_classification_record",
+  "type": "object"
+}

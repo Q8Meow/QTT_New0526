@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "qku_launch_stage_primary": {
+      "enum": [
+        "STAGE1_PREDICTION_MARKET",
+        "STAGE2_EQUITIES",
+        "STAGE3_CRYPTO",
+        "STAGE4_MULTI_ASSET",
+        "FUTURE_MARKET_EXPANSION",
+        "MARKET_AGNOSTIC_FOUNDATION",
+        "DOCTRINE_ONLY_STAGELESS"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [],
+  "title": "pr161c_qku_launch_stage_classification_record",
+  "type": "object"
+}

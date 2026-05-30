@@ -190,6 +190,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         c.EXPECTED_BRANCH,
         c.REPAIR_BRANCH,
         "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge",
+        "pr161c-qku-residual-candidate-assimilation-fill-campaign",
     } or (
         normalized == "main" and _ancestry_present(root)
     )

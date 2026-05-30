@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "qku_graph_isolated_flag": {
+      "type": "boolean"
+    },
+    "qku_id": {
+      "type": "string"
+    },
+    "qku_launch_stage_primary": {
+      "enum": [
+        "STAGE1_PREDICTION_MARKET",
+        "STAGE2_EQUITIES",
+        "STAGE3_CRYPTO",
+        "STAGE4_MULTI_ASSET",
+        "FUTURE_MARKET_EXPANSION",
+        "MARKET_AGNOSTIC_FOUNDATION",
+        "DOCTRINE_ONLY_STAGELESS"
+      ],
+      "type": "string"
+    },
+    "qku_market_primary": {
+      "enum": [
+        "PREDICTION_MARKET",
+        "EQUITY_MARKET",
+        "CRYPTO_MARKET",
+        "FX_MARKET",
+        "FUTURES_MARKET",
+        "OPTIONS_MARKET",
+        "FIXED_INCOME_MARKET",
+        "COMMODITIES_MARKET",
+        "MULTI_MARKET",
+        "MARKET_AGNOSTIC",
+        "FUTURE_MARKET_UNSPECIFIED"
+      ],
+      "type": "string"
+    },
+    "qku_materialization_state": {
+      "enum": [
+        "MATERIALIZED_NUMERIC_DEFAULT",
+        "MATERIALIZED_RANGE_DEFAULT",
+        "MATERIALIZED_FORMULA_DEFAULT",
+        "MATERIALIZED_ALGORITHM_CONFIG",
+        "MATERIALIZED_OPTIMIZER_CONFIG",
+        "MATERIALIZED_STRATEGY_TEMPLATE",
+        "MATERIALIZED_QUANTUM_CANDIDATE_CONFIG",
+        "MATERIALIZED_CLASSICAL_BASELINE_CONFIG",
+        "MATERIALIZED_HYBRID_ARBITRATION_CONFIG",
+        "MATERIALIZED_CATEGORICAL_DEFAULT",
+        "MATERIALIZED_AGENT_ROUTE",
+        "MATERIALIZED_UPSTREAM_DOWNSTREAM_ROUTE",
+        "MATERIALIZED_QKU_GRAPH_EDGE_ROUTE",
+        "MATERIALIZED_REPLAY_PAPER_ROUTE",
+        "MATERIALIZED_SOURCE_RETRIEVAL_RECORD",
+        "MATERIALIZED_OWNER_POLICY_RECORD",
+        "MATERIALIZED_DOCTRINE_RECORD",
+        "MATERIALIZED_FIELD_VALUE_FACET",
+        "MATERIALIZED_FUTURE_RUNTIME_ROUTE",
+        "MATERIALIZED_UNSAFE_REJECTION_RECORD",
+        "MATERIALIZED_SECRET_REJECTION_RECORD"
+      ],
+      "type": "string"
+    },
+    "qku_materialized_flag": {
+      "type": "boolean"
+    },
+    "qku_source_acceptance_state": {
+      "enum": [
+        "SOURCE_ACCEPTED_FOR_QKU_CANDIDATE_USE",
+        "SOURCE_ACCEPTED_FOR_DEFAULT_MATERIALIZATION",
+        "SOURCE_ACCEPTED_FOR_RESEARCH_USE",
+        "SOURCE_ACCEPTED_FOR_REPLAY_PAPER_TESTING",
+        "SOURCE_ACCEPTED_FOR_AGENT_RETRIEVAL",
+        "SOURCE_ACCEPTED_FOR_OWNER_REVIEW",
+        "SOURCE_ACCEPTED_FOR_SOURCE_UPGRADE_ROUTE",
+        "SOURCE_ACCEPTED_FOR_ONLINE_SCOUT_QUEUE",
+        "SOURCE_ACCEPTED_FOR_QKU_GRAPH_LINKAGE",
+        "SOURCE_REJECTED_UNSAFE",
+        "SOURCE_REJECTED_SECRET",
+        "SOURCE_REJECTED_IRRELEVANT",
+        "SOURCE_REJECTED_DUPLICATE_NO_NEW_ALIAS_VALUE",
+        "SOURCE_REJECTED_UNMAPPABLE"
+      ],
+      "type": "string"
+    },
+    "qku_source_class": {
+      "enum": [
+        "OWNER_PROVIDED_SOURCE",
+        "MASTER_PLAN_LITERAL_SOURCE",
+        "PRIOR_PR_ARTIFACT_SOURCE",
+        "PR136_ORCHESTRATION_SOURCE",
+        "ATOMICROWS_COMPATIBILITY_SOURCE",
+        "PR154_COMPATIBILITY_SOURCE",
+        "OFFICIAL_PUBLIC_SOURCE",
+        "NON_OFFICIAL_PUBLIC_RESEARCH_SOURCE",
+        "ACADEMIC_PUBLIC_SOURCE",
+        "INSTITUTIONAL_PUBLIC_SOURCE",
+        "BLOG_PUBLIC_SOURCE",
+        "FORUM_PUBLIC_SOURCE",
+        "SOCIAL_PUBLIC_SOURCE",
+        "NEWS_PUBLIC_SOURCE",
+        "GITHUB_PUBLIC_SOURCE",
+        "PUBLIC_CODE_PATTERN_SOURCE",
+        "OPTIMIZER_LIBRARY_DOC_SOURCE",
+        "QUANTUM_LIBRARY_DOC_SOURCE",
+        "CLASSICAL_BASELINE_REFERENCE_SOURCE",
+        "HYBRID_ARBITRATION_REFERENCE_SOURCE",
+        "UNKNOWN_PUBLIC_SOURCE",
+        "UNSAFE_REJECTED_SOURCE",
+        "SECRET_REJECTED_SOURCE"
+      ],
+      "type": "string"
+    },
+    "qku_state": {
+      "enum": [
+        "QKU_MATERIALIZED_ACTIVE",
+        "QKU_ALIAS_MAPPED",
+        "QKU_DOCTRINE_ONLY_MATERIALIZED",
+        "QKU_SOURCE_UPGRADE_READY",
+        "QKU_ONLINE_SCOUT_READY",
+        "QKU_FUTURE_RUNTIME_ROUTE_MATERIALIZED",
+        "QKU_UNSAFE_REJECTED",
+        "QKU_SECRET_REJECTED"
+      ],
+      "type": "string"
+    },
+    "qku_type": {
+      "enum": [
+        "ATOMICROW_QKU",
+        "PR154_TARGET_QKU",
+        "FIELD_VALUE_FACET_QKU",
+        "PARAMETER_QKU",
+        "FORMULA_QKU",
+        "ALGORITHM_QKU",
+        "RANGE_QKU",
+        "SCALE_QKU",
+        "DEFAULT_VALUE_QKU",
+        "CONSTRAINT_QKU",
+        "SIGNAL_QKU",
+        "FEATURE_QKU",
+        "RISK_QKU",
+        "CAPITAL_QKU",
+        "EXECUTION_QKU",
+        "LATENCY_QKU",
+        "MARKET_MICROSTRUCTURE_QKU",
+        "SOURCE_RECORD_QKU",
+        "REPLAY_CANDIDATE_QKU",
+        "PAPER_CANDIDATE_QKU",
+        "QUANTUM_CANDIDATE_QKU",
+        "CLASSICAL_CANDIDATE_QKU",
+        "HYBRID_CANDIDATE_QKU",
+        "AGENT_BINDING_QKU",
+        "MATERIALIZATION_QKU",
+        "METADATA_QKU",
+        "RESIDUAL_CANDIDATE_QKU",
+        "STRATEGY_TEMPLATE_QKU",
+        "OPTIMIZER_SETTING_QKU",
+        "OWNER_POLICY_QKU",
+        "CONNECTOR_FUTURE_QKU",
+        "LIVE_FUTURE_QKU",
+        "DOCTRINE_ONLY_QKU",
+        "SOURCE_UPGRADE_QKU",
+        "ONLINE_SCOUT_QKU",
+        "FUTURE_RUNTIME_ONLY_QKU"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "qku_id",
+    "qku_type",
+    "qku_materialized_flag",
+    "qku_graph_isolated_flag"
+  ],
+  "title": "pr161c_qku_record",
+  "type": "object"
+}
