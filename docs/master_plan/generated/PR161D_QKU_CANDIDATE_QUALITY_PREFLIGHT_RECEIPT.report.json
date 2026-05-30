@@ -184,7 +184,7 @@
   "records": [
     {
       "active_branch": "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
-      "current_head_commit": "55a15b99c6f593c00e12dccee61ee13f0459b08e",
+      "current_head_commit": "35e61e34c78d12bb363b218de8aa0d8b541b19e8",
       "day1_launch_readiness_policy_consumed_flag": true,
       "expected_field_value_facet_count": 22625,
       "expected_primary_qku_count": 9360,

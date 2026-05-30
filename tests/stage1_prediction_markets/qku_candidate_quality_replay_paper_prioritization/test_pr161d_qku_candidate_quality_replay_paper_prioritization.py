@@ -7,6 +7,9 @@ from pathlib import Path
 import pytest
 
 from src.qtt.stage1_prediction_markets.qku_candidate_quality_replay_paper_prioritization import constants as c
+from src.qtt.stage1_prediction_markets.qku_candidate_quality_replay_paper_prioritization.report_builder import (
+    _payloads_for_write,
+)
 from src.qtt.stage1_prediction_markets.qku_candidate_quality_replay_paper_prioritization.validator import (
     _load_records,
     _validate_boundedness,
@@ -26,9 +29,111 @@ def _records(filename: str) -> list[dict[str, object]]:
     return _load_records(REPO_ROOT, _payload(filename))
 
 
+def _sharded_payload(shard_file: str) -> dict[str, object]:
+    return {
+        "records": [],
+        "record_count": 1,
+        "sharded_flag": True,
+        "shard_files": [shard_file],
+    }
+
+
+def _iter_shard_file_refs(value: object):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key == "shard_files" and isinstance(item, list):
+                for ref in item:
+                    if isinstance(ref, str):
+                        yield ref
+            yield from _iter_shard_file_refs(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _iter_shard_file_refs(item)
+
+
 @pytest.fixture(scope="module")
 def summary() -> dict[str, object]:
     return _payload("PR161D_FinalSummary.report.json")
+
+
+def _first_generated_shard_ref() -> str:
+    shard_refs = _payload("PR161D_QKUAgentGraphRoutingMatrix.report.json")["shard_files"]
+    assert isinstance(shard_refs, list)
+    assert shard_refs
+    shard_ref = shard_refs[0]
+    assert isinstance(shard_ref, str)
+    return shard_ref
+
+
+def test_pr161d_load_records_accepts_posix_shard_paths():
+    records = _load_records(REPO_ROOT, _sharded_payload(_first_generated_shard_ref()))
+
+    assert records
+
+
+def test_pr161d_load_records_accepts_windows_backslash_shard_paths():
+    records = _load_records(
+        REPO_ROOT,
+        _sharded_payload(_first_generated_shard_ref().replace("/", "\\")),
+    )
+
+    assert records
+
+
+def test_pr161d_load_records_rejects_absolute_shard_paths():
+    absolute_path = str((REPO_ROOT / _first_generated_shard_ref()).resolve())
+
+    with pytest.raises(ValueError, match="must be relative"):
+        _load_records(REPO_ROOT, _sharded_payload(absolute_path))
+
+
+def test_pr161d_load_records_rejects_traversal_shard_paths():
+    traversal_path = (
+        "docs/master_plan/generated/pr161d_qku_candidate_quality_shards/"
+        "../PR161D_Test.report.shard_0001.json"
+    )
+
+    with pytest.raises(ValueError, match="must not contain"):
+        _load_records(REPO_ROOT, _sharded_payload(traversal_path))
+
+
+def test_pr161d_sharding_builder_emits_posix_relative_shard_refs():
+    sharded_report = "PR161D_QKUAgentGraphRoutingMatrix.report.json"
+    payloads = {
+        filename: {"report_id": Path(filename).stem, "records": [], "record_count": 0}
+        for filename in c.REPORT_FILENAMES
+    }
+    records = [{"record_id": f"fixture-{index:05d}"} for index in range(20_001)]
+    payloads[sharded_report] = {
+        "report_id": "PR161D_QKU_AGENT_GRAPH_ROUTING_MATRIX",
+        "records": records,
+        "record_count": len(records),
+    }
+
+    main_payloads, shard_payloads, manifest_records = _payloads_for_write(payloads)
+
+    shard_refs = main_payloads[sharded_report]["shard_files"]
+    manifest = next(
+        record
+        for record in manifest_records
+        if record["report_filename"] == sharded_report
+    )
+    assert shard_refs
+    assert shard_refs == manifest["shard_files"]
+    assert set(shard_refs) == set(shard_payloads)
+    assert all("\\" not in ref for ref in shard_refs)
+    assert all(ref.startswith(c.SHARD_DIR.as_posix() + "/") for ref in shard_refs)
+
+
+def test_pr161d_generated_shard_refs_are_posix():
+    shard_refs: list[str] = []
+    for path in GENERATED.glob("PR161D_*.report.json"):
+        shard_refs.extend(_iter_shard_file_refs(json.loads(path.read_text(encoding="utf-8"))))
+
+    shard_refs = [ref for ref in shard_refs if ref]
+    assert shard_refs
+    assert all("\\" not in ref for ref in shard_refs)
+    assert all(ref.startswith(c.SHARD_DIR.as_posix() + "/") for ref in shard_refs)
 
 
 def test_pr161d_consumes_pr161c_and_registers_agent_network(summary):

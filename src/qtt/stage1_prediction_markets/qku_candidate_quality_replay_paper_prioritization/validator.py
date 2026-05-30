@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 from . import constants as c
@@ -125,9 +125,27 @@ def _load_records(repo_root: Path, payload: dict[str, Any]) -> list[dict[str, An
         return records
     merged: list[dict[str, Any]] = []
     for shard_file in payload.get("shard_files") or []:
-        shard_payload = json.loads((repo_root / str(shard_file)).read_text(encoding="utf-8"))
+        shard_payload = json.loads(_resolve_shard_path(repo_root, shard_file).read_text(encoding="utf-8"))
         merged.extend(records_from_payload(shard_payload))
     return merged
+
+
+def _resolve_shard_path(repo_root: Path, shard_file: Any) -> Path:
+    raw_path = str(shard_file)
+    normalized = raw_path.replace("\\", "/")
+    windows_path = PureWindowsPath(normalized)
+    posix_path = PurePosixPath(normalized)
+    if posix_path.is_absolute() or windows_path.is_absolute() or windows_path.drive:
+        raise ValueError(f"PR161D shard path must be relative: {raw_path}")
+    if any(part == ".." for part in posix_path.parts):
+        raise ValueError(f"PR161D shard path must not contain '..': {raw_path}")
+    candidate = repo_root.joinpath(*posix_path.parts)
+    resolved_root = repo_root.resolve(strict=False)
+    try:
+        candidate.resolve(strict=False).relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(f"PR161D shard path escapes repo root: {raw_path}") from exc
+    return candidate
 
 
 def _validate_rankings(records: list[dict[str, Any]], failures: list[str]) -> None:

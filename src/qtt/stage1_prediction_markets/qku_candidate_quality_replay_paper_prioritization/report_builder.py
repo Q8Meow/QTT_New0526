@@ -2403,6 +2403,7 @@ def _payloads_for_write(
         for index, chunk in enumerate(chunks, start=1):
             shard_name = f"{Path(filename).stem}.shard_{index:04d}.json"
             rel_path = c.SHARD_DIR / shard_name
+            rel_path_text = rel_path.as_posix()
             shard_payload = dict(payload)
             shard_payload["records"] = chunk
             shard_payload["record_count"] = len(chunk)
@@ -2410,8 +2411,8 @@ def _payloads_for_write(
             shard_payload["shard_index"] = index
             shard_payload["shard_count"] = len(chunks)
             shard_payload["sharded_flag"] = False
-            shard_payloads[str(rel_path)] = shard_payload
-            shard_files.append(str(rel_path))
+            shard_payloads[rel_path_text] = shard_payload
+            shard_files.append(rel_path_text)
         payload["records"] = []
         payload["record_count"] = len(records)
         payload["unsharded_record_count"] = len(records)

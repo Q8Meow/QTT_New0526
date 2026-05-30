@@ -843,7 +843,7 @@
       "overflow_bundle_count": 361,
       "phase_timings": [
         {
-          "duration_ms": 2.351,
+          "duration_ms": 2.309,
           "input_count": 1861,
           "output_count": 41,
           "phase_name": "boundedness_metric_reconciliation"
