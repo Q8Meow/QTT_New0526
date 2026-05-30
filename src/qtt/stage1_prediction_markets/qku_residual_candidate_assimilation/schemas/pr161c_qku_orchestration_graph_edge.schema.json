@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "edge_direction": {
+      "enum": [
+        "UPSTREAM",
+        "DOWNSTREAM"
+      ],
+      "type": "string"
+    },
+    "edge_id": {
+      "type": "string"
+    },
+    "edge_type": {
+      "enum": [
+        "UPSTREAM_MASTER_PLAN_SECTION",
+        "UPSTREAM_PR161A_ENTITY",
+        "UPSTREAM_PR161A_FIELD_VALUE_FACET",
+        "UPSTREAM_PR161B_RESIDUAL",
+        "UPSTREAM_PR136_ROUTE_TRIAGE",
+        "UPSTREAM_PR136_SECTION_CROSSWALK",
+        "UPSTREAM_PR136_MARKET_INDEX",
+        "UPSTREAM_PR136_COMMAND_ACTION",
+        "UPSTREAM_PR137R_ATOMICROWS_RECONCILIATION",
+        "UPSTREAM_PR138_ATOMICROWS_SEMANTIC_CONTRACT",
+        "UPSTREAM_PR154_TARGET",
+        "UPSTREAM_PRIOR_PR_ARTIFACT",
+        "UPSTREAM_ONLINE_SOURCE",
+        "UPSTREAM_OWNER_TEXT",
+        "UPSTREAM_QTT_DEFAULT_POLICY",
+        "UPSTREAM_PR161C_FALLBACK_MATERIALIZATION_POLICY",
+        "UPSTREAM_ONLINE_SCOUT_PENDING_ROUTE",
+        "UPSTREAM_SUPPLEMENTAL_ARTIFACT_SCOUT_ROUTE",
+        "DOWNSTREAM_QTT_AGENT",
+        "DOWNSTREAM_AGENT_ROLE",
+        "DOWNSTREAM_USER",
+        "DOWNSTREAM_WORKFLOW",
+        "DOWNSTREAM_PROCESS",
+        "DOWNSTREAM_PR",
+        "DOWNSTREAM_FILE",
+        "DOWNSTREAM_REPORT",
+        "DOWNSTREAM_VALIDATOR",
+        "DOWNSTREAM_REPLAY_PAPER_ROUTE",
+        "DOWNSTREAM_QUANTUM_ADVISORY",
+        "DOWNSTREAM_CLASSICAL_BASELINE",
+        "DOWNSTREAM_HYBRID_ARBITRATION",
+        "DOWNSTREAM_OPTIMIZER_ARBITRATION",
+        "DOWNSTREAM_EDGE_PARAMETER_STACK",
+        "DOWNSTREAM_ATOMICROWS_COMPATIBILITY",
+        "DOWNSTREAM_PR154_COMPATIBILITY",
+        "DOWNSTREAM_STAGE1_PREDICTION_MARKET",
+        "DOWNSTREAM_OWNER_REVIEW",
+        "DOWNSTREAM_FUTURE_LIVE_GATE",
+        "DOWNSTREAM_AGENT_RETRIEVAL_INDEX",
+        "DOWNSTREAM_STAGE1_LAUNCH_PREP_INDEX",
+        "DOWNSTREAM_REPLAY_PAPER_QUEUE",
+        "DOWNSTREAM_OWNER_REVIEW_QUEUE",
+        "DOWNSTREAM_SOURCE_INTAKE_QUEUE",
+        "DOWNSTREAM_FUTURE_PR_REVIEW_QUEUE"
+      ],
+      "type": "string"
+    },
+    "materialized_flag": {
+      "type": "boolean"
+    },
+    "source_qku_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "edge_id",
+    "source_qku_id",
+    "edge_direction",
+    "edge_type",
+    "materialized_flag"
+  ],
+  "title": "pr161c_qku_orchestration_graph_edge",
+  "type": "object"
+}

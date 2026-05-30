@@ -674,6 +674,40 @@ def test_pr161b_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr161c_explicit_changed_path_allowance_is_narrow():
+    branch = "pr161c-qku-residual-candidate-assimilation-fill-campaign"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=161) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/qku_residual_candidate_assimilation/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR161C_QKUFinalAssimilationSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr161c_qku_report_shards/PR161C_QKU9360PrimaryMaterializationRegistry.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr161c_qku_residual_candidate_assimilation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR161A_FinalValueStateSummary.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")

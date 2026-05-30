@@ -44,6 +44,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair/pr161a-atomicrows-pr154-value-state-materialization-bridge": 161,
     "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge": 161,
     "repair/pr161b-master-plan-residual-candidate-coverage-assimilation-bridge": 161,
+    "pr161c-qku-residual-candidate-assimilation-fill-campaign": 161,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -119,6 +120,106 @@ PR161B_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    }
+)
+PR161C_BRANCH = "pr161c-qku-residual-candidate-assimilation-fill-campaign"
+PR161C_GENERATED_REPORT_FILENAMES = (
+    "PR161C_QKU_RESIDUAL_ASSIMILATION_PREFLIGHT_RECEIPT.report.json",
+    "PR161C_PR161APrimaryEntityDiagnostic.report.json",
+    "PR161C_PR161AFieldValueFacetDiagnostic.report.json",
+    "PR161C_PR161BQueueDiagnostic.report.json",
+    "PR161C_PR161BToPR161AFieldCoverageDiagnostic.report.json",
+    "PR161C_QKUSupplementalArtifactScout.report.json",
+    "PR161C_QKUResidualTypeBreakdown.report.json",
+    "PR161C_QKUResidualDiagnosticJustification.report.json",
+    "PR161C_QKUFillLaneBreakdown.report.json",
+    "PR161C_QKUAuthorityAndProvenanceBreakdown.report.json",
+    "PR161C_QKUAgentAndWorkflowBreakdown.report.json",
+    "PR161C_QKUMarketBreakdown.report.json",
+    "PR161C_QKULaunchStageBreakdown.report.json",
+    "PR161C_QKUClassicalQuantumHybridBreakdown.report.json",
+    "PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "PR161C_QKU22625FieldValueFacetLinkage.report.json",
+    "PR161C_QKUExpandedRecordAccounting.report.json",
+    "PR161C_QKUDefaultMaterializationCoverage.report.json",
+    "PR161C_QKUNumericDefaultMaterialization.report.json",
+    "PR161C_QKUFormulaDefaultMaterialization.report.json",
+    "PR161C_QKUAlgorithmConfigMaterialization.report.json",
+    "PR161C_QKUOptimizerDefaultMaterialization.report.json",
+    "PR161C_QKUOwnerFallbackDefaultMaterialization.report.json",
+    "PR161C_QKUOnlineSourceMaterialization.report.json",
+    "PR161C_QKUAgentLaunchReadinessMaterialization.report.json",
+    "PR161C_QKUCanonicalRegistry.report.json",
+    "PR161C_QKUAliasMap.report.json",
+    "PR161C_QKUTypeTaxonomy.report.json",
+    "PR161C_QKUResidualAssimilationRegistry.report.json",
+    "PR161C_QKUResidualAssimilationDelta.report.json",
+    "PR161C_QKUFormulaAlgorithmAssimilation.report.json",
+    "PR161C_QKUParameterRangeAssimilation.report.json",
+    "PR161C_QKUQuantumAssimilation.report.json",
+    "PR161C_QKUQuantumResidualTrace.report.json",
+    "PR161C_QKUClassicalHybridAssimilation.report.json",
+    "PR161C_QKUReplayPaperRouteBridge.report.json",
+    "PR161C_QKUAgentConsumptionBridge.report.json",
+    "PR161C_QKUUpstreamDownstreamTraceability.report.json",
+    "PR161C_QKUWorkflowProcessBridge.report.json",
+    "PR161C_QKUDownstreamPRFileBridge.report.json",
+    "PR161C_QKUOrchestrationCompleteness.report.json",
+    "PR161C_QKUOrchestrationGraph.report.json",
+    "PR161C_QKUOrchestrationGraphEdges.report.json",
+    "PR161C_QKUOrchestrationGraphCompleteness.report.json",
+    "PR161C_QKUGraphQualityMetrics.report.json",
+    "PR161C_QKUIsolatedNodeAudit.report.json",
+    "PR161C_QKUSourceUpgradeQueue.report.json",
+    "PR161C_QKUOnlineScoutQueue.report.json",
+    "PR161C_QKUSourceIntakeAcceptancePolicy.report.json",
+    "PR161C_QKUOnlineRetrievalAudit.report.json",
+    "PR161C_QKUMasterInventoryBridge.report.json",
+    "PR161C_QKUAtomicRowsCompatibilityBridge.report.json",
+    "PR161C_QKUPR154CompatibilityBridge.report.json",
+    "PR161C_QKUMarketClassificationInventory.report.json",
+    "PR161C_QKULaunchStageClassification.report.json",
+    "PR161C_QKUClassicalQuantumHybridInventory.report.json",
+    "PR161C_QKUAlgorithmFormulaStrategyInventory.report.json",
+    "PR161C_QKUQuantumForwardOptimizationInventory.report.json",
+    "PR161C_QKUAgentRetrievalIndex.report.json",
+    "PR161C_QKUStage1PredictionMarketRetrievalIndex.report.json",
+    "PR161C_QKUStage1Day1LaunchPrepIndex.report.json",
+    "PR161C_QKUCrossMarketReuseIndex.report.json",
+    "PR161C_QKURangeOptimizerMaterializationAudit.report.json",
+    "PR161C_QKUFallbackDefaultExhaustionAudit.report.json",
+    "PR161C_QKUFinalAssimilationSummary.report.json",
+    "PR161C_ForbiddenAuthorityScan.report.json",
+    "PR161C_NoScatteredHardcodedAuthorityAudit.report.json",
+    "PR161C_QKUReportShardManifest.report.json",
+    "PR161C_BranchContextAndDeterministicAudit.report.json",
+)
+PR161C_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/pr161c_qku_report_shards/",
+    "src/qtt/stage1_prediction_markets/qku_residual_candidate_assimilation/",
+    "tests/stage1_prediction_markets/qku_residual_candidate_assimilation/",
+)
+PR161C_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr161c_qku_residual_candidate_assimilation.py",
+        "tools/validate_pr161c_qku_residual_candidate_assimilation.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(
+            f"docs/master_plan/generated/{filename}"
+            for filename in PR161C_GENERATED_REPORT_FILENAMES
+        ),
     }
 )
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
@@ -779,6 +880,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR161C_BRANCH:
+        return normalized in PR161C_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR161C_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR159_BRANCH:
         return normalized in PR159_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

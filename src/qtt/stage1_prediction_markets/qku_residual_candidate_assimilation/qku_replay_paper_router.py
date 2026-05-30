@@ -1,0 +1,5 @@
+"""Replay/paper route surface."""
+
+DEFAULT_REPLAY_PAPER_ROUTE = "DOWNSTREAM_REPLAY_PAPER_QUEUE"
+
+__all__ = ["DEFAULT_REPLAY_PAPER_ROUTE"]

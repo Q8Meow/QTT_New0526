@@ -24,6 +24,7 @@ _PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES = (
 )
 _PR161A_DOWNSTREAM_BRANCH = "pr161a-atomicrows-pr154-value-state-materialization-bridge"
 _PR161B_DOWNSTREAM_BRANCH = "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge"
+_PR161C_DOWNSTREAM_BRANCH = "pr161c-qku-residual-candidate-assimilation-fill-campaign"
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -114,6 +115,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
         c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
         _PR161A_DOWNSTREAM_BRANCH,
         _PR161B_DOWNSTREAM_BRANCH,
+        _PR161C_DOWNSTREAM_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
@@ -165,6 +167,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH,
         _PR161A_DOWNSTREAM_BRANCH,
         _PR161B_DOWNSTREAM_BRANCH,
+        _PR161C_DOWNSTREAM_BRANCH,
     }:
         return
     if ci_branch_context.github_actions_main_push_context_active():
