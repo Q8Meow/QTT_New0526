@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "agent_layer": {
+      "enum": [
+        "RESEARCH_KNOWLEDGE_LAYER",
+        "SCORING_SELECTION_LAYER",
+        "REPLAY_VALIDATION_LAYER",
+        "RISK_CAPITAL_LAYER",
+        "LATENCY_EXECUTION_PREP_LAYER",
+        "OWNER_REVIEW_LAYER",
+        "QKU_SERVICE_LAYER"
+      ],
+      "type": "string"
+    },
+    "agent_materialized_bundle_count": {
+      "const": 0,
+      "type": "integer"
+    },
+    "agent_role": {
+      "enum": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_SOURCE_EVIDENCE_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "type": "string"
+    },
+    "no_runtime_agent_claim_flag": {
+      "const": true,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "agent_role",
+    "agent_layer",
+    "agent_materialized_bundle_count",
+    "no_runtime_agent_claim_flag"
+  ],
+  "type": "object"
+}

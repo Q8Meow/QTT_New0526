@@ -1,0 +1,414 @@
+{
+  "authority_class": "QKU_CANDIDATE_QUALITY_TRIAGE_NOT_LIVE_AUTHORITY_NOT_RESULT_EVIDENCE",
+  "central_enum_value_sets": {
+    "agent_task_queue_types": [
+      "QKU_AGENT_TASK_REPLAY_PAPER_PREP",
+      "QKU_AGENT_TASK_ONLINE_ENRICHMENT",
+      "QKU_AGENT_TASK_QUANTUM_COMPARE_PREP",
+      "QKU_AGENT_TASK_CLASSICAL_BASELINE_PREP",
+      "QKU_AGENT_TASK_HYBRID_ARBITRATION_PREP",
+      "QKU_AGENT_TASK_RANGE_SENSITIVITY_PREP",
+      "QKU_AGENT_TASK_OPTIMIZER_CONFIG_PREP",
+      "QKU_AGENT_TASK_SOURCE_TRIANGULATION",
+      "QKU_AGENT_TASK_SCENARIO_MATRIX_PREP",
+      "QKU_AGENT_TASK_CATEGORY_RANKING_REVIEW",
+      "QKU_AGENT_TASK_BUNDLE_REPLAY_PAPER_PREP",
+      "QKU_AGENT_TASK_OWNER_REVIEW",
+      "QKU_AGENT_TASK_FUTURE_MARKET_HOLD",
+      "QKU_AGENT_TASK_REJECTED_UNSAFE_OR_SECRET"
+    ],
+    "canonical_qtt_agent_roles": [
+      "QTT_RESEARCH_AGENT",
+      "QTT_SOURCE_EVIDENCE_AGENT",
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "QTT_PARAMETER_STACK_AGENT",
+      "QTT_OWNER_REVIEW_AGENT",
+      "QTT_SCORING_AGENT",
+      "QTT_RANKING_AGENT",
+      "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "QTT_QUANTUM_ADVISORY_AGENT",
+      "QTT_REPLAY_AGENT",
+      "QTT_PAPER_AGENT",
+      "QTT_RISK_AGENT",
+      "QTT_CAPITAL_AGENT",
+      "QTT_LATENCY_AGENT",
+      "QTT_EXECUTION_PREP_AGENT"
+    ],
+    "future_profitability_labels": [
+      "UNOBSERVED",
+      "PROFITABLE_AFTER_COSTS",
+      "NON_PROFITABLE_AFTER_COSTS",
+      "BREAK_EVEN_AFTER_COSTS",
+      "PROFITABLE_BUT_HIGH_DRAWDOWN",
+      "PROFITABLE_BUT_LOW_CONFIDENCE",
+      "NON_PROFITABLE_BUT_DIAGNOSTICALLY_USEFUL",
+      "INSUFFICIENT_SAMPLE",
+      "REGIME_SPECIFIC",
+      "REJECTED_UNSAFE_OR_SECRET"
+    ],
+    "market_bundle_activation_states": [
+      "MARKET_BUNDLE_ACTIVE_STAGE1_REPLAY_PAPER",
+      "MARKET_BUNDLE_ACTIVE_STAGE1_AGENT_SCORING",
+      "MARKET_BUNDLE_ACTIVE_RESEARCH_ONLY",
+      "MARKET_BUNDLE_DORMANT_FUTURE_STAGE",
+      "MARKET_BUNDLE_OWNER_REVIEW_REQUIRED",
+      "MARKET_BUNDLE_REJECTED_UNSAFE_OR_SECRET"
+    ],
+    "online_enrichment_states": [
+      "ONLINE_ENRICHED_DIRECT_SOURCE_USED",
+      "ONLINE_ENRICHED_CLUSTER_SOURCE_USED",
+      "ONLINE_ENRICHED_SOURCE_FOUND_NOT_USED",
+      "ONLINE_SCOUT_QUEUED",
+      "ONLINE_SOURCE_NOT_REQUIRED_LOCAL_ARTIFACT_STRONG",
+      "ONLINE_SEARCH_UNAVAILABLE",
+      "ONLINE_SOURCE_REJECTED_UNSAFE",
+      "ONLINE_SOURCE_REJECTED_IRRELEVANT",
+      "ONLINE_SOURCE_REJECTED_UNMAPPABLE"
+    ],
+    "qtt_agent_layers": [
+      "RESEARCH_KNOWLEDGE_LAYER",
+      "SCORING_SELECTION_LAYER",
+      "REPLAY_VALIDATION_LAYER",
+      "RISK_CAPITAL_LAYER",
+      "LATENCY_EXECUTION_PREP_LAYER",
+      "OWNER_REVIEW_LAYER",
+      "QKU_SERVICE_LAYER"
+    ],
+    "quality_lanes": [
+      "QKU_QUALITY_LANE_A_DAY1_REPLAY_PAPER_PRIORITY",
+      "QKU_QUALITY_LANE_B_STAGE1_AGENT_READY",
+      "QKU_QUALITY_LANE_C_QUANTUM_FORWARD_COMPARE",
+      "QKU_QUALITY_LANE_D_CLASSICAL_BASELINE_COMPARE",
+      "QKU_QUALITY_LANE_E_HYBRID_ARBITRATION_COMPARE",
+      "QKU_QUALITY_LANE_F_ONLINE_ENRICHMENT_NEEDED",
+      "QKU_QUALITY_LANE_G_SOURCE_TRIANGULATION_NEEDED",
+      "QKU_QUALITY_LANE_H_FUTURE_MARKET_HOLD",
+      "QKU_QUALITY_LANE_I_FUTURE_RUNTIME_ONLY",
+      "QKU_QUALITY_LANE_J_REJECTED_UNSAFE_OR_SECRET"
+    ],
+    "quantum_priority_subclasses": [
+      "QUBO_PRIORITY",
+      "ISING_PRIORITY",
+      "QAOA_PRIORITY",
+      "VQE_PRIORITY",
+      "ANNEALING_PRIORITY",
+      "QUANTUM_PORTFOLIO_PRIORITY",
+      "QUANTUM_CAPITAL_ALLOCATION_PRIORITY",
+      "QUANTUM_MARKET_SELECTION_PRIORITY",
+      "QUANTUM_SIGNAL_COMBINATION_PRIORITY",
+      "QUANTUM_LATENCY_ROUTING_PRIORITY",
+      "QUANTUM_ARBITRAGE_PATH_PRIORITY",
+      "HYBRID_QUANTUM_CLASSICAL_PRIORITY",
+      "QUANTUM_INSPIRED_PRIORITY",
+      "QUANTUM_ADVISORY_PRIORITY"
+    ],
+    "replay_paper_priority_lanes": [
+      "REPLAY_PAPER_PRIORITY_L0_DAY1_CRITICAL",
+      "REPLAY_PAPER_PRIORITY_L1_HIGH",
+      "REPLAY_PAPER_PRIORITY_L2_MEDIUM",
+      "REPLAY_PAPER_PRIORITY_L3_LOW",
+      "REPLAY_PAPER_PRIORITY_L4_ONLINE_ENRICHMENT_FIRST",
+      "REPLAY_PAPER_PRIORITY_L5_FUTURE_MARKET_HOLD",
+      "REPLAY_PAPER_PRIORITY_L6_NOT_TESTABLE_DOCTRINE_ONLY",
+      "REPLAY_PAPER_PRIORITY_L7_REJECTED_UNSAFE_OR_SECRET"
+    ],
+    "scenario_result_states": [
+      "NO_RESULT_YET",
+      "REPLAY_RESULT_PENDING",
+      "PAPER_RESULT_PENDING",
+      "SHADOW_RESULT_PENDING",
+      "LIVE_RESULT_PENDING",
+      "NOT_TESTABLE_DOCTRINE_ONLY",
+      "FUTURE_MARKET_HOLD",
+      "REJECTED_UNSAFE_OR_SECRET"
+    ]
+  },
+  "central_policy_module": "src\\qtt\\stage1_prediction_markets\\qku_candidate_quality_replay_paper_prioritization\\constants.py",
+  "live_execution_count": 0,
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "atomicrows_bundle_freeze_authority_created": false,
+    "atomicrows_final_bundle_created": false,
+    "connector_semantic_binding_created": false,
+    "live_execution_created": false,
+    "live_order_authority_created": false,
+    "live_result_created": false,
+    "live_trading_created": false,
+    "optimizer_execution_created": false,
+    "paper_execution_created": false,
+    "paper_result_created": false,
+    "private_state_receipt_created": false,
+    "profit_evidence_created": false,
+    "qtt_generated_sha_created": false,
+    "qtt_sha_authority_created": false,
+    "quantum_backend_execution_created": false,
+    "replay_execution_created": false,
+    "replay_result_created": false,
+    "shadow_execution_created": false,
+    "shadow_result_created": false
+  },
+  "optimizer_execution_count": 0,
+  "owner_approvals": {
+    "OWNER_APPROVES_AGGRESSIVE_DEFAULT_RANGE_SCALE_FILLING": true,
+    "OWNER_APPROVES_ALL_USEFUL_EXTERNAL_INFORMATION_INTO_CANDIDATE_LANES": true,
+    "OWNER_APPROVES_CLASSICAL_BASELINE_PRIORITIZATION": true,
+    "OWNER_APPROVES_HYBRID_ARBITRATION_PRIORITIZATION": true,
+    "OWNER_APPROVES_NON_OFFICIAL_SOURCE_INTAKE_FOR_QKU_CANDIDATE_USE": true,
+    "OWNER_APPROVES_ONLINE_SEARCH_FOR_ALL_QKU_FAMILIES": true,
+    "OWNER_APPROVES_OPEN_SOURCE_RESEARCH_SOCIAL_WEB_GITHUB_INTAKE_AS_QKU_SOURCES": true,
+    "OWNER_APPROVES_OWNER_INTERNAL_DEFAULTS_AS_CANDIDATE_VALUES": true,
+    "OWNER_APPROVES_OWNER_LIVE_PROMOTION_CONTROL": true,
+    "OWNER_APPROVES_PR161D_QKU_BUNDLE_CANDIDATE_GENERATION": true,
+    "OWNER_APPROVES_PR161D_QKU_CATEGORY_RANKING": true,
+    "OWNER_APPROVES_PR161D_QKU_FUTURE_PROFITABILITY_PATTERN_FIELDS": true,
+    "OWNER_APPROVES_PR161D_QKU_ONLINE_ENRICHMENT_COVERAGE": true,
+    "OWNER_APPROVES_PR161D_QKU_ORDER_CONDITION_SCENARIO_REGISTRY": true,
+    "OWNER_APPROVES_PR161D_QKU_QUALITY_TRIAGE": true,
+    "OWNER_APPROVES_PR161D_QKU_RESULT_BACKED_RANKING_SLOTS": true,
+    "OWNER_APPROVES_PR161D_QKU_SCENARIO_OUTCOME_MATRIX": true,
+    "OWNER_APPROVES_PR161D_QKU_SCORING_POLICY_CONSUMPTION": true,
+    "OWNER_APPROVES_QKU_AGENT_NETWORK_ROUTING": true,
+    "OWNER_APPROVES_QKU_AGENT_TASK_QUEUE_GENERATION": true,
+    "OWNER_APPROVES_QKU_FAMILY_CLUSTERED_ONLINE_SEARCH": true,
+    "OWNER_APPROVES_QKU_STAGE1_PREDICTION_MARKET_PRIORITY_SURFACES": true,
+    "OWNER_APPROVES_QUANTUM_FORWARD_PRIORITIZATION": true,
+    "OWNER_APPROVES_REPLAY_PAPER_AS_PROFIT_FILTER": true,
+    "OWNER_GLOBAL_AUTHORITY": true,
+    "OWNER_REMOVES_OFFICIAL_SOURCE_ONLY_RESTRICTION_FOR_PR161D": true
+  },
+  "paper_execution_count": 0,
+  "pr_id": "PR161D",
+  "profit_evidence_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 15,
+  "records": [
+    {
+      "agent_layer": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_purpose": "discover_classify_enrich",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-01",
+      "assigned_agent_role": "QTT_RESEARCH_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_purpose": "source_coverage_labeling",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-02",
+      "assigned_agent_role": "QTT_SOURCE_EVIDENCE_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_purpose": "atomicrows_enrichment",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-03",
+      "assigned_agent_role": "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_purpose": "parameter_stack_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-04",
+      "assigned_agent_role": "QTT_PARAMETER_STACK_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "OWNER_REVIEW_LAYER",
+      "agent_purpose": "owner_review_queue_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-05",
+      "assigned_agent_role": "QTT_OWNER_REVIEW_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "SCORING_SELECTION_LAYER",
+      "agent_purpose": "candidate_quality_scoring",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-06",
+      "assigned_agent_role": "QTT_SCORING_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "SCORING_SELECTION_LAYER",
+      "agent_purpose": "category_ranking",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-07",
+      "assigned_agent_role": "QTT_RANKING_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "SCORING_SELECTION_LAYER",
+      "agent_purpose": "optimizer_arbitration_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-08",
+      "assigned_agent_role": "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "SCORING_SELECTION_LAYER",
+      "agent_purpose": "quantum_classical_hybrid_compare_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-09",
+      "assigned_agent_role": "QTT_QUANTUM_ADVISORY_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "REPLAY_VALIDATION_LAYER",
+      "agent_purpose": "replay_input_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-10",
+      "assigned_agent_role": "QTT_REPLAY_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "REPLAY_VALIDATION_LAYER",
+      "agent_purpose": "paper_test_requirements_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-11",
+      "assigned_agent_role": "QTT_PAPER_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "RISK_CAPITAL_LAYER",
+      "agent_purpose": "risk_limit_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-12",
+      "assigned_agent_role": "QTT_RISK_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "RISK_CAPITAL_LAYER",
+      "agent_purpose": "capital_allocation_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-13",
+      "assigned_agent_role": "QTT_CAPITAL_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "LATENCY_EXECUTION_PREP_LAYER",
+      "agent_purpose": "latency_sensitivity_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-14",
+      "assigned_agent_role": "QTT_LATENCY_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    },
+    {
+      "agent_layer": "LATENCY_EXECUTION_PREP_LAYER",
+      "agent_purpose": "order_condition_preparation",
+      "agent_role_registry_id": "PR161D-AGENT-ROLE-15",
+      "assigned_agent_role": "QTT_EXECUTION_PREP_AGENT",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "canonical_agent_role_flag": true,
+      "no_runtime_agent_claim_flag": true,
+      "workflow_consumer_role_flag": true
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_type": "PR161D_QTT_AGENT_ROLE_NETWORK_REGISTRY",
+  "service_layer_domains": [
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_INVENTORY_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-01"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_RETRIEVAL_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-02"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_MARKET_CLASSIFICATION_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-03"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_LAUNCH_STAGE_CLASSIFICATION_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-04"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_ALIAS_RESOLUTION_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-05"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_SCENARIO_MATRIX_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-06"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_CATEGORY_RANKING_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-07"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_BUNDLE_GENERATION_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-08"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_RESULT_BACKED_RANKING_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-09"
+    },
+    {
+      "agent_layer": "QKU_SERVICE_LAYER",
+      "autonomous_runtime_agent_claimed_flag": false,
+      "no_runtime_agent_claim_flag": true,
+      "service_layer_domain": "QTT_QKU_AGENT_TASK_QUEUE_SERVICE",
+      "service_layer_domain_id": "PR161D-QKU-SERVICE-10"
+    }
+  ],
+  "shadow_execution_count": 0,
+  "shard_count": 0,
+  "shard_files": [],
+  "sharded_flag": false
+}

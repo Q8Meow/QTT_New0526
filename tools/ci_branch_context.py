@@ -45,6 +45,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge": 161,
     "repair/pr161b-master-plan-residual-candidate-coverage-assimilation-bridge": 161,
     "pr161c-qku-residual-candidate-assimilation-fill-campaign": 161,
+    "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization": 161,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -219,6 +220,81 @@ PR161C_ALLOWED_CHANGED_PATHS = frozenset(
         *(
             f"docs/master_plan/generated/{filename}"
             for filename in PR161C_GENERATED_REPORT_FILENAMES
+        ),
+    }
+)
+PR161D_BRANCH = "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization"
+PR161D_GENERATED_REPORT_FILENAMES = (
+    "PR161D_QKU_CANDIDATE_QUALITY_PREFLIGHT_RECEIPT.report.json",
+    "PR161D_QKUOnlineSearchCapabilityReceipt.report.json",
+    "PR161D_QKUQualityScoreRegistry.report.json",
+    "PR161D_QKUScoreComponentBreakdown.report.json",
+    "PR161D_QKUQualityLaneClassification.report.json",
+    "PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "PR161D_QKUOnlineEnrichmentClusterMap.report.json",
+    "PR161D_QKUOnlineEnrichmentCoverage.report.json",
+    "PR161D_QKUOnlineSourceCandidateRegistry.report.json",
+    "PR161D_QKUQuantumPriorityQueue.report.json",
+    "PR161D_QKUClassicalBaselinePriorityQueue.report.json",
+    "PR161D_QKUHybridArbitrationPriorityQueue.report.json",
+    "PR161D_QKUAtomicRowsPR154PriorityBridge.report.json",
+    "PR161D_QKUAgentTaskQueue.report.json",
+    "PR161D_QTTAgentRoleNetworkRegistry.report.json",
+    "PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "PR161D_QKUAgentLayerCoverage.report.json",
+    "PR161D_QKUAgentRoleCoverageGaps.report.json",
+    "PR161D_QKUStage1Day1PriorityIndex.report.json",
+    "PR161D_QKUOwnerReviewQueue.report.json",
+    "PR161D_QKUGraphConsumptionAudit.report.json",
+    "PR161D_QKUScoringPolicyConsumptionAudit.report.json",
+    "PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "PR161D_QKUOrderConditionScenarioRegistry.report.json",
+    "PR161D_QKUCombinationCandidateRegistry.report.json",
+    "PR161D_QKUCombinationScenarioMap.report.json",
+    "PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "PR161D_QKUCombinationGenerationBoundedness.report.json",
+    "PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "PR161D_QKUMarketBundleActivationDashboardOptions.report.json",
+    "PR161D_QKUMarketBundleDormancyQueue.report.json",
+    "PR161D_QKUMarketActiveBundleSet.report.json",
+    "PR161D_QKUAgentRoleBundleSlice.report.json",
+    "PR161D_QKUAgentRoleBundleReferenceFanout.report.json",
+    "PR161D_QKUCategoryRankingRegistry.report.json",
+    "PR161D_QKUCategoryTopListIndex.report.json",
+    "PR161D_QKUCategoryRankingBreakdown.report.json",
+    "PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "PR161D_QKUResultBackedRankingSlots.report.json",
+    "PR161D_QKUForbiddenAuthorityScan.report.json",
+    "PR161D_NoScatteredHardcodedAuthorityAudit.report.json",
+    "PR161D_ReportShardManifest.report.json",
+    "PR161D_FinalSummary.report.json",
+)
+PR161D_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/pr161d_qku_candidate_quality_shards/",
+    "src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/",
+    "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/",
+)
+PR161D_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr161d_qku_candidate_quality_replay_paper_prioritization.py",
+        "tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(
+            f"docs/master_plan/generated/{filename}"
+            for filename in PR161D_GENERATED_REPORT_FILENAMES
         ),
     }
 )
@@ -880,6 +956,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR161D_BRANCH:
+        return normalized in PR161D_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR161D_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR161C_BRANCH:
         return normalized in PR161C_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

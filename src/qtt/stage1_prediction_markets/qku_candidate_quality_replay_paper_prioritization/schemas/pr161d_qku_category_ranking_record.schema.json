@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "ranking_basis": {
+      "enum": [
+        "PRE_RESULT_RANKING",
+        "RESULT_BACKED_RANKING"
+      ],
+      "type": "string"
+    },
+    "result_state": {
+      "enum": [
+        "NO_RESULT_YET",
+        "REPLAY_RESULT_PENDING",
+        "PAPER_RESULT_PENDING",
+        "SHADOW_RESULT_PENDING",
+        "LIVE_RESULT_PENDING",
+        "NOT_TESTABLE_DOCTRINE_ONLY",
+        "FUTURE_MARKET_HOLD",
+        "REJECTED_UNSAFE_OR_SECRET"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
