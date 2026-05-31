@@ -201,6 +201,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         c.REPAIR_BRANCH,
         "pr161c-qku-residual-candidate-assimilation-fill-campaign",
         "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
+        "pr161e-replay-paper-outcome-capture-scenario-learning-bridge",
     } or (
         normalized == "main" and _ancestry_present(root)
     )

@@ -1,0 +1,810 @@
+{
+  "all_shard_files": [
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUBundleResultLedger.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUScenarioResultAttribution.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QuantumClassicalHybridOutcomeComparison.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0002.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0003.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0004.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0005.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0006.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0007.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0008.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0009.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0010.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0011.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0012.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0013.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0014.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0015.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0016.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0017.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0018.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0002.json"
+  ],
+  "all_shard_refs_posix_flag": true,
+  "authority_class": "OWNER_APPROVED_INTERNAL_POLICY",
+  "central_policy_module": "src.qtt.stage1_prediction_markets.replay_paper_outcome_capture_scenario_learning.constants",
+  "live_execution_count": 0,
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "atomicrows_bundle_hash_sha_freeze_authority_created": false,
+    "atomicrows_bundle_jsonl_created": false,
+    "atomicrows_bundle_sha_reference_created": false,
+    "atomicrows_final_bundle_created": false,
+    "connector_semantic_authority_created": false,
+    "live_execution_created": false,
+    "live_order_authority_created": false,
+    "live_profit_evidence_created": false,
+    "live_result_fabricated": false,
+    "live_trading_created": false,
+    "optimizer_execution_created": false,
+    "paper_execution_created": false,
+    "paper_result_fabricated": false,
+    "profit_guarantee_created": false,
+    "qtt_checksum_global_digest_authority_created": false,
+    "qtt_freeze_authority_created": false,
+    "qtt_generated_sha_authority_created": false,
+    "qtt_sha_authority_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "replay_execution_created": false,
+    "replay_paper_performance_evidence_fabricated": false,
+    "replay_result_fabricated": false,
+    "runtime_cash_receipt_created": false,
+    "shadow_execution_created": false,
+    "shadow_result_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "owner_approvals": {
+    "OWNER_APPROVES_ATOMICROWS_PR154_RESULT_COMPATIBILITY_BRIDGE": true,
+    "OWNER_APPROVES_DETERMINISTIC_PENDING_SURFACES_WHEN_NO_RESULTS_EXIST": true,
+    "OWNER_APPROVES_FUTURE_PROFITABILITY_PATTERN_UPDATE_CANDIDATE_BRIDGE": true,
+    "OWNER_APPROVES_MISSING_VALUE_CANDIDATE_MATERIALIZATION": true,
+    "OWNER_APPROVES_NON_OFFICIAL_SOURCE_INTAKE_FOR_CANDIDATE_USE": true,
+    "OWNER_APPROVES_OWNER_LIVE_PROMOTION_CONTROL": true,
+    "OWNER_APPROVES_PR161E_REPLAY_PAPER_OUTCOME_CAPTURE_BRIDGE": true,
+    "OWNER_APPROVES_PR161E_SCENARIO_LEARNING_BRIDGE": true,
+    "OWNER_APPROVES_QKU_BUNDLE_RESULT_LEDGER": true,
+    "OWNER_APPROVES_QKU_REPLAY_PAPER_PROFITABILITY_LEDGER": true,
+    "OWNER_APPROVES_QKU_SCENARIO_OUTCOME_UPDATE_BRIDGE": true,
+    "OWNER_APPROVES_QKU_SCENARIO_RESULT_ATTRIBUTION": true,
+    "OWNER_APPROVES_QKU_UPSTREAM_DOWNSTREAM_TRACEABILITY_REQUIRED": true,
+    "OWNER_APPROVES_QUANTUM_CLASSICAL_HYBRID_OUTCOME_COMPARISON_BRIDGE": true,
+    "OWNER_APPROVES_REPLAY_PAPER_AS_PROFIT_FILTER": true,
+    "OWNER_APPROVES_RESULT_BACKED_RANKING_UPDATE_CANDIDATE_BRIDGE": true,
+    "OWNER_AUTHORIZES_CODEX_ONLINE_SEARCH_FOR_QTT_CANDIDATE_INTAKE": true,
+    "OWNER_AUTHORIZES_PR161E_IMPLEMENTATION": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA256_REFERENCE_IN_AUTHORITY_ARTIFACTS": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA_HASH_FREEZE_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_FREEZE_CHECKSUM_GLOBAL_DIGEST_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_GENERATED_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_SCATTERED_HARDCODED_BLOCKERS": true,
+    "OWNER_FORBIDS_SCATTERED_NONLIVE_NOPROFIT_NOSHA_WORDING": true,
+    "OWNER_GLOBAL_AUTHORITY": true,
+    "OWNER_REMOVES_OFFICIAL_SOURCE_ONLY_RESTRICTION_FOR_RESEARCH_AND_CANDIDATE_LANES": true
+  },
+  "pr_id": "PR161E",
+  "pr_label": "PR161E",
+  "profit_evidence_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 12,
+  "records": [
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_ReplayPaperOutcomeCaptureRegistry.report",
+      "report_filename": "PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+      "report_type": "PR161E_REPLAY_PAPER_OUTCOME_CAPTURE_REGISTRY",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_replay_paper_outcome_capture_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4360
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_replay_paper_outcome_capture_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_replay_paper_outcome_capture_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 9360
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 9360
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 9360
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 1861,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUBundleResultLedger.report",
+      "report_filename": "PR161E_QKUBundleResultLedger.report.json",
+      "report_type": "PR161E_QKU_BUNDLE_RESULT_LEDGER",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_bundle_result_ledger_record.schema.json",
+      "shard_count": 1,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUBundleResultLedger.report.shard_0001.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1861
+      ],
+      "shards": [
+        {
+          "record_count": 1861,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_bundle_result_ledger_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUBundleResultLedger.report.shard_0001.json",
+          "shard_index": 1
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 1861
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 1861
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 1861
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 1861
+        },
+        "total_records": 1861
+      },
+      "total_record_count": 1861
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUReplayPaperProfitabilityLedger.report",
+      "report_filename": "PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+      "report_type": "PR161E_QKU_REPLAY_PAPER_PROFITABILITY_LEDGER",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_replay_paper_profitability_ledger_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4360
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_replay_paper_profitability_ledger_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_replay_paper_profitability_ledger_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUReplayPaperProfitabilityLedger.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 9360
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 9360
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 9360
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 1861,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUScenarioResultAttribution.report",
+      "report_filename": "PR161E_QKUScenarioResultAttribution.report.json",
+      "report_type": "PR161E_QKU_SCENARIO_RESULT_ATTRIBUTION",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_scenario_result_attribution_record.schema.json",
+      "shard_count": 1,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUScenarioResultAttribution.report.shard_0001.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1861
+      ],
+      "shards": [
+        {
+          "record_count": 1861,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_scenario_result_attribution_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUScenarioResultAttribution.report.shard_0001.json",
+          "shard_index": 1
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 1861
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 1861
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 1861
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 1861
+        },
+        "total_records": 1861
+      },
+      "total_record_count": 1861
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUResultBackedRankingUpdateCandidates.report",
+      "report_filename": "PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+      "report_type": "PR161E_QKU_RESULT_BACKED_RANKING_UPDATE_CANDIDATES",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_result_backed_ranking_update_candidate_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4360
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_result_backed_ranking_update_candidate_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_result_backed_ranking_update_candidate_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUResultBackedRankingUpdateCandidates.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 9360
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 9360
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 9360
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 1861,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report",
+      "report_filename": "PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+      "report_type": "PR161E_QKU_FUTURE_PROFITABILITY_PATTERN_UPDATE_CANDIDATES",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_future_profitability_pattern_update_candidate_record.schema.json",
+      "shard_count": 1,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.shard_0001.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1861
+      ],
+      "shards": [
+        {
+          "record_count": 1861,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_qku_future_profitability_pattern_update_candidate_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.shard_0001.json",
+          "shard_index": 1
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 1861
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 1861
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 1861
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 1861
+        },
+        "total_records": 1861
+      },
+      "total_record_count": 1861
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 4525,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QuantumClassicalHybridOutcomeComparison.report",
+      "report_filename": "PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+      "report_type": "PR161E_QUANTUM_CLASSICAL_HYBRID_OUTCOME_COMPARISON",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_quantum_classical_hybrid_outcome_comparison_record.schema.json",
+      "shard_count": 1,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QuantumClassicalHybridOutcomeComparison.report.shard_0001.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        4525
+      ],
+      "shards": [
+        {
+          "record_count": 4525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_quantum_classical_hybrid_outcome_comparison_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QuantumClassicalHybridOutcomeComparison.report.shard_0001.json",
+          "shard_index": 1
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_comparison_state": {
+          "RESULT_PACKET_REQUIRED": 4525
+        },
+        "by_confidence_class": {
+          "UNOBSERVED": 4525
+        },
+        "by_evidence_state": {
+          "NO_EVIDENCE": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 4525,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_AtomicRowsPR154ResultCompatibilityBridge.report",
+      "report_filename": "PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+      "report_type": "PR161E_ATOMICROWS_PR154_RESULT_COMPATIBILITY_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_atomicrows_pr154_result_compatibility_record.schema.json",
+      "shard_count": 1,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.shard_0001.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        4525
+      ],
+      "shards": [
+        {
+          "record_count": 4525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_atomicrows_pr154_result_compatibility_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.shard_0001.json",
+          "shard_index": 1
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_compatibility_state": {
+          "REPLAY_PAPER_RESULT_PACKET_REQUIRED": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_ResultConfidenceGate.report",
+      "report_filename": "PR161E_ResultConfidenceGate.report.json",
+      "report_type": "PR161E_RESULT_CONFIDENCE_GATE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_result_confidence_gate_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4360
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_result_confidence_gate_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_result_confidence_gate_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ResultConfidenceGate.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_confidence_class": {
+          "UNOBSERVED": 9360
+        },
+        "by_evidence_state": {
+          "NO_EVIDENCE": 9360
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 9360
+        },
+        "by_sample_size_class": {
+          "NO_SAMPLE": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_OwnerReviewResultPromotionQueue.report",
+      "report_filename": "PR161E_OwnerReviewResultPromotionQueue.report.json",
+      "report_type": "PR161E_OWNER_REVIEW_RESULT_PROMOTION_QUEUE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_owner_review_result_promotion_queue_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4149
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_owner_review_result_promotion_queue_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4149,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_owner_review_result_promotion_queue_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_OwnerReviewResultPromotionQueue.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_evidence_state": {
+          "NO_EVIDENCE": 9149
+        },
+        "by_owner_review_state": {
+          "AWAITING_VALIDATED_RESULT_PACKET": 9149
+        },
+        "by_profitability_label": {
+          "UNOBSERVED": 9149
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 9149
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 9149
+        },
+        "total_records": 9149
+      },
+      "total_record_count": 9149
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_AgentOutcomeTaskQueue.report",
+      "report_filename": "PR161E_AgentOutcomeTaskQueue.report.json",
+      "report_type": "PR161E_AGENT_OUTCOME_TASK_QUEUE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+      "shard_count": 18,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0002.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0003.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0004.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0005.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0006.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0007.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0008.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0009.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0010.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0011.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0012.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0013.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0014.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0015.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0016.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0017.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0018.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        2461
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0005.json",
+          "shard_index": 5
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0006.json",
+          "shard_index": 6
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0007.json",
+          "shard_index": 7
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0008.json",
+          "shard_index": 8
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0009.json",
+          "shard_index": 9
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0010.json",
+          "shard_index": 10
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0011.json",
+          "shard_index": 11
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0012.json",
+          "shard_index": 12
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0013.json",
+          "shard_index": 13
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0014.json",
+          "shard_index": 14
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0015.json",
+          "shard_index": 15
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0016.json",
+          "shard_index": 16
+        },
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0017.json",
+          "shard_index": 17
+        },
+        {
+          "record_count": 2461,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_agent_outcome_task_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0018.json",
+          "shard_index": 18
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "by_agent_task_state": {
+          "MISSING_VALUE_CANDIDATE_REVIEW_REQUIRED": 11475,
+          "ONLINE_CANDIDATE_REVIEW_REQUIRED": 18096,
+          "OWNER_REVIEW_REQUIRED": 9360,
+          "RESULT_PACKET_PENDING": 20760,
+          "RESULT_PACKET_REQUIRED": 27770
+        },
+        "by_evidence_state": {
+          "NO_EVIDENCE": 87461
+        },
+        "by_result_state": {
+          "NO_RESULT_YET": 87461
+        },
+        "by_validation_state": {
+          "NO_VALIDATED_RESULT_ARTIFACT": 87461
+        },
+        "total_records": 87461
+      },
+      "total_record_count": 87461
+    },
+    {
+      "canonical_records_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+      "compact_records_canonical_flag": true,
+      "full_records_only_in_shards_flag": false,
+      "largest_shard_record_count": 5000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR161E-SHARD-MANIFEST-PR161E_QKUGraphTraceabilityBridge.report",
+      "report_filename": "PR161E_QKUGraphTraceabilityBridge.report.json",
+      "report_type": "PR161E_QKU_GRAPH_TRACEABILITY_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_graph_traceability_record.schema.json",
+      "shard_count": 2,
+      "shard_files": [
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0002.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        5000,
+        4360
+      ],
+      "shards": [
+        {
+          "record_count": 5000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_graph_traceability_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 4360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_graph_traceability_record.schema.json",
+          "shard_file": "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_QKUGraphTraceabilityBridge.report.shard_0002.json",
+          "shard_index": 2
+        }
+      ],
+      "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+      "summary_counts": {
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_sharding_status": "SHARDED_LARGE_REPORTS_UNDER_50_MB",
+  "report_type": "PR161E_REPORT_SHARD_MANIFEST",
+  "shadow_execution_count": 0,
+  "total_shard_count": 35,
+  "total_sharded_report_count": 12
+}

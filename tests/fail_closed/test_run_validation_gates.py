@@ -481,6 +481,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr161e_replay_paper_outcome_capture_scenario_learning.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
