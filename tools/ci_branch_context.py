@@ -48,6 +48,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization": 161,
     "pr161e-replay-paper-outcome-capture-scenario-learning-bridge": 161,
     "pr161f-replay-paper-executor-input-run-artifact-generation": 161,
+    "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge": 162,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -423,6 +424,63 @@ PR161F_ALLOWED_CHANGED_PATHS = frozenset(
         *(
             f"docs/master_plan/generated/{filename}"
             for filename in PR161F_GENERATED_REPORT_FILENAMES
+        ),
+    }
+)
+PR162_BRANCH = "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge"
+PR162_GENERATED_REPORT_FILENAMES = (
+    "PR162_FinalSummary.report.json",
+    "PR162_SharedDictionary.report.json",
+    "PR162_NonLiveDatasetDiscovery.report.json",
+    "PR162_DataAuthorityAndProvenanceGate.report.json",
+    "PR162_ReplayDataAdapterContract.report.json",
+    "PR162_PaperDataAdapterContract.report.json",
+    "PR162_AdapterCapabilityDiscovery.report.json",
+    "PR162_SyntheticVsRealNonLiveSeparation.report.json",
+    "PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "PR162_ResultPacketReadinessHandoffCandidate.report.json",
+    "PR162_PR161EIngestionHandoffCandidate.report.json",
+    "PR162_QKUArtifactCoverageBridge.report.json",
+    "PR162_QTTAgentExecutorHandoffBridge.report.json",
+    "PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "PR162_ExternalCandidateIntakeRegistry.report.json",
+    "PR162_ForbiddenAuthorityScan.report.json",
+    "PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "PR162_ReportShardManifest.report.json",
+)
+PR162_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/",
+    "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/",
+    "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/",
+)
+PR162_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py",
+        "tools/validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(
+            f"docs/master_plan/generated/{filename}"
+            for filename in PR162_GENERATED_REPORT_FILENAMES
         ),
     }
 )
@@ -1084,6 +1142,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR162_BRANCH:
+        return normalized in PR162_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR162_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR161F_BRANCH:
         return normalized in PR161F_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

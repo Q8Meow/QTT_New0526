@@ -1,0 +1,1336 @@
+{
+  "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "blocker_codes": [
+    "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA"
+  ],
+  "created_by_pr": "PR162",
+  "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+    "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+    "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+    "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+    "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+    "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+    "PR180_CANARY_GATE_ROUTE"
+  ],
+  "record_count": 19,
+  "records": [
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_RESEARCH_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "candidate_classifications_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "classify_repo_local_and_external_candidates",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-01-QTT_RESEARCH_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_SOURCE_EVIDENCE_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "source_evidence_routing_status_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "route_official_source_candidates_without_fact_acceptance",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-02-QTT_SOURCE_EVIDENCE_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "link_atomicrows_qku_readiness_without_bundle_mutation",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-03-QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_PARAMETER_STACK_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_parameter_stack_replay_paper_readiness_candidates",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-04-QTT_PARAMETER_STACK_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_QUANTUM_ADVISORY_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_LATENCY_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "quantum_blueprints_and_work_orders_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_quantum_blueprints_backend_fit_and_work_orders_without_execution",
+      "quantum_forward_role_if_applicable": "QUANTUM_BLUEPRINT_AND_WORK_ORDER_ONLY",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json",
+        "PR162_QKUQuantumExecutionReadinessBridge.report.json",
+        "PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+        "PR162_QuantumBackendFitCandidateMatrix.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-05-QTT_QUANTUM_ADVISORY_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_LATENCY_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "optimizer_arbitration_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_arbitration_readiness_without_optimizer_execution",
+      "quantum_forward_role_if_applicable": "QUANTUM_BLUEPRINT_AND_WORK_ORDER_ONLY",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json",
+        "PR162_QKUQuantumExecutionReadinessBridge.report.json",
+        "PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+        "PR162_QuantumBackendFitCandidateMatrix.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-06-QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_REPLAY_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "replay_blocker_or_candidate_artifact_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_replay_artifact_candidate_or_blocker",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json",
+        "PR162_ReplayDataAdapterContract.report.json",
+        "PR162_PaperDataAdapterContract.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-07-QTT_REPLAY_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_PAPER_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "paper_blocker_or_candidate_artifact_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_paper_artifact_candidate_or_blocker_without_venue_api",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json",
+        "PR162_ReplayDataAdapterContract.report.json",
+        "PR162_PaperDataAdapterContract.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-08-QTT_PAPER_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_SCORING_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_blocked_scoring_status_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-09-QTT_SCORING_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_RANKING_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_blocked_ranking_status_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-10-QTT_RANKING_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_RISK_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_future_risk_gate_placeholder",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-11-QTT_RISK_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_CAPITAL_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_future_capital_gate_placeholder_without_allocation",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-12-QTT_CAPITAL_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_LATENCY_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_precomputed_snapshot_latency_readiness_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-13-QTT_LATENCY_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_EXECUTION_PREP_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_nonlive_execution_prep_readiness_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-14-QTT_EXECUTION_PREP_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_OWNER_REVIEW_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_COMMANDER_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_owner_review_candidate_queue_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-15-QTT_OWNER_REVIEW_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_COMMANDER_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_future_pr163_command_readiness_only",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-16-QTT_COMMANDER_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_GOVERNANCE_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_governance_scan_status",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-17-QTT_GOVERNANCE_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_VENUE_SPECIALIST_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_venue_specific_blockers_without_semantic_binding",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-18-QTT_VENUE_SPECIALIST_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_handoff_status": "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+      "agent_id": "QTT_EXECUTION_ROUTER_AGENT",
+      "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+      "contradictory_input_behavior": "OWNER_ESCALATION_REQUIRED",
+      "created_by_pr": "PR162",
+      "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+      "creates_connector_semantics": false,
+      "creates_live_authority": false,
+      "creates_order_authority": false,
+      "creates_private_state": false,
+      "creates_profit_evidence": false,
+      "creates_qtt_sha_authority": false,
+      "creates_quantum_backend_evidence": false,
+      "creates_result_backed_ranking": false,
+      "creates_source_evidence_fact": false,
+      "downstream_agents": [
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_pr_routes": [
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+        "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+        "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+        "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+        "PR180_CANARY_GATE_ROUTE"
+      ],
+      "emits_artifacts": [
+        "blocked_or_pending_readiness_metadata_only"
+      ],
+      "future_live_role_if_applicable": "FUTURE_GATED_PRECOMPUTED_OR_ASYNC_ONLY",
+      "invalid_input_behavior": "FAIL_CLOSED",
+      "kpi_readiness_status": "CANDIDATE_ONLY_BLOCKED_INPUTS",
+      "live_authority_allowed_flag": false,
+      "missing_input_behavior": "EMIT_BLOCKER_AND_OWNER_REVIEW_ROUTE",
+      "no_authority_boundary_status": "NO_LIVE_NO_ORDER_NO_PRIVATE_STATE_NO_PROFIT",
+      "owner_escalation_ref": "PR161F_QTTAgentOwnerEscalationQueue.report.json",
+      "processing_role": "emit_no_order_no_live_status",
+      "quantum_forward_role_if_applicable": "NOT_QUANTUM_SPECIFIC",
+      "quarantine_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "reads_from_artifacts": [
+        "PR162_NonLiveDatasetDiscovery.report.json",
+        "PR162_QuantumLatencyLivePathReadinessBridge.report.json"
+      ],
+      "record_id": "PR162-AGENT-HANDOFF-19-QTT_EXECUTION_ROUTER_AGENT",
+      "reroute_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "retry_policy_ref": "PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "stale_input_behavior": "EMIT_STALE_BLOCKER_AND_SOURCE_REVALIDATION_ROUTE",
+      "task_receipt_status": "NO_RUNTIME_AGENT_EXECUTION_PR162",
+      "trust_score_inputs": [
+        "dataset_provenance_status",
+        "adapter_contract_status",
+        "forbidden_authority_scan_status"
+      ],
+      "unmappable_input_behavior": "BLOCK_ARTIFACT_MATERIALIZATION",
+      "unsafe_input_behavior": "QUARANTINE_AND_GOVERNANCE_ESCALATION",
+      "validates_input_with": [
+        "PR162_DataAuthorityAndProvenanceGate.report.json",
+        "PR162_ForbiddenAuthorityScan.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162_QTTAgentExecutorHandoffBridge.report.json",
+  "report_id": "PR162_QTTAgentExecutorHandoffBridge",
+  "report_type": "PR162_QTT_AGENT_EXECUTOR_HANDOFF_BRIDGE",
+  "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qttagentexecutorhandoffbridge.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_agent_handoff_status": {
+      "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS": 19
+    },
+    "by_agent_id": {
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT": 1,
+      "QTT_CAPITAL_AGENT": 1,
+      "QTT_COMMANDER_AGENT": 1,
+      "QTT_EXECUTION_PREP_AGENT": 1,
+      "QTT_EXECUTION_ROUTER_AGENT": 1,
+      "QTT_GOVERNANCE_AGENT": 1,
+      "QTT_LATENCY_AGENT": 1,
+      "QTT_OPTIMIZER_ARBITRATION_AGENT": 1,
+      "QTT_OWNER_REVIEW_AGENT": 1,
+      "QTT_PAPER_AGENT": 1,
+      "QTT_PARAMETER_STACK_AGENT": 1,
+      "QTT_QUANTUM_ADVISORY_AGENT": 1,
+      "QTT_RANKING_AGENT": 1,
+      "QTT_REPLAY_AGENT": 1,
+      "QTT_RESEARCH_AGENT": 1,
+      "QTT_RISK_AGENT": 1,
+      "QTT_SCORING_AGENT": 1,
+      "QTT_SOURCE_EVIDENCE_AGENT": 1,
+      "QTT_VENUE_SPECIALIST_AGENT": 1
+    },
+    "total_records": 19
+  },
+  "total_record_count": 19,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR154",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F"
+  ],
+  "validation_status": "PR162_VALIDATION_PENDING_UNTIL_VALIDATOR_RUN"
+}
