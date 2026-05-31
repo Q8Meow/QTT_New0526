@@ -215,6 +215,40 @@ def test_pr_branch_merged_ancestry_refreshes_shallow_history_before_retry():
     ) in calls
 
 
+def test_pr161e_explicit_changed_path_allowance_is_narrow():
+    branch = "pr161e-replay-paper-outcome-capture-scenario-learning-bridge"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=161) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_AgentOutcomeTaskQueue.report.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+
+
 def test_pr154_explicit_changed_path_allowance_is_narrow():
     branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
     repair_branch = "repair/pr154-post-merge-pytest-context-hygiene"

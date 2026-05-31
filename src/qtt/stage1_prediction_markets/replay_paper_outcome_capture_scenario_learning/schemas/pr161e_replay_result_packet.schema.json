@@ -1,0 +1,682 @@
+{
+  "$id": "https://qtt.local/schemas/pr161e_replay_result_packet.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Schema for future validated replay/paper result packets. Absent values remain pending and cannot create live authority.",
+  "properties": {
+    "annealing_metadata_candidate_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "atomicrow_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "brier_score_if_available": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "calibration_error_if_available": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "classical_baseline_route_id_if_applicable": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "confidence_class": {
+      "enum": [
+        "UNOBSERVED",
+        "LOW_SAMPLE_CANDIDATE",
+        "MEDIUM_SAMPLE_CANDIDATE",
+        "HIGH_SAMPLE_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "confidence_class"
+    },
+    "event_type": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "evidence_state": {
+      "enum": [
+        "NO_EVIDENCE",
+        "RESULT_PACKET_REQUIRED",
+        "VALIDATED_REPLAY_PAPER_EVIDENCE_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "evidence_state"
+    },
+    "expected_value_after_fees": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "fees": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "fill_quality_metric": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "fill_rate_if_available": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "future_live_gate_required_flag": {
+      "type": "boolean"
+    },
+    "gross_profit": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "hybrid_arbitration_route_id_if_applicable": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "ising_metadata_candidate_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "latency_observed_ms": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "latency_percentile_class": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "liquidity_class": {
+      "enum": [
+        "UNOBSERVED_LIQUIDITY",
+        "LOW_LIQUIDITY_CANDIDATE",
+        "MEDIUM_LIQUIDITY_CANDIDATE",
+        "HIGH_LIQUIDITY_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "liquidity_class"
+    },
+    "log_loss_if_available": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "loss_rate": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "market": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "market_microstructure_context": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "max_drawdown": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "net_profit_after_fees": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "no_atomicrows_bundle_sha_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_live_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_live_profit_evidence_created_flag": {
+      "type": "boolean"
+    },
+    "no_optimizer_execution_created_flag": {
+      "type": "boolean"
+    },
+    "no_profit_evidence_created_without_validated_result_packet_flag": {
+      "type": "boolean"
+    },
+    "no_profit_guarantee_created_flag": {
+      "type": "boolean"
+    },
+    "no_qtt_sha_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_quantum_backend_execution_created_flag": {
+      "type": "boolean"
+    },
+    "optimizer_family_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "order_condition_fingerprint": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "order_condition_scenario_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "owner_review_required_flag": {
+      "type": "boolean"
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr154_target_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "prediction_market_category_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "profit_factor": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "profitability_label": {
+      "enum": [
+        "UNOBSERVED",
+        "PROFITABLE_AFTER_FEES",
+        "UNPROFITABLE_AFTER_FEES",
+        "BREAK_EVEN_AFTER_FEES"
+      ],
+      "x-pr161e-enum-source": "profitability_label"
+    },
+    "promotion_blocker": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "provenance_class": {
+      "enum": [
+        "LOCAL_REPO_ARTIFACT",
+        "SOURCE_EVIDENCE_FIXTURE",
+        "ONLINE_CANDIDATE_SOURCE"
+      ],
+      "x-pr161e-enum-source": "provenance_class"
+    },
+    "qaoa_metadata_candidate_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qku_bundle_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qku_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "quantum_applicability_class_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "quantum_route_id_if_applicable": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qubo_metadata_candidate_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "regime_class": {
+      "enum": [
+        "UNOBSERVED_REGIME",
+        "LOW_VOLATILITY_CANDIDATE",
+        "HIGH_VOLATILITY_CANDIDATE",
+        "EVENT_DRIVEN_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "regime_class"
+    },
+    "replay_paper_evidence_class": {
+      "enum": [
+        "NO_REPLAY_PAPER_EVIDENCE",
+        "REPLAY_RESULT_EVIDENCE_CANDIDATE",
+        "PAPER_RESULT_EVIDENCE_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "replay_paper_evidence_class"
+    },
+    "replay_paper_required_flag": {
+      "type": "boolean"
+    },
+    "replay_paper_scenario_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "result_authenticity_class": {
+      "enum": [
+        "NO_VALIDATED_RESULT_PACKET",
+        "SCHEMA_OR_CONTRACT_ONLY",
+        "SYNTHETIC_FIXTURE_NOT_PERFORMANCE_EVIDENCE",
+        "PRE_RESULT_PRIORITY_NOT_PERFORMANCE_EVIDENCE",
+        "UNSAFE_OR_UNMAPPABLE",
+        "VALIDATED_REAL_REPLAY_PACKET",
+        "VALIDATED_REAL_PAPER_PACKET"
+      ],
+      "x-pr161e-enum-source": "result_authenticity_class"
+    },
+    "result_backed_score": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "result_mode": {
+      "const": "REPLAY"
+    },
+    "result_packet_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "result_packet_type": {
+      "const": "REPLAY_RESULT_PACKET",
+      "x-pr161e-enum-source": "RESULT_PACKET_TYPES"
+    },
+    "result_state": {
+      "enum": [
+        "NO_RESULT_YET",
+        "RESULT_PENDING",
+        "RESULT_OBSERVED"
+      ],
+      "x-pr161e-enum-source": "result_state"
+    },
+    "risk_adjusted_return": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "sample_size": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "scenario_matrix_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "slippage": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    },
+    "source_artifact_class": {
+      "enum": [
+        "ACTUAL_REPLAY_RESULT_PACKET_CANDIDATE",
+        "ACTUAL_PAPER_RESULT_PACKET_CANDIDATE",
+        "VALIDATED_REPLAY_RESULT_PACKET",
+        "VALIDATED_PAPER_RESULT_PACKET",
+        "REJECTED_REPLAY_RESULT_PACKET",
+        "REJECTED_PAPER_RESULT_PACKET",
+        "SYNTHETIC_TEST_FIXTURE_RESULT_PACKET",
+        "SCHEMA_ONLY_ARTIFACT",
+        "CONTRACT_ONLY_ARTIFACT",
+        "EMPTY_PENDING_CAPTURE_SURFACE",
+        "PRE_RESULT_RANKING_ARTIFACT",
+        "NO_RESULT_ARTIFACT",
+        "UNSAFE_OR_UNMAPPABLE_RESULT_ARTIFACT"
+      ],
+      "x-pr161e-enum-source": "source_artifact_class"
+    },
+    "source_artifact_path": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "time_to_expiry_class": {
+      "enum": [
+        "UNOBSERVED_TIME_TO_EXPIRY",
+        "SHORT_EXPIRY_CANDIDATE",
+        "MEDIUM_EXPIRY_CANDIDATE",
+        "LONG_EXPIRY_CANDIDATE"
+      ],
+      "x-pr161e-enum-source": "time_to_expiry_class"
+    },
+    "time_window": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "validation_state": {
+      "enum": [
+        "NO_VALIDATED_RESULT_ARTIFACT",
+        "VALIDATED_RESULT_PACKET",
+        "REJECTED_RESULT_PACKET",
+        "RESULT_ARTIFACT_UNMAPPABLE"
+      ],
+      "x-pr161e-enum-source": "validation_state"
+    },
+    "venue_scope": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "vqe_metadata_candidate_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "win_rate": {
+      "type": [
+        "number",
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "result_packet_id",
+    "result_packet_type",
+    "result_mode",
+    "source_artifact_path",
+    "source_artifact_class",
+    "result_authenticity_class",
+    "provenance_class",
+    "qku_ids",
+    "qku_bundle_id",
+    "scenario_matrix_id",
+    "order_condition_scenario_id",
+    "replay_paper_scenario_id",
+    "market",
+    "platform",
+    "venue_scope",
+    "event_type",
+    "prediction_market_category_if_available",
+    "time_window",
+    "time_to_expiry_class",
+    "liquidity_class",
+    "order_condition_fingerprint",
+    "result_state",
+    "validation_state",
+    "evidence_state",
+    "replay_paper_evidence_class",
+    "profitability_label",
+    "gross_profit",
+    "net_profit_after_fees",
+    "expected_value_after_fees",
+    "fees",
+    "slippage",
+    "max_drawdown",
+    "win_rate",
+    "loss_rate",
+    "profit_factor",
+    "risk_adjusted_return",
+    "calibration_error_if_available",
+    "brier_score_if_available",
+    "log_loss_if_available",
+    "latency_observed_ms",
+    "fill_quality_metric",
+    "fill_rate_if_available",
+    "sample_size",
+    "result_backed_score",
+    "latency_percentile_class",
+    "confidence_class",
+    "regime_class",
+    "market_microstructure_context",
+    "quantum_applicability_class_if_available",
+    "quantum_route_id_if_applicable",
+    "classical_baseline_route_id_if_applicable",
+    "hybrid_arbitration_route_id_if_applicable",
+    "optimizer_family_id_if_available",
+    "qaoa_metadata_candidate_if_available",
+    "vqe_metadata_candidate_if_available",
+    "annealing_metadata_candidate_if_available",
+    "qubo_metadata_candidate_if_available",
+    "ising_metadata_candidate_if_available",
+    "atomicrow_id_if_available",
+    "pr154_target_id_if_available",
+    "owner_review_required_flag",
+    "replay_paper_required_flag",
+    "future_live_gate_required_flag",
+    "promotion_blocker",
+    "no_live_authority_created_flag",
+    "no_profit_guarantee_created_flag",
+    "no_live_profit_evidence_created_flag",
+    "no_profit_evidence_created_without_validated_result_packet_flag",
+    "no_optimizer_execution_created_flag",
+    "no_quantum_backend_execution_created_flag",
+    "no_qtt_sha_authority_created_flag",
+    "no_atomicrows_bundle_sha_authority_created_flag"
+  ],
+  "title": "PR161E Replay Result Packet Candidate Schema",
+  "type": "object",
+  "x-pr161e-pr-label": "PR161E",
+  "x-pr161e-schema-enum-source": "src.qtt.stage1_prediction_markets.replay_paper_outcome_capture_scenario_learning.constants"
+}

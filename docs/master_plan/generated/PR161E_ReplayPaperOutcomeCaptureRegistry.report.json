@@ -1,0 +1,111 @@
+{
+  "authority_class": "OWNER_APPROVED_INTERNAL_POLICY",
+  "central_policy_module": "src.qtt.stage1_prediction_markets.replay_paper_outcome_capture_scenario_learning.constants",
+  "compact_records_flag": true,
+  "full_records_canonical_location": "PR161E_COMPACT_SHARDS_PLUS_SHARED_DICTIONARY",
+  "full_records_only_in_shards_flag": false,
+  "full_records_resolvable_from_compact_records_flag": true,
+  "largest_shard_record_count": 5000,
+  "live_execution_count": 0,
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "atomicrows_bundle_hash_sha_freeze_authority_created": false,
+    "atomicrows_bundle_jsonl_created": false,
+    "atomicrows_bundle_sha_reference_created": false,
+    "atomicrows_final_bundle_created": false,
+    "connector_semantic_authority_created": false,
+    "live_execution_created": false,
+    "live_order_authority_created": false,
+    "live_profit_evidence_created": false,
+    "live_result_fabricated": false,
+    "live_trading_created": false,
+    "optimizer_execution_created": false,
+    "paper_execution_created": false,
+    "paper_result_fabricated": false,
+    "profit_guarantee_created": false,
+    "qtt_checksum_global_digest_authority_created": false,
+    "qtt_freeze_authority_created": false,
+    "qtt_generated_sha_authority_created": false,
+    "qtt_sha_authority_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "replay_execution_created": false,
+    "replay_paper_performance_evidence_fabricated": false,
+    "replay_result_fabricated": false,
+    "runtime_cash_receipt_created": false,
+    "shadow_execution_created": false,
+    "shadow_result_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "owner_approvals": {
+    "OWNER_APPROVES_ATOMICROWS_PR154_RESULT_COMPATIBILITY_BRIDGE": true,
+    "OWNER_APPROVES_DETERMINISTIC_PENDING_SURFACES_WHEN_NO_RESULTS_EXIST": true,
+    "OWNER_APPROVES_FUTURE_PROFITABILITY_PATTERN_UPDATE_CANDIDATE_BRIDGE": true,
+    "OWNER_APPROVES_MISSING_VALUE_CANDIDATE_MATERIALIZATION": true,
+    "OWNER_APPROVES_NON_OFFICIAL_SOURCE_INTAKE_FOR_CANDIDATE_USE": true,
+    "OWNER_APPROVES_OWNER_LIVE_PROMOTION_CONTROL": true,
+    "OWNER_APPROVES_PR161E_REPLAY_PAPER_OUTCOME_CAPTURE_BRIDGE": true,
+    "OWNER_APPROVES_PR161E_SCENARIO_LEARNING_BRIDGE": true,
+    "OWNER_APPROVES_QKU_BUNDLE_RESULT_LEDGER": true,
+    "OWNER_APPROVES_QKU_REPLAY_PAPER_PROFITABILITY_LEDGER": true,
+    "OWNER_APPROVES_QKU_SCENARIO_OUTCOME_UPDATE_BRIDGE": true,
+    "OWNER_APPROVES_QKU_SCENARIO_RESULT_ATTRIBUTION": true,
+    "OWNER_APPROVES_QKU_UPSTREAM_DOWNSTREAM_TRACEABILITY_REQUIRED": true,
+    "OWNER_APPROVES_QUANTUM_CLASSICAL_HYBRID_OUTCOME_COMPARISON_BRIDGE": true,
+    "OWNER_APPROVES_REPLAY_PAPER_AS_PROFIT_FILTER": true,
+    "OWNER_APPROVES_RESULT_BACKED_RANKING_UPDATE_CANDIDATE_BRIDGE": true,
+    "OWNER_AUTHORIZES_CODEX_ONLINE_SEARCH_FOR_QTT_CANDIDATE_INTAKE": true,
+    "OWNER_AUTHORIZES_PR161E_IMPLEMENTATION": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA256_REFERENCE_IN_AUTHORITY_ARTIFACTS": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA_HASH_FREEZE_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_FREEZE_CHECKSUM_GLOBAL_DIGEST_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_GENERATED_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_SCATTERED_HARDCODED_BLOCKERS": true,
+    "OWNER_FORBIDS_SCATTERED_NONLIVE_NOPROFIT_NOSHA_WORDING": true,
+    "OWNER_GLOBAL_AUTHORITY": true,
+    "OWNER_REMOVES_OFFICIAL_SOURCE_ONLY_RESTRICTION_FOR_RESEARCH_AND_CANDIDATE_LANES": true
+  },
+  "pr_id": "PR161E",
+  "pr_label": "PR161E",
+  "preview_record_count": 0,
+  "preview_records": [],
+  "profit_evidence_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 9360,
+  "records": [],
+  "records_omitted_for_sharding_flag": true,
+  "replay_paper_execution_count": 0,
+  "report_type": "PR161E_REPLAY_PAPER_OUTCOME_CAPTURE_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schemas/pr161e_replay_paper_outcome_capture_record.schema.json",
+  "shadow_execution_count": 0,
+  "shard_count": 2,
+  "shard_files": [
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0001.json",
+    "docs/master_plan/generated/pr161e_replay_paper_outcome_capture_shards/PR161E_ReplayPaperOutcomeCaptureRegistry.report.shard_0002.json"
+  ],
+  "shard_manifest_ref": "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+  "shard_record_counts": [
+    5000,
+    4360
+  ],
+  "sharded_flag": true,
+  "shared_dictionary_ref": "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+  "summary_counts": {
+    "by_evidence_state": {
+      "NO_EVIDENCE": 9360
+    },
+    "by_profitability_label": {
+      "UNOBSERVED": 9360
+    },
+    "by_result_state": {
+      "NO_RESULT_YET": 9360
+    },
+    "by_validation_state": {
+      "NO_VALIDATED_RESULT_ARTIFACT": 9360
+    },
+    "total_records": 9360
+  },
+  "total_record_count": 9360,
+  "unsharded_record_count": 9360
+}
