@@ -1,0 +1,2340 @@
+{
+  "authority_class": "OWNER_APPROVED_INTERNAL_POLICY",
+  "central_policy_module": "src.qtt.stage1_prediction_markets.replay_paper_executor_input_run_artifact_generation.constants",
+  "live_execution_count": 0,
+  "live_use_allowed_flag": false,
+  "no_authority_confirmation": {
+    "agent_permission_expansion_created": false,
+    "agent_self_authorized_live_trading_created": false,
+    "atomicrows_bundle_hash_sha_freeze_authority_created": false,
+    "atomicrows_bundle_jsonl_created": false,
+    "atomicrows_bundle_sha_reference_created": false,
+    "atomicrows_final_bundle_created": false,
+    "connector_semantic_authority_created": false,
+    "live_execution_created": false,
+    "live_order_authority_created": false,
+    "live_profit_evidence_created": false,
+    "live_result_fabricated": false,
+    "live_trading_created": false,
+    "optimizer_execution_created": false,
+    "paper_result_fabricated": false,
+    "profit_guarantee_created": false,
+    "qtt_checksum_global_digest_authority_created": false,
+    "qtt_freeze_authority_created": false,
+    "qtt_generated_sha_authority_created": false,
+    "qtt_sha_authority_created": false,
+    "quantum_backend_execution_created": false,
+    "quantum_simulator_execution_created": false,
+    "replay_paper_performance_evidence_fabricated": false,
+    "replay_result_fabricated": false,
+    "runtime_cash_receipt_created": false,
+    "shadow_execution_created": false,
+    "shadow_result_fabricated": false
+  },
+  "optimizer_execution_count": 0,
+  "owner_approvals": {
+    "OWNER_APPROVES_ATOMICROWS_PR154_REPLAY_PAPER_RUN_COMPATIBILITY_BRIDGE": true,
+    "OWNER_APPROVES_COMPACT_REPORTS_AND_SHARED_DICTIONARY_MODEL": true,
+    "OWNER_APPROVES_MISSING_VALUE_CANDIDATE_MATERIALIZATION": true,
+    "OWNER_APPROVES_NON_OFFICIAL_SOURCE_INTAKE_FOR_CANDIDATE_USE": true,
+    "OWNER_APPROVES_OWNER_LIVE_PROMOTION_CONTROL": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_COMMUNICATION_PROTOCOL": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_FAILURE_RESPONSE_MATRIX": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_HANDOFF_MATRIX": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_KPI_READINESS_BRIDGE": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_OWNER_ESCALATION_QUEUE": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_RETRY_REROUTE_QUARANTINE_POLICY": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_ROLE_IO_CONTRACT": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_TASK_RECEIPT_LEDGER": true,
+    "OWNER_APPROVES_PR161F_QTT_AGENT_WORKFLOW_ORCHESTRATION_CONTRACT": true,
+    "OWNER_APPROVES_PR161F_REPLAY_PAPER_EXECUTOR_INPUT_PRODUCTION": true,
+    "OWNER_APPROVES_PR161F_VALIDATED_NONLIVE_RUN_ARTIFACT_ENVELOPES": true,
+    "OWNER_APPROVES_QKU_END_TO_END_TRACEABILITY_MATRIX": true,
+    "OWNER_APPROVES_QKU_UPSTREAM_DOWNSTREAM_TRACEABILITY_REQUIRED": true,
+    "OWNER_APPROVES_QUANTUM_CLASSICAL_HYBRID_REPLAY_PAPER_RUN_INPUT_BRIDGE": true,
+    "OWNER_APPROVES_QUANTUM_FORWARD_LIVE_PROMOTION_LADDER_AS_FUTURE_GATED_ROUTE": true,
+    "OWNER_APPROVES_REPLAY_PAPER_AS_PROFIT_FILTER": true,
+    "OWNER_APPROVES_SYNTHETIC_SMOKE_RUN_ARTIFACTS_FOR_PIPELINE_VALIDATION_ONLY": true,
+    "OWNER_AUTHORIZES_CODEX_ONLINE_SEARCH_FOR_QTT_CANDIDATE_INTAKE": true,
+    "OWNER_AUTHORIZES_PR161F_IMPLEMENTATION": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA256_REFERENCE_IN_AUTHORITY_ARTIFACTS": true,
+    "OWNER_FORBIDS_ATOMICROWS_BUNDLE_SHA_HASH_FREEZE_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_FREEZE_CHECKSUM_GLOBAL_DIGEST_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_GENERATED_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_QTT_SHA_AUTHORITY": true,
+    "OWNER_FORBIDS_SCATTERED_HARDCODED_BLOCKERS": true,
+    "OWNER_FORBIDS_SCATTERED_NONLIVE_NOPROFIT_NOSHA_WORDING": true,
+    "OWNER_GLOBAL_AUTHORITY": true,
+    "OWNER_REMOVES_OFFICIAL_SOURCE_ONLY_RESTRICTION_FOR_RESEARCH_AND_CANDIDATE_LANES": true
+  },
+  "pr_id": "PR161F",
+  "pr_label": "PR161F",
+  "profit_evidence_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 19,
+  "records": [
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_role_id": "QTT_RESEARCH_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_SOURCE_EVIDENCE_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0001",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_role_id": "QTT_SOURCE_EVIDENCE_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0002",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "RESEARCH_KNOWLEDGE_LAYER",
+      "agent_role_id": "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RISK_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0003",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "PARAMETER_AND_OPTIMIZATION_LAYER",
+      "agent_role_id": "QTT_PARAMETER_STACK_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0004",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "PARAMETER_AND_OPTIMIZATION_LAYER",
+      "agent_role_id": "QTT_QUANTUM_ADVISORY_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0005",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "PARAMETER_AND_OPTIMIZATION_LAYER",
+      "agent_role_id": "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_SCORING_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0006",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "REPLAY_PAPER_EXECUTION_LAYER",
+      "agent_role_id": "QTT_REPLAY_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_RunArtifactEnvelopeRegistry"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0007",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161F_ExecutorInputRegistry",
+        "PR161F_ReplayRunRequestRegistry",
+        "PR161F_PaperRunRequestRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "REPLAY_PAPER_EXECUTION_LAYER",
+      "agent_role_id": "QTT_PAPER_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_RunArtifactEnvelopeRegistry"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0008",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161F_ExecutorInputRegistry",
+        "PR161F_ReplayRunRequestRegistry",
+        "PR161F_PaperRunRequestRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "SCORING_RANKING_RISK_LAYER",
+      "agent_role_id": "QTT_SCORING_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_RANKING_AGENT",
+        "QTT_RISK_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0009",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "SCORING_RANKING_RISK_LAYER",
+      "agent_role_id": "QTT_RANKING_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_RISK_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0010",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "SCORING_RANKING_RISK_LAYER",
+      "agent_role_id": "QTT_RISK_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_CAPITAL_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0011",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "CAPITAL_LATENCY_EXECUTION_PREP_LAYER",
+      "agent_role_id": "QTT_CAPITAL_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0012",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "CAPITAL_LATENCY_EXECUTION_PREP_LAYER",
+      "agent_role_id": "QTT_LATENCY_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0013",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "CAPITAL_LATENCY_EXECUTION_PREP_LAYER",
+      "agent_role_id": "QTT_EXECUTION_PREP_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_EXECUTION_ROUTER_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0014",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "OWNER_GOVERNANCE_ORCHESTRATION_LAYER",
+      "agent_role_id": "QTT_OWNER_REVIEW_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_COMMANDER_AGENT",
+        "QTT_GOVERNANCE_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_OwnerReviewRunReadinessQueue"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": true,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0015",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_EXISTING_REPO_ARTIFACTS",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161F_OwnerReviewRunReadinessQueue",
+        "PR161F_ResultPacketEmissionEligibilityGate"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "OWNER_GOVERNANCE_ORCHESTRATION_LAYER",
+      "agent_role_id": "QTT_COMMANDER_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_GOVERNANCE_AGENT",
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0016",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_MASTER_PLAN_PENDING_RUNTIME_MANIFEST",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "OWNER_GOVERNANCE_ORCHESTRATION_LAYER",
+      "agent_role_id": "QTT_GOVERNANCE_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": true,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0017",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_MASTER_PLAN_PENDING_RUNTIME_MANIFEST",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "CAPITAL_LATENCY_EXECUTION_PREP_LAYER",
+      "agent_role_id": "QTT_VENUE_SPECIALIST_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_RISK_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": false,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "validate_inputs",
+        "process_nonlive_replay_paper_candidate_state",
+        "emit_receipt_or_failure_packet"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0018",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": true,
+      "role_materialization_state": "ROLE_DECLARED_BY_MASTER_PLAN_PENDING_RUNTIME_MANIFEST",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    },
+    {
+      "agent_manifest_ref_if_available": null,
+      "agent_role_family": "FUTURE_LIVE_CONSUMER_LAYER",
+      "agent_role_id": "QTT_EXECUTION_ROUTER_AGENT",
+      "downstream_future_pr_routes": [
+        "PR161G_OR_PR162_AFTER_PR161F_OUTPUT_STATE"
+      ],
+      "downstream_process_routes": [
+        "PR161F_NONLIVE_RUN_ARTIFACT_PROCESS"
+      ],
+      "downstream_receiver_agents": [
+        "QTT_OWNER_REVIEW_AGENT"
+      ],
+      "downstream_workflow_routes": [
+        "PR161F_REPLAY_PAPER_EXECUTOR_INPUT_WORKFLOW"
+      ],
+      "failure_incident_required_flag": true,
+      "forbidden_inputs": [
+        "live_connector_data",
+        "private_account_state",
+        "live_write_secret",
+        "optimizer_backend_output",
+        "quantum_backend_output"
+      ],
+      "input_read_paths": [
+        "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+        "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+        "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json"
+      ],
+      "input_validation_checks": [
+        "schema_validation",
+        "qku_traceability_validation",
+        "no_live_authority_validation",
+        "owner_review_gate_validation"
+      ],
+      "io_contract_state": "AGENT_WORKFLOW_CONTRACT_MATERIALIZED",
+      "kpi_scorecard_required_flag": true,
+      "live_authority_allowed_flag": false,
+      "live_write_secret_grant_allowed_flag": false,
+      "master_plan_authority_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "no_atomicrows_bundle_hash_freeze_authority_created_flag": true,
+      "no_atomicrows_bundle_sha_authority_created_flag": true,
+      "no_live_authority_created_flag": true,
+      "no_live_connector_used_flag": true,
+      "no_optimizer_execution_created_flag": true,
+      "no_order_execution_flag": true,
+      "no_private_state_used_flag": true,
+      "no_profit_evidence_created_flag": true,
+      "no_qtt_freeze_checksum_global_digest_authority_created_flag": true,
+      "no_qtt_generated_sha_authority_created_flag": true,
+      "no_qtt_sha_authority_created_flag": true,
+      "no_quantum_backend_execution_created_flag": true,
+      "no_quantum_simulator_execution_created_flag": true,
+      "output_artifacts": [
+        "PR161F_QTTAgentTaskReceiptLedger"
+      ],
+      "output_schema_refs": [
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_input_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_replay_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paper_run_request_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_paired_replay_paper_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_run_artifact_envelope_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_synthetic_smoke_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_real_nonlive_run_artifact_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_result_packet_emission_eligibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_quantum_classical_hybrid_run_plan_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_atomicrows_pr154_run_compatibility_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_run_task_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_owner_review_run_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_online_candidate_intake_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_missing_value_candidate_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_graph_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_qku_end_to_end_traceability_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_executor_capability_discovery_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_dataset_authority_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_workflow_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_handoff_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_failure_response_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_task_receipt_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_communication_protocol.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_kpi_readiness_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_retry_reroute_quarantine_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_owner_escalation_record.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_forbidden_authority_scan.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_no_scattered_hardcoded_authority_audit.schema.json",
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_final_summary.schema.json"
+      ],
+      "owner_approval_bypass_allowed_flag": false,
+      "owner_escalation_required_flag": true,
+      "permission_expansion_allowed_flag": false,
+      "processing_duties": [
+        "future_live_consumer_only",
+        "reject_pr161f_live_order_authority"
+      ],
+      "qku_coverage_group": "ALL_PRIMARY_QKUS_OR_ROLE_LEVEL_QKU_COVERAGE_GROUP",
+      "quarantine_required_flag": true,
+      "record_id": "PR161F-AGENT-ROLE-IO-0019",
+      "reroute_allowed_flag": true,
+      "retry_allowed_flag": false,
+      "role_materialization_state": "ROLE_DECLARED_BY_MASTER_PLAN_PENDING_RUNTIME_MANIFEST",
+      "self_authorizing_trading_allowed_flag": false,
+      "source_evidence_bypass_allowed_flag": false,
+      "task_receipt_required_flag": true,
+      "trust_score_update_required_flag": true,
+      "upstream_optional_inputs": [
+        "online_candidate_intake",
+        "missing_value_candidate_materialization"
+      ],
+      "upstream_required_inputs": [
+        "PR161C_QKUMasterInventoryBridge",
+        "PR161D_QKUReplayPaperScenarioInputs",
+        "PR161E_ReplayPaperOutcomeCaptureRegistry"
+      ]
+    }
+  ],
+  "replay_paper_execution_count": 0,
+  "report_filename": "PR161F_QTTAgentRoleIOContract.report.json",
+  "report_type": "PR161F_QTT_AGENT_ROLE_IO_CONTRACT",
+  "schema_ref": "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schemas/pr161f_agent_role_io_contract.schema.json",
+  "shadow_execution_count": 0,
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "summary_counts": {
+    "by_agent_role_id": {
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT": 1,
+      "QTT_CAPITAL_AGENT": 1,
+      "QTT_COMMANDER_AGENT": 1,
+      "QTT_EXECUTION_PREP_AGENT": 1,
+      "QTT_EXECUTION_ROUTER_AGENT": 1,
+      "QTT_GOVERNANCE_AGENT": 1,
+      "QTT_LATENCY_AGENT": 1,
+      "QTT_OPTIMIZER_ARBITRATION_AGENT": 1,
+      "QTT_OWNER_REVIEW_AGENT": 1,
+      "QTT_PAPER_AGENT": 1,
+      "QTT_PARAMETER_STACK_AGENT": 1,
+      "QTT_QUANTUM_ADVISORY_AGENT": 1,
+      "QTT_RANKING_AGENT": 1,
+      "QTT_REPLAY_AGENT": 1,
+      "QTT_RESEARCH_AGENT": 1,
+      "QTT_RISK_AGENT": 1,
+      "QTT_SCORING_AGENT": 1,
+      "QTT_SOURCE_EVIDENCE_AGENT": 1,
+      "QTT_VENUE_SPECIALIST_AGENT": 1
+    },
+    "total_records": 19
+  },
+  "total_record_count": 19
+}

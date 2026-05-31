@@ -202,6 +202,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr161c-qku-residual-candidate-assimilation-fill-campaign",
         "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
         "pr161e-replay-paper-outcome-capture-scenario-learning-bridge",
+        "pr161f-replay-paper-executor-input-run-artifact-generation",
     } or (
         normalized == "main" and _ancestry_present(root)
     )
