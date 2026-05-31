@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-                    branch="pr161e-replay-paper-outcome-capture-scenario-learning-bridge",
+            branch="pr161f-replay-paper-executor-input-run-artifact-generation",
             source="unit-test",
         ),
     )

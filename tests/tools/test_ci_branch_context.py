@@ -249,6 +249,44 @@ def test_pr161e_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr161f_explicit_changed_path_allowance_is_narrow():
+    branch = "pr161f-replay-paper-executor-input-run-artifact-generation"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=161) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr161f_replay_paper_executor_input_run_artifact_generation_shards/PR161F_AgentRunTaskQueue.report.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+
+
 def test_pr154_explicit_changed_path_allowance_is_narrow():
     branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
     repair_branch = "repair/pr154-post-merge-pytest-context-hygiene"

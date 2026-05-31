@@ -1,0 +1,945 @@
+{
+  "$id": "https://qtt.local/schemas/pr161f_replay_run_request_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "agent_manifest_ref_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "agent_role_family": {
+      "enum": [
+        "RESEARCH_KNOWLEDGE_LAYER",
+        "PARAMETER_AND_OPTIMIZATION_LAYER",
+        "REPLAY_PAPER_EXECUTION_LAYER",
+        "SCORING_RANKING_RISK_LAYER",
+        "CAPITAL_LATENCY_EXECUTION_PREP_LAYER",
+        "OWNER_GOVERNANCE_ORCHESTRATION_LAYER",
+        "FUTURE_LIVE_CONSUMER_LAYER"
+      ],
+      "x-pr161f-enum-source": "agent_role_family"
+    },
+    "agent_role_id": {
+      "enum": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_SOURCE_EVIDENCE_AGENT",
+        "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+        "QTT_PARAMETER_STACK_AGENT",
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_SCORING_AGENT",
+        "QTT_RANKING_AGENT",
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_LATENCY_AGENT",
+        "QTT_EXECUTION_PREP_AGENT",
+        "QTT_OWNER_REVIEW_AGENT",
+        "QTT_COMMANDER_AGENT",
+        "QTT_GOVERNANCE_AGENT",
+        "QTT_VENUE_SPECIALIST_AGENT",
+        "QTT_EXECUTION_ROUTER_AGENT"
+      ],
+      "x-pr161f-enum-source": "agent_role_id"
+    },
+    "agent_task_state": {
+      "enum": [
+        "EXECUTOR_INPUT_REQUIRED",
+        "EXECUTOR_INPUT_PRODUCED",
+        "REPLAY_RUN_REQUEST_READY",
+        "PAPER_RUN_REQUEST_READY",
+        "PAIRED_RUN_PLAN_READY",
+        "RUN_ARTIFACT_PENDING",
+        "RUN_ARTIFACT_VALIDATED",
+        "SYNTHETIC_SMOKE_RUN_ARTIFACT_VALIDATED",
+        "REAL_NONLIVE_RUN_ARTIFACT_VALIDATED",
+        "RESULT_PACKET_EMISSION_BLOCKED",
+        "RESULT_PACKET_READY_FOR_CAPTURE",
+        "OWNER_REVIEW_REQUIRED",
+        "FUTURE_LIVE_GATE_REQUIRED",
+        "HANDOFF_READY",
+        "HANDOFF_ACCEPTED",
+        "HANDOFF_REJECTED",
+        "HANDOFF_QUARANTINED",
+        "AGENT_FAILURE_ESCALATED"
+      ],
+      "x-pr161f-enum-source": "agent_task_state"
+    },
+    "authority_class": {
+      "enum": [
+        "OWNER_APPROVED_INTERNAL_POLICY",
+        "CANDIDATE_DEFAULT",
+        "PROVISIONAL_DEFAULT",
+        "REPLAY_PAPER_TEST_DEFAULT",
+        "SOURCE_REQUIRED_PLACEHOLDER",
+        "OWNER_REVIEW_REQUIRED_VALUE",
+        "MISSING_RUN_PLACEHOLDER",
+        "PENDING_RESULT_EVIDENCE_STATE"
+      ],
+      "x-pr161f-enum-source": "AUTHORITY_CLASSES"
+    },
+    "candidate_source_class": {
+      "enum": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "RESEARCH_CANDIDATE",
+        "SOCIAL_SIGNAL_CANDIDATE",
+        "WEB_CANDIDATE",
+        "INSTITUTIONAL_RESEARCH_CANDIDATE",
+        "OWNER_SUBMITTED_CANDIDATE",
+        "CLASSICAL_OPTIMIZATION_CANDIDATE",
+        "QUANTUM_OPTIMIZATION_CANDIDATE",
+        "HYBRID_OPTIMIZATION_CANDIDATE",
+        "PROVISIONAL_DEFAULT_CANDIDATE",
+        "REPLAY_PAPER_TEST_CANDIDATE",
+        "HISTORICAL_DATA_SOURCE_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "candidate_source_class"
+    },
+    "comparison_state": {
+      "enum": [
+        "QUANTUM_METADATA_ONLY",
+        "REPLAY_PAPER_RUN_PLAN_READY",
+        "REAL_NONLIVE_QUANTUM_OR_HYBRID_ARTIFACT_VALIDATED",
+        "RESULT_PACKET_READY_FOR_PR161E_CAPTURE",
+        "RESULT_BACKED_QUANTUM_CLASSICAL_HYBRID_COMPARISON",
+        "OWNER_REVIEW_REQUIRED",
+        "OWNER_APPROVED_LIVE_PROMOTION_CANDIDATE",
+        "FUTURE_LIVE_ORDER_ROUTE_ELIGIBLE"
+      ],
+      "x-pr161f-enum-source": "comparison_state"
+    },
+    "compatibility_state": {
+      "enum": [
+        "RUN_COMPATIBILITY_PENDING",
+        "REPLAY_PAPER_RUN_ARTIFACT_REQUIRED"
+      ],
+      "x-pr161f-enum-source": "compatibility_state"
+    },
+    "confidence_class": {
+      "enum": [
+        "UNOBSERVED",
+        "LOW_SAMPLE_CANDIDATE",
+        "MEDIUM_SAMPLE_CANDIDATE",
+        "HIGH_SAMPLE_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "confidence_class"
+    },
+    "dataset_authority_class": {
+      "enum": [
+        "NO_DATASET_AVAILABLE",
+        "SYNTHETIC_FIXTURE_DATASET",
+        "STATIC_TEST_FIXTURE_DATASET",
+        "HISTORICAL_DATA_CANDIDATE",
+        "OWNER_SUBMITTED_DATA_CANDIDATE",
+        "OFFICIAL_SOURCE_DATA_CANDIDATE",
+        "RESEARCH_DATA_CANDIDATE",
+        "WEB_DATA_CANDIDATE",
+        "LIVE_CONNECTOR_DATA_FORBIDDEN",
+        "PRIVATE_STATE_DATA_FORBIDDEN",
+        "UNSAFE_OR_UNMAPPABLE_DATASET"
+      ],
+      "x-pr161f-enum-source": "dataset_authority_class"
+    },
+    "dataset_candidate_ref_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "downstream_agent_roles": {
+      "type": "array"
+    },
+    "downstream_future_live_order_route_eligibility_gate": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "downstream_future_pr_routes": {
+      "type": "array"
+    },
+    "downstream_process_route": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "downstream_process_routes": {
+      "type": "array"
+    },
+    "downstream_receiver_agents": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "downstream_workflow_route": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "downstream_workflow_routes": {
+      "type": "array"
+    },
+    "drawdown_class": {
+      "enum": [
+        "UNOBSERVED_DRAWDOWN",
+        "LOW_DRAWDOWN_CANDIDATE",
+        "MEDIUM_DRAWDOWN_CANDIDATE",
+        "HIGH_DRAWDOWN_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "drawdown_class"
+    },
+    "evidence_state": {
+      "enum": [
+        "NO_EVIDENCE",
+        "RESULT_PACKET_REQUIRED",
+        "VALIDATED_REAL_NONLIVE_EVIDENCE_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "evidence_state"
+    },
+    "execution_mode": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "execution_state": {
+      "enum": [
+        "INPUT_READY_RUN_PENDING",
+        "EXECUTOR_UNAVAILABLE",
+        "SYNTHETIC_SMOKE_VALIDATED",
+        "REAL_NONLIVE_ARTIFACT_UNAVAILABLE"
+      ],
+      "x-pr161f-enum-source": "execution_state"
+    },
+    "executor_capability_state": {
+      "enum": [
+        "EXECUTOR_INPUT_ONLY",
+        "SYNTHETIC_SMOKE_RUN_AVAILABLE",
+        "REAL_NONLIVE_RUN_AVAILABLE",
+        "EXECUTOR_UNAVAILABLE",
+        "DATA_UNAVAILABLE",
+        "UNSAFE_LIVE_DEPENDENCY_BLOCKED"
+      ],
+      "x-pr161f-enum-source": "executor_capability_state"
+    },
+    "executor_input_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "executor_input_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "executor_input_type": {
+      "enum": [
+        "REPLAY_PAPER_EXECUTOR_INPUT"
+      ],
+      "x-pr161f-enum-source": "executor_input_type"
+    },
+    "failure_class": {
+      "enum": [
+        "MISSING_REQUIRED_INPUT",
+        "INVALID_SCHEMA",
+        "MISSING_QKU_TRACEABILITY",
+        "UNMAPPABLE_QKU",
+        "STALE_SOURCE",
+        "UNACCEPTED_SOURCE_FACT",
+        "UNSAFE_LIVE_DEPENDENCY",
+        "PRIVATE_STATE_REQUIRED_BUT_FORBIDDEN",
+        "LIVE_WRITE_SECRET_REQUIRED_BUT_FORBIDDEN",
+        "REPLAY_DATA_UNAVAILABLE",
+        "PAPER_INPUT_UNAVAILABLE",
+        "OPTIMIZER_BACKEND_REQUIRED_BUT_FORBIDDEN",
+        "QUANTUM_BACKEND_REQUIRED_BUT_FORBIDDEN",
+        "CAPITAL_RECEIPT_REQUIRED_BUT_MISSING",
+        "RISK_GATE_BLOCKED",
+        "LATENCY_GATE_BLOCKED",
+        "OWNER_APPROVAL_REQUIRED",
+        "AGENT_TASK_TIMEOUT",
+        "AGENT_OUTPUT_LOW_TRUST",
+        "AGENT_DUTY_MISSED"
+      ],
+      "x-pr161f-enum-source": "failure_class"
+    },
+    "failure_incident_required_flag": {
+      "type": "boolean"
+    },
+    "forbidden_inputs": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "future_pr_route": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "handoff_state": {
+      "enum": [
+        "HANDOFF_READY",
+        "HANDOFF_ACCEPTED",
+        "HANDOFF_REJECTED_INVALID_SCHEMA",
+        "HANDOFF_REJECTED_MISSING_INPUT",
+        "HANDOFF_REJECTED_STALE_SOURCE",
+        "HANDOFF_REJECTED_UNSAFE_DEPENDENCY",
+        "HANDOFF_REJECTED_UNMAPPABLE_QKU",
+        "HANDOFF_RETRY_REQUIRED",
+        "HANDOFF_REROUTED",
+        "HANDOFF_QUARANTINED",
+        "HANDOFF_OWNER_REVIEW_REQUIRED",
+        "HANDOFF_BLOCKED_LIVE_AUTHORITY"
+      ],
+      "x-pr161f-enum-source": "handoff_state"
+    },
+    "input_provenance_class": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "input_read_paths": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "input_validation_checks": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "kpi_scorecard_required_flag": {
+      "type": "boolean"
+    },
+    "latency_class": {
+      "enum": [
+        "UNOBSERVED_LATENCY",
+        "LOW_LATENCY_CANDIDATE",
+        "MEDIUM_LATENCY_CANDIDATE",
+        "HIGH_LATENCY_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "latency_class"
+    },
+    "live_authority_allowed_flag": {
+      "type": "boolean"
+    },
+    "live_profit_evidence_class": {
+      "enum": [
+        "NO_LIVE_PROFIT_EVIDENCE"
+      ],
+      "x-pr161f-enum-source": "live_profit_evidence_class"
+    },
+    "market": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "master_plan_authority_ref": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "no_atomicrows_bundle_sha_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_live_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_live_connector_used_flag": {
+      "type": "boolean"
+    },
+    "no_optimizer_execution_created_flag": {
+      "type": "boolean"
+    },
+    "no_order_execution_flag": {
+      "type": "boolean"
+    },
+    "no_private_state_used_flag": {
+      "type": "boolean"
+    },
+    "no_profit_evidence_created_flag": {
+      "type": "boolean"
+    },
+    "no_qtt_sha_authority_created_flag": {
+      "type": "boolean"
+    },
+    "no_quantum_backend_execution_created_flag": {
+      "type": "boolean"
+    },
+    "output_artifacts": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "output_schema_refs": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "owner_escalation_required_flag": {
+      "type": "boolean"
+    },
+    "owner_review_required_flag": {
+      "type": "boolean"
+    },
+    "owner_review_state": {
+      "enum": [
+        "RUN_READINESS_OWNER_REVIEW_REQUIRED",
+        "NO_VALIDATED_RESULT_ARTIFACT"
+      ],
+      "x-pr161f-enum-source": "owner_review_state"
+    },
+    "paired_replay_paper_run_plan_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "paired_run_plan_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "paper_run_request_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "paper_run_request_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "permission_expansion_allowed_flag": {
+      "type": "boolean"
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161c_graph_edges_ref": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161c_graph_ref": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161c_registry_ref": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161d_replay_paper_scenario_ref_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161d_score_ref_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr161e_outcome_capture_ref_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "pr_label": {
+      "const": "PR161F"
+    },
+    "processing_duties": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qku_bundle_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qku_graph_node_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "qku_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "quantum_applicability_class": {
+      "enum": [
+        "QUANTUM_METADATA_ONLY",
+        "QUANTUM_APPLICABLE",
+        "QUANTUM_INSPIRED_QKU",
+        "CLASSICAL_BASELINE_ONLY",
+        "HYBRID_ARBITRATION_CANDIDATE",
+        "UNOBSERVED_QUANTUM_APPLICABILITY"
+      ],
+      "x-pr161f-enum-source": "quantum_applicability_class"
+    },
+    "quarantine_required_flag": {
+      "type": "boolean"
+    },
+    "real_nonlive_flag": {
+      "type": "boolean"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "replay_paper_evidence_class": {
+      "enum": [
+        "NO_REPLAY_PAPER_EVIDENCE",
+        "REPLAY_ARTIFACT_EVIDENCE_CANDIDATE",
+        "PAPER_ARTIFACT_EVIDENCE_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "replay_paper_evidence_class"
+    },
+    "replay_paper_scenario_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "replay_run_request_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "replay_run_request_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "reroute_allowed_flag": {
+      "type": "boolean"
+    },
+    "result_packet_emission_eligibility_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "result_packet_emission_eligibility_state": {
+      "enum": [
+        "RESULT_PACKET_EMISSION_BLOCKED",
+        "RESULT_PACKET_READY_FOR_CAPTURE"
+      ],
+      "x-pr161f-enum-source": "result_packet_emission_eligibility_state"
+    },
+    "result_state": {
+      "enum": [
+        "NO_RESULT_YET",
+        "RESULT_PENDING",
+        "RESULT_OBSERVED"
+      ],
+      "x-pr161f-enum-source": "result_state"
+    },
+    "retry_allowed_flag": {
+      "type": "boolean"
+    },
+    "role_materialization_state": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "run_artifact_authenticity_class": {
+      "enum": [
+        "RUN_ARTIFACT_PENDING_NOT_PERFORMANCE_EVIDENCE",
+        "SYNTHETIC_FIXTURE_NOT_PERFORMANCE_EVIDENCE",
+        "VALIDATED_REAL_NONLIVE_REPLAY_ARTIFACT_CANDIDATE",
+        "VALIDATED_REAL_NONLIVE_PAPER_ARTIFACT_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "run_artifact_authenticity_class"
+    },
+    "run_artifact_class": {
+      "enum": [
+        "RUN_ARTIFACT_ENVELOPE_PRODUCED",
+        "SYNTHETIC_PIPELINE_SMOKE_RUN_ARTIFACT",
+        "REAL_NONLIVE_REPLAY_RUN_ARTIFACT",
+        "REAL_NONLIVE_PAPER_RUN_ARTIFACT"
+      ],
+      "x-pr161f-enum-source": "run_artifact_class"
+    },
+    "run_artifact_envelope_record": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "run_artifact_id": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "run_plan_state": {
+      "enum": [
+        "PAIRED_REPLAY_PAPER_RUN_PLAN_PRODUCED",
+        "REPLAY_PAPER_RUN_PLAN_READY"
+      ],
+      "x-pr161f-enum-source": "run_plan_state"
+    },
+    "run_request_type": {
+      "enum": [
+        "REPLAY_RUN_REQUEST",
+        "PAPER_RUN_REQUEST"
+      ],
+      "x-pr161f-enum-source": "run_request_type"
+    },
+    "run_validation_state": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "sample_size_class": {
+      "enum": [
+        "NO_SAMPLE",
+        "SMALL_SAMPLE",
+        "MEDIUM_SAMPLE",
+        "LARGE_SAMPLE"
+      ],
+      "x-pr161f-enum-source": "sample_size_class"
+    },
+    "scenario_matrix_id_if_available": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "self_authorizing_trading_allowed_flag": {
+      "type": "boolean"
+    },
+    "slippage_cost_class": {
+      "enum": [
+        "UNOBSERVED_COST",
+        "LOW_COST_CANDIDATE",
+        "MEDIUM_COST_CANDIDATE",
+        "HIGH_COST_CANDIDATE"
+      ],
+      "x-pr161f-enum-source": "slippage_cost_class"
+    },
+    "source_route": {
+      "enum": [
+        "ONLINE_CANDIDATE_INTAKE",
+        "HISTORICAL_DATA_CANDIDATE_DISCOVERY",
+        "OWNER_APPROVED_PROVISIONAL_DEFAULT",
+        "PR161D_REPLAY_PAPER_PREPARATION",
+        "PR161E_PENDING_OUTCOME_CAPTURE",
+        "PR161F_MISSING_VALUE_MATERIALIZATION"
+      ],
+      "x-pr161f-enum-source": "source_route"
+    },
+    "synthetic_flag": {
+      "type": "boolean"
+    },
+    "task_receipt_required_flag": {
+      "type": "boolean"
+    },
+    "trust_score_update_required_flag": {
+      "type": "boolean"
+    },
+    "upstream_optional_inputs": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "upstream_required_inputs": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    },
+    "value_authority_class": {
+      "enum": [
+        "OWNER_APPROVED_INTERNAL_POLICY",
+        "CANDIDATE_DEFAULT",
+        "PROVISIONAL_DEFAULT",
+        "REPLAY_PAPER_TEST_DEFAULT",
+        "SOURCE_REQUIRED_PLACEHOLDER",
+        "OWNER_REVIEW_REQUIRED_VALUE",
+        "MISSING_RUN_PLACEHOLDER",
+        "PENDING_RESULT_EVIDENCE_STATE"
+      ],
+      "x-pr161f-enum-source": "value_authority_class"
+    },
+    "venue_scope": {
+      "type": [
+        "string",
+        "null",
+        "object",
+        "array",
+        "boolean",
+        "number",
+        "integer"
+      ]
+    }
+  },
+  "required": [
+    "record_id"
+  ],
+  "title": "PR161F pr161f_replay_run_request_record.schema.json",
+  "type": "object",
+  "x-pr161f-pr-label": "PR161F",
+  "x-pr161f-schema-enum-source": "src.qtt.stage1_prediction_markets.replay_paper_executor_input_run_artifact_generation.constants"
+}
