@@ -1,0 +1,746 @@
+{
+  "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162A",
+  "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+    "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+    "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+    "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+    "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 19,
+  "records": [
+    {
+      "agent_id": "QTT_RESEARCH_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "dataset_source_candidate_classifications"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-01-QTT_RESEARCH_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_SOURCE_EVIDENCE_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "source_evidence_routing_status_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-02-QTT_SOURCE_EVIDENCE_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "atomicrows_qku_dataset_mapping_readiness_without_bundle_mutation"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-03-QTT_ATOMICROWS_ENRICHMENT_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_PARAMETER_STACK_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "parameter_stack_data_readiness"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-04-QTT_PARAMETER_STACK_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_QUANTUM_ADVISORY_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "quantum_feature_readiness_no_backend_execution"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json",
+        "PR162A_QuantumQKUDatasetFeatureBridge.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-05-QTT_QUANTUM_ADVISORY_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_comparator_readiness_no_optimizer_execution"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json",
+        "PR162A_QuantumQKUDatasetFeatureBridge.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-06-QTT_OPTIMIZER_ARBITRATION_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_REPLAY_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "pr162b_pr162r_replay_rerun_readiness_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json",
+        "PR162A_PR162AdapterRerunReadinessBridge.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-07-QTT_REPLAY_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_PAPER_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "pr162b_pr162r_paper_rerun_readiness_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json",
+        "PR162A_PR162AdapterRerunReadinessBridge.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-08-QTT_PAPER_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_SCORING_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-09-QTT_SCORING_AGENT",
+      "routes": [
+        "PR163_BLOCKED_NO_VALIDATED_REAL_NONLIVE_REPLAY_ARTIFACTS"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_RANKING_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-10-QTT_RANKING_AGENT",
+      "routes": [
+        "PR163_BLOCKED_NO_VALIDATED_REAL_NONLIVE_REPLAY_ARTIFACTS"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_RISK_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-11-QTT_RISK_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_CAPITAL_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-12-QTT_CAPITAL_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_LATENCY_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-13-QTT_LATENCY_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_EXECUTION_PREP_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-14-QTT_EXECUTION_PREP_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_OWNER_REVIEW_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "owner_review_queue_candidates_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json",
+        "PR162A_FetchPlanAndOwnerMaterializationCommandQueue.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-15-QTT_OWNER_REVIEW_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_COMMANDER_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-16-QTT_COMMANDER_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_GOVERNANCE_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "forbidden_authority_scan_pass_fail"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-17-QTT_GOVERNANCE_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_VENUE_SPECIALIST_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_gate_readiness_metadata_only"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-18-QTT_VENUE_SPECIALIST_AGENT",
+      "routes": [
+        "PR162B_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR162R_RERUN_PR162_WITH_PR162A_DATASETS",
+        "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+        "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+        "PR165_RESULT_BACKED_RANKING_GATE_ROUTE"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    },
+    {
+      "agent_id": "QTT_EXECUTION_ROUTER_AGENT",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocker_code": "NONE",
+      "created_by_pr": "PR162A",
+      "emits": [
+        "future_precomputed_input_candidate_no_orders"
+      ],
+      "live_write_secret_access_allowed_flag": false,
+      "order_routing_allowed_flag": false,
+      "permission_expansion_created_flag": false,
+      "reads": [
+        "PR162A_DatasetMaterializationManifest.report.json"
+      ],
+      "record_id": "PR162A-AGENT-DATASET-HANDOFF-19-QTT_EXECUTION_ROUTER_AGENT",
+      "routes": [
+        "NO_ORDER_ROUTE_CREATED"
+      ],
+      "run_capable_dataset_count_visible": 1,
+      "runtime_agent_execution_created_flag": false,
+      "self_authorizing_trading_allowed_flag": false,
+      "validates": [
+        "PR162A_DatasetAuthorityGate.report.json",
+        "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+        "PR162A_ForbiddenAuthorityScan.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162A_QTTAgentDatasetHandoffBridge.report.json",
+  "report_id": "PR162A_QTTAgentDatasetHandoffBridge",
+  "report_type": "PR162A_QTT_AGENT_DATASET_HANDOFF_BRIDGE",
+  "schema_ref": "src/qtt/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate/schemas/pr162a_qttagentdatasethandoffbridge.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_NonLiveDatasetDiscovery.report.json",
+    "docs/master_plan/generated/PR162_DataAuthorityAndProvenanceGate.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_AdapterCapabilityDiscovery.report.json",
+    "docs/master_plan/generated/PR162_SyntheticVsRealNonLiveSeparation.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ResultPacketReadinessHandoffCandidate.report.json",
+    "docs/master_plan/generated/PR162_PR161EIngestionHandoffCandidate.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QTTAgentExecutorHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json"
+  ],
+  "summary_counts": {
+    "by_agent_id": {
+      "QTT_ATOMICROWS_ENRICHMENT_AGENT": 1,
+      "QTT_CAPITAL_AGENT": 1,
+      "QTT_COMMANDER_AGENT": 1,
+      "QTT_EXECUTION_PREP_AGENT": 1,
+      "QTT_EXECUTION_ROUTER_AGENT": 1,
+      "QTT_GOVERNANCE_AGENT": 1,
+      "QTT_LATENCY_AGENT": 1,
+      "QTT_OPTIMIZER_ARBITRATION_AGENT": 1,
+      "QTT_OWNER_REVIEW_AGENT": 1,
+      "QTT_PAPER_AGENT": 1,
+      "QTT_PARAMETER_STACK_AGENT": 1,
+      "QTT_QUANTUM_ADVISORY_AGENT": 1,
+      "QTT_RANKING_AGENT": 1,
+      "QTT_REPLAY_AGENT": 1,
+      "QTT_RESEARCH_AGENT": 1,
+      "QTT_RISK_AGENT": 1,
+      "QTT_SCORING_AGENT": 1,
+      "QTT_SOURCE_EVIDENCE_AGENT": 1,
+      "QTT_VENUE_SPECIALIST_AGENT": 1
+    },
+    "by_blocker_code": {
+      "NONE": 19
+    },
+    "total_records": 19
+  },
+  "total_record_count": 19,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162"
+  ],
+  "validation_status": "PASS"
+}

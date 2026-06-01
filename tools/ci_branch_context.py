@@ -49,6 +49,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr161e-replay-paper-outcome-capture-scenario-learning-bridge": 161,
     "pr161f-replay-paper-executor-input-run-artifact-generation": 161,
     "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge": 162,
+    "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate": 162,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -481,6 +482,60 @@ PR162_ALLOWED_CHANGED_PATHS = frozenset(
         *(
             f"docs/master_plan/generated/{filename}"
             for filename in PR162_GENERATED_REPORT_FILENAMES
+        ),
+    }
+)
+PR162A_BRANCH = "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate"
+PR162A_GENERATED_REPORT_FILENAMES = (
+    "PR162A_FinalSummary.report.json",
+    "PR162A_SharedDictionary.report.json",
+    "PR162A_SourceDiscoveryCandidateRegistry.report.json",
+    "PR162A_FetchPlanAndOwnerMaterializationCommandQueue.report.json",
+    "PR162A_DatasetMaterializationManifest.report.json",
+    "PR162A_DatasetAuthorityGate.report.json",
+    "PR162A_DatasetProvenanceAccessRightsLedger.report.json",
+    "PR162A_DatasetSafetyAndForbiddenPathScan.report.json",
+    "PR162A_DatasetLifecycleStateRegistry.report.json",
+    "PR162A_DatasetSchemaNormalizationContract.report.json",
+    "PR162A_NormalizedDatasetInventory.report.json",
+    "PR162A_DataQualityLeakageAndTimeWindowAudit.report.json",
+    "PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "PR162A_PR163ReadinessBlockerStatus.report.json",
+    "PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "PR162A_MissingValueCandidateRegistry.report.json",
+    "PR162A_ForbiddenAuthorityScan.report.json",
+    "PR162A_ReportShardManifest.report.json",
+)
+PR162A_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/pr162a_safe_repo_local_nonlive_dataset_shards/",
+    "src/qtt/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate/",
+    "tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate/",
+    "data/stage1_prediction_markets/nonlive_datasets/pr162a/",
+)
+PR162A_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
+        "tools/validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(
+            f"docs/master_plan/generated/{filename}"
+            for filename in PR162A_GENERATED_REPORT_FILENAMES
         ),
     }
 )
@@ -1142,6 +1197,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR162A_BRANCH:
+        return normalized in PR162A_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR162A_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR162_BRANCH:
         return normalized in PR162_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

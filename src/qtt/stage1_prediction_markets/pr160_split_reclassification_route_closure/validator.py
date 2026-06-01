@@ -31,6 +31,9 @@ _PR161F_DOWNSTREAM_BRANCH = "pr161f-replay-paper-executor-input-run-artifact-gen
 _PR162_DOWNSTREAM_BRANCH = (
     "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge"
 )
+_PR162A_DOWNSTREAM_BRANCH = (
+    "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate"
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -126,6 +129,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
         _PR161E_DOWNSTREAM_BRANCH,
         _PR161F_DOWNSTREAM_BRANCH,
         _PR162_DOWNSTREAM_BRANCH,
+        _PR162A_DOWNSTREAM_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
@@ -182,6 +186,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         _PR161E_DOWNSTREAM_BRANCH,
         _PR161F_DOWNSTREAM_BRANCH,
         _PR162_DOWNSTREAM_BRANCH,
+        _PR162A_DOWNSTREAM_BRANCH,
     }:
         return
     if ci_branch_context.github_actions_main_push_context_active():

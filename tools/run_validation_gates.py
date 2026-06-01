@@ -978,6 +978,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",
