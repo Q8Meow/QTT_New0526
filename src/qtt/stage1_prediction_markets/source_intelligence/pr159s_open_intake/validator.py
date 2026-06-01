@@ -20,6 +20,9 @@ _PR161C_DOWNSTREAM_BRANCH = "pr161c-qku-residual-candidate-assimilation-fill-cam
 _PR161D_DOWNSTREAM_BRANCH = "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization"
 _PR161E_DOWNSTREAM_BRANCH = "pr161e-replay-paper-outcome-capture-scenario-learning-bridge"
 _PR161F_DOWNSTREAM_BRANCH = "pr161f-replay-paper-executor-input-run-artifact-generation"
+_PR162_DOWNSTREAM_BRANCH = (
+    "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge"
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -62,6 +65,7 @@ def _branch_context_allowed(branch_context: str) -> bool:
         or normalized == _PR161D_DOWNSTREAM_BRANCH
         or normalized == _PR161E_DOWNSTREAM_BRANCH
         or normalized == _PR161F_DOWNSTREAM_BRANCH
+        or normalized == _PR162_DOWNSTREAM_BRANCH
         or normalized in _REPAIR_BRANCHES
     )
 
@@ -89,7 +93,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch in {c.EXPECTED_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH}:
+    if branch in {c.EXPECTED_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH}:
         return
     if ci_branch_context.github_actions_main_push_context_active():
         if branch == "main" and _ancestry_present(root):

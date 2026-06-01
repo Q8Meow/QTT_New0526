@@ -1,0 +1,425 @@
+{
+  "$id": "https://qtt.local/schemas/pr162_forbiddenauthorityscan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY"
+    },
+    "blocker_codes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "created_by_pr": {
+      "const": "PR162"
+    },
+    "creates_atomicrows_bundle_hash_or_freeze_authority": {
+      "const": false
+    },
+    "creates_connector_semantics": {
+      "const": false
+    },
+    "creates_live_authority": {
+      "const": false
+    },
+    "creates_order_authority": {
+      "const": false
+    },
+    "creates_private_state": {
+      "const": false
+    },
+    "creates_profit_evidence": {
+      "const": false
+    },
+    "creates_qtt_sha_authority": {
+      "const": false
+    },
+    "creates_quantum_backend_evidence": {
+      "const": false
+    },
+    "creates_result_backed_ranking": {
+      "const": false
+    },
+    "creates_source_evidence_fact": {
+      "const": false
+    },
+    "downstream_pr_routes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": true,
+        "properties": {
+          "agent_handoff_status": {
+            "enum": [
+              "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS",
+              "PR162_AGENT_HANDOFF_CANDIDATE_ONLY",
+              "PR162_AGENT_HANDOFF_QUARANTINE_REQUIRED",
+              "PR162_AGENT_HANDOFF_OWNER_ESCALATION_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:agent_handoff_status"
+          },
+          "artifact_status": {
+            "enum": [
+              "REPLAY_ARTIFACT_CANDIDATE_CREATED",
+              "PAPER_ARTIFACT_CANDIDATE_CREATED",
+              "REPLAY_BLOCKED_NO_SAFE_DATA",
+              "PAPER_BLOCKED_NO_SAFE_DATA",
+              "REPLAY_BLOCKED_SYNTHETIC_ONLY",
+              "PAPER_BLOCKED_SYNTHETIC_ONLY",
+              "REPLAY_BLOCKED_UNSAFE_DATA",
+              "PAPER_BLOCKED_UNSAFE_DATA",
+              "REPLAY_BLOCKED_UNMAPPABLE",
+              "PAPER_BLOCKED_UNMAPPABLE",
+              "BOTH_LANES_CANDIDATE_READY",
+              "BOTH_LANES_NOT_READY",
+              "PARTIAL_LANE_ONLY",
+              "NO_REAL_NONLIVE_ARTIFACT_CANDIDATE_CREATED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:artifact_status"
+          },
+          "authority_class": {
+            "enum": [
+              "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:authority_class"
+          },
+          "blocker_code": {
+            "enum": [
+              "PR162_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+              "PR162_BLOCKED_SYNTHETIC_ONLY",
+              "PR162_BLOCKED_UNSAFE_PATH",
+              "PR162_BLOCKED_UNMAPPABLE_QKU",
+              "PR162_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+              "PR162_BLOCKED_PARTIAL_LANE_ONLY",
+              "PR162_BLOCKED_QUANTUM_BLUEPRINT_ONLY",
+              "PR162_BLOCKED_OWNER_REVIEW_REQUIRED",
+              "PR162_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+              "PR162_BLOCKED_RESULT_AUTHENTICITY_REQUIRED",
+              "PR162_BLOCKED_LIVE_AUTHORITY_FORBIDDEN",
+              "PR162_BLOCKED_ORDER_AUTHORITY_FORBIDDEN",
+              "PR162_BLOCKED_PRIVATE_STATE_FORBIDDEN",
+              "PR162_BLOCKED_OPTIMIZER_EXECUTION_FORBIDDEN",
+              "PR162_BLOCKED_QUANTUM_BACKEND_EXECUTION_FORBIDDEN",
+              "PR162_BLOCKED_FORBIDDEN_AUTHORITY_PATTERN",
+              "PR162_BLOCKED_ABSOLUTE_PATH",
+              "PR162_BLOCKED_SCHEMA_CONSUMER_NOT_FOUND",
+              "PR162_BLOCKED_AUTHORITY_DRIFT",
+              "PR162_STALE_PRECOMPUTED_SNAPSHOT_BLOCKER",
+              "REPLAY_ARTIFACT_CANDIDATE_CREATED",
+              "PAPER_ARTIFACT_CANDIDATE_CREATED",
+              "REPLAY_BLOCKED_NO_SAFE_DATA",
+              "PAPER_BLOCKED_NO_SAFE_DATA",
+              "REPLAY_BLOCKED_SYNTHETIC_ONLY",
+              "PAPER_BLOCKED_SYNTHETIC_ONLY",
+              "REPLAY_BLOCKED_UNSAFE_DATA",
+              "PAPER_BLOCKED_UNSAFE_DATA",
+              "REPLAY_BLOCKED_UNMAPPABLE",
+              "PAPER_BLOCKED_UNMAPPABLE",
+              "BOTH_LANES_CANDIDATE_READY",
+              "BOTH_LANES_NOT_READY",
+              "PARTIAL_LANE_ONLY",
+              "NO_REAL_NONLIVE_ARTIFACT_CANDIDATE_CREATED",
+              "PR161E_HANDOFF_CANDIDATE_ONLY",
+              "PR161E_HANDOFF_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+              "PR161E_HANDOFF_BLOCKED_PARTIAL_LANE_ONLY",
+              "PR161E_HANDOFF_BLOCKED_SYNTHETIC_ONLY",
+              "PR161E_HANDOFF_BLOCKED_UNSAFE_DATA",
+              "PR161E_HANDOFF_BLOCKED_UNMAPPABLE_QKU",
+              "PR161E_HANDOFF_BLOCKED_SCHEMA_CONSUMER_NOT_FOUND",
+              "PR161E_HANDOFF_BLOCKED_AUTHORITY_DRIFT",
+              "PR161E_HANDOFF_BLOCKED_QUANTUM_BLUEPRINT_ONLY",
+              "PR161E_HANDOFF_BLOCKED_QUANTUM_BACKEND_EVIDENCE_FORBIDDEN",
+              "NOT_QUANTUM_APPLICABLE",
+              "QUANTUM_APPLICABLE_METADATA_ONLY_BLOCKED",
+              "QUANTUM_ENCODING_BLUEPRINT_READY",
+              "QUANTUM_PARAMETER_CANDIDATE_READY",
+              "QUANTUM_BACKEND_FIT_CANDIDATE_READY",
+              "QUANTUM_CLASSICAL_COMPARATOR_BLUEPRINT_READY",
+              "QUANTUM_REPLAY_PAPER_WORK_ORDER_READY",
+              "QUANTUM_REAL_NONLIVE_ARTIFACT_CANDIDATE_READY",
+              "QUANTUM_RESULT_PACKET_HANDOFF_CANDIDATE_READY",
+              "QUANTUM_FUTURE_LIVE_CONTROL_PLANE_CANDIDATE",
+              "QUANTUM_FUTURE_LIVE_PRECOMPUTED_SNAPSHOT_CANDIDATE",
+              "QUANTUM_BLOCKED_NO_QKU_LINEAGE",
+              "QUANTUM_BLOCKED_NO_SAFE_DATA",
+              "QUANTUM_BLOCKED_NO_CLASSICAL_BASELINE",
+              "QUANTUM_BLOCKED_NO_ENCODING",
+              "QUANTUM_BLOCKED_BACKEND_UNAVAILABLE_OR_UNVERIFIED",
+              "QUANTUM_BLOCKED_LIVE_PATH_LATENCY_UNSAFE",
+              "QUANTUM_BLOCKED_NO_OWNER_REVIEW",
+              "QUANTUM_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+              "QUANTUM_BLOCKED_RESULT_AUTHENTICITY_REQUIRED",
+              "CLASSICAL_BASELINE_ONLY",
+              "QUANTUM_INSPIRED_LOCAL_CANDIDATE",
+              "QAOA_SIMULATOR_CANDIDATE_FUTURE",
+              "QAOA_HARDWARE_CANDIDATE_FUTURE",
+              "VQE_SIMULATOR_CANDIDATE_FUTURE",
+              "ANNEALING_SIMULATOR_CANDIDATE_FUTURE",
+              "ANNEALING_HARDWARE_CANDIDATE_FUTURE",
+              "HYBRID_QUANTUM_CLASSICAL_JOB_CANDIDATE_FUTURE",
+              "BACKEND_UNVERIFIED_SOURCE_REQUIRED",
+              "BACKEND_BLOCKED_NO_DATA",
+              "BACKEND_BLOCKED_NO_ENCODING",
+              "BACKEND_BLOCKED_LATENCY_UNSAFE",
+              "BACKEND_BLOCKED_COST_UNSAFE",
+              "BACKEND_BLOCKED_OWNER_REVIEW_REQUIRED",
+              "COMPARATOR_BLUEPRINT_READY",
+              "COMPARATOR_BLOCKED_NO_CLASSICAL_BASELINE",
+              "COMPARATOR_BLOCKED_NO_QUANTUM_CANDIDATE",
+              "COMPARATOR_BLOCKED_NO_SAFE_DATA",
+              "COMPARATOR_BLOCKED_NO_VALIDATED_RESULT_PACKET",
+              "COMPARATOR_BLOCKED_AUTHENTICITY_GATE_REQUIRED",
+              "COMPARATOR_BLOCKED_OWNER_REVIEW_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:blocker_code"
+          },
+          "candidate_authority_class": {
+            "enum": [
+              "OFFICIAL_DOC_CANDIDATE",
+              "RESEARCH_CANDIDATE",
+              "INSTITUTIONAL_CANDIDATE",
+              "OWNER_CANDIDATE",
+              "REPO_EXISTING_CANDIDATE",
+              "HEURISTIC_CANDIDATE",
+              "UNKNOWN_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:candidate_authority_class"
+          },
+          "candidate_backend_family": {
+            "enum": [
+              "CLASSICAL_BASELINE_ONLY",
+              "QUANTUM_INSPIRED_LOCAL_CANDIDATE",
+              "QAOA_SIMULATOR_CANDIDATE_FUTURE",
+              "QAOA_HARDWARE_CANDIDATE_FUTURE",
+              "VQE_SIMULATOR_CANDIDATE_FUTURE",
+              "ANNEALING_SIMULATOR_CANDIDATE_FUTURE",
+              "ANNEALING_HARDWARE_CANDIDATE_FUTURE",
+              "HYBRID_QUANTUM_CLASSICAL_JOB_CANDIDATE_FUTURE",
+              "BACKEND_UNVERIFIED_SOURCE_REQUIRED",
+              "BACKEND_BLOCKED_NO_DATA",
+              "BACKEND_BLOCKED_NO_ENCODING",
+              "BACKEND_BLOCKED_LATENCY_UNSAFE",
+              "BACKEND_BLOCKED_COST_UNSAFE",
+              "BACKEND_BLOCKED_OWNER_REVIEW_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:candidate_backend_family"
+          },
+          "comparator_blueprint_status": {
+            "enum": [
+              "COMPARATOR_BLUEPRINT_READY",
+              "COMPARATOR_BLOCKED_NO_CLASSICAL_BASELINE",
+              "COMPARATOR_BLOCKED_NO_QUANTUM_CANDIDATE",
+              "COMPARATOR_BLOCKED_NO_SAFE_DATA",
+              "COMPARATOR_BLOCKED_NO_VALIDATED_RESULT_PACKET",
+              "COMPARATOR_BLOCKED_AUTHENTICITY_GATE_REQUIRED",
+              "COMPARATOR_BLOCKED_OWNER_REVIEW_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:comparator_blueprint_status"
+          },
+          "created_by_pr": {
+            "enum": [
+              "PR162"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:created_by_pr"
+          },
+          "dataset_authority_class": {
+            "enum": [
+              "REPO_LOCAL_ACCEPTED_NONLIVE_HISTORICAL_DATASET",
+              "REPO_LOCAL_OWNER_PROVIDED_NONLIVE_DATASET",
+              "REPO_LOCAL_PUBLIC_RESEARCH_DATASET_CANDIDATE",
+              "REPO_LOCAL_SYNTHETIC_FIXTURE",
+              "REPO_LOCAL_SMOKE_FIXTURE",
+              "ONLINE_DISCOVERED_CANDIDATE_METADATA_ONLY",
+              "UNKNOWN_OR_UNMAPPABLE_DATASET",
+              "UNSAFE_OR_FORBIDDEN_DATASET"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:dataset_authority_class"
+          },
+          "encoding_readiness_state": {
+            "enum": [
+              "QUANTUM_ENCODING_BLUEPRINT_READY",
+              "QUANTUM_BLOCKED_NO_ENCODING",
+              "QUANTUM_BLOCKED_NO_QKU_LINEAGE"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:encoding_readiness_state"
+          },
+          "live_hot_path_admissibility": {
+            "enum": [
+              "PRECOMPUTED_ONLY",
+              "ASYNC_CONTROL_PLANE_ONLY",
+              "FORBIDDEN",
+              "PRECOMPUTED_SNAPSHOT_ONLY",
+              "RESEARCH_ONLY",
+              "FORBIDDEN_UNTIL_FUTURE_OWNER_GATE"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:live_hot_path_admissibility"
+          },
+          "pr161e_handoff_state": {
+            "enum": [
+              "PR161E_HANDOFF_CANDIDATE_ONLY",
+              "PR161E_HANDOFF_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+              "PR161E_HANDOFF_BLOCKED_PARTIAL_LANE_ONLY",
+              "PR161E_HANDOFF_BLOCKED_SYNTHETIC_ONLY",
+              "PR161E_HANDOFF_BLOCKED_UNSAFE_DATA",
+              "PR161E_HANDOFF_BLOCKED_UNMAPPABLE_QKU",
+              "PR161E_HANDOFF_BLOCKED_SCHEMA_CONSUMER_NOT_FOUND",
+              "PR161E_HANDOFF_BLOCKED_AUTHORITY_DRIFT",
+              "PR161E_HANDOFF_BLOCKED_QUANTUM_BLUEPRINT_ONLY",
+              "PR161E_HANDOFF_BLOCKED_QUANTUM_BACKEND_EVIDENCE_FORBIDDEN"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:pr161e_handoff_state"
+          },
+          "qku_coverage_state": {
+            "enum": [
+              "QKU_COVERED_WITH_BLOCKED_NONLIVE_LANES",
+              "QKU_COVERED_WITH_REAL_NONLIVE_REPLAY_ARTIFACT_CANDIDATE",
+              "QKU_COVERED_WITH_REAL_NONLIVE_PAPER_ARTIFACT_CANDIDATE",
+              "QKU_COVERED_WITH_BOTH_LANES_CANDIDATE",
+              "QKU_BLOCKED_NO_REPO_LOCAL_DATA",
+              "QKU_BLOCKED_SYNTHETIC_ONLY",
+              "QKU_BLOCKED_UNSAFE_DATA",
+              "QKU_BLOCKED_UNMAPPABLE"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:qku_coverage_state"
+          },
+          "quantum_forward_promotion_state": {
+            "enum": [
+              "QUANTUM_FORWARD_BLUEPRINT_ONLY",
+              "QUANTUM_FORWARD_WORK_ORDER_READY",
+              "QUANTUM_FORWARD_RESULT_PACKET_BLOCKED",
+              "QUANTUM_FORWARD_FUTURE_LIVE_GATED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:quantum_forward_promotion_state"
+          },
+          "quantum_readiness_state": {
+            "enum": [
+              "NOT_QUANTUM_APPLICABLE",
+              "QUANTUM_APPLICABLE_METADATA_ONLY_BLOCKED",
+              "QUANTUM_ENCODING_BLUEPRINT_READY",
+              "QUANTUM_PARAMETER_CANDIDATE_READY",
+              "QUANTUM_BACKEND_FIT_CANDIDATE_READY",
+              "QUANTUM_CLASSICAL_COMPARATOR_BLUEPRINT_READY",
+              "QUANTUM_REPLAY_PAPER_WORK_ORDER_READY",
+              "QUANTUM_REAL_NONLIVE_ARTIFACT_CANDIDATE_READY",
+              "QUANTUM_RESULT_PACKET_HANDOFF_CANDIDATE_READY",
+              "QUANTUM_FUTURE_LIVE_CONTROL_PLANE_CANDIDATE",
+              "QUANTUM_FUTURE_LIVE_PRECOMPUTED_SNAPSHOT_CANDIDATE",
+              "QUANTUM_BLOCKED_NO_QKU_LINEAGE",
+              "QUANTUM_BLOCKED_NO_SAFE_DATA",
+              "QUANTUM_BLOCKED_NO_CLASSICAL_BASELINE",
+              "QUANTUM_BLOCKED_NO_ENCODING",
+              "QUANTUM_BLOCKED_BACKEND_UNAVAILABLE_OR_UNVERIFIED",
+              "QUANTUM_BLOCKED_LIVE_PATH_LATENCY_UNSAFE",
+              "QUANTUM_BLOCKED_NO_OWNER_REVIEW",
+              "QUANTUM_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+              "QUANTUM_BLOCKED_RESULT_AUTHENTICITY_REQUIRED"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:quantum_readiness_state"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "result_readiness_state": {
+            "enum": [
+              "RESULT_PACKET_HANDOFF_CANDIDATE_ONLY",
+              "RESULT_PACKET_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+              "RESULT_PACKET_BLOCKED_PARTIAL_LANE_ONLY",
+              "RESULT_PACKET_BLOCKED_SYNTHETIC_ONLY",
+              "RESULT_PACKET_BLOCKED_UNSAFE_DATA"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:result_readiness_state"
+          },
+          "source_class": {
+            "enum": [
+              "OFFICIAL_SOURCE_CANDIDATE",
+              "RESEARCH_SOURCE_CANDIDATE",
+              "SOCIAL_SIGNAL_CANDIDATE",
+              "WEB_SOURCE_CANDIDATE",
+              "INSTITUTIONAL_METHOD_CANDIDATE",
+              "OWNER_PROVIDED_CANDIDATE",
+              "CLASSICAL_METHOD_CANDIDATE",
+              "HYBRID_METHOD_CANDIDATE",
+              "QUANTUM_METHOD_CANDIDATE",
+              "QUANTUM_BACKEND_DOC_CANDIDATE",
+              "QUANTUM_ALGORITHM_DOC_CANDIDATE",
+              "QUANTUM_PARAMETER_RANGE_CANDIDATE",
+              "QUANTUM_ENCODING_CANDIDATE"
+            ],
+            "x-pr162-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants:source_class"
+          }
+        },
+        "required": [
+          "record_id"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR162_ForbiddenAuthorityScan.report.json"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "schema_ref": {
+      "const": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_forbiddenauthorityscan.schema.json"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "sharded_flag": {
+      "type": "boolean"
+    },
+    "source_inputs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "upstream_pr_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "schema_ref",
+    "created_by_pr",
+    "authority_class",
+    "source_inputs",
+    "upstream_pr_refs",
+    "downstream_pr_routes",
+    "validation_status",
+    "blocker_codes",
+    "records",
+    "sharded_flag",
+    "creates_live_authority",
+    "creates_order_authority",
+    "creates_private_state",
+    "creates_profit_evidence",
+    "creates_result_backed_ranking",
+    "creates_quantum_backend_evidence",
+    "creates_connector_semantics",
+    "creates_source_evidence_fact",
+    "creates_qtt_sha_authority",
+    "creates_atomicrows_bundle_hash_or_freeze_authority"
+  ],
+  "title": "PR162 PR162_ForbiddenAuthorityScan.report.json",
+  "type": "object",
+  "x-pr162-schema-enum-source": "src.qtt.stage1_prediction_markets.nonlive_replay_paper_data_adapter_quantum_forward_bridge.constants"
+}

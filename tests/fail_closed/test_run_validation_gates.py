@@ -499,6 +499,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2146,6 +2155,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr161f_index = command_names.index(
         "validate_pr161f_replay_paper_executor_input_run_artifact_generation.py"
     )
+    pr162_index = command_names.index(
+        "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2221,6 +2233,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         == 1
     )
     assert (
+        command_names.count(
+            "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+        )
+        == 1
+    )
+    assert (
         pr154_index
         < pr155_index
         < pr156_index
@@ -2236,6 +2254,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr161d_index
         < pr161e_index
         < pr161f_index
+        < pr162_index
         < next_gate_index
     )
     assert commands[pr155_index] == [
@@ -2357,24 +2376,36 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr162_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr161a_index]
     assert "--write-report" not in commands[pr161b_index]
     assert "--write-report" not in commands[pr161c_index]
     assert "--write-report" not in commands[pr161d_index]
     assert "--write-report" not in commands[pr161e_index]
     assert "--write-report" not in commands[pr161f_index]
+    assert "--write-report" not in commands[pr162_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
     assert "--branch" not in commands[pr161c_index]
     assert "--branch" not in commands[pr161d_index]
     assert "--branch" not in commands[pr161e_index]
     assert "--branch" not in commands[pr161f_index]
+    assert "--branch" not in commands[pr162_index]
     assert "--allow-main" not in commands[pr161a_index]
     assert "--allow-main" not in commands[pr161b_index]
     assert "--allow-main" not in commands[pr161c_index]
     assert "--allow-main" not in commands[pr161d_index]
     assert "--allow-main" not in commands[pr161e_index]
     assert "--allow-main" not in commands[pr161f_index]
+    assert "--allow-main" not in commands[pr162_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
     assert "--output" not in commands[pr160_index]
@@ -2386,6 +2417,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--output" not in commands[pr161d_index]
     assert "--output" not in commands[pr161e_index]
     assert "--output" not in commands[pr161f_index]
+    assert "--output" not in commands[pr162_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):

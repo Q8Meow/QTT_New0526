@@ -1,0 +1,1043 @@
+{
+  "all_shard_files": [
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0006.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0007.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0008.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0009.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0010.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0006.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0007.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0008.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0009.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0010.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0006.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0007.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0008.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0009.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0010.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0005.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0001.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0002.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0003.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0004.json",
+    "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0005.json"
+  ],
+  "all_shard_refs_posix_relative_flag": true,
+  "authority_class": "NONLIVE_ARTIFACT_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "blocker_codes": [],
+  "created_by_pr": "PR162",
+  "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR163_RESULT_PACKET_ROUTE_AFTER_VALIDATED_REAL_NONLIVE_ARTIFACTS",
+    "PR164_RESULT_AUTHENTICITY_GATE_ROUTE",
+    "PR165_RESULT_BACKED_RANKING_GATE_ROUTE",
+    "PR168_RISK_CAPITAL_LATENCY_GATE_ROUTE",
+    "PR171_RUNTIME_SCHEDULER_GATE_ROUTE",
+    "PR177_LIVE_SAFE_PROMOTION_GATE_ROUTE",
+    "PR180_CANARY_GATE_ROUTE"
+  ],
+  "record_count": 12,
+  "records": [
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_ResultPacketReadinessHandoffCandidate.report",
+      "report_filename": "PR162_ResultPacketReadinessHandoffCandidate.report.json",
+      "report_type": "PR162_RESULT_PACKET_READINESS_HANDOFF_CANDIDATE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+      "shard_count": 10,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0005.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0006.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0007.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0008.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0009.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0010.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        360
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0005.json",
+          "shard_index": 5
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0006.json",
+          "shard_index": 6
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0007.json",
+          "shard_index": 7
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0008.json",
+          "shard_index": 8
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0009.json",
+          "shard_index": 9
+        },
+        {
+          "record_count": 360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_resultpacketreadinesshandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_ResultPacketReadinessHandoffCandidate.report.shard_0010.json",
+          "shard_index": 10
+        }
+      ],
+      "summary_counts": {
+        "by_result_readiness_state": {
+          "RESULT_PACKET_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_PR161EIngestionHandoffCandidate.report",
+      "report_filename": "PR162_PR161EIngestionHandoffCandidate.report.json",
+      "report_type": "PR162_PR161E_INGESTION_HANDOFF_CANDIDATE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+      "shard_count": 10,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0005.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0006.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0007.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0008.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0009.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0010.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        360
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0005.json",
+          "shard_index": 5
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0006.json",
+          "shard_index": 6
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0007.json",
+          "shard_index": 7
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0008.json",
+          "shard_index": 8
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0009.json",
+          "shard_index": 9
+        },
+        {
+          "record_count": 360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_pr161eingestionhandoffcandidate.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_PR161EIngestionHandoffCandidate.report.shard_0010.json",
+          "shard_index": 10
+        }
+      ],
+      "summary_counts": {
+        "by_pr161e_handoff_state": {
+          "PR161E_HANDOFF_BLOCKED_NO_VALIDATED_REAL_NONLIVE_ARTIFACTS": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QKUArtifactCoverageBridge.report",
+      "report_filename": "PR162_QKUArtifactCoverageBridge.report.json",
+      "report_type": "PR162_QKU_ARTIFACT_COVERAGE_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+      "shard_count": 10,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0005.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0006.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0007.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0008.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0009.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0010.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        360
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0005.json",
+          "shard_index": 5
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0006.json",
+          "shard_index": 6
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0007.json",
+          "shard_index": 7
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0008.json",
+          "shard_index": 8
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0009.json",
+          "shard_index": 9
+        },
+        {
+          "record_count": 360,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuartifactcoveragebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUArtifactCoverageBridge.report.shard_0010.json",
+          "shard_index": 10
+        }
+      ],
+      "summary_counts": {
+        "by_qku_coverage_state": {
+          "QKU_COVERED_WITH_BLOCKED_NONLIVE_LANES": 9360
+        },
+        "total_records": 9360
+      },
+      "total_record_count": 9360
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumClassicalHybridArtifactInputBridge.report",
+      "report_filename": "PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+      "report_type": "PR162_QUANTUM_CLASSICAL_HYBRID_ARTIFACT_INPUT_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridartifactinputbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridArtifactInputBridge.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QKUQuantumExecutionReadinessBridge.report",
+      "report_filename": "PR162_QKUQuantumExecutionReadinessBridge.report.json",
+      "report_type": "PR162_QKU_QUANTUM_EXECUTION_READINESS_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumexecutionreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumExecutionReadinessBridge.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_quantum_forward_promotion_state": {
+          "QUANTUM_FORWARD_WORK_ORDER_READY": 4525
+        },
+        "by_quantum_readiness_state": {
+          "QUANTUM_REPLAY_PAPER_WORK_ORDER_READY": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QKUQuantumProblemEncodingBlueprint.report",
+      "report_filename": "PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+      "report_type": "PR162_QKU_QUANTUM_PROBLEM_ENCODING_BLUEPRINT",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumproblemencodingblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumProblemEncodingBlueprint.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumBackendFitCandidateMatrix.report",
+      "report_filename": "PR162_QuantumBackendFitCandidateMatrix.report.json",
+      "report_type": "PR162_QUANTUM_BACKEND_FIT_CANDIDATE_MATRIX",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumbackendfitcandidatematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumBackendFitCandidateMatrix.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_candidate_backend_family": {
+          "BACKEND_BLOCKED_NO_DATA": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumClassicalHybridComparatorBlueprint.report",
+      "report_filename": "PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+      "report_type": "PR162_QUANTUM_CLASSICAL_HYBRID_COMPARATOR_BLUEPRINT",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumclassicalhybridcomparatorblueprint.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumClassicalHybridComparatorBlueprint.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_comparator_blueprint_status": {
+          "COMPARATOR_BLOCKED_NO_SAFE_DATA": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumReplayPaperWorkOrderQueue.report",
+      "report_filename": "PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+      "report_type": "PR162_QUANTUM_REPLAY_PAPER_WORK_ORDER_QUEUE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumreplaypaperworkorderqueue.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumReplayPaperWorkOrderQueue.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_quantum_forward_promotion_state": {
+          "QUANTUM_FORWARD_WORK_ORDER_READY": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumLiveModeControlPlaneBridge.report",
+      "report_filename": "PR162_QuantumLiveModeControlPlaneBridge.report.json",
+      "report_type": "PR162_QUANTUM_LIVE_MODE_CONTROL_PLANE_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlivemodecontrolplanebridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLiveModeControlPlaneBridge.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_live_hot_path_admissibility": {
+          "PRECOMPUTED_ONLY": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QuantumLatencyLivePathReadinessBridge.report",
+      "report_filename": "PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+      "report_type": "PR162_QUANTUM_LATENCY_LIVE_PATH_READINESS_BRIDGE",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_quantumlatencylivepathreadinessbridge.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QuantumLatencyLivePathReadinessBridge.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_live_hot_path_admissibility": {
+          "PRECOMPUTED_SNAPSHOT_ONLY": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    },
+    {
+      "canonical_records_location": "PR162_FULL_RECORD_SHARDS",
+      "full_records_only_in_shards_flag": true,
+      "largest_shard_record_count": 1000,
+      "posix_relative_shard_refs_flag": true,
+      "record_id": "PR162-SHARD-MANIFEST-PR162_QKUQuantumDownstreamAgentRouteMatrix.report",
+      "report_filename": "PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+      "report_type": "PR162_QKU_QUANTUM_DOWNSTREAM_AGENT_ROUTE_MATRIX",
+      "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+      "shard_count": 5,
+      "shard_files": [
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0001.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0002.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0003.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0004.json",
+        "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0005.json"
+      ],
+      "shard_manifest_ref": "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+      "shard_record_counts": [
+        1000,
+        1000,
+        1000,
+        1000,
+        525
+      ],
+      "shards": [
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0001.json",
+          "shard_index": 1
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0002.json",
+          "shard_index": 2
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0003.json",
+          "shard_index": 3
+        },
+        {
+          "record_count": 1000,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0004.json",
+          "shard_index": 4
+        },
+        {
+          "record_count": 525,
+          "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_qkuquantumdownstreamagentroutematrix.schema.json",
+          "shard_file": "docs/master_plan/generated/pr162_safe_nonlive_replay_paper_quantum_forward_shards/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.shard_0005.json",
+          "shard_index": 5
+        }
+      ],
+      "summary_counts": {
+        "by_agent_handoff_status": {
+          "PR162_AGENT_HANDOFF_READY_BLOCKED_INPUTS": 4525
+        },
+        "total_records": 4525
+      },
+      "total_record_count": 4525
+    }
+  ],
+  "report_filename": "PR162_ReportShardManifest.report.json",
+  "report_id": "PR162_ReportShardManifest",
+  "report_type": "PR162_SHARD_MANIFEST",
+  "schema_ref": "src/qtt/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/schemas/pr162_reportshardmanifest.schema.json",
+  "source_inputs": [
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR154",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F"
+  ],
+  "validation_status": "PR162_VALIDATION_PENDING_UNTIL_VALIDATOR_RUN"
+}
