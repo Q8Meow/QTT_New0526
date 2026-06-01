@@ -2114,6 +2114,26 @@ def test_runner_includes_pr153_family_and_pr154_validators_after_pr152(monkeypat
     assert "--output" not in commands[pr154_index]
 
 
+def test_runner_guidance_requires_pr152_finalization_before_validation_gates():
+    guidance = runner.build_pre_validation_finalization_guidance()
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands if len(command) > 1]
+
+    assert guidance == [
+        {
+            "command_id": "pr152_currentize_after_generated_artifacts",
+            "command": (
+                ".\\.venv\\Scripts\\python.exe "
+                "tools\\currentize_pr152_after_generated_artifacts.py"
+            ),
+            "when": "after final generated artifacts settle and before validation gates",
+            "ci_tracked_report_mutation_allowed": False,
+        }
+    ]
+    assert "currentize_pr152_after_generated_artifacts.py" not in command_names
+    assert "validate_grand_global_debug_logical_consistency_audit.py" in command_names
+
+
 def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)

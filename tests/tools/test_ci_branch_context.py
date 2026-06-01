@@ -354,6 +354,14 @@ def test_pr162a_explicit_changed_path_allowance_is_narrow():
     )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
+        "tools/currentize_pr152_after_generated_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
     )
     assert context.is_explicit_downstream_repair_changed_path(

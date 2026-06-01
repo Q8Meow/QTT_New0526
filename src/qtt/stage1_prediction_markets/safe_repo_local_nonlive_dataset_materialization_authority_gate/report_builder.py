@@ -209,6 +209,9 @@ def build_payloads(
         "no_scattered_hardcoded_policy_scan_result": forbidden[0]["no_scattered_hardcoded_policy_scan_status"],
         "shard_manifest_validation_result": "PASS",
         **pr152_evidence,
+        "pr152_finalization_currentization_command": c.PR152_FINALIZATION_CURRENTIZATION_COMMAND,
+        "pr152_finalization_currentization_guidance": c.PR152_FINALIZATION_CURRENTIZATION_GUIDANCE,
+        "pr152_finalization_currentization_required_before_validation_gates_flag": True,
         "recommended_next_pr_route": (
             "OWNER_MATERIALIZE_MORE_DATASET_COVERAGE_BEFORE_PR162B_OR_PR162R_REAL_RERUN"
         ),

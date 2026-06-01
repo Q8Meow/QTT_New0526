@@ -181,3 +181,22 @@ def test_pr162a_mapping_rerun_pr163_quantum_agent_and_guardrail_contracts():
     assert all(record["order_routing_allowed_flag"] is False for record in agents)
     assert scan["scan_status"] == "PASS"
     assert scan["no_scattered_hardcoded_policy_scan_status"] == "PASS"
+
+
+def test_pr162a_final_summary_records_pr152_currentization_finalization_guidance():
+    summary = _report("PR162A_FinalSummary.report.json")
+
+    assert (
+        summary["pr152_finalization_currentization_command"]
+        == c.PR152_FINALIZATION_CURRENTIZATION_COMMAND
+    )
+    assert (
+        summary["pr152_finalization_currentization_guidance"]
+        == c.PR152_FINALIZATION_CURRENTIZATION_GUIDANCE
+    )
+    assert (
+        summary[
+            "pr152_finalization_currentization_required_before_validation_gates_flag"
+        ]
+        is True
+    )

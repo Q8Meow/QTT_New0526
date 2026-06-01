@@ -519,10 +519,12 @@ PR162A_ALLOWED_CHANGED_PATH_PREFIXES = (
 PR162A_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/build_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
         "tools/run_validation_gates.py",
         "tools/ci_branch_context.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",

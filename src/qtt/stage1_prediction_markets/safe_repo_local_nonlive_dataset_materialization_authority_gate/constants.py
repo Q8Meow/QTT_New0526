@@ -55,6 +55,13 @@ PR152_CURRENTIZATION_RESULTS = (
 PR152_CURRENTIZATION_VALIDATION_COMMAND = (
     "python tools/validate_grand_global_debug_logical_consistency_audit.py"
 )
+PR152_FINALIZATION_CURRENTIZATION_COMMAND = (
+    "python tools/currentize_pr152_after_generated_artifacts.py"
+)
+PR152_FINALIZATION_CURRENTIZATION_GUIDANCE = (
+    "Run tools/currentize_pr152_after_generated_artifacts.py after final generated "
+    "artifacts settle and before validation gates."
+)
 PR152_CURRENTIZATION_REPORT_REF = (
     "docs/master_plan/generated/"
     "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
