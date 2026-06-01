@@ -577,7 +577,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr141_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge",
+            branch="pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate",
             source="unit-test",
         ),
     )

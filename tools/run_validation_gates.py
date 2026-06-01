@@ -11,6 +11,17 @@ from typing import Sequence
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
+PRE_VALIDATION_FINALIZATION_GUIDANCE = (
+    {
+        "command_id": "pr152_currentize_after_generated_artifacts",
+        "command": (
+            ".\\.venv\\Scripts\\python.exe "
+            "tools\\currentize_pr152_after_generated_artifacts.py"
+        ),
+        "when": "after final generated artifacts settle and before validation gates",
+        "ci_tracked_report_mutation_allowed": False,
+    },
+)
 PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT = (
     "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py"
 )
@@ -393,6 +404,10 @@ def _is_final_pytest_command(command: Sequence[str]) -> bool:
         len(command) > 1
         and pathlib.PurePath(command[1]).name == PYTEST_FRESH_BASETEMP_SCRIPT
     )
+
+
+def build_pre_validation_finalization_guidance() -> list[dict[str, object]]:
+    return [dict(record) for record in PRE_VALIDATION_FINALIZATION_GUIDANCE]
 
 
 def _is_pr142_handoff_readiness_validator_command(command: Sequence[str]) -> bool:
@@ -970,6 +985,15 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
             ),
             "--repo-root",
             ".",

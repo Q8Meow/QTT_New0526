@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge",
+            branch="pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate",
             source="unit-test",
         ),
     )

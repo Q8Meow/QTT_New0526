@@ -508,6 +508,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2105,6 +2114,26 @@ def test_runner_includes_pr153_family_and_pr154_validators_after_pr152(monkeypat
     assert "--output" not in commands[pr154_index]
 
 
+def test_runner_guidance_requires_pr152_finalization_before_validation_gates():
+    guidance = runner.build_pre_validation_finalization_guidance()
+    commands = runner.build_validation_commands()
+    command_names = [Path(command[1]).name for command in commands if len(command) > 1]
+
+    assert guidance == [
+        {
+            "command_id": "pr152_currentize_after_generated_artifacts",
+            "command": (
+                ".\\.venv\\Scripts\\python.exe "
+                "tools\\currentize_pr152_after_generated_artifacts.py"
+            ),
+            "when": "after final generated artifacts settle and before validation gates",
+            "ci_tracked_report_mutation_allowed": False,
+        }
+    ]
+    assert "currentize_pr152_after_generated_artifacts.py" not in command_names
+    assert "validate_grand_global_debug_logical_consistency_audit.py" in command_names
+
+
 def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2157,6 +2186,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     pr162_index = command_names.index(
         "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py"
+    )
+    pr162a_index = command_names.index(
+        "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py"
     )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
@@ -2239,6 +2271,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         == 1
     )
     assert (
+        command_names.count(
+            "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py"
+        )
+        == 1
+    )
+    assert (
         pr154_index
         < pr155_index
         < pr156_index
@@ -2255,6 +2293,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr161e_index
         < pr161f_index
         < pr162_index
+        < pr162a_index
         < next_gate_index
     )
     assert commands[pr155_index] == [
@@ -2385,6 +2424,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr162a_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr161a_index]
     assert "--write-report" not in commands[pr161b_index]
     assert "--write-report" not in commands[pr161c_index]
@@ -2392,6 +2440,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr161e_index]
     assert "--write-report" not in commands[pr161f_index]
     assert "--write-report" not in commands[pr162_index]
+    assert "--write-report" not in commands[pr162a_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
     assert "--branch" not in commands[pr161c_index]
@@ -2399,6 +2448,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--branch" not in commands[pr161e_index]
     assert "--branch" not in commands[pr161f_index]
     assert "--branch" not in commands[pr162_index]
+    assert "--branch" not in commands[pr162a_index]
     assert "--allow-main" not in commands[pr161a_index]
     assert "--allow-main" not in commands[pr161b_index]
     assert "--allow-main" not in commands[pr161c_index]
@@ -2406,6 +2456,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--allow-main" not in commands[pr161e_index]
     assert "--allow-main" not in commands[pr161f_index]
     assert "--allow-main" not in commands[pr162_index]
+    assert "--allow-main" not in commands[pr162a_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
     assert "--output" not in commands[pr160_index]
@@ -2418,6 +2469,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--output" not in commands[pr161e_index]
     assert "--output" not in commands[pr161f_index]
     assert "--output" not in commands[pr162_index]
+    assert "--output" not in commands[pr162a_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):

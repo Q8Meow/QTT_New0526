@@ -324,6 +324,88 @@ def test_pr162_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr162a_explicit_changed_path_allowance_is_narrow():
+    branch = "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=162) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "safe_repo_local_nonlive_dataset_materialization_authority_gate/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "pr162a_safe_repo_local_nonlive_dataset_shards/"
+        "PR162A_MarketScenarioQKUMappingMatrix.report.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "data/stage1_prediction_markets/nonlive_datasets/pr162a/"
+        "normalized_candidates/kalshi_historical_market_trades_candlesticks_tiny_candidate.normalized.jsonl",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/currentize_pr152_after_generated_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/unrelated.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+
+
 def test_pr154_explicit_changed_path_allowance_is_narrow():
     branch = "pr154-atomicrows-parameter-default-value-materialization-gate"
     repair_branch = "repair/pr154-post-merge-pytest-context-hygiene"

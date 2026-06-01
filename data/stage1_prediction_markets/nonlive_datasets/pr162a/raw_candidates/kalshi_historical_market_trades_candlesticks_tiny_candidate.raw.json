@@ -1,0 +1,65 @@
+{
+  "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+  "candidate_only_flag": true,
+  "created_by_pr": "PR162A",
+  "dataset_id": "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY",
+  "materialization_source": "manual_bounded_public_fetch_observed_during_pr162a_implementation",
+  "network_required_for_ci": false,
+  "source_class": "OFFICIAL_PUBLIC_HISTORICAL_DATA_CANDIDATE",
+  "source_locator": "https://external-api.kalshi.com/trade-api/v2/historical/markets/KXMVESPORTSMULTIGAMEEXTENDED-S20263E3DCE3AA81-AE5B880E5C0/candlesticks?start_ts=1774997354&end_ts=1775003128&period_interval=1",
+  "source_name": "Kalshi Historical Market Candlesticks and Trades public candidate snapshot",
+  "source_platform_or_venue": "KALSHI",
+  "source_revalidation_required_flag": true,
+  "raw_payload": {
+    "candlesticks": [
+      {
+        "end_period_ts": 1774997400,
+        "open_interest": "31.00",
+        "price": {
+          "close": "0.1490",
+          "high": "0.1490",
+          "low": "0.1490",
+          "mean": "0.1490",
+          "open": "0.1490",
+          "previous": null
+        },
+        "volume": "31.00",
+        "yes_ask": {
+          "close": "1.0000",
+          "high": "1.0000",
+          "low": "0.1490",
+          "open": "0.1620"
+        },
+        "yes_bid": {
+          "close": "0.0000",
+          "high": "0.0000",
+          "low": "0.0000",
+          "open": "0.0000"
+        }
+      }
+    ],
+    "market": {
+      "event_ticker": "KXMVESPORTSMULTIGAMEEXTENDED-S20263E3DCE3AA81",
+      "market_type": "binary",
+      "open_time": "2026-03-31T22:49:14.395587Z",
+      "close_time": "2026-03-31T23:24:20Z",
+      "settlement_ts": "2026-03-31T23:25:27.920522Z",
+      "status": "finalized",
+      "ticker": "KXMVESPORTSMULTIGAMEEXTENDED-S20263E3DCE3AA81-AE5B880E5C0"
+    },
+    "ticker": "KXMVESPORTSMULTIGAMEEXTENDED-S20263E3DCE3AA81-AE5B880E5C0",
+    "trades": [
+      {
+        "count_fp": "31.00",
+        "created_time": "2026-03-31T22:49:35.537483Z",
+        "no_price_dollars": "0.8510",
+        "taker_book_side": "bid",
+        "taker_outcome_side": "yes",
+        "taker_side": "yes",
+        "ticker": "KXMVESPORTSMULTIGAMEEXTENDED-S20263E3DCE3AA81-AE5B880E5C0",
+        "trade_id": "143bd9dc-d84f-5733-f828-57902c2bbe78",
+        "yes_price_dollars": "0.1490"
+      }
+    ]
+  }
+}

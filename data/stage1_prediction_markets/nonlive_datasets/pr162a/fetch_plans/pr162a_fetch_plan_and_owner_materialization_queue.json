@@ -1,0 +1,325 @@
+{
+  "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "ci_requires_network": false,
+  "created_by_pr": "PR162A",
+  "records": [
+    {
+      "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "NETWORK_DISABLED_BY_DEFAULT_IN_CI",
+      "blocker_code": "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "FETCH_PLAN_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "historical/trades",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-001-OWNER-COMMAND",
+      "recommended_owner_action": "REVIEW_TERMS_AND_RUN_BOUNDED_FETCH_OUTSIDE_CI",
+      "record_id": "PR162A-FETCH-PLAN-001",
+      "safe_to_execute_without_owner_review_flag": true,
+      "source_candidate_ref": "PR162A-SOURCE-KALSHI-HISTORICAL-TRADES",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "OFFICIAL_PUBLIC_HISTORICAL_DATA_CANDIDATE"
+      ],
+      "source_endpoint_family": "historical/trades",
+      "source_locator": "https://external-api.kalshi.com/trade-api/v2/historical/trades",
+      "source_name": "Kalshi historical trades public endpoint"
+    },
+    {
+      "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "NETWORK_DISABLED_BY_DEFAULT_IN_CI",
+      "blocker_code": "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "BOUNDED_PUBLIC_FETCH_CANDIDATE",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "historical/markets/candlesticks",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-002-OWNER-COMMAND",
+      "recommended_owner_action": "REVIEW_TERMS_AND_RUN_BOUNDED_FETCH_OUTSIDE_CI",
+      "record_id": "PR162A-FETCH-PLAN-002",
+      "safe_to_execute_without_owner_review_flag": true,
+      "source_candidate_ref": "PR162A-SOURCE-KALSHI-HISTORICAL-CANDLESTICKS",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "OFFICIAL_PUBLIC_HISTORICAL_DATA_CANDIDATE",
+        "OFFICIAL_PUBLIC_OHLC_EVENT_HISTORY_CANDIDATE"
+      ],
+      "source_endpoint_family": "historical/markets/candlesticks",
+      "source_locator": "https://external-api.kalshi.com/trade-api/v2/historical/markets/{ticker}/candlesticks",
+      "source_name": "Kalshi historical market candlesticks public endpoint"
+    },
+    {
+      "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "NETWORK_DISABLED_BY_DEFAULT_IN_CI",
+      "blocker_code": "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "FETCH_PLAN_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "clob/prices-history",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-003-OWNER-COMMAND",
+      "recommended_owner_action": "REVIEW_TERMS_AND_RUN_BOUNDED_FETCH_OUTSIDE_CI",
+      "record_id": "PR162A-FETCH-PLAN-003",
+      "safe_to_execute_without_owner_review_flag": true,
+      "source_candidate_ref": "PR162A-SOURCE-POLYMARKET-PRICES-HISTORY",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "OFFICIAL_PUBLIC_PRICE_HISTORY_CANDIDATE"
+      ],
+      "source_endpoint_family": "clob/prices-history",
+      "source_locator": "https://clob.polymarket.com/prices-history",
+      "source_name": "Polymarket public price history endpoint"
+    },
+    {
+      "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "NETWORK_DISABLED_BY_DEFAULT_IN_CI",
+      "blocker_code": "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "FETCH_PLAN_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "clob/batch-prices-history",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-004-OWNER-COMMAND",
+      "recommended_owner_action": "REVIEW_TERMS_AND_RUN_BOUNDED_FETCH_OUTSIDE_CI",
+      "record_id": "PR162A-FETCH-PLAN-004",
+      "safe_to_execute_without_owner_review_flag": true,
+      "source_candidate_ref": "PR162A-SOURCE-POLYMARKET-BATCH-PRICES-HISTORY",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "OFFICIAL_PUBLIC_PRICE_HISTORY_CANDIDATE"
+      ],
+      "source_endpoint_family": "clob/batch-prices-history",
+      "source_locator": "https://clob.polymarket.com/batch-prices-history",
+      "source_name": "Polymarket public batch price history endpoint"
+    },
+    {
+      "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "NETWORK_DISABLED_BY_DEFAULT_IN_CI",
+      "blocker_code": "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "FETCH_PLAN_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "gamma/markets",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-005-OWNER-COMMAND",
+      "recommended_owner_action": "REVIEW_TERMS_AND_RUN_BOUNDED_FETCH_OUTSIDE_CI",
+      "record_id": "PR162A-FETCH-PLAN-005",
+      "safe_to_execute_without_owner_review_flag": true,
+      "source_candidate_ref": "PR162A-SOURCE-POLYMARKET-GAMMA-MARKETS",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "WEB_SOURCE_CANDIDATE"
+      ],
+      "source_endpoint_family": "gamma/markets",
+      "source_locator": "https://gamma-api.polymarket.com/markets",
+      "source_name": "Polymarket Gamma market discovery metadata"
+    },
+    {
+      "access_rights_status": "AUTHENTICATION_REQUIRED_BLOCKED",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "PR162A_BLOCKED_AUTHENTICATION_REQUIRED",
+      "blocker_code": "PR162A_BLOCKED_AUTHENTICATION_REQUIRED",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "BLOCKED_WITH_ACTIONABLE_OWNER_COMMAND",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "iserver/secdef-and-marketdata",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": true,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-006-OWNER-COMMAND",
+      "recommended_owner_action": "PROVIDE_OWNER_ATTESTATION_OR_REJECT_SOURCE",
+      "record_id": "PR162A-FETCH-PLAN-006",
+      "safe_to_execute_without_owner_review_flag": false,
+      "source_candidate_ref": "PR162A-SOURCE-IBKR-FORECASTEX-SECEF-SEARCH",
+      "source_class": "OFFICIAL_SOURCE_CANDIDATE",
+      "source_classes": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "OFFICIAL_PUBLIC_OHLC_EVENT_HISTORY_CANDIDATE",
+        "INSTITUTIONAL_METHOD_CANDIDATE"
+      ],
+      "source_endpoint_family": "iserver/secdef-and-marketdata",
+      "source_locator": "https://ibkrcampus.com/campus/ibkr-api-page/event-contracts/",
+      "source_name": "IBKR ForecastEx event-contract discovery documentation"
+    },
+    {
+      "access_rights_status": "AUTHENTICATION_REQUIRED_BLOCKED",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "PR162A_BLOCKED_AUTHENTICATION_REQUIRED",
+      "blocker_code": "PR162A_BLOCKED_AUTHENTICATION_REQUIRED",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "DISCOVERY_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "quantum/optimization-docs",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": true,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-007-OWNER-COMMAND",
+      "recommended_owner_action": "PROVIDE_OWNER_ATTESTATION_OR_REJECT_SOURCE",
+      "record_id": "PR162A-FETCH-PLAN-007",
+      "safe_to_execute_without_owner_review_flag": false,
+      "source_candidate_ref": "PR162A-SOURCE-QISKIT-OPTIMIZATION-DOCS",
+      "source_class": "QUANTUM_METHOD_CANDIDATE",
+      "source_classes": [
+        "QUANTUM_METHOD_CANDIDATE",
+        "QUANTUM_BACKEND_DOC_CANDIDATE",
+        "QUANTUM_ALGORITHM_DOC_CANDIDATE",
+        "QUANTUM_PARAMETER_RANGE_CANDIDATE",
+        "QUANTUM_ENCODING_CANDIDATE"
+      ],
+      "source_endpoint_family": "quantum/optimization-docs",
+      "source_locator": "https://qiskit.qotlabs.org/docs/tutorials/solve-higher-order-binary-optimization-problems-with-q-ctrls-optimization-solver",
+      "source_name": "IBM Quantum/Qiskit optimization workflow documentation"
+    },
+    {
+      "access_rights_status": "RESEARCH_USE_CANDIDATE_OK",
+      "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "blocked_reason": "PR162A_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+      "blocker_code": "PR162A_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+      "bounded_fetch_caps": {
+        "max_bytes": 250000,
+        "max_rows": 1000,
+        "retry_count": 0,
+        "timeout_seconds": 20
+      },
+      "ci_requires_network": false,
+      "created_by_pr": "PR162A",
+      "execute_in_pr162a_default_build_flag": false,
+      "materialization_mode": "DISCOVERY_ONLY",
+      "network_disabled_by_default_flag": true,
+      "owner_command_parameters": {
+        "endpoint_family": "method-benchmark-candidates",
+        "method": "GET_OR_POST_AS_DOCUMENTED",
+        "repo_local_output_root": "data/stage1_prediction_markets/nonlive_datasets/pr162a",
+        "requires_credentials": false,
+        "requires_order_endpoint": false,
+        "requires_private_state": false
+      },
+      "owner_command_type": "STRUCTURED_REVIEW_PLAN_NOT_EXECUTED_BY_CI",
+      "owner_materialization_command_ref": "PR162A-FETCH-PLAN-008-OWNER-COMMAND",
+      "recommended_owner_action": "PROVIDE_OWNER_ATTESTATION_OR_REJECT_SOURCE",
+      "record_id": "PR162A-FETCH-PLAN-008",
+      "safe_to_execute_without_owner_review_flag": false,
+      "source_candidate_ref": "PR162A-SOURCE-CLASSICAL-HYBRID-BENCHMARKS",
+      "source_class": "RESEARCH_SOURCE_CANDIDATE",
+      "source_classes": [
+        "RESEARCH_SOURCE_CANDIDATE",
+        "CLASSICAL_METHOD_CANDIDATE",
+        "HYBRID_METHOD_CANDIDATE"
+      ],
+      "source_endpoint_family": "method-benchmark-candidates",
+      "source_locator": "RESEARCH_AND_OWNER_REVIEW_QUEUE",
+      "source_name": "Classical and hybrid optimizer benchmark candidate surfaces"
+    }
+  ]
+}

@@ -1,0 +1,388 @@
+{
+  "$id": "https://qtt.local/schemas/pr162a_missingvaluecandidateregistry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY"
+    },
+    "blocker_codes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ci_requires_network": {
+      "const": false
+    },
+    "created_by_pr": {
+      "const": "PR162A"
+    },
+    "creates_atomicrows_bundle_hash_or_freeze_authority": {
+      "const": false
+    },
+    "creates_connector_semantics": {
+      "const": false
+    },
+    "creates_live_authority": {
+      "const": false
+    },
+    "creates_order_authority": {
+      "const": false
+    },
+    "creates_private_state": {
+      "const": false
+    },
+    "creates_profit_evidence": {
+      "const": false
+    },
+    "creates_qtt_sha_authority": {
+      "const": false
+    },
+    "creates_quantum_backend_evidence": {
+      "const": false
+    },
+    "creates_result_backed_ranking": {
+      "const": false
+    },
+    "creates_source_evidence_fact": {
+      "const": false
+    },
+    "downstream_pr_routes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "emits_replay_paper_results": {
+      "const": false
+    },
+    "emits_result_packets": {
+      "const": false
+    },
+    "mutates_atomicrows_bundle_jsonl": {
+      "const": false
+    },
+    "records": {
+      "items": {
+        "additionalProperties": true,
+        "properties": {
+          "access_rights_status": {
+            "enum": [
+              "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+              "OWNER_PROVIDED_ATTESTED_OK",
+              "RESEARCH_USE_CANDIDATE_OK",
+              "THIRD_PARTY_TERMS_REVIEW_REQUIRED",
+              "AUTHENTICATION_REQUIRED_BLOCKED",
+              "PRIVATE_ACCOUNT_STATE_REQUIRED_BLOCKED",
+              "LIVE_CONNECTOR_REQUIRED_BLOCKED",
+              "ORDER_ENDPOINT_REQUIRED_BLOCKED",
+              "ACCESS_RIGHTS_UNCLEAR_BLOCKED",
+              "OWNER_ATTESTATION_REQUIRED"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:access_rights_status"
+          },
+          "authority_class": {
+            "enum": [
+              "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:authority_class"
+          },
+          "blocker_code": {
+            "enum": [
+              "NONE",
+              "PR162A_BLOCKED_ACCESS_RIGHTS_UNCLEAR",
+              "PR162A_BLOCKED_AUTHENTICATION_REQUIRED",
+              "PR162A_BLOCKED_PRIVATE_STATE_REQUIRED",
+              "PR162A_BLOCKED_LIVE_OR_ORDER_ENDPOINT",
+              "PR162A_BLOCKED_UNBOUNDED_OR_TOO_LARGE",
+              "PR162A_BLOCKED_UNMAPPABLE_SCHEMA",
+              "PR162A_BLOCKED_UNMAPPABLE_QKU",
+              "PR162A_BLOCKED_DATA_LEAKAGE_RISK",
+              "PR162A_BLOCKED_SYNTHETIC_ONLY",
+              "PR162A_BLOCKED_DUPLICATE",
+              "PR162A_BLOCKED_OWNER_ATTESTATION_REQUIRED",
+              "PR162A_BLOCKED_NO_SAFE_REPO_LOCAL_DATA",
+              "PR162A_BLOCKED_FORBIDDEN_PATH",
+              "PR162A_BLOCKED_FORBIDDEN_AUTHORITY_PATTERN",
+              "PR162A_BLOCKED_SOURCE_EVIDENCE_REQUIRED",
+              "PR162A_BLOCKED_NETWORK_DISABLED_BY_DEFAULT",
+              "PR162A_BLOCKED_PR163_REQUIRES_VALIDATED_REAL_ARTIFACTS",
+              "PR162A_PR162B_RERUN_READY",
+              "PR162A_PR162R_RERUN_READY",
+              "PR163_BLOCKED_NO_VALIDATED_REAL_NONLIVE_REPLAY_ARTIFACTS",
+              "PR163_BLOCKED_NO_VALIDATED_REAL_NONLIVE_PAPER_ARTIFACTS",
+              "QUANTUM_BLOCKED_NO_SAFE_DATA",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_ROWS",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_TIME_WINDOW",
+              "RUN_CAPABLE_BLOCKED_VENUE_SCOPE_MISMATCH",
+              "RUN_CAPABLE_BLOCKED_QKU_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_SCENARIO_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_PR162B_REQUIRES_STRICT_DATASET_COVERAGE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:blocker_code"
+          },
+          "created_by_pr": {
+            "enum": [
+              "PR162A"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:created_by_pr"
+          },
+          "data_quality_status": {
+            "enum": [
+              "PASS",
+              "FAIL_CLOSED",
+              "WARNING_CANDIDATE_ONLY"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:data_quality_status"
+          },
+          "dataset_authority_class": {
+            "enum": [
+              "REPO_LOCAL_ACCEPTED_NONLIVE_HISTORICAL_DATASET",
+              "REPO_LOCAL_OWNER_PROVIDED_NONLIVE_DATASET",
+              "REPO_LOCAL_OFFICIAL_PUBLIC_HISTORICAL_DATASET_CANDIDATE",
+              "REPO_LOCAL_OFFICIAL_PUBLIC_PRICE_HISTORY_DATASET_CANDIDATE",
+              "REPO_LOCAL_OFFICIAL_PUBLIC_OHLC_EVENT_HISTORY_DATASET_CANDIDATE",
+              "REPO_LOCAL_PUBLIC_RESEARCH_DATASET_CANDIDATE",
+              "REPO_LOCAL_THIRD_PARTY_DATA_VENDOR_CANDIDATE",
+              "REPO_LOCAL_INSTITUTIONAL_RESEARCH_DATASET_CANDIDATE",
+              "REPO_LOCAL_CLASSICAL_BENCHMARK_DATASET_CANDIDATE",
+              "REPO_LOCAL_HYBRID_BENCHMARK_DATASET_CANDIDATE",
+              "REPO_LOCAL_QUANTUM_BENCHMARK_DATASET_CANDIDATE",
+              "REPO_LOCAL_SYNTHETIC_FIXTURE_NOT_REAL_ARTIFACT_DATA",
+              "REPO_LOCAL_SMOKE_FIXTURE_NOT_REAL_ARTIFACT_DATA",
+              "ONLINE_DISCOVERED_CANDIDATE_METADATA_ONLY",
+              "FETCH_PLAN_ONLY_NOT_MATERIALIZED",
+              "OWNER_ATTESTATION_REQUIRED_DATASET",
+              "UNSAFE_OR_FORBIDDEN_DATASET",
+              "UNKNOWN_OR_UNMAPPABLE_DATASET",
+              "ACCESS_RIGHTS_UNCLEAR_DATASET",
+              "DUPLICATE_DATASET",
+              "LIVE_OR_PRIVATE_DATASET_BLOCKED"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:dataset_authority_class"
+          },
+          "dataset_coverage_state": {
+            "enum": [
+              "DATASET_SEED_CANDIDATE_READY",
+              "ADAPTER_MECHANICS_FIXTURE_READY",
+              "VENUE_SCOPED_RUN_CAPABLE_READY",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_ROWS",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_TIME_WINDOW",
+              "RUN_CAPABLE_BLOCKED_VENUE_SCOPE_MISMATCH",
+              "RUN_CAPABLE_BLOCKED_QKU_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_SCENARIO_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_PR162B_REQUIRES_STRICT_DATASET_COVERAGE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:dataset_coverage_state"
+          },
+          "dataset_lifecycle_state": {
+            "enum": [
+              "SOURCE_CANDIDATE_DISCOVERED",
+              "SOURCE_CLASSIFIED",
+              "ACCESS_RIGHTS_CLASSIFIED",
+              "MATERIALIZATION_PLAN_CREATED",
+              "OWNER_APPROVAL_OR_PUBLIC_ACCESS_CONFIRMED",
+              "REPO_LOCAL_CANDIDATE_REGISTERED",
+              "REPO_LOCAL_CANDIDATE_NORMALIZED",
+              "DATA_QUALITY_AND_LEAKAGE_AUDITED",
+              "QKU_SCENARIO_RUNPLAN_MAPPED",
+              "RUN_CAPABLE_GATE_PASSED",
+              "PR162B_RERUN_READY",
+              "BLOCKED_ACCESS_RIGHTS_UNCLEAR",
+              "BLOCKED_AUTHENTICATION_REQUIRED",
+              "BLOCKED_PRIVATE_STATE_REQUIRED",
+              "BLOCKED_LIVE_OR_ORDER_ENDPOINT",
+              "BLOCKED_UNBOUNDED_OR_TOO_LARGE",
+              "BLOCKED_UNMAPPABLE_SCHEMA",
+              "BLOCKED_UNMAPPABLE_QKU",
+              "BLOCKED_DATA_LEAKAGE_RISK",
+              "BLOCKED_SYNTHETIC_ONLY",
+              "BLOCKED_DUPLICATE",
+              "BLOCKED_OWNER_ATTESTATION_REQUIRED",
+              "BLOCKED_NO_SAFE_REPO_LOCAL_DATA"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:dataset_lifecycle_state"
+          },
+          "leakage_audit_status": {
+            "enum": [
+              "PASS",
+              "FAIL_CLOSED",
+              "WARNING_CANDIDATE_ONLY"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:leakage_audit_status"
+          },
+          "live_hot_path_admissibility": {
+            "enum": [
+              "PRECOMPUTED_SNAPSHOT_ONLY",
+              "ASYNC_CONTROL_PLANE_ONLY",
+              "FORBIDDEN_UNTIL_FUTURE_OWNER_GATE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:live_hot_path_admissibility"
+          },
+          "mapping_status": {
+            "enum": [
+              "MAPPED_TO_RUN_CAPABLE_CANDIDATE",
+              "MAPPED_TO_CANDIDATE_BLOCKED_FROM_RUN",
+              "BLOCKED_UNMAPPABLE_QKU"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:mapping_status"
+          },
+          "materialization_mode": {
+            "enum": [
+              "DISCOVERY_ONLY",
+              "FETCH_PLAN_ONLY",
+              "OWNER_LOCAL_FILE_REGISTRATION",
+              "BOUNDED_PUBLIC_FETCH_CANDIDATE",
+              "NORMALIZE_EXISTING_REPO_LOCAL_DATA",
+              "COMMITTED_FIXTURE_ONLY",
+              "BLOCKED_WITH_ACTIONABLE_OWNER_COMMAND"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:materialization_mode"
+          },
+          "normalization_status": {
+            "enum": [
+              "NORMALIZED",
+              "NOT_NORMALIZED",
+              "NORMALIZATION_BLOCKED"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:normalization_status"
+          },
+          "quantum_feature_materialization_status": {
+            "enum": [
+              "FEATURE_SEED_CANDIDATE_ONLY",
+              "QUANTUM_DATASET_FEATURE_RUN_CAPABLE_READY",
+              "QUANTUM_DATASET_FEATURE_CANDIDATE_READY",
+              "QUANTUM_DATASET_FEATURE_BLOCKED_NO_SAFE_DATA"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:quantum_feature_materialization_status"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "rerun_readiness_state": {
+            "enum": [
+              "DATASET_SEED_CANDIDATE_READY",
+              "ADAPTER_MECHANICS_FIXTURE_READY",
+              "VENUE_SCOPED_RUN_CAPABLE_READY",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_ROWS",
+              "RUN_CAPABLE_BLOCKED_INSUFFICIENT_TIME_WINDOW",
+              "RUN_CAPABLE_BLOCKED_VENUE_SCOPE_MISMATCH",
+              "RUN_CAPABLE_BLOCKED_QKU_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_SCENARIO_SCOPE_TOO_BROAD",
+              "RUN_CAPABLE_BLOCKED_PR162B_REQUIRES_STRICT_DATASET_COVERAGE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:rerun_readiness_state"
+          },
+          "run_capable_gate_status": {
+            "enum": [
+              "RUN_CAPABLE_GATE_PASSED",
+              "RUN_CAPABLE_GATE_BLOCKED",
+              "RUN_CAPABLE_GATE_NOT_APPLICABLE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:run_capable_gate_status"
+          },
+          "schema_validation_status": {
+            "enum": [
+              "PASS",
+              "FAIL_CLOSED",
+              "WARNING_CANDIDATE_ONLY"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:schema_validation_status"
+          },
+          "source_class": {
+            "enum": [
+              "OFFICIAL_SOURCE_CANDIDATE",
+              "OFFICIAL_PUBLIC_HISTORICAL_DATA_CANDIDATE",
+              "OFFICIAL_PUBLIC_PRICE_HISTORY_CANDIDATE",
+              "OFFICIAL_PUBLIC_OHLC_EVENT_HISTORY_CANDIDATE",
+              "RESEARCH_SOURCE_CANDIDATE",
+              "THIRD_PARTY_DATA_VENDOR_CANDIDATE",
+              "SOCIAL_SIGNAL_CANDIDATE",
+              "WEB_SOURCE_CANDIDATE",
+              "INSTITUTIONAL_METHOD_CANDIDATE",
+              "OWNER_PROVIDED_CANDIDATE",
+              "CLASSICAL_METHOD_CANDIDATE",
+              "HYBRID_METHOD_CANDIDATE",
+              "QUANTUM_METHOD_CANDIDATE",
+              "QUANTUM_BACKEND_DOC_CANDIDATE",
+              "QUANTUM_ALGORITHM_DOC_CANDIDATE",
+              "QUANTUM_PARAMETER_RANGE_CANDIDATE",
+              "QUANTUM_ENCODING_CANDIDATE"
+            ],
+            "x-pr162a-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants:source_class"
+          }
+        },
+        "required": [
+          "record_id"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR162A_MissingValueCandidateRegistry.report.json"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "schema_ref": {
+      "const": "src/qtt/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate/schemas/pr162a_missingvaluecandidateregistry.schema.json"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "sharded_flag": {
+      "type": "boolean"
+    },
+    "source_inputs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "upstream_pr_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "schema_ref",
+    "created_by_pr",
+    "authority_class",
+    "source_inputs",
+    "upstream_pr_refs",
+    "downstream_pr_routes",
+    "validation_status",
+    "blocker_codes",
+    "records",
+    "sharded_flag",
+    "creates_live_authority",
+    "creates_order_authority",
+    "creates_private_state",
+    "creates_profit_evidence",
+    "creates_result_backed_ranking",
+    "creates_quantum_backend_evidence",
+    "creates_connector_semantics",
+    "creates_source_evidence_fact",
+    "creates_qtt_sha_authority",
+    "creates_atomicrows_bundle_hash_or_freeze_authority",
+    "mutates_atomicrows_bundle_jsonl",
+    "emits_result_packets",
+    "emits_replay_paper_results",
+    "ci_requires_network"
+  ],
+  "title": "PR162A PR162A_MissingValueCandidateRegistry.report.json",
+  "type": "object",
+  "x-pr162a-schema-enum-source": "src.qtt.stage1_prediction_markets.safe_repo_local_nonlive_dataset_materialization_authority_gate.constants"
+}

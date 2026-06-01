@@ -1,0 +1,23 @@
+{
+  "access_rights_status": "PUBLIC_UNAUTHENTICATED_CANDIDATE_USE_OK",
+  "adapter_mechanics_fixture_flag": true,
+  "authority_class": "SAFE_REPO_LOCAL_NONLIVE_DATASET_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "candidate_only_flag": true,
+  "ci_requires_network": false,
+  "created_by_pr": "PR162A",
+  "dataset_authority_class": "REPO_LOCAL_OFFICIAL_PUBLIC_HISTORICAL_DATASET_CANDIDATE",
+  "dataset_coverage_state": "VENUE_SCOPED_RUN_CAPABLE_READY",
+  "dataset_id": "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY",
+  "dataset_seed_candidate_flag": true,
+  "materialization_mode": "NORMALIZE_EXISTING_REPO_LOCAL_DATA",
+  "network_materialization_in_default_build_flag": false,
+  "normalized_relative_posix_path": "data/stage1_prediction_markets/nonlive_datasets/pr162a/normalized_candidates/kalshi_historical_market_trades_candlesticks_tiny_candidate.normalized.jsonl",
+  "raw_relative_posix_path": "data/stage1_prediction_markets/nonlive_datasets/pr162a/raw_candidates/kalshi_historical_market_trades_candlesticks_tiny_candidate.raw.json",
+  "row_count_candidate": 2,
+  "source_class": "OFFICIAL_PUBLIC_HISTORICAL_DATA_CANDIDATE",
+  "strict_run_capable_min_row_count": 100,
+  "strict_run_capable_min_time_window_seconds": 3600,
+  "time_window_end": "2026-03-31T22:50:00Z",
+  "time_window_start": "2026-03-31T22:49:35Z",
+  "venue_scope": "KALSHI"
+}
