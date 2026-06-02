@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from fnmatch import fnmatchcase
 from pathlib import Path
 import subprocess
 import sys
@@ -42,6 +43,12 @@ _ATOMICROWS_BUNDLE_SIDECAR_PATH = _ATOMICROWS_BUNDLE_PATH.with_suffix(
 WriteReport = Callable[[Path], Mapping[str, Any]]
 ValidateArtifacts = Callable[..., Sequence[str]]
 ChangedPaths = Callable[[Path], Sequence[str]]
+UntrackedPaths = Callable[[Path], Sequence[str]]
+
+_UNTRACKED_PR_ARTIFACT_LIMIT = 20
+_UNTRACKED_PR_ARTIFACT_BLOCK_REASON = (
+    "PR152_CURRENTIZATION_BLOCKED_UNTRACKED_PR_ARTIFACTS"
+)
 
 
 @dataclass(frozen=True)
@@ -97,6 +104,76 @@ def _git_status_changed_paths(repo_root: Path) -> list[str]:
         paths.append(_normalize_path(path))
         index += 2 if code[:1] in {"R", "C"} or code[1:] in {"R", "C"} else 1
     return _stable_paths(paths)
+
+
+def _git_untracked_paths(repo_root: Path) -> list[str]:
+    completed = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "-z"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise CurrentizationError(
+            [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {detail}"]
+        )
+    return _stable_paths(completed.stdout.split("\0"))
+
+
+def _is_generated_report_shard_path(rel_path: str) -> bool:
+    parts = rel_path.split("/")
+    if len(parts) < 5 or parts[:3] != ["docs", "master_plan", "generated"]:
+        return False
+    shard_dir = parts[3].casefold()
+    return shard_dir.startswith("pr") and "shard" in shard_dir
+
+
+def _is_untracked_pr_artifact_path(rel_path: str | Path) -> bool:
+    normalized = _normalize_path(rel_path)
+    return (
+        fnmatchcase(normalized, "docs/master_plan/generated/PR*.report.json")
+        or _is_generated_report_shard_path(normalized)
+        or normalized.startswith("src/qtt/stage1_prediction_markets/")
+        or normalized.startswith("tests/stage1_prediction_markets/")
+        or fnmatchcase(normalized, "tools/build_pr*.py")
+        or fnmatchcase(normalized, "tools/validate_pr*.py")
+    )
+
+
+def _untracked_pr_artifact_paths(untracked_paths: Sequence[str | Path]) -> list[str]:
+    return _stable_paths(
+        path for path in untracked_paths if _is_untracked_pr_artifact_path(path)
+    )
+
+
+def _untracked_pr_artifact_failures(
+    untracked_paths: Sequence[str | Path],
+    *,
+    limit: int = _UNTRACKED_PR_ARTIFACT_LIMIT,
+) -> list[str]:
+    artifact_paths = _untracked_pr_artifact_paths(untracked_paths)
+    if not artifact_paths:
+        return []
+
+    shown_paths = artifact_paths[:limit]
+    omitted_count = len(artifact_paths) - len(shown_paths)
+    summary = (
+        f"{_UNTRACKED_PR_ARTIFACT_BLOCK_REASON}: "
+        f"{len(artifact_paths)} untracked PR artifact path(s); "
+        "stage or intentionally include final PR artifacts before PR152 currentization"
+    )
+    if omitted_count:
+        summary = f"{summary}; showing_first={limit}; omitted_count={omitted_count}"
+
+    return [
+        summary,
+        *(
+            f"PR152_CURRENTIZATION_UNTRACKED_PR_ARTIFACT_PATH: {path}"
+            for path in shown_paths
+        ),
+    ]
 
 
 def _file_snapshots(repo_root: Path, rel_paths: Sequence[Path]) -> dict[str, bytes | None]:
@@ -245,11 +322,17 @@ def currentize_pr152_after_generated_artifacts(
     write_report: WriteReport | None = None,
     validate_artifacts: ValidateArtifacts | None = None,
     changed_paths: ChangedPaths | None = None,
+    untracked_paths: UntrackedPaths | None = None,
 ) -> CurrentizationResult:
     root = repo_root.resolve()
     write_report = write_report or write_report_file
     validate_artifacts = validate_artifacts or validate_repository_artifacts
+    default_changed_paths = changed_paths is None
     changed_paths = changed_paths or _git_status_changed_paths
+    untracked_paths = (
+        untracked_paths
+        or (_git_untracked_paths if default_changed_paths else lambda _root: [])
+    )
 
     protected_before = _file_snapshots(root, _PROTECTED_PATHS)
     failures: list[str] = []
@@ -261,7 +344,16 @@ def currentize_pr152_after_generated_artifacts(
         raise CurrentizationError(
             [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {type(exc).__name__}"]
         ) from exc
+    try:
+        before_untracked_paths = list(untracked_paths(root))
+    except CurrentizationError:
+        raise
+    except Exception as exc:  # pragma: no cover - defensive adapter guard.
+        raise CurrentizationError(
+            [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {type(exc).__name__}"]
+        ) from exc
 
+    failures.extend(_untracked_pr_artifact_failures(before_untracked_paths))
     failures.extend(_protected_status_failures(before_changed_paths))
     failures.extend(_sidecar_appearance_failures(root))
     failures.extend(_changed_text_authority_failures(root, before_changed_paths))
@@ -283,8 +375,17 @@ def currentize_pr152_after_generated_artifacts(
         raise CurrentizationError(
             [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {type(exc).__name__}"]
         ) from exc
+    try:
+        after_untracked_paths = list(untracked_paths(root))
+    except CurrentizationError:
+        raise
+    except Exception as exc:  # pragma: no cover - defensive adapter guard.
+        raise CurrentizationError(
+            [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {type(exc).__name__}"]
+        ) from exc
 
     failures.extend(validation_failures)
+    failures.extend(_untracked_pr_artifact_failures(after_untracked_paths))
     failures.extend(_snapshot_mutation_failures(root, protected_before))
     failures.extend(_protected_status_failures(after_changed_paths))
     failures.extend(_sidecar_appearance_failures(root))

@@ -1,0 +1,1599 @@
+{
+  "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162B",
+  "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162C_STRICT_DATA_EXPANSION",
+    "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+    "PR163_RESULT_PACKET_EMISSION_AFTER_VALIDATED_REAL_ARTIFACTS",
+    "PR164_AUTHENTICITY_SAMPLE_CONFIDENCE_PROVENANCE_VALIDATION",
+    "PR165_RESULT_BACKED_RANKING_AFTER_PR164",
+    "FUTURE_LIVE_OWNER_RISK_CAPITAL_LATENCY_SOURCE_GATED"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 75,
+  "records": [
+    {
+      "artifact_ref": "PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "compute_contract_id": "PR162B-COMPUTE-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "implied_probability_from_binary_price",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "price"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "implied_probability"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY",
+      "compute_contract_id": "PR162B-COMPUTE-FAIR_PRICE_FROM_PROBABILITY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "fair_price_from_probability",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "probability"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "fair_price"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FAIR_PRICE_FROM_PROBABILITY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-PROBABILITY_EDGE",
+      "compute_contract_id": "PR162B-COMPUTE-PROBABILITY_EDGE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "probability_edge",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "model_probability",
+        "market_probability"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "edge"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PROBABILITY_EDGE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-EXPECTED_VALUE_BINARY",
+      "compute_contract_id": "PR162B-COMPUTE-EXPECTED_VALUE_BINARY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "expected_value_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "p_win",
+        "profit_if_win",
+        "loss_if_lose"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "expected_value"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPECTED_VALUE_BINARY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE",
+      "compute_contract_id": "PR162B-COMPUTE-FEE_ADJUSTED_EXPECTED_VALUE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "fee_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "ev",
+        "fee"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "fee_adjusted_ev"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "compute_contract_id": "PR162B-COMPUTE-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "slippage_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "ev",
+        "slippage_cost"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "slippage_adjusted_ev"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "compute_contract_id": "PR162B-COMPUTE-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "latency_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "ev",
+        "latency_penalty"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "latency_adjusted_ev"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-EXPECTED_UTILITY_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "expected_utility_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "expected_value",
+        "risk_penalty"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "expected_utility"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPECTED_UTILITY_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS",
+      "compute_contract_id": "PR162B-COMPUTE-BINARY_PAYOFF_PROFIT_LOSS",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "binary_payoff_profit_loss",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "outcome",
+        "price_paid",
+        "payout_if_win"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "profit_loss"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BINARY_PAYOFF_PROFIT_LOSS-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BREAK_EVEN_PROBABILITY",
+      "compute_contract_id": "PR162B-COMPUTE-BREAK_EVEN_PROBABILITY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "break_even_probability",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "cost",
+        "profit_if_win",
+        "loss_if_lose"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "break_even_probability"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BREAK_EVEN_PROBABILITY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD",
+      "compute_contract_id": "PR162B-COMPUTE-NO_TRADE_ZONE_THRESHOLD",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "no_trade_zone_threshold",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "input_fields": [
+        "edge",
+        "threshold"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "inside_no_trade_zone"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-NO_TRADE_ZONE_THRESHOLD-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BRIER_SCORE_BINARY",
+      "compute_contract_id": "PR162B-COMPUTE-BRIER_SCORE_BINARY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "brier_score_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "input_fields": [
+        "y_true",
+        "p_pred"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "brier_score"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BRIER_SCORE_BINARY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-LOG_LOSS_BINARY",
+      "compute_contract_id": "PR162B-COMPUTE-LOG_LOSS_BINARY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "log_loss_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "input_fields": [
+        "y_true",
+        "p_pred",
+        "epsilon"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "log_loss"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LOG_LOSS_BINARY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-PROBABILITY_CLIPPING",
+      "compute_contract_id": "PR162B-COMPUTE-PROBABILITY_CLIPPING",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "probability_clipping",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "input_fields": [
+        "probability",
+        "epsilon"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "clipped_probability"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PROBABILITY_CLIPPING-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-CALIBRATION_ERROR_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "calibration_error_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "input_fields": [
+        "observed_probability",
+        "predicted_probability"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "calibration_error"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CALIBRATION_ERROR_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-CONFIDENCE_PENALTY_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "confidence_penalty_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "input_fields": [
+        "confidence",
+        "penalty_weight"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "confidence_penalty"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CONFIDENCE_PENALTY_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-KELLY_FRACTION",
+      "compute_contract_id": "PR162B-COMPUTE-KELLY_FRACTION",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "kelly_fraction_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "p_win",
+        "net_odds"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "kelly_fraction"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-KELLY_FRACTION-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-FRACTIONAL_KELLY",
+      "compute_contract_id": "PR162B-COMPUTE-FRACTIONAL_KELLY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "fractional_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "kelly_fraction",
+        "fraction"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "fractional_kelly"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FRACTIONAL_KELLY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-CAPPED_KELLY",
+      "compute_contract_id": "PR162B-COMPUTE-CAPPED_KELLY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "capped_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "kelly_fraction",
+        "cap"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "capped_kelly"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CAPPED_KELLY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "compute_contract_id": "PR162B-COMPUTE-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "risk_budget_capped_position_size",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "raw_size",
+        "risk_budget",
+        "unit_risk"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "position_size"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MAX_EXPOSURE_CAP",
+      "compute_contract_id": "PR162B-COMPUTE-MAX_EXPOSURE_CAP",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "max_exposure_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "requested_exposure",
+        "max_exposure"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "exposure"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MAX_EXPOSURE_CAP-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-PER_MARKET_CAP",
+      "compute_contract_id": "PR162B-COMPUTE-PER_MARKET_CAP",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "per_market_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "requested_exposure",
+        "market_cap"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "market_exposure"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PER_MARKET_CAP-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-PER_EVENT_CAP",
+      "compute_contract_id": "PR162B-COMPUTE-PER_EVENT_CAP",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "per_event_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "requested_exposure",
+        "event_cap"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "event_exposure"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PER_EVENT_CAP-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MEAN_RETURN",
+      "compute_contract_id": "PR162B-COMPUTE-MEAN_RETURN",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "mean_return",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "values"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "mean"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MEAN_RETURN-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-VARIANCE",
+      "compute_contract_id": "PR162B-COMPUTE-VARIANCE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "variance",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "values"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "variance"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VARIANCE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-COVARIANCE",
+      "compute_contract_id": "PR162B-COMPUTE-COVARIANCE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "covariance",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "x",
+        "y"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "covariance"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-COVARIANCE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-CORRELATION",
+      "compute_contract_id": "PR162B-COMPUTE-CORRELATION",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "correlation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "x",
+        "y"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "correlation"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CORRELATION-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-VOLATILITY",
+      "compute_contract_id": "PR162B-COMPUTE-VOLATILITY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "volatility",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "returns"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "volatility"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VOLATILITY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-SHARPE_RATIO",
+      "compute_contract_id": "PR162B-COMPUTE-SHARPE_RATIO",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "sharpe_ratio",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "portfolio_return",
+        "risk_free_rate",
+        "volatility"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "sharpe_ratio"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SHARPE_RATIO-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MAX_DRAWDOWN",
+      "compute_contract_id": "PR162B-COMPUTE-MAX_DRAWDOWN",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "max_drawdown",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "equity_curve"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "max_drawdown"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MAX_DRAWDOWN-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE",
+      "compute_contract_id": "PR162B-COMPUTE-RISK_ADJUSTED_EXPECTED_VALUE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "risk_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "input_fields": [
+        "expected_value",
+        "risk_penalty"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "risk_adjusted_ev"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-MEAN_VARIANCE_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "mean_variance_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.portfolio_objectives",
+      "input_fields": [
+        "expected_return",
+        "variance",
+        "risk_aversion"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "objective_value"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MEAN_VARIANCE_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-PORTFOLIO_QP_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "portfolio_qp_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.portfolio_objectives",
+      "input_fields": [
+        "weights",
+        "returns",
+        "covariance_matrix",
+        "risk_aversion"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "objective_value"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PORTFOLIO_QP_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-SMA",
+      "compute_contract_id": "PR162B-COMPUTE-SMA",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "simple_moving_average",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "window"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "sma"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SMA-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-EMA",
+      "compute_contract_id": "PR162B-COMPUTE-EMA",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "exponential_moving_average",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "span"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "ema"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EMA-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-RSI",
+      "compute_contract_id": "PR162B-COMPUTE-RSI",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "rsi",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "period"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "rsi"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RSI-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MACD",
+      "compute_contract_id": "PR162B-COMPUTE-MACD",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "macd",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "fast_span",
+        "slow_span",
+        "signal_span"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "macd"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MACD-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BOLLINGER_BANDS",
+      "compute_contract_id": "PR162B-COMPUTE-BOLLINGER_BANDS",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "bollinger_bands",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "window",
+        "num_std"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "bands"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BOLLINGER_BANDS-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-Z_SCORE",
+      "compute_contract_id": "PR162B-COMPUTE-Z_SCORE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "z_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "value",
+        "mean",
+        "std"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "z_score"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-Z_SCORE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MOMENTUM",
+      "compute_contract_id": "PR162B-COMPUTE-MOMENTUM",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "values",
+        "window"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "momentum"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MOMENTUM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-REALIZED_VOLATILITY",
+      "compute_contract_id": "PR162B-COMPUTE-REALIZED_VOLATILITY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "realized_volatility",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "returns",
+        "annualization_factor"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "realized_volatility"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-REALIZED_VOLATILITY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-VWAP_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-VWAP_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "vwap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "prices",
+        "volumes"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "vwap"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VWAP_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-MIDPOINT",
+      "compute_contract_id": "PR162B-COMPUTE-MIDPOINT",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "midpoint",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "midpoint"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MIDPOINT-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-SPREAD",
+      "compute_contract_id": "PR162B-COMPUTE-SPREAD",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "spread",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "spread"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SPREAD-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "orderbook_imbalance_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "bid_size",
+        "ask_size"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "imbalance"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-LIQUIDITY_PROXY_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "liquidity_proxy_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "input_fields": [
+        "volume",
+        "spread_value",
+        "epsilon"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "liquidity_proxy"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LIQUIDITY_PROXY_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_OBJECTIVE_XTQX",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "x",
+        "Q"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "qubo_energy"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_OBJECTIVE_XTQX-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-EXPANDED_QUBO_TERMS",
+      "compute_contract_id": "PR162B-COMPUTE-EXPANDED_QUBO_TERMS",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "expanded_qubo_terms",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "Q"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "terms"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPANDED_QUBO_TERMS-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-ISING_ENERGY",
+      "compute_contract_id": "PR162B-COMPUTE-ISING_ENERGY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "ising_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "spins",
+        "h",
+        "J"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "ising_energy"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ISING_ENERGY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BQM_ENERGY",
+      "compute_contract_id": "PR162B-COMPUTE-BQM_ENERGY",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "bqm_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "x",
+        "linear",
+        "quadratic"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "bqm_energy"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BQM_ENERGY-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS",
+      "compute_contract_id": "PR162B-COMPUTE-CQM_OBJECTIVE_CONSTRAINTS",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "cqm_objective_and_constraints",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "objective_value",
+        "constraint_violations",
+        "penalty_lambda"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "cqm_value"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CQM_OBJECTIVE_CONSTRAINTS-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT",
+      "compute_contract_id": "PR162B-COMPUTE-BINARY_PENALTY_CONSTRAINT",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "binary_penalty_constraint",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "Ax_minus_b",
+        "lambda_penalty"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "penalty"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BINARY_PENALTY_CONSTRAINT-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_portfolio_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "expected_returns",
+        "risk_matrix",
+        "risk_aversion"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "Q"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_prediction_market_position_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "edges",
+        "risk_penalties"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "Q"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_market_bundle_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "scores"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "Q"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_parameter_stack_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "scores",
+        "penalties"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "Q"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_RISK_BUDGET_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_risk_budget_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "exposures",
+        "budget",
+        "penalty_lambda"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "Q"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qaoa_hamiltonian_mapping_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "Q"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "hamiltonian_mapping"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-VQE_OBJECTIVE_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "vqe_objective_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "hamiltonian_terms",
+        "expectation_values"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "vqe_objective"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VQE_OBJECTIVE_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE",
+      "compute_contract_id": "PR162B-COMPUTE-ANNEALING_BQM_CQM_CANDIDATE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "annealing_bqm_cqm_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "Q"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "annealing_candidate"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ANNEALING_BQM_CQM_CANDIDATE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "compute_contract_id": "PR162B-COMPUTE-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "hybrid_classical_quantum_comparator_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "input_fields": [
+        "classical_score",
+        "quantum_candidate_score"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "score_delta"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-BINARY_EDGE_SIGNAL_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "binary_edge_signal_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "model_probability",
+        "market_probability",
+        "threshold"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "edge",
+        "decision"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-EXPECTED_VALUE_GATE_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "expected_value_gate_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "p_win",
+        "profit_if_win",
+        "loss_if_lose",
+        "threshold"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "expected_value",
+        "passes_gate"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-NO_TRADE_ZONE_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-NO_TRADE_ZONE_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "no_trade_zone_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "edge",
+        "threshold"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "decision"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-NO_TRADE_ZONE_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-CAPPED_KELLY_POSITION_SIZE_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "capped_kelly_position_size_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "p_win",
+        "net_odds",
+        "fraction",
+        "cap"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "position_size"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-RISK_BUDGET_CAP_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "risk_budget_cap_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "raw_size",
+        "risk_budget",
+        "unit_risk"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "position_size"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-PROBABILITY_CLIPPING_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "probability_clipping_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "probability",
+        "epsilon"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "clipped_probability"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-MIDPOINT_SPREAD_FEATURE_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "midpoint_spread_feature_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "midpoint",
+        "spread"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-Z_SCORE_SIGNAL_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "z_score_signal_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "value",
+        "mean",
+        "std",
+        "threshold"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "z_score",
+        "signal"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-STRICT_COMPUTE_BINDING_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "strict_formula_binding_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "qku_type",
+        "formula_family",
+        "market_scope_match_flag"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "binding_status"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-EXACT_QUBO_SMOKE_ENUMERATION_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "exact_qubo_smoke_solve",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "Q",
+        "max_variables"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "best_x",
+        "best_energy"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-QUBO_INPUT_ASSEMBLY_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "qubo_input_assembly_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "Q"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "solver_input"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-ISING_INPUT_ASSEMBLY_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "ising_input_assembly_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "h",
+        "J"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "solver_input"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-MARKET_SCOPE_ACTIVATION_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "market_scope_activation_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "primary_market_scope",
+        "has_input_binding",
+        "confidence"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "activation_status"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM-001"
+      ]
+    },
+    {
+      "artifact_ref": "PR162B-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM",
+      "compute_contract_id": "PR162B-COMPUTE-DORMANT_QKU_EXCLUSION_COMPUTE",
+      "created_by_pr": "PR162B",
+      "execution_allowed_scope": "LOCAL_DETERMINISTIC_TEST_VECTOR_ONLY",
+      "implementation_function": "dormant_qku_exclusion_algorithm",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry",
+      "input_fields": [
+        "activation_status"
+      ],
+      "live_use_allowed_flag": false,
+      "output_fields": [
+        "allowed_flag"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM-001"
+      ]
+    }
+  ],
+  "report_filename": "PR162B_QKUExecutableComputeContractRegistry.report.json",
+  "report_id": "PR162B_QKU_EXECUTABLE_COMPUTE_CONTRACT_REGISTRY",
+  "report_type": "PR162B_QKU_EXECUTABLE_COMPUTE_CONTRACT_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization/schemas/pr162b_qkuexecutablecomputecontractregistry.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162A_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "total_records": 75
+  },
+  "total_record_count": 75,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A"
+  ],
+  "validation_status": "PASS"
+}

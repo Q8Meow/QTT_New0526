@@ -1,0 +1,4276 @@
+{
+  "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162B",
+  "creates_atomicrows_bundle_hash_or_freeze_authority": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162C_STRICT_DATA_EXPANSION",
+    "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+    "PR163_RESULT_PACKET_EMISSION_AFTER_VALIDATED_REAL_ARTIFACTS",
+    "PR164_AUTHENTICITY_SAMPLE_CONFIDENCE_PROVENANCE_VALIDATION",
+    "PR165_RESULT_BACKED_RANKING_AFTER_PR164",
+    "FUTURE_LIVE_OWNER_RISK_CAPITAL_LATENCY_SOURCE_GATED"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 61,
+  "records": [
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000477"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "formula_name": "implied_probability_from_binary_price",
+      "implementation_function": "implied_probability_from_binary_price",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "price"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "p = price",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "implied_probability"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Treats a normalized binary contract price as an implied probability candidate.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000477"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_VENUE_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.kalshi.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "price": "price"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000478"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY",
+      "formula_name": "fair_price_from_probability",
+      "implementation_function": "fair_price_from_probability",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "probability"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "price = p",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "fair_price"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Maps a calibrated probability to a fair binary contract price candidate.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000478"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_VENUE_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.polymarket.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FAIR_PRICE_FROM_PROBABILITY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "probability": "probability"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-PROBABILITY_EDGE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000688"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-PROBABILITY_EDGE",
+      "formula_name": "probability_edge",
+      "implementation_function": "probability_edge",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "model_probability",
+        "market_probability"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "edge = p_model - p_market",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "edge"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Computes model probability edge over market implied probability.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000688"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://www.forecastex.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PROBABILITY_EDGE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "market_probability": "market_probability",
+        "model_probability": "model_probability"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-EXPECTED_VALUE_BINARY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000847"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-EXPECTED_VALUE_BINARY",
+      "formula_name": "expected_value_binary",
+      "implementation_function": "expected_value_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_win",
+        "profit_if_win",
+        "loss_if_lose"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EV = p*w - (1-p)*l",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "expected_value"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Computes binary expected value from win probability, profit if win, and loss if lose.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000847"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "TEXTBOOK_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://en.wikipedia.org/wiki/Expected_value",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPECTED_VALUE_BINARY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "loss_if_lose": "loss_if_lose",
+        "p_win": "p_win",
+        "profit_if_win": "profit_if_win"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000848"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE",
+      "formula_name": "fee_adjusted_expected_value",
+      "implementation_function": "fee_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "ev",
+        "fee"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EV_fee = EV - fee",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "fee_adjusted_ev"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Subtracts a candidate fee cost from expected value.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000848"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_API_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.kalshi.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ev": "ev",
+        "fee": "fee"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000894"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "formula_name": "slippage_adjusted_expected_value",
+      "implementation_function": "slippage_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "ev",
+        "slippage_cost"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EV_slippage = EV - slippage",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "slippage_adjusted_ev"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Subtracts candidate slippage cost from expected value.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000894"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/optimize.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ev": "ev",
+        "slippage_cost": "slippage_cost"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000918"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "formula_name": "latency_adjusted_expected_value",
+      "implementation_function": "latency_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "ev",
+        "latency_penalty"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EV_latency = EV - latency_penalty",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "latency_adjusted_ev"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Subtracts candidate latency penalty from expected value.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000918"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/optimize.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ev": "ev",
+        "latency_penalty": "latency_penalty"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000942"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE",
+      "formula_name": "expected_utility_candidate",
+      "implementation_function": "expected_utility_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_value",
+        "risk_penalty"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "U = EV - risk_penalty",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "expected_utility"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Candidate risk-penalized expected utility.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000942"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPECTED_UTILITY_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expected_value": "expected_value",
+        "risk_penalty": "risk_penalty"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000963"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS",
+      "formula_name": "binary_payoff_profit_loss",
+      "implementation_function": "binary_payoff_profit_loss",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "outcome",
+        "price_paid",
+        "payout_if_win"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "PL = outcome*payout - price",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "profit_loss"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Computes candidate binary payoff profit/loss for a yes-style contract.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000963"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_VENUE_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.kalshi.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BINARY_PAYOFF_PROFIT_LOSS-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "outcome": "outcome",
+        "payout_if_win": "payout_if_win",
+        "price_paid": "price_paid"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BREAK_EVEN_PROBABILITY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000996"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-BREAK_EVEN_PROBABILITY",
+      "formula_name": "break_even_probability",
+      "implementation_function": "break_even_probability",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "cost",
+        "profit_if_win",
+        "loss_if_lose"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "p_be = (loss+cost)/(profit+loss)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "break_even_probability"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Computes break-even probability with candidate cost.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000996"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "TEXTBOOK_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://en.wikipedia.org/wiki/Expected_value",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BREAK_EVEN_PROBABILITY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "cost": "cost",
+        "loss_if_lose": "loss_if_lose",
+        "profit_if_win": "profit_if_win"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000099"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD",
+      "formula_name": "no_trade_zone_threshold",
+      "implementation_function": "no_trade_zone_threshold",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "edge",
+        "threshold"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "|edge| <= threshold",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "inside_no_trade_zone"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Returns true when edge is inside the candidate no-trade zone.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000099"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OWNER_APPROVED_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "OWNER_PR162B_SCOPE",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-NO_TRADE_ZONE_THRESHOLD-001"
+      ],
+      "units": "boolean",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "edge": "edge",
+        "threshold": "threshold"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BRIER_SCORE_BINARY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000014"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "calibration",
+      "formula_id": "PR162B-FORMULA-BRIER_SCORE_BINARY",
+      "formula_name": "brier_score_binary",
+      "implementation_function": "brier_score_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "y_true",
+        "p_pred"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(y-p)^2",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "brier_score"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Binary Brier score for probabilistic predictions.",
+      "primary_market_scope": "MARKET_AGNOSTIC_MATH",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000014"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BRIER_SCORE_BINARY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "p_pred": "p_pred",
+        "y_true": "y_true"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-LOG_LOSS_BINARY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000015"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "calibration",
+      "formula_id": "PR162B-FORMULA-LOG_LOSS_BINARY",
+      "formula_name": "log_loss_binary",
+      "implementation_function": "log_loss_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "y_true",
+        "p_pred",
+        "epsilon"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "-log(p_y)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "log_loss"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Binary log-loss with probability clipping.",
+      "primary_market_scope": "MARKET_AGNOSTIC_MATH",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000015"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LOG_LOSS_BINARY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "epsilon": "epsilon",
+        "p_pred": "p_pred",
+        "y_true": "y_true"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-PROBABILITY_CLIPPING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000017"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "calibration",
+      "formula_id": "PR162B-FORMULA-PROBABILITY_CLIPPING",
+      "formula_name": "probability_clipping",
+      "implementation_function": "probability_clipping",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "probability",
+        "epsilon"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "clip(p, eps, 1-eps)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "clipped_probability"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Clips probabilities away from zero and one.",
+      "primary_market_scope": "MARKET_AGNOSTIC_MATH",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000017"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PROBABILITY_CLIPPING-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "epsilon": "epsilon",
+        "probability": "probability"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000018"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "calibration",
+      "formula_id": "PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE",
+      "formula_name": "calibration_error_candidate",
+      "implementation_function": "calibration_error_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "observed_probability",
+        "predicted_probability"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "|p_observed - p_predicted|",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "calibration_error"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Candidate absolute calibration error.",
+      "primary_market_scope": "MARKET_AGNOSTIC_MATH",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000018"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CALIBRATION_ERROR_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "observed_probability": "observed_probability",
+        "predicted_probability": "predicted_probability"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000036"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "calibration",
+      "formula_id": "PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE",
+      "formula_name": "confidence_penalty_candidate",
+      "implementation_function": "confidence_penalty_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "confidence",
+        "penalty_weight"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "w*(1-confidence)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "confidence_penalty"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Candidate penalty for low confidence.",
+      "primary_market_scope": "MARKET_AGNOSTIC_MATH",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000036"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CONFIDENCE_PENALTY_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "confidence": "confidence",
+        "penalty_weight": "penalty_weight"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-KELLY_FRACTION-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000208"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-KELLY_FRACTION",
+      "formula_name": "kelly_fraction",
+      "implementation_function": "kelly_fraction_binary",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_win",
+        "net_odds"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(b*p-q)/b",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "kelly_fraction"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Binary Kelly fraction candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000208"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "TEXTBOOK_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/portfolio-construction/key-concepts",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-KELLY_FRACTION-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "net_odds": "net_odds",
+        "p_win": "p_win"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-FRACTIONAL_KELLY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000512"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-FRACTIONAL_KELLY",
+      "formula_name": "fractional_kelly",
+      "implementation_function": "fractional_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "kelly_fraction",
+        "fraction"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "f_fractional = f_kelly * fraction",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "fractional_kelly"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Scales Kelly by a conservative fraction.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000512"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/portfolio-construction/key-concepts",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-FRACTIONAL_KELLY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "fraction": "fraction",
+        "kelly_fraction": "kelly_fraction"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-CAPPED_KELLY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000513"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-CAPPED_KELLY",
+      "formula_name": "capped_kelly",
+      "implementation_function": "capped_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "kelly_fraction",
+        "cap"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "min(max(f,-cap),cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "capped_kelly"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Caps a Kelly fraction candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000513"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/portfolio-construction/key-concepts",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CAPPED_KELLY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "cap": "cap",
+        "kelly_fraction": "kelly_fraction"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000913"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "formula_name": "risk_budget_capped_position_size",
+      "implementation_function": "risk_budget_capped_position_size",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "raw_size",
+        "risk_budget",
+        "unit_risk"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "min(raw_size, risk_budget/unit_risk)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "position_size"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Caps position size by candidate risk budget.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000913"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "raw_size": "raw_size",
+        "risk_budget": "risk_budget",
+        "unit_risk": "unit_risk"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MAX_EXPOSURE_CAP-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000914"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-MAX_EXPOSURE_CAP",
+      "formula_name": "max_exposure_cap",
+      "implementation_function": "max_exposure_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "requested_exposure",
+        "max_exposure"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "clip(exposure, cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "exposure"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Global candidate exposure cap.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000914"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OWNER_APPROVED_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "OWNER_PR162B_SCOPE",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MAX_EXPOSURE_CAP-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "max_exposure": "max_exposure",
+        "requested_exposure": "requested_exposure"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-PER_MARKET_CAP-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000964"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-PER_MARKET_CAP",
+      "formula_name": "per_market_cap",
+      "implementation_function": "per_market_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "requested_exposure",
+        "market_cap"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "clip(exposure, market_cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "market_exposure"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Per-market candidate exposure cap.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000964"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OWNER_APPROVED_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "OWNER_PR162B_SCOPE",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PER_MARKET_CAP-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "market_cap": "market_cap",
+        "requested_exposure": "requested_exposure"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-PER_EVENT_CAP-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000965"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "position_sizing",
+      "formula_id": "PR162B-FORMULA-PER_EVENT_CAP",
+      "formula_name": "per_event_cap",
+      "implementation_function": "per_event_cap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "requested_exposure",
+        "event_cap"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "clip(exposure, event_cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "event_exposure"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Per-event candidate exposure cap.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000965"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OWNER_APPROVED_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "OWNER_PR162B_SCOPE",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PER_EVENT_CAP-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "event_cap": "event_cap",
+        "requested_exposure": "requested_exposure"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MEAN_RETURN-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001005"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-MEAN_RETURN",
+      "formula_name": "mean_return",
+      "implementation_function": "mean_return",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "mean(x)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "mean"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Population mean of returns or values.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001005"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MEAN_RETURN-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "values": "values"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-VARIANCE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001078"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-VARIANCE",
+      "formula_name": "variance",
+      "implementation_function": "variance",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "E[(x-mean)^2]",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "variance"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Population variance.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001078"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VARIANCE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "values": "values"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-COVARIANCE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001079"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-COVARIANCE",
+      "formula_name": "covariance",
+      "implementation_function": "covariance",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "x",
+        "y"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "E[(x-mx)(y-my)]",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "covariance"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Population covariance.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001079"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-COVARIANCE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "x": "x",
+        "y": "y"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-CORRELATION-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001152"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-CORRELATION",
+      "formula_name": "correlation",
+      "implementation_function": "correlation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "x",
+        "y"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "cov(x,y)/(std_x*std_y)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "correlation"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Population correlation.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001152"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CORRELATION-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "x": "x",
+        "y": "y"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-VOLATILITY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001197"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-VOLATILITY",
+      "formula_name": "volatility",
+      "implementation_function": "volatility",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "returns"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sqrt(variance)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "volatility"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Population standard deviation of returns.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001197"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VOLATILITY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "returns": "returns"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-SHARPE_RATIO-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001380"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-SHARPE_RATIO",
+      "formula_name": "sharpe_ratio",
+      "implementation_function": "sharpe_ratio",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "portfolio_return",
+        "risk_free_rate",
+        "volatility"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(r-rf)/sigma",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "sharpe_ratio"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Sharpe ratio candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001380"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SHARPE_RATIO-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "portfolio_return": "portfolio_return",
+        "risk_free_rate": "risk_free_rate",
+        "volatility": "volatility"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MAX_DRAWDOWN-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001611"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-MAX_DRAWDOWN",
+      "formula_name": "max_drawdown",
+      "implementation_function": "max_drawdown",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "equity_curve"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "max((peak-equity)/peak)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "max_drawdown"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Maximum drawdown as a positive fraction.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001611"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MAX_DRAWDOWN-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "equity_curve": "equity_curve"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002559"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE",
+      "formula_name": "risk_adjusted_expected_value",
+      "implementation_function": "risk_adjusted_expected_value",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.risk_position_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_value",
+        "risk_penalty"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EV - risk_penalty",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "risk_adjusted_ev"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Risk-adjusted expected value candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_RISK",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002559"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expected_value": "expected_value",
+        "risk_penalty": "risk_penalty"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002761"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE",
+      "formula_name": "mean_variance_objective",
+      "implementation_function": "mean_variance_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.portfolio_objectives",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_return",
+        "variance",
+        "risk_aversion"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "mu - lambda*sigma^2",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "objective_value"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Mean-variance objective candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002761"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OPEN_SOURCE_PACKAGE_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MEAN_VARIANCE_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expected_return": "expected_return",
+        "risk_aversion": "risk_aversion",
+        "variance": "variance"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002762"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "risk_portfolio",
+      "formula_id": "PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE",
+      "formula_name": "portfolio_qp_objective",
+      "implementation_function": "portfolio_qp_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.portfolio_objectives",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "weights",
+        "returns",
+        "covariance_matrix",
+        "risk_aversion"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "w^T mu - lambda*w^T Sigma w",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "objective_value"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Quadratic portfolio objective candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002762"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OPEN_SOURCE_PACKAGE_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-PORTFOLIO_QP_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "covariance_matrix": "covariance_matrix",
+        "returns": "returns",
+        "risk_aversion": "risk_aversion",
+        "weights": "weights"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-SMA-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000042"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-SMA",
+      "formula_name": "SMA",
+      "implementation_function": "simple_moving_average",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "window"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sum(x_window)/window",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "sma"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Simple moving average.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000042"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://ta-lib.github.io/ta-lib-python/funcs.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SMA-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "values": "values",
+        "window": "window"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-EMA-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000101"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-EMA",
+      "formula_name": "EMA",
+      "implementation_function": "exponential_moving_average",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "span"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "alpha*x_t + (1-alpha)*EMA_{t-1}",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "ema"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Exponential moving average.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000101"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pandas.pydata.org/docs/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EMA-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "span": "span",
+        "values": "values"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-RSI-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000102"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-RSI",
+      "formula_name": "RSI",
+      "implementation_function": "rsi",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "period"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "100 - 100/(1+RS)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "rsi"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Relative Strength Index candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000102"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://ta-lib.github.io/ta-lib-python/funcs.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-RSI-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "period": "period",
+        "values": "values"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MACD-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000108"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-MACD",
+      "formula_name": "MACD",
+      "implementation_function": "macd",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "fast_span",
+        "slow_span",
+        "signal_span"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "EMA_fast - EMA_slow",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "macd"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "MACD candidate with signal and histogram.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000108"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://ta-lib.github.io/ta-lib-python/funcs.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MACD-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "fast_span": "fast_span",
+        "signal_span": "signal_span",
+        "slow_span": "slow_span",
+        "values": "values"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BOLLINGER_BANDS-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000112"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-BOLLINGER_BANDS",
+      "formula_name": "Bollinger Bands",
+      "implementation_function": "bollinger_bands",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "window",
+        "num_std"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "SMA +/- k*std",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "bands"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Bollinger band candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000112"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://ta-lib.github.io/ta-lib-python/funcs.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BOLLINGER_BANDS-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "num_std": "num_std",
+        "values": "values",
+        "window": "window"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-Z_SCORE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000113"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-Z_SCORE",
+      "formula_name": "z_score",
+      "implementation_function": "z_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "value",
+        "mean",
+        "std"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(x-mean)/std",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "z_score"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Standard score.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000113"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-Z_SCORE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "mean": "mean",
+        "std": "std",
+        "value": "value"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MOMENTUM-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000114"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-MOMENTUM",
+      "formula_name": "momentum",
+      "implementation_function": "momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "window"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "x_t - x_{t-window}",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "momentum"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Price or feature momentum candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000114"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://ta-lib.github.io/ta-lib-python/funcs.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MOMENTUM-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "values": "values",
+        "window": "window"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-REALIZED_VOLATILITY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000118"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-REALIZED_VOLATILITY",
+      "formula_name": "realized_volatility",
+      "implementation_function": "realized_volatility",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "returns",
+        "annualization_factor"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sqrt(var(returns))*sqrt(annualization)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "realized_volatility"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Realized volatility candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000118"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-REALIZED_VOLATILITY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "annualization_factor": "annualization_factor",
+        "returns": "returns"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-VWAP_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000119"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-VWAP_CANDIDATE",
+      "formula_name": "VWAP_candidate",
+      "implementation_function": "vwap",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "prices",
+        "volumes"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sum(price*volume)/sum(volume)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "vwap"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Volume-weighted average price candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_FEATURE",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000119"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://pandas.pydata.org/docs/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VWAP_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "prices": "prices",
+        "volumes": "volumes"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-MIDPOINT-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-MIDPOINT",
+      "formula_name": "midpoint",
+      "implementation_function": "midpoint",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(ask+bid)/2",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "midpoint"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Bid-ask midpoint.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_VENUE_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.kalshi.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-MIDPOINT-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask": "ask",
+        "bid": "bid"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-SPREAD-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-SPREAD",
+      "formula_name": "spread",
+      "implementation_function": "spread",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "ask-bid",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "spread"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Bid-ask spread.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_VENUE_DOC_FIELD_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.kalshi.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-SPREAD-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask": "ask",
+        "bid": "bid"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "formula_name": "orderbook_imbalance_candidate",
+      "implementation_function": "orderbook_imbalance_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "bid_size",
+        "ask_size"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "(bid_size-ask_size)/(bid_size+ask_size)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "imbalance"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Order-book imbalance candidate.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.polymarket.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_size": "ask_size",
+        "bid_size": "bid_size"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE",
+      "formula_name": "liquidity_proxy_candidate",
+      "implementation_function": "liquidity_proxy_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "volume",
+        "spread_value",
+        "epsilon"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "volume/max(spread,epsilon)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "liquidity_proxy"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Candidate liquidity proxy.",
+      "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.polymarket.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-LIQUIDITY_PROXY_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "epsilon": "epsilon",
+        "spread_value": "spread_value",
+        "volume": "volume"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_OBJECTIVE_XTQX-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001354"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX",
+      "formula_name": "QUBO objective x^T Q x",
+      "implementation_function": "qubo_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "x",
+        "Q"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "x^T Q x",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "qubo_energy"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "QUBO energy for binary vector and square Q matrix.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001354"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_OBJECTIVE_XTQX-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Q": "Q",
+        "x": "x"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-EXPANDED_QUBO_TERMS-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001941"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-EXPANDED_QUBO_TERMS",
+      "formula_name": "expanded QUBO terms",
+      "implementation_function": "expanded_qubo_terms",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Q"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sum_i sum_j Q_ij x_i x_j",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "terms"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Expands non-zero QUBO terms.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001941"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-EXPANDED_QUBO_TERMS-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Q": "Q"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-ISING_ENERGY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002611"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-ISING_ENERGY",
+      "formula_name": "Ising energy",
+      "implementation_function": "ising_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "spins",
+        "h",
+        "J"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sum h_i s_i + sum J_ij s_i s_j",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "ising_energy"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Ising energy for spins and couplers.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002611"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ISING_ENERGY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "J": "J",
+        "h": "h",
+        "spins": "spins"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BQM_ENERGY-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004050"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-BQM_ENERGY",
+      "formula_name": "BQM energy",
+      "implementation_function": "bqm_energy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "x",
+        "linear",
+        "quadratic"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "linear + quadratic binary energy",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "bqm_energy"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Binary quadratic model energy candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004050"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BQM_ENERGY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "linear": "linear",
+        "quadratic": "quadratic",
+        "x": "x"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004319"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS",
+      "formula_name": "CQM objective and constraints",
+      "implementation_function": "cqm_objective_and_constraints",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "objective_value",
+        "constraint_violations",
+        "penalty_lambda"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "objective + lambda*sum(v_i^2)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "cqm_value"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Constrained quadratic model penalty assembly candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004319"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-CQM_OBJECTIVE_CONSTRAINTS-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "constraint_violations": "constraint_violations",
+        "objective_value": "objective_value",
+        "penalty_lambda": "penalty_lambda"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004320"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT",
+      "formula_name": "binary penalty constraint lambda(Ax-b)^2",
+      "implementation_function": "binary_penalty_constraint",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Ax_minus_b",
+        "lambda_penalty"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "lambda*(Ax-b)^2",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "penalty"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Penalty constraint used for QUBO conversion.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004320"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-BINARY_PENALTY_CONSTRAINT-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Ax_minus_b": "Ax_minus_b",
+        "lambda_penalty": "lambda_penalty"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004321"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "formula_name": "QUBO portfolio selection objective",
+      "implementation_function": "qubo_portfolio_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_returns",
+        "risk_matrix",
+        "risk_aversion"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "lambda*risk - return",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "Q"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Builds a candidate QUBO matrix for portfolio selection.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004321"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expected_returns": "expected_returns",
+        "risk_aversion": "risk_aversion",
+        "risk_matrix": "risk_matrix"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004352"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "formula_name": "QUBO prediction-market position selection objective",
+      "implementation_function": "qubo_prediction_market_position_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "edges",
+        "risk_penalties"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "risk_penalty - edge",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "Q"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Builds a diagonal QUBO for prediction-market position selection.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004352"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "edges": "edges",
+        "risk_penalties": "risk_penalties"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004353"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "formula_name": "QUBO market-bundle selection objective",
+      "implementation_function": "qubo_market_bundle_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "scores"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "-score_i x_i",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "Q"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Builds a diagonal market-bundle selection QUBO.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004353"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "scores": "scores"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004355"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "formula_name": "QUBO parameter-stack selection objective",
+      "implementation_function": "qubo_parameter_stack_selection_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "scores",
+        "penalties"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "penalty_i - score_i",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "Q"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Builds a diagonal parameter-stack selection QUBO.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004355"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "penalties": "penalties",
+        "scores": "scores"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004356"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE",
+      "formula_name": "QUBO risk-budget objective",
+      "implementation_function": "qubo_risk_budget_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "exposures",
+        "budget",
+        "penalty_lambda"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "lambda*exposure_i*exposure_j/budget",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "Q"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Builds a candidate risk-budget QUBO.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004356"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "budget": "budget",
+        "exposures": "exposures",
+        "penalty_lambda": "penalty_lambda"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004357"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "formula_name": "QAOA Hamiltonian mapping candidate",
+      "implementation_function": "qaoa_hamiltonian_mapping_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Q"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "QUBO -> Ising Hamiltonian candidate",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "hamiltonian_mapping"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Assembles QAOA Hamiltonian mapping metadata without backend execution.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004357"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.quantum.ibm.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Q": "Q"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004358"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE",
+      "formula_name": "VQE objective candidate",
+      "implementation_function": "vqe_objective_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "hamiltonian_terms",
+        "expectation_values"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "sum c_i <H_i>",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "vqe_objective"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Computes a local VQE-style expectation value candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004358"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.quantum.ibm.com/",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-VQE_OBJECTIVE_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expectation_values": "expectation_values",
+        "hamiltonian_terms": "hamiltonian_terms"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004359"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE",
+      "formula_name": "annealing BQM/CQM candidate",
+      "implementation_function": "annealing_bqm_cqm_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Q"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "QUBO -> BQM/CQM candidate",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "annealing_candidate"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Assembles annealing candidate metadata without backend execution.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004359"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_FORMULA_CANDIDATE",
+      "source_evidence_required_flag": true,
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-ANNEALING_BQM_CQM_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Q": "Q"
+      }
+    },
+    {
+      "agent_consumer_refs": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "authority_class": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY",
+      "binding_proof_refs": [
+        "PR162B-BINDING-PROOF-PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004360"
+      ],
+      "compatible_market_scopes": [
+        "PREDICTION_MARKET_BINARY_EVENT_CONTRACT",
+        "PREDICTION_MARKET_MULTIOUTCOME_EVENT_CONTRACT",
+        "PREDICTION_MARKET_SCALAR_RANGE_CONTRACT",
+        "NON_MARKET_SPECIFIC",
+        "MARKET_AGNOSTIC_MATH",
+        "MARKET_AGNOSTIC_FEATURE",
+        "MARKET_AGNOSTIC_RISK",
+        "MARKET_AGNOSTIC_OPTIMIZER",
+        "MARKET_AGNOSTIC_GOVERNANCE"
+      ],
+      "created_by_pr": "PR162B",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "formula_name": "hybrid classical-quantum comparator objective",
+      "implementation_function": "hybrid_classical_quantum_comparator_objective",
+      "implementation_module": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "classical_score",
+        "quantum_candidate_score"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "live_mode_status": "LIVE_BLOCKED_NO_REPLAY_PAPER_EVIDENCE",
+      "mathematical_expression_latex": "quantum_score - classical_score",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "output_fields": [
+        "score_delta"
+      ],
+      "owner_review_required_flag": true,
+      "parameter_defaults": {},
+      "parameter_ranges": {},
+      "parameter_scales": {},
+      "plain_english_definition": "Local comparator objective candidate.",
+      "primary_market_scope": "MARKET_AGNOSTIC_OPTIMIZER",
+      "qku_refs": [
+        "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004360"
+      ],
+      "replay_paper_required_flag": true,
+      "solver_mapping_refs": [],
+      "source_class": "REPO_EXISTING_FORMULA",
+      "source_evidence_required_flag": true,
+      "source_locator": "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+      "stage1_activation_status": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_refs": [
+        "PR162B-TEST-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "classical_score": "classical_score",
+        "quantum_candidate_score": "quantum_candidate_score"
+      }
+    }
+  ],
+  "report_filename": "PR162B_QKUFormulaRegistry.report.json",
+  "report_id": "PR162B_QKU_FORMULA_REGISTRY",
+  "report_type": "PR162B_QKU_FORMULA_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization/schemas/pr162b_qkuformularegistry.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162A_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_formula_family": {
+      "calibration": 5,
+      "position_sizing": 7,
+      "prediction_market": 11,
+      "quantum_hybrid": 15,
+      "risk_portfolio": 10,
+      "technical_feature": 13
+    },
+    "by_primary_market_scope": {
+      "MARKET_AGNOSTIC_FEATURE": 9,
+      "MARKET_AGNOSTIC_MATH": 5,
+      "MARKET_AGNOSTIC_OPTIMIZER": 17,
+      "MARKET_AGNOSTIC_RISK": 15,
+      "PREDICTION_MARKET_BINARY_EVENT_CONTRACT": 15
+    },
+    "total_records": 61
+  },
+  "total_record_count": 61,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A"
+  ],
+  "validation_status": "PASS"
+}
