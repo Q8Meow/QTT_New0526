@@ -975,6 +975,125 @@ def test_pr161d_explicit_changed_path_allowance_is_narrow():
     )
 
 
+def test_pr162c_explicit_changed_path_allowance_is_narrow():
+    branch = "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=162) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/"
+        "test_pr162c_preflight_consumes_required_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162C_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "PR162C_EXECUTABLE_QKU_AND_DATASET_PREFLIGHT_RECEIPT.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr162c_multisource_safe_nonlive_dataset_shards/"
+        "PR162C_StrictQKUCoverageProofMatrix.report.shard_0001.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr162c_multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr162c_multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/"
+        "test_pr160_branch_context_relaxation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/"
+        "test_pr159r_branch_context_relaxation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "source_intelligence/pr159s_open_intake/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/source_intelligence/"
+        "test_pr159s_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "atomicrows_pr154_value_state/test_pr161a_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162B_FinalSummary.report.json",
+    )
+
+
 def test_pull_request_detached_context_can_preserve_merge_ref_semantics(monkeypatch):
     _clear_github_branch_context_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")

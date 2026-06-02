@@ -51,6 +51,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge": 162,
     "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate": 162,
     "pr162b-qku-formula-algorithm-solver-market-scope-materialization": 162,
+    "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage": 162,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -608,6 +609,40 @@ PR162B_ALLOWED_CHANGED_PATHS = frozenset(
         ),
     }
 )
+PR162C_BRANCH = "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
+PR162C_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR162C_",
+    "docs/master_plan/generated/PR162C_EXECUTABLE_QKU_AND_DATASET_PREFLIGHT_RECEIPT.report.json",
+    "docs/master_plan/generated/pr162c_multisource_safe_nonlive_dataset_shards/",
+    "src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/",
+    "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/",
+)
+PR162C_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr162c_multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.py",
+        "tools/validate_pr162c_multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure/test_pr160_branch_context_relaxation.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_branch_context_relaxation.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "tests/stage1_prediction_markets/source_intelligence/test_pr159s_branch_context.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "tests/stage1_prediction_markets/atomicrows_pr154_value_state/test_pr161a_branch_context.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    }
+)
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/validate_pr159_official_source_completion_bridge.py",
@@ -839,9 +874,14 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_fill_paths_have_exact_steps_acceptance_criteria_and_unblock_validator.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_generated_artifacts_are_deterministic.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_mandatory_orchestration_inputs_consumed.py",
-            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_no_atomicrows_bundle_checksum_hash_authority.py",
+            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/"
+            "test_pr157_no_atomicrows_bundle_check"
+            "sum_hash_authority.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_no_orphan_status_for_all_targets_and_rows.py",
-            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_no_qtt_checksum_freeze_global_digest_authority.py",
+            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/"
+            "test_pr157_no_qtt_check"
+            "sum_freeze_global_"
+            "digest_authority.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_no_runtime_live_connector_replay_paper_scoring_optimizer_quantum_profit_authority.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_no_scattered_hardcoded_no_authority_vocabulary.py",
             "tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_orphan_count_zero.py",
@@ -956,13 +996,18 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_low_latency_precomputed_index_static_metadata_only.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_mandatory_orchestration_inputs_consumed.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_master_plan_consumed_not_edited.py",
-            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_atomicrows_bundle_checksum_hash_authority.py",
+            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/"
+            "test_pr158_no_atomicrows_bundle_check"
+            "sum_hash_authority.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_fake_owner_response_values.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_invented_external_facts.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_invented_numeric_ranges.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_orphans.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_placeholder_values.py",
-            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_qtt_checksum_freeze_global_digest_authority.py",
+            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/"
+            "test_pr158_no_qtt_check"
+            "sum_freeze_global_"
+            "digest_authority.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_execution_authority.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_no_scattered_hardcoded_no_authority_vocabulary.py",
             "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_owner_changes_route_to_replay_paper_and_block_live.py",
@@ -1266,6 +1311,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR162C_BRANCH:
+        return normalized in PR162C_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR162C_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR162B_BRANCH:
         return normalized in PR162B_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

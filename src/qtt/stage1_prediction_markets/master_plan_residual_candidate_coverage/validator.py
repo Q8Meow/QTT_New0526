@@ -206,6 +206,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge",
         "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate",
         "pr162b-qku-formula-algorithm-solver-market-scope-materialization",
+        "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage",
     } or (
         normalized == "main" and _ancestry_present(root)
     )

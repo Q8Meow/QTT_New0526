@@ -9,6 +9,9 @@ from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture impor
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
 PR160_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
+PR162C_DOWNSTREAM_BRANCH = (
+    "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
+)
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -109,6 +112,14 @@ def _set_pull_request_detached_env(monkeypatch, *, head_ref: str | None = None):
 def test_pr159r_exact_branch_allowed(monkeypatch):
     _clear_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, c.EXPECTED_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr159r_pr162c_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, PR162C_DOWNSTREAM_BRANCH)
 
     assert failures == ()
     assert receipts == ()

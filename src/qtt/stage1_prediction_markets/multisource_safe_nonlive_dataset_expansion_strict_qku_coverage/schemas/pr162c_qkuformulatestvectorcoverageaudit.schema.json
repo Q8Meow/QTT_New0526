@@ -1,0 +1,31 @@
+{
+  "$id": "src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/schemas/pr162c_qkuformulatestvectorcoverageaudit.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY"
+    },
+    "created_by_pr": {
+      "const": "PR162C"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR162C_QKUFormulaTestVectorCoverageAudit.report.json"
+    },
+    "report_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "records"
+  ],
+  "title": "PR162C_QKUFormulaTestVectorCoverageAudit.report.json",
+  "type": "object"
+}

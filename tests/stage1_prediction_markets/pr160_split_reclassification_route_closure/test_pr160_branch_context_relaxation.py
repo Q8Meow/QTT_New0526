@@ -21,6 +21,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 PR160_REPAIR_BRANCH = "repair/pr160-main-push-branch-context-relaxation"
 PR160_CURRENT_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
 PR159R_BRANCH_CONTEXT_REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
+PR162C_DOWNSTREAM_BRANCH = (
+    "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
+)
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -134,6 +137,19 @@ def test_pr160_exact_branch_allows_without_ci_receipt(monkeypatch):
     failures, receipts = _branch_outcome(
         monkeypatch,
         c.EXPECTED_BRANCH,
+        ancestry_present=False,
+    )
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr160_pr162c_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR162C_DOWNSTREAM_BRANCH,
         ancestry_present=False,
     )
 

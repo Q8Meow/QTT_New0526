@@ -1,0 +1,2870 @@
+{
+  "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162C",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+    "PR163_RESULT_PACKET_EMISSION_AFTER_VALIDATED_REAL_ARTIFACTS",
+    "PR164_AUTHENTICITY_SAMPLE_CONFIDENCE_PROVENANCE_VALIDATION",
+    "PR165_RESULT_BACKED_RANKING_AFTER_PR164",
+    "FUTURE_LIVE_OWNER_RISK_CAPITAL_LATENCY_SOURCE_GATED"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 61,
+  "records": [
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001-PR162B-FORMULA-MIDPOINT",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MIDPOINT",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002-PR162B-FORMULA-SPREAD",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-SPREAD",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003-PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004-PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000014-PR162B-FORMULA-BRIER_SCORE_BINARY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BRIER_SCORE_BINARY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000014",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000015-PR162B-FORMULA-LOG_LOSS_BINARY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-LOG_LOSS_BINARY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000015",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000017-PR162B-FORMULA-PROBABILITY_CLIPPING",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-PROBABILITY_CLIPPING",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000017",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000018-PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000018",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000036-PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000036",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000042-PR162B-FORMULA-SMA",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-SMA",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000042",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000099-PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000099",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000101-PR162B-FORMULA-EMA",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-EMA",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000101",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000102-PR162B-FORMULA-RSI",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-RSI",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000102",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000108-PR162B-FORMULA-MACD",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MACD",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000108",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000112-PR162B-FORMULA-BOLLINGER_BANDS",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BOLLINGER_BANDS",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000112",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000113-PR162B-FORMULA-Z_SCORE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-Z_SCORE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000113",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000114-PR162B-FORMULA-MOMENTUM",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MOMENTUM",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000114",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000118-PR162B-FORMULA-REALIZED_VOLATILITY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-REALIZED_VOLATILITY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000118",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000119-PR162B-FORMULA-VWAP_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-VWAP_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000119",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000208-PR162B-FORMULA-KELLY_FRACTION",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-KELLY_FRACTION",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000208",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000477-PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000477",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000478-PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000478",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000512-PR162B-FORMULA-FRACTIONAL_KELLY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-FRACTIONAL_KELLY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000512",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000513-PR162B-FORMULA-CAPPED_KELLY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-CAPPED_KELLY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000513",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000688-PR162B-FORMULA-PROBABILITY_EDGE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-PROBABILITY_EDGE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000688",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000847-PR162B-FORMULA-EXPECTED_VALUE_BINARY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-EXPECTED_VALUE_BINARY",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000847",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000848-PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000848",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000894-PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000894",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000913-PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000913",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000914-PR162B-FORMULA-MAX_EXPOSURE_CAP",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MAX_EXPOSURE_CAP",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000914",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000918-PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000918",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000942-PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000942",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000963-PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000963",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000964-PR162B-FORMULA-PER_MARKET_CAP",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-PER_MARKET_CAP",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000964",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000965-PR162B-FORMULA-PER_EVENT_CAP",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-PER_EVENT_CAP",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000965",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000996-PR162B-FORMULA-BREAK_EVEN_PROBABILITY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BREAK_EVEN_PROBABILITY",
+      "missing_input_fields": [
+        "close_time",
+        "fee_model_candidate",
+        "liquidity",
+        "no_ask",
+        "no_bid",
+        "no_price",
+        "outcome_no_id",
+        "outcome_yes_id",
+        "question",
+        "resolution_status",
+        "resolution_time",
+        "settlement_value"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_000996",
+      "required_input_fields": [
+        "event_id",
+        "market_id",
+        "question",
+        "outcome_yes_id",
+        "outcome_no_id",
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "no_bid",
+        "no_ask",
+        "implied_probability",
+        "resolution_status",
+        "settlement_value",
+        "open_time",
+        "close_time",
+        "resolution_time",
+        "volume",
+        "open_interest",
+        "liquidity",
+        "spread",
+        "fee_model_candidate",
+        "venue"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001005-PR162B-FORMULA-MEAN_RETURN",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MEAN_RETURN",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001005",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001078-PR162B-FORMULA-VARIANCE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-VARIANCE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001078",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001079-PR162B-FORMULA-COVARIANCE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-COVARIANCE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001079",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001152-PR162B-FORMULA-CORRELATION",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-CORRELATION",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001152",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001197-PR162B-FORMULA-VOLATILITY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-VOLATILITY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001197",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001354-PR162B-FORMULA-QUBO_OBJECTIVE_XTQX",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001354",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001380-PR162B-FORMULA-SHARPE_RATIO",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-SHARPE_RATIO",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001380",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001611-PR162B-FORMULA-MAX_DRAWDOWN",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MAX_DRAWDOWN",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001611",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001941-PR162B-FORMULA-EXPANDED_QUBO_TERMS",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-EXPANDED_QUBO_TERMS",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_001941",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002559-PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002559",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002611-PR162B-FORMULA-ISING_ENERGY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-ISING_ENERGY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002611",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002761-PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002761",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002762-PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_002762",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004050-PR162B-FORMULA-BQM_ENERGY",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BQM_ENERGY",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004050",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004319-PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004319",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004320-PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004320",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004321-PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004321",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004352-PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004352",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004353-PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004353",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004355-PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004355",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004356-PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004356",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004357-PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004357",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004358-PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004358",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004359-PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004359",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    },
+    {
+      "binding_id": "PR162C-FORMULA-DATASET-BINDING-QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004360-PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "binding_status": "STRICT_COVERAGE_FAIL_CLOSED",
+      "blocker_code": "BLOCKED_REQUIRED_FIELDS_MISSING",
+      "created_by_pr": "PR162C",
+      "dataset_ids": [
+        "PR162A-DATASET-KALSHI-HISTORICAL-CANDLES-TRADES-TINY"
+      ],
+      "formula_ref": "PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "missing_input_fields": [
+        "fee_model_candidate",
+        "liquidity",
+        "no_price"
+      ],
+      "provided_input_fields": [
+        "event_id",
+        "implied_probability",
+        "market_id",
+        "open_interest",
+        "open_time",
+        "spread",
+        "venue",
+        "volume",
+        "yes_ask",
+        "yes_bid",
+        "yes_price"
+      ],
+      "qku_id": "QKU-RESIDUAL-PR161B-PR161C_QUEUE__PR161B_CANDIDATE_004360",
+      "required_input_fields": [
+        "yes_price",
+        "no_price",
+        "yes_bid",
+        "yes_ask",
+        "volume",
+        "liquidity",
+        "fee_model_candidate"
+      ]
+    }
+  ],
+  "report_filename": "PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+  "report_id": "PR162C-PR162C_QKUFormulaToDatasetBindingMatrix.report",
+  "report_type": "PR162C_QKU_FORMULA_TO_DATASET_BINDING_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/schemas/pr162c_qkuformulatodatasetbindingmatrix.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162A_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162B_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162B_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_blocker_code": {
+      "BLOCKED_REQUIRED_FIELDS_MISSING": 61
+    },
+    "total_records": 61
+  },
+  "total_record_count": 61,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B"
+  ],
+  "validation_status": "PASS"
+}
