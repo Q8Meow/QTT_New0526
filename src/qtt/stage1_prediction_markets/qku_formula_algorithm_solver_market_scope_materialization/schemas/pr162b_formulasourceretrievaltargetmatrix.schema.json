@@ -1,0 +1,31 @@
+{
+  "$id": "src/qtt/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization/schemas/pr162b_formulasourceretrievaltargetmatrix.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "QKU_FORMULA_ALGORITHM_SOLVER_MARKET_SCOPE_CANDIDATE_OR_CONTROL_PLANE_ONLY"
+    },
+    "created_by_pr": {
+      "const": "PR162B"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR162B_FormulaSourceRetrievalTargetMatrix.report.json"
+    },
+    "report_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "records"
+  ],
+  "title": "PR162B_FormulaSourceRetrievalTargetMatrix.report.json",
+  "type": "object"
+}

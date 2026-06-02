@@ -50,6 +50,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr161f-replay-paper-executor-input-run-artifact-generation": 161,
     "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge": 162,
     "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate": 162,
+    "pr162b-qku-formula-algorithm-solver-market-scope-materialization": 162,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -538,6 +539,70 @@ PR162A_ALLOWED_CHANGED_PATHS = frozenset(
         *(
             f"docs/master_plan/generated/{filename}"
             for filename in PR162A_GENERATED_REPORT_FILENAMES
+        ),
+    }
+)
+PR162B_BRANCH = "pr162b-qku-formula-algorithm-solver-market-scope-materialization"
+PR162B_GENERATED_REPORT_FILENAMES = (
+    "PR162B_FinalSummary.report.json",
+    "PR162B_SharedDictionary.report.json",
+    "PR162B_FormulaSourceRetrievalTargetMatrix.report.json",
+    "PR162B_QKUExecutionClassificationAudit.report.json",
+    "PR162B_QKUMarketClassificationRegistry.report.json",
+    "PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "PR162B_QKUDormancyRegistry.report.json",
+    "PR162B_QKUTradeRoleRegistry.report.json",
+    "PR162B_QKUMarketInputFieldRequirementMatrix.report.json",
+    "PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "PR162B_QKUMarketClassificationCoverageAudit.report.json",
+    "PR162B_QKUFormulaCoverageAudit.report.json",
+    "PR162B_QKUFormulaRegistry.report.json",
+    "PR162B_QKUAlgorithmRegistry.report.json",
+    "PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "PR162B_QKUConstraintRegistry.report.json",
+    "PR162B_QKUParameterValueRegistry.report.json",
+    "PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "PR162B_QKUSolverMappingRegistry.report.json",
+    "PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "PR162B_QKUFormulaImplementationBindingRegistry.report.json",
+    "PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "PR162B_AgentFormulaConsumerRoutingMatrix.report.json",
+    "PR162B_LiveModeFormulaGateStatus.report.json",
+    "PR162B_MetadataOnlyBlockerAudit.report.json",
+    "PR162B_PR162CDataRequirementHandoff.report.json",
+    "PR162B_ForbiddenAuthorityScan.report.json",
+    "PR162B_ReportShardManifest.report.json",
+)
+PR162B_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/pr162b_qku_formula_solver_market_scope_shards/",
+    "src/qtt/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization/",
+    "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization/",
+)
+PR162B_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr162b_qku_formula_algorithm_solver_market_scope_materialization.py",
+        "tools/validate_pr162b_qku_formula_algorithm_solver_market_scope_materialization.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        *(
+            f"docs/master_plan/generated/{filename}"
+            for filename in PR162B_GENERATED_REPORT_FILENAMES
         ),
     }
 )
@@ -1199,6 +1264,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR162B_BRANCH:
+        return normalized in PR162B_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR162B_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR162A_BRANCH:
         return normalized in PR162A_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

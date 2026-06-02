@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
         pr140_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate",
+            branch="pr162b-qku-formula-algorithm-solver-market-scope-materialization",
             source="unit-test",
         ),
     )
