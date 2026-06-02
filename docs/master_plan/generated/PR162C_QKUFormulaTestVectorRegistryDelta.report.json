@@ -1,0 +1,784 @@
+{
+  "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162C",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+    "PR163_RESULT_PACKET_EMISSION_AFTER_VALIDATED_REAL_ARTIFACTS",
+    "PR164_AUTHENTICITY_SAMPLE_CONFIDENCE_PROVENANCE_VALIDATION",
+    "PR165_RESULT_BACKED_RANKING_AFTER_PR164",
+    "FUTURE_LIVE_OWNER_RISK_CAPITAL_LATENCY_SOURCE_GATED"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 27,
+  "records": [
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.05,
+      "formula_id": "PR162C-FORMULA-DELTA-YES_CONTRACT_EV",
+      "implementation_function": "yes_contract_ev",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.yes_contract_ev",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "ask_price_yes_adjusted": 0.5,
+        "p_model": 0.55,
+        "payout": 1.0
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.kalshi.com/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-YES_CONTRACT_EV-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.04999999999999993,
+      "formula_id": "PR162C-FORMULA-DELTA-NO_CONTRACT_EV",
+      "implementation_function": "no_contract_ev",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.no_contract_ev",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "ask_price_no_adjusted": 0.4,
+        "p_model": 0.55,
+        "payout": 1.0
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.polymarket.com/api-reference",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-NO_CONTRACT_EV-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.04,
+      "formula_id": "PR162C-FORMULA-DELTA-EXPECTED_NET_PROFIT",
+      "implementation_function": "expected_net_profit",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.expected_net_profit",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "expected_value": 0.1,
+        "fees": 0.01,
+        "latency_penalty": 0.03,
+        "slippage": 0.02
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-EXPECTED_NET_PROFIT-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.04999999999999993,
+      "formula_id": "PR162C-FORMULA-DELTA-EDGE_YES",
+      "implementation_function": "edge_yes",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.edge_yes",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "ask_price_yes_adjusted": 0.55,
+        "p_model": 0.6
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.polymarket.com/api-reference",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-EDGE_YES-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.050000000000000044,
+      "formula_id": "PR162C-FORMULA-DELTA-EDGE_NO",
+      "implementation_function": "edge_no",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.edge_no",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "ask_price_no_adjusted": 0.35,
+        "p_model": 0.6
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.polymarket.com/api-reference",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-EDGE_NO-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.97,
+      "formula_id": "PR162C-FORMULA-DELTA-MATCHED_YES_NO_BUNDLE_COST",
+      "implementation_function": "matched_yes_no_bundle_cost",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.matched_yes_no_bundle_cost",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "no_ask": 0.49,
+        "yes_ask": 0.48
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.kalshi.com/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-MATCHED_YES_NO_BUNDLE_COST-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.020000000000000018,
+      "formula_id": "PR162C-FORMULA-DELTA-BOUNDED_ARBITRAGE_CANDIDATE_EDGE",
+      "implementation_function": "bounded_arbitrage_candidate_edge",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.bounded_arbitrage_candidate_edge",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "fee_buffer": 0.01,
+        "no_ask": 0.49,
+        "yes_ask": 0.48
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.kalshi.com/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-BOUNDED_ARBITRAGE_CANDIDATE_EDGE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.050000000000000044,
+      "formula_id": "PR162C-FORMULA-DELTA-SAME_EVENT_PRICE_DISLOCATION",
+      "implementation_function": "same_event_price_dislocation",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.same_event_price_dislocation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "price_a": 0.52,
+        "price_b": 0.47
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://www.forecastex.com/data/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-SAME_EVENT_PRICE_DISLOCATION-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": true,
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_FEASIBLE_DISLOCATION",
+      "implementation_function": "liquidity_feasible_dislocation",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas.liquidity_feasible_dislocation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "inputs": {
+        "dislocation": 0.05,
+        "min_volume": 100,
+        "observed_volume": 120
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://www.forecastex.com/data/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_FEASIBLE_DISLOCATION-001",
+      "tolerance": 1e-09,
+      "unit": "boolean"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.20000000000000004,
+      "formula_id": "PR162C-FORMULA-DELTA-FORECAST_SHARPNESS_CANDIDATE",
+      "implementation_function": "forecast_sharpness_candidate",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas.forecast_sharpness_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas",
+      "inputs": {
+        "probabilities": [
+          0.2,
+          0.8,
+          0.5
+        ]
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-FORECAST_SHARPNESS_CANDIDATE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.19999999999999996,
+      "formula_id": "PR162C-FORMULA-DELTA-RELIABILITY_BIN_CALIBRATION_CANDIDATE",
+      "implementation_function": "reliability_bin_calibration_candidate",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas.reliability_bin_calibration_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas",
+      "inputs": {
+        "observed_outcomes": [
+          1,
+          0
+        ],
+        "predicted_probabilities": [
+          0.8,
+          0.6
+        ]
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-RELIABILITY_BIN_CALIBRATION_CANDIDATE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.2,
+      "formula_id": "PR162C-FORMULA-DELTA-DRAWDOWN_CAPPED_KELLY",
+      "implementation_function": "drawdown_capped_kelly",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas.drawdown_capped_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "inputs": {
+        "drawdown": 0.1,
+        "kelly_fraction": 0.4,
+        "max_drawdown": 0.2,
+        "max_fraction": 0.2
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-DRAWDOWN_CAPPED_KELLY-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 25.0,
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_ADJUSTED_SIZE",
+      "implementation_function": "liquidity_adjusted_size",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas.liquidity_adjusted_size",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "inputs": {
+        "available_liquidity": 100,
+        "liquidity_fraction_cap": 0.25,
+        "raw_size": 50
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_ADJUSTED_SIZE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 200.0,
+      "formula_id": "PR162C-FORMULA-DELTA-MAX_POSITION_BY_BUDGET",
+      "implementation_function": "max_position_by_budget",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas.max_position_by_budget",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "inputs": {
+        "budget": 100,
+        "price": 0.5
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-MAX_POSITION_BY_BUDGET-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.9,
+      "formula_id": "PR162C-FORMULA-DELTA-DRAWDOWN_PENALIZED_SCORE",
+      "implementation_function": "drawdown_penalized_score",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas.drawdown_penalized_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "inputs": {
+        "drawdown": 0.2,
+        "penalty_weight": 0.5,
+        "score": 1.0
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-DRAWDOWN_PENALIZED_SCORE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.06999999999999999,
+      "formula_id": "PR162C-FORMULA-DELTA-CORRELATION_PENALIZED_PORTFOLIO_SCORE",
+      "implementation_function": "correlation_penalized_portfolio_score",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives.correlation_penalized_portfolio_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives",
+      "inputs": {
+        "average_pairwise_correlation": 0.5,
+        "expected_return": 0.12,
+        "penalty_weight": 0.1
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-CORRELATION_PENALIZED_PORTFOLIO_SCORE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 2.3,
+      "formula_id": "PR162C-FORMULA-DELTA-MULTI_OBJECTIVE_WEIGHTED_SUM",
+      "implementation_function": "multi_objective_weighted_sum",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives.multi_objective_weighted_sum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives",
+      "inputs": {
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "weights": [
+          0.2,
+          0.3,
+          0.5
+        ]
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-MULTI_OBJECTIVE_WEIGHTED_SUM-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 60.0,
+      "formula_id": "PR162C-FORMULA-DELTA-TIME_TO_RESOLUTION_SECONDS",
+      "implementation_function": "time_to_resolution_seconds",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.time_to_resolution_seconds",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "observation_ts": 100.0,
+        "resolution_ts": 160.0
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-TIME_TO_RESOLUTION_SECONDS-001",
+      "tolerance": 1e-09,
+      "unit": "seconds"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.050000000000000044,
+      "formula_id": "PR162C-FORMULA-DELTA-PRICE_MOMENTUM",
+      "implementation_function": "price_momentum",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.price_momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "current_price": 0.55,
+        "previous_price": 0.5
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.polymarket.com/api-reference",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-PRICE_MOMENTUM-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 20.0,
+      "formula_id": "PR162C-FORMULA-DELTA-VOLUME_MOMENTUM",
+      "implementation_function": "volume_momentum",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.volume_momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "current_volume": 120,
+        "previous_volume": 100
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://www.forecastex.com/data/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-VOLUME_MOMENTUM-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 0.019999999999999997,
+      "formula_id": "PR162C-FORMULA-DELTA-SPREAD_CHANGE",
+      "implementation_function": "spread_change",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.spread_change",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "current_spread": 0.06,
+        "previous_spread": 0.04
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-SPREAD_CHANGE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 100.0,
+      "formula_id": "PR162C-FORMULA-DELTA-ORDERBOOK_DEPTH_PROXY",
+      "implementation_function": "orderbook_depth_proxy",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.orderbook_depth_proxy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "ask_size": 40,
+        "bid_size": 60
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.polymarket.com/api-reference",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-ORDERBOOK_DEPTH_PROXY-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 200.0,
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_SCORE",
+      "implementation_function": "liquidity_score",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas.liquidity_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "inputs": {
+        "epsilon": 1e-09,
+        "spread": 0.5,
+        "volume": 100
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://www.forecastex.com/data/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_SCORE-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "h": [
+          1.0,
+          2.0
+        ],
+        "variable_count": 2
+      },
+      "formula_id": "PR162C-FORMULA-DELTA-QUBO_TO_ISING_LINEAR_TERMS",
+      "implementation_function": "qubo_to_ising_linear_terms",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations.qubo_to_ising_linear_terms",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations",
+      "inputs": {
+        "Q": [
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://qiskit-community.github.io/qiskit-optimization/",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-QUBO_TO_ISING_LINEAR_TERMS-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": 12.0,
+      "formula_id": "PR162C-FORMULA-DELTA-CONSTRAINT_PENALTY",
+      "implementation_function": "constraint_penalty",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations.constraint_penalty",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations",
+      "inputs": {
+        "Ax_minus_b": 2.0,
+        "penalty_lambda": 3.0
+      },
+      "invalid_input_tests": [
+        "domain violations raise ValueError"
+      ],
+      "source_reference": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "test_vector_id": "PR162C-TEST-FORMULA-DELTA-CONSTRAINT_PENALTY-001",
+      "tolerance": 1e-09,
+      "unit": "unitless"
+    },
+    {
+      "algorithm_id": "PR162C-ALGORITHM-DELTA-STRICT_FIELD_COVERAGE_AUDIT",
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": {
+        "coverage_status": "BLOCKED_REQUIRED_FIELDS_MISSING",
+        "missing_input_fields": [
+          "event_id"
+        ]
+      },
+      "implementation_function": "strict_field_coverage_status",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.qku_field_coverage.strict_field_coverage_status",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.qku_field_coverage",
+      "inputs": {
+        "provided_fields": [
+          "market_id"
+        ],
+        "required_fields": [
+          "event_id",
+          "market_id"
+        ]
+      },
+      "invalid_input_tests": [],
+      "source_reference": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "test_vector_id": "PR162C-TEST-ALGORITHM-DELTA-STRICT_FIELD_COVERAGE_AUDIT-001",
+      "tolerance": 0.0,
+      "unit": "field_set"
+    },
+    {
+      "algorithm_id": "PR162C-ALGORITHM-DELTA-QUBO_INPUT_ASSEMBLY_AUDIT",
+      "created_by_pr": "PR162C",
+      "edge_case_tests": [],
+      "expected_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "input_representation": "QUBO_MATRIX",
+        "term_count": 3,
+        "variable_ids": [
+          "x0",
+          "x1"
+        ]
+      },
+      "implementation_function": "assemble_qubo_input",
+      "implementation_function_ref": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.solver_input_assembly.assemble_qubo_input",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.solver_input_assembly",
+      "inputs": {
+        "Q": [
+          [
+            2,
+            3
+          ],
+          [
+            0,
+            4
+          ]
+        ],
+        "variable_ids": [
+          "x0",
+          "x1"
+        ]
+      },
+      "invalid_input_tests": [],
+      "source_reference": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "test_vector_id": "PR162C-TEST-ALGORITHM-DELTA-QUBO_INPUT_ASSEMBLY_AUDIT-001",
+      "tolerance": 0.0,
+      "unit": "solver_input_metadata"
+    }
+  ],
+  "report_filename": "PR162C_QKUFormulaTestVectorRegistryDelta.report.json",
+  "report_id": "PR162C-PR162C_QKUFormulaTestVectorRegistryDelta.report",
+  "report_type": "PR162C_QKU_FORMULA_TEST_VECTOR_REGISTRY_DELTA",
+  "schema_ref": "src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/schemas/pr162c_qkuformulatestvectorregistrydelta.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162A_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162B_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162B_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "total_records": 27
+  },
+  "total_record_count": 27,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B"
+  ],
+  "validation_status": "PASS"
+}

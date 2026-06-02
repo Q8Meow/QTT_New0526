@@ -1,0 +1,1769 @@
+{
+  "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162C",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_quantum_backend_evidence": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_evidence_fact": false,
+  "downstream_pr_routes": [
+    "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+    "PR163_RESULT_PACKET_EMISSION_AFTER_VALIDATED_REAL_ARTIFACTS",
+    "PR164_AUTHENTICITY_SAMPLE_CONFIDENCE_PROVENANCE_VALIDATION",
+    "PR165_RESULT_BACKED_RANKING_AFTER_PR164",
+    "FUTURE_LIVE_OWNER_RISK_CAPITAL_LATENCY_SOURCE_GATED"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 25,
+  "records": [
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-YES_CONTRACT_EV",
+      "formula_name": "yes_contract_ev",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "p_model",
+        "ask_price_yes_adjusted",
+        "payout"
+      ],
+      "implementation_function": "yes_contract_ev",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_model",
+        "ask_price_yes_adjusted",
+        "payout"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "EV_yes = p_model*payout - ask_yes",
+      "mathematical_expression_latex": "EV_yes = p_model*payout - ask_yes",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "yes_ev"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Expected value candidate for buying a yes contract at adjusted ask.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.kalshi.com/",
+      "source_title": "Kalshi public documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-YES_CONTRACT_EV-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_price_yes_adjusted": "ask_price_yes_adjusted",
+        "p_model": "p_model",
+        "payout": "payout"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-NO_CONTRACT_EV",
+      "formula_name": "no_contract_ev",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "p_model",
+        "ask_price_no_adjusted",
+        "payout"
+      ],
+      "implementation_function": "no_contract_ev",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_model",
+        "ask_price_no_adjusted",
+        "payout"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "EV_no = (1-p_model)*payout - ask_no",
+      "mathematical_expression_latex": "EV_no = (1-p_model)*payout - ask_no",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "no_ev"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Expected value candidate for buying a no contract at adjusted ask.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.polymarket.com/api-reference",
+      "source_title": "Polymarket API documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-NO_CONTRACT_EV-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_price_no_adjusted": "ask_price_no_adjusted",
+        "p_model": "p_model",
+        "payout": "payout"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-EXPECTED_NET_PROFIT",
+      "formula_name": "expected_net_profit",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "expected_value",
+        "fees",
+        "slippage",
+        "latency_penalty"
+      ],
+      "implementation_function": "expected_net_profit",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_value",
+        "fees",
+        "slippage",
+        "latency_penalty"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "net = EV - fees - slippage - latency_penalty",
+      "mathematical_expression_latex": "net = EV - fees - slippage - latency_penalty",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "expected_net_profit"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate net expected profit after explicit cost adjustments.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "source_title": "Owner-approved PR162C internal cost adjustment candidate",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-EXPECTED_NET_PROFIT-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "expected_value": "expected_value",
+        "fees": "fees",
+        "latency_penalty": "latency_penalty",
+        "slippage": "slippage"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-EDGE_YES",
+      "formula_name": "edge_yes",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "p_model",
+        "ask_price_yes_adjusted"
+      ],
+      "implementation_function": "edge_yes",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_model",
+        "ask_price_yes_adjusted"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "edge_yes = p_model - ask_yes_adjusted",
+      "mathematical_expression_latex": "edge_yes = p_model - ask_yes_adjusted",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "edge_yes"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate probability edge for yes side.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.polymarket.com/api-reference",
+      "source_title": "Polymarket public API documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-EDGE_YES-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_price_yes_adjusted": "ask_price_yes_adjusted",
+        "p_model": "p_model"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-EDGE_NO",
+      "formula_name": "edge_no",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "p_model",
+        "ask_price_no_adjusted"
+      ],
+      "implementation_function": "edge_no",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "p_model",
+        "ask_price_no_adjusted"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "edge_no = (1-p_model) - ask_no_adjusted",
+      "mathematical_expression_latex": "edge_no = (1-p_model) - ask_no_adjusted",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "edge_no"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate probability edge for no side.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.polymarket.com/api-reference",
+      "source_title": "Polymarket public API documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-EDGE_NO-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_price_no_adjusted": "ask_price_no_adjusted",
+        "p_model": "p_model"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-MATCHED_YES_NO_BUNDLE_COST",
+      "formula_name": "matched_yes_no_bundle_cost",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "yes_ask",
+        "no_ask"
+      ],
+      "implementation_function": "matched_yes_no_bundle_cost",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "yes_ask",
+        "no_ask"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "cost = yes_ask + no_ask",
+      "mathematical_expression_latex": "cost = yes_ask + no_ask",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "bundle_cost"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate matched yes/no bundle cost.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.kalshi.com/",
+      "source_title": "Kalshi public documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-MATCHED_YES_NO_BUNDLE_COST-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "no_ask": "no_ask",
+        "yes_ask": "yes_ask"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-BOUNDED_ARBITRAGE_CANDIDATE_EDGE",
+      "formula_name": "bounded_arbitrage_candidate_edge",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "yes_ask",
+        "no_ask",
+        "fee_buffer"
+      ],
+      "implementation_function": "bounded_arbitrage_candidate_edge",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "yes_ask",
+        "no_ask",
+        "fee_buffer"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "edge = 1 - yes_ask - no_ask - fee_buffer",
+      "mathematical_expression_latex": "edge = 1 - yes_ask - no_ask - fee_buffer",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "arbitrage_candidate_edge"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate bounded dislocation edge before replay/paper validation.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.kalshi.com/",
+      "source_title": "Kalshi public documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-BOUNDED_ARBITRAGE_CANDIDATE_EDGE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "fee_buffer": "fee_buffer",
+        "no_ask": "no_ask",
+        "yes_ask": "yes_ask"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-SAME_EVENT_PRICE_DISLOCATION",
+      "formula_name": "same_event_price_dislocation",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "price_a",
+        "price_b"
+      ],
+      "implementation_function": "same_event_price_dislocation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "price_a",
+        "price_b"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "abs(price_a - price_b)",
+      "mathematical_expression_latex": "abs(price_a - price_b)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "price_dislocation"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate same-event price dislocation.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://www.forecastex.com/data/",
+      "source_title": "ForecastEx public data locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-SAME_EVENT_PRICE_DISLOCATION-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "price_a": "price_a",
+        "price_b": "price_b"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "prediction_market",
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_FEASIBLE_DISLOCATION",
+      "formula_name": "liquidity_feasible_dislocation",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "dislocation",
+        "min_volume",
+        "observed_volume"
+      ],
+      "implementation_function": "liquidity_feasible_dislocation",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.prediction_market_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "dislocation",
+        "min_volume",
+        "observed_volume"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "dislocation > 0 and observed_volume >= min_volume",
+      "mathematical_expression_latex": "dislocation > 0 and observed_volume >= min_volume",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "liquidity_feasible"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Boolean candidate for dislocation with minimum volume support.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_EXECUTION_PREP_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://www.forecastex.com/data/",
+      "source_title": "ForecastEx public data locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_FEASIBLE_DISLOCATION-001"
+      ],
+      "units": "boolean",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "dislocation": "dislocation",
+        "min_volume": "min_volume",
+        "observed_volume": "observed_volume"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "calibration",
+      "formula_id": "PR162C-FORMULA-DELTA-FORECAST_SHARPNESS_CANDIDATE",
+      "formula_name": "forecast_sharpness_candidate",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "probabilities"
+      ],
+      "implementation_function": "forecast_sharpness_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "probabilities"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "mean(abs(p_i - 0.5))",
+      "mathematical_expression_latex": "mean(abs(p_i - 0.5))",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "forecast_sharpness"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate measure of forecast sharpness.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "source_title": "scikit-learn model evaluation documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-FORECAST_SHARPNESS_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "probabilities": "probabilities"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "calibration",
+      "formula_id": "PR162C-FORMULA-DELTA-RELIABILITY_BIN_CALIBRATION_CANDIDATE",
+      "formula_name": "reliability_bin_calibration_candidate",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "predicted_probabilities",
+        "observed_outcomes"
+      ],
+      "implementation_function": "reliability_bin_calibration_candidate",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.calibration_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "predicted_probabilities",
+        "observed_outcomes"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "abs(mean(p)-mean(y))",
+      "mathematical_expression_latex": "abs(mean(p)-mean(y))",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "calibration_gap"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Single-bin candidate calibration gap.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+      "source_title": "scikit-learn model evaluation documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-RELIABILITY_BIN_CALIBRATION_CANDIDATE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "observed_outcomes": "observed_outcomes",
+        "predicted_probabilities": "predicted_probabilities"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "risk_sizing",
+      "formula_id": "PR162C-FORMULA-DELTA-DRAWDOWN_CAPPED_KELLY",
+      "formula_name": "drawdown_capped_kelly",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "kelly_fraction",
+        "max_fraction",
+        "drawdown",
+        "max_drawdown"
+      ],
+      "implementation_function": "drawdown_capped_kelly",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "kelly_fraction",
+        "max_fraction",
+        "drawdown",
+        "max_drawdown"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "clip(f_kelly*(1-dd/max_dd), +/- cap)",
+      "mathematical_expression_latex": "clip(f_kelly*(1-dd/max_dd), +/- cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "drawdown_capped_kelly"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate Kelly fraction reduced by drawdown pressure.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "source_title": "Owner-approved PR162C internal risk candidate",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-DRAWDOWN_CAPPED_KELLY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "drawdown": "drawdown",
+        "kelly_fraction": "kelly_fraction",
+        "max_drawdown": "max_drawdown",
+        "max_fraction": "max_fraction"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "risk_sizing",
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_ADJUSTED_SIZE",
+      "formula_name": "liquidity_adjusted_size",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "raw_size",
+        "available_liquidity",
+        "liquidity_fraction_cap"
+      ],
+      "implementation_function": "liquidity_adjusted_size",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "raw_size",
+        "available_liquidity",
+        "liquidity_fraction_cap"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "clip(raw_size, +/- available_liquidity*cap)",
+      "mathematical_expression_latex": "clip(raw_size, +/- available_liquidity*cap)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "liquidity_adjusted_size"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate position size capped by liquidity.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "source_title": "Owner-approved PR162C internal liquidity candidate",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_ADJUSTED_SIZE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "available_liquidity": "available_liquidity",
+        "liquidity_fraction_cap": "liquidity_fraction_cap",
+        "raw_size": "raw_size"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "risk_sizing",
+      "formula_id": "PR162C-FORMULA-DELTA-MAX_POSITION_BY_BUDGET",
+      "formula_name": "max_position_by_budget",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "budget",
+        "price"
+      ],
+      "implementation_function": "max_position_by_budget",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "budget",
+        "price"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "budget / price",
+      "mathematical_expression_latex": "budget / price",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "max_position"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Maximum position quantity by budget and price.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "OWNER_APPROVED_FORMULA_OR_VALUE_CANDIDATE",
+      "source_locator": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "source_title": "Owner-approved PR162C internal sizing candidate",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-MAX_POSITION_BY_BUDGET-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "budget": "budget",
+        "price": "price"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "risk_sizing",
+      "formula_id": "PR162C-FORMULA-DELTA-DRAWDOWN_PENALIZED_SCORE",
+      "formula_name": "drawdown_penalized_score",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "score",
+        "drawdown",
+        "penalty_weight"
+      ],
+      "implementation_function": "drawdown_penalized_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.risk_sizing_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "score",
+        "drawdown",
+        "penalty_weight"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "score - weight*drawdown",
+      "mathematical_expression_latex": "score - weight*drawdown",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "drawdown_penalized_score"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate drawdown-penalized score.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RISK_AGENT",
+        "QTT_CAPITAL_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "OWNER_PR162C_INTERNAL_APPROVED_CANDIDATE",
+      "source_title": "Owner-approved PR162C internal score candidate",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-DRAWDOWN_PENALIZED_SCORE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "drawdown": "drawdown",
+        "penalty_weight": "penalty_weight",
+        "score": "score"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "portfolio_objectives",
+      "formula_id": "PR162C-FORMULA-DELTA-CORRELATION_PENALIZED_PORTFOLIO_SCORE",
+      "formula_name": "correlation_penalized_portfolio_score",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "expected_return",
+        "average_pairwise_correlation",
+        "penalty_weight"
+      ],
+      "implementation_function": "correlation_penalized_portfolio_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "expected_return",
+        "average_pairwise_correlation",
+        "penalty_weight"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "return - weight*abs(correlation)",
+      "mathematical_expression_latex": "return - weight*abs(correlation)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "correlation_penalized_score"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate portfolio score penalizing correlation.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "source_title": "NumPy statistics documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-CORRELATION_PENALIZED_PORTFOLIO_SCORE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "average_pairwise_correlation": "average_pairwise_correlation",
+        "expected_return": "expected_return",
+        "penalty_weight": "penalty_weight"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "portfolio_objectives",
+      "formula_id": "PR162C-FORMULA-DELTA-MULTI_OBJECTIVE_WEIGHTED_SUM",
+      "formula_name": "multi_objective_weighted_sum",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "values",
+        "weights"
+      ],
+      "implementation_function": "multi_objective_weighted_sum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.portfolio_objectives",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "values",
+        "weights"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "sum(w_i*x_i)",
+      "mathematical_expression_latex": "sum(w_i*x_i)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "weighted_sum"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate multi-objective weighted sum.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_RESEARCH_AGENT",
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "INSTITUTIONAL_FORMULA_CANDIDATE",
+      "source_locator": "https://numpy.org/doc/stable/reference/routines.statistics.html",
+      "source_title": "NumPy statistics documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-MULTI_OBJECTIVE_WEIGHTED_SUM-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "values": "values",
+        "weights": "weights"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-TIME_TO_RESOLUTION_SECONDS",
+      "formula_name": "time_to_resolution",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "observation_ts",
+        "resolution_ts"
+      ],
+      "implementation_function": "time_to_resolution_seconds",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "observation_ts",
+        "resolution_ts"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "max(0, resolution_ts - observation_ts)",
+      "mathematical_expression_latex": "max(0, resolution_ts - observation_ts)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "time_to_resolution_seconds"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Time remaining until resolution candidate.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "source_title": "Kalshi candlestick documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-TIME_TO_RESOLUTION_SECONDS-001"
+      ],
+      "units": "seconds",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "observation_ts": "observation_ts",
+        "resolution_ts": "resolution_ts"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-PRICE_MOMENTUM",
+      "formula_name": "price_momentum",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "current_price",
+        "previous_price"
+      ],
+      "implementation_function": "price_momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "current_price",
+        "previous_price"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "current_price - previous_price",
+      "mathematical_expression_latex": "current_price - previous_price",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "price_momentum"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate price momentum.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.polymarket.com/api-reference",
+      "source_title": "Polymarket public API documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-PRICE_MOMENTUM-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "current_price": "current_price",
+        "previous_price": "previous_price"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-VOLUME_MOMENTUM",
+      "formula_name": "volume_momentum",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "current_volume",
+        "previous_volume"
+      ],
+      "implementation_function": "volume_momentum",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "current_volume",
+        "previous_volume"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "current_volume - previous_volume",
+      "mathematical_expression_latex": "current_volume - previous_volume",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "volume_momentum"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate volume momentum.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://www.forecastex.com/data/",
+      "source_title": "ForecastEx public data locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-VOLUME_MOMENTUM-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "current_volume": "current_volume",
+        "previous_volume": "previous_volume"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-SPREAD_CHANGE",
+      "formula_name": "spread_change",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "current_spread",
+        "previous_spread"
+      ],
+      "implementation_function": "spread_change",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "current_spread",
+        "previous_spread"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "current_spread - previous_spread",
+      "mathematical_expression_latex": "current_spread - previous_spread",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "spread_change"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate spread change feature.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "source_title": "Kalshi candlestick documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-SPREAD_CHANGE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "current_spread": "current_spread",
+        "previous_spread": "previous_spread"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-ORDERBOOK_DEPTH_PROXY",
+      "formula_name": "orderbook_depth_proxy",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "bid_size",
+        "ask_size"
+      ],
+      "implementation_function": "orderbook_depth_proxy",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "bid_size",
+        "ask_size"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "bid_size + ask_size",
+      "mathematical_expression_latex": "bid_size + ask_size",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "orderbook_depth_proxy"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate order-book depth proxy.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://docs.polymarket.com/api-reference",
+      "source_title": "Polymarket public API documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-ORDERBOOK_DEPTH_PROXY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "ask_size": "ask_size",
+        "bid_size": "bid_size"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "technical_feature",
+      "formula_id": "PR162C-FORMULA-DELTA-LIQUIDITY_SCORE",
+      "formula_name": "liquidity_score",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "volume",
+        "spread",
+        "epsilon"
+      ],
+      "implementation_function": "liquidity_score",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.technical_feature_formulas",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "volume",
+        "spread",
+        "epsilon"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "volume / max(spread, epsilon)",
+      "mathematical_expression_latex": "volume / max(spread, epsilon)",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": true,
+      "objective_refs": [],
+      "official_truth_flag": false,
+      "output_fields": [
+        "liquidity_score"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Candidate liquidity score.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_REPLAY_AGENT",
+        "QTT_PAPER_AGENT",
+        "QTT_PARAMETER_STACK_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "RESEARCH_FORMULA_CANDIDATE",
+      "source_locator": "https://www.forecastex.com/data/",
+      "source_title": "ForecastEx public data locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-LIQUIDITY_SCORE-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "epsilon": "epsilon",
+        "spread": "spread",
+        "volume": "volume"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162C-FORMULA-DELTA-QUBO_TO_ISING_LINEAR_TERMS",
+      "formula_name": "QUBO-to-Ising mapping candidate",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "Q"
+      ],
+      "implementation_function": "qubo_to_ising_linear_terms",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Q"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "Q -> h terms",
+      "mathematical_expression_latex": "Q -> h terms",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": false,
+      "objective_refs": [],
+      "official_truth_flag": true,
+      "output_fields": [
+        "ising_linear_terms"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Local QUBO-to-Ising linear-term assembly candidate without solving.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_SOLVER_SOURCE",
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/",
+      "source_title": "Qiskit Optimization documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-QUBO_TO_ISING_LINEAR_TERMS-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Q": "Q"
+      }
+    },
+    {
+      "authority_class": "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY",
+      "candidate_provisional_flag": true,
+      "constraint_refs": [],
+      "created_by_pr": "PR162C",
+      "dataset_requirement_refs": [],
+      "derivation_method": "PR162C_LOCAL_DETERMINISTIC_FORMULA_DELTA",
+      "formula_family": "quantum_hybrid",
+      "formula_id": "PR162C-FORMULA-DELTA-CONSTRAINT_PENALTY",
+      "formula_name": "constraint_penalty",
+      "formula_refs": [],
+      "formula_value_field_dependencies": [
+        "Ax_minus_b",
+        "penalty_lambda"
+      ],
+      "implementation_function": "constraint_penalty",
+      "implementation_module": "src.qtt.stage1_prediction_markets.multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.quantum_formulations",
+      "implementation_status": "IMPLEMENTED_DETERMINISTIC_PYTHON",
+      "input_fields": [
+        "Ax_minus_b",
+        "penalty_lambda"
+      ],
+      "invalid_input_conditions": [
+        "missing input",
+        "non-numeric input where numeric input is required",
+        "domain violations raise ValueError"
+      ],
+      "mathematical_expression": "lambda*(Ax-b)^2",
+      "mathematical_expression_latex": "lambda*(Ax-b)^2",
+      "missing_value_policy": "reject missing values before formula execution",
+      "normalization_policy": "caller supplies normalized numeric values",
+      "not_live_authority": true,
+      "not_official_truth_if_non_official": false,
+      "objective_refs": [],
+      "official_truth_flag": true,
+      "output_fields": [
+        "constraint_penalty"
+      ],
+      "parameter_refs": [],
+      "plain_english_definition": "Penalty term for constraint violation.",
+      "qku_id_refs": [],
+      "qtt_agent_consumer_route": [
+        "QTT_QUANTUM_ADVISORY_AGENT",
+        "QTT_OPTIMIZER_ARBITRATION_AGENT"
+      ],
+      "replay_paper_candidate_route": "PR162R_ADAPTER_RERUN_AFTER_STRICT_DATASETS",
+      "retrieval_timestamp": null,
+      "solver_refs": [],
+      "source_class": "OFFICIAL_LIBRARY_DOC_SOLVER_SOURCE",
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "source_title": "D-Wave model documentation locator",
+      "test_vector_refs": [
+        "PR162C-TEST-FORMULA-DELTA-CONSTRAINT_PENALTY-001"
+      ],
+      "units": "unitless",
+      "valid_input_domain": "bounded numeric inputs documented by implementation validation",
+      "variables": {
+        "Ax_minus_b": "Ax_minus_b",
+        "penalty_lambda": "penalty_lambda"
+      }
+    }
+  ],
+  "report_filename": "PR162C_QKUFormulaRegistryDelta.report.json",
+  "report_id": "PR162C-PR162C_QKUFormulaRegistryDelta.report",
+  "report_type": "PR162C_QKU_FORMULA_REGISTRY_DELTA",
+  "schema_ref": "src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/schemas/pr162c_qkuformularegistrydelta.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUResultBackedRankingSlots.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_AtomicRowsPR154ResultCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161E_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUFutureProfitabilityPatternUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUResultBackedRankingUpdateCandidates.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161E_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161E_ResultAuthenticityClassification.report.json",
+    "docs/master_plan/generated/PR161E_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR161F_AtomicRowsPR154RunCompatibilityBridge.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_FinalSummary.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR161F_SharedDictionary.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162A_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162B_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162B_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumLatencyLivePathReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumLiveModeControlPlaneBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_ReportShardManifest.report.json",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_authority_class": {
+      "PR162C_CANDIDATE_DATASET_FORMULA_AND_STRICT_COVERAGE_GATE_ONLY": 25
+    },
+    "by_formula_family": {
+      "calibration": 2,
+      "portfolio_objectives": 2,
+      "prediction_market": 9,
+      "quantum_hybrid": 2,
+      "risk_sizing": 4,
+      "technical_feature": 6
+    },
+    "by_source_class": {
+      "INSTITUTIONAL_FORMULA_CANDIDATE": 6,
+      "OFFICIAL_LIBRARY_DOC_SOLVER_SOURCE": 2,
+      "OWNER_APPROVED_FORMULA_OR_VALUE_CANDIDATE": 1,
+      "RESEARCH_FORMULA_CANDIDATE": 16
+    },
+    "total_records": 25
+  },
+  "total_record_count": 25,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR152",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B"
+  ],
+  "validation_status": "PASS"
+}
