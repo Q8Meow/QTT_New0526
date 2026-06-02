@@ -45,6 +45,10 @@ def _unchanged_paths(_root: Path) -> list[str]:
     return []
 
 
+def _no_untracked_paths(_root: Path) -> list[str]:
+    return []
+
+
 def test_helper_detects_stale_pr152_after_write(tmp_path: Path) -> None:
     root = _prepared_repo(tmp_path)
 
@@ -59,6 +63,72 @@ def test_helper_detects_stale_pr152_after_write(tmp_path: Path) -> None:
         )
 
     assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in exc_info.value.failures
+
+
+def test_helper_fails_closed_if_untracked_pr_artifacts_exist(tmp_path: Path) -> None:
+    root = _prepared_repo(tmp_path)
+    calls: list[Path] = []
+
+    with pytest.raises(helper.CurrentizationError) as exc_info:
+        helper.currentize_pr152_after_generated_artifacts(
+            root,
+            write_report=lambda report_root: calls.append(report_root) or _report(),
+            validate_artifacts=lambda _root, **_kwargs: [],
+            changed_paths=_unchanged_paths,
+            untracked_paths=lambda _root: [
+                "docs/master_plan/generated/PR999_NewReport.report.json",
+                (
+                    "docs/master_plan/generated/pr999_new_report_shards/"
+                    "PR999_NewReport.report.shard_0001.json"
+                ),
+                "src/qtt/stage1_prediction_markets/new_pr_package/__init__.py",
+                "tests/stage1_prediction_markets/new_pr_package/test_new_pr.py",
+                "tools/build_pr999_new_report.py",
+                "tools/validate_pr999_new_report.py",
+            ],
+        )
+
+    assert calls == []
+    assert any(
+        failure.startswith(
+            "PR152_CURRENTIZATION_BLOCKED_UNTRACKED_PR_ARTIFACTS"
+        )
+        for failure in exc_info.value.failures
+    )
+    assert (
+        "PR152_CURRENTIZATION_UNTRACKED_PR_ARTIFACT_PATH: "
+        "docs/master_plan/generated/PR999_NewReport.report.json"
+    ) in exc_info.value.failures
+    assert (
+        "PR152_CURRENTIZATION_UNTRACKED_PR_ARTIFACT_PATH: "
+        "tools/validate_pr999_new_report.py"
+    ) in exc_info.value.failures
+
+
+def test_helper_allows_intentionally_included_pr_artifacts(tmp_path: Path) -> None:
+    root = _prepared_repo(tmp_path)
+
+    result = helper.currentize_pr152_after_generated_artifacts(
+        root,
+        write_report=lambda _root: _report(
+            generated_report_count=14,
+            test_file_count=5,
+            validator_tool_count=6,
+        ),
+        validate_artifacts=lambda _root, **_kwargs: [],
+        changed_paths=lambda _root: [
+            "docs/master_plan/generated/PR999_NewReport.report.json",
+            "src/qtt/stage1_prediction_markets/new_pr_package/__init__.py",
+            "tests/stage1_prediction_markets/new_pr_package/test_new_pr.py",
+            "tools/build_pr999_new_report.py",
+            "tools/validate_pr999_new_report.py",
+        ],
+        untracked_paths=_no_untracked_paths,
+    )
+
+    assert result.generated_report_count == 14
+    assert result.test_file_count == 5
+    assert result.validator_tool_count == 6
 
 
 def test_helper_currentizes_through_established_write_path(tmp_path: Path) -> None:
@@ -168,6 +238,25 @@ def test_helper_fails_if_atomicrows_bundle_sidecar_appears(tmp_path: Path) -> No
     )
 
 
+def test_helper_does_not_create_atomicrows_bundle_sidecar(tmp_path: Path) -> None:
+    root = _prepared_repo(tmp_path)
+    sidecar = (
+        root
+        / Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").with_suffix(
+            "." + "sha" + "256"
+        )
+    )
+
+    helper.currentize_pr152_after_generated_artifacts(
+        root,
+        write_report=lambda _root: _report(),
+        validate_artifacts=lambda _root, **_kwargs: [],
+        changed_paths=_unchanged_paths,
+    )
+
+    assert not sidecar.exists()
+
+
 def test_helper_fails_if_qtt_integrity_authority_text_appears(tmp_path: Path) -> None:
     root = _prepared_repo(tmp_path)
     note = root / "new_authority_note.txt"
@@ -193,6 +282,49 @@ def test_helper_fails_if_qtt_integrity_authority_text_appears(tmp_path: Path) ->
             write_report=lambda _root: _report(),
             validate_artifacts=lambda _root, **_kwargs: [],
             changed_paths=lambda _root: ["new_authority_note.txt"],
+        )
+
+    assert "PR152_CURRENTIZATION_FORBIDDEN_QTT_AUTHORITY_TEXT: new_authority_note.txt" in (
+        exc_info.value.failures
+    )
+
+
+def test_helper_fails_if_qtt_integrity_authority_text_is_created(
+    tmp_path: Path,
+) -> None:
+    root = _prepared_repo(tmp_path)
+    note = root / "new_authority_note.txt"
+    forbidden = "".join(
+        (
+            "QTT ",
+            "SH",
+            "A/",
+            "freeze/",
+            "check",
+            "sum/",
+            "global ",
+            "di",
+            "gest ",
+            "authority",
+        )
+    )
+    calls = 0
+
+    def changed_paths(_root: Path) -> list[str]:
+        nonlocal calls
+        calls += 1
+        return [] if calls == 1 else ["new_authority_note.txt"]
+
+    def mutating_write(_root: Path) -> dict[str, object]:
+        note.write_text(forbidden, encoding="utf-8")
+        return _report()
+
+    with pytest.raises(helper.CurrentizationError) as exc_info:
+        helper.currentize_pr152_after_generated_artifacts(
+            root,
+            write_report=mutating_write,
+            validate_artifacts=lambda _root, **_kwargs: [],
+            changed_paths=changed_paths,
         )
 
     assert "PR152_CURRENTIZATION_FORBIDDEN_QTT_AUTHORITY_TEXT: new_authority_note.txt" in (

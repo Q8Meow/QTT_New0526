@@ -586,11 +586,13 @@ PR162B_ALLOWED_CHANGED_PATH_PREFIXES = (
 PR162B_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/build_pr162b_qku_formula_algorithm_solver_market_scope_materialization.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/validate_pr162b_qku_formula_algorithm_solver_market_scope_materialization.py",
         "tools/run_validation_gates.py",
         "tools/ci_branch_context.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_currentize_pr152_after_generated_artifacts.py",
         "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
         "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
