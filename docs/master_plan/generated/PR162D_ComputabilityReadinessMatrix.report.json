@@ -1,0 +1,3087 @@
+{
+  "authority_class": "PR162D_CANDIDATE_MATERIALIZATION_AGENT_ROUTING_AND_QUANTUM_SMOKE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 325,
+  "records": [
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B97A79521454333E898D",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B97A79521454333E898D",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-AE855BFB763A840518F2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-AE855BFB763A840518F2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-0A6FA319180ACAEE3789",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-0A6FA319180ACAEE3789",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-2EE59064865346E3969A",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-2EE59064865346E3969A",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B45580BCB044287D60A4",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B45580BCB044287D60A4",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-02EF378CEB3A3B42122A",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-02EF378CEB3A3B42122A",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-65584B47D96162329C70",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-65584B47D96162329C70",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-21A1C5141A0907D9A2BE",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-21A1C5141A0907D9A2BE",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-CDF9F8A4E6735766C61E",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-CDF9F8A4E6735766C61E",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-40C0BE4EE42C73BEF613",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-40C0BE4EE42C73BEF613",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-EAEE2DA139D097FB79AF",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-EAEE2DA139D097FB79AF",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-A96B052589E0B40A57EF",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-A96B052589E0B40A57EF",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-6040E1604250561694B0",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-6040E1604250561694B0",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-FB0809CC3D90301D8D5A",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-FB0809CC3D90301D8D5A",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-3B24B15E02DC12D61F3F",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-3B24B15E02DC12D61F3F",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-A98826E8D5EFCC1FE079",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-A98826E8D5EFCC1FE079",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-1787495E8CC967F394A2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-1787495E8CC967F394A2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-DAC81DB45F2AE08AF47F",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-DAC81DB45F2AE08AF47F",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-0B5DF2465D7C61FC36C8",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-0B5DF2465D7C61FC36C8",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-BC1B737B20452F63FE17",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-BC1B737B20452F63FE17",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-EDD48D8F1BBD2799CB18",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-EDD48D8F1BBD2799CB18",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-CFB044B7D1CDEDEFC658",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-CFB044B7D1CDEDEFC658",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-64ABCB95E880077602E1",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-64ABCB95E880077602E1",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-CE89AFE6C966C5922E3A",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-CE89AFE6C966C5922E3A",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-3DACEACA03BD635E97C9",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-3DACEACA03BD635E97C9",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-2C51C6CA944DDE77E086",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-2C51C6CA944DDE77E086",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-88FCAB09DD363F43C23D",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-88FCAB09DD363F43C23D",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-AC22C935AF92A21D09C5",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-AC22C935AF92A21D09C5",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-FC05C7F75319AD74C3F8",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-FC05C7F75319AD74C3F8",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-A6CEEEBAA303A675015E",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-A6CEEEBAA303A675015E",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-C527D1380060BEF87A43",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-C527D1380060BEF87A43",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-D5369EEC6AEE1AA458B5",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-D5369EEC6AEE1AA458B5",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-7EE1E8A8B4F95BD2CD66",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-7EE1E8A8B4F95BD2CD66",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-E1B9A0380735F03AB7CB",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-E1B9A0380735F03AB7CB",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B049EDB959196D6206AD",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B049EDB959196D6206AD",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-C4C975D13F1CC45BEA94",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-C4C975D13F1CC45BEA94",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-DA0565407F7CCF546EC2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-DA0565407F7CCF546EC2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-0BD6626C0467A9581B10",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-0BD6626C0467A9581B10",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-52D0FD8AC9379A79461B",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-52D0FD8AC9379A79461B",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-F0E9650A60AB4FE2560A",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-F0E9650A60AB4FE2560A",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-62594B24C4D58E4EDDE2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-62594B24C4D58E4EDDE2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-D0316AB54A9BFFDC3116",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-D0316AB54A9BFFDC3116",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-961CE28A75196463B961",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-961CE28A75196463B961",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-6298803F910A41ADA8E4",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-6298803F910A41ADA8E4",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-CBE8944670D8345D6209",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-CBE8944670D8345D6209",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-75A5415A97BC5F8AD1B9",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-75A5415A97BC5F8AD1B9",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-D4D702E546CB57E615C2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-D4D702E546CB57E615C2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-D1F1C197AB367C055271",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-D1F1C197AB367C055271",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-9B4AF905B8B58D0F213D",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-9B4AF905B8B58D0F213D",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-8C03211CE3F15BCAD022",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-8C03211CE3F15BCAD022",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-CB0C833B831C5119A390",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-CB0C833B831C5119A390",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-022E30422A9F1F8FDA04",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-022E30422A9F1F8FDA04",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B3B27E273ABB7E8F8CBD",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B3B27E273ABB7E8F8CBD",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-55040292E97753936BA2",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-55040292E97753936BA2",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B3D8CBC4BC18253847EC",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B3D8CBC4BC18253847EC",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-56AA3C95FAA850C8A3D3",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-56AA3C95FAA850C8A3D3",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-15112AC1F44A2CF37838",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-15112AC1F44A2CF37838",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-0D0B32AAB47D2C9BCA97",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-0D0B32AAB47D2C9BCA97",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-76FBD31A91FFA06AF2FF",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-76FBD31A91FFA06AF2FF",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-BC872D931490B175CCE0",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-BC872D931490B175CCE0",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-FORMULA-CANDIDATE-B1C493AA18F75440A515",
+      "computability_id": "PR162D-FORMULA-COMPUTABILITY-B1C493AA18F75440A515",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-EC188B617649E1448C0E",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-EC188B617649E1448C0E",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-71151643507015257779",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-71151643507015257779",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-2E125C226DFB798CCA40",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-2E125C226DFB798CCA40",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-1B200324551CE807C354",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-1B200324551CE807C354",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-10ADB56BA163834C6DA6",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-10ADB56BA163834C6DA6",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-C6C09CF7046E43A17D16",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-C6C09CF7046E43A17D16",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-98EB687976FF45426277",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-98EB687976FF45426277",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-11AA026955FD5CAB47D8",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-11AA026955FD5CAB47D8",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-4378C9C1166DEC55B98C",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-4378C9C1166DEC55B98C",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-2A9C0B99CD6D5E92D073",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-2A9C0B99CD6D5E92D073",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-31D384D68AEE50B196CD",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-31D384D68AEE50B196CD",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-FE1F2938C69B989012A1",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-FE1F2938C69B989012A1",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-877707901147AEB57817",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-877707901147AEB57817",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-ALGORITHM-CANDIDATE-45BE3EFFBED8EB621863",
+      "computability_id": "PR162D-ALGORITHM-COMPUTABILITY-45BE3EFFBED8EB621863",
+      "computability_status": "COMPUTABLE_OR_PARTIALLY_COMPUTABLE_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-657D0FCC52C1403CAC34",
+      "computability_id": "PR162D-COMPUTABILITY-657D0FCC52C1403CAC34",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F1198765053CB2D7DFC7",
+      "computability_id": "PR162D-COMPUTABILITY-F1198765053CB2D7DFC7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A969DBD95BA4861DFEE8",
+      "computability_id": "PR162D-COMPUTABILITY-A969DBD95BA4861DFEE8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-AB5E4F4ADDFB00FEF56C",
+      "computability_id": "PR162D-COMPUTABILITY-AB5E4F4ADDFB00FEF56C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-28CF1DEA7316A95CE6A7",
+      "computability_id": "PR162D-COMPUTABILITY-28CF1DEA7316A95CE6A7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9AEFE2FB9A37CD3E267C",
+      "computability_id": "PR162D-COMPUTABILITY-9AEFE2FB9A37CD3E267C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4079C408B948570239EE",
+      "computability_id": "PR162D-COMPUTABILITY-4079C408B948570239EE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A72B501B3E3231B22B55",
+      "computability_id": "PR162D-COMPUTABILITY-A72B501B3E3231B22B55",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A334D616E4C7D16A7565",
+      "computability_id": "PR162D-COMPUTABILITY-A334D616E4C7D16A7565",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0F49FD642400F92B797D",
+      "computability_id": "PR162D-COMPUTABILITY-0F49FD642400F92B797D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B93A4FA62CBE8892B525",
+      "computability_id": "PR162D-COMPUTABILITY-B93A4FA62CBE8892B525",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1B5CE883E84C928DFD3C",
+      "computability_id": "PR162D-COMPUTABILITY-1B5CE883E84C928DFD3C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F6943EB0DDA762802114",
+      "computability_id": "PR162D-COMPUTABILITY-F6943EB0DDA762802114",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8E0C4DB7D759B2B37859",
+      "computability_id": "PR162D-COMPUTABILITY-8E0C4DB7D759B2B37859",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-03455FF232966273A812",
+      "computability_id": "PR162D-COMPUTABILITY-03455FF232966273A812",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5BE692A9540A1D7A4222",
+      "computability_id": "PR162D-COMPUTABILITY-5BE692A9540A1D7A4222",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BBFA356C1D49DCA218DE",
+      "computability_id": "PR162D-COMPUTABILITY-BBFA356C1D49DCA218DE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C1A46848BD00665F07E6",
+      "computability_id": "PR162D-COMPUTABILITY-C1A46848BD00665F07E6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BF33A90976BD0D697031",
+      "computability_id": "PR162D-COMPUTABILITY-BF33A90976BD0D697031",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7864CA7264CB734DE4E3",
+      "computability_id": "PR162D-COMPUTABILITY-7864CA7264CB734DE4E3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-450922BAB7B0F0882CA9",
+      "computability_id": "PR162D-COMPUTABILITY-450922BAB7B0F0882CA9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9675A74ECE94BFE98E12",
+      "computability_id": "PR162D-COMPUTABILITY-9675A74ECE94BFE98E12",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-25106BF3FB7DBFD3C30E",
+      "computability_id": "PR162D-COMPUTABILITY-25106BF3FB7DBFD3C30E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9C2FDBC4EA22C24A5D2F",
+      "computability_id": "PR162D-COMPUTABILITY-9C2FDBC4EA22C24A5D2F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9F45687CB178793B0FFD",
+      "computability_id": "PR162D-COMPUTABILITY-9F45687CB178793B0FFD",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-721F4638C2DC2D351E02",
+      "computability_id": "PR162D-COMPUTABILITY-721F4638C2DC2D351E02",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4360D41BEC45E27814C6",
+      "computability_id": "PR162D-COMPUTABILITY-4360D41BEC45E27814C6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D366E9BD044DB423010B",
+      "computability_id": "PR162D-COMPUTABILITY-D366E9BD044DB423010B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-56502EE017E9CE77F242",
+      "computability_id": "PR162D-COMPUTABILITY-56502EE017E9CE77F242",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-51E216FC318D74560599",
+      "computability_id": "PR162D-COMPUTABILITY-51E216FC318D74560599",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-40F4F1BCB79667023D97",
+      "computability_id": "PR162D-COMPUTABILITY-40F4F1BCB79667023D97",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-24BA4AE8C3AC1DDF2D8D",
+      "computability_id": "PR162D-COMPUTABILITY-24BA4AE8C3AC1DDF2D8D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0B0006C079BBE9AE868D",
+      "computability_id": "PR162D-COMPUTABILITY-0B0006C079BBE9AE868D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B467BB4905BC50F3D85C",
+      "computability_id": "PR162D-COMPUTABILITY-B467BB4905BC50F3D85C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-24027FF0163C2F4B1B55",
+      "computability_id": "PR162D-COMPUTABILITY-24027FF0163C2F4B1B55",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2D79671CF638A7761F41",
+      "computability_id": "PR162D-COMPUTABILITY-2D79671CF638A7761F41",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6D4C0528A0113BC80C63",
+      "computability_id": "PR162D-COMPUTABILITY-6D4C0528A0113BC80C63",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-230683AF9C663712A5BF",
+      "computability_id": "PR162D-COMPUTABILITY-230683AF9C663712A5BF",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-08A27A035FC472591FFB",
+      "computability_id": "PR162D-COMPUTABILITY-08A27A035FC472591FFB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6BCBF30C1565F453CE41",
+      "computability_id": "PR162D-COMPUTABILITY-6BCBF30C1565F453CE41",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6B84707930421F148AB6",
+      "computability_id": "PR162D-COMPUTABILITY-6B84707930421F148AB6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-964F4A5741692D6AD54E",
+      "computability_id": "PR162D-COMPUTABILITY-964F4A5741692D6AD54E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BDEA3779AC56FCBBA81F",
+      "computability_id": "PR162D-COMPUTABILITY-BDEA3779AC56FCBBA81F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F9857B3D31EB1BB0171D",
+      "computability_id": "PR162D-COMPUTABILITY-F9857B3D31EB1BB0171D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8B15F3AC5E238F0F27FC",
+      "computability_id": "PR162D-COMPUTABILITY-8B15F3AC5E238F0F27FC",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D58DC9987E2EAA4B5961",
+      "computability_id": "PR162D-COMPUTABILITY-D58DC9987E2EAA4B5961",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E2EA7541E556A800095E",
+      "computability_id": "PR162D-COMPUTABILITY-E2EA7541E556A800095E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7E9B4903A697AD0E9B2F",
+      "computability_id": "PR162D-COMPUTABILITY-7E9B4903A697AD0E9B2F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C5A496F065EC9F167C94",
+      "computability_id": "PR162D-COMPUTABILITY-C5A496F065EC9F167C94",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1038316C9FA7DA39F7E9",
+      "computability_id": "PR162D-COMPUTABILITY-1038316C9FA7DA39F7E9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-59A18289C8AA71126A3A",
+      "computability_id": "PR162D-COMPUTABILITY-59A18289C8AA71126A3A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0151CE2D1DDA25741354",
+      "computability_id": "PR162D-COMPUTABILITY-0151CE2D1DDA25741354",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-46FFFCE8710A837A6ED8",
+      "computability_id": "PR162D-COMPUTABILITY-46FFFCE8710A837A6ED8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0B2EFE72F662C1B7E2F7",
+      "computability_id": "PR162D-COMPUTABILITY-0B2EFE72F662C1B7E2F7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1C07DECB97C5ABF7DCC5",
+      "computability_id": "PR162D-COMPUTABILITY-1C07DECB97C5ABF7DCC5",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-98C64ED69F279D7E27ED",
+      "computability_id": "PR162D-COMPUTABILITY-98C64ED69F279D7E27ED",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6A9C0422219F9DC08A6D",
+      "computability_id": "PR162D-COMPUTABILITY-6A9C0422219F9DC08A6D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-97AF427D7777DF365D9B",
+      "computability_id": "PR162D-COMPUTABILITY-97AF427D7777DF365D9B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9E6AAF065131437D3FE7",
+      "computability_id": "PR162D-COMPUTABILITY-9E6AAF065131437D3FE7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-42B2CDC6E720FC1E3A3C",
+      "computability_id": "PR162D-COMPUTABILITY-42B2CDC6E720FC1E3A3C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F5823D1AE7FA2BDF9BAA",
+      "computability_id": "PR162D-COMPUTABILITY-F5823D1AE7FA2BDF9BAA",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6440ADCC467779447D71",
+      "computability_id": "PR162D-COMPUTABILITY-6440ADCC467779447D71",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8C582FA1170251E43C82",
+      "computability_id": "PR162D-COMPUTABILITY-8C582FA1170251E43C82",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B93F9E260688163B30D3",
+      "computability_id": "PR162D-COMPUTABILITY-B93F9E260688163B30D3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-EA4FC2595C55D5EA9347",
+      "computability_id": "PR162D-COMPUTABILITY-EA4FC2595C55D5EA9347",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BAC66595DA3731314937",
+      "computability_id": "PR162D-COMPUTABILITY-BAC66595DA3731314937",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4E98C1F776CF566DF5F7",
+      "computability_id": "PR162D-COMPUTABILITY-4E98C1F776CF566DF5F7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E1D2529968716B974681",
+      "computability_id": "PR162D-COMPUTABILITY-E1D2529968716B974681",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-46476CD31126CE1EF34B",
+      "computability_id": "PR162D-COMPUTABILITY-46476CD31126CE1EF34B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-688997332B8ECEC502FE",
+      "computability_id": "PR162D-COMPUTABILITY-688997332B8ECEC502FE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D9AB01BD9C66D5BBCDB7",
+      "computability_id": "PR162D-COMPUTABILITY-D9AB01BD9C66D5BBCDB7",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5E356CFC2681FAE7BF6D",
+      "computability_id": "PR162D-COMPUTABILITY-5E356CFC2681FAE7BF6D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5DFB2EA49870F5125042",
+      "computability_id": "PR162D-COMPUTABILITY-5DFB2EA49870F5125042",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-49AC6338C1FE98C3C7E9",
+      "computability_id": "PR162D-COMPUTABILITY-49AC6338C1FE98C3C7E9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2E2BB3C9D8578DC1EBAE",
+      "computability_id": "PR162D-COMPUTABILITY-2E2BB3C9D8578DC1EBAE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-84AFC86136A7DAD4BF2E",
+      "computability_id": "PR162D-COMPUTABILITY-84AFC86136A7DAD4BF2E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-3CD8389A038C7135FA17",
+      "computability_id": "PR162D-COMPUTABILITY-3CD8389A038C7135FA17",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-36B8438E087A7C471556",
+      "computability_id": "PR162D-COMPUTABILITY-36B8438E087A7C471556",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-75EC63DB43D84A87ACB4",
+      "computability_id": "PR162D-COMPUTABILITY-75EC63DB43D84A87ACB4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-50CABEAC4C4AF6A63CA0",
+      "computability_id": "PR162D-COMPUTABILITY-50CABEAC4C4AF6A63CA0",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8C99EA33980B2983ACC3",
+      "computability_id": "PR162D-COMPUTABILITY-8C99EA33980B2983ACC3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F1901BE0D84878BBD66F",
+      "computability_id": "PR162D-COMPUTABILITY-F1901BE0D84878BBD66F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-064CAF0BBF96EADE8352",
+      "computability_id": "PR162D-COMPUTABILITY-064CAF0BBF96EADE8352",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C2C92F2BE31FB62E9210",
+      "computability_id": "PR162D-COMPUTABILITY-C2C92F2BE31FB62E9210",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C9B46A146D517FBA2B6F",
+      "computability_id": "PR162D-COMPUTABILITY-C9B46A146D517FBA2B6F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F4C1334D9AEF0D450F92",
+      "computability_id": "PR162D-COMPUTABILITY-F4C1334D9AEF0D450F92",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-AACC417CB9F34E6917B4",
+      "computability_id": "PR162D-COMPUTABILITY-AACC417CB9F34E6917B4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C100BED4B6A87778885B",
+      "computability_id": "PR162D-COMPUTABILITY-C100BED4B6A87778885B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0FCF504EE1901CEC4EA8",
+      "computability_id": "PR162D-COMPUTABILITY-0FCF504EE1901CEC4EA8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8B3B2225AA30FA444630",
+      "computability_id": "PR162D-COMPUTABILITY-8B3B2225AA30FA444630",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-ABB6E8B18534741C4DC1",
+      "computability_id": "PR162D-COMPUTABILITY-ABB6E8B18534741C4DC1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4A97F143E38C730E9F55",
+      "computability_id": "PR162D-COMPUTABILITY-4A97F143E38C730E9F55",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-33EECF9642EE479F154C",
+      "computability_id": "PR162D-COMPUTABILITY-33EECF9642EE479F154C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-CFBE1B594520BC64EA5B",
+      "computability_id": "PR162D-COMPUTABILITY-CFBE1B594520BC64EA5B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-71B60AF340501ED0896A",
+      "computability_id": "PR162D-COMPUTABILITY-71B60AF340501ED0896A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-58D62B00D133DAC2F187",
+      "computability_id": "PR162D-COMPUTABILITY-58D62B00D133DAC2F187",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-33CFA0839E2D411914C1",
+      "computability_id": "PR162D-COMPUTABILITY-33CFA0839E2D411914C1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1E8ABC2640D4B826A109",
+      "computability_id": "PR162D-COMPUTABILITY-1E8ABC2640D4B826A109",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F3CC9B59A429A8526B6E",
+      "computability_id": "PR162D-COMPUTABILITY-F3CC9B59A429A8526B6E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5335582173D2474E9A24",
+      "computability_id": "PR162D-COMPUTABILITY-5335582173D2474E9A24",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-698CB5DB94740CA9E6AE",
+      "computability_id": "PR162D-COMPUTABILITY-698CB5DB94740CA9E6AE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-34199050D2B8C003F813",
+      "computability_id": "PR162D-COMPUTABILITY-34199050D2B8C003F813",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7C45462C7697656131BC",
+      "computability_id": "PR162D-COMPUTABILITY-7C45462C7697656131BC",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-41304312EE2F76E34A42",
+      "computability_id": "PR162D-COMPUTABILITY-41304312EE2F76E34A42",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-66BA0E2E51DC1351CFC1",
+      "computability_id": "PR162D-COMPUTABILITY-66BA0E2E51DC1351CFC1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F792B2DE506A94CEE1CC",
+      "computability_id": "PR162D-COMPUTABILITY-F792B2DE506A94CEE1CC",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-37B67236B3220D1A1C97",
+      "computability_id": "PR162D-COMPUTABILITY-37B67236B3220D1A1C97",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-CBAF24E833386EAA81A1",
+      "computability_id": "PR162D-COMPUTABILITY-CBAF24E833386EAA81A1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1356B081A36121019C64",
+      "computability_id": "PR162D-COMPUTABILITY-1356B081A36121019C64",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2878EA1F92127A89459A",
+      "computability_id": "PR162D-COMPUTABILITY-2878EA1F92127A89459A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A7BF67CBF35783AFD8F9",
+      "computability_id": "PR162D-COMPUTABILITY-A7BF67CBF35783AFD8F9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F47E4846E10DBF5EEBC4",
+      "computability_id": "PR162D-COMPUTABILITY-F47E4846E10DBF5EEBC4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-AB728B4F8269D1C3A16C",
+      "computability_id": "PR162D-COMPUTABILITY-AB728B4F8269D1C3A16C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-63DB9930B69101A13ACB",
+      "computability_id": "PR162D-COMPUTABILITY-63DB9930B69101A13ACB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C1C64B55F3897D29D4FA",
+      "computability_id": "PR162D-COMPUTABILITY-C1C64B55F3897D29D4FA",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D075CD9D1EC2EFA94BBB",
+      "computability_id": "PR162D-COMPUTABILITY-D075CD9D1EC2EFA94BBB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-63AB32CBD62C86EEE329",
+      "computability_id": "PR162D-COMPUTABILITY-63AB32CBD62C86EEE329",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5503694A577D8C31BC4B",
+      "computability_id": "PR162D-COMPUTABILITY-5503694A577D8C31BC4B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-26704705FBD830B6FA22",
+      "computability_id": "PR162D-COMPUTABILITY-26704705FBD830B6FA22",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-22A094AD6413F4285B0F",
+      "computability_id": "PR162D-COMPUTABILITY-22A094AD6413F4285B0F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-981EC42BF7AACFB7E13C",
+      "computability_id": "PR162D-COMPUTABILITY-981EC42BF7AACFB7E13C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5870E8CFEFB678C0685D",
+      "computability_id": "PR162D-COMPUTABILITY-5870E8CFEFB678C0685D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F53F292DCB6C8F32440A",
+      "computability_id": "PR162D-COMPUTABILITY-F53F292DCB6C8F32440A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9761ECFBE6F6D6DD403C",
+      "computability_id": "PR162D-COMPUTABILITY-9761ECFBE6F6D6DD403C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2A5E0C0727CE886F39B8",
+      "computability_id": "PR162D-COMPUTABILITY-2A5E0C0727CE886F39B8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9225418D9823F717109F",
+      "computability_id": "PR162D-COMPUTABILITY-9225418D9823F717109F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2AA874A7F16213C8A741",
+      "computability_id": "PR162D-COMPUTABILITY-2AA874A7F16213C8A741",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7AE3BF3F339185200E78",
+      "computability_id": "PR162D-COMPUTABILITY-7AE3BF3F339185200E78",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-578131409ABD54069081",
+      "computability_id": "PR162D-COMPUTABILITY-578131409ABD54069081",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-CDEA3A805AFC045D2312",
+      "computability_id": "PR162D-COMPUTABILITY-CDEA3A805AFC045D2312",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-FD236C55E776D0B1890A",
+      "computability_id": "PR162D-COMPUTABILITY-FD236C55E776D0B1890A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D5759CFB53AF2C673284",
+      "computability_id": "PR162D-COMPUTABILITY-D5759CFB53AF2C673284",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-45CAD36ECBF6915144BB",
+      "computability_id": "PR162D-COMPUTABILITY-45CAD36ECBF6915144BB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-DAFDCAAF352C5439E4A2",
+      "computability_id": "PR162D-COMPUTABILITY-DAFDCAAF352C5439E4A2",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E84985515537484796A1",
+      "computability_id": "PR162D-COMPUTABILITY-E84985515537484796A1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2F240666EFA6EC040F57",
+      "computability_id": "PR162D-COMPUTABILITY-2F240666EFA6EC040F57",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1E0D5DBF844A9CEB2D15",
+      "computability_id": "PR162D-COMPUTABILITY-1E0D5DBF844A9CEB2D15",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-13008B7A61BAE036CD92",
+      "computability_id": "PR162D-COMPUTABILITY-13008B7A61BAE036CD92",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-AB8E7FD1E4070D97F79A",
+      "computability_id": "PR162D-COMPUTABILITY-AB8E7FD1E4070D97F79A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-073D591E65AAFE6A596A",
+      "computability_id": "PR162D-COMPUTABILITY-073D591E65AAFE6A596A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D456715B274A6C382B76",
+      "computability_id": "PR162D-COMPUTABILITY-D456715B274A6C382B76",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-03A0939A6F0FABD2AEB8",
+      "computability_id": "PR162D-COMPUTABILITY-03A0939A6F0FABD2AEB8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-63514DCE9C2C45804703",
+      "computability_id": "PR162D-COMPUTABILITY-63514DCE9C2C45804703",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-262045F92282F05098F3",
+      "computability_id": "PR162D-COMPUTABILITY-262045F92282F05098F3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9333A15770382E36426B",
+      "computability_id": "PR162D-COMPUTABILITY-9333A15770382E36426B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-46F187D705F3C5A51353",
+      "computability_id": "PR162D-COMPUTABILITY-46F187D705F3C5A51353",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8A8E68C593767CAB7E5C",
+      "computability_id": "PR162D-COMPUTABILITY-8A8E68C593767CAB7E5C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-40F5EE71005996EF465A",
+      "computability_id": "PR162D-COMPUTABILITY-40F5EE71005996EF465A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8D34A5298A3AEC54168A",
+      "computability_id": "PR162D-COMPUTABILITY-8D34A5298A3AEC54168A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B753522F9C6A13A453E4",
+      "computability_id": "PR162D-COMPUTABILITY-B753522F9C6A13A453E4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2B78ED9D0AAA9268DC2D",
+      "computability_id": "PR162D-COMPUTABILITY-2B78ED9D0AAA9268DC2D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9EFAE6E30FCD2D1438EE",
+      "computability_id": "PR162D-COMPUTABILITY-9EFAE6E30FCD2D1438EE",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-16724F5CDE8EB56F6B03",
+      "computability_id": "PR162D-COMPUTABILITY-16724F5CDE8EB56F6B03",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-86271A31A3A394A02266",
+      "computability_id": "PR162D-COMPUTABILITY-86271A31A3A394A02266",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A8BB9F578108AE57857A",
+      "computability_id": "PR162D-COMPUTABILITY-A8BB9F578108AE57857A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2E49FD3E4C8470B442AD",
+      "computability_id": "PR162D-COMPUTABILITY-2E49FD3E4C8470B442AD",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-13BD374B8308FFF66508",
+      "computability_id": "PR162D-COMPUTABILITY-13BD374B8308FFF66508",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F230B190CF0E9F863AE0",
+      "computability_id": "PR162D-COMPUTABILITY-F230B190CF0E9F863AE0",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-350523AD000D2ACEA631",
+      "computability_id": "PR162D-COMPUTABILITY-350523AD000D2ACEA631",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-91CA5FAE6124CC064A0B",
+      "computability_id": "PR162D-COMPUTABILITY-91CA5FAE6124CC064A0B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-40D450B36E8D4E723A75",
+      "computability_id": "PR162D-COMPUTABILITY-40D450B36E8D4E723A75",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D850CF72C645368843E1",
+      "computability_id": "PR162D-COMPUTABILITY-D850CF72C645368843E1",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-069207FDC341081154E4",
+      "computability_id": "PR162D-COMPUTABILITY-069207FDC341081154E4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5F755FF0432A622384EA",
+      "computability_id": "PR162D-COMPUTABILITY-5F755FF0432A622384EA",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-807B5C99960DDBB49F78",
+      "computability_id": "PR162D-COMPUTABILITY-807B5C99960DDBB49F78",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2FB6513FC7FBD96CD27C",
+      "computability_id": "PR162D-COMPUTABILITY-2FB6513FC7FBD96CD27C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7D153965FD0062F864DB",
+      "computability_id": "PR162D-COMPUTABILITY-7D153965FD0062F864DB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2AEFB44F15BC6757D7EB",
+      "computability_id": "PR162D-COMPUTABILITY-2AEFB44F15BC6757D7EB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C620A4131B3C1224BA2F",
+      "computability_id": "PR162D-COMPUTABILITY-C620A4131B3C1224BA2F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-EF853576488E95DA2C81",
+      "computability_id": "PR162D-COMPUTABILITY-EF853576488E95DA2C81",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-67997C3C89E0BC035711",
+      "computability_id": "PR162D-COMPUTABILITY-67997C3C89E0BC035711",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0B6B7127C49110EE3AD5",
+      "computability_id": "PR162D-COMPUTABILITY-0B6B7127C49110EE3AD5",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D1DEF65B1DC6A1A77845",
+      "computability_id": "PR162D-COMPUTABILITY-D1DEF65B1DC6A1A77845",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-EA52FCF3DFBF878BBD76",
+      "computability_id": "PR162D-COMPUTABILITY-EA52FCF3DFBF878BBD76",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-786FB7E223A88892E7F3",
+      "computability_id": "PR162D-COMPUTABILITY-786FB7E223A88892E7F3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-01AC1CFC58B3CCDD6F7B",
+      "computability_id": "PR162D-COMPUTABILITY-01AC1CFC58B3CCDD6F7B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BECF2088264C6A2EBA16",
+      "computability_id": "PR162D-COMPUTABILITY-BECF2088264C6A2EBA16",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-449C46D1A20B267B0788",
+      "computability_id": "PR162D-COMPUTABILITY-449C46D1A20B267B0788",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C25DA78F7722B2901280",
+      "computability_id": "PR162D-COMPUTABILITY-C25DA78F7722B2901280",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E0BC0D7C8DF6D8047D7E",
+      "computability_id": "PR162D-COMPUTABILITY-E0BC0D7C8DF6D8047D7E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E9BDD6F7791494BFA9DF",
+      "computability_id": "PR162D-COMPUTABILITY-E9BDD6F7791494BFA9DF",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4D225168A024EDA7BBA6",
+      "computability_id": "PR162D-COMPUTABILITY-4D225168A024EDA7BBA6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F22B1F8D6CFB7193B400",
+      "computability_id": "PR162D-COMPUTABILITY-F22B1F8D6CFB7193B400",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-864BFC505015FDA8D853",
+      "computability_id": "PR162D-COMPUTABILITY-864BFC505015FDA8D853",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-0AD59E23151FE29A0EB8",
+      "computability_id": "PR162D-COMPUTABILITY-0AD59E23151FE29A0EB8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-35CABED410F8C7879657",
+      "computability_id": "PR162D-COMPUTABILITY-35CABED410F8C7879657",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5BF3B66121C395BFA1D0",
+      "computability_id": "PR162D-COMPUTABILITY-5BF3B66121C395BFA1D0",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-CCEE11281931E9532513",
+      "computability_id": "PR162D-COMPUTABILITY-CCEE11281931E9532513",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-26DD28B4AA567D905037",
+      "computability_id": "PR162D-COMPUTABILITY-26DD28B4AA567D905037",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-677A3FF95BBB58C1ADD4",
+      "computability_id": "PR162D-COMPUTABILITY-677A3FF95BBB58C1ADD4",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-708A59BD6FA43A82DA7D",
+      "computability_id": "PR162D-COMPUTABILITY-708A59BD6FA43A82DA7D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-08CCB8B2FC18880EE275",
+      "computability_id": "PR162D-COMPUTABILITY-08CCB8B2FC18880EE275",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BBC05EDA7C37513B633F",
+      "computability_id": "PR162D-COMPUTABILITY-BBC05EDA7C37513B633F",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-070D56C4447DF411EF78",
+      "computability_id": "PR162D-COMPUTABILITY-070D56C4447DF411EF78",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-920BBF8AEB47788BB51C",
+      "computability_id": "PR162D-COMPUTABILITY-920BBF8AEB47788BB51C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-2D962CF8215729DD8693",
+      "computability_id": "PR162D-COMPUTABILITY-2D962CF8215729DD8693",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-638CFFFEE59B5223668E",
+      "computability_id": "PR162D-COMPUTABILITY-638CFFFEE59B5223668E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D483BDBEBD044A3121E9",
+      "computability_id": "PR162D-COMPUTABILITY-D483BDBEBD044A3121E9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-47E04A18AEA7DC455745",
+      "computability_id": "PR162D-COMPUTABILITY-47E04A18AEA7DC455745",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-38286D205E6EEA319752",
+      "computability_id": "PR162D-COMPUTABILITY-38286D205E6EEA319752",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9F1A4EF4D9BE5B904A59",
+      "computability_id": "PR162D-COMPUTABILITY-9F1A4EF4D9BE5B904A59",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-606D7FD87A6DA22874BF",
+      "computability_id": "PR162D-COMPUTABILITY-606D7FD87A6DA22874BF",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-38D34C7CC6132F4FD082",
+      "computability_id": "PR162D-COMPUTABILITY-38D34C7CC6132F4FD082",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B52FFF4CB801208AABF6",
+      "computability_id": "PR162D-COMPUTABILITY-B52FFF4CB801208AABF6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F545AE99C809B8FD0ECA",
+      "computability_id": "PR162D-COMPUTABILITY-F545AE99C809B8FD0ECA",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D8A99D29DDD810FB19D6",
+      "computability_id": "PR162D-COMPUTABILITY-D8A99D29DDD810FB19D6",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4E8BB910663F2AFDDD5D",
+      "computability_id": "PR162D-COMPUTABILITY-4E8BB910663F2AFDDD5D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7CB16A3CEAE7B24A74C3",
+      "computability_id": "PR162D-COMPUTABILITY-7CB16A3CEAE7B24A74C3",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E68302FC0FF0606DCF88",
+      "computability_id": "PR162D-COMPUTABILITY-E68302FC0FF0606DCF88",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-669B4FB806E9CDBCD331",
+      "computability_id": "PR162D-COMPUTABILITY-669B4FB806E9CDBCD331",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-3172642E6391D090E9A5",
+      "computability_id": "PR162D-COMPUTABILITY-3172642E6391D090E9A5",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F398F2BC183143C26066",
+      "computability_id": "PR162D-COMPUTABILITY-F398F2BC183143C26066",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-86CD7AB9E7422FA4DA8B",
+      "computability_id": "PR162D-COMPUTABILITY-86CD7AB9E7422FA4DA8B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-74A2F423B0E4F93936D5",
+      "computability_id": "PR162D-COMPUTABILITY-74A2F423B0E4F93936D5",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B24B687A32098AD31EC9",
+      "computability_id": "PR162D-COMPUTABILITY-B24B687A32098AD31EC9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-3740732328B734785B9C",
+      "computability_id": "PR162D-COMPUTABILITY-3740732328B734785B9C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4E426709A82AE3D75F04",
+      "computability_id": "PR162D-COMPUTABILITY-4E426709A82AE3D75F04",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-977B9435973744DF3045",
+      "computability_id": "PR162D-COMPUTABILITY-977B9435973744DF3045",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-954E48129310B076A04A",
+      "computability_id": "PR162D-COMPUTABILITY-954E48129310B076A04A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-19A1BB66224240109F18",
+      "computability_id": "PR162D-COMPUTABILITY-19A1BB66224240109F18",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5E7C3CF4163AF1CA5695",
+      "computability_id": "PR162D-COMPUTABILITY-5E7C3CF4163AF1CA5695",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-9352D0F302997FC0E1B9",
+      "computability_id": "PR162D-COMPUTABILITY-9352D0F302997FC0E1B9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-DB884EB38A7B1B2F57BC",
+      "computability_id": "PR162D-COMPUTABILITY-DB884EB38A7B1B2F57BC",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F68B66669966D097C7D8",
+      "computability_id": "PR162D-COMPUTABILITY-F68B66669966D097C7D8",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-7B4F24A4E06304A8A26D",
+      "computability_id": "PR162D-COMPUTABILITY-7B4F24A4E06304A8A26D",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-C3BD2B2FD955204EFC9E",
+      "computability_id": "PR162D-COMPUTABILITY-C3BD2B2FD955204EFC9E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-5BEACD1906E1645B2C8C",
+      "computability_id": "PR162D-COMPUTABILITY-5BEACD1906E1645B2C8C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-4A032A122CE1A2E5F49E",
+      "computability_id": "PR162D-COMPUTABILITY-4A032A122CE1A2E5F49E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B52757DFBD3B4BE82076",
+      "computability_id": "PR162D-COMPUTABILITY-B52757DFBD3B4BE82076",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-E23645D8F3F808CAD505",
+      "computability_id": "PR162D-COMPUTABILITY-E23645D8F3F808CAD505",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-97AA35AEE0A6D4696213",
+      "computability_id": "PR162D-COMPUTABILITY-97AA35AEE0A6D4696213",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-80AC584245AD04217440",
+      "computability_id": "PR162D-COMPUTABILITY-80AC584245AD04217440",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F41F0A04BDFAA3EB9804",
+      "computability_id": "PR162D-COMPUTABILITY-F41F0A04BDFAA3EB9804",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-66B4E32A0314426D5FEF",
+      "computability_id": "PR162D-COMPUTABILITY-66B4E32A0314426D5FEF",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A61CDD574D527D4E0B6B",
+      "computability_id": "PR162D-COMPUTABILITY-A61CDD574D527D4E0B6B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F92975D3530CA6F47B97",
+      "computability_id": "PR162D-COMPUTABILITY-F92975D3530CA6F47B97",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-D9B310F56D29853FF6F9",
+      "computability_id": "PR162D-COMPUTABILITY-D9B310F56D29853FF6F9",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-1162B44AE71735374AF2",
+      "computability_id": "PR162D-COMPUTABILITY-1162B44AE71735374AF2",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A953340364515346C503",
+      "computability_id": "PR162D-COMPUTABILITY-A953340364515346C503",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-F6750A863441286D1E2B",
+      "computability_id": "PR162D-COMPUTABILITY-F6750A863441286D1E2B",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B9BE10C3C73C9EF014DC",
+      "computability_id": "PR162D-COMPUTABILITY-B9BE10C3C73C9EF014DC",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-19CC96D4A9A352354E3C",
+      "computability_id": "PR162D-COMPUTABILITY-19CC96D4A9A352354E3C",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-98B648F4082CC8A9C07A",
+      "computability_id": "PR162D-COMPUTABILITY-98B648F4082CC8A9C07A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-A0AB8B470D62058EA68E",
+      "computability_id": "PR162D-COMPUTABILITY-A0AB8B470D62058EA68E",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-26C838D16E240B5F01D5",
+      "computability_id": "PR162D-COMPUTABILITY-26C838D16E240B5F01D5",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-95594B96917E40DB9B1A",
+      "computability_id": "PR162D-COMPUTABILITY-95594B96917E40DB9B1A",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-8CA67A9751129DB24EAB",
+      "computability_id": "PR162D-COMPUTABILITY-8CA67A9751129DB24EAB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-BEF8738D609CFFD6FEFB",
+      "computability_id": "PR162D-COMPUTABILITY-BEF8738D609CFFD6FEFB",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-6EFCAD7B9577777E3D22",
+      "computability_id": "PR162D-COMPUTABILITY-6EFCAD7B9577777E3D22",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    },
+    {
+      "candidate_ref": "PR162D-SOLVER-INPUT-B96C6B2A18CD917075F0",
+      "computability_id": "PR162D-COMPUTABILITY-B96C6B2A18CD917075F0",
+      "computability_status": "SOLVER_INPUT_ASSEMBLED_CANDIDATE",
+      "expression_or_function_reference_present_flag": true,
+      "input_fields_present_flag": true,
+      "output_fields_present_flag": true,
+      "units_present_flag": true
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_ComputabilityReadinessMatrix.report.json",
+  "report_id": "PR162D-PR162D_COMPUTABILITY_READINESS_MATRIX",
+  "report_type": "PR162D_COMPUTABILITY_READINESS_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing/schemas/pr162d_computabilityreadinessmatrix.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_DataRequirementClassificationLedger.report.json",
+    "docs/master_plan/generated/PR162C_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162C_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162C_OwnerMaterializationCommandQueue.report.json",
+    "docs/master_plan/generated/PR162C_PR162RAdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162C_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUInputFieldCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentDatasetConsumerRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentExecutableQKURoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_StrictQKUCoverageProofMatrix.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "total_records": 325
+  },
+  "total_record_count": 325,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B",
+    "PR162C"
+  ],
+  "validation_status": "PASS"
+}

@@ -1,0 +1,5 @@
+from .pr162d_test_support import assert_optional_adapters_import
+
+
+def test_pr162d_quantum_backend_adapters_import_safely_without_optional_dependencies():
+    assert_optional_adapters_import()

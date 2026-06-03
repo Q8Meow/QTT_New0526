@@ -1,0 +1,971 @@
+{
+  "authority_class": "PR162D_CANDIDATE_MATERIALIZATION_AGENT_ROUTING_AND_QUANTUM_SMOKE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 14,
+  "records": [
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-EC188B617649E1448C0E",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.binary_edge_signal_algorithm",
+      "expression": "deterministic algorithm candidate: binary_edge_signal_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "model_probability",
+        "market_probability",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "edge",
+        "decision"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM",
+        "binary_edge_signal_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-71151643507015257779",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.expected_value_gate_algorithm",
+      "expression": "deterministic algorithm candidate: expected_value_gate_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "p_win",
+        "profit_if_win",
+        "loss_if_lose",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "expected_value",
+        "passes_gate"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM",
+        "expected_value_gate_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-NO_TRADE_ZONE_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-2E125C226DFB798CCA40",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.no_trade_zone_algorithm",
+      "expression": "deterministic algorithm candidate: no_trade_zone_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "edge",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "decision"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-NO_TRADE_ZONE_ALGORITHM",
+        "no_trade_zone_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-NO_TRADE_ZONE_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-1B200324551CE807C354",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.capped_kelly_position_size_algorithm",
+      "expression": "deterministic algorithm candidate: capped_kelly_position_size_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "p_win",
+        "net_odds",
+        "fraction",
+        "cap"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "position_size"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM",
+        "capped_kelly_position_size_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-10ADB56BA163834C6DA6",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.risk_budget_cap_algorithm",
+      "expression": "deterministic algorithm candidate: risk_budget_cap_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "raw_size",
+        "risk_budget",
+        "unit_risk"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "position_size"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM",
+        "risk_budget_cap_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-C6C09CF7046E43A17D16",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.probability_clipping_algorithm",
+      "expression": "deterministic algorithm candidate: probability_clipping_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "probability",
+        "epsilon"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "clipped_probability"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM",
+        "probability_clipping_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-98EB687976FF45426277",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.midpoint_spread_feature_algorithm",
+      "expression": "deterministic algorithm candidate: midpoint_spread_feature_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "ask",
+        "bid"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "midpoint",
+        "spread"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM",
+        "midpoint_spread_feature_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-11AA026955FD5CAB47D8",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.z_score_signal_algorithm",
+      "expression": "deterministic algorithm candidate: z_score_signal_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "value",
+        "mean",
+        "std",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "z_score",
+        "signal"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM",
+        "z_score_signal_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-4378C9C1166DEC55B98C",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.strict_formula_binding_algorithm",
+      "expression": "deterministic algorithm candidate: strict_formula_binding_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "qku_type",
+        "formula_family",
+        "market_scope_match_flag"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "binding_status"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM",
+        "strict_formula_binding_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-2A9C0B99CD6D5E92D073",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.exact_qubo_smoke_solve",
+      "expression": "deterministic algorithm candidate: exact_qubo_smoke_enumeration_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "Q",
+        "max_variables"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "best_x",
+        "best_energy"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM",
+        "exact_qubo_smoke_enumeration_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-31D384D68AEE50B196CD",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.qubo_input_assembly_algorithm",
+      "expression": "deterministic algorithm candidate: qubo_input_assembly_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "Q"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "solver_input"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM",
+        "qubo_input_assembly_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-FE1F2938C69B989012A1",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.ising_input_assembly_algorithm",
+      "expression": "deterministic algorithm candidate: ising_input_assembly_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "h",
+        "J"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "solver_input"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM",
+        "ising_input_assembly_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-877707901147AEB57817",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.market_scope_activation_algorithm",
+      "expression": "deterministic algorithm candidate: market_scope_activation_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "primary_market_scope",
+        "has_input_binding",
+        "confidence"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "activation_status"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM",
+        "market_scope_activation_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    },
+    {
+      "agent_route_refs": [
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM"
+      ],
+      "authority_class": "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH",
+      "candidate_id": "PR162D-ALGORITHM-CANDIDATE-45BE3EFFBED8EB621863",
+      "candidate_or_provisional_flag": true,
+      "computable_candidate_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "created_by_pr": "PR162D",
+      "default_value_candidate": null,
+      "executable_function_reference_or_planned_function_reference": "src.qtt.stage1_prediction_markets.qku_formula_algorithm_solver_market_scope_materialization.algorithm_registry.dormant_qku_exclusion_algorithm",
+      "expression": "deterministic algorithm candidate: dormant_qku_exclusion_algorithm",
+      "formula_refs": [],
+      "input_fields": [
+        "activation_status"
+      ],
+      "live_order_authority": false,
+      "metadata_only_flag": false,
+      "missing_input_behavior": "candidate_remains_partial_and_routes_to_replay_paper",
+      "normalization_rule": "validate inputs before candidate runtime execution",
+      "official_truth_flag": false,
+      "output_fields": [
+        "allowed_flag"
+      ],
+      "qku_refs": [
+        "PR162D_CANDIDATE_QKU_BACKLOG"
+      ],
+      "range_max_candidate": null,
+      "range_min_candidate": null,
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "scale_class": "algorithm_output_native_scale",
+      "source_class": "REPO_LOCAL_OWNER_PROVIDED",
+      "source_quality_score": 0.92,
+      "source_refs": [
+        "PR162B_LOCAL_DETERMINISTIC_ALGORITHM_CONTRACT"
+      ],
+      "source_tier": "TIER_0",
+      "stable_deterministic_id_inputs": [
+        "PR162B-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM",
+        "dormant_qku_exclusion_algorithm"
+      ],
+      "test_vector_refs": [
+        "PR162B-TEST-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM-001"
+      ],
+      "units": "unitless"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+  "report_id": "PR162D-PR162D_QKU_ALGORITHM_MATERIALIZATION_EXPANSION",
+  "report_type": "PR162D_QKU_ALGORITHM_MATERIALIZATION_EXPANSION",
+  "schema_ref": "src/qtt/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing/schemas/pr162d_qkualgorithmmaterializationexpansion.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_DataRequirementClassificationLedger.report.json",
+    "docs/master_plan/generated/PR162C_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162C_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162C_OwnerMaterializationCommandQueue.report.json",
+    "docs/master_plan/generated/PR162C_PR162RAdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162C_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUInputFieldCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentDatasetConsumerRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentExecutableQKURoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_StrictQKUCoverageProofMatrix.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_authority_class": {
+      "REPO_LOCAL_CANDIDATE_NOT_LIVE_TRUTH": 14
+    },
+    "by_confidence_class": {
+      "HIGH_OFFICIAL_LOCATOR": 14
+    },
+    "by_source_class": {
+      "REPO_LOCAL_OWNER_PROVIDED": 14
+    },
+    "by_source_tier": {
+      "TIER_0": 14
+    },
+    "total_records": 14
+  },
+  "total_record_count": 14,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B",
+    "PR162C"
+  ],
+  "validation_status": "PASS"
+}

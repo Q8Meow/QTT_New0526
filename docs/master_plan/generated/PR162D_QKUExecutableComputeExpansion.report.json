@@ -1,0 +1,1944 @@
+{
+  "authority_class": "PR162D_CANDIDATE_MATERIALIZATION_AGENT_ROUTING_AND_QUANTUM_SMOKE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 75,
+  "records": [
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-F65267C726B43553CE89",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.62,
+      "inputs": {
+        "price": 0.62
+      },
+      "live_order_authority": false,
+      "observed_output": 0.62,
+      "test_vector_ref": "PR162B-TEST-FORMULA-IMPLIED_PROBABILITY_FROM_BINARY_PRICE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-FAIR_PRICE_FROM_PROBABILITY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-AC900C0F7FAF48A80280",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.58,
+      "inputs": {
+        "probability": 0.58
+      },
+      "live_order_authority": false,
+      "observed_output": 0.58,
+      "test_vector_ref": "PR162B-TEST-FORMULA-FAIR_PRICE_FROM_PROBABILITY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-PROBABILITY_EDGE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-49CAC1400705D5EE9E61",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.05,
+      "inputs": {
+        "market_probability": 0.5,
+        "model_probability": 0.55
+      },
+      "live_order_authority": false,
+      "observed_output": 0.050000000000000044,
+      "test_vector_ref": "PR162B-TEST-FORMULA-PROBABILITY_EDGE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-EXPECTED_VALUE_BINARY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-E85F932F493442584A55",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "loss_if_lose": 1.0,
+        "p_win": 0.55,
+        "profit_if_win": 1.0
+      },
+      "live_order_authority": false,
+      "observed_output": 0.10000000000000009,
+      "test_vector_ref": "PR162B-TEST-FORMULA-EXPECTED_VALUE_BINARY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-EB801BC5C483527E40DC",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.09,
+      "inputs": {
+        "ev": 0.1,
+        "fee": 0.01
+      },
+      "live_order_authority": false,
+      "observed_output": 0.09000000000000001,
+      "test_vector_ref": "PR162B-TEST-FORMULA-FEE_ADJUSTED_EXPECTED_VALUE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-374CDB17055E5E0B5F2A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.08,
+      "inputs": {
+        "ev": 0.1,
+        "slippage_cost": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": 0.08,
+      "test_vector_ref": "PR162B-TEST-FORMULA-SLIPPAGE_ADJUSTED_EXPECTED_VALUE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-A9A279263466824815EF",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.07,
+      "inputs": {
+        "ev": 0.1,
+        "latency_penalty": 0.03
+      },
+      "live_order_authority": false,
+      "observed_output": 0.07,
+      "test_vector_ref": "PR162B-TEST-FORMULA-LATENCY_ADJUSTED_EXPECTED_VALUE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-EXPECTED_UTILITY_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-3F0CC5C023888336D71A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "expected_value": 0.12,
+        "risk_penalty": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": 0.09999999999999999,
+      "test_vector_ref": "PR162B-TEST-FORMULA-EXPECTED_UTILITY_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BINARY_PAYOFF_PROFIT_LOSS",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-2A30AF727D3025DEBCAE",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.6,
+      "inputs": {
+        "outcome": 1,
+        "payout_if_win": 1.0,
+        "price_paid": 0.4
+      },
+      "live_order_authority": false,
+      "observed_output": 0.6,
+      "test_vector_ref": "PR162B-TEST-FORMULA-BINARY_PAYOFF_PROFIT_LOSS-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BREAK_EVEN_PROBABILITY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-AB2954310210C2B6FB99",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.5,
+      "inputs": {
+        "cost": 0.0,
+        "loss_if_lose": 1.0,
+        "profit_if_win": 1.0
+      },
+      "live_order_authority": false,
+      "observed_output": 0.5,
+      "test_vector_ref": "PR162B-TEST-FORMULA-BREAK_EVEN_PROBABILITY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-NO_TRADE_ZONE_THRESHOLD",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-0EE7640D753B1D932631",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": true,
+      "inputs": {
+        "edge": 0.01,
+        "threshold": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": true,
+      "test_vector_ref": "PR162B-TEST-FORMULA-NO_TRADE_ZONE_THRESHOLD-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BRIER_SCORE_BINARY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-92E179A158721D047C36",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.04,
+      "inputs": {
+        "p_pred": 0.8,
+        "y_true": 1
+      },
+      "live_order_authority": false,
+      "observed_output": 0.03999999999999998,
+      "test_vector_ref": "PR162B-TEST-FORMULA-BRIER_SCORE_BINARY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-LOG_LOSS_BINARY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-891F20958EA3BCD658A9",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.2231435513142097,
+      "inputs": {
+        "epsilon": 1e-15,
+        "p_pred": 0.8,
+        "y_true": 1
+      },
+      "live_order_authority": false,
+      "observed_output": 0.2231435513142097,
+      "test_vector_ref": "PR162B-TEST-FORMULA-LOG_LOSS_BINARY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-PROBABILITY_CLIPPING",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-3DC42F85B71EE2ED3A79",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.01,
+      "inputs": {
+        "epsilon": 0.01,
+        "probability": 0.0
+      },
+      "live_order_authority": false,
+      "observed_output": 0.01,
+      "test_vector_ref": "PR162B-TEST-FORMULA-PROBABILITY_CLIPPING-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-CALIBRATION_ERROR_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-D75B7EF7E39B64567F8A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "observed_probability": 0.7,
+        "predicted_probability": 0.6
+      },
+      "live_order_authority": false,
+      "observed_output": 0.09999999999999998,
+      "test_vector_ref": "PR162B-TEST-FORMULA-CALIBRATION_ERROR_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-CONFIDENCE_PENALTY_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-862E0675168BCC2959AC",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "confidence": 0.8,
+        "penalty_weight": 0.5
+      },
+      "live_order_authority": false,
+      "observed_output": 0.09999999999999998,
+      "test_vector_ref": "PR162B-TEST-FORMULA-CONFIDENCE_PENALTY_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-KELLY_FRACTION",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-67E2681B00ABA3FD5023",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "net_odds": 1.0,
+        "p_win": 0.55
+      },
+      "live_order_authority": false,
+      "observed_output": 0.10000000000000009,
+      "test_vector_ref": "PR162B-TEST-FORMULA-KELLY_FRACTION-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-FRACTIONAL_KELLY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-25C6BDBDB5929602B5E3",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.05,
+      "inputs": {
+        "fraction": 0.5,
+        "kelly_fraction": 0.1
+      },
+      "live_order_authority": false,
+      "observed_output": 0.05,
+      "test_vector_ref": "PR162B-TEST-FORMULA-FRACTIONAL_KELLY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-CAPPED_KELLY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-B67459F0A79258D1ADE9",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.2,
+      "inputs": {
+        "cap": 0.2,
+        "kelly_fraction": 0.3
+      },
+      "live_order_authority": false,
+      "observed_output": 0.2,
+      "test_vector_ref": "PR162B-TEST-FORMULA-CAPPED_KELLY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-0DBBF0501309F9AD3FD1",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 6.0,
+      "inputs": {
+        "raw_size": 10,
+        "risk_budget": 3,
+        "unit_risk": 0.5
+      },
+      "live_order_authority": false,
+      "observed_output": 6.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-RISK_BUDGET_CAPPED_POSITION_SIZE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MAX_EXPOSURE_CAP",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-8901178F9B6544E9738D",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 5.0,
+      "inputs": {
+        "max_exposure": 5,
+        "requested_exposure": 12
+      },
+      "live_order_authority": false,
+      "observed_output": 5.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MAX_EXPOSURE_CAP-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-PER_MARKET_CAP",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-D54F52F7DC7ED52AAC23",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 3.0,
+      "inputs": {
+        "market_cap": 3,
+        "requested_exposure": 4
+      },
+      "live_order_authority": false,
+      "observed_output": 3.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-PER_MARKET_CAP-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-PER_EVENT_CAP",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-F5455E98B0C0122756EC",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 2.0,
+      "inputs": {
+        "event_cap": 2,
+        "requested_exposure": 4
+      },
+      "live_order_authority": false,
+      "observed_output": 2.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-PER_EVENT_CAP-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MEAN_RETURN",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-51B16A25F9E50D13FB56",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 2.0,
+      "inputs": {
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 2.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MEAN_RETURN-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-VARIANCE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-76AFF49E01EA3AD0EBCA",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.6666666666666666,
+      "inputs": {
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 0.6666666666666666,
+      "test_vector_ref": "PR162B-TEST-FORMULA-VARIANCE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-COVARIANCE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-B941425A0E14BE470EC0",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 2.0,
+      "inputs": {
+        "x": [
+          1,
+          2,
+          3
+        ],
+        "y": [
+          1,
+          5,
+          7
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 2.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-COVARIANCE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-CORRELATION",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-FE95361C603E202BE398",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 1.0,
+      "inputs": {
+        "x": [
+          1,
+          2,
+          3
+        ],
+        "y": [
+          1,
+          2,
+          3
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 1.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-CORRELATION-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-VOLATILITY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-DF85DC85F74751DFC266",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.08164965809277261,
+      "inputs": {
+        "returns": [
+          0.0,
+          0.1,
+          -0.1
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 0.08164965809277261,
+      "test_vector_ref": "PR162B-TEST-FORMULA-VOLATILITY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-SHARPE_RATIO",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-514522732B3E69EFE655",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.5,
+      "inputs": {
+        "portfolio_return": 0.12,
+        "risk_free_rate": 0.02,
+        "volatility": 0.2
+      },
+      "live_order_authority": false,
+      "observed_output": 0.49999999999999994,
+      "test_vector_ref": "PR162B-TEST-FORMULA-SHARPE_RATIO-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MAX_DRAWDOWN",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-9789F7EF0DD992D04E30",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.25,
+      "inputs": {
+        "equity_curve": [
+          100,
+          120,
+          90,
+          130
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 0.25,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MAX_DRAWDOWN-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-1505A95F7DD45BDFC61F",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1,
+      "inputs": {
+        "expected_value": 0.12,
+        "risk_penalty": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": 0.09999999999999999,
+      "test_vector_ref": "PR162B-TEST-FORMULA-RISK_ADJUSTED_EXPECTED_VALUE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-3BE5F27C46AEF3EC5229",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.08,
+      "inputs": {
+        "expected_return": 0.12,
+        "risk_aversion": 1.0,
+        "variance": 0.04
+      },
+      "live_order_authority": false,
+      "observed_output": 0.07999999999999999,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MEAN_VARIANCE_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-PORTFOLIO_QP_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-73E79BEBD61F73F4443A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.1175,
+      "inputs": {
+        "covariance_matrix": [
+          [
+            0.04,
+            0.0
+          ],
+          [
+            0.0,
+            0.09
+          ]
+        ],
+        "returns": [
+          0.1,
+          0.2
+        ],
+        "risk_aversion": 1.0,
+        "weights": [
+          0.5,
+          0.5
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 0.11750000000000002,
+      "test_vector_ref": "PR162B-TEST-FORMULA-PORTFOLIO_QP_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-SMA",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-69786F7D982071D5A066",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 3.5,
+      "inputs": {
+        "values": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "window": 2
+      },
+      "live_order_authority": false,
+      "observed_output": 3.5,
+      "test_vector_ref": "PR162B-TEST-FORMULA-SMA-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-EMA",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-4A3D4387AD5DFBBC63B6",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 2.5555555555555554,
+      "inputs": {
+        "span": 2,
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 2.5555555555555554,
+      "test_vector_ref": "PR162B-TEST-FORMULA-EMA-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-RSI",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-329C7D5BE273503833F4",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 80.0,
+      "inputs": {
+        "period": 4,
+        "values": [
+          1,
+          2,
+          3,
+          2,
+          4
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 80.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-RSI-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MACD",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-9D100468A3CFA3AD6145",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "histogram": 9.637220359737242e-05,
+        "macd": 1.499855382323247,
+        "signal": 1.4997590101196496
+      },
+      "inputs": {
+        "fast_span": 3,
+        "signal_span": 3,
+        "slow_span": 6,
+        "values": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0,
+          11.0,
+          12.0,
+          13.0,
+          14.0,
+          15.0,
+          16.0,
+          17.0,
+          18.0,
+          19.0,
+          20.0,
+          21.0,
+          22.0,
+          23.0,
+          24.0,
+          25.0,
+          26.0,
+          27.0,
+          28.0,
+          29.0,
+          30.0
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "histogram": 9.637220359737242e-05,
+        "macd": 1.499855382323247,
+        "signal": 1.4997590101196496
+      },
+      "test_vector_ref": "PR162B-TEST-FORMULA-MACD-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BOLLINGER_BANDS",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-55A98AE890158C5F0441",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "lower": 0.1715728752538097,
+        "middle": 3.0,
+        "upper": 5.82842712474619
+      },
+      "inputs": {
+        "num_std": 2.0,
+        "values": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "window": 5
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "lower": 0.1715728752538097,
+        "middle": 3.0,
+        "upper": 5.82842712474619
+      },
+      "test_vector_ref": "PR162B-TEST-FORMULA-BOLLINGER_BANDS-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-Z_SCORE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-07B9B3925A92CEDD48B0",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 1.0,
+      "inputs": {
+        "mean": 10,
+        "std": 2,
+        "value": 12
+      },
+      "live_order_authority": false,
+      "observed_output": 1.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-Z_SCORE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MOMENTUM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-B6F5D5A43B4E8CBC551D",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 5.0,
+      "inputs": {
+        "values": [
+          1,
+          3,
+          6
+        ],
+        "window": 2
+      },
+      "live_order_authority": false,
+      "observed_output": 5.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MOMENTUM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-REALIZED_VOLATILITY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-CCA7374D51A4308A969E",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.08164965809277261,
+      "inputs": {
+        "annualization_factor": 1.0,
+        "returns": [
+          0.0,
+          0.1,
+          -0.1
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 0.08164965809277261,
+      "test_vector_ref": "PR162B-TEST-FORMULA-REALIZED_VOLATILITY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-VWAP_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-F810E45EF8CCAE2CD91B",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 1.3333333333333333,
+      "inputs": {
+        "prices": [
+          1,
+          2
+        ],
+        "volumes": [
+          2,
+          1
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 1.3333333333333333,
+      "test_vector_ref": "PR162B-TEST-FORMULA-VWAP_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-MIDPOINT",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-491EDDDA11DC4558B4FA",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.5,
+      "inputs": {
+        "ask": 0.6,
+        "bid": 0.4
+      },
+      "live_order_authority": false,
+      "observed_output": 0.5,
+      "test_vector_ref": "PR162B-TEST-FORMULA-MIDPOINT-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-SPREAD",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-810D7146C263A1D8B6A3",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.2,
+      "inputs": {
+        "ask": 0.6,
+        "bid": 0.4
+      },
+      "live_order_authority": false,
+      "observed_output": 0.19999999999999996,
+      "test_vector_ref": "PR162B-TEST-FORMULA-SPREAD-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-880667AE4FF0355CF2BA",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.2,
+      "inputs": {
+        "ask_size": 40,
+        "bid_size": 60
+      },
+      "live_order_authority": false,
+      "observed_output": 0.2,
+      "test_vector_ref": "PR162B-TEST-FORMULA-ORDERBOOK_IMBALANCE_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-LIQUIDITY_PROXY_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-EA333CC85233A6257F53",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 200.0,
+      "inputs": {
+        "epsilon": 1e-09,
+        "spread_value": 0.5,
+        "volume": 100
+      },
+      "live_order_authority": false,
+      "observed_output": 200.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-LIQUIDITY_PROXY_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-35E44F8061633E1E574F",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 2.0,
+      "inputs": {
+        "Q": [
+          [
+            2,
+            3
+          ],
+          [
+            0,
+            4
+          ]
+        ],
+        "x": [
+          1,
+          0
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 2.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_OBJECTIVE_XTQX-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-EXPANDED_QUBO_TERMS",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-78B67DE1F02652794881",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        {
+          "coefficient": 2.0,
+          "i": 0,
+          "j": 0,
+          "term": "x_0*x_0"
+        },
+        {
+          "coefficient": 4.0,
+          "i": 1,
+          "j": 1,
+          "term": "x_1*x_1"
+        }
+      ],
+      "inputs": {
+        "Q": [
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        {
+          "coefficient": 2.0,
+          "i": 0,
+          "j": 0,
+          "term": "x_0*x_0"
+        },
+        {
+          "coefficient": 4.0,
+          "i": 1,
+          "j": 1,
+          "term": "x_1*x_1"
+        }
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-EXPANDED_QUBO_TERMS-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-ISING_ENERGY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-76B78C7340ACD6B6F74D",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 1.25,
+      "inputs": {
+        "J": [
+          [
+            0,
+            1,
+            0.25
+          ]
+        ],
+        "h": [
+          1.0,
+          -0.5
+        ],
+        "spins": [
+          1,
+          -1
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 1.25,
+      "test_vector_ref": "PR162B-TEST-FORMULA-ISING_ENERGY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BQM_ENERGY",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-0BD65A0B85EB26C44C47",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 6.0,
+      "inputs": {
+        "linear": [
+          1.0,
+          2.0
+        ],
+        "quadratic": [
+          [
+            0,
+            1,
+            3.0
+          ]
+        ],
+        "x": [
+          1,
+          1
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 6.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-BQM_ENERGY-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-CQM_OBJECTIVE_CONSTRAINTS",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-18D6C61B32BC2A5129BC",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 13.0,
+      "inputs": {
+        "constraint_violations": [
+          2.0
+        ],
+        "objective_value": 1.0,
+        "penalty_lambda": 3.0
+      },
+      "live_order_authority": false,
+      "observed_output": 13.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-CQM_OBJECTIVE_CONSTRAINTS-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-BINARY_PENALTY_CONSTRAINT",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-D53454960DF44D8FBF4D",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 12.0,
+      "inputs": {
+        "Ax_minus_b": 2.0,
+        "lambda_penalty": 3.0
+      },
+      "live_order_authority": false,
+      "observed_output": 12.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-BINARY_PENALTY_CONSTRAINT-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-015D6D5C08DD283E8F05",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        [
+          0.9,
+          0.0
+        ],
+        [
+          0.0,
+          0.8
+        ]
+      ],
+      "inputs": {
+        "expected_returns": [
+          0.1,
+          0.2
+        ],
+        "risk_aversion": 1.0,
+        "risk_matrix": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        [
+          0.9,
+          0.0
+        ],
+        [
+          0.0,
+          0.8
+        ]
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_PORTFOLIO_SELECTION_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-A55714C8AF102A9DDF95",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        [
+          0.19999999999999998,
+          0.0
+        ],
+        [
+          0.0,
+          0.2
+        ]
+      ],
+      "inputs": {
+        "edges": [
+          0.1,
+          0.2
+        ],
+        "risk_penalties": [
+          0.3,
+          0.4
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        [
+          0.19999999999999998,
+          0.0
+        ],
+        [
+          0.0,
+          0.2
+        ]
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_PREDICTION_MARKET_POSITION_SELECTION_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-D71DC541A898C48EB512",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        [
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -2.0
+        ]
+      ],
+      "inputs": {
+        "scores": [
+          1.0,
+          2.0
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        [
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -2.0
+        ]
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_MARKET_BUNDLE_SELECTION_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-4E7E2EB6B51BA175DD85",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        [
+          -0.9,
+          0.0
+        ],
+        [
+          0.0,
+          -1.8
+        ]
+      ],
+      "inputs": {
+        "penalties": [
+          0.1,
+          0.2
+        ],
+        "scores": [
+          1.0,
+          2.0
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        [
+          -0.9,
+          0.0
+        ],
+        [
+          0.0,
+          -1.8
+        ]
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_PARAMETER_STACK_SELECTION_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-8DF23F0C6F55218E5054",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": [
+        [
+          0.5,
+          1.0
+        ],
+        [
+          1.0,
+          2.0
+        ]
+      ],
+      "inputs": {
+        "budget": 2.0,
+        "exposures": [
+          1.0,
+          2.0
+        ],
+        "penalty_lambda": 1.0
+      },
+      "live_order_authority": false,
+      "observed_output": [
+        [
+          0.5,
+          1.0
+        ],
+        [
+          1.0,
+          2.0
+        ]
+      ],
+      "test_vector_ref": "PR162B-TEST-FORMULA-QUBO_RISK_BUDGET_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-CBBFF207767CAD692C57",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "hamiltonian_family": "QAOA_QUBO_TO_ISING_CANDIDATE",
+        "term_count": 2
+      },
+      "inputs": {
+        "Q": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "hamiltonian_family": "QAOA_QUBO_TO_ISING_CANDIDATE",
+        "term_count": 2
+      },
+      "test_vector_ref": "PR162B-TEST-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-3BF0C5154B2B1C4A9B97",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 1.0,
+      "inputs": {
+        "expectation_values": [
+          0.5,
+          0.25
+        ],
+        "hamiltonian_terms": [
+          1.0,
+          2.0
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": 1.0,
+      "test_vector_ref": "PR162B-TEST-FORMULA-VQE_OBJECTIVE_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-F18F468602A0386B6D2E",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "input_representation": "BQM_OR_CQM_CANDIDATE",
+        "term_count": 2,
+        "variable_count": 2
+      },
+      "inputs": {
+        "Q": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "input_representation": "BQM_OR_CQM_CANDIDATE",
+        "term_count": 2,
+        "variable_count": 2
+      },
+      "test_vector_ref": "PR162B-TEST-FORMULA-ANNEALING_BQM_CQM_CANDIDATE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "FORMULA",
+      "candidate_ref": "PR162B-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-35260F462358A8C2690F",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.2,
+      "inputs": {
+        "classical_score": 0.5,
+        "quantum_candidate_score": 0.7
+      },
+      "live_order_authority": false,
+      "observed_output": 0.19999999999999996,
+      "test_vector_ref": "PR162B-TEST-FORMULA-HYBRID_CLASSICAL_QUANTUM_COMPARATOR_OBJECTIVE-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-CD6E158AD7728289067A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "decision": "BUY_YES",
+        "edge": 0.05
+      },
+      "inputs": {
+        "market_probability": 0.5,
+        "model_probability": 0.55,
+        "threshold": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "decision": "BUY_YES",
+        "edge": 0.050000000000000044
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-BINARY_EDGE_SIGNAL_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-A2512006DE2F8938983C",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "expected_value": 0.1,
+        "passes_gate": true
+      },
+      "inputs": {
+        "loss_if_lose": 1.0,
+        "p_win": 0.55,
+        "profit_if_win": 1.0,
+        "threshold": 0.05
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "expected_value": 0.10000000000000009,
+        "passes_gate": true
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-EXPECTED_VALUE_GATE_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-NO_TRADE_ZONE_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-40E4901635CEFE8881EA",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": "NO_TRADE",
+      "inputs": {
+        "edge": 0.01,
+        "threshold": 0.02
+      },
+      "live_order_authority": false,
+      "observed_output": "NO_TRADE",
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-NO_TRADE_ZONE_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-3FD77406E297C0C1C8F7",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.05,
+      "inputs": {
+        "cap": 0.2,
+        "fraction": 0.5,
+        "net_odds": 1.0,
+        "p_win": 0.55
+      },
+      "live_order_authority": false,
+      "observed_output": 0.050000000000000044,
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-CAPPED_KELLY_POSITION_SIZE_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-C99364B355DAA68C9796",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 6.0,
+      "inputs": {
+        "raw_size": 10,
+        "risk_budget": 3,
+        "unit_risk": 0.5
+      },
+      "live_order_authority": false,
+      "observed_output": 6.0,
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-RISK_BUDGET_CAP_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-82EF27A0AD73193D1FC3",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": 0.01,
+      "inputs": {
+        "epsilon": 0.01,
+        "probability": 0.0
+      },
+      "live_order_authority": false,
+      "observed_output": 0.01,
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-PROBABILITY_CLIPPING_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-E67290347C408D15DC72",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "midpoint": 0.5,
+        "spread": 0.2
+      },
+      "inputs": {
+        "ask": 0.6,
+        "bid": 0.4
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "midpoint": 0.5,
+        "spread": 0.19999999999999996
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-MIDPOINT_SPREAD_FEATURE_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-343EA59AABD9C9280C1A",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "signal": "HIGH",
+        "z_score": 1.0
+      },
+      "inputs": {
+        "mean": 10,
+        "std": 2,
+        "threshold": 0.5,
+        "value": 12
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "signal": "HIGH",
+        "z_score": 1.0
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-Z_SCORE_SIGNAL_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-A07FDF1C11F02A79093C",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": "STRICT_BINDING_CONFIRMED",
+      "inputs": {
+        "formula_family": "prediction_market",
+        "market_scope_match_flag": true,
+        "qku_type": "FORMULA_QKU"
+      },
+      "live_order_authority": false,
+      "observed_output": "STRICT_BINDING_CONFIRMED",
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-STRICT_FORMULA_BINDING_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-49007E7C3E799D7CD451",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "best_energy": 0.0,
+        "best_x": [
+          0,
+          0
+        ],
+        "status": "SMOKE_EXECUTED_NO_TRADING_EVIDENCE",
+        "variable_count": 2
+      },
+      "inputs": {
+        "Q": [
+          [
+            2.0,
+            3.0
+          ],
+          [
+            0.0,
+            4.0
+          ]
+        ],
+        "max_variables": 12
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "best_energy": 0.0,
+        "best_x": [
+          0,
+          0
+        ],
+        "status": "SMOKE_EXECUTED_NO_TRADING_EVIDENCE",
+        "variable_count": 2
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-C1C3C36B9D93B809D8E3",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "Q": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "input_representation": "QUBO_MATRIX",
+        "variable_count": 2,
+        "variable_type": "BINARY"
+      },
+      "inputs": {
+        "Q": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "Q": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "input_representation": "QUBO_MATRIX",
+        "variable_count": 2,
+        "variable_type": "BINARY"
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-4011FEC1F6DFF3BF0D83",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": {
+        "J": {
+          "0,1": 0.25
+        },
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "h": [
+          1.0,
+          -0.5
+        ],
+        "input_representation": "ISING_H_J",
+        "variable_count": 2,
+        "variable_type": "SPIN"
+      },
+      "inputs": {
+        "J": [
+          [
+            0,
+            1,
+            0.25
+          ]
+        ],
+        "h": [
+          1.0,
+          -0.5
+        ]
+      },
+      "live_order_authority": false,
+      "observed_output": {
+        "J": {
+          "0,1": 0.25
+        },
+        "execution_status": "SOLVER_INPUT_ASSEMBLED_NO_EVIDENCE_SOLVE",
+        "h": [
+          1.0,
+          -0.5
+        ],
+        "input_representation": "ISING_H_J",
+        "variable_count": 2,
+        "variable_type": "SPIN"
+      },
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-70D8AF7D20DC97CEED20",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "inputs": {
+        "confidence": "HIGH_EXPLICIT_QKU_FAMILY",
+        "has_input_binding": true,
+        "primary_market_scope": "PREDICTION_MARKET_BINARY_EVENT_CONTRACT"
+      },
+      "live_order_authority": false,
+      "observed_output": "ACTIVE_STAGE1_REPLAY_PAPER_ONLY",
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-MARKET_SCOPE_ACTIVATION_ALGORITHM-001",
+      "tolerance": 1e-09
+    },
+    {
+      "candidate_kind": "ALGORITHM",
+      "candidate_ref": "PR162B-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM",
+      "computation_id": "PR162D-DETERMINISTIC-COMPUTE-AD383C5F778B26D97663",
+      "computation_status": "DETERMINISTIC_CANDIDATE_COMPUTATION_EXECUTED",
+      "creates_order_authority": false,
+      "creates_profit_evidence": false,
+      "expected_output": false,
+      "inputs": {
+        "activation_status": "DORMANT_NON_STAGE1_MARKET_SPECIFIC"
+      },
+      "live_order_authority": false,
+      "observed_output": false,
+      "test_vector_ref": "PR162B-TEST-ALGORITHM-DORMANT_QKU_EXCLUSION_ALGORITHM-001",
+      "tolerance": 1e-09
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_QKUExecutableComputeExpansion.report.json",
+  "report_id": "PR162D-PR162D_QKU_EXECUTABLE_COMPUTE_EXPANSION",
+  "report_type": "PR162D_QKU_EXECUTABLE_COMPUTE_EXPANSION",
+  "schema_ref": "src/qtt/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing/schemas/pr162d_qkuexecutablecomputeexpansion.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_DataRequirementClassificationLedger.report.json",
+    "docs/master_plan/generated/PR162C_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162C_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162C_OwnerMaterializationCommandQueue.report.json",
+    "docs/master_plan/generated/PR162C_PR162RAdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162C_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUInputFieldCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentDatasetConsumerRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentExecutableQKURoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_StrictQKUCoverageProofMatrix.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "by_candidate_kind": {
+      "ALGORITHM": 14,
+      "FORMULA": 61
+    },
+    "total_records": 75
+  },
+  "total_record_count": 75,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B",
+    "PR162C"
+  ],
+  "validation_status": "PASS"
+}

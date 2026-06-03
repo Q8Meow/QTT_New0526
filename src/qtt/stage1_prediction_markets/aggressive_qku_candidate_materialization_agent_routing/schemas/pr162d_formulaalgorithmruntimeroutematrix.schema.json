@@ -1,0 +1,31 @@
+{
+  "$id": "src/qtt/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing/schemas/pr162d_formulaalgorithmruntimeroutematrix.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "const": "PR162D_CANDIDATE_MATERIALIZATION_AGENT_ROUTING_AND_QUANTUM_SMOKE_ONLY"
+    },
+    "created_by_pr": {
+      "const": "PR162D"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR162D_FormulaAlgorithmRuntimeRouteMatrix.report.json"
+    },
+    "report_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "records"
+  ],
+  "title": "PR162D_FormulaAlgorithmRuntimeRouteMatrix.report.json",
+  "type": "object"
+}

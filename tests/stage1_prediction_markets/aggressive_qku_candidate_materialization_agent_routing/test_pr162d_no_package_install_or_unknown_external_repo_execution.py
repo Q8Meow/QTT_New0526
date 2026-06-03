@@ -1,0 +1,5 @@
+from .pr162d_test_support import assert_no_package_install_or_unknown_repo_execution
+
+
+def test_pr162d_no_package_install_or_unknown_external_repo_execution():
+    assert_no_package_install_or_unknown_repo_execution()

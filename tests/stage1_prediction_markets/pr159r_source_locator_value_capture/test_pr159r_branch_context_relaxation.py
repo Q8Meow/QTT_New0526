@@ -12,6 +12,9 @@ PR160_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
 PR162C_DOWNSTREAM_BRANCH = (
     "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
 )
+PR162D_DOWNSTREAM_BRANCH = (
+    "pr162d-aggressive-qku-candidate-materialization-agent-routing"
+)
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -120,6 +123,14 @@ def test_pr159r_exact_branch_allowed(monkeypatch):
 def test_pr159r_pr162c_downstream_branch_allows_cumulative_validation(monkeypatch):
     _clear_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, PR162C_DOWNSTREAM_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr159r_pr162d_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, PR162D_DOWNSTREAM_BRANCH)
 
     assert failures == ()
     assert receipts == ()

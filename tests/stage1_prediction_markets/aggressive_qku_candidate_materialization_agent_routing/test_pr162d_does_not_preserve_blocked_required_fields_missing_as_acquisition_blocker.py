@@ -1,0 +1,5 @@
+from .pr162d_test_support import assert_no_blocker_carryover
+
+
+def test_pr162d_does_not_preserve_blocked_required_fields_missing_as_acquisition_blocker():
+    assert_no_blocker_carryover()
