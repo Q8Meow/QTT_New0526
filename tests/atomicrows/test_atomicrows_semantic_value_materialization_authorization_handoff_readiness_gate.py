@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
         pr142_report,
         "current_branch_context",
         lambda repo_root: BranchContext(
-            branch="pr162d-aggressive-qku-candidate-materialization-agent-routing",
+            branch="pr162d-r1-external-formula-data-quantum-acquisition-expansion",
             source="unit-test",
         ),
     )

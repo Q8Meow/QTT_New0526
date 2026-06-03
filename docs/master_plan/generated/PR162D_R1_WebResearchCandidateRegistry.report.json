@@ -1,0 +1,3814 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 96,
+  "records": [
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_001"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_001"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_001"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_001",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/getting_started/historical_data",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_002"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_002"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_002"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_002",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-cutoff-timestamps.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_003"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_003"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_003"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_003",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-market-candlesticks.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_004"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_004"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_004"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_004",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-trades.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_005"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_005"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_005"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_005",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-markets.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_006"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_006"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_006"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_006",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_007"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_007"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_007"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_007",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-market-candlesticks.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_008"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_008"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_008"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_008",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-market-orderbook.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_009"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_009"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_009"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_009",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-multiple-market-orderbooks.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_010"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_010"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_010"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_010",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-trades.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_011"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_011"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_011"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_011",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-markets.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_012"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_012"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_012"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_012",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-market.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_013"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_013"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_013"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_id": "PR162D_R1_SOURCE_013",
+      "source_lane": "LANE_A_KALSHI",
+      "source_locator": "https://docs.kalshi.com/api-reference/events/get-event-candlesticks.md",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_014"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_014"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_014"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_014",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/introduction",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_015"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_015"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_015"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_015",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/list-markets-keyset-pagination",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_016"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_016"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_016"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_016",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/list-markets",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_017"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_017"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_017"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_017",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-market-by-id",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_018"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_018"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_018"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_018",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/events/list-events-keyset-pagination",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_019"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_019"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_019"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_019",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-order-book",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_020"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_020"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_020"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_020",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/data/get-midpoint-price",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_021"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_021"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_021"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_021",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-spread",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_022"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_022"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_022"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_022",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-prices-history",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_023"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_023"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_023"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_023",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/trade/get-trades",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_024"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_024"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_024"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_024",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-open-interest",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_025"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_025"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_025"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_025",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-top-holders-for-markets",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_026"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_026"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_026"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_026",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-market-by-token",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_027"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_027"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_027"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_027",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/data/get-market-price",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_028"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_028"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_028"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_id": "PR162D_R1_SOURCE_028",
+      "source_lane": "LANE_B_POLYMARKET",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-clob-market-info",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_029"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_029"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_029"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_FORECASTEX_DOC",
+      "source_id": "PR162D_R1_SOURCE_029",
+      "source_lane": "LANE_C_FORECASTEX",
+      "source_locator": "https://forecastex.com/data",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_030"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_030"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_030"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIKIT_LEARN_DOC",
+      "source_id": "PR162D_R1_SOURCE_030",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_031"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_031"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_031"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIKIT_LEARN_DOC",
+      "source_id": "PR162D_R1_SOURCE_031",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.log_loss.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_032"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_032"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_032"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIKIT_LEARN_DOC",
+      "source_id": "PR162D_R1_SOURCE_032",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://scikit-learn.org/stable/modules/generated/sklearn.calibration.calibration_curve.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_033"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_033"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_033"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIKIT_LEARN_DOC",
+      "source_id": "PR162D_R1_SOURCE_033",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_034"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_034"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000034"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_034"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_034",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/optimize.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_035"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_035"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000035"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_035"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_035",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_036"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_036"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000036"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_036"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_036",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_037"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_037"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000037"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_037"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_SCIPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_037",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zscore.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_038"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_038"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000038"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_038"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_NUMPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_038",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://numpy.org/doc/stable/reference/generated/numpy.cov.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_039"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_039"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000039"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_039"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_NUMPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_039",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://numpy.org/doc/stable/reference/generated/numpy.var.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_040"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_040"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000040"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_040"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_NUMPY_DOC",
+      "source_id": "PR162D_R1_SOURCE_040",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://numpy.org/doc/stable/reference/generated/numpy.percentile.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_041"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_041"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000041"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_041"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_PANDAS_DOC",
+      "source_id": "PR162D_R1_SOURCE_041",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.ewm.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_042"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_042"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000042"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_042"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_PANDAS_DOC",
+      "source_id": "PR162D_R1_SOURCE_042",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rolling.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_043"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_043"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000043"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_043"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_PANDAS_DOC",
+      "source_id": "PR162D_R1_SOURCE_043",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.pct_change.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_044"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_044"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000044"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_044"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_PANDAS_DOC",
+      "source_id": "PR162D_R1_SOURCE_044",
+      "source_lane": "LANE_D_FORMULA_LIBRARY",
+      "source_locator": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.quantile.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_045"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_045"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000045"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_045"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_045",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_046"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_046"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000046"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_046"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_046",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/RSI.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_047"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_047"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000047"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_047"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_047",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/MACD.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_048"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_048"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000048"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_048"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_048",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/BBANDS.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_049"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_049"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_049"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_049",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/EMA.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_050"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_050"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_050"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_050",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/SMA.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_051"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_051"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_051"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_051",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/ATR.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_052"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_052"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_052"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_052",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/ROC.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_053"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_053"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_053"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_053",
+      "source_lane": "LANE_D_TECHNICAL_INDICATORS",
+      "source_locator": "https://ta-lib.github.io/ta-doc/indicator/OBV.htm",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_054"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_054"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_054"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_054",
+      "source_lane": "LANE_D_PORTFOLIO_OPTIMIZER",
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_055"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_055"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_055"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_055",
+      "source_lane": "LANE_D_PORTFOLIO_OPTIMIZER",
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/RiskModels.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_056"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_056"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_056"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "REPUTABLE_LIBRARY_DOC",
+      "source_id": "PR162D_R1_SOURCE_056",
+      "source_lane": "LANE_D_PORTFOLIO_OPTIMIZER",
+      "source_locator": "https://pyportfolioopt.readthedocs.io/en/latest/ExpectedReturns.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_057"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_057"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_057"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_DWAVE_DOC",
+      "source_id": "PR162D_R1_SOURCE_057",
+      "source_lane": "LANE_E_QUANTUM",
+      "source_locator": "https://docs.dwavequantum.com/en/latest/concepts/models.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_058"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_058"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_058"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_DWAVE_DOC",
+      "source_id": "PR162D_R1_SOURCE_058",
+      "source_lane": "LANE_E_QUANTUM",
+      "source_locator": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_059"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_059"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_059"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_QISKIT_DOC",
+      "source_id": "PR162D_R1_SOURCE_059",
+      "source_lane": "LANE_E_QUANTUM",
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/tutorials/06_examples_max_cut_and_tsp.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_060"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_060"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_060"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_QISKIT_DOC",
+      "source_id": "PR162D_R1_SOURCE_060",
+      "source_lane": "LANE_E_QUANTUM",
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/tutorials/03_minimum_eigen_optimizer.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "OFFICIAL_PUBLIC_DOC_CANDIDATE",
+      "candidate_labels": [
+        "OFFICIAL_OR_REPUTABLE_CANDIDATE",
+        "REPLAY_PAPER_DATA_FORMULA_ROUTE"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "HIGH_OFFICIAL_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_061"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_061"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": false,
+      "official_truth_flag": true,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_061"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "OFFICIAL_QISKIT_DOC",
+      "source_id": "PR162D_R1_SOURCE_061",
+      "source_lane": "LANE_E_QUANTUM",
+      "source_locator": "https://qiskit-community.github.io/qiskit-optimization/tutorials/02_converters_for_quadratic_programs.html",
+      "source_quality_score": 0.94,
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "REPUTABLE_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_HIGH_RESEARCH_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_062"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_062"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_062"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "INSTITUTIONAL_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_062",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://docs.dune.com/data-catalog/curated/prediction-markets/overview/",
+      "source_quality_score": 0.82,
+      "source_tier": "TIER_2_RESEARCH_OR_INSTITUTIONAL"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_063"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_063"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_063"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_063",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://www.deltabase.tech/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_064"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_064"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_064"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_064",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://www.probalytics.io/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_065"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_065"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_065"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_065",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://www.entityml.com/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_066"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_066"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_066"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_066",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://www.pmxt.dev/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_067"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_067"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_067"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_067",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://tickfoundry.com/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_068"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_068"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_068"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_068",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://pred-markets.com/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_069"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_069"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_069"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATA_VENDOR_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_069",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://predictiondata.dev/",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_070"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_070"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_070"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "NON_OFFICIAL_DATASET_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_070",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://www.foresightflow.org/datasets/pmxt-stylized-facts-v1",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "REPUTABLE_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_HIGH_RESEARCH_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_071"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_071"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_071"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_071",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://arxiv.org/abs/2605.11640",
+      "source_quality_score": 0.82,
+      "source_tier": "TIER_2_RESEARCH_OR_INSTITUTIONAL"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "REPUTABLE_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_HIGH_RESEARCH_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_072"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_072"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_072"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_072",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://arxiv.org/abs/2602.19520",
+      "source_quality_score": 0.82,
+      "source_tier": "TIER_2_RESEARCH_OR_INSTITUTIONAL"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "REPUTABLE_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_HIGH_RESEARCH_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_073"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_073"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_073"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_073",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://arxiv.org/abs/2604.03888",
+      "source_quality_score": 0.82,
+      "source_tier": "TIER_2_RESEARCH_OR_INSTITUTIONAL"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_074"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_074"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_074"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_074",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Kelly_criterion",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_075"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_075"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_075"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_075",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Value_at_risk",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_076"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_076"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_076"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_076",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Expected_shortfall",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_077"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_077"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_077"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_077",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Sharpe_ratio",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_078"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_078"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_078"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_078",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Bollinger_Bands",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_079"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_079"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_079"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_079",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Relative_strength_index",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_080"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_080"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_080"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_080",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/MACD",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_081"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_081"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_081"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_081",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Volume-weighted_average_price",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_082"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_082"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000034"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_082"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_082",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Drawdown_(economics)",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_083"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_083"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000035"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_083"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_083",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Slippage_(finance)",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_084"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_084"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000036"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_084"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_084",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Prediction_market",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PROVISIONAL_NON_OFFICIAL_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "LOWER_CONFIDENCE_REPLAY_PAPER_REQUIRED",
+      "field_refs": [
+        "external_source_field_map_085"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_085"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000037"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_085"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_REFERENCE_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_085",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://en.wikipedia.org/wiki/Market_scoring_rule",
+      "source_quality_score": 0.52,
+      "source_tier": "TIER_4_NON_OFFICIAL_REPLAY_PAPER_CANDIDATE"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_086"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_086"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000038"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_086"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_086",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/Polymarket/py-clob-client",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_087"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_087"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000039"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_087"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_087",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/Polymarket/clob-client",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_088"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_088"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000040"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_088"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_088",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/kalshi/kalshi-python",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_089"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_089"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000041"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_089"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_089",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/dwavesystems/dimod",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_090"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_090"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000042"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_090"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_090",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/qiskit-community/qiskit-optimization",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_091"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_091"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000043"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_091"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_091",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/robertmartin8/PyPortfolioOpt",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_092"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_092"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000044"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_092"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_092",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/TA-Lib/ta-lib",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_093"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_093"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000045"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_093"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_093",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/scikit-learn/scikit-learn",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_094"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_094"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000046"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_094"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_094",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/scipy/scipy",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_095"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_095"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000047"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_095"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_095",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/numpy/numpy",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    },
+    {
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "authority_class": "PUBLIC_CODE_OR_RESEARCH_CANDIDATE",
+      "candidate_labels": [
+        "RESEARCH_CANDIDATE",
+        "PROVISIONAL_CANDIDATE",
+        "NON_OFFICIAL_REPLAY_PAPER_CANDIDATE",
+        "NOT_OFFICIAL_EXTERNAL_FACT"
+      ],
+      "candidate_or_provisional_flag": true,
+      "confidence_class": "MEDIUM_PUBLIC_LOCATOR",
+      "field_refs": [
+        "external_source_field_map_096"
+      ],
+      "formula_refs": [
+        "PR162D_R1_FORMULA_SOURCE_BINDING_096"
+      ],
+      "live_order_authority": false,
+      "not_official_external_fact_flag": true,
+      "official_truth_flag": false,
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000048"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_SOURCE_REPLAY_ROUTE_096"
+      ],
+      "snapshot_mode": "OFFLINE_SAFE_LOCATOR_AND_FIELD_SUMMARY_ONLY",
+      "source_class": "PUBLIC_CODE_RESEARCH_CANDIDATE",
+      "source_id": "PR162D_R1_SOURCE_096",
+      "source_lane": "LANE_F_RESEARCH",
+      "source_locator": "https://github.com/pandas-dev/pandas",
+      "source_quality_score": 0.68,
+      "source_tier": "TIER_3_PUBLIC_CODE_RESEARCH"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_WebResearchCandidateRegistry.report.json",
+  "report_id": "PR162D_R1_WEB_RESEARCH_CANDIDATE_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_webresearchcandidateregistry.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}

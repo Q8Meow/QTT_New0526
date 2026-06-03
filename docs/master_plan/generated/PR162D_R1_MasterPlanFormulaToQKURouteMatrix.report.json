@@ -1,0 +1,816 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 80,
+  "records": [
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0001",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0001",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0002",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0002",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0003",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0003",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0004",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0004",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0005",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0005",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0006",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0006",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0007",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0007",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0008",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0008",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0009",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0009",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0010",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0010",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0011",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0011",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0012",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0012",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0013",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0013",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0014",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0014",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0015",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0015",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0016",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0016",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0017",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0017",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0018",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0018",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0019",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0019",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0020",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0020",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0021",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0021",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0022",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0022",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0023",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0023",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0024",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0024",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0025",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0025",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0026",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0026",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0027",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0027",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0028",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0028",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0029",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0029",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0030",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0030",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0031",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0031",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0032",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0032",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0033",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0033",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000034"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0034",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0034",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000035"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0035",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0035",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000036"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0036",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0036",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000037"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0037",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0037",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000038"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0038",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0038",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000039"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0039",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0039",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000040"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0040",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0040",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000041"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0041",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0041",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000042"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0042",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0042",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000043"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0043",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0043",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000044"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0044",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0044",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000045"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0045",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0045",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000046"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0046",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0046",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000047"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0047",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0047",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000048"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0048",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0048",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0049",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0049",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0050",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0050",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0051",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0051",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0052",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0052",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0053",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0053",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0054",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0054",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0055",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0055",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0056",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0056",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0057",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0057",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0058",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0058",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0059",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0059",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0060",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0060",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0061",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0061",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0062",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0062",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0063",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0063",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0064",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0064",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0065",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0065",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0066",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0066",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0067",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0067",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0068",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0068",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0069",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0069",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0070",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0070",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0071",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0071",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0072",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0072",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0073",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0073",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0074",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0074",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0075",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0075",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0076",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0076",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0077",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0077",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0078",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0078",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0079",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0079",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032"
+      ],
+      "route_type": "qku"
+    },
+    {
+      "candidate_id": "PR162D_R1_MASTER_PLAN_FORMULA_0080",
+      "live_order_authority": false,
+      "route_matrix_id": "PR162D_R1_MASTER_PLAN_QKU_ROUTE_0080",
+      "route_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033"
+      ],
+      "route_type": "qku"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_MasterPlanFormulaToQKURouteMatrix.report.json",
+  "report_id": "PR162D_R1_MASTER_PLAN_FORMULA_TO_QKU_ROUTE_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_masterplanformulatoqkuroutematrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}

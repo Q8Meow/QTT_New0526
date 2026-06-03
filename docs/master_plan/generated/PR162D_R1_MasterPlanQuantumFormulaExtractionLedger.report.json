@@ -1,0 +1,2308 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 28,
+  "records": [
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Quantum Trading Team \u2014 Master Plan \u2014 Canonical Full-Density Rebuild v9.9.778 CODEX-PREPARATION WORKING DRAFT \u2014 FINAL NO-EDIT OWNER-START READINESS AUDIT AND START GATE CLOSURE",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0001",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0001"
+      ],
+      "source_line_excerpt": "# Quantum Trading Team \u2014 Master Plan \u2014 Canonical Full-Density Rebuild v9.9.778 CODEX-PREPARATION WORKING DRAFT \u2014 FINAL NO-EDIT OWNER-START READINESS AUDIT AND START GATE CLOSURE",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:1",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0002",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0002"
+      ],
+      "source_line_excerpt": "stage1_quantum_trade_intent_authority_boundary_integrated_flag = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:140",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0003",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0003"
+      ],
+      "source_line_excerpt": "stage1_dashboard_research_edge_stack_quantum_tests_integrated_flag = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:141",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0004",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0004"
+      ],
+      "source_line_excerpt": "stage1_v9_9_757_dashboard_research_edge_stack_atomicrows_quantum_schema_only_checklist_integrated_flag = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:145",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0005",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0005"
+      ],
+      "source_line_excerpt": "quantum_optimizer_replay_paper_candidate_trigger_allowed_flag = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:552",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0006",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0006"
+      ],
+      "source_line_excerpt": "quantum_optimizer_direct_live_order_submission_allowed_flag = false",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:553",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0007",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0007"
+      ],
+      "source_line_excerpt": "quantum_optimizer_live_trade_intent_creation_owner_mutable_after_all_gates_flag = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:554",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "Codex-ready working-draft status guard",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0008",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0008"
+      ],
+      "source_line_excerpt": "codex_first_pr_quantum_live_order_submission_allowed = false",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:582",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0M v9.9.750 canonical owner-section audit for final Codex ambiguity closure and low-latency boundary consistency",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0009",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0009"
+      ],
+      "source_line_excerpt": "pre_patch_day1_low_latency_ambiguity_materiality = NO_CONFLICT_FOUND__FINAL_LIVE_PATH_MATRIX_NEEDED_TO_KEEP_COMPILER_SOURCE_RETRIEVAL_RESOLVER_REPLAY_PAPER_REVIEW_DASHBOARD_LLM_AND_QUANTUM_CALLS_OUT_OF_LIVE_PRETRADE_PATH",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:1610",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0M v9.9.750 canonical owner-section audit for final Codex ambiguity closure and low-latency boundary consistency",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0010",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0010"
+      ],
+      "source_line_excerpt": "test_v9_9_750_live_pretrade_path_excludes_control_plane_replay_review_llm_and_quantum_calls.py",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:1679",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0N v9.9.751 canonical owner-section audit for owner field authority, Stage-1 shadow, parameter rehabilitation, usable cash, and Codex execution authority closure",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0011",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0011"
+      ],
+      "source_line_excerpt": "public_venue_api_and_quantum_provider_examples = NOT_PATCHED_AS_FACTS_BECAUSE_NO_ACCEPTED_SOURCE_EVIDENCE_PACKET_CREATED",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:1733",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0012",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0012"
+      ],
+      "source_line_excerpt": "#### 0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent authority contracts",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2104",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0013",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0013"
+      ],
+      "source_line_excerpt": "This subsection records the pure no-edit owner-section audit performed before the v9.9.756 patch. It is parser-safety and placement-control material only. The pasted text contained useful implementation doctrine, but the",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2106",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0014",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0014"
+      ],
+      "source_line_excerpt": "pre_patch_quantum_trade_intent_ambiguity_materiality = QUANTUM_ADVISORY_AND_CLASSICAL_FINAL_AUTHORITY_PRESENT__OWNER_MUTABLE_LIVE_TRADE_INTENT_BOUNDARY_NEEDED_WITH_NO_DIRECT_ORDER_SUBMISSION",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2120",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0015",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0015"
+      ],
+      "source_line_excerpt": "quantum_live_trade_intent_owner_mutable_after_gates = PATCHED_AS_INTENT_ONLY_NOT_DIRECT_ORDER_AUTHORITY",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2135",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0016",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0016"
+      ],
+      "source_line_excerpt": "quantum_replay_paper_candidate_and_owner_enabled_trade_intent_authority -> 8.1C1",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2149",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0017",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0017"
+      ],
+      "source_line_excerpt": "code_facing_tests_for_dashboard_research_edge_stack_quantum_boundaries -> 21.6BA",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2150",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0018",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0018"
+      ],
+      "source_line_excerpt": "this_patch_uses_8_1c_because_it_is_the_existing_quantum_candidate_template_and_owner_control_subject_owner_section = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2166",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0019",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0019"
+      ],
+      "source_line_excerpt": "quantum_trade_intent_patch_may_not_enable_direct_quantum_order_submission = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2190",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0S v9.9.756 canonical owner-section audit for dashboard/Telegram research ingestion, edge parameter-stack selection, AtomicRows inventory consumption, and quantum trade-intent a",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0020",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0020"
+      ],
+      "source_line_excerpt": "test_v9_9_756_quantum_can_create_replay_paper_candidates_but_not_direct_live_orders.py",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2202",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0021",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0021"
+      ],
+      "source_line_excerpt": "This subsection records the pure no-edit owner-section audit performed before the v9.9.757 patch. It is parser-safety and placement-control material only. It does not move source-evidence, dashboard, research-ingestion, ",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2210",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0022",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0022"
+      ],
+      "source_line_excerpt": "pre_patch_source_master_plan = QTT_MasterPlan_Current_v9_9_756_CODEX_READY_WORKING_DRAFT_DASHBOARD_TELEGRAM_RESEARCH_INGESTION_EDGE_STACK_AND_QUANTUM_INTENT_CONTRACTS.md",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2215",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0023",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0023"
+      ],
+      "source_line_excerpt": "pre_patch_quantum_intent_ambiguity_materiality = NO_DIRECT_ORDER_RULE_PRESENT_BUT_THREE_LEVEL_QUANTUM_AUTHORITY_ENUM_AND_GATE_TEST_CHECKLIST_NEEDED",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2229",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0024",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0024"
+      ],
+      "source_line_excerpt": "quantum_three_level_authority_model = PATCHED_AS_EXPLICIT_ENUM_AND_GATE_CHECKLIST_WITH_NO_DIRECT_ORDER_SUBMISSION",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2245",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0025",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0025"
+      ],
+      "source_line_excerpt": "quantum_authority_level_enum_and_trade_intent_gate -> 8.1C2",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2262",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0026",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0026"
+      ],
+      "source_line_excerpt": "this_patch_uses_3_3a0_6_5b2_0x5f_8_1c_and_8_11b_because_they_are_existing_subject_owner_sections_for_research_edge_stack_inventory_quantum_and_owner_submission_flow = true",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2275",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0T v9.9.757 canonical owner-section audit for Codex first-PR minimal execution runbook and source-evidence/dashboard/research-ingestion checklist",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0027",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0027"
+      ],
+      "source_line_excerpt": "test_v9_9_757_dashboard_research_edge_quantum_items_are_schema_only_until_runtime_receipts_exist.py",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2312",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_EXECUTION_HARNESS"
+      ],
+      "candidate_class": "MASTER_PLAN_QUANTUM_FORMULATION_CANDIDATE",
+      "candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "candidate_status": "MASTER_PLAN_QUANTUM_MINED_NO_ADVANTAGE_CLAIM",
+      "coefficient_definitions": {
+        "Q_ij": "risk, exclusivity, and interaction coefficient candidate"
+      },
+      "constraint_definitions": [
+        "budget_limit",
+        "exposure_limit",
+        "same-basis comparator required"
+      ],
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "live_order_authority": false,
+      "master_plan_section_ref": "0X.0U v9.9.758 final no-edit verification audit and minimal Codex-essential file-set placement closure",
+      "mathematical_objective": "minimize x.T @ Q @ x + penalty_budget + penalty_exposure; map to Ising by x=(s+1)/2 when needed",
+      "metadata_only_flag": false,
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "quantum_candidate_id": "PR162D_R1_MASTER_PLAN_QUANTUM_0028",
+      "quantum_family": "MASTER_PLAN_QUANTUM_ROUTE_OR_FORMULATION",
+      "quantum_metadata_only_flag": false,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_MASTER_PLAN_QUANTUM_0028"
+      ],
+      "source_line_excerpt": "This subsection records the pure no-edit verification audit performed before the v9.9.758 patch. It is parser-safety and placement-control material only. The audit found no need to weaken v9.9.757 first-PR scope, source-",
+      "source_locator": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "text_locator": "line:2320",
+      "variable_definitions": {
+        "x_i": "binary selected edge, feature, or parameter-stack variable"
+      }
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+  "report_id": "PR162D_R1_MASTER_PLAN_QUANTUM_FORMULA_EXTRACTION_LEDGER",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_masterplanquantumformulaextractionledger.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}

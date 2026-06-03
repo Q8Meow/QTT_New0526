@@ -1,0 +1,2859 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 32,
+  "records": [
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0001",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0001",
+      "dataset_family": "kalshi_historical_markets",
+      "dedupe_key": "DATASET::kalshi_historical_markets::0001",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "market_ticker": "kalshi::market_ticker",
+        "settlement_ts": "kalshi::settlement_ts",
+        "status": "kalshi::status",
+        "yes_price": "kalshi::yes_price"
+      },
+      "input_fields": [
+        "market_ticker",
+        "settlement_ts",
+        "status",
+        "yes_price"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_ticker",
+        "settlement_ts",
+        "status",
+        "yes_price"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0001",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0001",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0001",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0001",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0001"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-cutoff-timestamps.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0002",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0002",
+      "dataset_family": "kalshi_historical_trades",
+      "dedupe_key": "DATASET::kalshi_historical_trades::0002",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "count": "kalshi::count",
+        "created_ts": "kalshi::created_ts",
+        "market_ticker": "kalshi::market_ticker",
+        "price": "kalshi::price",
+        "trade_id": "kalshi::trade_id"
+      },
+      "input_fields": [
+        "trade_id",
+        "market_ticker",
+        "price",
+        "count",
+        "created_ts"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "trade_id",
+        "market_ticker",
+        "price",
+        "count",
+        "created_ts"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0002",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0002",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0002",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0002",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0002"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-market-candlesticks.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0003",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0003",
+      "dataset_family": "kalshi_historical_candles_1m",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1m::0003",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume",
+        "yes_ask": "kalshi::yes_ask",
+        "yes_bid": "kalshi::yes_bid"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "yes_bid",
+        "yes_ask",
+        "price",
+        "volume"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "yes_bid",
+        "yes_ask",
+        "price",
+        "volume"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0003",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0003",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0003",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0003",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0003"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-trades.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0004",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0004",
+      "dataset_family": "kalshi_historical_candles_1h",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1h::0004",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "open_interest": "kalshi::open_interest",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0004",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0004",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0004",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0004",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0004"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/historical/get-historical-markets.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0005",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0005",
+      "dataset_family": "kalshi_historical_candles_1d",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1d::0005",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "open_interest": "kalshi::open_interest",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0005",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0005",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0005",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0005",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0005"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/batch-get-market-candlesticks",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0006",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0006",
+      "dataset_family": "polymarket_gamma_markets",
+      "dedupe_key": "DATASET::polymarket_gamma_markets::0006",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "clobTokenIds": "polymarket::clobTokenIds",
+        "id": "polymarket::id",
+        "outcomePrices": "polymarket::outcomePrices",
+        "outcomes": "polymarket::outcomes",
+        "question": "polymarket::question"
+      },
+      "input_fields": [
+        "id",
+        "question",
+        "outcomes",
+        "outcomePrices",
+        "clobTokenIds"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "question",
+        "outcomes",
+        "outcomePrices",
+        "clobTokenIds"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0006",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0006",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0006",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0006",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0006"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/data/get-midpoint-price",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0007",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0007",
+      "dataset_family": "polymarket_gamma_events",
+      "dedupe_key": "DATASET::polymarket_gamma_events::0007",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "endDate": "polymarket::endDate",
+        "id": "polymarket::id",
+        "markets": "polymarket::markets",
+        "slug": "polymarket::slug",
+        "title": "polymarket::title"
+      },
+      "input_fields": [
+        "id",
+        "slug",
+        "title",
+        "markets",
+        "endDate"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "slug",
+        "title",
+        "markets",
+        "endDate"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0007",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0007",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0007",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0007",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0007"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-spread",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0008",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0008",
+      "dataset_family": "polymarket_clob_orderbook",
+      "dedupe_key": "DATASET::polymarket_clob_orderbook::0008",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "asks": "polymarket::asks",
+        "asset_id": "polymarket::asset_id",
+        "bids": "polymarket::bids",
+        "timestamp": "polymarket::timestamp"
+      },
+      "input_fields": [
+        "asset_id",
+        "bids",
+        "asks",
+        "timestamp"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "asset_id",
+        "bids",
+        "asks",
+        "timestamp"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0008",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0008",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0008",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0008",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0008"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-prices-history",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0009",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0009",
+      "dataset_family": "polymarket_midpoint",
+      "dedupe_key": "DATASET::polymarket_midpoint::0009",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "mid": "polymarket::mid",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "mid"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "mid"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0009",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0009",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0009",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0009",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0009"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/trade/get-trades",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0010",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0010",
+      "dataset_family": "polymarket_spread",
+      "dedupe_key": "DATASET::polymarket_spread::0010",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "spread": "polymarket::spread",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "spread"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "spread"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0010",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0010",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0010",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0010",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0010"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-open-interest",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0011",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0011",
+      "dataset_family": "polymarket_prices_history",
+      "dedupe_key": "DATASET::polymarket_prices_history::0011",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "p": "polymarket::p",
+        "t": "polymarket::t",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "t",
+        "p"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "t",
+        "p"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0011",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0011",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0011",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0011",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0011"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-top-holders-for-markets",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0012",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0012",
+      "dataset_family": "polymarket_public_trades",
+      "dedupe_key": "DATASET::polymarket_public_trades::0012",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "asset_id": "polymarket::asset_id",
+        "id": "polymarket::id",
+        "price": "polymarket::price",
+        "size": "polymarket::size",
+        "timestamp": "polymarket::timestamp"
+      },
+      "input_fields": [
+        "id",
+        "asset_id",
+        "price",
+        "size",
+        "timestamp"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "asset_id",
+        "price",
+        "size",
+        "timestamp"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0012",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0012",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0012",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0012",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0012"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-market-by-token",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0013",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0013",
+      "dataset_family": "polymarket_open_interest",
+      "dedupe_key": "DATASET::polymarket_open_interest::0013",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "market_id": "polymarket::market_id",
+        "open_interest": "polymarket::open_interest"
+      },
+      "input_fields": [
+        "market_id",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_id",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0013",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0013",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0013",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0013",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0013"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/data/get-market-price",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0014",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0014",
+      "dataset_family": "polymarket_top_holders",
+      "dedupe_key": "DATASET::polymarket_top_holders::0014",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "balance": "polymarket::balance",
+        "holder": "polymarket::holder",
+        "market_id": "polymarket::market_id"
+      },
+      "input_fields": [
+        "market_id",
+        "holder",
+        "balance"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_id",
+        "holder",
+        "balance"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0014",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0014",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0014",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0014",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0014"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-clob-market-info",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0015",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0015",
+      "dataset_family": "forecastex_daily_pairs",
+      "dedupe_key": "DATASET::forecastex_daily_pairs::0015",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "date": "forecastex::date",
+        "event_contract": "forecastex::event_contract",
+        "no_pair": "forecastex::no_pair",
+        "yes_pair": "forecastex::yes_pair"
+      },
+      "input_fields": [
+        "date",
+        "event_contract",
+        "yes_pair",
+        "no_pair"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "date",
+        "event_contract",
+        "yes_pair",
+        "no_pair"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0015",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0015",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0015",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0015",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0015"
+      ],
+      "source_class": "OFFICIAL_FORECASTEX_DOC",
+      "source_locator": "https://forecastex.com/data",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "FORECASTEX"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0016",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0016",
+      "dataset_family": "forecastex_daily_prices",
+      "dedupe_key": "DATASET::forecastex_daily_prices::0016",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "close_price": "forecastex::close_price",
+        "date": "forecastex::date",
+        "event_contract": "forecastex::event_contract"
+      },
+      "input_fields": [
+        "date",
+        "event_contract",
+        "close_price"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "date",
+        "event_contract",
+        "close_price"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0016",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0016",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0016",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0016",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0016"
+      ],
+      "source_class": "OFFICIAL_FORECASTEX_DOC",
+      "source_locator": "https://forecastex.com/data",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "FORECASTEX"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0017",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0017",
+      "dataset_family": "forecastex_summary_activity",
+      "dedupe_key": "DATASET::forecastex_summary_activity::0017",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "activity": "forecastex::activity",
+        "date": "forecastex::date",
+        "product": "forecastex::product",
+        "total_pairs": "forecastex::total_pairs"
+      },
+      "input_fields": [
+        "date",
+        "product",
+        "total_pairs",
+        "activity"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "date",
+        "product",
+        "total_pairs",
+        "activity"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0017",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0017",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0017",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0017",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0017"
+      ],
+      "source_class": "OFFICIAL_FORECASTEX_DOC",
+      "source_locator": "https://forecastex.com/data",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "FORECASTEX"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0018",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0018",
+      "dataset_family": "forecastex_intraday_csv",
+      "dedupe_key": "DATASET::forecastex_intraday_csv::0018",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "event_contract": "forecastex::event_contract",
+        "price": "forecastex::price",
+        "size": "forecastex::size",
+        "timestamp": "forecastex::timestamp"
+      },
+      "input_fields": [
+        "timestamp",
+        "event_contract",
+        "price",
+        "size"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "timestamp",
+        "event_contract",
+        "price",
+        "size"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0018",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0018",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0018",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0018",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0018"
+      ],
+      "source_class": "OFFICIAL_FORECASTEX_DOC",
+      "source_locator": "https://forecastex.com/data",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "FORECASTEX"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0021",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0021",
+      "dataset_family": "kalshi_historical_markets",
+      "dedupe_key": "DATASET::kalshi_historical_markets::0021",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "market_ticker": "kalshi::market_ticker",
+        "settlement_ts": "kalshi::settlement_ts",
+        "status": "kalshi::status",
+        "yes_price": "kalshi::yes_price"
+      },
+      "input_fields": [
+        "market_ticker",
+        "settlement_ts",
+        "status",
+        "yes_price"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_ticker",
+        "settlement_ts",
+        "status",
+        "yes_price"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0021",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0021",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0021",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0021",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0021"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-multiple-market-orderbooks.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0022",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0022",
+      "dataset_family": "kalshi_historical_trades",
+      "dedupe_key": "DATASET::kalshi_historical_trades::0022",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "count": "kalshi::count",
+        "created_ts": "kalshi::created_ts",
+        "market_ticker": "kalshi::market_ticker",
+        "price": "kalshi::price",
+        "trade_id": "kalshi::trade_id"
+      },
+      "input_fields": [
+        "trade_id",
+        "market_ticker",
+        "price",
+        "count",
+        "created_ts"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "trade_id",
+        "market_ticker",
+        "price",
+        "count",
+        "created_ts"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0022",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0022",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0022",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0022",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0022"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-trades.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0023",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0023",
+      "dataset_family": "kalshi_historical_candles_1m",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1m::0023",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume",
+        "yes_ask": "kalshi::yes_ask",
+        "yes_bid": "kalshi::yes_bid"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "yes_bid",
+        "yes_ask",
+        "price",
+        "volume"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "yes_bid",
+        "yes_ask",
+        "price",
+        "volume"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0023",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0023",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0023",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0023",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0023"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-markets.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0024",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0024",
+      "dataset_family": "kalshi_historical_candles_1h",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1h::0024",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "open_interest": "kalshi::open_interest",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0024",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0024",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0024",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0024",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0024"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/market/get-market.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0025",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0025",
+      "dataset_family": "kalshi_historical_candles_1d",
+      "dedupe_key": "DATASET::kalshi_historical_candles_1d::0025",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "end_period_ts": "kalshi::end_period_ts",
+        "open_interest": "kalshi::open_interest",
+        "price": "kalshi::price",
+        "volume": "kalshi::volume"
+      },
+      "input_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "end_period_ts",
+        "price",
+        "volume",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0025",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0025",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0025",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0025",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0025"
+      ],
+      "source_class": "OFFICIAL_KALSHI_DOC",
+      "source_locator": "https://docs.kalshi.com/api-reference/events/get-event-candlesticks.md",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "KALSHI"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0026",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0026",
+      "dataset_family": "polymarket_gamma_markets",
+      "dedupe_key": "DATASET::polymarket_gamma_markets::0026",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "clobTokenIds": "polymarket::clobTokenIds",
+        "id": "polymarket::id",
+        "outcomePrices": "polymarket::outcomePrices",
+        "outcomes": "polymarket::outcomes",
+        "question": "polymarket::question"
+      },
+      "input_fields": [
+        "id",
+        "question",
+        "outcomes",
+        "outcomePrices",
+        "clobTokenIds"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "question",
+        "outcomes",
+        "outcomePrices",
+        "clobTokenIds"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0026",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0026",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0026",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0026",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0026"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-top-holders-for-markets",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0027",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0027",
+      "dataset_family": "polymarket_gamma_events",
+      "dedupe_key": "DATASET::polymarket_gamma_events::0027",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "endDate": "polymarket::endDate",
+        "id": "polymarket::id",
+        "markets": "polymarket::markets",
+        "slug": "polymarket::slug",
+        "title": "polymarket::title"
+      },
+      "input_fields": [
+        "id",
+        "slug",
+        "title",
+        "markets",
+        "endDate"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "slug",
+        "title",
+        "markets",
+        "endDate"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0027",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0027",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0027",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0027",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0027"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-market-by-token",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0028",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0028",
+      "dataset_family": "polymarket_clob_orderbook",
+      "dedupe_key": "DATASET::polymarket_clob_orderbook::0028",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "asks": "polymarket::asks",
+        "asset_id": "polymarket::asset_id",
+        "bids": "polymarket::bids",
+        "timestamp": "polymarket::timestamp"
+      },
+      "input_fields": [
+        "asset_id",
+        "bids",
+        "asks",
+        "timestamp"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "asset_id",
+        "bids",
+        "asks",
+        "timestamp"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0028",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0028",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0028",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0028",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0028"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/data/get-market-price",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0029",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0029",
+      "dataset_family": "polymarket_midpoint",
+      "dedupe_key": "DATASET::polymarket_midpoint::0029",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "mid": "polymarket::mid",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "mid"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "mid"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0029",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0029",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0029",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0029",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0029"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/market-data/get-clob-market-info",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0030",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0030",
+      "dataset_family": "polymarket_spread",
+      "dedupe_key": "DATASET::polymarket_spread::0030",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "spread": "polymarket::spread",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "spread"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "spread"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0030",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0030",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0030",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0030",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0030"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/introduction",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0031",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0031",
+      "dataset_family": "polymarket_prices_history",
+      "dedupe_key": "DATASET::polymarket_prices_history::0031",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "p": "polymarket::p",
+        "t": "polymarket::t",
+        "token_id": "polymarket::token_id"
+      },
+      "input_fields": [
+        "token_id",
+        "t",
+        "p"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "token_id",
+        "t",
+        "p"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0031",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0031",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0031",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0031",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0031"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/list-markets-keyset-pagination",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0032",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0032",
+      "dataset_family": "polymarket_public_trades",
+      "dedupe_key": "DATASET::polymarket_public_trades::0032",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "asset_id": "polymarket::asset_id",
+        "id": "polymarket::id",
+        "price": "polymarket::price",
+        "size": "polymarket::size",
+        "timestamp": "polymarket::timestamp"
+      },
+      "input_fields": [
+        "id",
+        "asset_id",
+        "price",
+        "size",
+        "timestamp"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "id",
+        "asset_id",
+        "price",
+        "size",
+        "timestamp"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0032",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0032",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0032",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0032",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0032"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/list-markets",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0033",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0033",
+      "dataset_family": "polymarket_open_interest",
+      "dedupe_key": "DATASET::polymarket_open_interest::0033",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "market_id": "polymarket::market_id",
+        "open_interest": "polymarket::open_interest"
+      },
+      "input_fields": [
+        "market_id",
+        "open_interest"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_id",
+        "open_interest"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0033",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0033",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0033",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0033",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0033"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/markets/get-market-by-id",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    },
+    {
+      "agent_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "agent_route_refs": [
+        "QKU_DATA_ACQUISITION_AGENT",
+        "QKU_FORMULA_COMPUTE_ENGINE",
+        "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_MODE",
+        "FEATURE_BUILDER",
+        "PARAMETER_STACK_AGENT",
+        "REPLAY_PAPER_CANDIDATE_ROUTER",
+        "REPLAY_ENGINE_INPUT_PREP",
+        "PAPER_ENGINE_INPUT_PREP",
+        "RISK_MANAGER_CANDIDATE_REVIEW",
+        "CAPITAL_SIZING_CANDIDATE_REVIEW",
+        "QUANTUM_ADVISORY_AGENT",
+        "QUANTUM_CLASSICAL_HYBRID_COMPARATOR",
+        "STRATEGY_SIGNAL_DECISION_AGENT_CANDIDATE_INTENT",
+        "EXECUTION_ROUTER_NON_AUTHORITY_PREVIEW",
+        "OWNER_REVIEW_OPTIONAL"
+      ],
+      "candidate_id": "PR162D_R1_DATASET_0034",
+      "candidate_or_provisional_flag": true,
+      "dataset_candidate_id": "PR162D_R1_DATASET_0034",
+      "dataset_family": "polymarket_top_holders",
+      "dedupe_key": "DATASET::polymarket_top_holders::0034",
+      "downstream_pr_routes": [
+        "PR162R",
+        "PR163",
+        "PR164",
+        "PR165"
+      ],
+      "field_mapping": {
+        "balance": "polymarket::balance",
+        "holder": "polymarket::holder",
+        "market_id": "polymarket::market_id"
+      },
+      "input_fields": [
+        "market_id",
+        "holder",
+        "balance"
+      ],
+      "live_order_authority": false,
+      "locator_schema_fields": [
+        "market_id",
+        "holder",
+        "balance"
+      ],
+      "metadata_only_flag": false,
+      "output_fields": [
+        "replay_paper_dataset_candidate"
+      ],
+      "pr162r_handoff_ref": "PR162D_R1_PR162R_HANDOFF::PR162D_R1_DATASET_0034",
+      "pr163_future_result_consumer_ref": "PR162D_R1_PR163_FUTURE_CONSUMER::PR162D_R1_DATASET_0034",
+      "pr164_future_review_ref": "PR162D_R1_PR164_FUTURE_REVIEW::PR162D_R1_DATASET_0034",
+      "pr165_future_scoring_ref": "PR162D_R1_PR165_FUTURE_SCORING::PR162D_R1_DATASET_0034",
+      "qku_refs": [
+        "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000034"
+      ],
+      "replay_paper_candidate_flag": true,
+      "replay_paper_route_refs": [
+        "PR162D_R1_REPLAY_PAPER_CANDIDATE_QUEUE",
+        "PR162D_R1_REPLAY_PAPER_ROUTE::PR162D_R1_DATASET_0034"
+      ],
+      "source_class": "OFFICIAL_POLYMARKET_DOC",
+      "source_locator": "https://docs.polymarket.com/api-reference/events/list-events-keyset-pagination",
+      "source_tier": "TIER_1_OFFICIAL_OR_PROJECT_DOC",
+      "units": "dataset_schema",
+      "venue": "POLYMARKET"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_PredictionMarketDatasetAcquisitionLedger.report.json",
+  "report_id": "PR162D_R1_PREDICTION_MARKET_DATASET_ACQUISITION_LEDGER",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_predictionmarketdatasetacquisitionledger.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}
