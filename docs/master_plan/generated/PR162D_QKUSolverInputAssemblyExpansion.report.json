@@ -1,0 +1,4412 @@
+{
+  "authority_class": "PR162D_CANDIDATE_MATERIALIZATION_AGENT_ROUTING_AND_QUANTUM_SMOKE_ONLY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 250,
+  "records": [
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000001",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-657D0FCC52C1403CAC34",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00001"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000002",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F1198765053CB2D7DFC7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00002"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000003",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A969DBD95BA4861DFEE8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00003"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000004",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-AB5E4F4ADDFB00FEF56C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00004"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000005",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-28CF1DEA7316A95CE6A7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00005"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000006",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9AEFE2FB9A37CD3E267C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00006"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000007",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4079C408B948570239EE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00007"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000008",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A72B501B3E3231B22B55",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00008"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000009",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A334D616E4C7D16A7565",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00009"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000010",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0F49FD642400F92B797D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00010"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000011",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B93A4FA62CBE8892B525",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00011"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000012",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1B5CE883E84C928DFD3C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00012"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000013",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F6943EB0DDA762802114",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00013"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000014",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8E0C4DB7D759B2B37859",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00014"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000015",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-03455FF232966273A812",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00015"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000016",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5BE692A9540A1D7A4222",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00016"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000017",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BBFA356C1D49DCA218DE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00017"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000018",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C1A46848BD00665F07E6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00018"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000019",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BF33A90976BD0D697031",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00019"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000020",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7864CA7264CB734DE4E3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00020"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000021",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-450922BAB7B0F0882CA9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00021"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000022",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9675A74ECE94BFE98E12",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00022"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000023",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-25106BF3FB7DBFD3C30E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00023"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000024",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9C2FDBC4EA22C24A5D2F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00024"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000025",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9F45687CB178793B0FFD",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00025"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000026",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-721F4638C2DC2D351E02",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00026"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000027",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4360D41BEC45E27814C6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00027"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000028",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D366E9BD044DB423010B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00028"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000029",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-56502EE017E9CE77F242",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00029"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000030",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-51E216FC318D74560599",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00030"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_VQE_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_EXPECTATION_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000031",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-40F4F1BCB79667023D97",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00031"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_VQE_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_EXPECTATION_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000032",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-24BA4AE8C3AC1DDF2D8D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00032"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000033",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0B0006C079BBE9AE868D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00033"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000034",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B467BB4905BC50F3D85C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00034"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000035",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-24027FF0163C2F4B1B55",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00035"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000036",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2D79671CF638A7761F41",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00036"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000037",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6D4C0528A0113BC80C63",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00037"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000038",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-230683AF9C663712A5BF",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00038"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000039",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-08A27A035FC472591FFB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00039"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000040",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6BCBF30C1565F453CE41",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00040"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000041",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6B84707930421F148AB6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00041"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000042",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-964F4A5741692D6AD54E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00042"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000043",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BDEA3779AC56FCBBA81F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00043"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000044",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F9857B3D31EB1BB0171D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00044"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000045",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8B15F3AC5E238F0F27FC",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00045"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000046",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D58DC9987E2EAA4B5961",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00046"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000047",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E2EA7541E556A800095E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00047"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000048",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7E9B4903A697AD0E9B2F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00048"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000049",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C5A496F065EC9F167C94",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00049"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000050",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1038316C9FA7DA39F7E9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00050"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000051",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-59A18289C8AA71126A3A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00051"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000052",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0151CE2D1DDA25741354",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00052"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000053",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-46FFFCE8710A837A6ED8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00053"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000054",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0B2EFE72F662C1B7E2F7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00054"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000055",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1C07DECB97C5ABF7DCC5",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00055"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000056",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-98C64ED69F279D7E27ED",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00056"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000057",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6A9C0422219F9DC08A6D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00057"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000058",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-97AF427D7777DF365D9B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00058"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000059",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9E6AAF065131437D3FE7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00059"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000060",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-42B2CDC6E720FC1E3A3C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00060"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000061",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F5823D1AE7FA2BDF9BAA",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00061"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000062",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6440ADCC467779447D71",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00062"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000063",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8C582FA1170251E43C82",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00063"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000064",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B93F9E260688163B30D3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00064"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000065",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-EA4FC2595C55D5EA9347",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00065"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000066",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BAC66595DA3731314937",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00066"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000067",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4E98C1F776CF566DF5F7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00067"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000068",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E1D2529968716B974681",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00068"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000069",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-46476CD31126CE1EF34B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00069"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000070",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-688997332B8ECEC502FE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00070"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000071",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D9AB01BD9C66D5BBCDB7",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00071"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000072",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5E356CFC2681FAE7BF6D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00072"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000073",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5DFB2EA49870F5125042",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00073"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000074",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-49AC6338C1FE98C3C7E9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00074"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000075",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2E2BB3C9D8578DC1EBAE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00075"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000076",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-84AFC86136A7DAD4BF2E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00076"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000077",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-3CD8389A038C7135FA17",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00077"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000078",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-36B8438E087A7C471556",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00078"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000079",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-75EC63DB43D84A87ACB4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00079"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000080",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-50CABEAC4C4AF6A63CA0",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00080"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000081",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8C99EA33980B2983ACC3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00081"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000082",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F1901BE0D84878BBD66F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00082"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000083",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-064CAF0BBF96EADE8352",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00083"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000084",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C2C92F2BE31FB62E9210",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00084"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000085",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C9B46A146D517FBA2B6F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00085"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000086",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F4C1334D9AEF0D450F92",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00086"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000087",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-AACC417CB9F34E6917B4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00087"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000088",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C100BED4B6A87778885B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00088"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000089",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0FCF504EE1901CEC4EA8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00089"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000090",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8B3B2225AA30FA444630",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00090"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000091",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-ABB6E8B18534741C4DC1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00091"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000092",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4A97F143E38C730E9F55",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00092"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000093",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-33EECF9642EE479F154C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00093"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000094",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-CFBE1B594520BC64EA5B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00094"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000095",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-71B60AF340501ED0896A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00095"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000096",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-58D62B00D133DAC2F187",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00096"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000097",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-33CFA0839E2D411914C1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00097"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000098",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1E8ABC2640D4B826A109",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00098"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000099",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F3CC9B59A429A8526B6E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00099"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000100",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5335582173D2474E9A24",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00100"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000101",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-698CB5DB94740CA9E6AE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00101"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000102",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-34199050D2B8C003F813",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00102"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000103",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7C45462C7697656131BC",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00103"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000104",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-41304312EE2F76E34A42",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00104"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000105",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-66BA0E2E51DC1351CFC1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00105"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000106",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F792B2DE506A94CEE1CC",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00106"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000107",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-37B67236B3220D1A1C97",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00107"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000108",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-CBAF24E833386EAA81A1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00108"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000109",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1356B081A36121019C64",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00109"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000110",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2878EA1F92127A89459A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00110"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000111",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A7BF67CBF35783AFD8F9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00111"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000112",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F47E4846E10DBF5EEBC4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00112"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000113",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-AB728B4F8269D1C3A16C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00113"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000114",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-63DB9930B69101A13ACB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00114"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000115",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C1C64B55F3897D29D4FA",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00115"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000116",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D075CD9D1EC2EFA94BBB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00116"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000117",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-63AB32CBD62C86EEE329",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00117"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000118",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5503694A577D8C31BC4B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00118"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000119",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-26704705FBD830B6FA22",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00119"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000120",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-22A094AD6413F4285B0F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00120"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000121",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-981EC42BF7AACFB7E13C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00121"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000122",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5870E8CFEFB678C0685D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00122"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000123",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F53F292DCB6C8F32440A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00123"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ISING_ENERGY"
+      ],
+      "input_representation": "ISING_H_J",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000124",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9761ECFBE6F6D6DD403C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00124"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ISING_ENERGY"
+      ],
+      "input_representation": "ISING_H_J",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000125",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2A5E0C0727CE886F39B8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00125"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000126",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9225418D9823F717109F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00126"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000127",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2AA874A7F16213C8A741",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00127"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000128",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7AE3BF3F339185200E78",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00128"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000129",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-578131409ABD54069081",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00129"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000130",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-CDEA3A805AFC045D2312",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00130"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000131",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-FD236C55E776D0B1890A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00131"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000132",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D5759CFB53AF2C673284",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00132"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000133",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-45CAD36ECBF6915144BB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00133"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000134",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-DAFDCAAF352C5439E4A2",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00134"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000135",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E84985515537484796A1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00135"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000136",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2F240666EFA6EC040F57",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00136"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000137",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1E0D5DBF844A9CEB2D15",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00137"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000138",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-13008B7A61BAE036CD92",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00138"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000139",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-AB8E7FD1E4070D97F79A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00139"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000140",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-073D591E65AAFE6A596A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00140"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000141",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D456715B274A6C382B76",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00141"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000142",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-03A0939A6F0FABD2AEB8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00142"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000143",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-63514DCE9C2C45804703",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00143"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000144",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-262045F92282F05098F3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00144"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000145",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9333A15770382E36426B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00145"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000146",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-46F187D705F3C5A51353",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00146"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000147",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8A8E68C593767CAB7E5C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00147"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000148",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-40F5EE71005996EF465A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00148"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000149",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8D34A5298A3AEC54168A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00149"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000150",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B753522F9C6A13A453E4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00150"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000151",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2B78ED9D0AAA9268DC2D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00151"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000152",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9EFAE6E30FCD2D1438EE",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00152"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000153",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-16724F5CDE8EB56F6B03",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00153"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000154",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-86271A31A3A394A02266",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00154"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000155",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A8BB9F578108AE57857A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00155"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000156",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2E49FD3E4C8470B442AD",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00156"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000157",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-13BD374B8308FFF66508",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00157"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000158",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F230B190CF0E9F863AE0",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00158"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000159",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-350523AD000D2ACEA631",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00159"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000160",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-91CA5FAE6124CC064A0B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00160"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000161",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-40D450B36E8D4E723A75",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00161"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000162",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D850CF72C645368843E1",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00162"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000163",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-069207FDC341081154E4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00163"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000164",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5F755FF0432A622384EA",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00164"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000165",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-807B5C99960DDBB49F78",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00165"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000166",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2FB6513FC7FBD96CD27C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00166"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000167",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7D153965FD0062F864DB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00167"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000168",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2AEFB44F15BC6757D7EB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00168"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000169",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C620A4131B3C1224BA2F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00169"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000170",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-EF853576488E95DA2C81",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00170"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000171",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-67997C3C89E0BC035711",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00171"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000172",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0B6B7127C49110EE3AD5",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00172"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000173",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D1DEF65B1DC6A1A77845",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00173"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000174",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-EA52FCF3DFBF878BBD76",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00174"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000175",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-786FB7E223A88892E7F3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00175"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000176",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-01AC1CFC58B3CCDD6F7B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00176"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000177",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BECF2088264C6A2EBA16",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00177"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000178",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-449C46D1A20B267B0788",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00178"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000179",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C25DA78F7722B2901280",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00179"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000180",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E0BC0D7C8DF6D8047D7E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00180"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000181",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E9BDD6F7791494BFA9DF",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00181"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000182",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4D225168A024EDA7BBA6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00182"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000183",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F22B1F8D6CFB7193B400",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00183"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000184",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-864BFC505015FDA8D853",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00184"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000185",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-0AD59E23151FE29A0EB8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00185"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000186",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-35CABED410F8C7879657",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00186"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000187",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5BF3B66121C395BFA1D0",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00187"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000188",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-CCEE11281931E9532513",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00188"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000189",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-26DD28B4AA567D905037",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00189"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000190",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-677A3FF95BBB58C1ADD4",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00190"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000191",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-708A59BD6FA43A82DA7D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00191"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000192",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-08CCB8B2FC18880EE275",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00192"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QUBO_EXACT_ENUMERATION_SMOKE",
+      "formula_refs": [
+        "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX"
+      ],
+      "input_representation": "QUBO_MATRIX",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000193",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": true,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BBC05EDA7C37513B633F",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00193"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QUBO_EXACT_ENUMERATION_SMOKE",
+      "formula_refs": [
+        "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX"
+      ],
+      "input_representation": "QUBO_MATRIX",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000194",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": true,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-070D56C4447DF411EF78",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00194"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000195",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-920BBF8AEB47788BB51C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00195"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000196",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-2D962CF8215729DD8693",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00196"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000197",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-638CFFFEE59B5223668E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00197"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000198",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D483BDBEBD044A3121E9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00198"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000199",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-47E04A18AEA7DC455745",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00199"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000200",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-38286D205E6EEA319752",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00200"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000201",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9F1A4EF4D9BE5B904A59",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00201"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000202",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-606D7FD87A6DA22874BF",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00202"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000203",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-38D34C7CC6132F4FD082",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00203"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000204",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B52FFF4CB801208AABF6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00204"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-ISING_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_ISING_QAOA_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-QAOA_HAMILTONIAN_MAPPING_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000205",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F545AE99C809B8FD0ECA",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00205"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000206",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D8A99D29DDD810FB19D6",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00206"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000207",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4E8BB910663F2AFDDD5D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00207"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QUBO_EXACT_ENUMERATION_SMOKE",
+      "formula_refs": [
+        "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX"
+      ],
+      "input_representation": "QUBO_MATRIX",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000208",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": true,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7CB16A3CEAE7B24A74C3",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00208"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-QUBO_INPUT_ASSEMBLY_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QUBO_EXACT_ENUMERATION_SMOKE",
+      "formula_refs": [
+        "PR162B-FORMULA-QUBO_OBJECTIVE_XTQX"
+      ],
+      "input_representation": "QUBO_MATRIX",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000209",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": true,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E68302FC0FF0606DCF88",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00209"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000210",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-669B4FB806E9CDBCD331",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00210"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000211",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-3172642E6391D090E9A5",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00211"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000212",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F398F2BC183143C26066",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00212"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000213",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-86CD7AB9E7422FA4DA8B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00213"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000214",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-74A2F423B0E4F93936D5",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00214"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000215",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B24B687A32098AD31EC9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00215"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000216",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-3740732328B734785B9C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00216"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000217",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4E426709A82AE3D75F04",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00217"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000218",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-977B9435973744DF3045",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00218"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000219",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-954E48129310B076A04A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00219"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000220",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-19A1BB66224240109F18",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00220"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000221",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5E7C3CF4163AF1CA5695",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00221"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000222",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-9352D0F302997FC0E1B9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00222"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_VQE_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_EXPECTATION_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000223",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-DB884EB38A7B1B2F57BC",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00223"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "QISKIT_VQE_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-VQE_OBJECTIVE_CANDIDATE"
+      ],
+      "input_representation": "HAMILTONIAN_EXPECTATION_TERMS",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000224",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F68B66669966D097C7D8",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00224"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000225",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-7B4F24A4E06304A8A26D",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00225"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000226",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-C3BD2B2FD955204EFC9E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00226"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000227",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-5BEACD1906E1645B2C8C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00227"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000228",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-4A032A122CE1A2E5F49E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00228"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000229",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B52757DFBD3B4BE82076",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00229"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000230",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-E23645D8F3F808CAD505",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00230"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000231",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-97AA35AEE0A6D4696213",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00231"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000232",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-80AC584245AD04217440",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00232"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000233",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F41F0A04BDFAA3EB9804",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00233"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000234",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-66B4E32A0314426D5FEF",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00234"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000235",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A61CDD574D527D4E0B6B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00235"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000236",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F92975D3530CA6F47B97",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00236"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000237",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-D9B310F56D29853FF6F9",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00237"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000238",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-1162B44AE71735374AF2",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00238"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000239",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A953340364515346C503",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00239"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000240",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-F6750A863441286D1E2B",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00240"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000241",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B9BE10C3C73C9EF014DC",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00241"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000242",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-19CC96D4A9A352354E3C",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00242"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000243",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-98B648F4082CC8A9C07A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00243"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000244",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-A0AB8B470D62058EA68E",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00244"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000245",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-26C838D16E240B5F01D5",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00245"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000246",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-95594B96917E40DB9B1A",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00246"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "DWAVE_BQM_CANDIDATE",
+      "formula_refs": [
+        "PR162B-FORMULA-ANNEALING_BQM_CQM_CANDIDATE"
+      ],
+      "input_representation": "BQM_OR_CQM",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000247",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-8CA67A9751129DB24EAB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00247"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000248",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-BEF8738D609CFFD6FEFB",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00248"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000249",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-6EFCAD7B9577777E3D22",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00249"
+    },
+    {
+      "algorithm_refs": [
+        "PR162B-ALGORITHM-EXACT_QUBO_SMOKE_ENUMERATION_ALGORITHM"
+      ],
+      "candidate_solver_input_ready_flag": true,
+      "compatible_solver_family": "CLASSICAL_VECTOR_FORMULA",
+      "formula_refs": [
+        "PR162B-FORMULA-MEAN_VARIANCE_OBJECTIVE"
+      ],
+      "input_representation": "VECTOR_FORMULA_INPUT",
+      "live_execution_allowed_flag": false,
+      "qku_id": "QKU-ATOMICROW-AR_EXACT_001_SIGNAL_FEATURES_000250",
+      "replay_paper_candidate_flag": true,
+      "smoke_execution_allowed_flag": false,
+      "solver_input_candidate_id": "PR162D-SOLVER-INPUT-B96C6B2A18CD917075F0",
+      "solver_mapping_ref": "PR162B-SOLVER-MAPPING-00250"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_QKUSolverInputAssemblyExpansion.report.json",
+  "report_id": "PR162D-PR162D_QKU_SOLVER_INPUT_ASSEMBLY_EXPANSION",
+  "report_type": "PR162D_QKU_SOLVER_INPUT_ASSEMBLY_EXPANSION",
+  "schema_ref": "src/qtt/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing/schemas/pr162d_qkusolverinputassemblyexpansion.schema.json",
+  "shard_count": 0,
+  "shard_files": [],
+  "shard_manifest_ref": null,
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137R_AtomicRowsBundleReconciliation.report.json",
+    "docs/master_plan/generated/PR138_AtomicRowsSemanticRowContract.report.json",
+    "docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUGraphQualityMetrics.report.json",
+    "docs/master_plan/generated/PR161C_QKUMasterInventoryBridge.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraphEdges.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUMarketBundleActivationPolicy.report.json",
+    "docs/master_plan/generated/PR161D_QKUQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperPriorityQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUReplayPaperScenarioInputs.report.json",
+    "docs/master_plan/generated/PR161D_QKUScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR161E_AgentOutcomeTaskQueue.report.json",
+    "docs/master_plan/generated/PR161E_OwnerReviewResultPromotionQueue.report.json",
+    "docs/master_plan/generated/PR161E_QKUReplayPaperProfitabilityLedger.report.json",
+    "docs/master_plan/generated/PR161E_QKUScenarioResultAttribution.report.json",
+    "docs/master_plan/generated/PR161E_QuantumClassicalHybridOutcomeComparison.report.json",
+    "docs/master_plan/generated/PR161E_ReplayPaperOutcomeCaptureRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ExecutorInputRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentCommunicationProtocol.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentFailureResponseMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentKPIReadinessBridge.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentOwnerEscalationQueue.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRetryRerouteQuarantinePolicy.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QuantumClassicalHybridRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR161F_RunArtifactEnvelopeRegistry.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUArtifactCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumDownstreamAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumBackendFitCandidateMatrix.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridArtifactInputBridge.report.json",
+    "docs/master_plan/generated/PR162_QuantumClassicalHybridComparatorBlueprint.report.json",
+    "docs/master_plan/generated/PR162_QuantumParameterRangeCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_QuantumReplayPaperWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162A_DatasetMaterializationManifest.report.json",
+    "docs/master_plan/generated/PR162A_MarketScenarioQKUMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162A_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162A_PR161FRunPlanDatasetCoverageBridge.report.json",
+    "docs/master_plan/generated/PR162A_PR162AdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162A_QTTAgentDatasetHandoffBridge.report.json",
+    "docs/master_plan/generated/PR162A_QuantumFeatureMaterializationWorkOrderQueue.report.json",
+    "docs/master_plan/generated/PR162A_QuantumQKUDatasetFeatureBridge.report.json",
+    "docs/master_plan/generated/PR162B_PR162CDataRequirementHandoff.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUDormancyRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutableComputeContractRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUExecutionClassificationAudit.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaBindingProofMatrix.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaTestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUMarketClassificationRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterRangeScaleRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUParameterValueRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUStage1PredictionMarketActivationGate.report.json",
+    "docs/master_plan/generated/PR162B_QKUTradableValueCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QTTAgentStage1QKUActivationAllowlist.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_DataRequirementClassificationLedger.report.json",
+    "docs/master_plan/generated/PR162C_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162C_NormalizedDatasetInventory.report.json",
+    "docs/master_plan/generated/PR162C_OwnerMaterializationCommandQueue.report.json",
+    "docs/master_plan/generated/PR162C_PR162RAdapterRerunReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162C_PR163ReadinessBlockerStatus.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUInputFieldCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentDatasetConsumerRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QTTAgentExecutableQKURoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_StrictQKUCoverageProofMatrix.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "src/qtt/stage1_prediction_markets/launch_readiness/day1_launch_readiness_roadmap_policy.py",
+    "tools/ci_branch_context.py",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/run_validation_gates.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py"
+  ],
+  "summary_counts": {
+    "total_records": 250
+  },
+  "total_record_count": 250,
+  "upstream_pr_refs": [
+    "PR136",
+    "PR137R",
+    "PR138",
+    "PR161C",
+    "PR161D",
+    "PR161E",
+    "PR161F",
+    "PR162",
+    "PR162A",
+    "PR162B",
+    "PR162C"
+  ],
+  "validation_status": "PASS"
+}

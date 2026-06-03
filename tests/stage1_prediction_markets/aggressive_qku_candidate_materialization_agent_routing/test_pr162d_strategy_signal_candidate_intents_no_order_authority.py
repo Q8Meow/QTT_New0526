@@ -1,0 +1,5 @@
+from .pr162d_test_support import assert_strategy_intents_no_order_authority
+
+
+def test_pr162d_strategy_signal_candidate_intents_no_order_authority():
+    assert_strategy_intents_no_order_authority()

@@ -1,0 +1,5 @@
+from .pr162d_test_support import assert_quantum_no_profit_advantage
+
+
+def test_pr162d_quantum_execution_smoke_result_is_not_profit_or_advantage_evidence():
+    assert_quantum_no_profit_advantage()

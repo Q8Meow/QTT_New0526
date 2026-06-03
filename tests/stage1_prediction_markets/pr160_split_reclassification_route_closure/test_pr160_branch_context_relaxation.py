@@ -24,6 +24,9 @@ PR159R_BRANCH_CONTEXT_REPAIR_BRANCH = "repair/pr159r-detached-head-branch-contex
 PR162C_DOWNSTREAM_BRANCH = (
     "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
 )
+PR162D_DOWNSTREAM_BRANCH = (
+    "pr162d-aggressive-qku-candidate-materialization-agent-routing"
+)
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -150,6 +153,19 @@ def test_pr160_pr162c_downstream_branch_allows_cumulative_validation(monkeypatch
     failures, receipts = _branch_outcome(
         monkeypatch,
         PR162C_DOWNSTREAM_BRANCH,
+        ancestry_present=False,
+    )
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr160_pr162d_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR162D_DOWNSTREAM_BRANCH,
         ancestry_present=False,
     )
 
