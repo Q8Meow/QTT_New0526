@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "type": "string"
+    },
+    "created_by_pr": {
+      "type": "string"
+    },
+    "record_count": {
+      "type": "integer"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_filename": {
+      "type": "string"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "validation_status",
+    "record_count",
+    "records"
+  ],
+  "title": "PR162D_R1_QAOAVQESamplingVQEAnnealingFormulationLedger.report.json",
+  "type": "object"
+}

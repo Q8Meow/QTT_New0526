@@ -1,0 +1,528 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 54,
+  "records": [
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 1
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 6502
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 12
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 344
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 61
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 61
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 14
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 19
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 19
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 19
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 250
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 6502
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 6502
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 1
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 7
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 13
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 4
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 2
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 4
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 14
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 7
+    },
+    {
+      "consumption_mode": "CONSUME_EXISTING_OUTPUT_NO_REBUILD",
+      "input_ref": "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 15
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/QTT_MasterPlan_Current.md",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR136RouteTriage.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR136MasterPlanSectionCrosswalk.report.json",
+      "live_order_authority": false,
+      "missing_input_note": "MISSING_INPUT_CONTINUE_WHEN_PR162D_ROUTE_FALLBACK_AVAILABLE",
+      "present_flag": false,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": null
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 9360
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 9360
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 87461
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 87461
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 19
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 19
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 45
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 9360
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 1
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 1
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 4525
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 4525
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 61
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 14
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 8
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 6
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 4631
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 156
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 3
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 9
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 9
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 73
+    },
+    {
+      "consumption_mode": "UPSTREAM_CONTEXT_READ_ONLY",
+      "input_ref": "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json",
+      "live_order_authority": false,
+      "missing_input_note": null,
+      "present_flag": true,
+      "record_count": 61
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_PR162DConsumptionAudit.report.json",
+  "report_id": "PR162D_R1_PR162D_CONSUMPTION_AUDIT",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_pr162dconsumptionaudit.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}

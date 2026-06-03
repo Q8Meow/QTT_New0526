@@ -53,6 +53,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr162b-qku-formula-algorithm-solver-market-scope-materialization": 162,
     "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage": 162,
     "pr162d-aggressive-qku-candidate-materialization-agent-routing": 162,
+    "pr162d-r1-external-formula-data-quantum-acquisition-expansion": 162,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -675,6 +676,53 @@ PR162D_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    }
+)
+PR162D_R1_BRANCH = "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
+PR162D_R1_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR162D_R1_",
+    "src/qtt/stage1_prediction_markets/"
+    "pr162d_r1_external_formula_data_quantum_acquisition_expansion/",
+    "tests/stage1_prediction_markets/"
+    "pr162d_r1_external_formula_data_quantum_acquisition_expansion/",
+)
+PR162D_R1_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr162d_r1_external_formula_data_quantum_acquisition_expansion.py",
+        "tools/validate_pr162d_r1_external_formula_data_quantum_acquisition_expansion.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/tools/test_ci_branch_context.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+        "tests/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/"
+        "test_pr160_branch_context_relaxation.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/validator.py",
+        "tests/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/"
+        "test_pr159r_branch_context_relaxation.py",
+        "src/qtt/stage1_prediction_markets/"
+        "source_intelligence/pr159s_open_intake/validator.py",
+        "tests/stage1_prediction_markets/source_intelligence/"
+        "test_pr159s_branch_context.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "tests/stage1_prediction_markets/"
+        "atomicrows_pr154_value_state/test_pr161a_branch_context.py",
+        "src/qtt/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/validator.py",
+        "tests/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
     }
 )
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
@@ -1345,6 +1393,11 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if branch == PR162D_R1_BRANCH:
+        return normalized in PR162D_R1_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR162D_R1_ALLOWED_CHANGED_PATH_PREFIXES
+        )
     if branch == PR162D_BRANCH:
         return normalized in PR162D_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

@@ -1,0 +1,1456 @@
+{
+  "authority_class": "PR162D_R1_CANDIDATE_ACQUISITION_ONLY_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R1",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 170,
+  "records": [
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::binary_price_probability::variant_2::record_0001",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::binary_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0001",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::no_price_probability::variant_3::record_0002",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::no_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0002",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::midpoint_probability::variant_4::record_0003",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::midpoint_probability",
+      "formula_id": "PR162D_R1_FORMULA_0003",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::bid_ask_spread::variant_5::record_0004",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bid_ask_spread",
+      "formula_id": "PR162D_R1_FORMULA_0004",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::yes_no_cross_spread::variant_6::record_0005",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::yes_no_cross_spread",
+      "formula_id": "PR162D_R1_FORMULA_0005",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::orderbook_depth::variant_7::record_0006",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::orderbook_depth",
+      "formula_id": "PR162D_R1_FORMULA_0006",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::volume_weighted_price::variant_1::record_0007",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::volume_weighted_price",
+      "formula_id": "PR162D_R1_FORMULA_0007",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_return::variant_2::record_0008",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_return",
+      "formula_id": "PR162D_R1_FORMULA_0008",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_range::variant_3::record_0009",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_range",
+      "formula_id": "PR162D_R1_FORMULA_0009",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::open_interest_delta::variant_4::record_0010",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::open_interest_delta",
+      "formula_id": "PR162D_R1_FORMULA_0010",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::settlement_time_remaining::variant_5::record_0011",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::settlement_time_remaining",
+      "formula_id": "PR162D_R1_FORMULA_0011",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::historical_cutoff_route::variant_6::record_0012",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::historical_cutoff_route",
+      "formula_id": "PR162D_R1_FORMULA_0012",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::event_volume_share::variant_7::record_0013",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::event_volume_share",
+      "formula_id": "PR162D_R1_FORMULA_0013",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::token_outcome_probability_map::variant_1::record_0014",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::token_outcome_probability_map",
+      "formula_id": "PR162D_R1_FORMULA_0014",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::maker_taker_gap::variant_2::record_0015",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::maker_taker_gap",
+      "formula_id": "PR162D_R1_FORMULA_0015",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::binary_price_probability::variant_3::record_0016",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::binary_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0016",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::no_price_probability::variant_4::record_0017",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::no_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0017",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::midpoint_probability::variant_5::record_0018",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::midpoint_probability",
+      "formula_id": "PR162D_R1_FORMULA_0018",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::bid_ask_spread::variant_6::record_0019",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bid_ask_spread",
+      "formula_id": "PR162D_R1_FORMULA_0019",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::yes_no_cross_spread::variant_7::record_0020",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::yes_no_cross_spread",
+      "formula_id": "PR162D_R1_FORMULA_0020",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::orderbook_depth::variant_1::record_0021",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::orderbook_depth",
+      "formula_id": "PR162D_R1_FORMULA_0021",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::volume_weighted_price::variant_2::record_0022",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::volume_weighted_price",
+      "formula_id": "PR162D_R1_FORMULA_0022",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_return::variant_3::record_0023",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_return",
+      "formula_id": "PR162D_R1_FORMULA_0023",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_range::variant_4::record_0024",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_range",
+      "formula_id": "PR162D_R1_FORMULA_0024",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::open_interest_delta::variant_5::record_0025",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::open_interest_delta",
+      "formula_id": "PR162D_R1_FORMULA_0025",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::settlement_time_remaining::variant_6::record_0026",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::settlement_time_remaining",
+      "formula_id": "PR162D_R1_FORMULA_0026",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::historical_cutoff_route::variant_7::record_0027",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::historical_cutoff_route",
+      "formula_id": "PR162D_R1_FORMULA_0027",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::event_volume_share::variant_1::record_0028",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::event_volume_share",
+      "formula_id": "PR162D_R1_FORMULA_0028",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::token_outcome_probability_map::variant_2::record_0029",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::token_outcome_probability_map",
+      "formula_id": "PR162D_R1_FORMULA_0029",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::maker_taker_gap::variant_3::record_0030",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::maker_taker_gap",
+      "formula_id": "PR162D_R1_FORMULA_0030",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::binary_price_probability::variant_4::record_0031",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::binary_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0031",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::no_price_probability::variant_5::record_0032",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::no_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0032",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::midpoint_probability::variant_6::record_0033",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::midpoint_probability",
+      "formula_id": "PR162D_R1_FORMULA_0033",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::bid_ask_spread::variant_7::record_0034",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bid_ask_spread",
+      "formula_id": "PR162D_R1_FORMULA_0034",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::yes_no_cross_spread::variant_1::record_0035",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::yes_no_cross_spread",
+      "formula_id": "PR162D_R1_FORMULA_0035",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::orderbook_depth::variant_2::record_0036",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::orderbook_depth",
+      "formula_id": "PR162D_R1_FORMULA_0036",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::volume_weighted_price::variant_3::record_0037",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::volume_weighted_price",
+      "formula_id": "PR162D_R1_FORMULA_0037",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_return::variant_4::record_0038",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_return",
+      "formula_id": "PR162D_R1_FORMULA_0038",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_range::variant_5::record_0039",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_range",
+      "formula_id": "PR162D_R1_FORMULA_0039",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::open_interest_delta::variant_6::record_0040",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::open_interest_delta",
+      "formula_id": "PR162D_R1_FORMULA_0040",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::settlement_time_remaining::variant_7::record_0041",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::settlement_time_remaining",
+      "formula_id": "PR162D_R1_FORMULA_0041",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::historical_cutoff_route::variant_1::record_0042",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::historical_cutoff_route",
+      "formula_id": "PR162D_R1_FORMULA_0042",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::event_volume_share::variant_2::record_0043",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::event_volume_share",
+      "formula_id": "PR162D_R1_FORMULA_0043",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::token_outcome_probability_map::variant_3::record_0044",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::token_outcome_probability_map",
+      "formula_id": "PR162D_R1_FORMULA_0044",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::maker_taker_gap::variant_4::record_0045",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::maker_taker_gap",
+      "formula_id": "PR162D_R1_FORMULA_0045",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::binary_price_probability::variant_5::record_0046",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::binary_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0046",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::no_price_probability::variant_6::record_0047",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::no_price_probability",
+      "formula_id": "PR162D_R1_FORMULA_0047",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::midpoint_probability::variant_7::record_0048",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::midpoint_probability",
+      "formula_id": "PR162D_R1_FORMULA_0048",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::bid_ask_spread::variant_1::record_0049",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bid_ask_spread",
+      "formula_id": "PR162D_R1_FORMULA_0049",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::yes_no_cross_spread::variant_2::record_0050",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::yes_no_cross_spread",
+      "formula_id": "PR162D_R1_FORMULA_0050",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::orderbook_depth::variant_3::record_0051",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::orderbook_depth",
+      "formula_id": "PR162D_R1_FORMULA_0051",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::volume_weighted_price::variant_4::record_0052",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::volume_weighted_price",
+      "formula_id": "PR162D_R1_FORMULA_0052",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_return::variant_5::record_0053",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_return",
+      "formula_id": "PR162D_R1_FORMULA_0053",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::candle_range::variant_6::record_0054",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::candle_range",
+      "formula_id": "PR162D_R1_FORMULA_0054",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PREDICTION_MARKET_FORMULA::open_interest_delta::variant_7::record_0055",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::open_interest_delta",
+      "formula_id": "PR162D_R1_FORMULA_0055",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_binary::variant_1::record_0056",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_binary",
+      "formula_id": "PR162D_R1_FORMULA_0056",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_multiclass::variant_2::record_0057",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_multiclass",
+      "formula_id": "PR162D_R1_FORMULA_0057",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::log_loss_binary::variant_3::record_0058",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::log_loss_binary",
+      "formula_id": "PR162D_R1_FORMULA_0058",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::probability_clip::variant_4::record_0059",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::probability_clip",
+      "formula_id": "PR162D_R1_FORMULA_0059",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_accuracy::variant_5::record_0060",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_accuracy",
+      "formula_id": "PR162D_R1_FORMULA_0060",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_confidence::variant_6::record_0061",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_confidence",
+      "formula_id": "PR162D_R1_FORMULA_0061",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::expected_calibration_error::variant_7::record_0062",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::expected_calibration_error",
+      "formula_id": "PR162D_R1_FORMULA_0062",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::maximum_calibration_error::variant_1::record_0063",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::maximum_calibration_error",
+      "formula_id": "PR162D_R1_FORMULA_0063",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_binary::variant_2::record_0064",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_binary",
+      "formula_id": "PR162D_R1_FORMULA_0064",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_multiclass::variant_3::record_0065",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_multiclass",
+      "formula_id": "PR162D_R1_FORMULA_0065",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::log_loss_binary::variant_4::record_0066",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::log_loss_binary",
+      "formula_id": "PR162D_R1_FORMULA_0066",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::probability_clip::variant_5::record_0067",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::probability_clip",
+      "formula_id": "PR162D_R1_FORMULA_0067",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_accuracy::variant_6::record_0068",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_accuracy",
+      "formula_id": "PR162D_R1_FORMULA_0068",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_confidence::variant_7::record_0069",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_confidence",
+      "formula_id": "PR162D_R1_FORMULA_0069",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::expected_calibration_error::variant_1::record_0070",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::expected_calibration_error",
+      "formula_id": "PR162D_R1_FORMULA_0070",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::maximum_calibration_error::variant_2::record_0071",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::maximum_calibration_error",
+      "formula_id": "PR162D_R1_FORMULA_0071",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_binary::variant_3::record_0072",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_binary",
+      "formula_id": "PR162D_R1_FORMULA_0072",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::brier_multiclass::variant_4::record_0073",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::brier_multiclass",
+      "formula_id": "PR162D_R1_FORMULA_0073",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::log_loss_binary::variant_5::record_0074",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::log_loss_binary",
+      "formula_id": "PR162D_R1_FORMULA_0074",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::probability_clip::variant_6::record_0075",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::probability_clip",
+      "formula_id": "PR162D_R1_FORMULA_0075",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_accuracy::variant_7::record_0076",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_accuracy",
+      "formula_id": "PR162D_R1_FORMULA_0076",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "CALIBRATION_FORMULA::calibration_bin_confidence::variant_1::record_0077",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::calibration_bin_confidence",
+      "formula_id": "PR162D_R1_FORMULA_0077",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sharpe_ratio::variant_2::record_0078",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sharpe_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0078",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sortino_ratio::variant_3::record_0079",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sortino_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0079",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::kelly_fraction_binary::variant_4::record_0080",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::kelly_fraction_binary",
+      "formula_id": "PR162D_R1_FORMULA_0080",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::fractional_kelly::variant_5::record_0081",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::fractional_kelly",
+      "formula_id": "PR162D_R1_FORMULA_0081",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::value_at_risk_quantile::variant_6::record_0082",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::value_at_risk_quantile",
+      "formula_id": "PR162D_R1_FORMULA_0082",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::conditional_value_at_risk::variant_7::record_0083",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::conditional_value_at_risk",
+      "formula_id": "PR162D_R1_FORMULA_0083",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::max_drawdown::variant_1::record_0084",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_drawdown",
+      "formula_id": "PR162D_R1_FORMULA_0084",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::latency_adjusted_ev::variant_2::record_0085",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::latency_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0085",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::slippage_adjusted_ev::variant_3::record_0086",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::slippage_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0086",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sharpe_ratio::variant_4::record_0087",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sharpe_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0087",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sortino_ratio::variant_5::record_0088",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sortino_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0088",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::kelly_fraction_binary::variant_6::record_0089",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::kelly_fraction_binary",
+      "formula_id": "PR162D_R1_FORMULA_0089",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::fractional_kelly::variant_7::record_0090",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::fractional_kelly",
+      "formula_id": "PR162D_R1_FORMULA_0090",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::value_at_risk_quantile::variant_1::record_0091",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::value_at_risk_quantile",
+      "formula_id": "PR162D_R1_FORMULA_0091",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::conditional_value_at_risk::variant_2::record_0092",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::conditional_value_at_risk",
+      "formula_id": "PR162D_R1_FORMULA_0092",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::max_drawdown::variant_3::record_0093",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_drawdown",
+      "formula_id": "PR162D_R1_FORMULA_0093",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::latency_adjusted_ev::variant_4::record_0094",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::latency_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0094",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::slippage_adjusted_ev::variant_5::record_0095",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::slippage_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0095",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sharpe_ratio::variant_6::record_0096",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sharpe_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0096",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sortino_ratio::variant_7::record_0097",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sortino_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0097",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::kelly_fraction_binary::variant_1::record_0098",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::kelly_fraction_binary",
+      "formula_id": "PR162D_R1_FORMULA_0098",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::fractional_kelly::variant_2::record_0099",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::fractional_kelly",
+      "formula_id": "PR162D_R1_FORMULA_0099",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::value_at_risk_quantile::variant_3::record_0100",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::value_at_risk_quantile",
+      "formula_id": "PR162D_R1_FORMULA_0100",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::conditional_value_at_risk::variant_4::record_0101",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::conditional_value_at_risk",
+      "formula_id": "PR162D_R1_FORMULA_0101",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::max_drawdown::variant_5::record_0102",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_drawdown",
+      "formula_id": "PR162D_R1_FORMULA_0102",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::latency_adjusted_ev::variant_6::record_0103",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::latency_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0103",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::slippage_adjusted_ev::variant_7::record_0104",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::slippage_adjusted_ev",
+      "formula_id": "PR162D_R1_FORMULA_0104",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sharpe_ratio::variant_1::record_0105",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sharpe_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0105",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::sortino_ratio::variant_2::record_0106",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sortino_ratio",
+      "formula_id": "PR162D_R1_FORMULA_0106",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::kelly_fraction_binary::variant_3::record_0107",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::kelly_fraction_binary",
+      "formula_id": "PR162D_R1_FORMULA_0107",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::fractional_kelly::variant_4::record_0108",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::fractional_kelly",
+      "formula_id": "PR162D_R1_FORMULA_0108",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::value_at_risk_quantile::variant_5::record_0109",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::value_at_risk_quantile",
+      "formula_id": "PR162D_R1_FORMULA_0109",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::conditional_value_at_risk::variant_6::record_0110",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::conditional_value_at_risk",
+      "formula_id": "PR162D_R1_FORMULA_0110",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "RISK_SIZING_FORMULA::max_drawdown::variant_7::record_0111",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_drawdown",
+      "formula_id": "PR162D_R1_FORMULA_0111",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::sma::variant_1::record_0112",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sma",
+      "formula_id": "PR162D_R1_FORMULA_0112",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::ema::variant_2::record_0113",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::ema",
+      "formula_id": "PR162D_R1_FORMULA_0113",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rsi::variant_3::record_0114",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rsi",
+      "formula_id": "PR162D_R1_FORMULA_0114",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_line::variant_4::record_0115",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_line",
+      "formula_id": "PR162D_R1_FORMULA_0115",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_signal::variant_5::record_0116",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_signal",
+      "formula_id": "PR162D_R1_FORMULA_0116",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_histogram::variant_6::record_0117",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_histogram",
+      "formula_id": "PR162D_R1_FORMULA_0117",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_upper::variant_7::record_0118",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_upper",
+      "formula_id": "PR162D_R1_FORMULA_0118",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_lower::variant_1::record_0119",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_lower",
+      "formula_id": "PR162D_R1_FORMULA_0119",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_zscore::variant_2::record_0120",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_zscore",
+      "formula_id": "PR162D_R1_FORMULA_0120",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rate_of_change::variant_3::record_0121",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rate_of_change",
+      "formula_id": "PR162D_R1_FORMULA_0121",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_volatility::variant_4::record_0122",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_volatility",
+      "formula_id": "PR162D_R1_FORMULA_0122",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::sma::variant_5::record_0123",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sma",
+      "formula_id": "PR162D_R1_FORMULA_0123",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::ema::variant_6::record_0124",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::ema",
+      "formula_id": "PR162D_R1_FORMULA_0124",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rsi::variant_7::record_0125",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rsi",
+      "formula_id": "PR162D_R1_FORMULA_0125",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_line::variant_1::record_0126",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_line",
+      "formula_id": "PR162D_R1_FORMULA_0126",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_signal::variant_2::record_0127",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_signal",
+      "formula_id": "PR162D_R1_FORMULA_0127",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_histogram::variant_3::record_0128",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_histogram",
+      "formula_id": "PR162D_R1_FORMULA_0128",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_upper::variant_4::record_0129",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_upper",
+      "formula_id": "PR162D_R1_FORMULA_0129",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_lower::variant_5::record_0130",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_lower",
+      "formula_id": "PR162D_R1_FORMULA_0130",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_zscore::variant_6::record_0131",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_zscore",
+      "formula_id": "PR162D_R1_FORMULA_0131",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rate_of_change::variant_7::record_0132",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rate_of_change",
+      "formula_id": "PR162D_R1_FORMULA_0132",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_volatility::variant_1::record_0133",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_volatility",
+      "formula_id": "PR162D_R1_FORMULA_0133",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::sma::variant_2::record_0134",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sma",
+      "formula_id": "PR162D_R1_FORMULA_0134",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::ema::variant_3::record_0135",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::ema",
+      "formula_id": "PR162D_R1_FORMULA_0135",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rsi::variant_4::record_0136",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rsi",
+      "formula_id": "PR162D_R1_FORMULA_0136",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_line::variant_5::record_0137",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_line",
+      "formula_id": "PR162D_R1_FORMULA_0137",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_signal::variant_6::record_0138",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_signal",
+      "formula_id": "PR162D_R1_FORMULA_0138",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::macd_histogram::variant_7::record_0139",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::macd_histogram",
+      "formula_id": "PR162D_R1_FORMULA_0139",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_upper::variant_1::record_0140",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_upper",
+      "formula_id": "PR162D_R1_FORMULA_0140",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::bollinger_lower::variant_2::record_0141",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::bollinger_lower",
+      "formula_id": "PR162D_R1_FORMULA_0141",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_zscore::variant_3::record_0142",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_zscore",
+      "formula_id": "PR162D_R1_FORMULA_0142",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rate_of_change::variant_4::record_0143",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rate_of_change",
+      "formula_id": "PR162D_R1_FORMULA_0143",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::rolling_volatility::variant_5::record_0144",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::rolling_volatility",
+      "formula_id": "PR162D_R1_FORMULA_0144",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::sma::variant_6::record_0145",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::sma",
+      "formula_id": "PR162D_R1_FORMULA_0145",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "TECHNICAL_INDICATOR_FORMULA::ema::variant_7::record_0146",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::ema",
+      "formula_id": "PR162D_R1_FORMULA_0146",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::minimum_variance::variant_1::record_0147",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::minimum_variance",
+      "formula_id": "PR162D_R1_FORMULA_0147",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::mean_variance_utility::variant_2::record_0148",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::mean_variance_utility",
+      "formula_id": "PR162D_R1_FORMULA_0148",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::max_sharpe_objective::variant_3::record_0149",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_sharpe_objective",
+      "formula_id": "PR162D_R1_FORMULA_0149",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::quadratic_utility::variant_4::record_0150",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::quadratic_utility",
+      "formula_id": "PR162D_R1_FORMULA_0150",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::risk_budget_penalty::variant_5::record_0151",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::risk_budget_penalty",
+      "formula_id": "PR162D_R1_FORMULA_0151",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::minimum_variance::variant_6::record_0152",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::minimum_variance",
+      "formula_id": "PR162D_R1_FORMULA_0152",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::mean_variance_utility::variant_7::record_0153",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::mean_variance_utility",
+      "formula_id": "PR162D_R1_FORMULA_0153",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::max_sharpe_objective::variant_1::record_0154",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_sharpe_objective",
+      "formula_id": "PR162D_R1_FORMULA_0154",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::quadratic_utility::variant_2::record_0155",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::quadratic_utility",
+      "formula_id": "PR162D_R1_FORMULA_0155",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::risk_budget_penalty::variant_3::record_0156",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::risk_budget_penalty",
+      "formula_id": "PR162D_R1_FORMULA_0156",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::minimum_variance::variant_4::record_0157",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::minimum_variance",
+      "formula_id": "PR162D_R1_FORMULA_0157",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::mean_variance_utility::variant_5::record_0158",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::mean_variance_utility",
+      "formula_id": "PR162D_R1_FORMULA_0158",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::max_sharpe_objective::variant_6::record_0159",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_sharpe_objective",
+      "formula_id": "PR162D_R1_FORMULA_0159",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::quadratic_utility::variant_7::record_0160",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::quadratic_utility",
+      "formula_id": "PR162D_R1_FORMULA_0160",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::risk_budget_penalty::variant_1::record_0161",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::risk_budget_penalty",
+      "formula_id": "PR162D_R1_FORMULA_0161",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::minimum_variance::variant_2::record_0162",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::minimum_variance",
+      "formula_id": "PR162D_R1_FORMULA_0162",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::mean_variance_utility::variant_3::record_0163",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::mean_variance_utility",
+      "formula_id": "PR162D_R1_FORMULA_0163",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::max_sharpe_objective::variant_4::record_0164",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_sharpe_objective",
+      "formula_id": "PR162D_R1_FORMULA_0164",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::quadratic_utility::variant_5::record_0165",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::quadratic_utility",
+      "formula_id": "PR162D_R1_FORMULA_0165",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::risk_budget_penalty::variant_6::record_0166",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::risk_budget_penalty",
+      "formula_id": "PR162D_R1_FORMULA_0166",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::minimum_variance::variant_7::record_0167",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::minimum_variance",
+      "formula_id": "PR162D_R1_FORMULA_0167",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::mean_variance_utility::variant_1::record_0168",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::mean_variance_utility",
+      "formula_id": "PR162D_R1_FORMULA_0168",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::max_sharpe_objective::variant_2::record_0169",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::max_sharpe_objective",
+      "formula_id": "PR162D_R1_FORMULA_0169",
+      "live_order_authority": false
+    },
+    {
+      "dedupe_key": "PORTFOLIO_OPTIMIZER_FORMULA::quadratic_utility::variant_3::record_0170",
+      "dedupe_status": "UNIQUE_COUNTABLE_CANDIDATE",
+      "duplicate_count_inflation_flag": false,
+      "formula_equivalence_family_id": "EQF::quadratic_utility",
+      "formula_id": "PR162D_R1_FORMULA_0170",
+      "live_order_authority": false
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162D_R1_FormulaEquivalenceAndDedupLedger.report.json",
+  "report_id": "PR162D_R1_FORMULA_EQUIVALENCE_AND_DEDUP_LEDGER",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion/schemas/pr162d_r1_formulaequivalenceanddedupledger.schema.json",
+  "source_inputs": [
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_CandidateSourceIntakeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_CandidateFormulaAlgorithmValueInventory.report.json",
+    "docs/master_plan/generated/PR162D_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QKUFormulaMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUAlgorithmMaterializationExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterValueFieldFillExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUParameterRangeScaleExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUTradableValueCandidateExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUSolverInputAssemblyExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingBqmCqmCandidateInputExpansion.report.json",
+    "docs/master_plan/generated/PR162D_QUBOIsingLocalExactSmokeExecution.report.json",
+    "docs/master_plan/generated/PR162D_QuantumBackendAdapterReadinessMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProviderDryRunPayloadRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumAgentUsabilityAtLaunchMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161C_QKUCanonicalRegistry.report.json",
+    "docs/master_plan/generated/PR161C_QKUOrchestrationGraph.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumExecutionReadinessBridge.report.json",
+    "docs/master_plan/generated/PR162_QKUQuantumProblemEncodingBlueprint.report.json",
+    "docs/master_plan/generated/PR162B_QKUFormulaRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUAlgorithmRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUObjectiveFunctionRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUConstraintRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QKUSolverMappingRegistry.report.json",
+    "docs/master_plan/generated/PR162B_QuantumQUBOIsingFormulaMaterialization.report.json",
+    "docs/master_plan/generated/PR162B_QuantumSolverSmokeExecutionReport.report.json",
+    "docs/master_plan/generated/PR162C_SourceDiscoveryLedger.report.json",
+    "docs/master_plan/generated/PR162C_SourcePortfolioRegistry.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToAgentRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162C_QKUFormulaToDatasetBindingMatrix.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161C",
+    "PR161D",
+    "PR161F",
+    "PR162",
+    "PR162B",
+    "PR162C",
+    "PR162D"
+  ],
+  "validation_status": "PASS"
+}

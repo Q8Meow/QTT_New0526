@@ -199,6 +199,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr162b-qku-formula-algorithm-solver-market-scope-materialization",
         "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage",
         "pr162d-aggressive-qku-candidate-materialization-agent-routing",
+        "pr162d-r1-external-formula-data-quantum-acquisition-expansion",
     } or (
         normalized == "main" and _ancestry_present(root)
     )
