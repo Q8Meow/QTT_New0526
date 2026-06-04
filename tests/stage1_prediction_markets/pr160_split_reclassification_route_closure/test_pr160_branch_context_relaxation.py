@@ -30,6 +30,9 @@ PR162D_DOWNSTREAM_BRANCH = (
 PR162D_R1_DOWNSTREAM_BRANCH = (
     "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
 )
+PR162R_A_DOWNSTREAM_BRANCH = (
+    "pr162r-a-replay-paper-executability-classification-audit"
+)
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -182,6 +185,19 @@ def test_pr160_pr162d_r1_downstream_branch_allows_cumulative_validation(monkeypa
     failures, receipts = _branch_outcome(
         monkeypatch,
         PR162D_R1_DOWNSTREAM_BRANCH,
+        ancestry_present=False,
+    )
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr160_pr162r_a_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR162R_A_DOWNSTREAM_BRANCH,
         ancestry_present=False,
     )
 

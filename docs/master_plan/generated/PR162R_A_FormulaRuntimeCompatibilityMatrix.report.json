@@ -1,0 +1,1461 @@
+{
+  "authority_class": "PR162R_A_CLASSIFICATION_AUDIT_NO_REPLAY_PAPER_EXECUTION_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R_A",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR162D_R2",
+    "PR162E",
+    "PR162F",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 170,
+  "records": [
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0001",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_binary_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "binary_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0002",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_no_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "no_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0003",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_midpoint_probability",
+      "expression_present_flag": true,
+      "formula_family": "midpoint_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0004",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bid_ask_spread",
+      "expression_present_flag": true,
+      "formula_family": "bid_ask_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0005",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_yes_no_cross_spread",
+      "expression_present_flag": true,
+      "formula_family": "yes_no_cross_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0006",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_orderbook_depth",
+      "expression_present_flag": true,
+      "formula_family": "orderbook_depth",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0007",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_volume_weighted_price",
+      "expression_present_flag": true,
+      "formula_family": "volume_weighted_price",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0008",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_return",
+      "expression_present_flag": true,
+      "formula_family": "candle_return",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0009",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_range",
+      "expression_present_flag": true,
+      "formula_family": "candle_range",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0010",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_open_interest_delta",
+      "expression_present_flag": true,
+      "formula_family": "open_interest_delta",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0011",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_settlement_time_remaining",
+      "expression_present_flag": true,
+      "formula_family": "settlement_time_remaining",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0012",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_historical_cutoff_route",
+      "expression_present_flag": true,
+      "formula_family": "historical_cutoff_route",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0013",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_event_volume_share",
+      "expression_present_flag": true,
+      "formula_family": "event_volume_share",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0014",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_token_outcome_probability_map",
+      "expression_present_flag": true,
+      "formula_family": "token_outcome_probability_map",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0015",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_maker_taker_gap",
+      "expression_present_flag": true,
+      "formula_family": "maker_taker_gap",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0016",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_binary_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "binary_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0017",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_no_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "no_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0018",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_midpoint_probability",
+      "expression_present_flag": true,
+      "formula_family": "midpoint_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0019",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bid_ask_spread",
+      "expression_present_flag": true,
+      "formula_family": "bid_ask_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0020",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_yes_no_cross_spread",
+      "expression_present_flag": true,
+      "formula_family": "yes_no_cross_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0021",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_orderbook_depth",
+      "expression_present_flag": true,
+      "formula_family": "orderbook_depth",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0022",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_volume_weighted_price",
+      "expression_present_flag": true,
+      "formula_family": "volume_weighted_price",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0023",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_return",
+      "expression_present_flag": true,
+      "formula_family": "candle_return",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0024",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_range",
+      "expression_present_flag": true,
+      "formula_family": "candle_range",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0025",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_open_interest_delta",
+      "expression_present_flag": true,
+      "formula_family": "open_interest_delta",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0026",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_settlement_time_remaining",
+      "expression_present_flag": true,
+      "formula_family": "settlement_time_remaining",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0027",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_historical_cutoff_route",
+      "expression_present_flag": true,
+      "formula_family": "historical_cutoff_route",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0028",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_event_volume_share",
+      "expression_present_flag": true,
+      "formula_family": "event_volume_share",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0029",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_token_outcome_probability_map",
+      "expression_present_flag": true,
+      "formula_family": "token_outcome_probability_map",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0030",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_maker_taker_gap",
+      "expression_present_flag": true,
+      "formula_family": "maker_taker_gap",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0031",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_binary_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "binary_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0032",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_no_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "no_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0033",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_midpoint_probability",
+      "expression_present_flag": true,
+      "formula_family": "midpoint_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0034",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bid_ask_spread",
+      "expression_present_flag": true,
+      "formula_family": "bid_ask_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0035",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_yes_no_cross_spread",
+      "expression_present_flag": true,
+      "formula_family": "yes_no_cross_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0036",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_orderbook_depth",
+      "expression_present_flag": true,
+      "formula_family": "orderbook_depth",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0037",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_volume_weighted_price",
+      "expression_present_flag": true,
+      "formula_family": "volume_weighted_price",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0038",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_return",
+      "expression_present_flag": true,
+      "formula_family": "candle_return",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0039",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_range",
+      "expression_present_flag": true,
+      "formula_family": "candle_range",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0040",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_open_interest_delta",
+      "expression_present_flag": true,
+      "formula_family": "open_interest_delta",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0041",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_settlement_time_remaining",
+      "expression_present_flag": true,
+      "formula_family": "settlement_time_remaining",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0042",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_historical_cutoff_route",
+      "expression_present_flag": true,
+      "formula_family": "historical_cutoff_route",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0043",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_event_volume_share",
+      "expression_present_flag": true,
+      "formula_family": "event_volume_share",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0044",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_token_outcome_probability_map",
+      "expression_present_flag": true,
+      "formula_family": "token_outcome_probability_map",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0045",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_maker_taker_gap",
+      "expression_present_flag": true,
+      "formula_family": "maker_taker_gap",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0046",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_binary_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "binary_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0047",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_no_price_probability",
+      "expression_present_flag": true,
+      "formula_family": "no_price_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0048",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_midpoint_probability",
+      "expression_present_flag": true,
+      "formula_family": "midpoint_probability",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0049",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bid_ask_spread",
+      "expression_present_flag": true,
+      "formula_family": "bid_ask_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0050",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_yes_no_cross_spread",
+      "expression_present_flag": true,
+      "formula_family": "yes_no_cross_spread",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0051",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_orderbook_depth",
+      "expression_present_flag": true,
+      "formula_family": "orderbook_depth",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0052",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_volume_weighted_price",
+      "expression_present_flag": true,
+      "formula_family": "volume_weighted_price",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0053",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_return",
+      "expression_present_flag": true,
+      "formula_family": "candle_return",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0054",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_candle_range",
+      "expression_present_flag": true,
+      "formula_family": "candle_range",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0055",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_open_interest_delta",
+      "expression_present_flag": true,
+      "formula_family": "open_interest_delta",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0056",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_binary",
+      "expression_present_flag": true,
+      "formula_family": "brier_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0057",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_multiclass",
+      "expression_present_flag": true,
+      "formula_family": "brier_multiclass",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0058",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_log_loss_binary",
+      "expression_present_flag": true,
+      "formula_family": "log_loss_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0059",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_probability_clip",
+      "expression_present_flag": true,
+      "formula_family": "probability_clip",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0060",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_accuracy",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_accuracy",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0061",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_confidence",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_confidence",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0062",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_expected_calibration_error",
+      "expression_present_flag": true,
+      "formula_family": "expected_calibration_error",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0063",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_maximum_calibration_error",
+      "expression_present_flag": true,
+      "formula_family": "maximum_calibration_error",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0064",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_binary",
+      "expression_present_flag": true,
+      "formula_family": "brier_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0065",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_multiclass",
+      "expression_present_flag": true,
+      "formula_family": "brier_multiclass",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0066",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_log_loss_binary",
+      "expression_present_flag": true,
+      "formula_family": "log_loss_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0067",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_probability_clip",
+      "expression_present_flag": true,
+      "formula_family": "probability_clip",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0068",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_accuracy",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_accuracy",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0069",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_confidence",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_confidence",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0070",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_expected_calibration_error",
+      "expression_present_flag": true,
+      "formula_family": "expected_calibration_error",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0071",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_maximum_calibration_error",
+      "expression_present_flag": true,
+      "formula_family": "maximum_calibration_error",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0072",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_binary",
+      "expression_present_flag": true,
+      "formula_family": "brier_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0073",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_brier_multiclass",
+      "expression_present_flag": true,
+      "formula_family": "brier_multiclass",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0074",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_log_loss_binary",
+      "expression_present_flag": true,
+      "formula_family": "log_loss_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0075",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_probability_clip",
+      "expression_present_flag": true,
+      "formula_family": "probability_clip",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0076",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_accuracy",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_accuracy",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0077",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_calibration_bin_confidence",
+      "expression_present_flag": true,
+      "formula_family": "calibration_bin_confidence",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0078",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sharpe_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sharpe_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0079",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sortino_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sortino_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0080",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_kelly_fraction_binary",
+      "expression_present_flag": true,
+      "formula_family": "kelly_fraction_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0081",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_fractional_kelly",
+      "expression_present_flag": true,
+      "formula_family": "fractional_kelly",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0082",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_value_at_risk_quantile",
+      "expression_present_flag": true,
+      "formula_family": "value_at_risk_quantile",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0083",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_conditional_value_at_risk",
+      "expression_present_flag": true,
+      "formula_family": "conditional_value_at_risk",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0084",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_drawdown",
+      "expression_present_flag": true,
+      "formula_family": "max_drawdown",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0085",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_latency_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "latency_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0086",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_slippage_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "slippage_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0087",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sharpe_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sharpe_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0088",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sortino_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sortino_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0089",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_kelly_fraction_binary",
+      "expression_present_flag": true,
+      "formula_family": "kelly_fraction_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0090",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_fractional_kelly",
+      "expression_present_flag": true,
+      "formula_family": "fractional_kelly",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0091",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_value_at_risk_quantile",
+      "expression_present_flag": true,
+      "formula_family": "value_at_risk_quantile",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0092",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_conditional_value_at_risk",
+      "expression_present_flag": true,
+      "formula_family": "conditional_value_at_risk",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0093",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_drawdown",
+      "expression_present_flag": true,
+      "formula_family": "max_drawdown",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0094",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_latency_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "latency_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0095",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_slippage_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "slippage_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0096",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sharpe_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sharpe_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0097",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sortino_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sortino_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0098",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_kelly_fraction_binary",
+      "expression_present_flag": true,
+      "formula_family": "kelly_fraction_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0099",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_fractional_kelly",
+      "expression_present_flag": true,
+      "formula_family": "fractional_kelly",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0100",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_value_at_risk_quantile",
+      "expression_present_flag": true,
+      "formula_family": "value_at_risk_quantile",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0101",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_conditional_value_at_risk",
+      "expression_present_flag": true,
+      "formula_family": "conditional_value_at_risk",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0102",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_drawdown",
+      "expression_present_flag": true,
+      "formula_family": "max_drawdown",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0103",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_latency_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "latency_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0104",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_slippage_adjusted_ev",
+      "expression_present_flag": true,
+      "formula_family": "slippage_adjusted_ev",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0105",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sharpe_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sharpe_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0106",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sortino_ratio",
+      "expression_present_flag": true,
+      "formula_family": "sortino_ratio",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0107",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_kelly_fraction_binary",
+      "expression_present_flag": true,
+      "formula_family": "kelly_fraction_binary",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0108",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_fractional_kelly",
+      "expression_present_flag": true,
+      "formula_family": "fractional_kelly",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0109",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_value_at_risk_quantile",
+      "expression_present_flag": true,
+      "formula_family": "value_at_risk_quantile",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0110",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_conditional_value_at_risk",
+      "expression_present_flag": true,
+      "formula_family": "conditional_value_at_risk",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0111",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_drawdown",
+      "expression_present_flag": true,
+      "formula_family": "max_drawdown",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0112",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sma",
+      "expression_present_flag": true,
+      "formula_family": "sma",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0113",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_ema",
+      "expression_present_flag": true,
+      "formula_family": "ema",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0114",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rsi",
+      "expression_present_flag": true,
+      "formula_family": "rsi",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0115",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_line",
+      "expression_present_flag": true,
+      "formula_family": "macd_line",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0116",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_signal",
+      "expression_present_flag": true,
+      "formula_family": "macd_signal",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0117",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_histogram",
+      "expression_present_flag": true,
+      "formula_family": "macd_histogram",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0118",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_upper",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_upper",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0119",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_lower",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_lower",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0120",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_zscore",
+      "expression_present_flag": true,
+      "formula_family": "rolling_zscore",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0121",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rate_of_change",
+      "expression_present_flag": true,
+      "formula_family": "rate_of_change",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0122",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_volatility",
+      "expression_present_flag": true,
+      "formula_family": "rolling_volatility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0123",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sma",
+      "expression_present_flag": true,
+      "formula_family": "sma",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0124",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_ema",
+      "expression_present_flag": true,
+      "formula_family": "ema",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0125",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rsi",
+      "expression_present_flag": true,
+      "formula_family": "rsi",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0126",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_line",
+      "expression_present_flag": true,
+      "formula_family": "macd_line",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0127",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_signal",
+      "expression_present_flag": true,
+      "formula_family": "macd_signal",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0128",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_histogram",
+      "expression_present_flag": true,
+      "formula_family": "macd_histogram",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0129",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_upper",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_upper",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0130",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_lower",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_lower",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0131",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_zscore",
+      "expression_present_flag": true,
+      "formula_family": "rolling_zscore",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0132",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rate_of_change",
+      "expression_present_flag": true,
+      "formula_family": "rate_of_change",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0133",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_volatility",
+      "expression_present_flag": true,
+      "formula_family": "rolling_volatility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0134",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sma",
+      "expression_present_flag": true,
+      "formula_family": "sma",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0135",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_ema",
+      "expression_present_flag": true,
+      "formula_family": "ema",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0136",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rsi",
+      "expression_present_flag": true,
+      "formula_family": "rsi",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0137",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_line",
+      "expression_present_flag": true,
+      "formula_family": "macd_line",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0138",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_signal",
+      "expression_present_flag": true,
+      "formula_family": "macd_signal",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0139",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_macd_histogram",
+      "expression_present_flag": true,
+      "formula_family": "macd_histogram",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0140",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_upper",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_upper",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0141",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_bollinger_lower",
+      "expression_present_flag": true,
+      "formula_family": "bollinger_lower",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0142",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_zscore",
+      "expression_present_flag": true,
+      "formula_family": "rolling_zscore",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0143",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rate_of_change",
+      "expression_present_flag": true,
+      "formula_family": "rate_of_change",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0144",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_rolling_volatility",
+      "expression_present_flag": true,
+      "formula_family": "rolling_volatility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0145",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_sma",
+      "expression_present_flag": true,
+      "formula_family": "sma",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0146",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_ema",
+      "expression_present_flag": true,
+      "formula_family": "ema",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0147",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_minimum_variance",
+      "expression_present_flag": true,
+      "formula_family": "minimum_variance",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0148",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_mean_variance_utility",
+      "expression_present_flag": true,
+      "formula_family": "mean_variance_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0149",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_sharpe_objective",
+      "expression_present_flag": true,
+      "formula_family": "max_sharpe_objective",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0150",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_quadratic_utility",
+      "expression_present_flag": true,
+      "formula_family": "quadratic_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0151",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_risk_budget_penalty",
+      "expression_present_flag": true,
+      "formula_family": "risk_budget_penalty",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0152",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_minimum_variance",
+      "expression_present_flag": true,
+      "formula_family": "minimum_variance",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0153",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_mean_variance_utility",
+      "expression_present_flag": true,
+      "formula_family": "mean_variance_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0154",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_sharpe_objective",
+      "expression_present_flag": true,
+      "formula_family": "max_sharpe_objective",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0155",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_quadratic_utility",
+      "expression_present_flag": true,
+      "formula_family": "quadratic_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0156",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_risk_budget_penalty",
+      "expression_present_flag": true,
+      "formula_family": "risk_budget_penalty",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0157",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_minimum_variance",
+      "expression_present_flag": true,
+      "formula_family": "minimum_variance",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0158",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_mean_variance_utility",
+      "expression_present_flag": true,
+      "formula_family": "mean_variance_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0159",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_sharpe_objective",
+      "expression_present_flag": true,
+      "formula_family": "max_sharpe_objective",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0160",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_quadratic_utility",
+      "expression_present_flag": true,
+      "formula_family": "quadratic_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0161",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_risk_budget_penalty",
+      "expression_present_flag": true,
+      "formula_family": "risk_budget_penalty",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0162",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_minimum_variance",
+      "expression_present_flag": true,
+      "formula_family": "minimum_variance",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0163",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_mean_variance_utility",
+      "expression_present_flag": true,
+      "formula_family": "mean_variance_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0164",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_sharpe_objective",
+      "expression_present_flag": true,
+      "formula_family": "max_sharpe_objective",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0165",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_quadratic_utility",
+      "expression_present_flag": true,
+      "formula_family": "quadratic_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0166",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_risk_budget_penalty",
+      "expression_present_flag": true,
+      "formula_family": "risk_budget_penalty",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0167",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_minimum_variance",
+      "expression_present_flag": true,
+      "formula_family": "minimum_variance",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0168",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_mean_variance_utility",
+      "expression_present_flag": true,
+      "formula_family": "mean_variance_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0169",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_max_sharpe_objective",
+      "expression_present_flag": true,
+      "formula_family": "max_sharpe_objective",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0170",
+      "deterministic_runtime_reference": "src.qtt.stage1_prediction_markets.pr162d_r1_external_formula_data_quantum_acquisition_expansion.formula_acquisition.compute_quadratic_utility",
+      "expression_present_flag": true,
+      "formula_family": "quadratic_utility",
+      "live_order_authority": false,
+      "runtime_compatibility_status": "FORMULA_RUNTIME_COMPATIBLE_FOR_REPLAY_PAPER_INPUT"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162R_A_FormulaRuntimeCompatibilityMatrix.report.json",
+  "report_id": "PR162R_A_FORMULA_RUNTIME_COMPATIBILITY_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/schemas/pr162r_a_formularuntimecompatibilitymatrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketDatasetAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumClassicalComparatorMappingLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_TestVectorExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoMetadataOnlyCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoOrphanExternalCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceTierCoverage.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "tools/run_validation_gates.py",
+    "tools/ci_branch_context.py"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1"
+  ],
+  "validation_status": "PASS"
+}

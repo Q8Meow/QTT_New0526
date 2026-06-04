@@ -422,13 +422,13 @@ def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
 
 def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeypatch) -> None:
     monkeypatch.setattr(
-        pr142_report,
-        "current_branch_context",
-        lambda repo_root: BranchContext(
-            branch="pr162d-r1-external-formula-data-quantum-acquisition-expansion",
-            source="unit-test",
-        ),
-    )
+            pr142_report,
+            "current_branch_context",
+            lambda repo_root: BranchContext(
+                branch="pr162r-a-replay-paper-executability-classification-audit",
+                source="unit-test",
+            ),
+        )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
 
