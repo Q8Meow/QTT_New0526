@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "anyOf": [
+    {
+      "required": [
+        "formulation_ref"
+      ]
+    },
+    {
+      "required": [
+        "exact_fill_action_ref"
+      ]
+    }
+  ],
+  "properties": {
+    "callable_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "exact_fill_action_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "formulation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inputs": {
+      "type": "array"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "official_truth_flag": {
+      "const": false
+    },
+    "outputs": {
+      "type": "array"
+    },
+    "qku_ids": {
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "CandidatePacketV1"
+    },
+    "test_vectors": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "candidate_packet_id",
+    "source_universe",
+    "source_record_ids",
+    "domain_family_key",
+    "subfamily_key",
+    "variant_key",
+    "candidate_type",
+    "formulation_materialization_state",
+    "source_truth_status",
+    "candidate_truth_status",
+    "official_truth_flag",
+    "candidate_or_provisional_flag",
+    "replay_paper_candidate_flag",
+    "live_order_authority",
+    "schema_version"
+  ],
+  "title": "CandidatePacketV1",
+  "type": "object"
+}

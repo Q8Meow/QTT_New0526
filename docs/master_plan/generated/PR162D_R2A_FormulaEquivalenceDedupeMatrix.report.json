@@ -1,0 +1,875 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 58,
+  "records": [
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::CANDIDATE_SELECTION_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0001",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::candidate_selection_score",
+      "equivalent_formula_refs": [
+        "FORMULA::CANDIDATE_SELECTION_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::DATA_MISSING_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0002",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::data_missing_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::DATA_MISSING_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::CROSS_MARKET_GENERALIZATION_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0003",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::generalization",
+      "equivalent_formula_refs": [
+        "FORMULA::CROSS_MARKET_GENERALIZATION_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::MATERIALIZATION_PRIORITY_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0004",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::materialization_priority",
+      "equivalent_formula_refs": [
+        "FORMULA::MATERIALIZATION_PRIORITY_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::ROUTE_READINESS_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0005",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::route_readiness",
+      "equivalent_formula_refs": [
+        "FORMULA::ROUTE_READINESS_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::WEIGHTED_SIGNAL_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0006",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "deterministic_candidate_ranking_algorithm::weighted_signal",
+      "equivalent_formula_refs": [
+        "FORMULA::WEIGHTED_SIGNAL_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::IMPLIED_PROBABILITY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0007",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "expected_value_probability_edge::implied_probability",
+      "equivalent_formula_refs": [
+        "FORMULA::IMPLIED_PROBABILITY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::NET_EDGE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0008",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "expected_value_probability_edge::net_edge",
+      "equivalent_formula_refs": [
+        "FORMULA::NET_EDGE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::NO_EV",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0009",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "expected_value_probability_edge::no_ev",
+      "equivalent_formula_refs": [
+        "FORMULA::NO_EV"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::PROBABILITY_EDGE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0010",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "expected_value_probability_edge::probability_edge",
+      "equivalent_formula_refs": [
+        "FORMULA::PROBABILITY_EDGE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::YES_EV",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0011",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "expected_value_probability_edge::yes_ev",
+      "equivalent_formula_refs": [
+        "FORMULA::YES_EV"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::LATENCY_COST",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0012",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "latency_slippage_cost::latency_cost",
+      "equivalent_formula_refs": [
+        "FORMULA::LATENCY_COST"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::DEPTH_IMPACT_COMPONENT",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0013",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "latency_slippage_cost::slippage_depth",
+      "equivalent_formula_refs": [
+        "FORMULA::DEPTH_IMPACT_COMPONENT"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::SLIPPAGE_ESTIMATE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0014",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "latency_slippage_cost::slippage_estimate",
+      "equivalent_formula_refs": [
+        "FORMULA::SLIPPAGE_ESTIMATE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::VOLATILITY_IMPACT_COMPONENT",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0015",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "latency_slippage_cost::slippage_volatility",
+      "equivalent_formula_refs": [
+        "FORMULA::VOLATILITY_IMPACT_COMPONENT"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::SPREAD_COMPONENT",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0016",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "latency_slippage_cost::spread_component",
+      "equivalent_formula_refs": [
+        "FORMULA::SPREAD_COMPONENT"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::DEPTH_WEIGHTED_MID_PRICE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0017",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::depth_weighted_mid",
+      "equivalent_formula_refs": [
+        "FORMULA::DEPTH_WEIGHTED_MID_PRICE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::LIQUIDITY_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0018",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::liquidity_score",
+      "equivalent_formula_refs": [
+        "FORMULA::LIQUIDITY_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::MARKET_PRESSURE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0019",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::market_pressure",
+      "equivalent_formula_refs": [
+        "FORMULA::MARKET_PRESSURE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::MID_PRICE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0020",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::mid_price",
+      "equivalent_formula_refs": [
+        "FORMULA::MID_PRICE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::ORDERBOOK_IMBALANCE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0021",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::orderbook_imbalance",
+      "equivalent_formula_refs": [
+        "FORMULA::ORDERBOOK_IMBALANCE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::REALIZED_SPREAD_PROXY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0022",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::realized_spread",
+      "equivalent_formula_refs": [
+        "FORMULA::REALIZED_SPREAD_PROXY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::RELATIVE_SPREAD",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0023",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::relative_spread",
+      "equivalent_formula_refs": [
+        "FORMULA::RELATIVE_SPREAD"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::SPREAD",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0024",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::spread",
+      "equivalent_formula_refs": [
+        "FORMULA::SPREAD"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::TOP_OF_BOOK_DEPTH",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0025",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "market_microstructure_liquidity::top_of_book_depth",
+      "equivalent_formula_refs": [
+        "FORMULA::TOP_OF_BOOK_DEPTH"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::STACK_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0026",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "parameter_default_range_pack::optimizer_parameters",
+      "equivalent_formula_refs": [
+        "FORMULA::STACK_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::BRIER_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0027",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::brier_score",
+      "equivalent_formula_refs": [
+        "FORMULA::BRIER_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::PROBABILITY_CALIBRATION_ERROR",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0028",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::calibration_error",
+      "equivalent_formula_refs": [
+        "FORMULA::PROBABILITY_CALIBRATION_ERROR"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::ENSEMBLE_PROBABILITY_MEAN",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0029",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::ensemble",
+      "equivalent_formula_refs": [
+        "FORMULA::ENSEMBLE_PROBABILITY_MEAN"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::BINARY_ENTROPY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0030",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::entropy",
+      "equivalent_formula_refs": [
+        "FORMULA::BINARY_ENTROPY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::LOG_LOSS",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0031",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::log_loss",
+      "equivalent_formula_refs": [
+        "FORMULA::LOG_LOSS"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::LOGIT",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0032",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::logit",
+      "equivalent_formula_refs": [
+        "FORMULA::LOGIT"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::SIGMOID_PROBABILITY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0033",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::sigmoid",
+      "equivalent_formula_refs": [
+        "FORMULA::SIGMOID_PROBABILITY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::STABILITY_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0034",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "probability_calibration_edge::stability",
+      "equivalent_formula_refs": [
+        "FORMULA::STABILITY_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::BUDGET_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0035",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::budget_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::BUDGET_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::EXPOSURE_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0036",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::exposure_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::EXPOSURE_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::INCOMPATIBILITY_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0037",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::incompatibility_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::INCOMPATIBILITY_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::ONE_HOT_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0038",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::one_hot_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::ONE_HOT_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::QUANTUM_PRIORITY_BOOST",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0039",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::quantum_priority",
+      "equivalent_formula_refs": [
+        "FORMULA::QUANTUM_PRIORITY_BOOST"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::COVARIANCE_PENALTY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0040",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "quantum_bundle_selection_optimizer::risk_penalty",
+      "equivalent_formula_refs": [
+        "FORMULA::COVARIANCE_PENALTY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::COST_TO_BUDGET_RATIO",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0041",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::budget_ratio",
+      "equivalent_formula_refs": [
+        "FORMULA::COST_TO_BUDGET_RATIO"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::CAPITAL_UTILIZATION",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0042",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::capital_utilization",
+      "equivalent_formula_refs": [
+        "FORMULA::CAPITAL_UTILIZATION"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::EXPECTED_SHORTFALL_PROXY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0043",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::expected_shortfall",
+      "equivalent_formula_refs": [
+        "FORMULA::EXPECTED_SHORTFALL_PROXY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::EXPOSURE_UTILIZATION",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0044",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::exposure_utilization",
+      "equivalent_formula_refs": [
+        "FORMULA::EXPOSURE_UTILIZATION"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::KELLY_CAPPED",
+      "canonical_variant": "capped_owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0045",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::kelly",
+      "equivalent_formula_refs": [
+        "FORMULA::KELLY_CAPPED"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::RISK_ADJUSTED_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0046",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::risk_adjusted_score",
+      "equivalent_formula_refs": [
+        "FORMULA::RISK_ADJUSTED_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::SHARPE_LIKE_SCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0047",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "risk_capital_sizing::risk_return",
+      "equivalent_formula_refs": [
+        "FORMULA::SHARPE_LIKE_SCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::BOLLINGER_Z",
+      "canonical_variant": "z_score_owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0048",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::Bollinger",
+      "equivalent_formula_refs": [
+        "FORMULA::BOLLINGER_Z"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::EMA",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0049",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::EMA",
+      "equivalent_formula_refs": [
+        "FORMULA::EMA"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::MACD",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0050",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::MACD",
+      "equivalent_formula_refs": [
+        "FORMULA::MACD"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::RSI",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0051",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::RSI",
+      "equivalent_formula_refs": [
+        "FORMULA::RSI"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::VWAP",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0052",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::VWAP",
+      "equivalent_formula_refs": [
+        "FORMULA::VWAP"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::CANDLE_BODY",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0053",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::candlestick",
+      "equivalent_formula_refs": [
+        "FORMULA::CANDLE_BODY",
+        "FORMULA::HIGH_LOW_RANGE",
+        "FORMULA::WICK_RATIO"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::MOMENTUM_N_PERIOD",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0054",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::momentum",
+      "equivalent_formula_refs": [
+        "FORMULA::MOMENTUM_N_PERIOD"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::CANDLE_RETURN",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0055",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::returns",
+      "equivalent_formula_refs": [
+        "FORMULA::CANDLE_RETURN",
+        "FORMULA::SIMPLE_RETURN"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::ROLLING_VOLATILITY",
+      "canonical_variant": "rolling_owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0056",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::volatility",
+      "equivalent_formula_refs": [
+        "FORMULA::ROLLING_VOLATILITY"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::VOLUME_GROWTH_RATE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0057",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::volume",
+      "equivalent_formula_refs": [
+        "FORMULA::VOLUME_GROWTH_RATE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    },
+    {
+      "candidate_truth_status": "CANDIDATE",
+      "canonical_formula": "FORMULA::PRICE_ZSCORE",
+      "canonical_variant": "owner_template_v1",
+      "dedupe_record_id": "PR162D_R2A_DEDUPE::0058",
+      "duplicate_source_provenance_preserved": true,
+      "equivalence_family": "technical_indicator_price_feature::zscore",
+      "equivalent_formula_refs": [
+        "FORMULA::PRICE_ZSCORE"
+      ],
+      "live_order_authority": false,
+      "source_truth_status": "OWNER_TEMPLATE"
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_FormulaEquivalenceDedupeMatrix.report.json",
+  "report_id": "PR162D_R2A_FORMULA_EQUIVALENCE_DEDUPE_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_FormulaEquivalenceDedupeMatrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

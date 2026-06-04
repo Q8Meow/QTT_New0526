@@ -1,0 +1,712 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 30,
+  "records": [
+    {
+      "algorithm_id": "ALGORITHM::DETERMINISTIC_CANDIDATE_RANKING",
+      "algorithm_procedure": "Filter invalid candidates, compute final_score, sort descending, and tie-break by latency_class, risk_class, candidate_id.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:deterministic_candidate_ranking",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ranked_candidate_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::DETERMINISTIC_CANDIDATE_RANKING"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::GREEDY_MARKET_BUNDLE_SELECTION",
+      "algorithm_procedure": "Sort candidates by expected_net_value/capital_required and greedily add while budget and exposure remain satisfied.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:greedy_market_bundle_selection",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates",
+        "budget",
+        "max_exposure"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "selected_candidate_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::GREEDY_MARKET_BUNDLE_SELECTION"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::REPLAY_PAPER_ELIGIBILITY_ROUTER",
+      "algorithm_procedure": "Route materialized formulations with route records to replay/paper, create route fill actions for route gaps, and field-fill actions for unmaterialized records.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:replay_paper_eligibility_router",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "formulation_record",
+        "route_record"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "route_state",
+        "fill_action"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::REPLAY_PAPER_ELIGIBILITY_ROUTER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::PARAMETER_STACK_SELECTOR",
+      "algorithm_procedure": "Reject incompatible parameter stacks, compute deterministic stack score, rank, and select the top stack.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:parameter_stack_selector",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "stacks"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "selected_stack_candidate"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::PARAMETER_STACK_SELECTOR"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::BUILD_PARAMETER_PACK_FROM_DEFAULTS",
+      "algorithm_procedure": "Return a versioned parameter pack from candidate defaults and ranges.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:build_parameter_pack_from_defaults",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "defaults",
+        "ranges",
+        "version"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "parameter_pack"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::BUILD_PARAMETER_PACK_FROM_DEFAULTS"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::STABLE_DEDUPE_BY_FAMILY",
+      "algorithm_procedure": "Sort records, keep first record per equivalence family, and preserve duplicate provenance externally.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:stable_dedupe_by_family",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "records"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "canonical_record_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::STABLE_DEDUPE_BY_FAMILY"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::TOP_K_CANDIDATE_FILTER",
+      "algorithm_procedure": "Rank candidates with deterministic ordering and return the top k candidate IDs.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:top_k_candidate_filter",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates",
+        "k"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "top_candidate_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::TOP_K_CANDIDATE_FILTER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::LATENCY_BUCKET_ROUTER",
+      "algorithm_procedure": "Group candidates by latency class for hot path and precompute planning.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:latency_bucket_router",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "latency_buckets"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::LATENCY_BUCKET_ROUTER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::SOURCE_CONFIDENCE_RANKER",
+      "algorithm_procedure": "Rank candidate source locators by confidence while preserving candidate status.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:source_confidence_ranker",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "sources"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ranked_source_locator_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::SOURCE_CONFIDENCE_RANKER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::FIELD_FILL_PRIORITY_ORDER",
+      "algorithm_procedure": "Order exact field-fill actions by materialization priority.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:field_fill_priority_order",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "actions"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ordered_fill_action_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::FIELD_FILL_PRIORITY_ORDER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::ROUTE_FILL_PRIORITY_ORDER",
+      "algorithm_procedure": "Order route-fill actions by route-fill need score.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:route_fill_priority_order",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "actions"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ordered_route_fill_action_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::ROUTE_FILL_PRIORITY_ORDER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::PORTFOLIO_EXPOSURE_CHECK",
+      "algorithm_procedure": "Sum candidate exposures and verify whether max exposure is satisfied.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:portfolio_exposure_check",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "positions",
+        "max_exposure"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "exposure",
+        "within_limit_flag"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::PORTFOLIO_EXPOSURE_CHECK"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::PARAMETER_RANGE_CLIPPER",
+      "algorithm_procedure": "Clip a candidate parameter value into a deterministic min/max range.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:parameter_range_clipper",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "value",
+        "min_value",
+        "max_value"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "clipped_value"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::PARAMETER_RANGE_CLIPPER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::COMPATIBILITY_THRESHOLD_FILTER",
+      "algorithm_procedure": "Keep candidates with compatibility scores above a deterministic threshold.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:compatibility_threshold_filter",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "compatible_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::COMPATIBILITY_THRESHOLD_FILTER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::QUANTUM_PRIORITY_RANKER",
+      "algorithm_procedure": "Rank candidates by quantum priority for batch optimizer materialization.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:quantum_priority_ranker",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ranked_quantum_candidate_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::QUANTUM_PRIORITY_RANKER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::FAMILY_VARIANT_NORMALIZER",
+      "algorithm_procedure": "Normalize a raw mention label into deterministic domain and variant keys.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:family_variant_normalizer",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "raw_label"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "domain_family_key",
+        "variant_key"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::FAMILY_VARIANT_NORMALIZER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::REPLAY_PAPER_BATCH_PARTITION",
+      "algorithm_procedure": "Partition candidate IDs into stable replay/paper adapter batches.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:replay_paper_batch_partition",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidate_ids",
+        "batch_size"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "batches"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::REPLAY_PAPER_BATCH_PARTITION"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::CACHEABILITY_CLASSIFIER",
+      "algorithm_procedure": "Classify compute tiers that can be cached or precomputed.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:cacheability_classifier",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "compute_tier"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "cacheable"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::CACHEABILITY_CLASSIFIER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::HOT_PATH_PRECOMPUTE_SELECTOR",
+      "algorithm_procedure": "Split formulations into future hot-path candidates and precompute-required candidates.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:hot_path_precompute_selector",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "formulations"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "hot_path_candidate_ids",
+        "precompute_required_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::HOT_PATH_PRECOMPUTE_SELECTOR"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::FORMULA_COVERAGE_CLASSIFIER",
+      "algorithm_procedure": "Count formulation-backed and unmapped formulation attempts.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:formula_coverage_classifier",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "mappings"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "formulation_backed_count",
+        "formulation_unmapped_count"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::FORMULA_COVERAGE_CLASSIFIER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::EXACT_FILL_ACTION_BUILDER",
+      "algorithm_procedure": "Create a deterministic exact field-fill action payload after mapping attempts fail.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:exact_fill_action_builder",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "missing_field",
+        "responsible_agent",
+        "priority_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "fill_action"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::EXACT_FILL_ACTION_BUILDER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::OWNER_REVIEW_ESCALATION_SELECTOR",
+      "algorithm_procedure": "Select owner-review rows only after deterministic materialization attempts fail or exceed priority threshold.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:owner_review_escalation_selector",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "records",
+        "threshold"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "owner_review_record_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::OWNER_REVIEW_ESCALATION_SELECTOR"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::MARKET_BUNDLE_DIVERSIFIER",
+      "algorithm_procedure": "Select highest-scoring candidates while limiting one candidate per family.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:market_bundle_diversifier",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidates"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "diversified_candidate_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::MARKET_BUNDLE_DIVERSIFIER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::OBJECTIVE_CONSTRAINT_PAIRER",
+      "algorithm_procedure": "Pair objective refs with constraint refs for objective/constraint/solver records.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:objective_constraint_pairer",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "objective_refs",
+        "constraint_refs"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "objective_constraint_pairs"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::OBJECTIVE_CONSTRAINT_PAIRER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::COMPARATOR_ASSIGNMENT",
+      "algorithm_procedure": "Attach a deterministic classical comparator to each quantum formulation.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:comparator_assignment",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "quantum_records",
+        "default_comparator_ref"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "classical_comparator_assignments"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::COMPARATOR_ASSIGNMENT"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::TEST_VECTOR_SMOKE_SELECTOR",
+      "algorithm_procedure": "Select deterministic smoke test vectors for validation samples.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:test_vector_smoke_selector",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "test_vectors",
+        "limit"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "smoke_test_vector_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::TEST_VECTOR_SMOKE_SELECTOR"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::SCHEMA_VERSION_ROUTER",
+      "algorithm_procedure": "Route candidate packet rows to a candidate schema version.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:schema_version_router",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "candidate_type",
+        "schema_version"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "schema_route"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::SCHEMA_VERSION_ROUTER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::PROMOTION_SEED_CLASSIFIER",
+      "algorithm_procedure": "Seed future promotion state without promoting to live authority.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:promotion_seed_classifier",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "replay_paper_candidate_flag",
+        "formulation_materialization_state"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "promotion_state_seed"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::PROMOTION_SEED_CLASSIFIER"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::DETERMINISTIC_ARBITRATION_MERGE",
+      "algorithm_procedure": "Merge candidate values in deterministic source-priority order.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:deterministic_arbitration_merge",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "records"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "merged_values"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::DETERMINISTIC_ARBITRATION_MERGE"
+      ]
+    },
+    {
+      "algorithm_id": "ALGORITHM::SOURCE_LOCATOR_RANKER",
+      "algorithm_procedure": "Rank source locators as candidate inputs without making them accepted facts.",
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.algorithm_seed_library:source_locator_ranker",
+      "failure_modes": [
+        "missing required input",
+        "non-numeric score where numeric score is required"
+      ],
+      "inputs": [
+        "source_locators"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ranked_source_locator_ids"
+      ],
+      "test_vector_refs": [
+        "PR162D_R2A_TV_ALGORITHM::SOURCE_LOCATOR_RANKER"
+      ]
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_AlgorithmProcedureRegistry.report.json",
+  "report_id": "PR162D_R2A_ALGORITHM_PROCEDURE_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_AlgorithmProcedureRegistry.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

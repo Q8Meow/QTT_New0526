@@ -210,6 +210,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr162d-aggressive-qku-candidate-materialization-agent-routing",
         "pr162d-r1-external-formula-data-quantum-acquisition-expansion",
         "pr162r-a-replay-paper-executability-classification-audit",
+        "pr162d-r2a-real-computable-formulations-redo",
     } or (
         normalized == "main" and _ancestry_present(root)
     )
