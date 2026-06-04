@@ -593,13 +593,13 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
     _outputs()
     _restore_tracked_generated_side_effects()
     monkeypatch.setattr(
-        pr140_report,
-        "current_branch_context",
-        lambda repo_root: BranchContext(
-            branch="pr162d-r1-external-formula-data-quantum-acquisition-expansion",
-            source="unit-test",
-        ),
-    )
+            pr140_report,
+            "current_branch_context",
+            lambda repo_root: BranchContext(
+                branch="pr162r-a-replay-paper-executability-classification-audit",
+                source="unit-test",
+            ),
+        )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
     assert validate_report_payload(_report(), build_report(REPO_ROOT)) == []

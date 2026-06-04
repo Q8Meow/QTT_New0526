@@ -574,13 +574,13 @@ def test_pr140_guard_repair_allowance_is_integration_support_not_materialization
 
 def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) -> None:
     monkeypatch.setattr(
-        pr141_report,
-        "current_branch_context",
-        lambda repo_root: BranchContext(
-            branch="pr162d-r1-external-formula-data-quantum-acquisition-expansion",
-            source="unit-test",
-        ),
-    )
+            pr141_report,
+            "current_branch_context",
+            lambda repo_root: BranchContext(
+                branch="pr162r-a-replay-paper-executability-classification-audit",
+                source="unit-test",
+            ),
+        )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
 

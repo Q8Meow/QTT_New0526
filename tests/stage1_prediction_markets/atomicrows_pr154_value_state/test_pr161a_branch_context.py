@@ -13,6 +13,9 @@ PR162D_DOWNSTREAM_BRANCH = (
 PR162D_R1_DOWNSTREAM_BRANCH = (
     "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
 )
+PR162R_A_DOWNSTREAM_BRANCH = (
+    "pr162r-a-replay-paper-executability-classification-audit"
+)
 
 
 def test_pr161a_branch_context_allows_only_pr161a_scope():
@@ -48,6 +51,16 @@ def test_pr161a_pr162d_r1_downstream_branch_allows_cumulative_validation():
         validator._branch_context_allowed(
             validator.Path(__file__).resolve().parents[3],
             PR162D_R1_DOWNSTREAM_BRANCH,
+        )
+        is True
+    )
+
+
+def test_pr161a_pr162r_a_downstream_branch_allows_cumulative_validation():
+    assert (
+        validator._branch_context_allowed(
+            validator.Path(__file__).resolve().parents[3],
+            PR162R_A_DOWNSTREAM_BRANCH,
         )
         is True
     )

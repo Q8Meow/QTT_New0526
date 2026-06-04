@@ -1,0 +1,749 @@
+{
+  "authority_class": "PR162R_A_CLASSIFICATION_AUDIT_NO_REPLAY_PAPER_EXECUTION_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R_A",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR162D_R2",
+    "PR162E",
+    "PR162F",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 72,
+  "records": [
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0001",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0002",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0003",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0004",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0005",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0006",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0007",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0008",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0009",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0010",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0011",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0012",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0013",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0014",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0015",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0016",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0017",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0018",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0019",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0020",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0021",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0022",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0023",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0024",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0025",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0026",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0027",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0028",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0029",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0030",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0031",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0032",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0033",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0034",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0035",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0036",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0037",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0038",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0039",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0040",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0041",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0042",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0043",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0044",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0045",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0046",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0047",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0048",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0049",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0050",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0051",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0052",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0053",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0054",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0055",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0056",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0057",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0058",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0059",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0060",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0061",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0062",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0063",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0064",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0065",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0066",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0067",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0068",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0069",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0070",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0071",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0072",
+      "classical_comparator_ready_flag": true,
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "live_order_authority": false,
+      "quantum_specific_mapping_ready_flag": true,
+      "remote_quantum_hot_path_flag": false,
+      "replay_paper_quantum_eligible_flag": true
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162R_A_QuantumReplayPaperEligibilityMatrix.report.json",
+  "report_id": "PR162R_A_QUANTUM_REPLAY_PAPER_ELIGIBILITY_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/schemas/pr162r_a_quantumreplaypapereligibilitymatrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketDatasetAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumClassicalComparatorMappingLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_TestVectorExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoMetadataOnlyCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoOrphanExternalCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceTierCoverage.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "tools/run_validation_gates.py",
+    "tools/ci_branch_context.py"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1"
+  ],
+  "validation_status": "PASS"
+}

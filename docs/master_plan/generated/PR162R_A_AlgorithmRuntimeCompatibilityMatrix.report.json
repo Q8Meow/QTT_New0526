@@ -1,0 +1,517 @@
+{
+  "authority_class": "PR162R_A_CLASSIFICATION_AUDIT_NO_REPLAY_PAPER_EXECUTION_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R_A",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR162D_R2",
+    "PR162E",
+    "PR162F",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 52,
+  "records": [
+    {
+      "algorithm_family": "kalshi_historical_cutoff_router",
+      "candidate_id": "PR162D_R1_ALGORITHM_0001",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kalshi_candlestick_feature_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0002",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_token_outcome_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0003",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_orderbook_mid_spread_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0004",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "forecastex_csv_schema_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0005",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "prediction_market_replay_dataset_joiner",
+      "candidate_id": "PR162D_R1_ALGORITHM_0006",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "probability_clipping_pipeline",
+      "candidate_id": "PR162D_R1_ALGORITHM_0007",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "calibration_bin_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0008",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "brier_log_loss_scorecard",
+      "candidate_id": "PR162D_R1_ALGORITHM_0009",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "technical_indicator_window_engine",
+      "candidate_id": "PR162D_R1_ALGORITHM_0010",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "microstructure_depth_feature_engine",
+      "candidate_id": "PR162D_R1_ALGORITHM_0011",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kelly_fractional_sizing_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0012",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "var_cvar_tail_risk_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0013",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "drawdown_invalidation_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0014",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "mean_variance_optimizer_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0015",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "scipy_slsqp_weight_solver_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0016",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "qubo_market_bundle_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0017",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "ising_energy_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0018",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "bqm_local_exact_smoke_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0019",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "qaoa_parameter_grid_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0020",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "quantum_classical_comparator_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0021",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kalshi_historical_cutoff_router",
+      "candidate_id": "PR162D_R1_ALGORITHM_0022",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kalshi_candlestick_feature_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0023",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_token_outcome_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0024",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_orderbook_mid_spread_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0025",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "forecastex_csv_schema_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0026",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "prediction_market_replay_dataset_joiner",
+      "candidate_id": "PR162D_R1_ALGORITHM_0027",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "probability_clipping_pipeline",
+      "candidate_id": "PR162D_R1_ALGORITHM_0028",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "calibration_bin_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0029",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "brier_log_loss_scorecard",
+      "candidate_id": "PR162D_R1_ALGORITHM_0030",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "technical_indicator_window_engine",
+      "candidate_id": "PR162D_R1_ALGORITHM_0031",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "microstructure_depth_feature_engine",
+      "candidate_id": "PR162D_R1_ALGORITHM_0032",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kelly_fractional_sizing_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0033",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "var_cvar_tail_risk_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0034",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "drawdown_invalidation_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0035",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "mean_variance_optimizer_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0036",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "scipy_slsqp_weight_solver_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0037",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "qubo_market_bundle_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0038",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "ising_energy_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0039",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "bqm_local_exact_smoke_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0040",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "qaoa_parameter_grid_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0041",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "quantum_classical_comparator_candidate",
+      "candidate_id": "PR162D_R1_ALGORITHM_0042",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kalshi_historical_cutoff_router",
+      "candidate_id": "PR162D_R1_ALGORITHM_0043",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "kalshi_candlestick_feature_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0044",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_token_outcome_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0045",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "polymarket_orderbook_mid_spread_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0046",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "forecastex_csv_schema_mapper",
+      "candidate_id": "PR162D_R1_ALGORITHM_0047",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "prediction_market_replay_dataset_joiner",
+      "candidate_id": "PR162D_R1_ALGORITHM_0048",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "probability_clipping_pipeline",
+      "candidate_id": "PR162D_R1_ALGORITHM_0049",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "calibration_bin_builder",
+      "candidate_id": "PR162D_R1_ALGORITHM_0050",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "brier_log_loss_scorecard",
+      "candidate_id": "PR162D_R1_ALGORITHM_0051",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    },
+    {
+      "algorithm_family": "technical_indicator_window_engine",
+      "candidate_id": "PR162D_R1_ALGORITHM_0052",
+      "deterministic_steps_present_flag": true,
+      "live_order_authority": false,
+      "parameter_ranges_present_flag": true,
+      "runtime_compatibility_status": "ALGORITHM_RUNTIME_COMPATIBLE_FOR_NONLIVE_INPUT_PREP"
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162R_A_AlgorithmRuntimeCompatibilityMatrix.report.json",
+  "report_id": "PR162R_A_ALGORITHM_RUNTIME_COMPATIBILITY_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/schemas/pr162r_a_algorithmruntimecompatibilitymatrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketDatasetAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumClassicalComparatorMappingLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_TestVectorExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoMetadataOnlyCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoOrphanExternalCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceTierCoverage.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "tools/run_validation_gates.py",
+    "tools/ci_branch_context.py"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1"
+  ],
+  "validation_status": "PASS"
+}

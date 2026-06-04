@@ -38,6 +38,9 @@ _PR162D_DOWNSTREAM_BRANCH = (
 _PR162D_R1_DOWNSTREAM_BRANCH = (
     "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
 )
+_PR162R_A_DOWNSTREAM_BRANCH = (
+    "pr162r-a-replay-paper-executability-classification-audit"
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -86,6 +89,7 @@ def _branch_context_allowed(branch_context: str) -> bool:
         or normalized == _PR162C_DOWNSTREAM_BRANCH
         or normalized == _PR162D_DOWNSTREAM_BRANCH
         or normalized == _PR162D_R1_DOWNSTREAM_BRANCH
+        or normalized == _PR162R_A_DOWNSTREAM_BRANCH
         or normalized in _REPAIR_BRANCHES
     )
 
@@ -113,7 +117,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch in {c.EXPECTED_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH, _PR162A_DOWNSTREAM_BRANCH, _PR162B_DOWNSTREAM_BRANCH, _PR162C_DOWNSTREAM_BRANCH, _PR162D_DOWNSTREAM_BRANCH, _PR162D_R1_DOWNSTREAM_BRANCH}:
+    if branch in {c.EXPECTED_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH, _PR162A_DOWNSTREAM_BRANCH, _PR162B_DOWNSTREAM_BRANCH, _PR162C_DOWNSTREAM_BRANCH, _PR162D_DOWNSTREAM_BRANCH, _PR162D_R1_DOWNSTREAM_BRANCH, _PR162R_A_DOWNSTREAM_BRANCH}:
         return
     if ci_branch_context.github_actions_main_push_context_active():
         if branch == "main" and _ancestry_present(root):
@@ -295,4 +299,3 @@ def validate_existing_artifacts(root: Path) -> ValidationResult:
     _validate_taxonomy(by_path[c.SOURCE_TAXONOMY_PATH.as_posix()], failures)
     _validate_schema_files(root, failures)
     return ValidationResult(tuple(sorted(set(failures))), tuple(receipts))
-

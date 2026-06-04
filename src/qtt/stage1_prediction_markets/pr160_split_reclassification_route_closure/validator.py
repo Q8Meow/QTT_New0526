@@ -46,6 +46,9 @@ _PR162D_DOWNSTREAM_BRANCH = (
 _PR162D_R1_DOWNSTREAM_BRANCH = (
     "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
 )
+_PR162R_A_DOWNSTREAM_BRANCH = (
+    "pr162r-a-replay-paper-executability-classification-audit"
+)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -146,6 +149,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
         _PR162C_DOWNSTREAM_BRANCH,
         _PR162D_DOWNSTREAM_BRANCH,
         _PR162D_R1_DOWNSTREAM_BRANCH,
+        _PR162R_A_DOWNSTREAM_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
 
@@ -207,6 +211,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         _PR162C_DOWNSTREAM_BRANCH,
         _PR162D_DOWNSTREAM_BRANCH,
         _PR162D_R1_DOWNSTREAM_BRANCH,
+        _PR162R_A_DOWNSTREAM_BRANCH,
     }:
         return
     if ci_branch_context.github_actions_main_push_context_active():

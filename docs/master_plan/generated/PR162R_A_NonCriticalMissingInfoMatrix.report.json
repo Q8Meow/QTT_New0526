@@ -1,0 +1,5571 @@
+{
+  "authority_class": "PR162R_A_CLASSIFICATION_AUDIT_NO_REPLAY_PAPER_EXECUTION_NO_LIVE_ORDER_AUTHORITY",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R_A",
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_order_authority": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_digest_authority": false,
+  "creates_result_backed_ranking": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "PR162R",
+    "PR162D_R2",
+    "PR162E",
+    "PR162F",
+    "PR163",
+    "PR164",
+    "PR165"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "record_count": 548,
+  "records": [
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0001",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0002",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0003",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0004",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0005",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0006",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0007",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0008",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0009",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0010",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0011",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0012",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0013",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0014",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0015",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0016",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0017",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0018",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0019",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0020",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0021",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0022",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0023",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0024",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0025",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0026",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0027",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0028",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0029",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0030",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0031",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0032",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0033",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0034",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0035",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0036",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0037",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0038",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0039",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0040",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0041",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0042",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0043",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0044",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0045",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0046",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0047",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0048",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0049",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0050",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0051",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0052",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0053",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0054",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0055",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0056",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0057",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0058",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0059",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0060",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0061",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0062",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0063",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0064",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0065",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0066",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0067",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0068",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0069",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0070",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0071",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0072",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0073",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0074",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0075",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0076",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0077",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0078",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0079",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0080",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0081",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0082",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0083",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0084",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0085",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0086",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0087",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0088",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0089",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0090",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0091",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0092",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0093",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0094",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0095",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0096",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0097",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0098",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0099",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0100",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0101",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0102",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0103",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0104",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0105",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0106",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0107",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0108",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0109",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0110",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0111",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0112",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0113",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0114",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0115",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0116",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0117",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0118",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0119",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0120",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0121",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0122",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0123",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0124",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0125",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0126",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0127",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0128",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0129",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0130",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0131",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0132",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0133",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0134",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0135",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0136",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0137",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0138",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0139",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0140",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0141",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0142",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0143",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0144",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0145",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0146",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0147",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0148",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0149",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0150",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0151",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0152",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0153",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0154",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0155",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0156",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0157",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0158",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0159",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0160",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0161",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0162",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0163",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0164",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0165",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0166",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0167",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0168",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0169",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_FORMULA_0170",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0001",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0002",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0003",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0004",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0005",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0006",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0007",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0008",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0009",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0010",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0011",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0012",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0013",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0014",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0015",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0016",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0017",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0018",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0019",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0020",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0021",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0022",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0023",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0024",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0025",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0026",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0027",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0028",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0029",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0030",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0031",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0032",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0033",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0034",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0035",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0036",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0037",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0038",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0039",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0040",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0041",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0042",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0043",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0044",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0045",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0046",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0047",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0048",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0049",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0050",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0051",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_ALGORITHM_0052",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "FORMULA_DEDUPE_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0001",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0002",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0003",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0004",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0005",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0006",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0007",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0008",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0009",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0010",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0011",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0012",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0013",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0014",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0015",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0016",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0017",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0018",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0019",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0020",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0021",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0022",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0023",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0024",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0025",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0026",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0027",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0028",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0029",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0030",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0031",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0032",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0033",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0034",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0035",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0036",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0037",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0038",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0039",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0040",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0041",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0042",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0043",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0044",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0045",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0046",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0047",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0048",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0049",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0050",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0051",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0052",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0053",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0054",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0055",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0056",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0057",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0058",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0059",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0060",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0061",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0062",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0063",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0064",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0065",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0066",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0067",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0068",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0069",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0070",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0071",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0072",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0073",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0074",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0075",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0076",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0077",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0078",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0079",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0080",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0081",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0082",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0083",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0084",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0085",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0086",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0087",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0088",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0089",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0090",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0091",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0092",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0093",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0094",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0095",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0096",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0097",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0098",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0099",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0100",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0101",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0102",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0103",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0104",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0105",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0106",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0107",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0108",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0109",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0110",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0111",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0112",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0113",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0114",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0115",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0116",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0117",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0118",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0119",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0120",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0121",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0122",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0123",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0124",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0125",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0126",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0127",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0128",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0129",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0130",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0131",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0132",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0133",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0134",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0135",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0136",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0137",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0138",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0139",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0140",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0141",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0142",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0143",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0144",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0145",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0146",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0147",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0148",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0149",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0150",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0151",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0152",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0153",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0154",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0155",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0156",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0157",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0158",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0159",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0160",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0161",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0162",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0163",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0164",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0165",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0166",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0167",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0168",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0169",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0170",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0171",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0172",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0173",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0174",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0175",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0176",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0177",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0178",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0179",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0180",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0181",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0182",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0183",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0184",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0185",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0186",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0187",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0188",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0189",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0190",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0191",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0192",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0193",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0194",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0195",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0196",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0197",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0198",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0199",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0200",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0201",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0202",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0203",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0204",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0205",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0206",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0207",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0208",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0209",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0210",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0211",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0212",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0213",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0214",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0215",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0216",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0217",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0218",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0219",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_PARAMETER_0220",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0001",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0002",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0003",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0004",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0005",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0006",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0007",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0008",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0009",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0010",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0011",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0012",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0013",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0014",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0015",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0016",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0017",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0018",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0019",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0020",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "NON_OFFICIAL_SOURCE",
+        "OWNER_REVIEW_OPTIONAL",
+        "PROVISIONAL_SOURCE"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0021",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0022",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0023",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0024",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0025",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0026",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0027",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0028",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0029",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0030",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0031",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0032",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0033",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_DATASET_0034",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0001",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0002",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0003",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0004",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0005",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0006",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0007",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0008",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0009",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0010",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0011",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0012",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0013",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0014",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0015",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0016",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0017",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0018",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0019",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0020",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0021",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0022",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0023",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0024",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0025",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0026",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0027",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0028",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0029",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0030",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0031",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0032",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0033",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0034",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0035",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0036",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0037",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0038",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0039",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0040",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0041",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0042",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0043",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0044",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0045",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0046",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0047",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0048",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0049",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0050",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0051",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0052",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0053",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0054",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0055",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0056",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0057",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0058",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0059",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0060",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0061",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0062",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "PARAMETER_CALIBRATION_NEEDED",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0063",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0064",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0065",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0066",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0067",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "CAPITAL_SIZING_REVIEW_NEEDED",
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0068",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0069",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0070",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY",
+        "RISK_REVIEW_NEEDED"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0071",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    },
+    {
+      "candidate_id": "PR162D_R1_QUANTUM_0072",
+      "does_not_block_replay_paper_flag": true,
+      "live_order_authority": false,
+      "noncritical_missing_info_tags": [
+        "OWNER_REVIEW_OPTIONAL",
+        "QUANTUM_BACKEND_OPTIONAL",
+        "QUANTUM_COMPARATOR_READY"
+      ]
+    }
+  ],
+  "remote_quantum_required_for_ci": false,
+  "report_filename": "PR162R_A_NonCriticalMissingInfoMatrix.report.json",
+  "report_id": "PR162R_A_NONCRITICAL_MISSING_INFO_MATRIX",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/schemas/pr162r_a_noncriticalmissinginfomatrix.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketDatasetAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_PredictionMarketFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumFormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumClassicalComparatorMappingLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_TestVectorExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoMetadataOnlyCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_NoOrphanExternalCandidateAudit.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceTierCoverage.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QuantumProblemModelRegistry.report.json",
+    "docs/master_plan/generated/PR162D_QuantumExecutionModeRegistry.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_RealNonLiveRunArtifactCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "tools/currentize_pr152_after_generated_artifacts.py",
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "tools/run_validation_gates.py",
+    "tools/ci_branch_context.py"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1"
+  ],
+  "validation_status": "PASS"
+}

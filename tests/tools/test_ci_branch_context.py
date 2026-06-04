@@ -1325,6 +1325,70 @@ def test_pr162d_r1_explicit_changed_path_allowance_is_narrow():
         branch,
         "docs/master_plan/generated/PR162D_FinalSummary.report.json",
     )
+
+
+def test_pr162r_a_explicit_changed_path_allowance_is_narrow():
+    branch = "pr162r-a-replay-paper-executability-classification-audit"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=162) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr162r_a_replay_paper_executability_classification_audit/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr162r_a_replay_paper_executability_classification_audit/"
+        "schemas/pr162r_a_finalsummary.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr162r_a_replay_paper_executability_classification_audit/"
+        "test_pr162r_a_classifies_all_routed_candidates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr162r_a_replay_paper_executability_classification_audit.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr162r_a_replay_paper_executability_classification_audit.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/fail_closed/test_run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/test_ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "src/qtt/stage1_prediction_markets/"
