@@ -162,6 +162,7 @@ def test_pr159r_pr162r_a_downstream_branch_allows_cumulative_validation(monkeypa
 
 
 def test_pr159r_pr162d_r2a_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, PR162D_R2A_DOWNSTREAM_BRANCH)
 
     assert failures == ()
