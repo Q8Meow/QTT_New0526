@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "adapter_input_ref": {
+      "type": "string"
+    },
+    "candidate_packet_ref": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "paper_run_request_candidate_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "paper_run_request_candidate_id",
+    "adapter_input_ref",
+    "candidate_packet_ref",
+    "run_request_status"
+  ],
+  "title": "PaperRunRequestCandidateV1",
+  "type": "object"
+}

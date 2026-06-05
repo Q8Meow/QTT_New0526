@@ -19,6 +19,9 @@ PR162R_A_DOWNSTREAM_BRANCH = (
 PR162D_R2A_DOWNSTREAM_BRANCH = (
     "pr162d-r2a-real-computable-formulations-redo"
 )
+PR162R_DOWNSTREAM_BRANCH = (
+    "pr162r-generic-replay-paper-adapter-rerun"
+)
 
 
 def test_pr161b_branch_context_allows_only_pr161b_scope():
@@ -75,6 +78,16 @@ def test_pr161b_pr162d_r2a_downstream_branch_allows_cumulative_validation():
         validator._branch_context_allowed(
             validator.Path(__file__).resolve().parents[3],
             PR162D_R2A_DOWNSTREAM_BRANCH,
+        )
+        is True
+    )
+
+
+def test_pr161b_pr162r_downstream_branch_allows_cumulative_validation():
+    assert (
+        validator._branch_context_allowed(
+            validator.Path(__file__).resolve().parents[3],
+            PR162R_DOWNSTREAM_BRANCH,
         )
         is True
     )

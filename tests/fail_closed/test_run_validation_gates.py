@@ -559,6 +559,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr162r_generic_replay_paper_adapter_rerun.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2247,6 +2253,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr162d_r2a_index = command_names.index(
         "validate_pr162d_r2a_real_formulations.py"
     )
+    pr162r_index = command_names.index(
+        "validate_pr162r_generic_replay_paper_adapter_rerun.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2359,6 +2368,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     assert command_names.count("validate_pr162d_r2a_real_formulations.py") == 1
     assert (
+        command_names.count(
+            "validate_pr162r_generic_replay_paper_adapter_rerun.py"
+        )
+        == 1
+    )
+    assert (
         pr154_index
         < pr155_index
         < pr156_index
@@ -2381,6 +2396,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr162d_index
         < pr162r_a_index
         < pr162d_r2a_index
+        < pr162r_index
         < next_gate_index
     )
     assert commands[pr155_index] == [
@@ -2562,6 +2578,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr162r_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr162r_generic_replay_paper_adapter_rerun.py"),
+        "--repo-root",
+        ".",
+    ]
     assert "--write-report" not in commands[pr161a_index]
     assert "--write-report" not in commands[pr161b_index]
     assert "--write-report" not in commands[pr161c_index]
@@ -2575,6 +2597,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr162d_index]
     assert "--write-report" not in commands[pr162r_a_index]
     assert "--write-report" not in commands[pr162d_r2a_index]
+    assert "--write-report" not in commands[pr162r_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
     assert "--branch" not in commands[pr161c_index]
@@ -2588,6 +2611,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--branch" not in commands[pr162d_index]
     assert "--branch" not in commands[pr162d_r2a_index]
     assert "--branch" not in commands[pr162r_a_index]
+    assert "--branch" not in commands[pr162r_index]
     assert "--allow-main" not in commands[pr161a_index]
     assert "--allow-main" not in commands[pr161b_index]
     assert "--allow-main" not in commands[pr161c_index]
@@ -2601,6 +2625,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--allow-main" not in commands[pr162d_index]
     assert "--allow-main" not in commands[pr162r_a_index]
     assert "--allow-main" not in commands[pr162d_r2a_index]
+    assert "--allow-main" not in commands[pr162r_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
     assert "--output" not in commands[pr160_index]
@@ -2619,6 +2644,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--output" not in commands[pr162d_index]
     assert "--output" not in commands[pr162r_a_index]
     assert "--output" not in commands[pr162d_r2a_index]
+    assert "--output" not in commands[pr162r_index]
 
 
 def test_runner_validates_pr138_without_tracked_artifact_writer(monkeypatch):
@@ -3012,41 +3038,43 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
 
 def test_runner_preserves_initially_modified_files_after_final_pytest(
     monkeypatch,
-    tmp_path,
 ):
     class Completed:
         returncode = 0
         stdout = ""
         stderr = ""
 
-    repo_root = tmp_path
-    report_rel = (
-        "docs/master_plan/generated/"
-        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
-    )
-    report_path = repo_root / report_rel
-    report_path.parent.mkdir(parents=True)
-    report_path.write_text("updated\n", encoding="utf-8")
-    modified_sets = iter([{report_rel}, {report_rel}, set()])
+    with tempfile.TemporaryDirectory(prefix="qtt_pr162r_runner_test_") as temp_dir:
+        repo_root = Path(temp_dir)
+        report_rel = (
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
+        )
+        report_path = repo_root / report_rel
+        report_path.parent.mkdir(parents=True)
+        report_path.write_text("updated\n", encoding="utf-8")
+        modified_sets = iter([{report_rel}, {report_rel}, set()])
 
-    def fake_run(command: list[str], **kwargs) -> Completed:
-        report_path.write_text("head\n", encoding="utf-8")
-        return Completed()
+        def fake_run(command: list[str], **kwargs) -> Completed:
+            report_path.write_text("head\n", encoding="utf-8")
+            return Completed()
 
-    monkeypatch.setattr(runner, "_tracked_modified_paths", lambda repo_root: next(modified_sets))
-    monkeypatch.setattr(runner.subprocess, "run", fake_run)
-    monkeypatch.setattr(
-        runner,
-        "_routed_generated_output_currentness_failures",
-        lambda command, repo_root: [],
-    )
+        monkeypatch.setattr(
+            runner, "_tracked_modified_paths", lambda repo_root: next(modified_sets)
+        )
+        monkeypatch.setattr(runner.subprocess, "run", fake_run)
+        monkeypatch.setattr(
+            runner,
+            "_routed_generated_output_currentness_failures",
+            lambda command, repo_root: [],
+        )
 
-    command = [
-        runner.sys.executable,
-        str(Path("tools") / runner.PYTEST_FRESH_BASETEMP_SCRIPT),
-    ]
-    assert runner.run_commands([command], repo_root=repo_root) == 0
-    assert report_path.read_text(encoding="utf-8") == "updated\n"
+        command = [
+            runner.sys.executable,
+            str(Path("tools") / runner.PYTEST_FRESH_BASETEMP_SCRIPT),
+        ]
+        assert runner.run_commands([command], repo_root=repo_root) == 0
+        assert report_path.read_text(encoding="utf-8") == "updated\n"
 
 
 def test_runner_includes_qtt_pr_identity_roster_validator(monkeypatch):

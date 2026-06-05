@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "live_order_authority": {
+      "const": false
+    },
+    "source_candidate_id": {
+      "type": "string"
+    },
+    "source_class": {
+      "type": "string"
+    },
+    "source_locator": {
+      "type": "string"
+    },
+    "target_qku_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_candidate_id",
+    "target_qku_id",
+    "target_field",
+    "source_class",
+    "source_locator",
+    "candidate_truth_status"
+  ],
+  "title": "SourceCandidateMaterializationV1",
+  "type": "object"
+}

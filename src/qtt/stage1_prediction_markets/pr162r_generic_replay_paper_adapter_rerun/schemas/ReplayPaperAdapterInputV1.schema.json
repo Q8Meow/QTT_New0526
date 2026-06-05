@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "adapter_input_id": {
+      "type": "string"
+    },
+    "agent_refs": {
+      "type": "array"
+    },
+    "callable_ref": {
+      "type": "string"
+    },
+    "candidate_packet_ref": {
+      "type": "string"
+    },
+    "formulation_ref": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "no_live_order_authority": {
+      "const": true
+    },
+    "no_result_packet_created": {
+      "const": true
+    },
+    "qku_ids": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "adapter_input_id",
+    "candidate_packet_ref",
+    "formulation_ref",
+    "callable_ref",
+    "qku_ids",
+    "agent_refs",
+    "source_truth_status",
+    "candidate_truth_status",
+    "replay_paper_candidate_flag",
+    "live_order_authority",
+    "computability_route",
+    "required_inputs",
+    "available_inputs",
+    "missing_inputs",
+    "data_binding_status",
+    "fill_action_refs",
+    "smoke_execution_status",
+    "replay_adapter_status",
+    "paper_adapter_status",
+    "paired_status",
+    "no_result_packet_created",
+    "no_live_order_authority",
+    "validation_status"
+  ],
+  "title": "ReplayPaperAdapterInputV1",
+  "type": "object"
+}

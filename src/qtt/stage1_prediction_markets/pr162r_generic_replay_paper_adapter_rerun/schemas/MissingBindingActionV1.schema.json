@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "action_id": {
+      "type": "string"
+    },
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "priority_score": {
+      "type": "number"
+    },
+    "qku_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "action_id",
+    "candidate_packet_id",
+    "qku_id",
+    "missing_field",
+    "responsible_agent",
+    "priority_score"
+  ],
+  "title": "MissingBindingActionV1",
+  "type": "object"
+}
