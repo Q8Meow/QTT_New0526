@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
             pr140_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr162d-r2a-real-computable-formulations-redo",
+                branch="pr162r-generic-replay-paper-adapter-rerun",
                 source="unit-test",
             ),
         )

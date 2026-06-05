@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_ref": {
+      "type": "string"
+    },
+    "formulation_ref": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "quantum_batch_route_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "quantum_batch_route_id",
+    "candidate_packet_ref",
+    "formulation_ref",
+    "model_family",
+    "quantum_replay_paper_lane"
+  ],
+  "title": "QuantumBatchPrecomputeRouteV1",
+  "type": "object"
+}

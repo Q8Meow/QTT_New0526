@@ -24,6 +24,9 @@ PR162R_A_DOWNSTREAM_BRANCH = (
 PR162D_R2A_DOWNSTREAM_BRANCH = (
     "pr162d-r2a-real-computable-formulations-redo"
 )
+PR162R_DOWNSTREAM_BRANCH = (
+    "pr162r-generic-replay-paper-adapter-rerun"
+)
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -164,6 +167,14 @@ def test_pr159r_pr162r_a_downstream_branch_allows_cumulative_validation(monkeypa
 def test_pr159r_pr162d_r2a_downstream_branch_allows_cumulative_validation(monkeypatch):
     _clear_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, PR162D_R2A_DOWNSTREAM_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr159r_pr162r_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, PR162R_DOWNSTREAM_BRANCH)
 
     assert failures == ()
     assert receipts == ()

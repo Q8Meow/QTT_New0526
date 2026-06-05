@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_ref": {
+      "type": "string"
+    },
+    "classification_id": {
+      "type": "string"
+    },
+    "computability_route": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "qku_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "classification_id",
+    "candidate_packet_ref",
+    "qku_id",
+    "computability_route"
+  ],
+  "title": "QKUComputabilityRouteV1",
+  "type": "object"
+}
