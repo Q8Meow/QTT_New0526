@@ -1,0 +1,20 @@
+{
+  "connector_binding": false,
+  "execution": "DISABLED",
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "live_authority": false,
+  "mode": "SOURCE_REQUIRED",
+  "open_orders": [
+    {
+      "limit_price": 0.47,
+      "market_id": "PR162R_B_SYNTH_MARKET_001",
+      "order_authority": false,
+      "paper_order_id": "PR162R_B_PAPER_ORDER_001",
+      "remaining_size": 25,
+      "side": "BUY"
+    }
+  ],
+  "paper_open_order_state_id": "PR162R_B_PAPER_OPEN_ORDERS_001",
+  "profit_evidence": false,
+  "source_acceptance": false
+}

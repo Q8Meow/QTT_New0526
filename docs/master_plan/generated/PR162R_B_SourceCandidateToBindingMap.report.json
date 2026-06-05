@@ -1,0 +1,1632 @@
+{
+  "authority_class": "PR162R_B_REPLAY_PAPER_DATA_BINDING_COMPLETION_NONLIVE_NO_EXECUTION_NO_AUTHORITY",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162r_b_replay_paper_data_binding_completion.authority_policy",
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R-B",
+  "creates_connector_binding": false,
+  "creates_live_order_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_order_ready_claim": false,
+  "creates_paper_result_packets": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_checksum_global_digest_authority": false,
+  "creates_qtt_generated_sha_authority": false,
+  "creates_quantum_advantage_claim": false,
+  "creates_replay_result_packets": false,
+  "creates_runtime_cash_receipt": false,
+  "creates_source_acceptance": false,
+  "downstream_pr_routes": [
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162E",
+    "PR162Q",
+    "PR162R-C"
+  ],
+  "executes_quantum_backend": false,
+  "executes_quantum_simulator": false,
+  "fetches_private_state": false,
+  "mutates_protected_atomicrows_bundle_checksum_artifacts": false,
+  "record_count": 84,
+  "records": [
+    {
+      "binding_family": "CLASSICAL_COMPARATOR_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0001",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0001"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0002"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0001",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "CLASSICAL_COMPARATOR_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0002",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0002"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0006"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0002",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0003",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0003"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0010"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0003",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0004",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0004"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0014"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0004",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0005",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0005"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0018"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0005",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0006",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0006"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0022"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0006",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0007",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0007"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0024"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0007",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0008",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0008"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0030"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0008",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0009",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0009"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0036"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0009",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0010",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0010"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0042"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0010",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0011",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0011"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0046"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0011",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0012",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0012"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0050"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0012",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0013",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0013"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0054"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0013",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0014",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0014"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0058"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0014",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "FEE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0015",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0015"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0060"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0015",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "FEE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0016",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0016"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0064"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0016",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0017",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0017"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0066"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0017",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0018",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0018"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0072"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0018",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0019",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0019"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0078"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0019",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0020",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0020"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0084"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0020",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0021",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0021"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0088"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0021",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0022",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0022"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0092"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0022",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0023",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0023"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0096"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0023",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0024",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0024"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0100"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0024",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_TRADE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0025",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0025"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0102"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0025",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_TRADE_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0026",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0026"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0108"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0026",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0027",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0027"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0112"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0027",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0028",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0028"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0116"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0028",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0029",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0029"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0120"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0029",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0030",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0030"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0124"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0030",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "MARKET_CATEGORY_CALIBRATION",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0031",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0031"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0126"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0031",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "MARKET_CATEGORY_CALIBRATION",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0032",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0032"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0130"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0032",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0033",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0033"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0132"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0033",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0034",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0034"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0136"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0034",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0035",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0035"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0140"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0035",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0036",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0036"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0144"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0036",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0037",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0037"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0147"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0037",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0038",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0038"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0151"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0038",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0039",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0039"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0155"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0039",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0040",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0040"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0158"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0040",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0041",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0041"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0161"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0041",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0042",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0042"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0165"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0042",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0043",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0043"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0169"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0043",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0044",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0044"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0172"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0044",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0045",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0045"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0175"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0045",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0046",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0046"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0179"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0046",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0047",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0047"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0183"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0047",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0048",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0048"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0186"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0048",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0049",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0049"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0189"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0049",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0050",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0050"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0193"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0050",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0051",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0051"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0197"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0051",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0052",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0052"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0200"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0052",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0053",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0053"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0202"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0053",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0054",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0054"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0206"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0054",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0055",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0055"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0210"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0055",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0056",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0056"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0214"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0056",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0057",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0057"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0217"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0057",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0058",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0058"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0221"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0058",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0059",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0059"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0225"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0059",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0060",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0060"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0228"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0060",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0061",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0061"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0231"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0061",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0062",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0062"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0235"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0062",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0063",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0063"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0239"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0063",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0064",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0064"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0242"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0064",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0065",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0065"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0245"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0065",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0066",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0066"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0249"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0066",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0067",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0067"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0253"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0067",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0068",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0068"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0256"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0068",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0069",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0069"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0258"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0069",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0070",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0070"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0262"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0070",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0071",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0071"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0266"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0071",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0072",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0072"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0270"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0072",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0073",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0073"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0272"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0073",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0074",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0074"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0276"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0074",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0075",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0075"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0280"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0075",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0076",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0076"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0284"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0076",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0077",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0077"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0286"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0077",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0078",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0078"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0292"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0078",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0079",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0079"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0298"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0079",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0080",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0080"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0304"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0080",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0081",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0081"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0308"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0081",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0082",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0082"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0312"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0082",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0083",
+      "candidate_truth_status": "REPO_LOCAL_ARTIFACT_CANDIDATE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0083"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0316"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0083",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "binding_ref": "PR162R_B_DATASET_BINDING::0084",
+      "candidate_truth_status": "SYNTHETIC_TEST_FIXTURE",
+      "live_order_authority": false,
+      "no_connector_binding": true,
+      "no_source_acceptance": true,
+      "normalization_receipt_refs": [
+        "PR162R_B_NORMALIZATION_RECEIPT::0084"
+      ],
+      "promotion_requires_later_source_acceptance": true,
+      "source_candidate_refs": [
+        "PR162R_B_SOURCE_CANDIDATE::0320"
+      ],
+      "source_candidate_to_binding_id": "PR162R_B_SOURCE_TO_BINDING::0084",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    }
+  ],
+  "report_filename": "PR162R_B_SourceCandidateToBindingMap.report.json",
+  "report_id": "PR162R_B_SOURCECANDIDATETOBINDINGMAP",
+  "schema_ref": null,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R2A_CandidatePacketV1Registry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162RGenericCandidateInputExtension.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationRecordRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_AlgorithmProcedureRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QuantumObjectiveRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_ClassicalComparatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_TestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QKUAgentWorkflowTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_UpstreamDownstreamQKUOrchestrationMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationCoverageAudit.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaLatencyClassRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_HotPathPrecomputeCacheabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162EPluginSeedCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162R_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_InputConsumptionAudit.report.json",
+    "docs/master_plan/generated/PR162R_CandidatePacketV1IngestionLedger.report.json",
+    "docs/master_plan/generated/PR162R_QKUComputabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_ReplayPaperDataBindingRequirementMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MissingDataBindingActionQueue.report.json",
+    "docs/master_plan/generated/PR162R_OnlineSourceScoutQueue.report.json",
+    "docs/master_plan/generated/PR162R_SourceCandidateMaterializationQueue.report.json",
+    "docs/master_plan/generated/PR162R_ReplayAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_PaperAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_ReplayRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PaperRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PairedReplayPaperRunRequestCandidatePlan.report.json",
+    "docs/master_plan/generated/PR162R_QuantumBatchPrecomputeRoutingPlan.report.json",
+    "docs/master_plan/generated/PR162R_LatencyPrecomputeRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_QKUAgentReplayPaperHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MarketSpecificQKUAdapterIndex.report.json",
+    "docs/master_plan/generated/PR162R_CommandActionQKUBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_PR163PaperAdapterHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR164ReviewProvenanceHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR165ScoringRankingHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR162EPluginReplayPaperCompatibilitySeed.report.json",
+    "docs/master_plan/generated/PR162R_DecisionAndNextPRRecommendation.report.json",
+    "docs/master_plan/generated/PR162R_ReportManifest.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A",
+    "PR162D_R2A",
+    "PR162R"
+  ],
+  "validation_status": "PASS"
+}

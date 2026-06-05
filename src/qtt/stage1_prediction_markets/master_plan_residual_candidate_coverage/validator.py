@@ -212,6 +212,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr162r-a-replay-paper-executability-classification-audit",
         "pr162d-r2a-real-computable-formulations-redo",
         "pr162r-generic-replay-paper-adapter-rerun",
+        "pr162r-b-replay-paper-data-binding-completion",
     } or (
         normalized == "main" and _ancestry_present(root)
     )

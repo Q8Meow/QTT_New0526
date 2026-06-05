@@ -1,0 +1,75 @@
+{
+  "connector_binding": false,
+  "correlation_matrix": [
+    [
+      1.0,
+      0.2,
+      0.0
+    ],
+    [
+      0.2,
+      1.0,
+      0.15
+    ],
+    [
+      0.0,
+      0.15,
+      1.0
+    ]
+  ],
+  "cost_adjusted_price_vector": [
+    0.49,
+    0.55,
+    0.44
+  ],
+  "covariance_matrix": [
+    [
+      0.04,
+      0.01,
+      0.0
+    ],
+    [
+      0.01,
+      0.05,
+      0.01
+    ],
+    [
+      0.0,
+      0.01,
+      0.03
+    ]
+  ],
+  "execution": "DISABLED",
+  "expected_value_vector": [
+    0.03,
+    0.04,
+    0.02
+  ],
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "liquidity_depth_vector": [
+    500,
+    420,
+    380
+  ],
+  "live_authority": false,
+  "mode": "SOURCE_REQUIRED",
+  "objective_scale": 1.0,
+  "probability_vector": [
+    0.54,
+    0.61,
+    0.48
+  ],
+  "profit_evidence": false,
+  "quantum_input_id": "PR162R_B_QUANTUM_OBJECTIVE_001",
+  "risk_vector": [
+    0.12,
+    0.16,
+    0.1
+  ],
+  "settlement_risk_vector": [
+    0.02,
+    0.03,
+    0.01
+  ],
+  "source_acceptance": false
+}

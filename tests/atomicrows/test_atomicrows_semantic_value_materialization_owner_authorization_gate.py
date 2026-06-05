@@ -577,7 +577,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
             pr141_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr162r-generic-replay-paper-adapter-rerun",
+                branch="pr162r-b-replay-paper-data-binding-completion",
                 source="unit-test",
             ),
         )

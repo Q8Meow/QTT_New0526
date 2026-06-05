@@ -1,0 +1,20 @@
+{
+  "connector_binding": false,
+  "execution": "DISABLED",
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "live_authority": false,
+  "mode": "SOURCE_REQUIRED",
+  "paper_cash": 10000.0,
+  "paper_portfolio_state_id": "PR162R_B_PAPER_PORTFOLIO_001",
+  "positions": [
+    {
+      "market_id": "PR162R_B_SYNTH_MARKET_001",
+      "outcome_id": "YES",
+      "quantity": 0
+    }
+  ],
+  "private_state": false,
+  "profit_evidence": false,
+  "runtime_cash_receipt": false,
+  "source_acceptance": false
+}

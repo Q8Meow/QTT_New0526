@@ -272,7 +272,7 @@ def _validate_generated_file_set(repo_root: Path, failures: list[str]) -> None:
     existing = {
         path.name
         for path in (repo_root / p.GENERATED_DIR).glob("PR162R_*.report.json")
-        if not path.name.startswith("PR162R_A_")
+        if not path.name.startswith(("PR162R_A_", "PR162R_B_"))
     }
     expected = set(p.REPORT_FILENAMES)
     _expect(not (existing - expected), failures, f"orphan PR162R generated files: {sorted(existing - expected)}")

@@ -22,6 +22,9 @@ PR162D_R2A_DOWNSTREAM_BRANCH = (
 PR162R_DOWNSTREAM_BRANCH = (
     "pr162r-generic-replay-paper-adapter-rerun"
 )
+PR162R_B_DOWNSTREAM_BRANCH = (
+    "pr162r-b-replay-paper-data-binding-completion"
+)
 
 
 def test_pr161a_branch_context_allows_only_pr161a_scope():
@@ -87,6 +90,16 @@ def test_pr161a_pr162r_downstream_branch_allows_cumulative_validation():
         validator._branch_context_allowed(
             validator.Path(__file__).resolve().parents[3],
             PR162R_DOWNSTREAM_BRANCH,
+        )
+        is True
+    )
+
+
+def test_pr161a_pr162r_b_downstream_branch_allows_cumulative_validation():
+    assert (
+        validator._branch_context_allowed(
+            validator.Path(__file__).resolve().parents[3],
+            PR162R_B_DOWNSTREAM_BRANCH,
         )
         is True
     )

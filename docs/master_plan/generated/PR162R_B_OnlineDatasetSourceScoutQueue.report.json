@@ -1,0 +1,1464 @@
+{
+  "authority_class": "PR162R_B_REPLAY_PAPER_DATA_BINDING_COMPLETION_NONLIVE_NO_EXECUTION_NO_AUTHORITY",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162r_b_replay_paper_data_binding_completion.authority_policy",
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R-B",
+  "creates_connector_binding": false,
+  "creates_live_order_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_order_ready_claim": false,
+  "creates_paper_result_packets": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_checksum_global_digest_authority": false,
+  "creates_qtt_generated_sha_authority": false,
+  "creates_quantum_advantage_claim": false,
+  "creates_replay_result_packets": false,
+  "creates_runtime_cash_receipt": false,
+  "creates_source_acceptance": false,
+  "downstream_pr_routes": [
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162E",
+    "PR162Q",
+    "PR162R-C"
+  ],
+  "executes_quantum_backend": false,
+  "executes_quantum_simulator": false,
+  "fetches_private_state": false,
+  "mutates_protected_atomicrows_bundle_checksum_artifacts": false,
+  "record_count": 84,
+  "records": [
+    {
+      "binding_family": "CLASSICAL_COMPARATOR_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0001",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS CLASSICAL_COMPARATOR_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "CLASSICAL_COMPARATOR_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0002",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS CLASSICAL_COMPARATOR_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0003",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS COVARIANCE_CORRELATION_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0004",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS COVARIANCE_CORRELATION_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0005",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB COVARIANCE_CORRELATION_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0006",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE COVARIANCE_CORRELATION_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0007",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS CROSS_VENUE_DISAGREEMENT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0008",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS CROSS_VENUE_DISAGREEMENT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0009",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB CROSS_VENUE_DISAGREEMENT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0010",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE CROSS_VENUE_DISAGREEMENT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0011",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS EVENT_STATE_TIMELINE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0012",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS EVENT_STATE_TIMELINE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0013",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB EVENT_STATE_TIMELINE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0014",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE EVENT_STATE_TIMELINE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "FEE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0015",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB FEE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "FEE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0016",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE FEE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0017",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0018",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0019",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0020",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0021",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS HISTORICAL_PRICE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0022",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS HISTORICAL_PRICE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0023",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB HISTORICAL_PRICE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0024",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE HISTORICAL_PRICE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "HISTORICAL_TRADE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0025",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB HISTORICAL_TRADE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "HISTORICAL_TRADE_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0026",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE HISTORICAL_TRADE_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0027",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS LATENCY_OBSERVATION_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0028",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS LATENCY_OBSERVATION_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0029",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB LATENCY_OBSERVATION_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0030",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE LATENCY_OBSERVATION_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "MARKET_CATEGORY_CALIBRATION",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0031",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB MARKET_CATEGORY_CALIBRATION historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "MARKET_CATEGORY_CALIBRATION",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0032",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE MARKET_CATEGORY_CALIBRATION historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0033",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS MARKET_METADATA_AND_LIFECYCLE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0034",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS MARKET_METADATA_AND_LIFECYCLE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0035",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB MARKET_METADATA_AND_LIFECYCLE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0036",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE MARKET_METADATA_AND_LIFECYCLE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0037",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS PAPER_EXECUTION_COST_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0038",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS PAPER_EXECUTION_COST_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0039",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB PAPER_EXECUTION_COST_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0040",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE PAPER_EXECUTION_COST_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0041",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS PAPER_MARKET_STATE_BINDING historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0042",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS PAPER_MARKET_STATE_BINDING historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0043",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB PAPER_MARKET_STATE_BINDING historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0044",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE PAPER_MARKET_STATE_BINDING historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0045",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS PAPER_PORTFOLIO_STATE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0046",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS PAPER_PORTFOLIO_STATE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0047",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB PAPER_PORTFOLIO_STATE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0048",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE PAPER_PORTFOLIO_STATE historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0049",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS PAPER_SYNTHETIC_FILL_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0050",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS PAPER_SYNTHETIC_FILL_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0051",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB PAPER_SYNTHETIC_FILL_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0052",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE PAPER_SYNTHETIC_FILL_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0053",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS PROBABILITY_MODEL_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0054",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS PROBABILITY_MODEL_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0055",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB PROBABILITY_MODEL_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0056",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE PROBABILITY_MODEL_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0057",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS QUANTUM_CONSTRAINT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0058",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS QUANTUM_CONSTRAINT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0059",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB QUANTUM_CONSTRAINT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0060",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE QUANTUM_CONSTRAINT_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0061",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS QUANTUM_OBJECTIVE_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0062",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS QUANTUM_OBJECTIVE_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0063",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB QUANTUM_OBJECTIVE_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0064",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE QUANTUM_OBJECTIVE_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0065",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS QUANTUM_VARIABLE_DOMAIN_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0066",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS QUANTUM_VARIABLE_DOMAIN_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0067",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB QUANTUM_VARIABLE_DOMAIN_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0068",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE QUANTUM_VARIABLE_DOMAIN_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0069",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS SETTLEMENT_OUTCOME_LABELS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0070",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS SETTLEMENT_OUTCOME_LABELS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0071",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB SETTLEMENT_OUTCOME_LABELS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0072",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE SETTLEMENT_OUTCOME_LABELS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0073",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS SLIPPAGE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0074",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS SLIPPAGE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0075",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB SLIPPAGE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0076",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE SLIPPAGE_MODEL historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0077",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS STALENESS_AND_FRESHNESS_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0078",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS STALENESS_AND_FRESHNESS_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0079",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB STALENESS_AND_FRESHNESS_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0080",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE STALENESS_AND_FRESHNESS_INPUTS historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0081",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "FORECASTEX_IBKR_EVENT_MARKETS VOLUME_DEPTH_LIQUIDITY_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "FORECASTEX_IBKR_EVENT_MARKETS"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0082",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "KALSHI_PREDICTION_MARKETS VOLUME_DEPTH_LIQUIDITY_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "KALSHI_PREDICTION_MARKETS"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0083",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "POLYMARKET_CLOB VOLUME_DEPTH_LIQUIDITY_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "POLYMARKET_CLOB"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "candidate_truth_status_only": true,
+      "live_order_authority": false,
+      "online_dataset_source_scout_id": "PR162R_B_ONLINE_DATASET_SCOUT::0084",
+      "runtime_retrieval_allowed": false,
+      "source_classes_to_scout": [
+        "OFFICIAL_SOURCE_CANDIDATE",
+        "NON_OFFICIAL_WEB_CANDIDATE",
+        "RESEARCH_SOURCE_CANDIDATE",
+        "PUBLIC_DATASET_CANDIDATE"
+      ],
+      "source_scout_query": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE VOLUME_DEPTH_LIQUIDITY_SERIES historical dataset data dictionary replay paper candidate source",
+      "validation_status": "PASS",
+      "venue_scope": "VENUE_NEUTRAL_SYNTHETIC_FIXTURE"
+    }
+  ],
+  "report_filename": "PR162R_B_OnlineDatasetSourceScoutQueue.report.json",
+  "report_id": "PR162R_B_ONLINEDATASETSOURCESCOUTQUEUE",
+  "schema_ref": null,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R2A_CandidatePacketV1Registry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162RGenericCandidateInputExtension.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationRecordRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_AlgorithmProcedureRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QuantumObjectiveRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_ClassicalComparatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_TestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QKUAgentWorkflowTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_UpstreamDownstreamQKUOrchestrationMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationCoverageAudit.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaLatencyClassRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_HotPathPrecomputeCacheabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162EPluginSeedCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162R_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_InputConsumptionAudit.report.json",
+    "docs/master_plan/generated/PR162R_CandidatePacketV1IngestionLedger.report.json",
+    "docs/master_plan/generated/PR162R_QKUComputabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_ReplayPaperDataBindingRequirementMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MissingDataBindingActionQueue.report.json",
+    "docs/master_plan/generated/PR162R_OnlineSourceScoutQueue.report.json",
+    "docs/master_plan/generated/PR162R_SourceCandidateMaterializationQueue.report.json",
+    "docs/master_plan/generated/PR162R_ReplayAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_PaperAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_ReplayRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PaperRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PairedReplayPaperRunRequestCandidatePlan.report.json",
+    "docs/master_plan/generated/PR162R_QuantumBatchPrecomputeRoutingPlan.report.json",
+    "docs/master_plan/generated/PR162R_LatencyPrecomputeRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_QKUAgentReplayPaperHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MarketSpecificQKUAdapterIndex.report.json",
+    "docs/master_plan/generated/PR162R_CommandActionQKUBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_PR163PaperAdapterHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR164ReviewProvenanceHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR165ScoringRankingHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR162EPluginReplayPaperCompatibilitySeed.report.json",
+    "docs/master_plan/generated/PR162R_DecisionAndNextPRRecommendation.report.json",
+    "docs/master_plan/generated/PR162R_ReportManifest.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A",
+    "PR162D_R2A",
+    "PR162R"
+  ],
+  "validation_status": "PASS"
+}

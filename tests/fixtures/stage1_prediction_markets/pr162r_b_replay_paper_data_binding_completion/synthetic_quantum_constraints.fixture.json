@@ -1,0 +1,42 @@
+{
+  "capital_budget": 1000.0,
+  "connector_binding": false,
+  "constraint_matrix_or_terms": [
+    [
+      1,
+      1,
+      1
+    ],
+    [
+      0.49,
+      0.55,
+      0.44
+    ]
+  ],
+  "drawdown_limit": 0.08,
+  "execution": "DISABLED",
+  "exposure_limit": 0.25,
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "latency_window": "BATCH_ONLY",
+  "live_authority": false,
+  "mode": "SOURCE_REQUIRED",
+  "penalty_weights": {
+    "budget": 3.0,
+    "exposure": 2.0,
+    "liquidity": 1.0
+  },
+  "position_size_limit": 100.0,
+  "profit_evidence": false,
+  "quantum_constraint_id": "PR162R_B_QUANTUM_CONSTRAINT_001",
+  "source_acceptance": false,
+  "variable_domain_map": {
+    "x0": "BINARY",
+    "x1": "BINARY",
+    "x2": "BINARY"
+  },
+  "venue_eligibility_vector": [
+    1,
+    1,
+    0
+  ]
+}

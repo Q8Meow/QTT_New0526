@@ -1,0 +1,18 @@
+{
+  "connector_binding": false,
+  "execution": "DISABLED",
+  "expected_slippage_per_share": 0.003,
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "latency_bucket_slippage": {
+    "HIGH": 0.006,
+    "LOW": 0.001,
+    "MEDIUM": 0.003
+  },
+  "live_authority": false,
+  "maker_fee_per_share": 0.001,
+  "mode": "SOURCE_REQUIRED",
+  "model_id": "PR162R_B_SYNTH_FEE_SLIPPAGE_MODEL_001",
+  "profit_evidence": false,
+  "source_acceptance": false,
+  "taker_fee_per_share": 0.002
+}

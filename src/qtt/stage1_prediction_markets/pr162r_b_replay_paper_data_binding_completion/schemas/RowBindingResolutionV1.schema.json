@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "binding_task_refs": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "candidate_packet_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "paper_binding_refs": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "replay_binding_refs": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "candidate_packet_id",
+    "binding_task_refs",
+    "replay_binding_refs",
+    "paper_binding_refs"
+  ],
+  "title": "RowBindingResolutionV1",
+  "type": "object"
+}
