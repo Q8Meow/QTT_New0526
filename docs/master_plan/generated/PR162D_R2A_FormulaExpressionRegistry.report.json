@@ -1,0 +1,1331 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 61,
+  "records": [
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_yes_ev",
+      "domain_family_key": "expected_value_probability_edge",
+      "expression": "yes_ev = p_model * payout - yes_price - fee_estimate - slippage_estimate - latency_cost_estimate",
+      "formula_id": "FORMULA::YES_EV",
+      "inputs": [
+        "p_model",
+        "payout",
+        "yes_price",
+        "fee_estimate",
+        "slippage_estimate",
+        "latency_cost_estimate"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "yes_ev"
+      ],
+      "subfamily_key": "yes_ev",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::YES_EV"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_no_ev",
+      "domain_family_key": "expected_value_probability_edge",
+      "expression": "no_ev = (1 - p_model) * payout - no_price - fee_estimate - slippage_estimate - latency_cost_estimate",
+      "formula_id": "FORMULA::NO_EV",
+      "inputs": [
+        "p_model",
+        "payout",
+        "no_price",
+        "fee_estimate",
+        "slippage_estimate",
+        "latency_cost_estimate"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "no_ev"
+      ],
+      "subfamily_key": "no_ev",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::NO_EV"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_implied_probability",
+      "domain_family_key": "expected_value_probability_edge",
+      "expression": "implied_probability = clamp(price / max(payout, epsilon), 0, 1)",
+      "formula_id": "FORMULA::IMPLIED_PROBABILITY",
+      "inputs": [
+        "price",
+        "payout"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "implied_probability"
+      ],
+      "subfamily_key": "implied_probability",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::IMPLIED_PROBABILITY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_probability_edge",
+      "domain_family_key": "expected_value_probability_edge",
+      "expression": "probability_edge = p_model - implied_probability",
+      "formula_id": "FORMULA::PROBABILITY_EDGE",
+      "inputs": [
+        "p_model",
+        "implied_probability"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "probability_edge"
+      ],
+      "subfamily_key": "probability_edge",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::PROBABILITY_EDGE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_net_edge",
+      "domain_family_key": "expected_value_probability_edge",
+      "expression": "net_edge = expected_net_value / max(entry_price, epsilon)",
+      "formula_id": "FORMULA::NET_EDGE",
+      "inputs": [
+        "expected_net_value",
+        "entry_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "net_edge"
+      ],
+      "subfamily_key": "net_edge",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::NET_EDGE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_mid_price",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "mid_price = (best_bid + best_ask) / 2",
+      "formula_id": "FORMULA::MID_PRICE",
+      "inputs": [
+        "best_bid",
+        "best_ask"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "mid_price"
+      ],
+      "subfamily_key": "mid_price",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::MID_PRICE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_spread",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "spread = best_ask - best_bid",
+      "formula_id": "FORMULA::SPREAD",
+      "inputs": [
+        "best_bid",
+        "best_ask"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "spread"
+      ],
+      "subfamily_key": "spread",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SPREAD"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_relative_spread",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "relative_spread = spread / max(mid_price, epsilon)",
+      "formula_id": "FORMULA::RELATIVE_SPREAD",
+      "inputs": [
+        "spread",
+        "mid_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "relative_spread"
+      ],
+      "subfamily_key": "relative_spread",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::RELATIVE_SPREAD"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_orderbook_imbalance",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "orderbook_imbalance = (bid_size - ask_size) / max(bid_size + ask_size, epsilon)",
+      "formula_id": "FORMULA::ORDERBOOK_IMBALANCE",
+      "inputs": [
+        "bid_size",
+        "ask_size"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "orderbook_imbalance"
+      ],
+      "subfamily_key": "orderbook_imbalance",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::ORDERBOOK_IMBALANCE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_liquidity_score",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "liquidity_score = log1p(volume) * log1p(depth) / max(spread, tick_size_or_epsilon)",
+      "formula_id": "FORMULA::LIQUIDITY_SCORE",
+      "inputs": [
+        "volume",
+        "depth",
+        "spread",
+        "tick_size_or_epsilon"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "liquidity_score"
+      ],
+      "subfamily_key": "liquidity_score",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::LIQUIDITY_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_latency_cost",
+      "domain_family_key": "latency_slippage_cost",
+      "expression": "latency_cost = abs(price_velocity_per_second) * expected_latency_seconds * notional_sensitivity",
+      "formula_id": "FORMULA::LATENCY_COST",
+      "inputs": [
+        "price_velocity_per_second",
+        "expected_latency_seconds",
+        "notional_sensitivity"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "latency_cost"
+      ],
+      "subfamily_key": "latency_cost",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::LATENCY_COST"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_slippage_estimate",
+      "domain_family_key": "latency_slippage_cost",
+      "expression": "slippage_estimate = spread_component + depth_impact_component + volatility_impact_component",
+      "formula_id": "FORMULA::SLIPPAGE_ESTIMATE",
+      "inputs": [
+        "spread_component",
+        "depth_impact_component",
+        "volatility_impact_component"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "slippage_estimate"
+      ],
+      "subfamily_key": "slippage_estimate",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SLIPPAGE_ESTIMATE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_kelly_capped",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "kelly_capped = clamp(((edge_probability * odds_payoff_ratio - loss_probability) / max(odds_payoff_ratio, epsilon)), 0, max_fraction_cap)",
+      "formula_id": "FORMULA::KELLY_CAPPED",
+      "inputs": [
+        "edge_probability",
+        "odds_payoff_ratio",
+        "loss_probability",
+        "max_fraction_cap"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "kelly_raw",
+        "kelly_capped"
+      ],
+      "subfamily_key": "kelly",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::KELLY_CAPPED"
+      ],
+      "variant_key": "capped_owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_brier_score",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "brier_score = mean((actual_outcome - predicted_probability)^2)",
+      "formula_id": "FORMULA::BRIER_SCORE",
+      "inputs": [
+        "actual_outcomes",
+        "predicted_probabilities"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "brier_score"
+      ],
+      "subfamily_key": "brier_score",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::BRIER_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_log_loss",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "log_loss = -mean(y * log(p_clipped) + (1 - y) * log(1 - p_clipped))",
+      "formula_id": "FORMULA::LOG_LOSS",
+      "inputs": [
+        "actual_outcomes",
+        "predicted_probabilities"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "log_loss"
+      ],
+      "subfamily_key": "log_loss",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::LOG_LOSS"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_ema",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "ema_t = alpha * price_t + (1 - alpha) * ema_t_minus_1",
+      "formula_id": "FORMULA::EMA",
+      "inputs": [
+        "alpha",
+        "price_t",
+        "ema_t_minus_1"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ema_t"
+      ],
+      "subfamily_key": "EMA",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::EMA"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_simple_return",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "simple_return = price_t / max(price_t_minus_1, epsilon) - 1",
+      "formula_id": "FORMULA::SIMPLE_RETURN",
+      "inputs": [
+        "price_t",
+        "price_t_minus_1"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "simple_return"
+      ],
+      "subfamily_key": "returns",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SIMPLE_RETURN"
+      ],
+      "variant_key": "simple_owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_rolling_volatility",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "rolling_volatility = std(returns_window)",
+      "formula_id": "FORMULA::ROLLING_VOLATILITY",
+      "inputs": [
+        "returns_window"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "rolling_volatility"
+      ],
+      "subfamily_key": "volatility",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::ROLLING_VOLATILITY"
+      ],
+      "variant_key": "rolling_owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_vwap",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "vwap = sum(price_i * volume_i) / max(sum(volume_i), epsilon)",
+      "formula_id": "FORMULA::VWAP",
+      "inputs": [
+        "prices",
+        "volumes"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "vwap"
+      ],
+      "subfamily_key": "VWAP",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::VWAP"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_bollinger_z",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "bollinger_z = (price - rolling_mean) / max(rolling_std, epsilon)",
+      "formula_id": "FORMULA::BOLLINGER_Z",
+      "inputs": [
+        "price",
+        "rolling_mean",
+        "rolling_std"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "bollinger_z"
+      ],
+      "subfamily_key": "Bollinger",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::BOLLINGER_Z"
+      ],
+      "variant_key": "z_score_owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_rsi",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "rsi = 100 - 100 / (1 + mean(max(delta_i,0)) / max(mean(abs(min(delta_i,0))), epsilon))",
+      "formula_id": "FORMULA::RSI",
+      "inputs": [
+        "deltas"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "avg_gain",
+        "avg_loss",
+        "rs",
+        "rsi"
+      ],
+      "subfamily_key": "RSI",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::RSI"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_macd",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "macd = ema_fast - ema_slow; macd_signal = ema(macd, signal_alpha); macd_histogram = macd - macd_signal",
+      "formula_id": "FORMULA::MACD",
+      "inputs": [
+        "ema_fast",
+        "ema_slow",
+        "signal_alpha",
+        "macd_signal_t_minus_1"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "macd",
+        "macd_signal",
+        "macd_histogram"
+      ],
+      "subfamily_key": "MACD",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::MACD"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_risk_adjusted_score",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "risk_adjusted_score = expected_net_value - drawdown_penalty_lambda*drawdown_risk - latency_penalty_lambda*latency_cost - slippage_penalty_lambda*slippage_estimate - complexity_penalty_lambda*complexity_score",
+      "formula_id": "FORMULA::RISK_ADJUSTED_SCORE",
+      "inputs": [
+        "expected_net_value",
+        "drawdown_penalty_lambda",
+        "drawdown_risk",
+        "latency_penalty_lambda",
+        "latency_cost",
+        "slippage_penalty_lambda",
+        "slippage_estimate",
+        "complexity_penalty_lambda",
+        "complexity_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "risk_adjusted_score"
+      ],
+      "subfamily_key": "risk_adjusted_score",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::RISK_ADJUSTED_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_candidate_selection_score",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "candidate_selection_score = replay_value_score + paper_value_score + stability_score + cross_market_generalization_score + quantum_priority_boost - latency_penalty - drawdown_penalty - data_missing_penalty - complexity_penalty",
+      "formula_id": "FORMULA::CANDIDATE_SELECTION_SCORE",
+      "inputs": [
+        "replay_value_score",
+        "paper_value_score",
+        "stability_score",
+        "cross_market_generalization_score",
+        "quantum_priority_boost",
+        "latency_penalty",
+        "drawdown_penalty",
+        "data_missing_penalty",
+        "complexity_penalty"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "candidate_selection_score"
+      ],
+      "subfamily_key": "candidate_selection_score",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::CANDIDATE_SELECTION_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_depth_impact_component",
+      "domain_family_key": "latency_slippage_cost",
+      "expression": "depth_impact_component = order_size / max(available_depth, epsilon)",
+      "formula_id": "FORMULA::DEPTH_IMPACT_COMPONENT",
+      "inputs": [
+        "order_size",
+        "available_depth"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "depth_impact_component"
+      ],
+      "subfamily_key": "slippage_depth",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::DEPTH_IMPACT_COMPONENT"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_volatility_impact_component",
+      "domain_family_key": "latency_slippage_cost",
+      "expression": "volatility_impact_component = rolling_volatility * sqrt(holding_period_seconds)",
+      "formula_id": "FORMULA::VOLATILITY_IMPACT_COMPONENT",
+      "inputs": [
+        "rolling_volatility",
+        "holding_period_seconds"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "volatility_impact_component"
+      ],
+      "subfamily_key": "slippage_volatility",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::VOLATILITY_IMPACT_COMPONENT"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_spread_component",
+      "domain_family_key": "latency_slippage_cost",
+      "expression": "spread_component = spread * spread_capture_fraction",
+      "formula_id": "FORMULA::SPREAD_COMPONENT",
+      "inputs": [
+        "spread",
+        "spread_capture_fraction"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "spread_component"
+      ],
+      "subfamily_key": "spread_component",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SPREAD_COMPONENT"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_depth_weighted_mid_price",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "depth_weighted_mid_price = (best_bid*ask_size + best_ask*bid_size) / max(bid_size + ask_size, epsilon)",
+      "formula_id": "FORMULA::DEPTH_WEIGHTED_MID_PRICE",
+      "inputs": [
+        "best_bid",
+        "best_ask",
+        "bid_size",
+        "ask_size"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "depth_weighted_mid_price"
+      ],
+      "subfamily_key": "depth_weighted_mid",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::DEPTH_WEIGHTED_MID_PRICE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_top_of_book_depth",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "top_of_book_depth = bid_size + ask_size",
+      "formula_id": "FORMULA::TOP_OF_BOOK_DEPTH",
+      "inputs": [
+        "bid_size",
+        "ask_size"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "top_of_book_depth"
+      ],
+      "subfamily_key": "top_of_book_depth",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::TOP_OF_BOOK_DEPTH"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_market_pressure",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "market_pressure = orderbook_imbalance * relative_spread",
+      "formula_id": "FORMULA::MARKET_PRESSURE",
+      "inputs": [
+        "orderbook_imbalance",
+        "relative_spread"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "market_pressure"
+      ],
+      "subfamily_key": "market_pressure",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::MARKET_PRESSURE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_volume_growth_rate",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "volume_growth_rate = volume_t / max(volume_t_minus_1, epsilon) - 1",
+      "formula_id": "FORMULA::VOLUME_GROWTH_RATE",
+      "inputs": [
+        "volume_t",
+        "volume_t_minus_1"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "volume_growth_rate"
+      ],
+      "subfamily_key": "volume",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::VOLUME_GROWTH_RATE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_candle_return",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "candle_return = close_price / max(open_price, epsilon) - 1",
+      "formula_id": "FORMULA::CANDLE_RETURN",
+      "inputs": [
+        "close_price",
+        "open_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "candle_return"
+      ],
+      "subfamily_key": "returns",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::CANDLE_RETURN"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_high_low_range",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "high_low_range = high_price - low_price",
+      "formula_id": "FORMULA::HIGH_LOW_RANGE",
+      "inputs": [
+        "high_price",
+        "low_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "high_low_range"
+      ],
+      "subfamily_key": "candlestick",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::HIGH_LOW_RANGE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_candle_body",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "candle_body = abs(close_price - open_price)",
+      "formula_id": "FORMULA::CANDLE_BODY",
+      "inputs": [
+        "close_price",
+        "open_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "candle_body"
+      ],
+      "subfamily_key": "candlestick",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::CANDLE_BODY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_wick_ratio",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "wick_ratio = ((high_price - low_price) - abs(close_price - open_price)) / max(high_price - low_price, epsilon)",
+      "formula_id": "FORMULA::WICK_RATIO",
+      "inputs": [
+        "high_price",
+        "low_price",
+        "close_price",
+        "open_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "wick_ratio"
+      ],
+      "subfamily_key": "candlestick",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::WICK_RATIO"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_realized_spread_proxy",
+      "domain_family_key": "market_microstructure_liquidity",
+      "expression": "realized_spread_proxy = abs(execution_price - mid_price_after_delay)",
+      "formula_id": "FORMULA::REALIZED_SPREAD_PROXY",
+      "inputs": [
+        "execution_price",
+        "mid_price_after_delay"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "realized_spread_proxy"
+      ],
+      "subfamily_key": "realized_spread",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::REALIZED_SPREAD_PROXY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_momentum_n_period",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "momentum_n_period = price_t - price_t_minus_n",
+      "formula_id": "FORMULA::MOMENTUM_N_PERIOD",
+      "inputs": [
+        "price_t",
+        "price_t_minus_n"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "momentum_n_period"
+      ],
+      "subfamily_key": "momentum",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::MOMENTUM_N_PERIOD"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_price_zscore",
+      "domain_family_key": "technical_indicator_price_feature",
+      "expression": "price_zscore = (price - mean_price) / max(std_price, epsilon)",
+      "formula_id": "FORMULA::PRICE_ZSCORE",
+      "inputs": [
+        "price",
+        "mean_price",
+        "std_price"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "price_zscore"
+      ],
+      "subfamily_key": "zscore",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::PRICE_ZSCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_sharpe_like_score",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "sharpe_like_score = mean_return / max(return_volatility, epsilon)",
+      "formula_id": "FORMULA::SHARPE_LIKE_SCORE",
+      "inputs": [
+        "mean_return",
+        "return_volatility"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "sharpe_like_score"
+      ],
+      "subfamily_key": "risk_return",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SHARPE_LIKE_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_expected_shortfall_proxy",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "expected_shortfall_proxy = mean(losses >= var_threshold)",
+      "formula_id": "FORMULA::EXPECTED_SHORTFALL_PROXY",
+      "inputs": [
+        "losses",
+        "var_threshold"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "expected_shortfall_proxy"
+      ],
+      "subfamily_key": "expected_shortfall",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::EXPECTED_SHORTFALL_PROXY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_capital_utilization",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "capital_utilization = capital_used / max(capital_budget, epsilon)",
+      "formula_id": "FORMULA::CAPITAL_UTILIZATION",
+      "inputs": [
+        "capital_used",
+        "capital_budget"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "capital_utilization"
+      ],
+      "subfamily_key": "capital_utilization",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::CAPITAL_UTILIZATION"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_exposure_utilization",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "exposure_utilization = exposure_used / max(max_exposure, epsilon)",
+      "formula_id": "FORMULA::EXPOSURE_UTILIZATION",
+      "inputs": [
+        "exposure_used",
+        "max_exposure"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "exposure_utilization"
+      ],
+      "subfamily_key": "exposure_utilization",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::EXPOSURE_UTILIZATION"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_cost_to_budget_ratio",
+      "domain_family_key": "risk_capital_sizing",
+      "expression": "cost_to_budget_ratio = candidate_cost / max(budget, epsilon)",
+      "formula_id": "FORMULA::COST_TO_BUDGET_RATIO",
+      "inputs": [
+        "candidate_cost",
+        "budget"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "cost_to_budget_ratio"
+      ],
+      "subfamily_key": "budget_ratio",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::COST_TO_BUDGET_RATIO"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_logit",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "logit = log(p_model / (1 - p_model))",
+      "formula_id": "FORMULA::LOGIT",
+      "inputs": [
+        "p_model"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "logit"
+      ],
+      "subfamily_key": "logit",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::LOGIT"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_sigmoid_probability",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "sigmoid_probability = 1 / (1 + exp(-logit))",
+      "formula_id": "FORMULA::SIGMOID_PROBABILITY",
+      "inputs": [
+        "logit"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "sigmoid_probability"
+      ],
+      "subfamily_key": "sigmoid",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::SIGMOID_PROBABILITY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_probability_calibration_error",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "probability_calibration_error = observed_frequency - predicted_probability",
+      "formula_id": "FORMULA::PROBABILITY_CALIBRATION_ERROR",
+      "inputs": [
+        "observed_frequency",
+        "predicted_probability"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "probability_calibration_error"
+      ],
+      "subfamily_key": "calibration_error",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::PROBABILITY_CALIBRATION_ERROR"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_binary_entropy",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "binary_entropy = -(p*log(p) + (1-p)*log(1-p))",
+      "formula_id": "FORMULA::BINARY_ENTROPY",
+      "inputs": [
+        "probability"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "binary_entropy"
+      ],
+      "subfamily_key": "entropy",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::BINARY_ENTROPY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_ensemble_probability_mean",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "ensemble_probability_mean = mean(probabilities)",
+      "formula_id": "FORMULA::ENSEMBLE_PROBABILITY_MEAN",
+      "inputs": [
+        "probabilities"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "ensemble_probability_mean"
+      ],
+      "subfamily_key": "ensemble",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::ENSEMBLE_PROBABILITY_MEAN"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_weighted_signal_score",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "weighted_signal_score = sum(signal_i*weight_i)/max(sum(weights), epsilon)",
+      "formula_id": "FORMULA::WEIGHTED_SIGNAL_SCORE",
+      "inputs": [
+        "signals",
+        "weights"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "weighted_signal_score"
+      ],
+      "subfamily_key": "weighted_signal",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::WEIGHTED_SIGNAL_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_covariance_penalty",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "covariance_penalty = lambda_risk * w^T covariance w",
+      "formula_id": "FORMULA::COVARIANCE_PENALTY",
+      "inputs": [
+        "weights",
+        "covariance",
+        "lambda_risk"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "covariance_penalty"
+      ],
+      "subfamily_key": "risk_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::COVARIANCE_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_budget_penalty",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "budget_penalty = lambda_budget * (sum(cost_i*x_i) - budget)^2",
+      "formula_id": "FORMULA::BUDGET_PENALTY",
+      "inputs": [
+        "costs",
+        "selections",
+        "budget",
+        "lambda_budget"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "budget_penalty"
+      ],
+      "subfamily_key": "budget_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::BUDGET_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_exposure_penalty",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "exposure_penalty = lambda_exposure * (sum(exposure_i*x_i) - max_exposure)^2",
+      "formula_id": "FORMULA::EXPOSURE_PENALTY",
+      "inputs": [
+        "exposures",
+        "selections",
+        "max_exposure",
+        "lambda_exposure"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "exposure_penalty"
+      ],
+      "subfamily_key": "exposure_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::EXPOSURE_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_one_hot_penalty",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "one_hot_penalty = lambda_onehot * (sum(x_i) - 1)^2",
+      "formula_id": "FORMULA::ONE_HOT_PENALTY",
+      "inputs": [
+        "selections",
+        "lambda_onehot"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "one_hot_penalty"
+      ],
+      "subfamily_key": "one_hot_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::ONE_HOT_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_incompatibility_penalty",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "incompatibility_penalty = lambda_incompat * sum(incompatibility_ij*x_i*x_j)",
+      "formula_id": "FORMULA::INCOMPATIBILITY_PENALTY",
+      "inputs": [
+        "selections",
+        "incompatibility",
+        "lambda_incompat"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "incompatibility_penalty"
+      ],
+      "subfamily_key": "incompatibility_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::INCOMPATIBILITY_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_stack_score",
+      "domain_family_key": "parameter_default_range_pack",
+      "expression": "stack_score = compatibility_score + replay_value_score - risk_score - complexity_score",
+      "formula_id": "FORMULA::STACK_SCORE",
+      "inputs": [
+        "compatibility_score",
+        "replay_value_score",
+        "risk_score",
+        "complexity_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "stack_score"
+      ],
+      "subfamily_key": "optimizer_parameters",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::STACK_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_route_readiness_score",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "route_readiness_score = qku_route_score + agent_route_score + replay_route_score + paper_route_score - missing_route_penalty",
+      "formula_id": "FORMULA::ROUTE_READINESS_SCORE",
+      "inputs": [
+        "qku_route_score",
+        "agent_route_score",
+        "replay_route_score",
+        "paper_route_score",
+        "missing_route_penalty"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "route_readiness_score"
+      ],
+      "subfamily_key": "route_readiness",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::ROUTE_READINESS_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_materialization_priority_score",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "overall_materialization_priority_score = weighted materialization priority components",
+      "formula_id": "FORMULA::MATERIALIZATION_PRIORITY_SCORE",
+      "inputs": [
+        "stage1_trading_relevance_score",
+        "replay_paper_value_score",
+        "quantum_priority_score",
+        "downstream_unlock_score",
+        "ease_of_materialization_score",
+        "critical_missing_field_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "overall_materialization_priority_score"
+      ],
+      "subfamily_key": "materialization_priority",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::MATERIALIZATION_PRIORITY_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_data_missing_penalty",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "data_missing_penalty = missing_required_fields * missing_field_penalty_weight",
+      "formula_id": "FORMULA::DATA_MISSING_PENALTY",
+      "inputs": [
+        "missing_required_fields",
+        "missing_field_penalty_weight"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "data_missing_penalty"
+      ],
+      "subfamily_key": "data_missing_penalty",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::DATA_MISSING_PENALTY"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_stability_score",
+      "domain_family_key": "probability_calibration_edge",
+      "expression": "stability_score = 1 / (1 + rolling_volatility + abs(calibration_error))",
+      "formula_id": "FORMULA::STABILITY_SCORE",
+      "inputs": [
+        "rolling_volatility",
+        "calibration_error_abs"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "stability_score"
+      ],
+      "subfamily_key": "stability",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::STABILITY_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_cross_market_generalization_score",
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "expression": "cross_market_generalization_score = venue_coverage_score * family_reuse_score * input_schema_portability_score",
+      "formula_id": "FORMULA::CROSS_MARKET_GENERALIZATION_SCORE",
+      "inputs": [
+        "venue_coverage_score",
+        "family_reuse_score",
+        "input_schema_portability_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "cross_market_generalization_score"
+      ],
+      "subfamily_key": "generalization",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::CROSS_MARKET_GENERALIZATION_SCORE"
+      ],
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.formula_seed_library:compute_quantum_priority_boost",
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "expression": "quantum_priority_boost = qubo_compatible_flag * binary_decision_density_score * batch_optimizer_fit_score",
+      "formula_id": "FORMULA::QUANTUM_PRIORITY_BOOST",
+      "inputs": [
+        "qubo_compatible_flag",
+        "binary_decision_density_score",
+        "batch_optimizer_fit_score"
+      ],
+      "live_order_authority": false,
+      "outputs": [
+        "quantum_priority_boost"
+      ],
+      "subfamily_key": "quantum_priority",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_FORMULA::QUANTUM_PRIORITY_BOOST"
+      ],
+      "variant_key": "owner_template_v1"
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_FormulaExpressionRegistry.report.json",
+  "report_id": "PR162D_R2A_FORMULA_EXPRESSION_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_FormulaExpressionRegistry.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

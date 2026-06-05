@@ -1,0 +1,893 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 25,
+  "records": [
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_MARKET_BUNDLE_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0108",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::CQM_capital_allocation",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::CQM_CONSTRAINED_CAPITAL_ALLOCATION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0109",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_PARAMETER_STACK_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0110",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::LATENCY_ADJUSTED_OPPORTUNITY_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0111",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_ising_binary_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::Ising_binary_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::ISING_BINARY_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0112",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qaoa_candidate_selection_shape",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QAOA_candidate_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QAOA_CANDIDATE_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0113",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_annealing_candidate_selection_shape",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::annealing_candidate_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::ANNEALING_CANDIDATE_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0114",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_bqm_risk_balanced_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::BQM_risk_balanced_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::BQM_RISK_BALANCED_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0115",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_route_fill_allocation",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::CQM_route_fill_allocation",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::CQM_ROUTE_FILL_ALLOCATION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "owner_template_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0116",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_STAGE1_SIGNAL_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "stage1_signal_bundle_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0117",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_LIQUIDITY_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "liquidity_bundle_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0118",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_RISK_CAPPED_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "risk_capped_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0119",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_CROSS_MARKET_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "cross_market_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0120",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_REPLAY_VALUE_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "replay_value_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0121",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_market_bundle_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_PAPER_VALUE_BUNDLE",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "paper_value_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0122",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::CQM_capital_allocation",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::CQM_CAPITAL_BUDGET_STRICT",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "capital_budget_strict_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0123",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::CQM_capital_allocation",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::CQM_EXPOSURE_BUDGET_STRICT",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "exposure_budget_strict_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0124",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_STACK_ONEHOT",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "onehot_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0125",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_STACK_INCOMPATIBILITY",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "incompatibility_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0126",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_LATENCY_ONLY",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "latency_only_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0127",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QUBO_SLIPPAGE_ONLY",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "slippage_only_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0128",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_ising_binary_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::Ising_binary_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::ISING_OPPORTUNITY_SPIN",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "opportunity_spin_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0129",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qaoa_candidate_selection_shape",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::QAOA_candidate_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::QAOA_RISK_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "risk_selection_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0130",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_annealing_candidate_selection_shape",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::annealing_candidate_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::ANNEALING_ROUTE_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "route_selection_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0131",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    },
+    {
+      "agent_routes": [
+        "QKU_COMPUTE_ENGINE",
+        "REPLAY_PAPER_CANDIDATE_ROUTER"
+      ],
+      "callable_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_bqm_risk_balanced_selection",
+      "candidate_registry_refs": [
+        "PR162D_R2A_CandidatePacketV1Registry.report.json"
+      ],
+      "duplicate_equivalence_refs": [],
+      "equivalence_family": "quantum_bundle_selection_optimizer::BQM_risk_balanced_selection",
+      "formulation_materialization_state": "FORMULATION_FULLY_MATERIALIZED",
+      "formulation_ref": "QUANTUM::BQM_LOW_CORRELATION_SELECTION",
+      "input_schema_version": "FormulationRecordV1",
+      "live_order_authority": false,
+      "output_schema_version": "CandidatePacketV1",
+      "parameter_version": "low_correlation_v1",
+      "plugin_seed_id": "PR162D_R2A_PLUGIN_SEED::0132",
+      "promotion_state_seed": "NEEDS_REPLAY_PAPER_EVIDENCE",
+      "qku_refs": [],
+      "replay_paper_route_state": "REPLAY_PAPER_ROUTE_READY",
+      "replay_paper_routes": [
+        "PR162R",
+        "PR163"
+      ],
+      "rollback_target": null,
+      "runtime_allowlist_candidate_stage": "REPLAY_PAPER_CANDIDATE_ONLY",
+      "semantic_version": "0.1.0",
+      "source_version": "owner_template_v1",
+      "test_vector_version": "v1"
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_QuantumPluginSeedRegistry.report.json",
+  "report_id": "PR162D_R2A_QUANTUM_PLUGIN_SEED_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_QuantumPluginSeedRegistry.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

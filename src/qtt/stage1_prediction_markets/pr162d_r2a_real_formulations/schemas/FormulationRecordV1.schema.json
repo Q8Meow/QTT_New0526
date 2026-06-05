@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "algorithm_procedure": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "callable_ref": {
+      "type": "string"
+    },
+    "domain_family_key": {
+      "type": "string"
+    },
+    "expression": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "formulation_id": {
+      "type": "string"
+    },
+    "formulation_type": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "objective": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "objective_output_meaning": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outputs": {
+      "type": "array"
+    },
+    "source_record_ids": {
+      "type": "array"
+    },
+    "subfamily_key": {
+      "type": "string"
+    },
+    "test_vector_refs": {
+      "type": "array"
+    },
+    "unit_unknown_but_type_known_flag": {
+      "type": "boolean"
+    },
+    "units_or_type_hints": {
+      "type": "object"
+    },
+    "variables": {
+      "type": "array"
+    },
+    "variant_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "formulation_id",
+    "formulation_type",
+    "domain_family_key",
+    "subfamily_key",
+    "variant_key",
+    "source_universe",
+    "source_record_ids",
+    "callable_ref",
+    "source_truth_status",
+    "candidate_truth_status",
+    "live_order_authority",
+    "replay_paper_candidate_flag",
+    "validator_materiality_status"
+  ],
+  "title": "FormulationRecordV1",
+  "type": "object"
+}

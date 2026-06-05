@@ -1,0 +1,2314 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 129,
+  "records": [
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::DETERMINISTIC_ARBITRATION_MERGE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::arbitration_merge::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::arbitration_merge::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "arbitration_merge",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::REPLAY_PAPER_BATCH_PARTITION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::batch_partition::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::batch_partition::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "batch_partition",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::DETERMINISTIC_CANDIDATE_RANKING"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::candidate_ranking::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::candidate_ranking::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "candidate_ranking",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::CANDIDATE_SELECTION_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::candidate_selection_score::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::candidate_selection_score::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "candidate_selection_score",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::FORMULA_COVERAGE_CLASSIFIER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::coverage::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::coverage::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "coverage",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::DATA_MISSING_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::data_missing_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::data_missing_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "data_missing_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::STABLE_DEDUPE_BY_FAMILY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::dedupe::family_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::dedupe::family_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "dedupe",
+      "variant_key": "family_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::FAMILY_VARIANT_NORMALIZER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::family_normalizer::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::family_normalizer::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "family_normalizer",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::EXACT_FILL_ACTION_BUILDER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::field_fill_builder::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::field_fill_builder::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "field_fill_builder",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::FIELD_FILL_PRIORITY_ORDER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::field_fill_priority::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::field_fill_priority::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "field_fill_priority",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::CROSS_MARKET_GENERALIZATION_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::generalization::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::generalization::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "generalization",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::MATERIALIZATION_PRIORITY_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::materialization_priority::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::materialization_priority::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "materialization_priority",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::OWNER_REVIEW_ESCALATION_SELECTOR"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::owner_review::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::owner_review::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "owner_review",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::PROMOTION_SEED_CLASSIFIER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::promotion_seed::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::promotion_seed::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "promotion_seed",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::REPLAY_PAPER_ELIGIBILITY_ROUTER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::replay_paper_router::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::replay_paper_router::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "replay_paper_router",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::ROUTE_FILL_PRIORITY_ORDER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::route_fill_priority::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::route_fill_priority::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "route_fill_priority",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::ROUTE_READINESS_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::route_readiness::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::route_readiness::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "route_readiness",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::SCHEMA_VERSION_ROUTER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::schema_router::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::schema_router::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "schema_router",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::TEST_VECTOR_SMOKE_SELECTOR"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::test_vector_selector::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::test_vector_selector::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "test_vector_selector",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::TOP_K_CANDIDATE_FILTER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::top_k::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::top_k::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "top_k",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "deterministic_candidate_ranking_algorithm",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::WEIGHTED_SIGNAL_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::deterministic_candidate_ranking_algorithm::weighted_signal::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::deterministic_candidate_ranking_algorithm::weighted_signal::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "weighted_signal",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "expected_value_probability_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::IMPLIED_PROBABILITY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::expected_value_probability_edge::implied_probability::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::expected_value_probability_edge::implied_probability::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "implied_probability",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "expected_value_probability_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::NET_EDGE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::expected_value_probability_edge::net_edge::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::expected_value_probability_edge::net_edge::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "net_edge",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "expected_value_probability_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::NO_EV"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::expected_value_probability_edge::no_ev::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::expected_value_probability_edge::no_ev::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "no_ev",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "expected_value_probability_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::PROBABILITY_EDGE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::expected_value_probability_edge::probability_edge::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::expected_value_probability_edge::probability_edge::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "probability_edge",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "expected_value_probability_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::YES_EV"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::expected_value_probability_edge::yes_ev::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::expected_value_probability_edge::yes_ev::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "yes_ev",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::CACHEABILITY_CLASSIFIER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::cacheability::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::cacheability::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "cacheability",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::HOT_PATH_PRECOMPUTE_SELECTOR"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::hot_path_precompute::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::hot_path_precompute::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "hot_path_precompute",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::LATENCY_COST"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::latency_cost::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::latency_cost::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "latency_cost",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::LATENCY_BUCKET_ROUTER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::latency_router::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::latency_router::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "latency_router",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::DEPTH_IMPACT_COMPONENT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::slippage_depth::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::slippage_depth::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "slippage_depth",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SLIPPAGE_ESTIMATE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::slippage_estimate::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::slippage_estimate::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "slippage_estimate",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::VOLATILITY_IMPACT_COMPONENT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::slippage_volatility::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::slippage_volatility::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "slippage_volatility",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "latency_slippage_cost",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SPREAD_COMPONENT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::latency_slippage_cost::spread_component::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::latency_slippage_cost::spread_component::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "spread_component",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::DEPTH_WEIGHTED_MID_PRICE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::depth_weighted_mid::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::depth_weighted_mid::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "depth_weighted_mid",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::LIQUIDITY_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::liquidity_score::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::liquidity_score::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "liquidity_score",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::MARKET_PRESSURE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::market_pressure::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::market_pressure::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "market_pressure",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::MID_PRICE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::mid_price::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::mid_price::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "mid_price",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::ORDERBOOK_IMBALANCE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::orderbook_imbalance::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::orderbook_imbalance::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "orderbook_imbalance",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::REALIZED_SPREAD_PROXY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::realized_spread::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::realized_spread::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "realized_spread",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::RELATIVE_SPREAD"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::relative_spread::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::relative_spread::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "relative_spread",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SPREAD"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::spread::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::spread::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "spread",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "market_microstructure_liquidity",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::TOP_OF_BOOK_DEPTH"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::market_microstructure_liquidity::top_of_book_depth::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::market_microstructure_liquidity::top_of_book_depth::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "top_of_book_depth",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "objective_constraint_solver",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::OBJECTIVE_CONSTRAINT_PAIRER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::objective_constraint_solver::objective_constraint_pairer::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::objective_constraint_solver::objective_constraint_pairer::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "objective_constraint_pairer",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_ANNEALING_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::annealing_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::annealing_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "annealing_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_CALIBRATION_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::calibration_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::calibration_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "calibration_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_CAPITAL_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::capital_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::capital_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "capital_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::COMPATIBILITY_THRESHOLD_FILTER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::compatibility_filter::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::compatibility_filter::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "compatibility_filter",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_CQM_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::cqm_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::cqm_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "cqm_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_FEATURE_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::feature_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::feature_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "feature_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_HOTPATH_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::hotpath_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::hotpath_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "hotpath_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_LATENCY_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::latency_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::latency_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "latency_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_LIQUIDITY_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::liquidity_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::liquidity_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "liquidity_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::STACK_SCORE",
+        "PARAMETER_PACK::PARAMETER_PACK_OPTIMIZER_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::optimizer_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::optimizer_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "optimizer_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_PAPER_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::paper_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::paper_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "paper_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::BUILD_PARAMETER_PACK_FROM_DEFAULTS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::parameter_pack_builder::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::parameter_pack_builder::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "parameter_pack_builder",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::PARAMETER_STACK_SELECTOR"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::parameter_stack_selector::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::parameter_stack_selector::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "parameter_stack_selector",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_QAOA_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::qaoa_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::qaoa_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "qaoa_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_QUANTUM_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::quantum_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::quantum_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "quantum_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::PARAMETER_RANGE_CLIPPER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::range_clipper::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::range_clipper::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "range_clipper",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_REPLAY_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::replay_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::replay_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "replay_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_RISK_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::risk_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::risk_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "risk_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_ROUTE_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::route_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::route_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "route_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "parameter_default_range_pack",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "PARAMETER_PACK::PARAMETER_PACK_SOURCE_PARAMETERS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::parameter_default_range_pack::source_parameters::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::parameter_default_range_pack::source_parameters::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "source_parameters",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::BRIER_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::brier_score::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::brier_score::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "brier_score",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::PROBABILITY_CALIBRATION_ERROR"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::calibration_error::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::calibration_error::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "calibration_error",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::ENSEMBLE_PROBABILITY_MEAN"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::ensemble::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::ensemble::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "ensemble",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::BINARY_ENTROPY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::entropy::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::entropy::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "entropy",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::LOG_LOSS"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::log_loss::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::log_loss::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "log_loss",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::LOGIT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::logit::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::logit::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "logit",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SIGMOID_PROBABILITY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::sigmoid::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::sigmoid::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "sigmoid",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::SOURCE_CONFIDENCE_RANKER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::source_confidence::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::source_confidence::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "source_confidence",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::SOURCE_LOCATOR_RANKER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::source_locator_ranker::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::source_locator_ranker::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "source_locator_ranker",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "probability_calibration_edge",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::STABILITY_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::probability_calibration_edge::stability::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::probability_calibration_edge::stability::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "stability",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::BQM_LOW_CORRELATION_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::BQM_risk_balanced_selection::low_correlation_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::BQM_risk_balanced_selection::low_correlation_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "BQM_risk_balanced_selection",
+      "variant_key": "low_correlation_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::BQM_RISK_BALANCED_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::BQM_risk_balanced_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::BQM_risk_balanced_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "BQM_risk_balanced_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::CQM_CAPITAL_BUDGET_STRICT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::CQM_capital_allocation::capital_budget_strict_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::CQM_capital_allocation::capital_budget_strict_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "CQM_capital_allocation",
+      "variant_key": "capital_budget_strict_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::CQM_EXPOSURE_BUDGET_STRICT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::CQM_capital_allocation::exposure_budget_strict_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::CQM_capital_allocation::exposure_budget_strict_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "CQM_capital_allocation",
+      "variant_key": "exposure_budget_strict_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::CQM_CONSTRAINED_CAPITAL_ALLOCATION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::CQM_capital_allocation::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::CQM_capital_allocation::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "CQM_capital_allocation",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::CQM_ROUTE_FILL_ALLOCATION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::CQM_route_fill_allocation::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::CQM_route_fill_allocation::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "CQM_route_fill_allocation",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::ISING_OPPORTUNITY_SPIN"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::Ising_binary_selection::opportunity_spin_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::Ising_binary_selection::opportunity_spin_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "Ising_binary_selection",
+      "variant_key": "opportunity_spin_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::ISING_BINARY_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::Ising_binary_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::Ising_binary_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "Ising_binary_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QAOA_CANDIDATE_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QAOA_candidate_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QAOA_candidate_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QAOA_candidate_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QAOA_RISK_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QAOA_candidate_selection::risk_selection_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QAOA_candidate_selection::risk_selection_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QAOA_candidate_selection",
+      "variant_key": "risk_selection_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_LATENCY_ONLY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::latency_only_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::latency_only_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_latency_adjusted_opportunity",
+      "variant_key": "latency_only_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::LATENCY_ADJUSTED_OPPORTUNITY_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_latency_adjusted_opportunity",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_SLIPPAGE_ONLY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::slippage_only_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_latency_adjusted_opportunity::slippage_only_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_latency_adjusted_opportunity",
+      "variant_key": "slippage_only_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_CROSS_MARKET_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::cross_market_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::cross_market_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "cross_market_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_LIQUIDITY_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::liquidity_bundle_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::liquidity_bundle_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "liquidity_bundle_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_MARKET_BUNDLE_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_PAPER_VALUE_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::paper_value_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::paper_value_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "paper_value_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_REPLAY_VALUE_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::replay_value_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::replay_value_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "replay_value_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_RISK_CAPPED_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::risk_capped_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::risk_capped_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "risk_capped_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_STAGE1_SIGNAL_BUNDLE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::stage1_signal_bundle_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_market_bundle_selection::stage1_signal_bundle_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_market_bundle_selection",
+      "variant_key": "stage1_signal_bundle_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_STACK_INCOMPATIBILITY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::incompatibility_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::incompatibility_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_parameter_stack_selection",
+      "variant_key": "incompatibility_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_STACK_ONEHOT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::onehot_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::onehot_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_parameter_stack_selection",
+      "variant_key": "onehot_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::QUBO_PARAMETER_STACK_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::QUBO_parameter_stack_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "QUBO_parameter_stack_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::ANNEALING_CANDIDATE_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::annealing_candidate_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::annealing_candidate_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "annealing_candidate_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "QUANTUM::ANNEALING_ROUTE_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::annealing_candidate_selection::route_selection_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::annealing_candidate_selection::route_selection_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "annealing_candidate_selection",
+      "variant_key": "route_selection_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::BUDGET_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::budget_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::budget_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "budget_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::COMPARATOR_ASSIGNMENT"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::comparator_assignment::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::comparator_assignment::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "comparator_assignment",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::EXPOSURE_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::exposure_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::exposure_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "exposure_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::INCOMPATIBILITY_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::incompatibility_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::incompatibility_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "incompatibility_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::ONE_HOT_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::one_hot_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::one_hot_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "one_hot_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::QUANTUM_PRIORITY_BOOST"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::quantum_priority::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::quantum_priority::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "quantum_priority",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::QUANTUM_PRIORITY_RANKER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::quantum_priority_ranker::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::quantum_priority_ranker::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "quantum_priority_ranker",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "quantum_bundle_selection_optimizer",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::COVARIANCE_PENALTY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::quantum_bundle_selection_optimizer::risk_penalty::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::quantum_bundle_selection_optimizer::risk_penalty::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "risk_penalty",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::COST_TO_BUDGET_RATIO"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::budget_ratio::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::budget_ratio::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "budget_ratio",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::CAPITAL_UTILIZATION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::capital_utilization::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::capital_utilization::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "capital_utilization",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::MARKET_BUNDLE_DIVERSIFIER"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::diversifier::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::diversifier::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "diversifier",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::EXPECTED_SHORTFALL_PROXY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::expected_shortfall::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::expected_shortfall::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "expected_shortfall",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::PORTFOLIO_EXPOSURE_CHECK"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::exposure_check::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::exposure_check::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "exposure_check",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::EXPOSURE_UTILIZATION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::exposure_utilization::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::exposure_utilization::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "exposure_utilization",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "ALGORITHM::GREEDY_MARKET_BUNDLE_SELECTION"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::greedy_market_bundle_selection::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::greedy_market_bundle_selection::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "greedy_market_bundle_selection",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::KELLY_CAPPED"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::kelly::capped_owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::kelly::capped_owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "kelly",
+      "variant_key": "capped_owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::RISK_ADJUSTED_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::risk_adjusted_score::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::risk_adjusted_score::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "risk_adjusted_score",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "risk_capital_sizing",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SHARPE_LIKE_SCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::risk_capital_sizing::risk_return::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::risk_capital_sizing::risk_return::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "risk_return",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::BOLLINGER_Z"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::Bollinger::z_score_owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::Bollinger::z_score_owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "Bollinger",
+      "variant_key": "z_score_owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::EMA"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::EMA::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::EMA::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "EMA",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::MACD"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::MACD::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::MACD::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "MACD",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::RSI"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::RSI::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::RSI::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "RSI",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::VWAP"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::VWAP::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::VWAP::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "VWAP",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::CANDLE_BODY",
+        "FORMULA::HIGH_LOW_RANGE",
+        "FORMULA::WICK_RATIO"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::candlestick::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::candlestick::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "candlestick",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::MOMENTUM_N_PERIOD"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::momentum::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::momentum::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "momentum",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::CANDLE_RETURN"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::returns::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::returns::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "returns",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::SIMPLE_RETURN"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::returns::simple_owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::returns::simple_owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "returns",
+      "variant_key": "simple_owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::ROLLING_VOLATILITY"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::volatility::rolling_owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::volatility::rolling_owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "volatility",
+      "variant_key": "rolling_owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::VOLUME_GROWTH_RATE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::volume::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::volume::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "volume",
+      "variant_key": "owner_template_v1"
+    },
+    {
+      "domain_family_key": "technical_indicator_price_feature",
+      "exact_fill_action_refs": [],
+      "formulation_refs": [
+        "FORMULA::PRICE_ZSCORE"
+      ],
+      "formulation_unmapped_flag": false,
+      "hierarchy_id": "PR162D_R2A_FAMILY::technical_indicator_price_feature::zscore::owner_template_v1",
+      "live_order_authority": false,
+      "mapping_attempted_flag": true,
+      "raw_mention_refs": [
+        "docs/master_plan/QTT_MasterPlan_Current.md#normalized::technical_indicator_price_feature::zscore::owner_template_v1"
+      ],
+      "route_state": "FORMULATION_FIRST_MAPPED",
+      "subfamily_key": "zscore",
+      "variant_key": "owner_template_v1"
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_FamilySubfamilyVariantHierarchy.report.json",
+  "report_id": "PR162D_R2A_FAMILY_SUBFAMILY_VARIANT_HIERARCHY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_FamilySubfamilyVariantHierarchy.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

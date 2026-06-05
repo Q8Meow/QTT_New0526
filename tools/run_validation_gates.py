@@ -1038,6 +1038,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr162d_r2a_real_formulations.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

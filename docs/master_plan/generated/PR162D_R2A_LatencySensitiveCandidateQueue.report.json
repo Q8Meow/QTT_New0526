@@ -1,0 +1,629 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 73,
+  "records": [
+    {
+      "formulation_ref": "FORMULA::EMA",
+      "latency_class": "INCREMENTAL_UPDATE_ELIGIBLE",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0016",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::ROLLING_VOLATILITY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0018",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::VWAP",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0019",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::RSI",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0021",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::MACD",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0022",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::VOLUME_GROWTH_RATE",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0031",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::CANDLE_RETURN",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0032",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::HIGH_LOW_RANGE",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0033",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::CANDLE_BODY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0034",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::WICK_RATIO",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0035",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::MOMENTUM_N_PERIOD",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0037",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::PRICE_ZSCORE",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0038",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "FORMULA::COVARIANCE_PENALTY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0050",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "FORMULA::BUDGET_PENALTY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0051",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "FORMULA::EXPOSURE_PENALTY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0052",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "FORMULA::ONE_HOT_PENALTY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0053",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "FORMULA::INCOMPATIBILITY_PENALTY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0054",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "FORMULA::QUANTUM_PRIORITY_BOOST",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0061",
+      "live_order_authority": false,
+      "recommended_latency_action": "ALLOW_FUTURE_HOTPATH_REVIEW_AFTER_LATER_VALIDATION"
+    },
+    {
+      "formulation_ref": "ALGORITHM::DETERMINISTIC_CANDIDATE_RANKING",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0062",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::GREEDY_MARKET_BUNDLE_SELECTION",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0063",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::REPLAY_PAPER_ELIGIBILITY_ROUTER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0064",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::PARAMETER_STACK_SELECTOR",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0065",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::BUILD_PARAMETER_PACK_FROM_DEFAULTS",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0066",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::STABLE_DEDUPE_BY_FAMILY",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0067",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::TOP_K_CANDIDATE_FILTER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0068",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::LATENCY_BUCKET_ROUTER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0069",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::SOURCE_CONFIDENCE_RANKER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0070",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::FIELD_FILL_PRIORITY_ORDER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0071",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::ROUTE_FILL_PRIORITY_ORDER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0072",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::PORTFOLIO_EXPOSURE_CHECK",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0073",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::PARAMETER_RANGE_CLIPPER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0074",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::COMPATIBILITY_THRESHOLD_FILTER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0075",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::QUANTUM_PRIORITY_RANKER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0076",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::FAMILY_VARIANT_NORMALIZER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0077",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::REPLAY_PAPER_BATCH_PARTITION",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0078",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::CACHEABILITY_CLASSIFIER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0079",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::HOT_PATH_PRECOMPUTE_SELECTOR",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0080",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::FORMULA_COVERAGE_CLASSIFIER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0081",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::EXACT_FILL_ACTION_BUILDER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0082",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::OWNER_REVIEW_ESCALATION_SELECTOR",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0083",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::MARKET_BUNDLE_DIVERSIFIER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0084",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::OBJECTIVE_CONSTRAINT_PAIRER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0085",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::COMPARATOR_ASSIGNMENT",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0086",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::TEST_VECTOR_SMOKE_SELECTOR",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0087",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::SCHEMA_VERSION_ROUTER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0088",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::PROMOTION_SEED_CLASSIFIER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0089",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::DETERMINISTIC_ARBITRATION_MERGE",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0090",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "ALGORITHM::SOURCE_LOCATOR_RANKER",
+      "latency_class": "PRECOMPUTE_REQUIRED",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0091",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_MARKET_BUNDLE_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0108",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::CQM_CONSTRAINED_CAPITAL_ALLOCATION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0109",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_PARAMETER_STACK_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0110",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::LATENCY_ADJUSTED_OPPORTUNITY_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0111",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::ISING_BINARY_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0112",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QAOA_CANDIDATE_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0113",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::ANNEALING_CANDIDATE_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0114",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::BQM_RISK_BALANCED_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0115",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::CQM_ROUTE_FILL_ALLOCATION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0116",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_STAGE1_SIGNAL_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0117",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_LIQUIDITY_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0118",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_RISK_CAPPED_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0119",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_CROSS_MARKET_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0120",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_REPLAY_VALUE_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0121",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_PAPER_VALUE_BUNDLE",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0122",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::CQM_CAPITAL_BUDGET_STRICT",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0123",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::CQM_EXPOSURE_BUDGET_STRICT",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0124",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_STACK_ONEHOT",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0125",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_STACK_INCOMPATIBILITY",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0126",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_LATENCY_ONLY",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0127",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QUBO_SLIPPAGE_ONLY",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0128",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::ISING_OPPORTUNITY_SPIN",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0129",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::QAOA_RISK_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0130",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::ANNEALING_ROUTE_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0131",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    },
+    {
+      "formulation_ref": "QUANTUM::BQM_LOW_CORRELATION_SELECTION",
+      "latency_class": "QUANTUM_BATCH_ONLY",
+      "latency_queue_id": "PR162D_R2A_LATENCY_QUEUE::0132",
+      "live_order_authority": false,
+      "recommended_latency_action": "PRECOMPUTE_OR_CACHE_BEFORE_FUTURE_RUNTIME_USE"
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_LatencySensitiveCandidateQueue.report.json",
+  "report_id": "PR162D_R2A_LATENCY_SENSITIVE_CANDIDATE_QUEUE",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_LatencySensitiveCandidateQueue.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}

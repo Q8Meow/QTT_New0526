@@ -1,0 +1,978 @@
+{
+  "authority_class": "PR162D_R2A_REAL_EXECUTABLE_CANDIDATE_FORMULATIONS_NO_LIVE_ORDER_NO_REPLAY_PAPER_EXECUTION",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.authority_policy",
+  "blocker_codes": [],
+  "ci_requires_network": false,
+  "created_by_pr": "PR162D_R2A",
+  "creates_atomicrows_bundle_hash_sha_artifact": false,
+  "creates_connector_semantics": false,
+  "creates_live_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_live_reachability_claim": false,
+  "creates_order_authority": false,
+  "creates_order_ready_claim": false,
+  "creates_private_state": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_authority": false,
+  "creates_qtt_generated_sha": false,
+  "creates_qtt_global_digest_checksum_authority": false,
+  "creates_qtt_sha_authority": false,
+  "creates_quantum_advantage_evidence": false,
+  "creates_source_truth_authority": false,
+  "downstream_pr_routes": [
+    "QKU_COMPUTE_ENGINE",
+    "FORMULA_ALGORITHM_RUNTIME_CANDIDATE_LANE",
+    "FEATURE_BUILDER",
+    "PARAMETER_STACK_AGENT",
+    "QUANTUM_ADVISORY_MAPPING_AGENT",
+    "REPLAY_PAPER_CANDIDATE_ROUTER",
+    "PR162R",
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162D_R2",
+    "PR162E"
+  ],
+  "emits_replay_paper_results": false,
+  "emits_result_packets": false,
+  "executes_paper_adapter": false,
+  "executes_replay_adapter": false,
+  "mutates_atomicrows_bundle_jsonl": false,
+  "quantum_backend_execution_required": false,
+  "record_count": 25,
+  "records": [
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::GREEDY_MARKET_BUNDLE_SELECTION",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_MARKET_BUNDLE_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_MARKET_BUNDLE_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MIXED_INTEGER_PROGRAMMING_COMPARATOR",
+      "constraints": [
+        "sum(size_i) <= capital_budget",
+        "sum(exposure_i*size_i) <= max_exposure",
+        "x_i in {0,1}",
+        "size_i >= 0"
+      ],
+      "domains": {
+        "expected_net_value_i": "real",
+        "size_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "CQM_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "QUBO_COMPATIBLE_REASON": "Explicit constraints can be converted to penalties for a QUBO candidate."
+      },
+      "objective": "maximize sum(x_i*expected_net_value_i) - lambda_drawdown*drawdown_risk(x) - lambda_latency*latency_cost(x) - lambda_slippage*slippage_cost(x)",
+      "penalties": [],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::CQM_CONSTRAINED_CAPITAL_ALLOCATION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::CQM_CONSTRAINED_CAPITAL_ALLOCATION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B",
+        "size_A",
+        "size_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::DETERMINISTIC_CANDIDATE_RANKING",
+      "constraints": [],
+      "domains": {
+        "incompatibility_ij": "nonnegative_real",
+        "stack_score_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(stack_score_i*x_i) + lambda_onehot*(sum(x_i)-1)^2 + lambda_incompat*sum(incompatibility_ij*x_i*x_j)",
+      "penalties": [
+        "one_hot_penalty",
+        "incompatibility_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_PARAMETER_STACK_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_PARAMETER_STACK_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::RISK_ADJUSTED_SCORE_RANKING",
+      "constraints": [],
+      "domains": {
+        "expected_net_value_i": "real",
+        "latency_cost_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(expected_net_value_i*x_i) + lambda_latency*sum(latency_cost_i*x_i) + lambda_slippage*sum(slippage_cost_i*x_i) + lambda_risk*portfolio_risk(x)",
+      "penalties": [
+        "latency_penalty",
+        "slippage_penalty",
+        "portfolio_risk_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::LATENCY_ADJUSTED_OPPORTUNITY_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::LATENCY_ADJUSTED_OPPORTUNITY_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_ising_binary_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::BRUTE_FORCE_BINARY_ENUMERATION",
+      "constraints": [],
+      "domains": {
+        "J_ij": "real",
+        "h_i": "real",
+        "s_i": "spin_minus_one_plus_one"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "binary_spin_transform": "x=(1+s)/2"
+      },
+      "objective": "sum(h_i*s_i) + sum(J_ij*s_i*s_j), where s_i in {-1,1}",
+      "penalties": [
+        "pairwise_interaction_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::ISING_BINARY_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::ISING_BINARY_SELECTION"
+      ],
+      "variables": [
+        "s_A",
+        "s_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qaoa_candidate_selection_shape",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::GREEDY_MARKET_BUNDLE_SELECTION",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QAOA_CANDIDATE_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QAOA_CANDIDATE_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_annealing_candidate_selection_shape",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::GREEDY_MARKET_BUNDLE_SELECTION",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::ANNEALING_CANDIDATE_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::ANNEALING_CANDIDATE_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_bqm_risk_balanced_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MEAN_VARIANCE_GREEDY_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j)",
+      "penalties": [
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::BQM_RISK_BALANCED_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::BQM_RISK_BALANCED_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_route_fill_allocation",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::ROUTE_FILL_PRIORITY_ORDER",
+      "constraints": [
+        "sum(route_fill_cost_i*x_i) <= route_fill_budget"
+      ],
+      "domains": {
+        "complexity_i": "nonnegative_real",
+        "route_unlock_score_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "CQM_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "maximize sum(route_unlock_score_i*x_i) - lambda_complexity*sum(complexity_i*x_i)",
+      "penalties": [],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::CQM_ROUTE_FILL_ALLOCATION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::CQM_ROUTE_FILL_ALLOCATION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::GREEDY_MARKET_BUNDLE_SELECTION",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_STAGE1_SIGNAL_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_STAGE1_SIGNAL_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::GREEDY_MARKET_BUNDLE_SELECTION",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_LIQUIDITY_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_LIQUIDITY_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MEAN_VARIANCE_GREEDY_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_RISK_CAPPED_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_RISK_CAPPED_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::DIVERSIFIED_GREEDY_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_CROSS_MARKET_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_CROSS_MARKET_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::REPLAY_VALUE_RANKING_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_REPLAY_VALUE_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_REPLAY_VALUE_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_market_bundle_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::PAPER_VALUE_RANKING_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_PAPER_VALUE_BUNDLE",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_PAPER_VALUE_BUNDLE"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MIXED_INTEGER_PROGRAMMING_COMPARATOR",
+      "constraints": [
+        "sum(size_i) <= capital_budget",
+        "sum(exposure_i*size_i) <= max_exposure",
+        "x_i in {0,1}",
+        "size_i >= 0"
+      ],
+      "domains": {
+        "expected_net_value_i": "real",
+        "size_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "CQM_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "QUBO_COMPATIBLE_REASON": "Explicit constraints can be converted to penalties for a QUBO candidate."
+      },
+      "objective": "maximize sum(x_i*expected_net_value_i) - lambda_drawdown*drawdown_risk(x) - lambda_latency*latency_cost(x) - lambda_slippage*slippage_cost(x)",
+      "penalties": [],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::CQM_CAPITAL_BUDGET_STRICT",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::CQM_CAPITAL_BUDGET_STRICT"
+      ],
+      "variables": [
+        "x_A",
+        "x_B",
+        "size_A",
+        "size_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_cqm_constrained_capital_allocation",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MIXED_INTEGER_PROGRAMMING_COMPARATOR",
+      "constraints": [
+        "sum(size_i) <= capital_budget",
+        "sum(exposure_i*size_i) <= max_exposure",
+        "x_i in {0,1}",
+        "size_i >= 0"
+      ],
+      "domains": {
+        "expected_net_value_i": "real",
+        "size_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "CQM_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "QUBO_COMPATIBLE_REASON": "Explicit constraints can be converted to penalties for a QUBO candidate."
+      },
+      "objective": "maximize sum(x_i*expected_net_value_i) - lambda_drawdown*drawdown_risk(x) - lambda_latency*latency_cost(x) - lambda_slippage*slippage_cost(x)",
+      "penalties": [],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::CQM_EXPOSURE_BUDGET_STRICT",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::CQM_EXPOSURE_BUDGET_STRICT"
+      ],
+      "variables": [
+        "x_A",
+        "x_B",
+        "size_A",
+        "size_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::DETERMINISTIC_CANDIDATE_RANKING",
+      "constraints": [],
+      "domains": {
+        "incompatibility_ij": "nonnegative_real",
+        "stack_score_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(stack_score_i*x_i) + lambda_onehot*(sum(x_i)-1)^2 + lambda_incompat*sum(incompatibility_ij*x_i*x_j)",
+      "penalties": [
+        "one_hot_penalty",
+        "incompatibility_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_STACK_ONEHOT",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_STACK_ONEHOT"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qubo_parameter_stack_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::PARAMETER_STACK_SELECTOR",
+      "constraints": [],
+      "domains": {
+        "incompatibility_ij": "nonnegative_real",
+        "stack_score_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(stack_score_i*x_i) + lambda_onehot*(sum(x_i)-1)^2 + lambda_incompat*sum(incompatibility_ij*x_i*x_j)",
+      "penalties": [
+        "one_hot_penalty",
+        "incompatibility_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_STACK_INCOMPATIBILITY",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_STACK_INCOMPATIBILITY"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::RISK_ADJUSTED_SCORE_RANKING",
+      "constraints": [],
+      "domains": {
+        "expected_net_value_i": "real",
+        "latency_cost_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(expected_net_value_i*x_i) + lambda_latency*sum(latency_cost_i*x_i) + lambda_slippage*sum(slippage_cost_i*x_i) + lambda_risk*portfolio_risk(x)",
+      "penalties": [
+        "latency_penalty",
+        "slippage_penalty",
+        "portfolio_risk_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_LATENCY_ONLY",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_LATENCY_ONLY"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_latency_adjusted_opportunity_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::RISK_ADJUSTED_SCORE_RANKING",
+      "constraints": [],
+      "domains": {
+        "expected_net_value_i": "real",
+        "latency_cost_i": "nonnegative_real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true
+      },
+      "objective": "-sum(expected_net_value_i*x_i) + lambda_latency*sum(latency_cost_i*x_i) + lambda_slippage*sum(slippage_cost_i*x_i) + lambda_risk*portfolio_risk(x)",
+      "penalties": [
+        "latency_penalty",
+        "slippage_penalty",
+        "portfolio_risk_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QUBO_SLIPPAGE_ONLY",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QUBO_SLIPPAGE_ONLY"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_ising_binary_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::BRUTE_FORCE_BINARY_ENUMERATION",
+      "constraints": [],
+      "domains": {
+        "J_ij": "real",
+        "h_i": "real",
+        "s_i": "spin_minus_one_plus_one"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "binary_spin_transform": "x=(1+s)/2"
+      },
+      "objective": "sum(h_i*s_i) + sum(J_ij*s_i*s_j), where s_i in {-1,1}",
+      "penalties": [
+        "pairwise_interaction_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::ISING_OPPORTUNITY_SPIN",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::ISING_OPPORTUNITY_SPIN"
+      ],
+      "variables": [
+        "s_A",
+        "s_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_qaoa_candidate_selection_shape",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MEAN_VARIANCE_GREEDY_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::QAOA_RISK_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::QAOA_RISK_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_annealing_candidate_selection_shape",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::ROUTE_FILL_PRIORITY_ORDER",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j) + lambda_budget*(sum(cost_i*x_i)-budget)^2 + lambda_exposure*(sum(exposure_i*x_i)-max_exposure)^2",
+      "penalties": [
+        "budget_penalty",
+        "exposure_penalty",
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::ANNEALING_ROUTE_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::ANNEALING_ROUTE_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    },
+    {
+      "build_shape_ref": "src.qtt.stage1_prediction_markets.pr162d_r2a_real_formulations.quantum_seed_library:build_bqm_risk_balanced_selection",
+      "classical_comparator_ref": "CLASSICAL_COMPARATOR::MEAN_VARIANCE_GREEDY_COMPARATOR",
+      "constraints": [],
+      "domains": {
+        "budget": "positive_real",
+        "cost_i": "nonnegative_real",
+        "covariance_ij": "real",
+        "exposure_i": "nonnegative_real",
+        "reward_i": "real",
+        "x_i": "binary"
+      },
+      "live_order_authority": false,
+      "mapping_rationale": {
+        "BQM_COMPATIBLE": true,
+        "CQM_COMPATIBLE": true,
+        "ISING_COMPATIBLE": true,
+        "QUBO_COMPATIBLE": true,
+        "ising_transform": "x=(1+s)/2"
+      },
+      "objective": "-sum(reward_i*x_i) + lambda_risk*sum(covariance_ij*x_i*x_j)",
+      "penalties": [
+        "risk_covariance_penalty"
+      ],
+      "quantum_advantage_claim_flag": false,
+      "quantum_backend_execution_flag": false,
+      "quantum_formulation_id": "QUANTUM::BQM_LOW_CORRELATION_SELECTION",
+      "test_vector_refs": [
+        "PR162D_R2A_TV_QUANTUM::BQM_LOW_CORRELATION_SELECTION"
+      ],
+      "variables": [
+        "x_A",
+        "x_B"
+      ]
+    }
+  ],
+  "references_protected_atomicrows_hash_sha_artifact_path": false,
+  "report_filename": "PR162D_R2A_QuantumObjectiveRegistry.report.json",
+  "report_id": "PR162D_R2A_QUANTUM_OBJECTIVE_REGISTRY",
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr162d_r2a_real_formulations/schemas/PR162D_R2A_QuantumObjectiveRegistry.schema.json",
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Consolidated_Static_Runtime_Live_Stage1_to_Stage5_v1_0.md",
+    "docs/roadmap/QTT_PR_Blueprints_Stage1_to_Stage5_PR83_to_PR224_v1_0.md",
+    "docs/roadmap/QTT_PRs_Roadmap_Index_v1_0.json",
+    "docs/roadmap/QTT_PR_Blueprints_Index_PR83_to_PR224_v1_0.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentWorkflowOrchestrationContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentRoleIOContract.report.json",
+    "docs/master_plan/generated/PR161F_QTTAgentHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR161F_QKUEndToEndTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_PR162CBlockerReinterpretationLedger.report.json",
+    "docs/master_plan/generated/PR162D_AggressiveQKUCandidateAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_QKUFieldFillExpansionMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUMaterializationProgressMatrix.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_ReportShardManifest.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaAlgorithmMiningLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQKUFormulaCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanAlgorithmFamilyCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanParameterPackExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanQuantumFormulaExtractionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_MasterPlanFormulaToExternalAcquisitionGapMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_FormulaExpressionExpansionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_AlgorithmAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_ParameterRangeAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_DefaultValueScaleAcquisitionLedger.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_TargetedMicroMaterializationLedger.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D_R2TargetedCriticalGapBacklog.report.json",
+    "docs/master_plan/generated/PR162R_A_PostLaunchFormulaPluginRequirementBacklog.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A"
+  ],
+  "validation_status": "PASS"
+}
