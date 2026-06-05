@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
             pr142_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr162r-b-replay-paper-data-binding-completion",
+                branch="pr163-generic-paper-adapter-capture-framework",
                 source="unit-test",
             ),
         )

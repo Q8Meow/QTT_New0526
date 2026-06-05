@@ -1,0 +1,18 @@
+{
+  "$id": "PaperAdapterInputV1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "live_order_authority": {
+      "const": false
+    },
+    "validation_status": {
+      "const": "PASS"
+    }
+  },
+  "title": "PaperAdapterInputV1",
+  "type": "object"
+}

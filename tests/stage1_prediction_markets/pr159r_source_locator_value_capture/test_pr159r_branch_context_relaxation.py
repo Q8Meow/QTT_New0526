@@ -30,6 +30,9 @@ PR162R_DOWNSTREAM_BRANCH = (
 PR162R_B_DOWNSTREAM_BRANCH = (
     "pr162r-b-replay-paper-data-binding-completion"
 )
+PR163_DOWNSTREAM_BRANCH = (
+    "pr163-generic-paper-adapter-capture-framework"
+)
 GITHUB_BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -186,6 +189,14 @@ def test_pr159r_pr162r_downstream_branch_allows_cumulative_validation(monkeypatc
 def test_pr159r_pr162r_b_downstream_branch_allows_cumulative_validation(monkeypatch):
     _clear_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, PR162R_B_DOWNSTREAM_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr159r_pr163_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, PR163_DOWNSTREAM_BRANCH)
 
     assert failures == ()
     assert receipts == ()
