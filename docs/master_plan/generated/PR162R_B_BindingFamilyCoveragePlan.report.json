@@ -1,0 +1,480 @@
+{
+  "authority_class": "PR162R_B_REPLAY_PAPER_DATA_BINDING_COMPLETION_NONLIVE_NO_EXECUTION_NO_AUTHORITY",
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr162r_b_replay_paper_data_binding_completion.authority_policy",
+  "ci_requires_network": false,
+  "created_by_pr": "PR162R-B",
+  "creates_connector_binding": false,
+  "creates_live_order_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_order_ready_claim": false,
+  "creates_paper_result_packets": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_checksum_global_digest_authority": false,
+  "creates_qtt_generated_sha_authority": false,
+  "creates_quantum_advantage_claim": false,
+  "creates_replay_result_packets": false,
+  "creates_runtime_cash_receipt": false,
+  "creates_source_acceptance": false,
+  "downstream_pr_routes": [
+    "PR163",
+    "PR164",
+    "PR165",
+    "PR162E",
+    "PR162Q",
+    "PR162R-C"
+  ],
+  "executes_quantum_backend": false,
+  "executes_quantum_simulator": false,
+  "fetches_private_state": false,
+  "mutates_protected_atomicrows_bundle_checksum_artifacts": false,
+  "record_count": 23,
+  "records": [
+    {
+      "binding_family": "HISTORICAL_PRICE_SERIES",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0021",
+        "PR162R_B_DATASET_BINDING::0022",
+        "PR162R_B_DATASET_BINDING::0023",
+        "PR162R_B_DATASET_BINDING::0024"
+      ],
+      "collapsed_missing_action_count": 1071,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::001",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "HISTORICAL_TRADE_SERIES",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0025",
+        "PR162R_B_DATASET_BINDING::0026"
+      ],
+      "collapsed_missing_action_count": 917,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::002",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "HISTORICAL_ORDERBOOK_SNAPSHOT_SERIES",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0017",
+        "PR162R_B_DATASET_BINDING::0018",
+        "PR162R_B_DATASET_BINDING::0019",
+        "PR162R_B_DATASET_BINDING::0020"
+      ],
+      "collapsed_missing_action_count": 294,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::003",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "EVENT_STATE_TIMELINE",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0011",
+        "PR162R_B_DATASET_BINDING::0012",
+        "PR162R_B_DATASET_BINDING::0013",
+        "PR162R_B_DATASET_BINDING::0014"
+      ],
+      "collapsed_missing_action_count": 69,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::004",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "SETTLEMENT_OUTCOME_LABELS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0069",
+        "PR162R_B_DATASET_BINDING::0070",
+        "PR162R_B_DATASET_BINDING::0071",
+        "PR162R_B_DATASET_BINDING::0072"
+      ],
+      "collapsed_missing_action_count": 86,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::005",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "VOLUME_DEPTH_LIQUIDITY_SERIES",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0081",
+        "PR162R_B_DATASET_BINDING::0082",
+        "PR162R_B_DATASET_BINDING::0083",
+        "PR162R_B_DATASET_BINDING::0084"
+      ],
+      "collapsed_missing_action_count": 93,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::006",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "FEE_MODEL",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0015",
+        "PR162R_B_DATASET_BINDING::0016"
+      ],
+      "collapsed_missing_action_count": 50,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::007",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "SLIPPAGE_MODEL",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0073",
+        "PR162R_B_DATASET_BINDING::0074",
+        "PR162R_B_DATASET_BINDING::0075",
+        "PR162R_B_DATASET_BINDING::0076"
+      ],
+      "collapsed_missing_action_count": 101,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::008",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "LATENCY_OBSERVATION_SERIES",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0027",
+        "PR162R_B_DATASET_BINDING::0028",
+        "PR162R_B_DATASET_BINDING::0029",
+        "PR162R_B_DATASET_BINDING::0030"
+      ],
+      "collapsed_missing_action_count": 1210,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::009",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "PROBABILITY_MODEL_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0053",
+        "PR162R_B_DATASET_BINDING::0054",
+        "PR162R_B_DATASET_BINDING::0055",
+        "PR162R_B_DATASET_BINDING::0056"
+      ],
+      "collapsed_missing_action_count": 724,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::010",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "COVARIANCE_CORRELATION_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0003",
+        "PR162R_B_DATASET_BINDING::0004",
+        "PR162R_B_DATASET_BINDING::0005",
+        "PR162R_B_DATASET_BINDING::0006"
+      ],
+      "collapsed_missing_action_count": 1037,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::011",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "QUANTUM_OBJECTIVE_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0061",
+        "PR162R_B_DATASET_BINDING::0062",
+        "PR162R_B_DATASET_BINDING::0063",
+        "PR162R_B_DATASET_BINDING::0064"
+      ],
+      "collapsed_missing_action_count": 478,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::012",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "QUANTUM_VARIABLE_DOMAIN_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0065",
+        "PR162R_B_DATASET_BINDING::0066",
+        "PR162R_B_DATASET_BINDING::0067",
+        "PR162R_B_DATASET_BINDING::0068"
+      ],
+      "collapsed_missing_action_count": 908,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::013",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "QUANTUM_CONSTRAINT_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0057",
+        "PR162R_B_DATASET_BINDING::0058",
+        "PR162R_B_DATASET_BINDING::0059",
+        "PR162R_B_DATASET_BINDING::0060"
+      ],
+      "collapsed_missing_action_count": 922,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::014",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "CLASSICAL_COMPARATOR_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0001",
+        "PR162R_B_DATASET_BINDING::0002"
+      ],
+      "collapsed_missing_action_count": 1824,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::015",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "PAPER_MARKET_STATE_BINDING",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0041",
+        "PR162R_B_DATASET_BINDING::0042",
+        "PR162R_B_DATASET_BINDING::0043",
+        "PR162R_B_DATASET_BINDING::0044"
+      ],
+      "collapsed_missing_action_count": 3710,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::016",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "PAPER_SYNTHETIC_FILL_MODEL",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0049",
+        "PR162R_B_DATASET_BINDING::0050",
+        "PR162R_B_DATASET_BINDING::0051",
+        "PR162R_B_DATASET_BINDING::0052"
+      ],
+      "collapsed_missing_action_count": 353,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::017",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "PAPER_PORTFOLIO_STATE",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0045",
+        "PR162R_B_DATASET_BINDING::0046",
+        "PR162R_B_DATASET_BINDING::0047",
+        "PR162R_B_DATASET_BINDING::0048"
+      ],
+      "collapsed_missing_action_count": 2238,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::018",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "PAPER_EXECUTION_COST_MODEL",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0037",
+        "PR162R_B_DATASET_BINDING::0038",
+        "PR162R_B_DATASET_BINDING::0039",
+        "PR162R_B_DATASET_BINDING::0040"
+      ],
+      "collapsed_missing_action_count": 201,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::019",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "MARKET_METADATA_AND_LIFECYCLE",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0033",
+        "PR162R_B_DATASET_BINDING::0034",
+        "PR162R_B_DATASET_BINDING::0035",
+        "PR162R_B_DATASET_BINDING::0036"
+      ],
+      "collapsed_missing_action_count": 69,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::020",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "MARKET_CATEGORY_CALIBRATION",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0031",
+        "PR162R_B_DATASET_BINDING::0032"
+      ],
+      "collapsed_missing_action_count": 917,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::021",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "CROSS_VENUE_DISAGREEMENT_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0007",
+        "PR162R_B_DATASET_BINDING::0008",
+        "PR162R_B_DATASET_BINDING::0009",
+        "PR162R_B_DATASET_BINDING::0010"
+      ],
+      "collapsed_missing_action_count": 353,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::022",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    },
+    {
+      "binding_family": "STALENESS_AND_FRESHNESS_INPUTS",
+      "binding_packet_refs": [
+        "PR162R_B_DATASET_BINDING::0077",
+        "PR162R_B_DATASET_BINDING::0078",
+        "PR162R_B_DATASET_BINDING::0079",
+        "PR162R_B_DATASET_BINDING::0080"
+      ],
+      "collapsed_missing_action_count": 1881,
+      "coverage_plan_id": "PR162R_B_BINDING_FAMILY_COVERAGE::023",
+      "coverage_status": "BINDING_MATERIALIZED",
+      "downstream_route": "Replay/Paper Candidate Router",
+      "exact_unavailable_reason": "",
+      "live_order_authority": false,
+      "validation_status": "PASS"
+    }
+  ],
+  "report_filename": "PR162R_B_BindingFamilyCoveragePlan.report.json",
+  "report_id": "PR162R_B_BINDINGFAMILYCOVERAGEPLAN",
+  "schema_ref": null,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
+    "docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json",
+    "docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136MasterPlanCoverageToReadinessDomainMap.report.json",
+    "docs/master_plan/generated/PR161F_ReplayRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PaperRunRequestRegistry.report.json",
+    "docs/master_plan/generated/PR161F_PairedReplayPaperRunPlan.report.json",
+    "docs/master_plan/generated/PR161F_ResultPacketEmissionEligibilityGate.report.json",
+    "docs/master_plan/generated/PR162_ReplayDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162_PaperDataAdapterContract.report.json",
+    "docs/master_plan/generated/PR162D_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_QKUToAgentToReplayPaperTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_ReplayPaperCandidateRouterQueue.report.json",
+    "docs/master_plan/generated/PR162D_PR162RReplayPaperAdapterCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR162D_R1_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R1_ComputableCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QKUExternalCandidateMappingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_AgentExternalCandidateRouteMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R1_ReplayPaperExternalCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162D_R1_PR162RHandoffExpansion.report.json",
+    "docs/master_plan/generated/PR162D_R1_SourceLocatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R1_QuantumProblemFormulationRegistry.report.json",
+    "docs/master_plan/generated/PR162R_A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162RAdapterRerunInputPack.report.json",
+    "docs/master_plan/generated/PR162R_A_ReplayPaperExecutabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_ComputabilityClassMatrix.report.json",
+    "docs/master_plan/generated/PR162R_A_PR162D6502CoverageRollup.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162D_R2A_CandidatePacketV1Registry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162RGenericCandidateInputExtension.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationRecordRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaExpressionRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_AlgorithmProcedureRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QuantumObjectiveRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_ClassicalComparatorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_TestVectorRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_QKUAgentWorkflowTraceabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_UpstreamDownstreamQKUOrchestrationMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulationCoverageAudit.report.json",
+    "docs/master_plan/generated/PR162D_R2A_FormulaLatencyClassRegistry.report.json",
+    "docs/master_plan/generated/PR162D_R2A_HotPathPrecomputeCacheabilityMatrix.report.json",
+    "docs/master_plan/generated/PR162D_R2A_PR162EPluginSeedCandidateRegistry.report.json",
+    "docs/master_plan/generated/PR162R_FinalSummary.report.json",
+    "docs/master_plan/generated/PR162R_InputConsumptionAudit.report.json",
+    "docs/master_plan/generated/PR162R_CandidatePacketV1IngestionLedger.report.json",
+    "docs/master_plan/generated/PR162R_QKUComputabilityClassificationMatrix.report.json",
+    "docs/master_plan/generated/PR162R_ReplayPaperDataBindingRequirementMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MissingDataBindingActionQueue.report.json",
+    "docs/master_plan/generated/PR162R_OnlineSourceScoutQueue.report.json",
+    "docs/master_plan/generated/PR162R_SourceCandidateMaterializationQueue.report.json",
+    "docs/master_plan/generated/PR162R_ReplayAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_PaperAdapterInputPacketRegistry.report.json",
+    "docs/master_plan/generated/PR162R_ReplayRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PaperRunRequestCandidateQueue.report.json",
+    "docs/master_plan/generated/PR162R_PairedReplayPaperRunRequestCandidatePlan.report.json",
+    "docs/master_plan/generated/PR162R_QuantumBatchPrecomputeRoutingPlan.report.json",
+    "docs/master_plan/generated/PR162R_LatencyPrecomputeRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_QKUAgentReplayPaperHandoffMatrix.report.json",
+    "docs/master_plan/generated/PR162R_MarketSpecificQKUAdapterIndex.report.json",
+    "docs/master_plan/generated/PR162R_CommandActionQKUBindingMatrix.report.json",
+    "docs/master_plan/generated/PR162R_PR163PaperAdapterHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR164ReviewProvenanceHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR165ScoringRankingHandoffSeed.report.json",
+    "docs/master_plan/generated/PR162R_PR162EPluginReplayPaperCompatibilitySeed.report.json",
+    "docs/master_plan/generated/PR162R_DecisionAndNextPRRecommendation.report.json",
+    "docs/master_plan/generated/PR162R_ReportManifest.report.json"
+  ],
+  "upstream_pr_refs": [
+    "PR136",
+    "PR161F",
+    "PR162",
+    "PR162D",
+    "PR162D_R1",
+    "PR162R_A",
+    "PR162D_R2A",
+    "PR162R"
+  ],
+  "validation_status": "PASS"
+}

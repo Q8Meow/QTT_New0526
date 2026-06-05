@@ -39,6 +39,9 @@ PR162D_R2A_DOWNSTREAM_BRANCH = (
 PR162R_DOWNSTREAM_BRANCH = (
     "pr162r-generic-replay-paper-adapter-rerun"
 )
+PR162R_B_DOWNSTREAM_BRANCH = (
+    "pr162r-b-replay-paper-data-binding-completion"
+)
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -222,6 +225,14 @@ def test_pr160_pr162d_r2a_downstream_branch_allows_cumulative_validation(monkeyp
 def test_pr160_pr162r_downstream_branch_allows_cumulative_validation(monkeypatch):
     _clear_branch_context_env(monkeypatch)
     failures, receipts = _branch_outcome(monkeypatch, PR162R_DOWNSTREAM_BRANCH)
+
+    assert failures == ()
+    assert receipts == ()
+
+
+def test_pr160_pr162r_b_downstream_branch_allows_cumulative_validation(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    failures, receipts = _branch_outcome(monkeypatch, PR162R_B_DOWNSTREAM_BRANCH)
 
     assert failures == ()
     assert receipts == ()

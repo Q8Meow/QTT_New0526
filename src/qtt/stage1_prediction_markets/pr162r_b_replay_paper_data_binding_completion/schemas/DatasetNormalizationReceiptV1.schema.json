@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "binding_task_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "normalization_receipt_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "source_candidate_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "normalization_receipt_id",
+    "source_candidate_id",
+    "binding_task_id"
+  ],
+  "title": "DatasetNormalizationReceiptV1",
+  "type": "object"
+}

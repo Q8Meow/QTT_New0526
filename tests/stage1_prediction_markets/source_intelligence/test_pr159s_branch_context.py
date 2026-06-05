@@ -22,6 +22,9 @@ PR162D_R2A_DOWNSTREAM_BRANCH = (
 PR162R_DOWNSTREAM_BRANCH = (
     "pr162r-generic-replay-paper-adapter-rerun"
 )
+PR162R_B_DOWNSTREAM_BRANCH = (
+    "pr162r-b-replay-paper-data-binding-completion"
+)
 
 
 def test_pr159s_branch_context_uses_central_ci_helper():
@@ -195,6 +198,35 @@ def test_pr159s_pr162r_downstream_branch_allows_cumulative_validation(monkeypatc
             return 0, PR162R_DOWNSTREAM_BRANCH, ""
         if command == ("rev-parse", "--abbrev-ref", "HEAD"):
             return 0, PR162R_DOWNSTREAM_BRANCH, ""
+        if command[:2] == ("merge-base", "--is-ancestor"):
+            return 1, "", "not ancestor"
+        if command[:3] == ("log", "--format=%s", "--fixed-strings"):
+            return 0, "", ""
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    failures: list[str] = []
+    receipts: list[str] = []
+    monkeypatch.setattr(validator, "_git_stdout", fake_git_stdout)
+
+    validator._validate_branch(validator.Path(__file__).resolve().parents[3], failures, receipts)
+
+    assert failures == []
+    assert receipts == []
+
+
+def test_pr159s_pr162r_b_downstream_branch_allows_cumulative_validation(monkeypatch):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    monkeypatch.delenv("GITHUB_EVENT_NAME", raising=False)
+    monkeypatch.delenv("GITHUB_REF", raising=False)
+    monkeypatch.delenv("GITHUB_REF_NAME", raising=False)
+    monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
+
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, PR162R_B_DOWNSTREAM_BRANCH, ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, PR162R_B_DOWNSTREAM_BRANCH, ""
         if command[:2] == ("merge-base", "--is-ancestor"):
             return 1, "", "not ancestor"
         if command[:3] == ("log", "--format=%s", "--fixed-strings"):

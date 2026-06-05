@@ -1,0 +1,17 @@
+{
+  "ask_depth": 660,
+  "best_ask": 0.5,
+  "best_bid": 0.46,
+  "bid_depth": 620,
+  "connector_binding": false,
+  "event_lifecycle_state": "OPEN",
+  "execution": "DISABLED",
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "live_authority": false,
+  "market_id": "PR162R_B_SYNTH_MARKET_001",
+  "mode": "SOURCE_REQUIRED",
+  "observation_timestamp_utc": "2026-01-01T00:00:05Z",
+  "paper_market_state_id": "PR162R_B_PAPER_MARKET_STATE_001",
+  "profit_evidence": false,
+  "source_acceptance": false
+}

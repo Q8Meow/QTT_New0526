@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_truth_status": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "source_candidate_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "source_class": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "source_locator": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "source_candidate_id",
+    "source_class",
+    "source_locator",
+    "candidate_truth_status"
+  ],
+  "title": "SourceAcquisitionCandidateV1",
+  "type": "object"
+}

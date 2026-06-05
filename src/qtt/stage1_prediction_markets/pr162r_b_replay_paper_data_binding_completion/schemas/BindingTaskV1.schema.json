@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "binding_family": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "binding_task_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "dedup_group_label": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "impacted_missing_action_refs": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "binding_task_id",
+    "binding_family",
+    "dedup_group_label",
+    "impacted_missing_action_refs"
+  ],
+  "title": "BindingTaskV1",
+  "type": "object"
+}

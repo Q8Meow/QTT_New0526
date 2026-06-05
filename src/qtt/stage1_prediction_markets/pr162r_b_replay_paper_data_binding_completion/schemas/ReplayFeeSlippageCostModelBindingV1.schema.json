@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "binding_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "binding_id"
+  ],
+  "title": "ReplayFeeSlippageCostModelBindingV1",
+  "type": "object"
+}

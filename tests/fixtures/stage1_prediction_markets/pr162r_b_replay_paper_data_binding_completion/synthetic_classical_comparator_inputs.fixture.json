@@ -1,0 +1,15 @@
+{
+  "classical_comparator_input_id": "PR162R_B_CLASSICAL_COMPARATOR_001",
+  "connector_binding": false,
+  "execution": "DISABLED",
+  "expected_value": 0.035,
+  "fixture_truth_status": "SYNTHETIC_TEST_FIXTURE",
+  "liquidity_score": 0.82,
+  "live_authority": false,
+  "mode": "SOURCE_REQUIRED",
+  "profit_evidence": false,
+  "risk_score": 0.14,
+  "source_acceptance": false,
+  "staleness_seconds": 0.0,
+  "transaction_cost_estimate": 0.005
+}

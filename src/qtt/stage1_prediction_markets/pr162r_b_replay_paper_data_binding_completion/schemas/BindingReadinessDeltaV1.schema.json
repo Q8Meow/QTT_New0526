@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "raw_missing_actions_consumed": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "readiness_delta_id": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    },
+    "rows_with_any_binding_improvement": {
+      "type": [
+        "string",
+        "array",
+        "number",
+        "integer",
+        "boolean",
+        "object"
+      ]
+    }
+  },
+  "required": [
+    "readiness_delta_id",
+    "raw_missing_actions_consumed",
+    "rows_with_any_binding_improvement"
+  ],
+  "title": "BindingReadinessDeltaV1",
+  "type": "object"
+}
