@@ -39,6 +39,8 @@
       "report_filename": "PR163_InputConsumptionAudit.report.json",
       "row_count": 58,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -49,6 +51,8 @@
       "report_filename": "PR163_PR162RBArtifactConsumptionLedger.report.json",
       "row_count": 12,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -59,6 +63,8 @@
       "report_filename": "PR163_PaperAdapterInputRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperAdapterInputV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -69,6 +75,8 @@
       "report_filename": "PR163_PaperVenueAdapterCapabilityMatrix.report.json",
       "row_count": 4,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperVenueAdapterCapabilityV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -79,6 +87,8 @@
       "report_filename": "PR163_PaperMarketStateNormalizationRegistry.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -89,6 +99,8 @@
       "report_filename": "PR163_PaperDecisionIntentRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperDecisionIntentV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -99,6 +111,8 @@
       "report_filename": "PR163_PaperOrderIntentRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperOrderIntentV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -109,6 +123,8 @@
       "report_filename": "PR163_PaperPreTradeCheckReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperPreTradeCheckReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -119,6 +135,8 @@
       "report_filename": "PR163_PaperRiskPolicyReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperRiskPolicyReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -129,8 +147,100 @@
       "report_filename": "PR163_PaperOrderStateTransitionRegistry.report.json",
       "row_count": 38102,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperOrderStateTransitionV1.schema.json",
-      "shard_paths": [],
-      "sharded_flag": false,
+      "shard_count": 8,
+      "shard_manifest_refs": [
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386803,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00000101",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00085304",
+          "row_count": 5000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0001_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0001"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386777,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00085305",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00170605",
+          "row_count": 5000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0002_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0002"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386915,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00170701",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00255904",
+          "row_count": 5000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0003_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0003"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386857,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00255905",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00341302",
+          "row_count": 5000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0004_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0004"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10387031,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00341303",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00426602",
+          "row_count": 5000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0005_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0005"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386741,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00426603",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00511905",
+          "row_count": 5000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0006_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0006"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 10386951,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00512001",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00597302",
+          "row_count": 5000,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0007_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0007"
+        },
+        {
+          "below_github_recommended_warning_threshold": true,
+          "estimated_shard_size_bytes": 6447787,
+          "first_state_transition_ref": "PR163_STATE_TRANSITION::00597303",
+          "last_state_transition_ref": "PR163_STATE_TRANSITION::00650205",
+          "row_count": 3102,
+          "shard_index": 8,
+          "shard_path": "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0008_of_0008.report.json",
+          "shard_ref": "PR163_PAPER_ORDER_STATE_TRANSITION_SHARD::0008"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0001_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0002_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0003_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0004_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0005_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0006_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0007_of_0008.report.json",
+        "docs/master_plan/generated/pr163_shards/PR163_PaperOrderStateTransitionRegistry.shard_0008_of_0008.report.json"
+      ],
+      "sharded_flag": true,
       "validation_status": "PASS"
     },
     {
@@ -139,6 +249,8 @@
       "report_filename": "PR163_PaperSyntheticFillEventRegistry.report.json",
       "row_count": 2054,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperSyntheticFillEventV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -149,6 +261,8 @@
       "report_filename": "PR163_PaperPortfolioLedgerSnapshotRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperPortfolioLedgerSnapshotV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -159,6 +273,8 @@
       "report_filename": "PR163_PaperCashReservationReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperCashReservationReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -169,6 +285,8 @@
       "report_filename": "PR163_PaperExecutionCostReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperExecutionCostReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -179,6 +297,8 @@
       "report_filename": "PR163_PaperLatencySlippageReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperLatencySlippageReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -189,6 +309,8 @@
       "report_filename": "PR163_PaperCaptureEventRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperCaptureEventV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -199,6 +321,8 @@
       "report_filename": "PR163_PaperAdapterRunPlanRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperAdapterRunPlanV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -209,6 +333,8 @@
       "report_filename": "PR163_PaperAdapterCaptureBundleRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperAdapterCaptureBundleV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -219,6 +345,8 @@
       "report_filename": "PR163_PaperScenarioCoverageMatrix.report.json",
       "row_count": 19,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperScenarioCoverageV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -229,6 +357,8 @@
       "report_filename": "PR163_PaperLedgerInvariantAudit.report.json",
       "row_count": 15,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperLedgerInvariantAuditV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -239,6 +369,8 @@
       "report_filename": "PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -249,6 +381,8 @@
       "report_filename": "PR163_PaperQuantumAdvisoryInputRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperQuantumAdvisoryInputV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -259,6 +393,8 @@
       "report_filename": "PR163_PaperQuantumConstraintProjectionRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperQuantumConstraintProjectionV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -269,6 +405,8 @@
       "report_filename": "PR163_PaperQuantumClassicalComparatorTraceRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperQuantumClassicalComparatorTraceV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -279,6 +417,8 @@
       "report_filename": "PR163_PaperHotPathExclusionMatrix.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -289,6 +429,8 @@
       "report_filename": "PR163_PaperReplayParityPreparationMatrix.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -299,6 +441,8 @@
       "report_filename": "PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperQKUPrioritizationFeatureHandoffV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -309,6 +453,8 @@
       "report_filename": "PR163_PaperLLMFutureHandoffExclusionReceiptRegistry.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperLLMFutureHandoffExclusionReceiptV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -319,6 +465,8 @@
       "report_filename": "PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
       "row_count": 6502,
       "schema_ref": "src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schemas/PaperDownstreamHandoffV1.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -329,6 +477,8 @@
       "report_filename": "PR163_PR164ReviewProvenanceHandoff.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -339,6 +489,8 @@
       "report_filename": "PR163_PR165ScoringRankingHandoff.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -349,6 +501,8 @@
       "report_filename": "PR163_PR166LLMReviewResearchHandoff.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -359,6 +513,8 @@
       "report_filename": "PR163_PR162EPluginPaperAdapterCompatibilityUpdate.report.json",
       "row_count": 6502,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -369,6 +525,8 @@
       "report_filename": "PR163_SourceCandidatePaperAdapterResearchQueue.report.json",
       "row_count": 6,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -379,6 +537,8 @@
       "report_filename": "PR163_NoPaperResultProfitLiveAuthorityAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -389,6 +549,8 @@
       "report_filename": "PR163_NoSourceAcceptanceConnectorPrivateStateAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -399,6 +561,8 @@
       "report_filename": "PR163_NoQuantumBackendAdvantageClaimAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -409,6 +573,8 @@
       "report_filename": "PR163_NoLLMHotPathOrderReleaseSourceAcceptanceResultRewriteAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -419,6 +585,8 @@
       "report_filename": "PR163_NoQTTChecksumFreezeAuthorityAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -429,6 +597,8 @@
       "report_filename": "PR163_OrphanPaperAdapterArtifactAudit.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -439,6 +609,8 @@
       "report_filename": "PR163_FinalSummary.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -449,6 +621,8 @@
       "report_filename": "PR163_DecisionAndNextPRRecommendation.report.json",
       "row_count": 1,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"
@@ -459,6 +633,8 @@
       "report_filename": "PR163_ReportManifest.report.json",
       "row_count": 43,
       "schema_ref": null,
+      "shard_count": 0,
+      "shard_manifest_refs": [],
       "shard_paths": [],
       "sharded_flag": false,
       "validation_status": "PASS"

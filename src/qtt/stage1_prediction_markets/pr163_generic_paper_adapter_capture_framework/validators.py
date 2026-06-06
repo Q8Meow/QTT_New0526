@@ -17,6 +17,13 @@ from .authority_policy import (
 from .json_io import read_json, records_from_payload
 from .paper_pretrade_checks import REQUIRED_CHECKS
 from .paper_scenario_grid import SCENARIOS
+from .report_sharding import (
+    GITHUB_RECOMMENDED_WARNING_THRESHOLD_BYTES,
+    TRANSITION_REGISTRY_REPORT_FILENAME,
+    aggregate_state_counts,
+    aggregate_transition_counts,
+    load_transition_registry_records,
+)
 
 
 @dataclass(frozen=True)
@@ -33,17 +40,18 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
     if failures:
         return ValidationResult(False, tuple(failures))
     _validate_common_contracts(reports, failures)
+    transition_rows = _validate_transition_registry_shards(repo_root, reports, failures)
     summary = reports["PR163_FinalSummary.report.json"]
     _validate_summary(summary, failures)
     _validate_materialized_universe(reports, summary, failures)
     _validate_pretrade(reports, failures)
-    _validate_state_machine(reports, failures)
+    _validate_state_machine(transition_rows, failures)
     _validate_fill_simulator(reports, failures)
     _validate_ledger(reports, summary, failures)
     _validate_scenarios(reports, failures)
     _validate_qku_quantum_llm_handoffs(reports, summary, failures)
     _validate_authority(summary, reports, failures)
-    _validate_plain_refs(reports, failures)
+    _validate_plain_refs(reports, failures, extra_records=transition_rows)
     _validate_manifest(reports, failures)
     return ValidationResult(not failures, tuple(failures))
 
@@ -81,8 +89,13 @@ def _validate_common_contracts(reports: dict[str, dict[str, Any]], failures: lis
         _expect(payload.get("created_by_pr") == "PR163", failures, f"{filename} created_by_pr mismatch")
         _expect(payload.get("authority_class") == AUTHORITY_CLASS, failures, f"{filename} authority_class mismatch")
         _expect(payload.get("validation_status") == "PASS", failures, f"{filename} validation_status must be PASS")
-        _expect(isinstance(payload.get("records"), list), failures, f"{filename} missing records list")
-        _expect(payload.get("record_count") == len(payload.get("records", [])), failures, f"{filename} record_count mismatch")
+        records = payload.get("records", [])
+        _expect(isinstance(records, list), failures, f"{filename} missing records list")
+        if filename == TRANSITION_REGISTRY_REPORT_FILENAME and payload.get("sharded_flag"):
+            _expect(records == [], failures, f"{filename} compact root must not duplicate shard records")
+            _expect(payload.get("record_count") == payload.get("total_row_count"), failures, f"{filename} compact root row count mismatch")
+        else:
+            _expect(payload.get("record_count") == len(records), failures, f"{filename} record_count mismatch")
         for key, expected in NO_AUTHORITY_FLAGS.items():
             _expect(payload.get(key) is expected, failures, f"{filename} top-level authority flag drift: {key}")
         for record in records_from_payload(payload):
@@ -169,8 +182,7 @@ def _validate_pretrade(reports: dict[str, dict[str, Any]], failures: list[str]) 
         _expect("BLOCKER" not in str(row), failures, "pretrade row uses BLOCKER")
 
 
-def _validate_state_machine(reports: dict[str, dict[str, Any]], failures: list[str]) -> None:
-    rows = records_from_payload(reports["PR163_PaperOrderStateTransitionRegistry.report.json"])
+def _validate_state_machine(rows: list[dict[str, Any]], failures: list[str]) -> None:
     _expect(rows, failures, "state transition registry empty")
     next_states = {row.get("next_state") for row in rows}
     for required in (
@@ -327,7 +339,12 @@ def _validate_authority(summary_payload: dict[str, Any], reports: dict[str, dict
             _expect(rows[0].get(key) == expected, failures, f"{filename} boundary count drift: {key}")
 
 
-def _validate_plain_refs(reports: dict[str, dict[str, Any]], failures: list[str]) -> None:
+def _validate_plain_refs(
+    reports: dict[str, dict[str, Any]],
+    failures: list[str],
+    *,
+    extra_records: list[dict[str, Any]] | None = None,
+) -> None:
     for filename, payload in reports.items():
         text = str(payload)
         _expect("AtomicRows.bundle.sha256" not in text, failures, f"{filename} contains AtomicRows.bundle.sha256")
@@ -339,6 +356,15 @@ def _validate_plain_refs(reports: dict[str, dict[str, Any]], failures: list[str]
                     for item in value:
                         if isinstance(item, str) and item.startswith("PR163_"):
                             failures.extend(validate_pr163_ref(item).failures)
+    for record in extra_records or []:
+        _expect("AtomicRows.bundle.sha256" not in str(record), failures, "state transition shard contains AtomicRows.bundle.sha256")
+        for key, value in record.items():
+            if isinstance(value, str) and key.endswith("_ref") and value.startswith("PR163_"):
+                failures.extend(validate_pr163_ref(value).failures)
+            elif isinstance(value, list) and key.endswith("_refs"):
+                for item in value:
+                    if isinstance(item, str) and item.startswith("PR163_"):
+                        failures.extend(validate_pr163_ref(item).failures)
 
 
 def _validate_manifest(reports: dict[str, dict[str, Any]], failures: list[str]) -> None:
@@ -352,6 +378,68 @@ def _validate_manifest(reports: dict[str, dict[str, Any]], failures: list[str]) 
             _expect(row["row_count"] == len(p.REPORT_FILENAMES), failures, "manifest self row count mismatch")
         elif filename in counts:
             _expect(row["row_count"] == counts[filename], failures, f"manifest row count mismatch: {filename}")
+        if filename == TRANSITION_REGISTRY_REPORT_FILENAME:
+            payload = reports[filename]
+            _expect(row.get("sharded_flag") is True, failures, "transition registry manifest must mark sharded")
+            _expect(row.get("shard_count") == payload.get("shard_count"), failures, "transition registry manifest shard count mismatch")
+            _expect(row.get("shard_paths") == payload.get("shard_files"), failures, "transition registry manifest shard path mismatch")
+
+
+def _validate_transition_registry_shards(
+    repo_root: Path,
+    reports: dict[str, dict[str, Any]],
+    failures: list[str],
+) -> list[dict[str, Any]]:
+    payload = reports[TRANSITION_REGISTRY_REPORT_FILENAME]
+    _expect(payload.get("report_name") == "PR163_PaperOrderStateTransitionRegistry", failures, "transition registry report_name mismatch")
+    _expect(payload.get("pr_id") == "PR163", failures, "transition registry pr_id mismatch")
+    _expect(payload.get("total_row_count") == 38102, failures, "transition registry total row count drift")
+    _expect(payload.get("record_count") == 38102, failures, "transition registry record_count drift")
+    _expect(payload.get("records") == [], failures, "transition registry root must be compact")
+    _expect(payload.get("sharded_flag") is True, failures, "transition registry must be sharded")
+    for key, expected in BOUNDARY_COUNT_FIELDS.items():
+        _expect(payload.get(key) == expected, failures, f"transition registry authority count drift: {key}")
+        _expect(payload.get("authority_counts", {}).get(key) == expected, failures, f"transition registry authority_counts drift: {key}")
+    shard_files = payload.get("shard_files") or []
+    shard_manifest_refs = payload.get("shard_manifest_refs") or []
+    _expect(len(shard_files) == payload.get("shard_count"), failures, "transition registry shard file count mismatch")
+    _expect(len(shard_manifest_refs) == payload.get("shard_count"), failures, "transition registry shard manifest ref count mismatch")
+    manifest_paths = [record.get("shard_path") for record in shard_manifest_refs]
+    _expect(manifest_paths == shard_files, failures, "transition registry shard_manifest_refs path mismatch")
+    failure_count_before_shards = len(failures)
+    for index, shard_ref in enumerate(shard_files, start=1):
+        try:
+            normalized = p.normalize_shard_ref(repo_root, shard_ref)
+        except ValueError as exc:
+            failures.append(str(exc))
+            continue
+        _expect(normalized == shard_ref, failures, f"transition registry shard ref not normalized: {shard_ref}")
+        _expect("\\" not in shard_ref, failures, f"transition registry shard ref must use POSIX slashes: {shard_ref}")
+        shard_path = p.resolve_repo_relative(repo_root, shard_ref)
+        _expect(shard_path.exists(), failures, f"missing transition registry shard: {shard_ref}")
+        if not shard_path.exists():
+            continue
+        _expect(
+            shard_path.stat().st_size < GITHUB_RECOMMENDED_WARNING_THRESHOLD_BYTES,
+            failures,
+            f"transition registry shard exceeds GitHub warning threshold: {shard_ref}",
+        )
+        shard_payload = read_json(shard_path)
+        _expect(shard_payload.get("parent_report_filename") == TRANSITION_REGISTRY_REPORT_FILENAME, failures, f"transition shard parent mismatch: {shard_ref}")
+        _expect(shard_payload.get("shard_index") == index, failures, f"transition shard index mismatch: {shard_ref}")
+        _expect(shard_payload.get("shard_count") == payload.get("shard_count"), failures, f"transition shard count mismatch: {shard_ref}")
+        _expect(shard_payload.get("total_row_count") == payload.get("total_row_count"), failures, f"transition shard total row count mismatch: {shard_ref}")
+        for key, expected in BOUNDARY_COUNT_FIELDS.items():
+            _expect(shard_payload.get(key) == expected, failures, f"transition shard authority count drift: {shard_ref}:{key}")
+        for record in records_from_payload(shard_payload):
+            failures.extend(validate_record_authority(record).failures)
+    if len(failures) != failure_count_before_shards:
+        return []
+    rows = load_transition_registry_records(repo_root, payload)
+    _expect(len(rows) == 38102, failures, "transition registry shard rows must total 38102")
+    _expect(payload.get("aggregate_transition_counts") == aggregate_transition_counts(rows), failures, "transition registry aggregate transition counts drift")
+    _expect(payload.get("aggregate_state_counts") == aggregate_state_counts(rows), failures, "transition registry aggregate state counts drift")
+    return rows
 
 
 def _expect(condition: bool, failures: list[str], message: str) -> None:

@@ -7,6 +7,10 @@ from src.qtt.stage1_prediction_markets.pr163_generic_paper_adapter_capture_frame
     read_json,
     records_from_payload,
 )
+from src.qtt.stage1_prediction_markets.pr163_generic_paper_adapter_capture_framework.report_sharding import (
+    TRANSITION_REGISTRY_REPORT_FILENAME,
+    load_transition_registry_records,
+)
 
 
 @pytest.fixture(scope="session")
@@ -25,7 +29,10 @@ def report(repo_root):
 @pytest.fixture(scope="session")
 def records(report):
     def _records(filename: str):
-        return records_from_payload(report(filename))
+        payload = report(filename)
+        if filename == TRANSITION_REGISTRY_REPORT_FILENAME:
+            return load_transition_registry_records(Path(__file__).resolve().parents[3], payload)
+        return records_from_payload(payload)
 
     return _records
 

@@ -51,6 +51,10 @@ from .polymarket_paper_adapter import build_capability_row as polymarket_capabil
 from .qku_agent_routing import build_qku_route
 from .qku_prioritization_handoff import build_qku_prioritization_handoff
 from .quantum_paper_advisory import build_quantum_rows
+from .report_sharding import (
+    TRANSITION_REGISTRY_REPORT_FILENAME,
+    build_transition_registry_payloads,
+)
 from .schema_writer import write_schemas
 from .source_candidate_policy import build_research_queue
 from .venue_neutral_synthetic_paper_adapter import build_capability_row as synthetic_capability
@@ -60,6 +64,7 @@ from .venue_neutral_synthetic_paper_adapter import build_capability_row as synth
 class BuildArtifacts:
     summary: dict[str, Any]
     payloads: dict[str, dict[str, Any]]
+    shard_payloads: dict[str, dict[str, Any]] | None = None
 
 
 ROW_LEVEL_REPORTS = {
@@ -97,13 +102,27 @@ ROW_LEVEL_REPORTS = {
 def write_artifacts(repo_root: Path) -> BuildArtifacts:
     p.ensure_branch(repo_root)
     write_schemas(repo_root)
-    payloads = build_payloads(repo_root, p.EXPECTED_BRANCH)
+    payloads, shard_payloads = build_payloads_with_shards(repo_root, p.EXPECTED_BRANCH)
     for filename in p.REPORT_FILENAMES:
         write_json(repo_root / p.GENERATED_DIR / filename, payloads[filename], compact=filename in ROW_LEVEL_REPORTS)
-    return BuildArtifacts(summary=payloads["PR163_FinalSummary.report.json"], payloads=payloads)
+    for rel_path, shard_payload in shard_payloads.items():
+        write_json(repo_root / rel_path, shard_payload, compact=True)
+    return BuildArtifacts(
+        summary=payloads["PR163_FinalSummary.report.json"],
+        payloads=payloads,
+        shard_payloads=shard_payloads,
+    )
 
 
 def build_payloads(repo_root: Path, branch: str | None = None) -> dict[str, dict[str, Any]]:
+    payloads, _shard_payloads = build_payloads_with_shards(repo_root, branch)
+    return payloads
+
+
+def build_payloads_with_shards(
+    repo_root: Path,
+    branch: str | None = None,
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     branch = branch or p.current_branch(repo_root)
     discovery = discover_inputs(repo_root)
     source_inputs = [row["consumed_path"] for row in discovery if row["consumed_path"]]
@@ -177,6 +196,10 @@ def build_payloads(repo_root: Path, branch: str | None = None) -> dict[str, dict
         filename: _payload(_report_id(filename), filename, records, source_inputs)
         for filename, records in row_payloads.items()
     }
+    transition_payload, transition_shard_payloads = build_transition_registry_payloads(
+        payloads[TRANSITION_REGISTRY_REPORT_FILENAME]
+    )
+    payloads[TRANSITION_REGISTRY_REPORT_FILENAME] = transition_payload
     summary = build_summary(
         branch=branch,
         discovery=discovery,
@@ -188,6 +211,9 @@ def build_payloads(repo_root: Path, branch: str | None = None) -> dict[str, dict
         source_queue=source_queue,
         pr162rb_ledger=pr162rb_ledger,
         orphan_audit=orphan_audit,
+        transition_registry_shard_count=transition_payload["shard_count"],
+        transition_registry_shard_files=transition_payload["shard_files"],
+        transition_registry_largest_shard_record_count=transition_payload["largest_shard_record_count"],
     )
     decision = build_decision(summary)
     manifest = build_manifest(payloads, summary)
@@ -215,7 +241,7 @@ def build_payloads(repo_root: Path, branch: str | None = None) -> dict[str, dict
     missing = sorted(set(p.REPORT_FILENAMES) - set(payloads))
     if missing:
         raise RuntimeError(f"PR163 payload map missing reports: {missing}")
-    return payloads
+    return payloads, transition_shard_payloads
 
 
 def _build_row_outputs(
@@ -679,6 +705,12 @@ def build_summary(**kwargs: Any) -> dict[str, Any]:
         "paper_pretrade_receipt_rows": len(row_outputs["pretrade_receipt_rows"]),
         "paper_risk_policy_receipt_rows": len(row_outputs["risk_policy_receipt_rows"]),
         "paper_order_state_transition_rows": len(row_outputs["state_transition_rows"]),
+        "paper_order_state_transition_registry_sharded_flag": True,
+        "paper_order_state_transition_registry_shard_count": kwargs["transition_registry_shard_count"],
+        "paper_order_state_transition_registry_shard_paths": kwargs["transition_registry_shard_files"],
+        "paper_order_state_transition_registry_largest_shard_record_count": kwargs[
+            "transition_registry_largest_shard_record_count"
+        ],
         "paper_synthetic_fill_event_rows": len(row_outputs["synthetic_fill_event_rows"]),
         "paper_portfolio_ledger_snapshot_rows": len(row_outputs["portfolio_ledger_snapshot_rows"]),
         "paper_cash_reservation_receipt_rows": len(row_outputs["cash_reservation_receipt_rows"]),
@@ -792,13 +824,17 @@ def build_manifest(payloads: dict[str, dict[str, Any]], summary: dict[str, Any])
     counts["PR163_ReportManifest.report.json"] = len(p.REPORT_FILENAMES)
     rows = []
     for idx, filename in enumerate(p.REPORT_FILENAMES, 1):
+        payload = payloads.get(filename, {})
+        shard_paths = list(payload.get("shard_files") or [])
         rows.append(
             {
                 "manifest_ref": f"PR163_MANIFEST::{idx:03d}",
                 "report_filename": filename,
-                "row_count": counts.get(filename, 0),
-                "sharded_flag": False,
-                "shard_paths": [],
+                "row_count": payload.get("total_row_count", counts.get(filename, 0)),
+                "sharded_flag": bool(payload.get("sharded_flag", False)),
+                "shard_count": int(payload.get("shard_count", 0) or 0),
+                "shard_paths": shard_paths,
+                "shard_manifest_refs": list(payload.get("shard_manifest_refs") or []),
                 "schema_ref": p.REPORT_SCHEMA_REFS.get(filename),
                 "validation_status": "PASS",
                 "live_order_authority": False,
