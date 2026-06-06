@@ -59,6 +59,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr162r-generic-replay-paper-adapter-rerun": 162,
     "pr162r-b-replay-paper-data-binding-completion": 162,
     "pr163-generic-paper-adapter-capture-framework": 163,
+    "pr163-b-paired-replay-paper-concurrent-executor": 163,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -919,6 +920,7 @@ PR162R_B_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 PR163_BRANCH = "pr163-generic-paper-adapter-capture-framework"
+PR163_B_BRANCH = "pr163-b-paired-replay-paper-concurrent-executor"
 PR163_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR163_",
     "docs/master_plan/generated/pr163_shards/",
@@ -1618,7 +1620,7 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
-    if branch == PR163_BRANCH:
+    if branch in {PR163_BRANCH, PR163_B_BRANCH}:
         return normalized in PR163_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR163_ALLOWED_CHANGED_PATH_PREFIXES

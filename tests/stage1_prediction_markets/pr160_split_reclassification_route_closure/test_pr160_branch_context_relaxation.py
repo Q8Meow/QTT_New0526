@@ -45,6 +45,20 @@ PR162R_B_DOWNSTREAM_BRANCH = (
 PR163_DOWNSTREAM_BRANCH = (
     "pr163-generic-paper-adapter-capture-framework"
 )
+PR163_B_DOWNSTREAM_BRANCH = "pr163-b-paired-replay-paper-concurrent-executor"
+AUTHORITY_CREATION_MARKERS = (
+    "SOURCE_ACCEPTANCE",
+    "CONNECTOR_BINDING",
+    "RUNTIME_CASH",
+    "ORDER",
+    "LIVE",
+    "PROFIT",
+    "QUANTUM_BACKEND",
+    "LLM_RUNTIME",
+    "SHA",
+    "CHECKSUM",
+    "ATOMICROWS",
+)
 
 
 def _clear_branch_context_env(monkeypatch):
@@ -247,6 +261,18 @@ def test_pr160_pr163_downstream_branch_allows_cumulative_validation(monkeypatch)
 
     assert failures == ()
     assert receipts == ()
+
+
+def test_pr160_pr163_b_downstream_branch_allows_baseline_without_authority(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    for branch in (c.EXPECTED_BRANCH, PR163_DOWNSTREAM_BRANCH, PR163_B_DOWNSTREAM_BRANCH):
+        failures, receipts = _branch_outcome(monkeypatch, branch)
+        authority_output = " ".join((*failures, *receipts)).upper()
+
+        assert failures == (), branch
+        assert receipts == (), branch
+        assert not any(marker in authority_output for marker in AUTHORITY_CREATION_MARKERS)
 
 
 def test_pr160_detached_head_ci_with_valid_branch_context_emits_relaxation_receipt(
