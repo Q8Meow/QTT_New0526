@@ -952,6 +952,27 @@ PR163_ALLOWED_CHANGED_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
+PR163_B_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR163_B_",
+    "docs/master_plan/generated/pr163_b_shards/",
+    "src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/",
+    "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/",
+)
+PR163_B_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr163_b_paired_replay_paper_concurrent_executor.py",
+        "tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/validate_pr159_official_source_completion_bridge.py",
@@ -1620,10 +1641,15 @@ def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
-    if branch in {PR163_BRANCH, PR163_B_BRANCH}:
+    if branch == PR163_BRANCH:
         return normalized in PR163_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR163_ALLOWED_CHANGED_PATH_PREFIXES
+        )
+    if branch == PR163_B_BRANCH:
+        return normalized in PR163_B_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR163_B_ALLOWED_CHANGED_PATH_PREFIXES
         )
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(
