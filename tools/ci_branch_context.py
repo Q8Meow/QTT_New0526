@@ -59,6 +59,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr162r-generic-replay-paper-adapter-rerun": 162,
     "pr162r-b-replay-paper-data-binding-completion": 162,
     "pr163-generic-paper-adapter-capture-framework": 163,
+    "pr163-b-paired-replay-paper-concurrent-executor": 163,
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -919,6 +920,7 @@ PR162R_B_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 PR163_BRANCH = "pr163-generic-paper-adapter-capture-framework"
+PR163_B_BRANCH = "pr163-b-paired-replay-paper-concurrent-executor"
 PR163_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR163_",
     "docs/master_plan/generated/pr163_shards/",
@@ -944,6 +946,27 @@ PR163_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/stage1_prediction_markets/atomicrows_pr154_value_state/test_pr161a_branch_context.py",
         "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
         "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+PR163_B_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR163_B_",
+    "docs/master_plan/generated/pr163_b_shards/",
+    "src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/",
+    "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/",
+)
+PR163_B_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr163_b_paired_replay_paper_concurrent_executor.py",
+        "tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
@@ -1622,6 +1645,11 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return normalized in PR163_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR163_ALLOWED_CHANGED_PATH_PREFIXES
+        )
+    if branch == PR163_B_BRANCH:
+        return normalized in PR163_B_ALLOWED_CHANGED_PATHS or any(
+            normalized.startswith(prefix)
+            for prefix in PR163_B_ALLOWED_CHANGED_PATH_PREFIXES
         )
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(

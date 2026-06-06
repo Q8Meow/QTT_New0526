@@ -577,7 +577,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
             pr141_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr163-generic-paper-adapter-capture-framework",
+                branch="pr163-b-paired-replay-paper-concurrent-executor",
                 source="unit-test",
             ),
         )

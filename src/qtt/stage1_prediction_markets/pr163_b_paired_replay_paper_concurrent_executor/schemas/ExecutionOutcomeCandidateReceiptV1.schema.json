@@ -1,0 +1,40 @@
+{
+  "$id": "https://qtt.local/schemas/pr163-b/ExecutionOutcomeCandidateReceiptV1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "no_connector_binding": {
+      "type": "boolean"
+    },
+    "no_live_authority": {
+      "type": "boolean"
+    },
+    "no_llm_runtime": {
+      "type": "boolean"
+    },
+    "no_private_state_fetch": {
+      "type": "boolean"
+    },
+    "no_profit_evidence": {
+      "type": "boolean"
+    },
+    "no_quantum_backend": {
+      "type": "boolean"
+    },
+    "no_source_acceptance": {
+      "type": "boolean"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "candidate_packet_id",
+    "validation_status"
+  ],
+  "title": "ExecutionOutcomeCandidateReceiptV1",
+  "type": "object"
+}
