@@ -1,0 +1,22 @@
+{
+  "$id": "https://qtt.local/schemas/pr164/pr164_infrastructure_rejection_review_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "created_by_pr": {
+      "type": "string"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "title": "pr164_infrastructure_rejection_review_record.schema.json",
+  "type": "object"
+}
