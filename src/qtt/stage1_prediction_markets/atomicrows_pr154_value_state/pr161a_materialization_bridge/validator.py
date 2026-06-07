@@ -186,6 +186,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
 def _branch_context_allowed(root: Path, branch: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch)
+    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+        normalized,
+        upstream_pr=161,
+    ):
+        return True
     return normalized in {
         c.EXPECTED_BRANCH,
         c.REPAIR_BRANCH,

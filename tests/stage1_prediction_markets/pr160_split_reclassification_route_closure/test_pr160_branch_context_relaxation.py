@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tools import ci_branch_context
+
 from src.qtt.stage1_prediction_markets.pr160_split_reclassification_route_closure import (
     constants as c,
 )
@@ -21,6 +23,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 PR160_REPAIR_BRANCH = "repair/pr160-main-push-branch-context-relaxation"
 PR160_CURRENT_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
 PR159R_BRANCH_CONTEXT_REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
+PR163_C_MAIN_CONTEXT_REPAIR_BRANCH = (
+    ci_branch_context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
+)
 PR162C_DOWNSTREAM_BRANCH = (
     "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
 )
@@ -355,6 +360,26 @@ def test_pr160_detached_head_ci_with_pr159r_repair_head_ref_emits_branch_only_re
     assert receipts == (c.PR160_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
 
 
+def test_pr160_detached_head_ci_with_pr163_c_repair_head_ref_emits_branch_only_relaxation_receipt(
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/178/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "178/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", PR163_C_MAIN_CONTEXT_REPAIR_BRANCH)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "HEAD",
+        ancestry_present=False,
+    )
+
+    assert failures == ()
+    assert receipts == (c.PR160_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
 def test_pr160_detached_head_ci_pr159r_repair_ref_name_without_head_ref_remains_blocked(
     monkeypatch,
 ):
@@ -409,6 +434,30 @@ def test_pr160_detached_head_ci_unrelated_head_ref_remains_blocked(
             c.EXPECTED_BRANCH,
             PR160_REPAIR_BRANCH,
             PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        },
+    )
+
+    assert failures == ("PR160_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
+
+
+def test_pr160_detached_head_ci_unlisted_repair_head_ref_remains_blocked(
+    monkeypatch,
+):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/178/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "178/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", "repair/pr163-c-unrelated-context")
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "HEAD",
+        ancestry_branches={
+            c.EXPECTED_BRANCH,
+            PR160_REPAIR_BRANCH,
+            PR163_C_MAIN_CONTEXT_REPAIR_BRANCH,
         },
     )
 
@@ -538,6 +587,19 @@ def test_pr160_unrelated_branch_remains_blocked_even_with_pr160_ancestry(monkeyp
     )
 
     assert failures == ("PR160_BLOCKED_WRONG_BRANCH:feature/unrelated",)
+    assert receipts == ()
+
+
+def test_pr160_local_pr163_c_main_context_repair_branch_allows_validation(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        PR163_C_MAIN_CONTEXT_REPAIR_BRANCH,
+        ancestry_branches={PR163_C_MAIN_CONTEXT_REPAIR_BRANCH},
+    )
+
+    assert failures == ()
     assert receipts == ()
 
 

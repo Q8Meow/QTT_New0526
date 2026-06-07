@@ -152,6 +152,11 @@ def _pr160_or_repair_ancestry_present(
 
 def _pr160_branch_context_allowed(branch_context: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch_context)
+    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+        normalized,
+        upstream_pr=160,
+    ):
+        return True
     return normalized in {
         c.EXPECTED_BRANCH,
         c.PR159R_DOWNSTREAM_SOURCE_CAPTURE_BRANCH,
@@ -246,6 +251,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         _PR163_C_DOWNSTREAM_BRANCH,
         _PR164_DOWNSTREAM_BRANCH,
     }:
+        return
+    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+        branch,
+        upstream_pr=160,
+    ):
         return
     if ci_branch_context.github_actions_main_push_context_active():
         ancestry_present = _pr160_or_repair_ancestry_present(

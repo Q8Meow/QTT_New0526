@@ -130,6 +130,11 @@ def _pr159r_or_repair_ancestry_present(root: Path, branch_context: str = "") -> 
 
 def _pr159r_branch_context_allowed(branch_context: str) -> bool:
     normalized = ci_branch_context.normalize_branch_context(branch_context)
+    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+        normalized,
+        upstream_pr=159,
+    ):
+        return True
     return (
         normalized
         in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH, _PR162A_DOWNSTREAM_BRANCH, _PR162B_DOWNSTREAM_BRANCH, _PR162C_DOWNSTREAM_BRANCH, _PR162D_DOWNSTREAM_BRANCH, _PR162D_R1_DOWNSTREAM_BRANCH, _PR162R_A_DOWNSTREAM_BRANCH, _PR162D_R2A_DOWNSTREAM_BRANCH, _PR162R_DOWNSTREAM_BRANCH, _PR162R_B_DOWNSTREAM_BRANCH, _PR163_DOWNSTREAM_BRANCH, _PR163_B_DOWNSTREAM_BRANCH, _PR163_C_DOWNSTREAM_BRANCH, _PR164_DOWNSTREAM_BRANCH}
@@ -174,6 +179,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
     if branch in {c.EXPECTED_BRANCH, c.PR159S_DOWNSTREAM_OPEN_INTAKE_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH, _PR162A_DOWNSTREAM_BRANCH, _PR162B_DOWNSTREAM_BRANCH, _PR162C_DOWNSTREAM_BRANCH, _PR162D_DOWNSTREAM_BRANCH, _PR162D_R1_DOWNSTREAM_BRANCH, _PR162R_A_DOWNSTREAM_BRANCH, _PR162D_R2A_DOWNSTREAM_BRANCH, _PR162R_DOWNSTREAM_BRANCH, _PR162R_B_DOWNSTREAM_BRANCH, _PR163_DOWNSTREAM_BRANCH, _PR163_B_DOWNSTREAM_BRANCH, _PR163_C_DOWNSTREAM_BRANCH, _PR164_DOWNSTREAM_BRANCH}:
+        return
+    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+        branch,
+        upstream_pr=159,
+    ):
         return
     ancestry_present = _pr159r_or_repair_ancestry_present(root)
     if ci_branch_context.github_actions_main_push_context_active():

@@ -1,6 +1,7 @@
-from pathlib import Path
+import os
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -10,6 +11,7 @@ from src.qtt.stage1_prediction_markets.pr163_c_pretrade_infrastructure_rejection
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 EXPECTED_BRANCH = "pr163-c-pretrade-infrastructure-rejection-remediation"
+MAIN_BRANCH = "main"
 BRANCH_CONTEXT_ENV = (
     "CI",
     "GITHUB_ACTIONS",
@@ -48,11 +50,40 @@ def _set_github_pull_request_env(monkeypatch, head_ref: str) -> None:
     monkeypatch.setenv("GITHUB_BASE_REF", "main")
 
 
+def _github_main_push_env() -> dict[str, str]:
+    return {
+        "CI": "true",
+        "GITHUB_ACTIONS": "true",
+        "GITHUB_EVENT_NAME": "push",
+        "GITHUB_REF": "refs/heads/main",
+        "GITHUB_REF_NAME": "main",
+    }
+
+
+def _set_github_main_push_env(monkeypatch) -> None:
+    for name, value in _github_main_push_env().items():
+        monkeypatch.setenv(name, value)
+
+
+def _branch_error(branch: str) -> str:
+    return (
+        f"PR163-C build must run on {EXPECTED_BRANCH} or {MAIN_BRANCH}; "
+        f"current branch is {branch}"
+    )
+
+
 def test_pr163_c_repeat_run_determinism():
+    env = os.environ.copy()
+    env.update(_github_main_push_env())
     result = subprocess.run(
-        [sys.executable, "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py", "--verify-idempotent"],
+        [
+            sys.executable,
+            "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+            "--verify-idempotent",
+        ],
         check=True,
         capture_output=True,
+        env=env,
         text=True,
     )
     assert "PR163_C_PRETRADE_INFRA_REPAIR_IDEMPOTENT" in result.stdout
@@ -66,6 +97,23 @@ def test_pr163_c_local_named_branch_passes_branch_context_check(monkeypatch):
     p.ensure_branch(REPO_ROOT)
 
 
+def test_pr163_c_main_branch_passes_post_merge_branch_context_check(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _stub_git_branch(monkeypatch, MAIN_BRANCH)
+
+    assert p.current_branch(REPO_ROOT) == MAIN_BRANCH
+    p.ensure_branch(REPO_ROOT)
+
+
+def test_pr163_c_ci_main_push_detached_head_passes_branch_context_check(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _stub_git_branch(monkeypatch, "")
+    _set_github_main_push_env(monkeypatch)
+
+    assert p.current_branch(REPO_ROOT) == MAIN_BRANCH
+    p.ensure_branch(REPO_ROOT)
+
+
 def test_pr163_c_ci_detached_head_uses_github_head_ref(monkeypatch):
     _clear_branch_context_env(monkeypatch)
     _stub_git_branch(monkeypatch, "")
@@ -73,6 +121,16 @@ def test_pr163_c_ci_detached_head_uses_github_head_ref(monkeypatch):
 
     assert p.current_branch(REPO_ROOT) == EXPECTED_BRANCH
     p.ensure_branch(REPO_ROOT)
+
+
+def test_pr163_c_wrong_local_branch_still_fails(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    _stub_git_branch(monkeypatch, "feature/not-pr163-c")
+
+    with pytest.raises(RuntimeError) as excinfo:
+        p.ensure_branch(REPO_ROOT)
+
+    assert _branch_error("feature/not-pr163-c") in str(excinfo.value)
 
 
 def test_pr163_c_wrong_ci_head_branch_still_fails(monkeypatch):
@@ -83,10 +141,7 @@ def test_pr163_c_wrong_ci_head_branch_still_fails(monkeypatch):
     with pytest.raises(RuntimeError) as excinfo:
         p.ensure_branch(REPO_ROOT)
 
-    assert (
-        f"PR163-C build must run on {EXPECTED_BRANCH}; "
-        "current branch is feature/not-pr163-c"
-    ) in str(excinfo.value)
+    assert _branch_error("feature/not-pr163-c") in str(excinfo.value)
 
 
 def test_pr163_c_empty_branch_outside_ci_still_fails(monkeypatch):
@@ -96,6 +151,4 @@ def test_pr163_c_empty_branch_outside_ci_still_fails(monkeypatch):
     with pytest.raises(RuntimeError) as excinfo:
         p.ensure_branch(REPO_ROOT)
 
-    assert (
-        f"PR163-C build must run on {EXPECTED_BRANCH}; current branch is "
-    ) in str(excinfo.value)
+    assert _branch_error("") in str(excinfo.value)

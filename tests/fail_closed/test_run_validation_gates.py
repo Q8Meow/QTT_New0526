@@ -164,6 +164,9 @@ from tools import run_validation_gates as runner
 
 PR153R_REPAIR_BRANCH = "repair-pr153r-redo-report-determinism"
 PR153S_REPAIR_BRANCH = "repair/pr153s-source-value-capture-closure-classifier"
+PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    ci_branch_context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
+)
 BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -4269,6 +4272,202 @@ def test_pr153s_repair_branch_is_narrow_explicit_downstream_validation_branch():
         ci_branch_context.is_explicit_downstream_repair_changed_path(
             PR153S_REPAIR_BRANCH,
             "docs/master_plan/QTT_MasterPlan_Current.md",
+        )
+        is False
+    )
+
+
+def test_pr163_c_main_context_repair_branch_is_narrow_explicit_downstream_validation_branch():
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=159,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=160,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=161,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=162,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=163,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            after_pr=160,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            after_pr=163,
+            allow_repair=False,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "pr159r_source_locator_value_capture/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "tests/stage1_prediction_markets/"
+            "pr159r_source_locator_value_capture/"
+            "test_pr159r_branch_context_relaxation.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "source_intelligence/pr159s_open_intake/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "tests/stage1_prediction_markets/"
+            "source_intelligence/test_pr159s_branch_context.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "pr160_split_reclassification_route_closure/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/"
+            "pr161a_materialization_bridge/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "tests/stage1_prediction_markets/atomicrows_pr154_value_state/"
+            "test_pr161a_branch_context.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "master_plan_residual_candidate_coverage/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "tests/stage1_prediction_markets/"
+            "master_plan_residual_candidate_coverage/"
+            "test_pr161b_branch_context.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "safe_repo_local_nonlive_dataset_materialization_authority_gate/"
+            "validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "tests/stage1_prediction_markets/"
+            "pr163_c_pretrade_infrastructure_rejection_remediation/"
+            "test_pr163_c_repeat_run_determinism.py",
+        )
+        is True
+    )
+    atomicrows_bundle_path = (
+        "docs/master_plan/atomic_rows/" + "AtomicRows" + ".bundle" + ".jsonl"
+    )
+    atomicrows_sidecar_path = (
+        "docs/master_plan/atomic_rows/"
+        + "AtomicRows"
+        + ".bundle"
+        + "."
+        + "sha256"
+    )
+    forbidden_repair_paths = (
+        "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
+        "tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/PR163_C_RuntimeCashAuthority.report.json",
+        atomicrows_bundle_path,
+        atomicrows_sidecar_path,
+        "docs/master_plan/source_evidence/accepted_source_packet.json",
+        "src/qtt/source_evidence/connector_binding.py",
+        "src/qtt/stage1_prediction_markets/private_state/account_snapshot.py",
+        "src/qtt/stage1_prediction_markets/runtime_cash/cash_state.py",
+        "src/qtt/stage1_prediction_markets/order_live/live_order_router.py",
+        "src/qtt/stage1_prediction_markets/quantum_backend/backend_runtime.py",
+        "src/qtt/stage1_prediction_markets/llm_runtime/model_client.py",
+        "src/qtt/stage1_prediction_markets/freeze_checksum/qku_digest.py",
+        "src/qtt/stage1_prediction_markets/profit_claims/profit_summary.py",
+    )
+    for forbidden_path in forbidden_repair_paths:
+        assert (
+            ci_branch_context.is_explicit_downstream_repair_changed_path(
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                forbidden_path,
+            )
+            is False
+        )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
         )
         is False
     )
