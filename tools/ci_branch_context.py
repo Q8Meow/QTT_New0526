@@ -1135,6 +1135,11 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/stage1_prediction_markets/"
             "master_plan_residual_candidate_coverage/"
             "test_pr161b_branch_context.py",
+            "src/qtt/stage1_prediction_markets/"
+            "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
+            "tests/stage1_prediction_markets/"
+            "pr163_c_pretrade_infrastructure_rejection_remediation/"
+            "test_pr163_c_repeat_run_determinism.py",
         }
     ),
     "repair-pr153r-redo-report-determinism": frozenset(

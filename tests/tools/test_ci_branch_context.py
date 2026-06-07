@@ -2085,16 +2085,51 @@ def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     )
     assert context.is_explicit_downstream_repair_changed_path(
         repair_branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/"
+        "test_pr163_c_repeat_run_determinism.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
         "tools/ci_branch_context.py",
     )
-    assert not context.is_explicit_downstream_repair_changed_path(
-        repair_branch,
+    atomicrows_bundle_path = (
+        "docs/master_plan/atomic_rows/" + "AtomicRows" + ".bundle" + ".jsonl"
+    )
+    atomicrows_sidecar_path = (
+        "docs/master_plan/atomic_rows/"
+        + "AtomicRows"
+        + ".bundle"
+        + "."
+        + "sha256"
+    )
+    forbidden_repair_paths = (
         "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
-    )
-    assert not context.is_explicit_downstream_repair_changed_path(
-        repair_branch,
         "tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/PR163_C_RuntimeCashAuthority.report.json",
+        atomicrows_bundle_path,
+        atomicrows_sidecar_path,
+        "docs/master_plan/source_evidence/accepted_source_packet.json",
+        "src/qtt/source_evidence/connector_binding.py",
+        "src/qtt/stage1_prediction_markets/private_state/account_snapshot.py",
+        "src/qtt/stage1_prediction_markets/runtime_cash/cash_state.py",
+        "src/qtt/stage1_prediction_markets/order_live/live_order_router.py",
+        "src/qtt/stage1_prediction_markets/quantum_backend/backend_runtime.py",
+        "src/qtt/stage1_prediction_markets/llm_runtime/model_client.py",
+        "src/qtt/stage1_prediction_markets/freeze_checksum/qku_digest.py",
+        "src/qtt/stage1_prediction_markets/profit_claims/profit_summary.py",
     )
+    for forbidden_path in forbidden_repair_paths:
+        assert not context.is_explicit_downstream_repair_changed_path(
+            repair_branch,
+            forbidden_path,
+        )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/QTT_MasterPlan_Current.md",
