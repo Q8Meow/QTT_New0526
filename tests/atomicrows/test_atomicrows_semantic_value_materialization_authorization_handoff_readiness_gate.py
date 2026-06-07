@@ -425,7 +425,7 @@ def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeyp
             pr142_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr163-b-paired-replay-paper-concurrent-executor",
+                branch="pr164-review-provenance-qku-canonical-coverage-audit",
                 source="unit-test",
             ),
         )

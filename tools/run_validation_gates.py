@@ -1083,6 +1083,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr164_review_provenance_qku_canonical_coverage_audit.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

@@ -206,6 +206,7 @@ def _branch_context_allowed(root: Path, branch: str) -> bool:
         "pr162r-b-replay-paper-data-binding-completion",
         "pr163-generic-paper-adapter-capture-framework",
         "pr163-b-paired-replay-paper-concurrent-executor",
+        "pr164-review-provenance-qku-canonical-coverage-audit",
     } or (
         normalized == "main" and _ancestry_present(root)
     )
