@@ -1848,6 +1848,104 @@ def test_pr164_explicit_changed_path_allowance_is_narrow(monkeypatch):
         branch,
         "docs/master_plan/QTT_MasterPlan_Current.md",
     )
+
+
+def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=163) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/validators.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/schemas/"
+        "pr163_c_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/test_pr163_c_report_sharding_limits.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr163_c_shards/"
+        "PR163_C_ArtificialInfrastructureRejectionTaxonomy.part_0001_of_0001.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "source_intelligence/pr159s_open_intake/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/"
+        "pr161a_materialization_bridge/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/validators.py",
+    )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/generated/PR163_B_FinalSummary.report.json",

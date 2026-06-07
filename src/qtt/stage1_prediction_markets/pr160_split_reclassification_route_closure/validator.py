@@ -62,6 +62,9 @@ _PR163_DOWNSTREAM_BRANCH = (
     "pr163-generic-paper-adapter-capture-framework"
 )
 _PR163_B_DOWNSTREAM_BRANCH = "pr163-b-paired-replay-paper-concurrent-executor"
+_PR163_C_DOWNSTREAM_BRANCH = (
+    "pr163-c-pretrade-infrastructure-rejection-remediation"
+)
 _PR164_DOWNSTREAM_BRANCH = (
     "pr164-review-provenance-qku-canonical-coverage-audit"
 )
@@ -171,6 +174,7 @@ def _pr160_branch_context_allowed(branch_context: str) -> bool:
         _PR162R_B_DOWNSTREAM_BRANCH,
         _PR163_DOWNSTREAM_BRANCH,
         _PR163_B_DOWNSTREAM_BRANCH,
+        _PR163_C_DOWNSTREAM_BRANCH,
         _PR164_DOWNSTREAM_BRANCH,
         *_PR160_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES,
     }
@@ -239,6 +243,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         _PR162R_B_DOWNSTREAM_BRANCH,
         _PR163_DOWNSTREAM_BRANCH,
         _PR163_B_DOWNSTREAM_BRANCH,
+        _PR163_C_DOWNSTREAM_BRANCH,
         _PR164_DOWNSTREAM_BRANCH,
     }:
         return
