@@ -596,7 +596,7 @@ def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) 
             pr140_report,
             "current_branch_context",
             lambda repo_root: BranchContext(
-                branch="pr164-review-provenance-qku-canonical-coverage-audit",
+                branch="pr163-c-pretrade-infrastructure-rejection-remediation",
                 source="unit-test",
             ),
         )

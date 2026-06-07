@@ -1,0 +1,52 @@
+{
+  "$id": "https://qtt.local/schemas/pr163-c/pr163_c_final_summary.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "pr163_c_allowed_dispositions": [
+    "BLOCKED_BY_EXACT_NON_REPAIRABLE_REASON",
+    "RECLASSIFIED_VALID_REJECTION_NOT_REPAIRABLE",
+    "REPAIRED_PAPER_READY_REPLAY_PENDING",
+    "REPAIRED_PRETRADE_READY_NEEDS_PAPER_RERUN",
+    "REPAIRED_PRETRADE_READY_NEEDS_REPLAY_RERUN",
+    "REPAIRED_REPLAY_PAPER_READY",
+    "REPAIRED_REPLAY_READY_PAPER_PENDING",
+    "REPAIRED_SYNTHETIC_FILL_READY_NEEDS_REPLAY_PAPER_RERUN",
+    "REPAIRED_TCA_READY_NEEDS_PR165_SCORING",
+    "ROUTED_TO_LATER_RUNTIME_OR_LIVE_PR_NOT_REPAIRABLE_HERE",
+    "ROUTED_TO_PR162D_R3_MISSING_VALUE_FILL_NOT_PR163C",
+    "ROUTED_TO_PR162E_PLUGIN_INTAKE_AFTER_EVIDENCE_RANKING",
+    "ROUTED_TO_PR165B_NEGATIVE_MEMORY_AFTER_REPAIR",
+    "ROUTED_TO_PR165_SCORING_AFTER_REPAIR"
+  ],
+  "pr163_c_prohibited_dispositions": [
+    "FORMULA_TEXT_WITHOUT_EXECUTABLE_FUNCTION",
+    "FUTURE_CONSUMER_ONLY",
+    "GENERIC_BLOCKED",
+    "METADATA_ONLY",
+    "PLACEHOLDER_ONLY",
+    "REPAIR_TODO_WITHOUT_AGENT",
+    "REPAIR_TODO_WITHOUT_DOWNSTREAM_PR",
+    "REPAIR_TODO_WITHOUT_EXACT_FIELD",
+    "REPLAY_PAPER_ELIGIBLE_WITHOUT_CONSUMER_ROUTE",
+    "SOURCE_CANDIDATE_WITHOUT_POINT_IN_TIME_TAG",
+    "TEST_VECTOR_MISSING",
+    "UNKNOWN"
+  ],
+  "properties": {
+    "created_by_pr": {
+      "type": "string"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  },
+  "title": "pr163_c_final_summary.schema.json",
+  "type": "object"
+}
