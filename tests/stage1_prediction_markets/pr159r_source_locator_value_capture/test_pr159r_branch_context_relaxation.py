@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tools import ci_branch_context as context
+
 from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture import constants as c
 from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture import validator
 
@@ -9,6 +11,9 @@ from src.qtt.stage1_prediction_markets.pr159r_source_locator_value_capture impor
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
 PR160_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
+PR163_C_MAIN_CONTEXT_REPAIR_BRANCH = (
+    context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
+)
 PR162C_DOWNSTREAM_BRANCH = (
     "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
 )
@@ -226,6 +231,17 @@ def test_pr159r_detached_head_pr160_repair_pr_context_allowed(monkeypatch):
     assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
 
 
+def test_pr159r_detached_head_pr163_c_repair_pr_context_allowed(monkeypatch):
+    _set_pull_request_detached_env(
+        monkeypatch,
+        head_ref=PR163_C_MAIN_CONTEXT_REPAIR_BRANCH,
+    )
+    failures, receipts = _branch_outcome(monkeypatch, "DETACHED_HEAD")
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_DETACHED_HEAD_RELAXATION_BRANCH_ONLY,)
+
+
 def test_pr159r_detached_head_without_head_ref_or_ancestry_fails_closed(
     monkeypatch,
 ):
@@ -242,6 +258,25 @@ def test_pr159r_detached_head_unrelated_head_ref_remains_blocked(monkeypatch):
         monkeypatch,
         "DETACHED_HEAD",
         ancestry_branches={c.EXPECTED_BRANCH, REPAIR_BRANCH},
+    )
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)
+    assert receipts == ()
+
+
+def test_pr159r_detached_head_unrelated_repair_head_ref_remains_blocked(monkeypatch):
+    _set_pull_request_detached_env(
+        monkeypatch,
+        head_ref="repair/pr163-c-unrelated-context",
+    )
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "DETACHED_HEAD",
+        ancestry_branches={
+            c.EXPECTED_BRANCH,
+            REPAIR_BRANCH,
+            PR163_C_MAIN_CONTEXT_REPAIR_BRANCH,
+        },
     )
 
     assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:DETACHED_HEAD",)

@@ -68,7 +68,9 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr164-review-provenance-qku-canonical-coverage-audit": 164,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
+    159: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
     160: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
+    161: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -1003,10 +1005,14 @@ PR163_C_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
         "tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py",
+        "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_branch_context_relaxation.py",
         "src/qtt/stage1_prediction_markets/source_intelligence/pr159s_open_intake/validator.py",
+        "tests/stage1_prediction_markets/source_intelligence/test_pr159s_branch_context.py",
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
         "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "tests/stage1_prediction_markets/atomicrows_pr154_value_state/test_pr161a_branch_context.py",
         "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
+        "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
@@ -1107,10 +1113,28 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/tools/test_ci_branch_context.py",
             "tests/fail_closed/test_run_validation_gates.py",
             "src/qtt/stage1_prediction_markets/"
+            "pr159r_source_locator_value_capture/validator.py",
+            "tests/stage1_prediction_markets/"
+            "pr159r_source_locator_value_capture/"
+            "test_pr159r_branch_context_relaxation.py",
+            "src/qtt/stage1_prediction_markets/"
+            "source_intelligence/pr159s_open_intake/validator.py",
+            "tests/stage1_prediction_markets/"
+            "source_intelligence/test_pr159s_branch_context.py",
+            "src/qtt/stage1_prediction_markets/"
             "pr160_split_reclassification_route_closure/validator.py",
             "tests/stage1_prediction_markets/"
             "pr160_split_reclassification_route_closure/"
             "test_pr160_branch_context_relaxation.py",
+            "src/qtt/stage1_prediction_markets/atomicrows_pr154_value_state/"
+            "pr161a_materialization_bridge/validator.py",
+            "tests/stage1_prediction_markets/atomicrows_pr154_value_state/"
+            "test_pr161a_branch_context.py",
+            "src/qtt/stage1_prediction_markets/"
+            "master_plan_residual_candidate_coverage/validator.py",
+            "tests/stage1_prediction_markets/"
+            "master_plan_residual_candidate_coverage/"
+            "test_pr161b_branch_context.py",
         }
     ),
     "repair-pr153r-redo-report-determinism": frozenset(
