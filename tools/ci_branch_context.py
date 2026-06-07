@@ -23,6 +23,9 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 )
 REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
+PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    "repair/pr163-c-main-branch-context-after-merge"
+)
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
     "repair/pr153s-source-value-capture-closure-classifier": 153,
@@ -61,7 +64,11 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr163-generic-paper-adapter-capture-framework": 163,
     "pr163-b-paired-replay-paper-concurrent-executor": 163,
     "pr163-c-pretrade-infrastructure-rejection-remediation": 163,
+    PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH: 163,
     "pr164-review-provenance-qku-canonical-coverage-audit": 164,
+}
+EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
+    160: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
 }
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
@@ -1094,6 +1101,18 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH: frozenset(
+        {
+            "tools/ci_branch_context.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/fail_closed/test_run_validation_gates.py",
+            "src/qtt/stage1_prediction_markets/"
+            "pr160_split_reclassification_route_closure/validator.py",
+            "tests/stage1_prediction_markets/"
+            "pr160_split_reclassification_route_closure/"
+            "test_pr160_branch_context_relaxation.py",
+        }
+    ),
     "repair-pr153r-redo-report-determinism": frozenset(
         {
             "tools/ci_branch_context.py",
@@ -1693,6 +1712,28 @@ def pr_branch_merged_ancestry_present_with_shallow_refresh(
 
 def _explicit_downstream_repair_branch_pr_number(branch: str) -> int | None:
     return EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS.get(branch)
+
+
+def is_explicit_downstream_repair_branch_context_allowed(
+    branch: str,
+    *,
+    upstream_pr: int,
+) -> bool:
+    normalized = normalize_branch_context(branch)
+    if not is_repair_branch(normalized):
+        return False
+    repair_pr = _explicit_downstream_repair_branch_pr_number(normalized)
+    return (
+        repair_pr is not None
+        and repair_pr > upstream_pr
+        and (
+            normalized
+            in EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES.get(
+                upstream_pr,
+                frozenset(),
+            )
+        )
+    )
 
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:

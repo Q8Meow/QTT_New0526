@@ -164,6 +164,9 @@ from tools import run_validation_gates as runner
 
 PR153R_REPAIR_BRANCH = "repair-pr153r-redo-report-determinism"
 PR153S_REPAIR_BRANCH = "repair/pr153s-source-value-capture-closure-classifier"
+PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    ci_branch_context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
+)
 BRANCH_CONTEXT_ENV = (
     "GITHUB_ACTIONS",
     "GITHUB_EVENT_NAME",
@@ -4269,6 +4272,54 @@ def test_pr153s_repair_branch_is_narrow_explicit_downstream_validation_branch():
         ci_branch_context.is_explicit_downstream_repair_changed_path(
             PR153S_REPAIR_BRANCH,
             "docs/master_plan/QTT_MasterPlan_Current.md",
+        )
+        is False
+    )
+
+
+def test_pr163_c_main_context_repair_branch_is_narrow_explicit_downstream_validation_branch():
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=160,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            upstream_pr=163,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            after_pr=160,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_downstream_or_main_validation_branch(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            after_pr=163,
+            allow_repair=False,
+        )
+        is False
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
+            "pr160_split_reclassification_route_closure/validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
         )
         is False
     )

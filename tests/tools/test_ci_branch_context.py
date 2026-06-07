@@ -1852,8 +1852,46 @@ def test_pr164_explicit_changed_path_allowance_is_narrow(monkeypatch):
 
 def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
+    repair_branch = context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
 
     assert context.is_pr_or_later_branch(branch, minimum_pr=163) is True
+    assert (
+        context.is_explicit_downstream_repair_branch_context_allowed(
+            repair_branch,
+            upstream_pr=160,
+        )
+        is True
+    )
+    assert (
+        context.is_explicit_downstream_repair_branch_context_allowed(
+            repair_branch,
+            upstream_pr=163,
+        )
+        is False
+    )
+    assert (
+        context.is_explicit_downstream_repair_branch_context_allowed(
+            "repair/pr163-c-unrelated-context",
+            upstream_pr=160,
+        )
+        is False
+    )
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            repair_branch,
+            after_pr=160,
+            allow_repair=False,
+        )
+        is True
+    )
+    assert (
+        context.is_downstream_or_main_validation_branch(
+            repair_branch,
+            after_pr=163,
+            allow_repair=False,
+        )
+        is False
+    )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "src/qtt/stage1_prediction_markets/"
@@ -1937,6 +1975,29 @@ def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/"
+        "test_pr160_branch_context_relaxation.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tools/ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py",
     )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
