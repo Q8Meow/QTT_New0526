@@ -6,6 +6,8 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 from typing import Any
 
+from tools import ci_branch_context
+
 from .pretrade_repair_authority_policy import EXPECTED_BRANCH, PR_ID
 
 
@@ -251,7 +253,18 @@ def current_branch(repo_root: Path) -> str:
         capture_output=True,
         text=True,
     )
-    return result.stdout.strip()
+    branch = ci_branch_context.normalize_branch_context(result.stdout)
+    if branch:
+        return branch
+    if ci_branch_context.github_actions_pull_request_detached_context_active(
+        branch_returncode=result.returncode,
+        branch=result.stdout,
+    ):
+        return (
+            ci_branch_context.github_actions_head_ref_branch_context()
+            or ci_branch_context.github_actions_branch_context()
+        )
+    return ""
 
 
 def ensure_branch(repo_root: Path) -> None:
