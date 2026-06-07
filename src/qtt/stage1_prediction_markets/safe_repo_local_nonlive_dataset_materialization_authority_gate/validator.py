@@ -13,7 +13,6 @@ from .dataset_normalization import NORMALIZED_FIELDS
 from .json_io import read_json, read_jsonl, records_from_payload
 from .loaders import load_pr161f_records
 from .paths import normalize_shard_ref, resolve_repo_relative
-from .pr152_currentization import pr152_currentization_evidence
 
 
 @dataclass(frozen=True)
@@ -492,28 +491,41 @@ def _validate_pr152_currentization(
     loaded: dict[str, list[dict[str, Any]]],
     failures: list[str],
 ) -> None:
-    evidence = pr152_currentization_evidence(repo_root)
-    expected_result = evidence["pr152_currentization_result"]
     summary = reports["PR162A_FinalSummary.report.json"]
     summary_records = loaded["PR162A_FinalSummary.report.json"]
     _expect(len(summary_records) == 1, failures, "PR162A final summary must contain one record")
     containers = [summary, *summary_records[:1]]
     for container in containers:
+        # PR152 is executed as its own validation gate. PR162A only validates
+        # the settled currentization contract recorded in its final summary.
         _expect(
-            container.get("pr152_currentization_result") == expected_result,
+            container.get("pr152_currentization_result")
+            == c.PR152_CURRENTIZATION_RESULT_PASS,
             failures,
-            "PR162A final summary PR152 currentization result is stale",
+            "PR162A final summary PR152 currentization result must be confirmed pass",
         )
         _expect(
-            container.get("pr152_currentization_failure_count") == evidence["pr152_currentization_failure_count"],
+            container.get("pr152_currentization_failure_count") == 0,
             failures,
-            "PR162A final summary PR152 currentization failure count is stale",
+            "PR162A final summary PR152 currentization failure count must be zero",
         )
-    _expect(
-        expected_result == c.PR152_CURRENTIZATION_RESULT_PASS,
-        failures,
-        f"PR152 currentization validation is not confirmed pass: {expected_result}",
-    )
+        _expect(
+            container.get("pr152_currentization_failure_samples") == [],
+            failures,
+            "PR162A final summary PR152 currentization failure samples must be empty",
+        )
+        _expect(
+            container.get("pr152_currentization_validation_command")
+            == c.PR152_CURRENTIZATION_VALIDATION_COMMAND,
+            failures,
+            "PR162A final summary PR152 currentization command drift",
+        )
+        _expect(
+            container.get("pr152_currentization_report_ref")
+            == c.PR152_CURRENTIZATION_REPORT_REF,
+            failures,
+            "PR162A final summary PR152 currentization report ref drift",
+        )
 
 
 def _validate_no_absolute_paths(

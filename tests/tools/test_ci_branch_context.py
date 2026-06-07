@@ -2028,6 +2028,12 @@ def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
+        "src/qtt/stage1_prediction_markets/"
+        "safe_repo_local_nonlive_dataset_materialization_authority_gate/"
+        "validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     )
     assert context.is_explicit_downstream_repair_changed_path(
@@ -2082,6 +2088,12 @@ def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
         "tests/stage1_prediction_markets/"
         "master_plan_residual_candidate_coverage/"
         "test_pr161b_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/"
+        "safe_repo_local_nonlive_dataset_materialization_authority_gate/"
+        "validator.py",
     )
     assert context.is_explicit_downstream_repair_changed_path(
         repair_branch,

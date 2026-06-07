@@ -4407,6 +4407,15 @@ def test_pr163_c_main_context_repair_branch_is_narrow_explicit_downstream_valida
         ci_branch_context.is_explicit_downstream_repair_changed_path(
             PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
             "src/qtt/stage1_prediction_markets/"
+            "safe_repo_local_nonlive_dataset_materialization_authority_gate/"
+            "validator.py",
+        )
+        is True
+    )
+    assert (
+        ci_branch_context.is_explicit_downstream_repair_changed_path(
+            PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            "src/qtt/stage1_prediction_markets/"
             "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
         )
         is True

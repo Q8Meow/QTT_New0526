@@ -1013,6 +1013,7 @@ PR163_C_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/stage1_prediction_markets/atomicrows_pr154_value_state/test_pr161a_branch_context.py",
         "src/qtt/stage1_prediction_markets/master_plan_residual_candidate_coverage/validator.py",
         "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage/test_pr161b_branch_context.py",
+        "src/qtt/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate/validator.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
@@ -1135,6 +1136,9 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
             "tests/stage1_prediction_markets/"
             "master_plan_residual_candidate_coverage/"
             "test_pr161b_branch_context.py",
+            "src/qtt/stage1_prediction_markets/"
+            "safe_repo_local_nonlive_dataset_materialization_authority_gate/"
+            "validator.py",
             "src/qtt/stage1_prediction_markets/"
             "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
             "tests/stage1_prediction_markets/"
