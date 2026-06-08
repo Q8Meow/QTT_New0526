@@ -11,9 +11,10 @@ permissions:
   contents: read
 
 jobs:
-  validation:
-    name: Validation Gates
+  fast_preflight:
+    name: Fast Preflight
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
       - name: Check out repository
@@ -24,46 +25,221 @@ jobs:
         with:
           python-version: '3.14'
 
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: &pip_cache
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-3.14-pip-pytest-${{ hashFiles('.github/workflows/qtt_validation.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-python-3.14-pip-pytest-
+
       - name: Install test dependency
-        run: |
+        run: &install_pytest |
           python -m pip install pytest
 
-      - name: Run fast validation preflight
-        run: |
-          python -B tools/validate_grand_global_debug_logical_consistency_audit.py --repo-root .
-          python -B tools/validate_ci_branch_context_matrix.py --repo-root .
-          python -B tools/validate_repair_pr_changed_file_scope.py --repo-root .
-          python -B tools/validate_nested_validator_contracts.py --repo-root .
+      - name: Run fast preflight
+        run: python -B tools/run_validation_gates.py --phase fast-preflight --timing-report .tmp/qtt-validation-timing/fast-preflight.json
 
-      - name: Run canonical validation gates
-        run: python tools/run_validation_gates.py
+  deterministic_validators:
+    name: Deterministic Validators
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
 
-      - name: Compile Python sources
-        run: python -m compileall -q tools tests src
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-      - name: Check diff whitespace
-        run: git diff --check
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
 
-      - name: Verify master plan unchanged by validation
-        run: git diff --exit-code -- docs/master_plan/QTT_MasterPlan_Current.md
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run deterministic validators
+        run: python -B tools/run_validation_gates.py --phase deterministic-validators --timing-report .tmp/qtt-validation-timing/deterministic-validators.json
+
+  pytest_shard_1:
+    name: Pytest Shard 1
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 1
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-1 --timing-report .tmp/qtt-validation-timing/pytest-shard-1.json
+
+  pytest_shard_2:
+    name: Pytest Shard 2
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 2
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-2 --timing-report .tmp/qtt-validation-timing/pytest-shard-2.json
+
+  pytest_shard_3:
+    name: Pytest Shard 3
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 3
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-3 --timing-report .tmp/qtt-validation-timing/pytest-shard-3.json
+
+  pytest_shard_4:
+    name: Pytest Shard 4
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 4
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-4 --timing-report .tmp/qtt-validation-timing/pytest-shard-4.json
+
+  post_validation_checks:
+    name: Post Validation Checks
+    runs-on: ubuntu-latest
+    needs:
+      - deterministic_validators
+      - pytest_shard_1
+      - pytest_shard_2
+      - pytest_shard_3
+      - pytest_shard_4
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
 
       - name: Verify AtomicRows bundle materialized and SHA absent
+        # Enforced by the post-validation runner phase:
+        # test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
+        # test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
+        # expected 4183 AtomicRows rows
+        run: python -B tools/run_validation_gates.py --phase post-validation --timing-report .tmp/qtt-validation-timing/post-validation.json
+
+  validation:
+    name: Validation Gates
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+      - deterministic_validators
+      - pytest_shard_1
+      - pytest_shard_2
+      - pytest_shard_3
+      - pytest_shard_4
+      - post_validation_checks
+    if: ${{ always() }}
+    timeout-minutes: 90
+
+    steps:
+      - name: Fail closed unless every phase succeeded
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
         run: |
-          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
-          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
           python - <<'PY'
           import json
-          from pathlib import Path
+          import os
+          import sys
 
-          p = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl")
-          data = p.read_bytes()
-          assert data, "AtomicRows bundle is empty"
-          assert not data.startswith(b"\xef\xbb\xbf"), "AtomicRows bundle has a UTF-8 BOM"
-          assert b"\r" not in data, "AtomicRows bundle contains CR or CRLF line endings"
-          assert data.endswith(b"\n"), "AtomicRows bundle must end with LF"
-          lines = data.decode("utf-8").splitlines()
-          assert len(lines) == 4183, f"expected 4183 AtomicRows rows, found {len(lines)}"
-          assert all(line.strip() for line in lines), "AtomicRows bundle contains blank rows"
-          for line_number, line in enumerate(lines, start=1):
-              json.loads(line)
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          failures = []
+          for job_id, data in sorted(needs.items()):
+              result = data.get("result")
+              print(f"{job_id}: {result}")
+              if result != "success":
+                  failures.append(f"{job_id}={result}")
+          if failures:
+              print(
+                  "Validation phase failure(s): " + ", ".join(failures),
+                  file=sys.stderr,
+              )
+              raise SystemExit(1)
+          print("All validation phase jobs succeeded.")
           PY

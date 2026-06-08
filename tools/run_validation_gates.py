@@ -1,16 +1,108 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
+from dataclasses import dataclass
+from datetime import UTC, datetime
 import pathlib
 import subprocess
 import sys
 import tempfile
 import inspect
 import json
+import time
 from typing import Sequence
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
+PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
+TIMING_SCHEMA_VERSION = 1
+SLOWEST_ENTRY_LIMIT = 20
+PYTEST_DURATIONS_ARG = "--durations=50"
+FAST_PREFLIGHT_PHASE = "fast-preflight"
+DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
+PYTEST_SHARD_PHASES = (
+    "pytest-shard-1",
+    "pytest-shard-2",
+    "pytest-shard-3",
+    "pytest-shard-4",
+)
+POST_VALIDATION_PHASE = "post-validation"
+ALL_PHASE = "all"
+ORDERED_PHASES = (
+    FAST_PREFLIGHT_PHASE,
+    DETERMINISTIC_VALIDATORS_PHASE,
+    *PYTEST_SHARD_PHASES,
+    POST_VALIDATION_PHASE,
+)
+VALIDATION_PHASES = (*ORDERED_PHASES, ALL_PHASE)
+FAST_PREFLIGHT_SCRIPT_NAMES = frozenset(
+    {
+        "validate_grand_global_debug_logical_consistency_audit.py",
+        "validate_ci_branch_context_matrix.py",
+        "validate_repair_pr_changed_file_scope.py",
+        "validate_nested_validator_contracts.py",
+    }
+)
+ISOLATED_SOURCE_EVIDENCE_PYTEST = (
+    "tests/source_evidence/"
+    "test_controlled_official_source_capture_candidate_packets.py"
+)
+
+
+@dataclass(frozen=True)
+class PytestShardCommand:
+    paths: tuple[str, ...]
+    ignores: tuple[str, ...] = ()
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class TimingEntry:
+    phase: str
+    command_index: int
+    command: list[str]
+    elapsed_seconds: float
+    returncode: int
+
+
+PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
+    "pytest-shard-1": (
+        PytestShardCommand(
+            paths=("tests/tools", "tests/fail_closed"),
+            reason="CI tooling and fail-closed runner policy tests",
+        ),
+    ),
+    "pytest-shard-2": (
+        PytestShardCommand(
+            paths=("tests/stage1_prediction_markets",),
+            reason="Stage 1 prediction-market tests",
+        ),
+    ),
+    "pytest-shard-3": (
+        PytestShardCommand(
+            paths=("tests/atomicrows",),
+            reason="AtomicRows tests",
+        ),
+    ),
+    "pytest-shard-4": (
+        PytestShardCommand(
+            paths=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
+            reason="Preserves the existing isolated source-evidence pytest invocation",
+        ),
+        PytestShardCommand(
+            paths=("tests",),
+            ignores=(
+                "tests/tools",
+                "tests/fail_closed",
+                "tests/stage1_prediction_markets",
+                "tests/atomicrows",
+                ISOLATED_SOURCE_EVIDENCE_PYTEST,
+            ),
+            reason="Remaining tests after the explicit stable shard groups",
+        ),
+    ),
+}
 PRE_VALIDATION_FINALIZATION_GUIDANCE = (
     {
         "command_id": "pr152_currentize_after_generated_artifacts",
@@ -385,6 +477,27 @@ PR138_NON_MUTATING_VALIDATION_SCRIPT = (
     "for receipt in outcome.receipts:\n"
     "    print(receipt)\n"
 )
+ATOMICROWS_BUNDLE_CHECK_SCRIPT = (
+    "import json\n"
+    "from pathlib import Path\n"
+    "\n"
+    "bundle = Path('docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl')\n"
+    "sidecar = Path('docs/master_plan/atomic_rows') / ('AtomicRows' + '.bundle' + '.' + 'sha256')\n"
+    "if not bundle.is_file():\n"
+    "    raise SystemExit('AtomicRows bundle is missing')\n"
+    "if sidecar.exists():\n"
+    "    raise SystemExit('AtomicRows bundle SHA sidecar must be absent')\n"
+    "data = bundle.read_bytes()\n"
+    "assert data, 'AtomicRows bundle is empty'\n"
+    "assert not data.startswith(b'\\xef\\xbb\\xbf'), 'AtomicRows bundle has a UTF-8 BOM'\n"
+    "assert b'\\r' not in data, 'AtomicRows bundle contains CR or CRLF line endings'\n"
+    "assert data.endswith(b'\\n'), 'AtomicRows bundle must end with LF'\n"
+    "lines = data.decode('utf-8').splitlines()\n"
+    "assert len(lines) == 4183, f'expected 4183 AtomicRows rows, found {len(lines)}'\n"
+    "assert all(line.strip() for line in lines), 'AtomicRows bundle contains blank rows'\n"
+    "for line_number, line in enumerate(lines, start=1):\n"
+    "    json.loads(line)\n"
+)
 
 
 def _path(*parts: str) -> str:
@@ -408,6 +521,99 @@ def _is_final_pytest_command(command: Sequence[str]) -> bool:
 
 def build_pre_validation_finalization_guidance() -> list[dict[str, object]]:
     return [dict(record) for record in PRE_VALIDATION_FINALIZATION_GUIDANCE]
+
+
+def _command_script_name(command: Sequence[str]) -> str:
+    if len(command) <= 1:
+        return ""
+    return pathlib.PurePath(command[1]).name
+
+
+def _command_uses_pytest_helper(command: Sequence[str]) -> bool:
+    return _command_script_name(command) == PYTEST_FRESH_BASETEMP_SCRIPT
+
+
+def _normal_repo_path_text(value: pathlib.Path | str) -> str:
+    return str(value).replace("\\", "/")
+
+
+def _is_pytest_file(path: pathlib.Path) -> bool:
+    return path.is_file() and path.suffix == ".py" and path.name.startswith("test_")
+
+
+def discover_pytest_files(repo_root: pathlib.Path | str | None = None) -> tuple[str, ...]:
+    root = _repo_root() if repo_root is None else pathlib.Path(repo_root)
+    tests_root = root / "tests"
+    if not tests_root.exists():
+        return ()
+    return tuple(
+        sorted(
+            _normal_repo_path_text(path.relative_to(root))
+            for path in tests_root.rglob("*.py")
+            if _is_pytest_file(path)
+        )
+    )
+
+
+def _path_contains(parent: str, child: str) -> bool:
+    normalized_parent = parent.rstrip("/")
+    normalized_child = child.rstrip("/")
+    return normalized_child == normalized_parent or normalized_child.startswith(
+        f"{normalized_parent}/"
+    )
+
+
+def _pytest_files_for_command(
+    command: PytestShardCommand,
+    repo_root: pathlib.Path | str | None = None,
+) -> tuple[str, ...]:
+    root = _repo_root() if repo_root is None else pathlib.Path(repo_root)
+    all_files = discover_pytest_files(root)
+    selected: set[str] = set()
+    for path_text in command.paths:
+        normalized = _normal_repo_path_text(path_text)
+        path = root / normalized
+        if path.is_file():
+            selected.add(normalized)
+            continue
+        selected.update(
+            test_file for test_file in all_files if _path_contains(normalized, test_file)
+        )
+    for ignore_text in command.ignores:
+        normalized_ignore = _normal_repo_path_text(ignore_text)
+        selected = {
+            test_file
+            for test_file in selected
+            if not _path_contains(normalized_ignore, test_file)
+        }
+    return tuple(sorted(selected))
+
+
+def pytest_shard_manifest(
+    repo_root: pathlib.Path | str | None = None,
+) -> dict[str, tuple[str, ...]]:
+    manifest: dict[str, list[str]] = {phase: [] for phase in PYTEST_SHARD_PHASES}
+    for phase in PYTEST_SHARD_PHASES:
+        for command in PYTEST_SHARD_COMMANDS[phase]:
+            manifest[phase].extend(_pytest_files_for_command(command, repo_root))
+    return {phase: tuple(sorted(paths)) for phase, paths in manifest.items()}
+
+
+def pytest_shard_membership(
+    repo_root: pathlib.Path | str | None = None,
+) -> dict[str, str]:
+    membership: dict[str, str] = {}
+    duplicates: list[str] = []
+    for phase, paths in pytest_shard_manifest(repo_root).items():
+        for path in paths:
+            if path in membership:
+                duplicates.append(path)
+                continue
+            membership[path] = phase
+    if duplicates:
+        duplicate_text = ", ".join(sorted(duplicates))
+        raise ValueError(f"pytest shard duplicate test files: {duplicate_text}")
+    return membership
 
 
 def _is_pr142_handoff_readiness_validator_command(command: Sequence[str]) -> bool:
@@ -2577,6 +2783,7 @@ def build_validation_commands(
                 "test_controlled_official_source_capture_candidate_packets.py",
             ),
             "-q",
+            PYTEST_DURATIONS_ARG,
             "--basetemp",
             str(pytest_basetemp),
         ],
@@ -2591,6 +2798,7 @@ def build_validation_commands(
                 "source_evidence",
                 "test_controlled_official_source_capture_candidate_packets.py",
             ),
+            PYTEST_DURATIONS_ARG,
             "--basetemp",
             str(pytest_basetemp),
         ],
@@ -2601,13 +2809,266 @@ def build_validation_commands(
     ]
 
 
+def build_fast_preflight_commands() -> list[list[str]]:
+    return [
+        [
+            sys.executable,
+            _path("tools", "validate_grand_global_debug_logical_consistency_audit.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_ci_branch_context_matrix.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_repair_pr_changed_file_scope.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_nested_validator_contracts.py"),
+            "--repo-root",
+            ".",
+        ],
+    ]
+
+
+def build_deterministic_validator_commands(
+    validation_dir: pathlib.Path | str | None = None,
+    pytest_basetemp: pathlib.Path | str | None = None,
+) -> list[list[str]]:
+    return [
+        command
+        for command in build_validation_commands(validation_dir, pytest_basetemp)
+        if not _command_uses_pytest_helper(command)
+        and _command_script_name(command) not in FAST_PREFLIGHT_SCRIPT_NAMES
+    ]
+
+
+def _build_pytest_command(
+    command: PytestShardCommand,
+    pytest_basetemp: pathlib.Path,
+) -> list[str]:
+    built = [
+        sys.executable,
+        _path("tools", PYTEST_FRESH_BASETEMP_SCRIPT),
+        *command.paths,
+        "-q",
+    ]
+    for ignored in command.ignores:
+        built.extend(["--ignore", ignored])
+    built.extend([PYTEST_DURATIONS_ARG, "--basetemp", str(pytest_basetemp)])
+    return built
+
+
+def build_pytest_shard_commands(
+    phase: str,
+    pytest_basetemp: pathlib.Path | str | None = None,
+) -> list[list[str]]:
+    if phase not in PYTEST_SHARD_COMMANDS:
+        raise ValueError(f"unknown pytest shard phase: {phase}")
+    basetemp = (
+        _default_validation_dir() / "run_validation_gates_pytest"
+        if pytest_basetemp is None
+        else pathlib.Path(pytest_basetemp)
+    )
+    return [_build_pytest_command(command, basetemp) for command in PYTEST_SHARD_COMMANDS[phase]]
+
+
+def build_post_validation_commands() -> list[list[str]]:
+    return [
+        [sys.executable, "-m", "compileall", "-q", "tools", "tests", "src"],
+        ["git", "diff", "--check"],
+        [
+            "git",
+            "diff",
+            "--exit-code",
+            "--",
+            _path("docs", "master_plan", "QTT_MasterPlan_Current.md"),
+        ],
+        [sys.executable, "-c", ATOMICROWS_BUNDLE_CHECK_SCRIPT],
+    ]
+
+
+def build_phase_commands(
+    phase: str = ALL_PHASE,
+    validation_dir: pathlib.Path | str | None = None,
+    pytest_basetemp: pathlib.Path | str | None = None,
+) -> list[list[str]]:
+    if phase == ALL_PHASE:
+        commands: list[list[str]] = []
+        for ordered_phase in ORDERED_PHASES:
+            commands.extend(
+                build_phase_commands(
+                    ordered_phase,
+                    validation_dir=validation_dir,
+                    pytest_basetemp=pytest_basetemp,
+                )
+            )
+        return commands
+    if phase == FAST_PREFLIGHT_PHASE:
+        return build_fast_preflight_commands()
+    if phase == DETERMINISTIC_VALIDATORS_PHASE:
+        return build_deterministic_validator_commands(validation_dir, pytest_basetemp)
+    if phase in PYTEST_SHARD_PHASES:
+        return build_pytest_shard_commands(phase, pytest_basetemp)
+    if phase == POST_VALIDATION_PHASE:
+        return build_post_validation_commands()
+    raise ValueError(f"unknown validation phase: {phase}")
+
+
+def build_phase_manifest(
+    validation_dir: pathlib.Path | str | None = None,
+    pytest_basetemp: pathlib.Path | str | None = None,
+) -> list[dict[str, object]]:
+    manifest: list[dict[str, object]] = []
+    for phase in ORDERED_PHASES:
+        commands = build_phase_commands(
+            phase,
+            validation_dir=validation_dir,
+            pytest_basetemp=pytest_basetemp,
+        )
+        manifest.append(
+            {
+                "phase": phase,
+                "command_count": len(commands),
+                "commands": [list(command) for command in commands],
+            }
+        )
+    return manifest
+
+
+def _timing_entry_payload(entry: TimingEntry) -> dict[str, object]:
+    return {
+        "phase": entry.phase,
+        "command_index": entry.command_index,
+        "command": entry.command,
+        "elapsed_seconds": entry.elapsed_seconds,
+        "returncode": entry.returncode,
+    }
+
+
+def _slowest_timing_entries(entries: Sequence[TimingEntry]) -> list[TimingEntry]:
+    return sorted(entries, key=lambda entry: entry.elapsed_seconds, reverse=True)[
+        :SLOWEST_ENTRY_LIMIT
+    ]
+
+
+def _print_timing_summary(
+    entries: Sequence[TimingEntry],
+    *,
+    phase: str,
+    total_elapsed_seconds: float,
+) -> None:
+    print(
+        f"QTT_VALIDATION_TIMING_TOTAL phase={phase} "
+        f"elapsed_seconds={total_elapsed_seconds:.3f}",
+        flush=True,
+    )
+    print(
+        f"QTT_VALIDATION_TIMING_SLOWEST_TOP_{SLOWEST_ENTRY_LIMIT} phase={phase}",
+        flush=True,
+    )
+    for rank, entry in enumerate(_slowest_timing_entries(entries), start=1):
+        print(
+            "QTT_VALIDATION_TIMING_SLOWEST "
+            f"rank={rank} phase={entry.phase} "
+            f"command_index={entry.command_index} "
+            f"elapsed_seconds={entry.elapsed_seconds:.3f} "
+            f"returncode={entry.returncode} "
+            f"command={subprocess.list2cmdline(entry.command)}",
+            flush=True,
+        )
+
+
+def _timing_report_path_allowed(
+    report_path: pathlib.Path,
+    *,
+    repo_root: pathlib.Path | None,
+) -> bool:
+    normalized = _normal_path_text(report_path)
+    if repo_root is not None:
+        try:
+            normalized = _normal_path_text(report_path.resolve().relative_to(repo_root))
+        except ValueError:
+            normalized = _normal_path_text(report_path)
+    return not any(
+        normalized.startswith(prefix) for prefix in TRACKED_GENERATED_PATH_PREFIXES
+    )
+
+
+def _write_timing_report(
+    report_path: pathlib.Path,
+    *,
+    phase: str,
+    entries: Sequence[TimingEntry],
+    total_elapsed_seconds: float,
+    repo_root: pathlib.Path | None,
+) -> None:
+    if not _timing_report_path_allowed(report_path, repo_root=repo_root):
+        raise ValueError(
+            "timing report path is inside a tracked generated authority path: "
+            f"{_normal_path_text(report_path)}"
+        )
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": TIMING_SCHEMA_VERSION,
+        "generated_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "phase": phase,
+        "command_entries": [_timing_entry_payload(entry) for entry in entries],
+        "total_elapsed_seconds": total_elapsed_seconds,
+        "slowest_entries": [
+            _timing_entry_payload(entry) for entry in _slowest_timing_entries(entries)
+        ],
+    }
+    report_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def run_commands(
     commands: Sequence[Sequence[str]],
     repo_root: pathlib.Path | None = None,
+    *,
+    phase: str = ALL_PHASE,
+    timing_report_path: pathlib.Path | None = None,
 ) -> int:
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
+    timing_entries: list[TimingEntry] = []
+    total_started = time.perf_counter()
+
+    def finish(returncode: int) -> int:
+        total_elapsed_seconds = time.perf_counter() - total_started
+        _print_timing_summary(
+            timing_entries,
+            phase=phase,
+            total_elapsed_seconds=total_elapsed_seconds,
+        )
+        if timing_report_path is not None:
+            try:
+                _write_timing_report(
+                    timing_report_path,
+                    phase=phase,
+                    entries=timing_entries,
+                    total_elapsed_seconds=total_elapsed_seconds,
+                    repo_root=cleanup_repo_root,
+                )
+            except ValueError as exc:
+                print(str(exc), file=sys.stderr, flush=True)
+                return 2
+        if returncode == 0:
+            print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={phase}", flush=True)
+            print(SUCCESS_MARKER, flush=True)
+        return returncode
+
     initially_modified_paths: set[str] = set()
     initially_modified_snapshots: dict[str, bytes | None] = {}
     if cleanup_repo_root is not None:
@@ -2629,7 +3090,7 @@ def run_commands(
             initially_modified_snapshots,
         )
 
-    for command in commands:
+    for command_index, command in enumerate(commands, start=1):
         command_list = list(command)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
@@ -2640,9 +3101,27 @@ def run_commands(
                 restore_gate_side_effects()
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
-                return 1
+                return finish(1)
         print(subprocess.list2cmdline(command_list), flush=True)
+        command_started = time.perf_counter()
         completed = subprocess.run(command_list)
+        elapsed_seconds = time.perf_counter() - command_started
+        timing_entries.append(
+            TimingEntry(
+                phase=phase,
+                command_index=command_index,
+                command=command_list,
+                elapsed_seconds=elapsed_seconds,
+                returncode=completed.returncode,
+            )
+        )
+        print(
+            "QTT_VALIDATION_TIMING_COMMAND "
+            f"phase={phase} command_index={command_index} "
+            f"elapsed_seconds={elapsed_seconds:.3f} "
+            f"returncode={completed.returncode}",
+            flush=True,
+        )
         if completed.returncode != 0:
             if cleanup_repo_root is not None and _is_final_pytest_command(
                 command_list
@@ -2651,13 +3130,13 @@ def run_commands(
                     restore_gate_side_effects()
                 except RuntimeError as exc:
                     print(str(exc), file=sys.stderr, flush=True)
-            return completed.returncode
+            return finish(completed.returncode)
         if cleanup_repo_root is not None and _is_final_pytest_command(command_list):
             try:
                 restore_gate_side_effects()
             except RuntimeError as exc:
                 print(str(exc), file=sys.stderr, flush=True)
-                return 1
+                return finish(1)
         if cleanup_repo_root is not None:
             currentness_failures = _routed_generated_output_currentness_failures(
                 command_list,
@@ -2666,10 +3145,9 @@ def run_commands(
             if currentness_failures:
                 for failure in currentness_failures:
                     print(failure, file=sys.stderr, flush=True)
-                return 1
+                return finish(1)
 
-    print(SUCCESS_MARKER, flush=True)
-    return 0
+    return finish(0)
 
 
 def _run_commands_accepts_repo_root() -> bool:
@@ -2686,11 +3164,33 @@ def _run_commands_accepts_repo_root() -> bool:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = sys.argv[1:] if argv is None else list(argv)
-    if args:
-        print("run_validation_gates.py does not accept arguments", file=sys.stderr)
-        return 2
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--phase",
+        choices=VALIDATION_PHASES,
+        default=ALL_PHASE,
+        help="Validation phase to run; default runs the full split validation plan.",
+    )
+    parser.add_argument(
+        "--timing-report",
+        type=pathlib.Path,
+        help="Optional untracked JSON timing report path.",
+    )
+    args = parser.parse_args(sys.argv[1:] if argv is None else list(argv))
     repo_root = _repo_root()
+    timing_report_path = args.timing_report
+    if timing_report_path is not None and not timing_report_path.is_absolute():
+        timing_report_path = repo_root / timing_report_path
+    if timing_report_path is not None and not _timing_report_path_allowed(
+        timing_report_path,
+        repo_root=repo_root,
+    ):
+        print(
+            "timing report path is inside a tracked generated authority path: "
+            f"{_normal_path_text(timing_report_path)}",
+            file=sys.stderr,
+        )
+        return 2
     tmp_parent = repo_root / ".tmp"
     tmp_parent.mkdir(parents=True, exist_ok=True)
     global _RUN_COMMANDS_CLEANUP_REPO_ROOT
@@ -2702,12 +3202,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 prefix="run_validation_gates_pytest_",
                 dir=tmp_parent,
             ) as pytest_temp_dir:
-                commands = build_validation_commands(
+                commands = build_phase_commands(
+                    args.phase,
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
                 )
                 if _run_commands_accepts_repo_root():
-                    return run_commands(commands, repo_root=repo_root)
+                    return run_commands(
+                        commands,
+                        repo_root=repo_root,
+                        phase=args.phase,
+                        timing_report_path=timing_report_path,
+                    )
                 return run_commands(commands)
     finally:
         _RUN_COMMANDS_CLEANUP_REPO_ROOT = previous_cleanup_repo_root

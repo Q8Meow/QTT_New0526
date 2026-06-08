@@ -162,6 +162,7 @@ from tools import (
 from tools import run_validation_gates as runner
 
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 PR153R_REPAIR_BRANCH = "repair-pr153r-redo-report-determinism"
 PR153S_REPAIR_BRANCH = "repair/pr153s-source-value-capture-closure-classifier"
 PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
@@ -2069,6 +2070,7 @@ def _expected_commands(
                 / "test_controlled_official_source_capture_candidate_packets.py"
             ),
             "-q",
+            runner.PYTEST_DURATIONS_ARG,
             "--basetemp",
             str(pytest_basetemp),
         ],
@@ -2083,6 +2085,7 @@ def _expected_commands(
                 / "source_evidence"
                 / "test_controlled_official_source_capture_candidate_packets.py"
             ),
+            runner.PYTEST_DURATIONS_ARG,
             "--basetemp",
             str(pytest_basetemp),
         ],
@@ -2094,8 +2097,19 @@ def _expected_commands(
 
 
 def _pytest_basetemp_from_commands(commands: list[list[str]]) -> Path:
-    pytest_command = commands[-1]
+    pytest_command = next(
+        command for command in reversed(commands) if "--basetemp" in command
+    )
     return Path(pytest_command[pytest_command.index("--basetemp") + 1])
+
+
+def _validation_dir_from_commands(commands: list[list[str]]) -> Path:
+    ingest_command = next(
+        command
+        for command in commands
+        if len(command) > 1 and Path(command[1]).name == "master_plan_ingest.py"
+    )
+    return Path(ingest_command[ingest_command.index("--section-manifest-out") + 1]).parent
 
 
 def test_runner_builds_expected_command_sequence(monkeypatch):
@@ -2103,6 +2117,105 @@ def test_runner_builds_expected_command_sequence(monkeypatch):
     monkeypatch.setattr(runner.sys, "executable", python_executable)
 
     assert runner.build_validation_commands() == _expected_commands(python_executable)
+
+
+def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+    validation_dir = Path("validation-dir")
+    pytest_basetemp = Path("pytest-basetemp")
+
+    manifest = runner.build_phase_manifest(validation_dir, pytest_basetemp)
+    manifest_commands = [
+        command
+        for phase_record in manifest
+        for command in phase_record["commands"]
+    ]
+
+    assert [record["phase"] for record in manifest] == list(runner.ORDERED_PHASES)
+    assert manifest_commands == runner.build_phase_commands(
+        runner.ALL_PHASE,
+        validation_dir,
+        pytest_basetemp,
+    )
+
+
+def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
+    python_executable = r"C:\repo\.venv\Scripts\python.exe"
+    monkeypatch.setattr(runner.sys, "executable", python_executable)
+    validation_dir = Path("validation-dir")
+    pytest_basetemp = Path("pytest-basetemp")
+
+    canonical_commands = runner.build_validation_commands(validation_dir, pytest_basetemp)
+    canonical_non_pytest = [
+        command
+        for command in canonical_commands
+        if not runner._command_uses_pytest_helper(command)
+    ]
+    phase_non_pytest = (
+        runner.build_phase_commands(runner.FAST_PREFLIGHT_PHASE, validation_dir, pytest_basetemp)
+        + runner.build_phase_commands(
+            runner.DETERMINISTIC_VALIDATORS_PHASE,
+            validation_dir,
+            pytest_basetemp,
+        )
+    )
+
+    for command in canonical_non_pytest:
+        assert phase_non_pytest.count(command) == 1
+    assert not any(
+        runner._command_uses_pytest_helper(command) for command in phase_non_pytest
+    )
+
+
+def test_runner_deterministic_phase_moves_preflight_validator_out_of_long_phase():
+    validation_dir = Path("validation-dir")
+    pytest_basetemp = Path("pytest-basetemp")
+
+    fast_names = [
+        Path(command[1]).name
+        for command in runner.build_phase_commands(
+            runner.FAST_PREFLIGHT_PHASE,
+            validation_dir,
+            pytest_basetemp,
+        )
+    ]
+    deterministic_names = [
+        Path(command[1]).name
+        for command in runner.build_phase_commands(
+            runner.DETERMINISTIC_VALIDATORS_PHASE,
+            validation_dir,
+            pytest_basetemp,
+        )
+    ]
+
+    assert set(fast_names) == runner.FAST_PREFLIGHT_SCRIPT_NAMES
+    assert "validate_grand_global_debug_logical_consistency_audit.py" in fast_names
+    assert "validate_grand_global_debug_logical_consistency_audit.py" not in deterministic_names
+
+
+def test_runner_pytest_shards_cover_each_test_file_once():
+    all_tests = set(runner.discover_pytest_files(REPO_ROOT))
+    shard_manifest = runner.pytest_shard_manifest(REPO_ROOT)
+    flattened = [
+        path
+        for shard_paths in shard_manifest.values()
+        for path in shard_paths
+    ]
+
+    assert all_tests
+    assert set(flattened) == all_tests
+    assert len(flattened) == len(set(flattened))
+    assert set(shard_manifest) == set(runner.PYTEST_SHARD_PHASES)
+    assert (
+        runner.ISOLATED_SOURCE_EVIDENCE_PYTEST
+        in shard_manifest["pytest-shard-4"]
+    )
+    assert "tests/tools/test_ci_branch_context.py" in shard_manifest["pytest-shard-1"]
+    assert (
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
+        in shard_manifest["pytest-shard-4"]
+    )
 
 
 def test_runner_commands_use_sys_executable(monkeypatch):
@@ -3892,6 +4005,7 @@ def test_runner_invokes_pytest_through_fresh_basetemp_helper(monkeypatch):
             / "source_evidence"
             / "test_controlled_official_source_capture_candidate_packets.py"
         ),
+        runner.PYTEST_DURATIONS_ARG,
         "--basetemp",
         str(pytest_basetemp),
     ]
@@ -8992,6 +9106,101 @@ def test_runner_does_not_emit_success_marker_if_selection_universe_registry_fail
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
+def test_runner_timing_summary_preserves_success_return_code(monkeypatch, capsys):
+    class Completed:
+        returncode = 0
+
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands([["python", "ok.py"]], phase="timing-test")
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert seen == [["python", "ok.py"]]
+    assert "QTT_VALIDATION_TIMING_COMMAND phase=timing-test" in output
+    assert "QTT_VALIDATION_TIMING_TOTAL phase=timing-test" in output
+    assert output.splitlines()[-1] == runner.SUCCESS_MARKER
+
+
+def test_runner_timing_summary_preserves_failure_return_code(monkeypatch, capsys):
+    class Completed:
+        returncode = 7
+
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        return Completed()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands([["python", "fails.py"]], phase="timing-test")
+
+    output = capsys.readouterr().out
+    assert exit_code == 7
+    assert "QTT_VALIDATION_TIMING_TOTAL phase=timing-test" in output
+    assert runner.SUCCESS_MARKER not in output
+
+
+def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
+    class Completed:
+        returncode = 0
+
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        return Completed()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    report_path = tmp_path / "timing" / "report.json"
+
+    assert runner.run_commands([["python", "ok.py"]], phase="no-report") == 0
+    assert not report_path.exists()
+
+    assert (
+        runner.run_commands(
+            [["python", "ok.py"]],
+            phase="with-report",
+            timing_report_path=report_path,
+        )
+        == 0
+    )
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == runner.TIMING_SCHEMA_VERSION
+    assert payload["phase"] == "with-report"
+    assert payload["command_entries"][0]["command"] == ["python", "ok.py"]
+    assert payload["slowest_entries"]
+    assert payload["total_elapsed_seconds"] >= 0
+
+
+def test_runner_rejects_tracked_generated_timing_report_path(monkeypatch):
+    class Completed:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    def fake_run(command: list[str], **kwargs) -> Completed:
+        return Completed()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(
+        [["python", "ok.py"]],
+        repo_root=REPO_ROOT,
+        phase="bad-report",
+        timing_report_path=(
+            REPO_ROOT
+            / "docs"
+            / "master_plan"
+            / "generated"
+            / "timing.json"
+        ),
+    )
+
+    assert exit_code == 2
+
+
 def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     class Completed:
         def __init__(self, stdout: str = "", stderr: str = "") -> None:
@@ -9017,10 +9226,19 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     exit_code = runner.main([])
 
     assert exit_code == 0
-    validation_dir = Path(seen[0][5]).parent
+    validation_dir = _validation_dir_from_commands(seen)
     pytest_basetemp = _pytest_basetemp_from_commands(seen)
     assert pytest_basetemp.name.startswith("run_validation_gates_pytest_")
-    assert seen == runner.build_validation_commands(validation_dir, pytest_basetemp)
+    expected = [
+        command
+        for command in runner.build_phase_commands(
+            runner.ALL_PHASE,
+            validation_dir,
+            pytest_basetemp,
+        )
+        if command[0] != "git"
+    ]
+    assert seen == expected
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
 
 
@@ -9078,6 +9296,7 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
     def fake_run_commands(
         commands: list[list[str]],
         repo_root: Path | None = None,
+        **kwargs,
     ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert pytest_basetemp.parent == tmp_parent
@@ -9112,6 +9331,7 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
     def fake_run_commands(
         commands: list[list[str]],
         repo_root: Path | None = None,
+        **kwargs,
     ) -> int:
         pytest_basetemp = _pytest_basetemp_from_commands(commands)
         assert pytest_basetemp != stale_basetemp
@@ -9137,26 +9357,108 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
         shutil.rmtree(repo_root, ignore_errors=True)
 
 
-def test_github_workflow_runs_fast_preflight_before_full_validation():
-    workflow = (
+def _workflow_text() -> str:
+    return (
         Path(__file__).resolve().parents[2]
         / ".github/workflows/qtt_validation.yml"
     ).read_text(encoding="utf-8")
-    preflight_index = workflow.index("Run fast validation preflight")
-    aggregate_index = workflow.index("Run canonical validation gates")
-    pr152_index = workflow.index(
-        "tools/validate_grand_global_debug_logical_consistency_audit.py --repo-root ."
+
+
+def _workflow_job_block(workflow: str, job_id: str) -> str:
+    marker = f"  {job_id}:\n"
+    start = workflow.index(marker)
+    next_job = workflow.find("\n  ", start + len(marker))
+    while next_job != -1 and workflow[next_job + 3 : next_job + 5] == "  ":
+        next_job = workflow.find("\n  ", next_job + 1)
+    if next_job == -1:
+        return workflow[start:]
+    return workflow[start:next_job]
+
+
+def test_github_workflow_preserves_required_validation_check_identity():
+    workflow = _workflow_text()
+    validation_block = _workflow_job_block(workflow, "validation")
+
+    assert workflow.startswith("name: QTT Validation\n")
+    assert "  validation:\n" in workflow
+    assert "    name: Validation Gates\n" in validation_block
+
+
+def test_github_workflow_splits_validation_into_parallel_phase_jobs():
+    workflow = (
+        _workflow_text()
+    )
+    phase_jobs = (
+        "fast_preflight",
+        "deterministic_validators",
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_4",
+        "post_validation_checks",
     )
 
-    assert preflight_index < aggregate_index
-    assert preflight_index < pr152_index < aggregate_index
+    for job_id in phase_jobs:
+        block = _workflow_job_block(workflow, job_id)
+        assert "    timeout-minutes: 90\n" in block
+        assert "          python-version: '3.14'\n" in block
+        assert "      - name: Restore pip download cache\n" in block
+        assert "        uses: actions/cache@v4\n" in block
+        assert "cache-dependency-path" not in block
+        assert "          cache: pip\n" not in block
+    fast_preflight_block = _workflow_job_block(
+        workflow,
+        "fast_preflight",
+    )
+    assert "        with: &pip_cache\n" in fast_preflight_block
+    assert "          path: ~/.cache/pip\n" in fast_preflight_block
     assert (
-        "python -B tools/validate_grand_global_debug_logical_consistency_audit.py "
-        "--repo-root ."
-    ) in workflow
-    assert "tools/validate_ci_branch_context_matrix.py --repo-root ." in workflow
-    assert "tools/validate_repair_pr_changed_file_scope.py --repo-root ." in workflow
-    assert "tools/validate_nested_validator_contracts.py --repo-root ." in workflow
+        "          key: ${{ runner.os }}-python-3.14-pip-pytest-"
+        "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
+    ) in fast_preflight_block
+    assert "            ${{ runner.os }}-python-3.14-pip-pytest-\n" in fast_preflight_block
+    assert "        run: &install_pytest |\n" in fast_preflight_block
+    assert "          python -m pip install pytest\n" in fast_preflight_block
+    for job_id in phase_jobs[1:]:
+        block = _workflow_job_block(workflow, job_id)
+        assert "        with: *pip_cache\n" in block
+        assert "        run: *install_pytest\n" in block
+    for phase in runner.ORDERED_PHASES:
+        assert f"tools/run_validation_gates.py --phase {phase}" in workflow
+    assert "Run canonical validation gates" not in workflow
+
+
+def test_github_workflow_aggregate_depends_on_every_required_phase_job():
+    workflow = _workflow_text()
+    validation_block = _workflow_job_block(workflow, "validation")
+
+    for job_id in (
+        "fast_preflight",
+        "deterministic_validators",
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_4",
+        "post_validation_checks",
+    ):
+        assert f"      - {job_id}\n" in validation_block
+    assert "    if: ${{ always() }}\n" in validation_block
+    assert 'if result != "success":' in validation_block
+    assert "raise SystemExit(1)" in validation_block
+
+
+def test_github_workflow_post_validation_waits_for_validators_and_pytest_shards():
+    workflow = _workflow_text()
+    post_block = _workflow_job_block(workflow, "post_validation_checks")
+
+    for job_id in (
+        "deterministic_validators",
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_4",
+    ):
+        assert f"      - {job_id}\n" in post_block
 
 
 def test_nested_validator_contract_scan_blocks_hidden_full_rerun():
