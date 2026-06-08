@@ -9135,3 +9135,66 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
     finally:
         monkeypatch.chdir(original_cwd)
         shutil.rmtree(repo_root, ignore_errors=True)
+
+
+def test_github_workflow_runs_fast_preflight_before_full_validation():
+    workflow = (
+        Path(__file__).resolve().parents[2]
+        / ".github/workflows/qtt_validation.yml"
+    ).read_text(encoding="utf-8")
+    preflight_index = workflow.index("Run fast validation preflight")
+    aggregate_index = workflow.index("Run canonical validation gates")
+
+    assert preflight_index < aggregate_index
+    assert "tools/validate_ci_branch_context_matrix.py --repo-root ." in workflow
+    assert "tools/validate_repair_pr_changed_file_scope.py --repo-root ." in workflow
+    assert "tools/validate_nested_validator_contracts.py --repo-root ." in workflow
+
+
+def test_nested_validator_contract_scan_blocks_hidden_full_rerun():
+    from tools import validate_nested_validator_contracts as nested_contracts
+
+    with tempfile.TemporaryDirectory(prefix="qtt_nested_contract_") as temp_dir:
+        repo_root = Path(temp_dir)
+        validator = repo_root / "tools" / "validate_pr200_downstream.py"
+        validator.parent.mkdir(parents=True)
+        validator.write_text(
+            "import subprocess\n"
+            "subprocess.run(['python', "
+            "'tools/validate_pr159r_source_locator_value_capture.py'])\n",
+            encoding="utf-8",
+        )
+
+        failures = nested_contracts.nested_validator_contract_failures_for_paths(
+            repo_root,
+            (validator,),
+        )
+
+    assert len(failures) == 1
+    assert "nested full validator rerun forbidden" in failures[0]
+    assert "validate_pr159r_source_locator_value_capture.py" in failures[0]
+
+
+def test_nested_validator_contract_scan_allows_recorded_receipt_contract_text():
+    from tools import validate_nested_validator_contracts as nested_contracts
+
+    with tempfile.TemporaryDirectory(prefix="qtt_nested_contract_") as temp_dir:
+        repo_root = Path(temp_dir)
+        validator = repo_root / "tools" / "validate_pr200_downstream.py"
+        validator.parent.mkdir(parents=True)
+        validator.write_text(
+            "RECEIPT_CONTRACT = {\n"
+            "    'validator_that_recorded_receipt': "
+            "'tools/validate_pr159r_source_locator_value_capture.py',\n"
+            "    'rerun_full_validator': False,\n"
+            "}\n",
+            encoding="utf-8",
+        )
+
+        assert (
+            nested_contracts.nested_validator_contract_failures_for_paths(
+                repo_root,
+                (validator,),
+            )
+            == ()
+        )

@@ -13,53 +13,7 @@ from .io import as_list, as_mapping, read_json
 from .models import ValidationResult
 
 
-_REPAIR_BRANCHES = (c.BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCH,)
-_PR161A_DOWNSTREAM_BRANCH = "pr161a-atomicrows-pr154-value-state-materialization-bridge"
-_PR161B_DOWNSTREAM_BRANCH = "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge"
-_PR161C_DOWNSTREAM_BRANCH = "pr161c-qku-residual-candidate-assimilation-fill-campaign"
-_PR161D_DOWNSTREAM_BRANCH = "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization"
-_PR161E_DOWNSTREAM_BRANCH = "pr161e-replay-paper-outcome-capture-scenario-learning-bridge"
-_PR161F_DOWNSTREAM_BRANCH = "pr161f-replay-paper-executor-input-run-artifact-generation"
-_PR162_DOWNSTREAM_BRANCH = (
-    "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge"
-)
-_PR162A_DOWNSTREAM_BRANCH = (
-    "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate"
-)
-_PR162B_DOWNSTREAM_BRANCH = (
-    "pr162b-qku-formula-algorithm-solver-market-scope-materialization"
-)
-_PR162C_DOWNSTREAM_BRANCH = (
-    "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage"
-)
-_PR162D_DOWNSTREAM_BRANCH = (
-    "pr162d-aggressive-qku-candidate-materialization-agent-routing"
-)
-_PR162D_R1_DOWNSTREAM_BRANCH = (
-    "pr162d-r1-external-formula-data-quantum-acquisition-expansion"
-)
-_PR162R_A_DOWNSTREAM_BRANCH = (
-    "pr162r-a-replay-paper-executability-classification-audit"
-)
-_PR162D_R2A_DOWNSTREAM_BRANCH = (
-    "pr162d-r2a-real-computable-formulations-redo"
-)
-_PR162R_DOWNSTREAM_BRANCH = (
-    "pr162r-generic-replay-paper-adapter-rerun"
-)
-_PR162R_B_DOWNSTREAM_BRANCH = (
-    "pr162r-b-replay-paper-data-binding-completion"
-)
-_PR163_DOWNSTREAM_BRANCH = (
-    "pr163-generic-paper-adapter-capture-framework"
-)
-_PR163_B_DOWNSTREAM_BRANCH = "pr163-b-paired-replay-paper-concurrent-executor"
-_PR163_C_DOWNSTREAM_BRANCH = (
-    "pr163-c-pretrade-infrastructure-rejection-remediation"
-)
-_PR164_DOWNSTREAM_BRANCH = (
-    "pr164-review-provenance-qku-canonical-coverage-audit"
-)
+_REPAIR_BRANCHES = (ci_branch_context.PR159S_BRANCH_CONTEXT_REPAIR_BRANCH,)
 
 
 def _require(condition: bool, failures: list[str], code: str) -> None:
@@ -93,41 +47,18 @@ def _ancestry_present(root: Path, branch_context: str = "") -> bool:
 
 
 def _branch_context_allowed(branch_context: str) -> bool:
-    normalized = ci_branch_context.normalize_branch_context(branch_context)
-    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
-        normalized,
-        upstream_pr=159,
-    ):
-        return True
-    return (
-        normalized == c.EXPECTED_BRANCH
-        or normalized == _PR161A_DOWNSTREAM_BRANCH
-        or normalized == _PR161B_DOWNSTREAM_BRANCH
-        or normalized == _PR161C_DOWNSTREAM_BRANCH
-        or normalized == _PR161D_DOWNSTREAM_BRANCH
-        or normalized == _PR161E_DOWNSTREAM_BRANCH
-        or normalized == _PR161F_DOWNSTREAM_BRANCH
-        or normalized == _PR162_DOWNSTREAM_BRANCH
-        or normalized == _PR162A_DOWNSTREAM_BRANCH
-        or normalized == _PR162B_DOWNSTREAM_BRANCH
-        or normalized == _PR162C_DOWNSTREAM_BRANCH
-        or normalized == _PR162D_DOWNSTREAM_BRANCH
-        or normalized == _PR162D_R1_DOWNSTREAM_BRANCH
-        or normalized == _PR162R_A_DOWNSTREAM_BRANCH
-        or normalized == _PR162D_R2A_DOWNSTREAM_BRANCH
-        or normalized == _PR162R_DOWNSTREAM_BRANCH
-        or normalized == _PR162R_B_DOWNSTREAM_BRANCH
-        or normalized == _PR163_DOWNSTREAM_BRANCH
-        or normalized == _PR163_B_DOWNSTREAM_BRANCH
-        or normalized == _PR163_C_DOWNSTREAM_BRANCH
-        or normalized == _PR164_DOWNSTREAM_BRANCH
-        or normalized in _REPAIR_BRANCHES
+    return ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
+        branch_context,
+        "PR159S",
     )
 
 
 def _detached_ci_context_allowed(root: Path) -> bool:
     branch_context = ci_branch_context.github_actions_branch_context()
-    if _branch_context_allowed(branch_context):
+    if ci_branch_context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+        branch_context,
+        "PR159S",
+    ):
         return True
     if branch_context:
         return False
@@ -148,22 +79,25 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
 
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout)
     branch = context.branch
-    if branch in {c.EXPECTED_BRANCH, _PR161A_DOWNSTREAM_BRANCH, _PR161B_DOWNSTREAM_BRANCH, _PR161C_DOWNSTREAM_BRANCH, _PR161D_DOWNSTREAM_BRANCH, _PR161E_DOWNSTREAM_BRANCH, _PR161F_DOWNSTREAM_BRANCH, _PR162_DOWNSTREAM_BRANCH, _PR162A_DOWNSTREAM_BRANCH, _PR162B_DOWNSTREAM_BRANCH, _PR162C_DOWNSTREAM_BRANCH, _PR162D_DOWNSTREAM_BRANCH, _PR162D_R1_DOWNSTREAM_BRANCH, _PR162R_A_DOWNSTREAM_BRANCH, _PR162D_R2A_DOWNSTREAM_BRANCH, _PR162R_DOWNSTREAM_BRANCH, _PR162R_B_DOWNSTREAM_BRANCH, _PR163_DOWNSTREAM_BRANCH, _PR163_B_DOWNSTREAM_BRANCH, _PR163_C_DOWNSTREAM_BRANCH, _PR164_DOWNSTREAM_BRANCH}:
+    if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159S"):
         return
-    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
+    ancestry_present = _ancestry_present(root)
+    if ci_branch_context.is_main_push_context_allowed_for_upstream_pr_gate(
         branch,
-        upstream_pr=159,
+        "PR159S",
+        ancestry_present=ancestry_present,
     ):
+        receipts.append(c.PR159S_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return
     if ci_branch_context.github_actions_main_push_context_active():
-        if branch == "main" and _ancestry_present(root):
-            receipts.append(c.PR159S_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
-            return
         failures.append(f"PR159S_BLOCKED_WRONG_BRANCH:{branch or 'main'}")
         return
-    if branch == "main" and _ancestry_present(root):
-        return
-    if ci_branch_context.normalize_branch_context(branch) in _REPAIR_BRANCHES and _ancestry_present(root, branch):
+    if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
+        branch,
+        "PR159S",
+        ancestry_present=ancestry_present,
+        include_main=True,
+    ):
         return
     failures.append(f"PR159S_BLOCKED_WRONG_BRANCH:{branch or 'DETACHED_HEAD'}")
 

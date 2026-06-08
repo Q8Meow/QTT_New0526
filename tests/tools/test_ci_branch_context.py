@@ -22,6 +22,13 @@ def test_repair_and_main_cumulative_branch_classification():
     assert context.is_repair_branch("repair/pr138-main-push-ci-context") is True
     assert context.is_main_cumulative_branch("main") is True
     assert context.is_main_cumulative_branch("repair/main-cumulative-example") is True
+    assert (
+        context.is_main_cumulative_branch(
+            "pr-ci-fastfail-validation-context-preflight"
+        )
+        is True
+    )
+    assert context.is_main_cumulative_branch("feature/unrelated") is False
     assert context.is_downstream_roadmap_branch(
         "feature/non-downstream-validation",
         after_pr=97,
@@ -2210,3 +2217,125 @@ def test_main_push_context_requires_exact_github_main_push_env(monkeypatch):
     monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     assert context.github_actions_main_push_context_active() is False
+
+
+def test_upstream_branch_gate_policy_exact_repairs_are_fail_closed():
+    assert context.is_branch_allowed_for_upstream_pr_gate(
+        context.PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+        "PR160",
+        ancestry_present=True,
+    )
+    assert not context.is_branch_allowed_for_upstream_pr_gate(
+        context.PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+        "PR160",
+    )
+    assert context.is_explicit_repair_branch_allowed_for_upstream_pr_gate(
+        context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+        "PR160",
+    )
+    assert not context.is_explicit_repair_branch_allowed_for_upstream_pr_gate(
+        "repair/pr163-c-unrelated-context",
+        "PR160",
+    )
+    assert not context.is_branch_allowed_for_upstream_pr_gate(
+        "repair/pr163-c-unrelated-context",
+        "PR160",
+        ancestry_present=True,
+    )
+
+
+def test_upstream_branch_gate_policy_allows_exact_validation_infrastructure_branch():
+    branch = "pr-ci-fastfail-validation-context-preflight"
+    for gate_id in context.BRANCH_CONTEXT_GATE_POLICIES:
+        assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate_id)
+        assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            branch,
+            gate_id,
+        )
+        assert not context.is_branch_allowed_for_upstream_pr_gate(
+            "pr-ci-fastfail-validation-context-preflight-copy",
+            gate_id,
+            ancestry_present=True,
+        )
+        assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            "pr-ci-fastfail-validation-context-preflight-copy",
+            gate_id,
+        )
+
+
+def test_changed_path_helper_requires_exact_repair_scope():
+    assert context.changed_path_allowed_for_explicit_repair_branch(
+        context.PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert not context.changed_path_allowed_for_explicit_repair_branch(
+        "repair/pr160-unlisted-context",
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+    )
+    assert not context.changed_path_allowed_for_explicit_repair_branch(
+        context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    )
+
+
+def test_validation_infrastructure_changed_path_scope_is_exact():
+    branch = "pr-ci-fastfail-validation-context-preflight"
+    assert context.is_validation_infrastructure_branch(branch)
+    assert context.is_validation_infrastructure_changed_path(
+        branch,
+        "tools/validate_ci_branch_context_matrix.py",
+    )
+    assert context.is_validation_infrastructure_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/validator.py",
+    )
+    assert not context.is_validation_infrastructure_changed_path(
+        "repair/pr163-c-main-branch-context-after-merge",
+        "tools/validate_ci_branch_context_matrix.py",
+    )
+    assert not context.is_validation_infrastructure_changed_path(
+        branch,
+        "docs/master_plan/generated/PR164ReviewProvenanceAudit.report.json",
+    )
+    assert not context.is_validation_infrastructure_changed_path(
+        branch,
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    )
+
+
+def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/200/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "200/merge")
+    monkeypatch.setenv(
+        "GITHUB_HEAD_REF",
+        context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+    )
+
+    def fake_git_stdout(repo_root, args):
+        command = tuple(args)
+        if command == ("branch", "--show-current"):
+            return 0, "", ""
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return 0, "HEAD", ""
+        raise AssertionError(f"unexpected git command: {command!r}")
+
+    branch_context = context.current_branch_context(
+        REPO_ROOT,
+        git_stdout=fake_git_stdout,
+    )
+    assert branch_context.branch == context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
+    assert context.github_actions_pull_request_detached_context_active(
+        branch_returncode=0,
+        branch="",
+    )
+    assert not context.github_actions_main_push_context_active()
+    assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+        branch_context.branch,
+        "PR160",
+    )

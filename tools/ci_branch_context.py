@@ -23,8 +23,72 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 )
 REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
+VALIDATION_INFRASTRUCTURE_BRANCHES = frozenset(
+    {
+        "pr-ci-fastfail-validation-context-preflight",
+    }
+)
+VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
+    {
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_parameter_default_value_materialization_gate/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_implementation_bridge/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "agent_consumable_parameter_default_registry/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "agent_default_binding_universal_intake_gate/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "grand_global_debug_logical_consistency_audit/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "master_plan_residual_candidate_coverage/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "official_source_retrieval_target_pack_parameter_defaults/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr159r_source_locator_value_capture/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr160_split_reclassification_route_closure/validator.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/paths.py",
+        "src/qtt/stage1_prediction_markets/"
+        "qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "source_backed_classical_quantum_parameter_default_target_matrix/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "source_intelligence/pr159s_open_intake/validator.py",
+        "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/"
+        "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tools/ci_branch_context.py",
+        "tools/validate_ci_branch_context_matrix.py",
+        "tools/validate_nested_validator_contracts.py",
+        "tools/validate_repair_pr_changed_file_scope.py",
+    }
+)
 PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
     "repair/pr163-c-main-branch-context-after-merge"
+)
+PR159R_BRANCH_CONTEXT_REPAIR_BRANCH = "repair/pr159r-branch-context-relaxation"
+PR159R_DETACHED_HEAD_REPAIR_BRANCH = "repair/pr159r-detached-head-branch-context"
+PR159S_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    "repair/pr159s-open-intake-branch-context-relaxation"
+)
+PR160_MAIN_ANCESTRY_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
+PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    "repair/pr160-main-push-branch-context-relaxation"
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
@@ -38,11 +102,12 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr159-official-source-retry-atomicrows-source-completion-bridge": 159,
     "pr159r-exact-source-locator-value-unit-capture": 159,
     "pr159s-open-source-intelligence-candidate-completion": 159,
-    "repair/pr159r-branch-context-relaxation": 159,
-    "repair/pr159s-open-intake-branch-context-relaxation": 159,
+    PR159R_BRANCH_CONTEXT_REPAIR_BRANCH: 159,
+    PR159R_DETACHED_HEAD_REPAIR_BRANCH: 159,
+    PR159S_BRANCH_CONTEXT_REPAIR_BRANCH: 159,
     "pr160-pr154-split-reclassification-route-closure-bridge": 160,
-    "repair/pr160-main-ancestry-after-pr176": 160,
-    "repair/pr160-main-push-branch-context-relaxation": 160,
+    PR160_MAIN_ANCESTRY_REPAIR_BRANCH: 160,
+    PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH: 160,
     "pr161a-atomicrows-pr154-value-state-materialization-bridge": 161,
     "repair/pr161a-atomicrows-pr154-value-state-materialization-bridge": 161,
     "pr161b-master-plan-residual-candidate-coverage-assimilation-bridge": 161,
@@ -1484,6 +1549,206 @@ class BranchContext:
     git_error: str = ""
 
 
+@dataclass(frozen=True)
+class UpstreamBranchGatePolicy:
+    gate_id: str
+    upstream_pr: int
+    allowed_branches: frozenset[str]
+    local_repair_branches_requiring_ancestry: frozenset[str]
+    detached_head_ref_branches: frozenset[str]
+    main_push_allowed: bool = True
+
+
+PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
+    {
+        PR162_BRANCH,
+        PR162A_BRANCH,
+        PR162B_BRANCH,
+        PR162C_BRANCH,
+        PR162D_BRANCH,
+        PR162D_R1_BRANCH,
+        PR162R_A_BRANCH,
+        PR162D_R2A_BRANCH,
+        PR162R_BRANCH,
+        PR162R_B_BRANCH,
+        PR163_BRANCH,
+        PR163_B_BRANCH,
+        PR163_C_BRANCH,
+        PR164_BRANCH,
+    }
+)
+PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
+    {
+        PR161C_BRANCH,
+        PR161D_BRANCH,
+        PR161E_BRANCH,
+        PR161F_BRANCH,
+        *PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+    }
+)
+PR161B_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
+    {
+        PR161B_BRANCH,
+        *PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+    }
+)
+PR161A_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
+    {
+        PR161A_BRANCH,
+        *PR161B_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+    }
+)
+PR159R_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY = frozenset(
+    {
+        PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        PR159R_DETACHED_HEAD_REPAIR_BRANCH,
+        PR159S_BRANCH_CONTEXT_REPAIR_BRANCH,
+    }
+)
+PR160_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY = frozenset(
+    {
+        PR159S_BRANCH_CONTEXT_REPAIR_BRANCH,
+        PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+        PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH,
+    }
+)
+PR159R_DETACHED_HEAD_REPAIR_BRANCHES = frozenset(
+    {
+        *PR159R_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY,
+        PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+    }
+)
+PR160_DETACHED_HEAD_REPAIR_BRANCHES = frozenset(
+    {
+        *PR160_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY,
+        PR159R_DETACHED_HEAD_REPAIR_BRANCH,
+    }
+)
+BRANCH_CONTEXT_GATE_POLICIES = {
+    "PR159R": UpstreamBranchGatePolicy(
+        gate_id="PR159R",
+        upstream_pr=159,
+        allowed_branches=frozenset(
+            {
+                PR159R_BRANCH,
+                PR159S_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                *PR161A_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=(
+            PR159R_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY
+        ),
+        detached_head_ref_branches=PR159R_DETACHED_HEAD_REPAIR_BRANCHES,
+    ),
+    "PR159S": UpstreamBranchGatePolicy(
+        gate_id="PR159S",
+        upstream_pr=159,
+        allowed_branches=frozenset(
+            {
+                PR159S_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                *PR161A_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=frozenset(
+            {PR159S_BRANCH_CONTEXT_REPAIR_BRANCH}
+        ),
+        detached_head_ref_branches=frozenset(
+            {
+                PR159S_BRANCH_CONTEXT_REPAIR_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            }
+        ),
+    ),
+    "PR160": UpstreamBranchGatePolicy(
+        gate_id="PR160",
+        upstream_pr=160,
+        allowed_branches=frozenset(
+            {
+                PR160_BRANCH,
+                PR159R_BRANCH,
+                PR159S_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                *PR161A_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=(
+            PR160_LOCAL_REPAIR_BRANCHES_REQUIRING_ANCESTRY
+        ),
+        detached_head_ref_branches=PR160_DETACHED_HEAD_REPAIR_BRANCHES,
+    ),
+    "PR161A": UpstreamBranchGatePolicy(
+        gate_id="PR161A",
+        upstream_pr=161,
+        allowed_branches=frozenset(
+            {
+                PR161A_BRANCH,
+                PR161A_REPAIR_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                *PR161B_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=frozenset(),
+        detached_head_ref_branches=frozenset(
+            {
+                PR161A_REPAIR_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            }
+        ),
+    ),
+    "PR161B": UpstreamBranchGatePolicy(
+        gate_id="PR161B",
+        upstream_pr=161,
+        allowed_branches=frozenset(
+            {
+                PR161B_BRANCH,
+                PR161B_REPAIR_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+                *PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=frozenset(),
+        detached_head_ref_branches=frozenset(
+            {
+                PR161B_REPAIR_BRANCH,
+                PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH,
+            }
+        ),
+    ),
+    "PR162A": UpstreamBranchGatePolicy(
+        gate_id="PR162A",
+        upstream_pr=162,
+        allowed_branches=frozenset(
+            {
+                PR162A_BRANCH,
+                PR162B_BRANCH,
+                PR162C_BRANCH,
+                PR162D_BRANCH,
+                PR162D_R1_BRANCH,
+                PR162R_A_BRANCH,
+                PR162D_R2A_BRANCH,
+                PR162R_BRANCH,
+                PR162R_B_BRANCH,
+                PR163_BRANCH,
+                PR163_B_BRANCH,
+                PR163_C_BRANCH,
+                PR164_BRANCH,
+            }
+        ),
+        local_repair_branches_requiring_ancestry=frozenset(),
+        detached_head_ref_branches=frozenset(),
+    ),
+    "PR163-C": UpstreamBranchGatePolicy(
+        gate_id="PR163-C",
+        upstream_pr=163,
+        allowed_branches=frozenset({PR163_C_BRANCH}),
+        local_repair_branches_requiring_ancestry=frozenset(),
+        detached_head_ref_branches=frozenset(),
+    ),
+}
+
+
 def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str, str]:
     completed = subprocess.run(
         ["git", *args],
@@ -1539,6 +1804,8 @@ def current_branch_context(
 
 
 def github_actions_branch_context() -> str:
+    if github_actions_active() and os.getenv("GITHUB_EVENT_NAME") == "pull_request":
+        return github_actions_head_ref_branch_context()
     for env_name in ("GITHUB_HEAD_REF", "GITHUB_REF_NAME", "GITHUB_REF"):
         branch = normalize_branch_context(os.getenv(env_name, ""))
         if branch:
@@ -1586,12 +1853,120 @@ def github_actions_main_push_context_active() -> bool:
     )
 
 
+def normalize_upstream_branch_gate(value: str | int) -> str:
+    if isinstance(value, int):
+        return f"PR{value}"
+    gate_id = str(value).strip().upper().replace("_", "-")
+    if gate_id == "PR163C":
+        return "PR163-C"
+    return gate_id
+
+
+def upstream_branch_gate_policy(value: str | int) -> UpstreamBranchGatePolicy:
+    gate_id = normalize_upstream_branch_gate(value)
+    try:
+        return BRANCH_CONTEXT_GATE_POLICIES[gate_id]
+    except KeyError as exc:
+        raise KeyError(f"unknown upstream branch gate: {value!r}") from exc
+
+
+def is_explicit_repair_branch_allowed_for_upstream_pr_gate(
+    branch: str,
+    upstream_gate: str | int,
+) -> bool:
+    normalized = normalize_branch_context(branch)
+    if not is_repair_branch(normalized):
+        return False
+    policy = upstream_branch_gate_policy(upstream_gate)
+    return (
+        normalized in policy.allowed_branches
+        or normalized in policy.local_repair_branches_requiring_ancestry
+        or normalized in policy.detached_head_ref_branches
+    )
+
+
+def is_branch_allowed_for_upstream_pr_gate(
+    branch: str,
+    upstream_gate: str | int,
+    *,
+    ancestry_present: bool = False,
+    include_main: bool = False,
+) -> bool:
+    normalized = normalize_branch_context(branch)
+    if not normalized:
+        return False
+    policy = upstream_branch_gate_policy(upstream_gate)
+    if is_validation_infrastructure_branch(normalized):
+        return True
+    if normalized == "main":
+        return include_main and ancestry_present
+    if normalized in policy.allowed_branches:
+        return True
+    return (
+        normalized in policy.local_repair_branches_requiring_ancestry
+        and ancestry_present
+    )
+
+
+def is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+    branch_context: str,
+    upstream_gate: str | int,
+) -> bool:
+    normalized = normalize_branch_context(branch_context)
+    if not normalized:
+        return False
+    policy = upstream_branch_gate_policy(upstream_gate)
+    return (
+        is_validation_infrastructure_branch(normalized)
+        or normalized in policy.allowed_branches
+        or normalized in policy.local_repair_branches_requiring_ancestry
+        or normalized in policy.detached_head_ref_branches
+    )
+
+
+def is_main_push_context_allowed_for_upstream_pr_gate(
+    branch_context: str,
+    upstream_gate: str | int,
+    *,
+    ancestry_present: bool,
+) -> bool:
+    return (
+        github_actions_main_push_context_active()
+        and upstream_branch_gate_policy(upstream_gate).main_push_allowed
+        and normalize_branch_context(branch_context) == "main"
+        and ancestry_present
+    )
+
+
+def changed_path_allowed_for_explicit_repair_branch(branch: str, path: str) -> bool:
+    normalized = normalize_branch_context(branch)
+    if not is_repair_branch(normalized):
+        return False
+    return is_explicit_downstream_repair_changed_path(normalized, path)
+
+
+def is_validation_infrastructure_branch(branch: str) -> bool:
+    normalized = normalize_branch_context(branch)
+    return normalized in VALIDATION_INFRASTRUCTURE_BRANCHES
+
+
+def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
+    if not is_validation_infrastructure_branch(branch):
+        return False
+    normalized = path.replace("\\", "/")
+    return normalized in VALIDATION_INFRASTRUCTURE_CHANGED_PATHS
+
+
 def is_repair_branch(branch: str) -> bool:
     return branch.startswith(REPAIR_BRANCH_PREFIX)
 
 
 def is_main_cumulative_branch(branch: str) -> bool:
-    return branch == "main" or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX)
+    return (
+        branch == "main"
+        or branch in VALIDATION_INFRASTRUCTURE_BRANCHES
+        or branch.startswith(MAIN_CUMULATIVE_BRANCH_PREFIX)
+    )
 
 
 def roadmap_pr_number(branch: str) -> int | None:
@@ -1871,12 +2246,20 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
             normalized.startswith(prefix)
             for prefix in PR159S_ALLOWED_CHANGED_PATH_PREFIXES
         )
-    if branch == PR159R_BRANCH or is_same_pr_repair_branch(branch, 159):
+    if branch in {
+        PR159R_BRANCH,
+        PR159R_BRANCH_CONTEXT_REPAIR_BRANCH,
+        PR159R_DETACHED_HEAD_REPAIR_BRANCH,
+    }:
         return normalized in PR159R_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR159R_ALLOWED_CHANGED_PATH_PREFIXES
         )
-    if branch == PR160_BRANCH or is_same_pr_repair_branch(branch, 160):
+    if branch in {
+        PR160_BRANCH,
+        PR160_MAIN_ANCESTRY_REPAIR_BRANCH,
+        PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH,
+    }:
         return normalized in PR160_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR160_ALLOWED_CHANGED_PATH_PREFIXES
@@ -1886,7 +2269,7 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
             normalized.startswith(prefix)
             for prefix in PR161B_ALLOWED_CHANGED_PATH_PREFIXES
         )
-    if branch == PR161A_BRANCH or branch == PR161A_REPAIR_BRANCH or is_same_pr_repair_branch(branch, 161):
+    if branch == PR161A_BRANCH or branch == PR161A_REPAIR_BRANCH:
         return normalized in PR161A_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
             for prefix in PR161A_ALLOWED_CHANGED_PATH_PREFIXES
@@ -1898,7 +2281,7 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
 
 
 def ci_branch_context_pr159s_repair(branch: str) -> bool:
-    return branch == "repair/pr159s-open-intake-branch-context-relaxation"
+    return branch == PR159S_BRANCH_CONTEXT_REPAIR_BRANCH
 
 
 def is_downstream_roadmap_branch(

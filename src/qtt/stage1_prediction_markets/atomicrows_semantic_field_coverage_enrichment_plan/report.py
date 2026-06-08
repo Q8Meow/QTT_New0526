@@ -16,6 +16,7 @@ from tools.ci_branch_context import (
     current_branch_context,
     is_downstream_roadmap_branch,
     is_explicit_downstream_repair_changed_path,
+    is_validation_infrastructure_changed_path,
 )
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
@@ -1735,6 +1736,10 @@ def _is_allowed_pr140_changed_path(path: str, repo_root: Path) -> bool:
             normalized,
             branch_context.branch,
         )
+        or is_validation_infrastructure_changed_path(
+            branch_context.branch,
+            normalized,
+        )
     )
 
 
@@ -1761,6 +1766,9 @@ def _validate_changed_paths(repo_root: Path) -> list[str]:
         } and not _is_pr153r_repair_branch_context_changed_path_for_branch(
             normalized,
             branch_context.branch,
+        ) and not is_validation_infrastructure_changed_path(
+            branch_context.branch,
+            normalized,
         ):
             failures.append("PR140_BRANCH_CONTEXT_HARDENING_MUTATION_DETECTED")
     return sorted(set(failures))

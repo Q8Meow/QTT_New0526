@@ -243,9 +243,6 @@ DOWNSTREAM_PR_ROUTES = (
 )
 
 UPSTREAM_PR_REFS = ("PR163-B", "PR164")
-ALLOWED_BUILD_BRANCHES = (EXPECTED_BRANCH, "main")
-
-
 def current_branch(repo_root: Path) -> str:
     if ci_branch_context.github_actions_main_push_context_active():
         return "main"
@@ -272,8 +269,13 @@ def current_branch(repo_root: Path) -> str:
 
 def ensure_branch(repo_root: Path) -> None:
     branch = current_branch(repo_root)
-    if branch not in ALLOWED_BUILD_BRANCHES:
-        allowed = " or ".join(ALLOWED_BUILD_BRANCHES)
+    if not ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
+        branch,
+        "PR163-C",
+        ancestry_present=True,
+        include_main=True,
+    ):
+        allowed = " or ".join((EXPECTED_BRANCH, "main"))
         raise RuntimeError(f"{PR_ID} build must run on {allowed}; current branch is {branch}")
 
 

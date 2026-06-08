@@ -186,44 +186,41 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
         failures.append("PR161B_BLOCKED_WRONG_BRANCH:DETACHED_HEAD")
         return
     context = ci_branch_context.current_branch_context(root, git_stdout=_git_stdout).branch
-    if _branch_context_allowed(root, context):
+    if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(context, "PR161B"):
         return
-    if ci_branch_context.github_actions_main_push_context_active() and context == "main" and _ancestry_present(root):
+    ancestry_present = _ancestry_present(root)
+    if ci_branch_context.is_main_push_context_allowed_for_upstream_pr_gate(
+        context,
+        "PR161B",
+        ancestry_present=ancestry_present,
+    ):
         receipts.append("PR161B_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY")
+        return
+    if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
+        context,
+        "PR161B",
+        ancestry_present=ancestry_present,
+        include_main=True,
+    ):
         return
     failures.append(f"PR161B_BLOCKED_WRONG_BRANCH:{context or 'DETACHED_HEAD'}")
 
 
 def _branch_context_allowed(root: Path, branch: str) -> bool:
-    normalized = ci_branch_context.normalize_branch_context(branch)
-    if ci_branch_context.is_explicit_downstream_repair_branch_context_allowed(
-        normalized,
-        upstream_pr=161,
-    ):
+    if ci_branch_context.github_actions_pull_request_detached_context_active():
+        return (
+            ci_branch_context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                branch,
+                "PR161B",
+            )
+        )
+    if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(branch, "PR161B"):
         return True
-    return normalized in {
-        c.EXPECTED_BRANCH,
-        c.REPAIR_BRANCH,
-        "pr161c-qku-residual-candidate-assimilation-fill-campaign",
-        "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
-        "pr161e-replay-paper-outcome-capture-scenario-learning-bridge",
-        "pr161f-replay-paper-executor-input-run-artifact-generation",
-        "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge",
-        "pr162a-safe-repo-local-nonlive-dataset-materialization-authority-gate",
-        "pr162b-qku-formula-algorithm-solver-market-scope-materialization",
-        "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage",
-        "pr162d-aggressive-qku-candidate-materialization-agent-routing",
-        "pr162d-r1-external-formula-data-quantum-acquisition-expansion",
-        "pr162r-a-replay-paper-executability-classification-audit",
-        "pr162d-r2a-real-computable-formulations-redo",
-        "pr162r-generic-replay-paper-adapter-rerun",
-        "pr162r-b-replay-paper-data-binding-completion",
-        "pr163-generic-paper-adapter-capture-framework",
-        "pr163-b-paired-replay-paper-concurrent-executor",
-        "pr163-c-pretrade-infrastructure-rejection-remediation",
-        "pr164-review-provenance-qku-canonical-coverage-audit",
-    } or (
-        normalized == "main" and _ancestry_present(root)
+    return ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
+        branch,
+        "PR161B",
+        ancestry_present=_ancestry_present(root),
+        include_main=True,
     )
 
 
