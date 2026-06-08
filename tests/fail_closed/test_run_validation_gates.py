@@ -2213,6 +2213,11 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     )
     assert "tests/tools/test_ci_branch_context.py" in shard_manifest["pytest-shard-1"]
     assert (
+        "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/"
+        "test_pr159r_branch_context_relaxation.py"
+        in shard_manifest["pytest-shard-2"]
+    )
+    assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
         in shard_manifest["pytest-shard-4"]
     )

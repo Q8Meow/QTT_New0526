@@ -73,23 +73,32 @@ def _git(
     *,
     ancestry_present: bool = False,
     ancestry_branches: set[str] | None = None,
+    shallow: bool = False,
+    fetch_restores_ancestry: bool = False,
 ):
     branches = set(ancestry_branches or set())
     if ancestry_present:
         branches.add(c.EXPECTED_BRANCH)
+    refreshed = False
+
+    def effective_branches() -> set[str]:
+        if refreshed and fetch_restores_ancestry:
+            return branches | {c.EXPECTED_BRANCH}
+        return branches
 
     def fake_git_stdout(repo_root, args):
+        nonlocal refreshed
         command = tuple(args)
         if command == ("branch", "--show-current"):
             if branch == "DETACHED_HEAD":
                 return 0, "", ""
             return 0, branch, ""
         if command[:2] == ("merge-base", "--is-ancestor"):
-            ancestor_branch = _branch_from_ref(command[2], branches)
+            ancestor_branch = _branch_from_ref(command[2], effective_branches())
             return (0, "", "") if ancestor_branch else (1, "", "not ancestor")
         if command[:3] == ("log", "--format=%s", "--fixed-strings"):
             grep = command[3].removeprefix("--grep=/")
-            if grep in branches:
+            if grep in effective_branches():
                 return 0, f"Merge pull request #1 from Owner/{grep}\n", ""
             return (
                 0,
@@ -98,6 +107,16 @@ def _git(
             )
         if command == ("rev-parse", "--abbrev-ref", "HEAD"):
             return 0, "HEAD" if branch == "DETACHED_HEAD" else branch, ""
+        if command == ("rev-parse", "--is-shallow-repository"):
+            return 0, "true" if shallow else "false", ""
+        if command in {
+            ("fetch", "--no-tags", "--prune", "--unshallow", "origin"),
+            ("fetch", "--no-tags", "--prune", "--depth=2147483647", "origin"),
+        }:
+            if shallow:
+                refreshed = True
+                return 0, "", ""
+            return 1, "", "not shallow"
         raise AssertionError(f"unexpected git command: {command!r}")
 
     return fake_git_stdout
@@ -109,6 +128,8 @@ def _branch_outcome(
     *,
     ancestry_present: bool = False,
     ancestry_branches: set[str] | None = None,
+    shallow: bool = False,
+    fetch_restores_ancestry: bool = False,
 ):
     monkeypatch.setattr(
         validator,
@@ -117,6 +138,8 @@ def _branch_outcome(
             branch,
             ancestry_present=ancestry_present,
             ancestry_branches=ancestry_branches,
+            shallow=shallow,
+            fetch_restores_ancestry=fetch_restores_ancestry,
         ),
     )
     failures: list[str] = []
@@ -311,6 +334,23 @@ def test_pr159r_main_push_with_ancestry_allowed(monkeypatch):
     assert receipts == (c.PR159R_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY,)
 
 
+def test_pr159r_main_push_refreshes_shallow_history_before_ancestry(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "main",
+        shallow=True,
+        fetch_restores_ancestry=True,
+    )
+
+    assert failures == ()
+    assert receipts == (c.PR159R_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY,)
+
+
 def test_pr159r_main_push_without_valid_ancestry_fails_closed(monkeypatch):
     _clear_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
@@ -320,6 +360,22 @@ def test_pr159r_main_push_without_valid_ancestry_fails_closed(monkeypatch):
     failures, receipts = _branch_outcome(monkeypatch, "main")
 
     assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:main",)
+    assert receipts == ()
+
+
+def test_pr159r_main_push_copycat_branch_rejected_even_with_ancestry(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main-copy")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main-copy")
+    failures, receipts = _branch_outcome(
+        monkeypatch,
+        "main-copy",
+        ancestry_present=True,
+    )
+
+    assert failures == ("PR159R_BLOCKED_WRONG_BRANCH:main-copy",)
     assert receipts == ()
 
 
