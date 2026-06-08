@@ -28,6 +28,12 @@ def test_repair_and_main_cumulative_branch_classification():
         )
         is True
     )
+    assert (
+        context.is_main_cumulative_branch(
+            context.CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH
+        )
+        is True
+    )
     assert context.is_main_cumulative_branch("feature/unrelated") is False
     assert context.is_downstream_roadmap_branch(
         "feature/non-downstream-validation",
@@ -2245,22 +2251,23 @@ def test_upstream_branch_gate_policy_exact_repairs_are_fail_closed():
 
 
 def test_upstream_branch_gate_policy_allows_exact_validation_infrastructure_branch():
-    branch = "pr-ci-fastfail-validation-context-preflight"
-    for gate_id in context.BRANCH_CONTEXT_GATE_POLICIES:
-        assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate_id)
-        assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
-            branch,
-            gate_id,
-        )
-        assert not context.is_branch_allowed_for_upstream_pr_gate(
-            "pr-ci-fastfail-validation-context-preflight-copy",
-            gate_id,
-            ancestry_present=True,
-        )
-        assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
-            "pr-ci-fastfail-validation-context-preflight-copy",
-            gate_id,
-        )
+    for branch in context.VALIDATION_INFRASTRUCTURE_BRANCHES:
+        for gate_id in context.BRANCH_CONTEXT_GATE_POLICIES:
+            assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate_id)
+            assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                branch,
+                gate_id,
+            )
+            copycat_branch = f"{branch}-copy"
+            assert not context.is_branch_allowed_for_upstream_pr_gate(
+                copycat_branch,
+                gate_id,
+                ancestry_present=True,
+            )
+            assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                copycat_branch,
+                gate_id,
+            )
 
 
 def test_changed_path_helper_requires_exact_repair_scope():
@@ -2281,27 +2288,31 @@ def test_changed_path_helper_requires_exact_repair_scope():
 
 
 def test_validation_infrastructure_changed_path_scope_is_exact():
-    branch = "pr-ci-fastfail-validation-context-preflight"
-    assert context.is_validation_infrastructure_branch(branch)
-    assert context.is_validation_infrastructure_changed_path(
-        branch,
-        "tools/validate_ci_branch_context_matrix.py",
-    )
-    assert context.is_validation_infrastructure_changed_path(
-        branch,
-        "src/qtt/stage1_prediction_markets/"
-        "pr159r_source_locator_value_capture/validator.py",
-    )
+    for branch in context.VALIDATION_INFRASTRUCTURE_BRANCHES:
+        assert context.is_validation_infrastructure_branch(branch)
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_ci_branch_context_matrix.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/run_validation_gates.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "src/qtt/stage1_prediction_markets/"
+            "pr159r_source_locator_value_capture/validator.py",
+        )
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
         "tools/validate_ci_branch_context_matrix.py",
     )
     assert not context.is_validation_infrastructure_changed_path(
-        branch,
+        context.CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH,
         "docs/master_plan/generated/PR164ReviewProvenanceAudit.report.json",
     )
     assert not context.is_validation_infrastructure_changed_path(
-        branch,
+        context.CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH,
         "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
     )
 
