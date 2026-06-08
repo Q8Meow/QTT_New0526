@@ -13,6 +13,7 @@ from tools.ci_branch_context import (
     current_branch_context,
     is_explicit_downstream_repair_changed_path,
     is_pr_or_later_branch,
+    is_validation_infrastructure_changed_path,
 )
 
 from . import constants as c
@@ -1420,6 +1421,8 @@ def _is_allowed_pr152_changed_path_for_branch(
     ):
         return True
     if is_explicit_downstream_repair_changed_path(branch, normalized):
+        return True
+    if is_validation_infrastructure_changed_path(branch, normalized):
         return True
     return normalized in c.EXACT_CHANGED_PATH_CANDIDATES and _branch_allows_pr152_changed_paths(
         branch

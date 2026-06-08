@@ -12,6 +12,7 @@ from tools.ci_branch_context import (
     current_branch_context,
     is_explicit_downstream_repair_changed_path,
     is_pr_or_later_branch,
+    is_validation_infrastructure_changed_path,
 )
 
 from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (
@@ -1566,6 +1567,8 @@ def _is_allowed_pr150_changed_path_for_branch(
     if _is_pr152_audit_changed_path_for_branch(normalized, branch):
         return True
     if is_explicit_downstream_repair_changed_path(branch, normalized):
+        return True
+    if is_validation_infrastructure_changed_path(branch, normalized):
         return True
     return normalized in c.EXACT_CHANGED_PATH_CANDIDATES and _branch_allows_pr150_changed_paths(
         branch
