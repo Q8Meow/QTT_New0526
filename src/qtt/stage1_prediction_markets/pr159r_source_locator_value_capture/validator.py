@@ -53,20 +53,35 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
     return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
 
 
-def _branch_merged_ancestry_present(root: Path, branch: str) -> bool:
-    return ci_branch_context.pr_branch_merged_ancestry_present(
+def _branch_merged_ancestry_present(
+    root: Path,
+    branch: str,
+    *,
+    refresh_shallow: bool = False,
+) -> bool:
+    helper = (
+        ci_branch_context.pr_branch_merged_ancestry_present_with_shallow_refresh
+        if refresh_shallow
+        else ci_branch_context.pr_branch_merged_ancestry_present
+    )
+    return helper(root, branch, git_stdout=_git_stdout)
+
+
+def _pr159r_ancestry_present(root: Path, *, refresh_shallow: bool = False) -> bool:
+    return _branch_merged_ancestry_present(
         root,
-        branch,
-        git_stdout=_git_stdout,
+        c.EXPECTED_BRANCH,
+        refresh_shallow=refresh_shallow,
     )
 
 
-def _pr159r_ancestry_present(root: Path) -> bool:
-    return _branch_merged_ancestry_present(root, c.EXPECTED_BRANCH)
-
-
-def _pr159r_or_repair_ancestry_present(root: Path, branch_context: str = "") -> bool:
-    if _pr159r_ancestry_present(root):
+def _pr159r_or_repair_ancestry_present(
+    root: Path,
+    branch_context: str = "",
+    *,
+    refresh_shallow: bool = False,
+) -> bool:
+    if _pr159r_ancestry_present(root, refresh_shallow=refresh_shallow):
         return True
     ancestry_branches = list(_BRANCH_CONTEXT_RELAXATION_REPAIR_BRANCHES)
     normalized = ci_branch_context.normalize_branch_context(branch_context)
@@ -76,7 +91,14 @@ def _pr159r_or_repair_ancestry_present(root: Path, branch_context: str = "") -> 
         and normalized not in ancestry_branches
     ):
         ancestry_branches.append(normalized)
-    return any(_branch_merged_ancestry_present(root, branch) for branch in ancestry_branches)
+    return any(
+        _branch_merged_ancestry_present(
+            root,
+            branch,
+            refresh_shallow=refresh_shallow,
+        )
+        for branch in ancestry_branches
+    )
 
 
 def _pr159r_detached_ci_context_allowed(root: Path) -> bool:
@@ -107,7 +129,11 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
     branch = context.branch
     if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159R"):
         return
-    ancestry_present = _pr159r_or_repair_ancestry_present(root)
+    main_push_context = ci_branch_context.github_actions_main_push_context_active()
+    ancestry_present = _pr159r_or_repair_ancestry_present(
+        root,
+        refresh_shallow=main_push_context,
+    )
     if ci_branch_context.is_main_push_context_allowed_for_upstream_pr_gate(
         branch,
         "PR159R",
@@ -115,7 +141,7 @@ def _validate_branch(root: Path, failures: list[str], receipts: list[str]) -> No
     ):
         receipts.append(c.PR159R_REASON_CI_MAIN_PUSH_RELAXATION_BRANCH_AND_ANCESTRY)
         return
-    if ci_branch_context.github_actions_main_push_context_active():
+    if main_push_context:
         failures.append(f"PR159R_BLOCKED_WRONG_BRANCH:{branch or 'main'}")
         return
     if ci_branch_context.is_branch_allowed_for_upstream_pr_gate(
