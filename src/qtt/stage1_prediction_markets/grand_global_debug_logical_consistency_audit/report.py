@@ -260,13 +260,51 @@ _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS = frozenset(
     }
 )
 
+_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS = frozenset(
+    {
+        "tools/validate_ci_branch_context_matrix.py",
+        "tools/validate_nested_validator_contracts.py",
+        "tools/validate_repair_pr_changed_file_scope.py",
+    }
+)
+
+
+def _validation_infrastructure_report_count_context_allowed(repo_root: Path) -> bool:
+    branch = branch_context_policy.current_branch_context(repo_root).branch
+    if is_validation_infrastructure_branch(branch):
+        return True
+    return any(
+        branch_context_policy.pr_branch_merged_ancestry_present(
+            repo_root,
+            validation_infrastructure_branch,
+        )
+        for validation_infrastructure_branch in sorted(
+            branch_context_policy.VALIDATION_INFRASTRUCTURE_BRANCHES
+        )
+    )
+
+
+def _pr_ci_fastfail_validator_tool_delta(repo_root: Path) -> int | None:
+    validation_tool_paths = frozenset(
+        path
+        for path in VALIDATION_INFRASTRUCTURE_CHANGED_PATHS
+        if path.startswith("tools/validate_") and path.endswith(".py")
+    )
+    if validation_tool_paths != _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS:
+        return None
+    if any(
+        not (repo_root / rel_path).is_file()
+        for rel_path in _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS
+    ):
+        return None
+    return len(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS)
+
 
 def _validation_infrastructure_report_count_mismatch_allowed(
     repo_root: Path,
     diagnostics: Sequence[Mapping[str, Any]],
 ) -> bool:
-    branch = branch_context_policy.current_branch_context(repo_root).branch
-    if not is_validation_infrastructure_branch(branch):
+    if not _validation_infrastructure_report_count_context_allowed(repo_root):
         return False
     if len(diagnostics) != len(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS):
         return False
@@ -290,14 +328,8 @@ def _validation_infrastructure_report_count_mismatch_allowed(
             return False
         deltas.add(rebuilt - tracked)
 
-    validation_tool_delta = len(
-        [
-            path
-            for path in VALIDATION_INFRASTRUCTURE_CHANGED_PATHS
-            if path.startswith("tools/validate_") and path.endswith(".py")
-        ]
-    )
-    return deltas == {validation_tool_delta}
+    validation_tool_delta = _pr_ci_fastfail_validator_tool_delta(repo_root)
+    return validation_tool_delta is not None and deltas == {validation_tool_delta}
 
 
 def _project_validation_infrastructure_report_counts(
