@@ -50,6 +50,8 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/"
         "grand_global_debug_logical_consistency_audit/report.py",
         "src/qtt/stage1_prediction_markets/"
+        "grand_global_debug_logical_consistency_audit/constants.py",
+        "src/qtt/stage1_prediction_markets/"
         "master_plan_residual_candidate_coverage/validator.py",
         "src/qtt/stage1_prediction_markets/"
         "official_source_retrieval_target_pack_parameter_defaults/report.py",
@@ -71,6 +73,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
         "tools/ci_branch_context.py",
         "tools/validate_ci_branch_context_matrix.py",
@@ -137,6 +140,18 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
     160: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
     161: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
 }
+PR152_CURRENTIZATION_AFTER_FASTFAIL_MERGE_CHANGED_PATHS = frozenset(
+    {
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/"
+        "grand_global_debug_logical_consistency_audit/constants.py",
+        "src/qtt/stage1_prediction_markets/"
+        "grand_global_debug_logical_consistency_audit/report.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
+        "tools/ci_branch_context.py",
+    }
+)
 PR159_BRANCH = "pr159-official-source-retry-atomicrows-source-completion-bridge"
 PR159_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR159_",
@@ -1870,6 +1885,14 @@ def upstream_branch_gate_policy(value: str | int) -> UpstreamBranchGatePolicy:
         raise KeyError(f"unknown upstream branch gate: {value!r}") from exc
 
 
+def upstream_branch_gate_pr_number(value: str | int) -> int | None:
+    gate_id = normalize_upstream_branch_gate(value)
+    match = re.match(r"^PR(?P<number>[0-9]+)", gate_id)
+    if match is None:
+        return None
+    return int(match.group("number"))
+
+
 def is_explicit_repair_branch_allowed_for_upstream_pr_gate(
     branch: str,
     upstream_gate: str | int,
@@ -1902,6 +1925,15 @@ def is_branch_allowed_for_upstream_pr_gate(
         return include_main and ancestry_present
     if normalized in policy.allowed_branches:
         return True
+    gate_pr_number = upstream_branch_gate_pr_number(upstream_gate)
+    branch_pr_number = roadmap_pr_number(normalized)
+    if (
+        ancestry_present
+        and gate_pr_number is not None
+        and branch_pr_number is not None
+        and branch_pr_number >= gate_pr_number
+    ):
+        return True
     return (
         normalized in policy.local_repair_branches_requiring_ancestry
         and ancestry_present
@@ -1921,6 +1953,12 @@ def is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
         or normalized in policy.allowed_branches
         or normalized in policy.local_repair_branches_requiring_ancestry
         or normalized in policy.detached_head_ref_branches
+        or (
+            upstream_branch_gate_pr_number(upstream_gate) is not None
+            and roadmap_pr_number(normalized) is not None
+            and roadmap_pr_number(normalized)
+            >= upstream_branch_gate_pr_number(upstream_gate)
+        )
     )
 
 
@@ -2146,6 +2184,16 @@ def is_explicit_downstream_repair_branch_context_allowed(
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if (
+        is_pr_or_later_branch(
+            branch,
+            152,
+            allow_main=False,
+            allow_repair=False,
+        )
+        and normalized in PR152_CURRENTIZATION_AFTER_FASTFAIL_MERGE_CHANGED_PATHS
+    ):
+        return True
     if branch == PR163_BRANCH:
         return normalized in PR163_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)

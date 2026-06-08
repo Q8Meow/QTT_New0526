@@ -30,6 +30,7 @@ jobs:
 
       - name: Run fast validation preflight
         run: |
+          python -B tools/validate_grand_global_debug_logical_consistency_audit.py --repo-root .
           python -B tools/validate_ci_branch_context_matrix.py --repo-root .
           python -B tools/validate_repair_pr_changed_file_scope.py --repo-root .
           python -B tools/validate_nested_validator_contracts.py --repo-root .
