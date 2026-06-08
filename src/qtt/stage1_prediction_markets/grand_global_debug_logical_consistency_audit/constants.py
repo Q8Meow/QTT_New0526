@@ -359,6 +359,7 @@ PR152_AUDIT_CHANGED_PATHS = (
     ),
     "tools/validate_grand_global_debug_logical_consistency_audit.py",
     "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
+    ".github/workflows/qtt_validation.yml",
     "tools/run_validation_gates.py",
     "tests/fail_closed/test_run_validation_gates.py",
     (

@@ -10,13 +10,11 @@ import re
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from tools import ci_branch_context as branch_context_policy
 from tools.ci_branch_context import (
     VALIDATION_INFRASTRUCTURE_CHANGED_PATHS,
     current_branch_context,
     is_explicit_downstream_repair_changed_path,
     is_pr_or_later_branch,
-    is_validation_infrastructure_branch,
     is_validation_infrastructure_changed_path,
 )
 
@@ -267,52 +265,78 @@ _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS = frozenset(
         "tools/validate_repair_pr_changed_file_scope.py",
     }
 )
+_PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA = len(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS)
 
 
-def _validation_infrastructure_report_count_context_allowed(repo_root: Path) -> bool:
-    branch = branch_context_policy.current_branch_context(repo_root).branch
-    if is_validation_infrastructure_branch(branch):
-        return True
-    return any(
-        branch_context_policy.pr_branch_merged_ancestry_present(
-            repo_root,
-            validation_infrastructure_branch,
-        )
-        for validation_infrastructure_branch in sorted(
-            branch_context_policy.VALIDATION_INFRASTRUCTURE_BRANCHES
-        )
-    )
-
-
-def _pr_ci_fastfail_validator_tool_delta(repo_root: Path) -> int | None:
-    validation_tool_paths = frozenset(
+def _registered_validation_infrastructure_validator_tool_paths() -> frozenset[str]:
+    return frozenset(
         path
         for path in VALIDATION_INFRASTRUCTURE_CHANGED_PATHS
         if path.startswith("tools/validate_") and path.endswith(".py")
     )
-    if validation_tool_paths != _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS:
-        return None
-    if any(
-        not (repo_root / rel_path).is_file()
-        for rel_path in _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS
-    ):
-        return None
-    return len(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS)
 
 
-def _validation_infrastructure_report_count_mismatch_allowed(
-    repo_root: Path,
+def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[str]:
+    failures: list[str] = []
+    registered_tool_paths = _registered_validation_infrastructure_validator_tool_paths()
+    unregistered_tool_paths = registered_tool_paths - _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS
+    missing_policy_paths = _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS - registered_tool_paths
+
+    for rel_path in sorted(unregistered_tool_paths, key=_stable_path_key):
+        failures.append(
+            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_UNREGISTERED_TOOL: "
+            f"{rel_path} is not covered by the current allowed delta policy; "
+            "explicitly register it in the PR152 validation-infrastructure inventory "
+            "delta policy or choose a deliberate PR152 currentization strategy"
+        )
+    for rel_path in sorted(missing_policy_paths, key=_stable_path_key):
+        failures.append(
+            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_REGISTRATION: "
+            f"{rel_path} must remain explicitly registered in the current allowed "
+            "delta policy"
+        )
+
+    for rel_path in sorted(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS, key=_stable_path_key):
+        path = repo_root / rel_path
+        if not path.is_file():
+            failures.append(
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_TOOL: "
+                f"{rel_path}"
+            )
+            continue
+        if _category_for_path(rel_path, text_file=_is_text_file(path)) != "VALIDATOR_TOOL":
+            failures.append(
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_NOT_VALIDATOR_TOOL: "
+                f"{rel_path}"
+            )
+
+    return failures
+
+
+def _validation_infrastructure_report_count_delta_failures(
     diagnostics: Sequence[Mapping[str, Any]],
-) -> bool:
-    if not _validation_infrastructure_report_count_context_allowed(repo_root):
-        return False
+) -> list[str]:
     if len(diagnostics) != len(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS):
-        return False
-    if {
-        str(diagnostic.get("json_path"))
-        for diagnostic in diagnostics
-    } != _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS:
-        return False
+        return [
+            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISMATCH_COUNT: "
+            f"expected {len(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS)} "
+            f"mismatch paths, found {len(diagnostics)}"
+        ]
+    diagnostic_paths = {str(diagnostic.get("json_path")) for diagnostic in diagnostics}
+    unexpected_paths = diagnostic_paths - _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS
+    missing_paths = _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS - diagnostic_paths
+    failures = [
+        "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_UNEXPECTED_JSON_PATH: "
+        f"{path}"
+        for path in sorted(unexpected_paths)
+    ]
+    failures.extend(
+        "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_JSON_PATH: "
+        f"{path}"
+        for path in sorted(missing_paths)
+    )
+    if failures:
+        return failures
 
     deltas: set[int] = set()
     for diagnostic in diagnostics:
@@ -321,15 +345,53 @@ def _validation_infrastructure_report_count_mismatch_allowed(
             or diagnostic.get("tracked_type") != "int"
             or diagnostic.get("rebuilt_type") != "int"
         ):
-            return False
+            return [
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_NON_INTEGER_MISMATCH: "
+                f"{diagnostic.get('json_path')}"
+            ]
         tracked = diagnostic.get("tracked_value")
         rebuilt = diagnostic.get("rebuilt_value")
         if not isinstance(tracked, int) or not isinstance(rebuilt, int):
-            return False
+            return [
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_NON_INTEGER_VALUE: "
+                f"{diagnostic.get('json_path')}"
+            ]
         deltas.add(rebuilt - tracked)
+    if deltas != {_PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA}:
+        found = ", ".join(f"{delta:+d}" for delta in sorted(deltas))
+        return [
+            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_WRONG_DELTA: "
+            f"expected +{_PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA}, found {found}"
+        ]
+    return []
 
-    validation_tool_delta = _pr_ci_fastfail_validator_tool_delta(repo_root)
-    return validation_tool_delta is not None and deltas == {validation_tool_delta}
+
+def _validation_infrastructure_report_count_policy_failures(
+    repo_root: Path,
+    diagnostics: Sequence[Mapping[str, Any]],
+) -> list[str]:
+    diagnostic_paths = {str(diagnostic.get("json_path")) for diagnostic in diagnostics}
+    if diagnostic_paths.isdisjoint(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS):
+        return []
+    return sorted(
+        set(
+            _validation_infrastructure_delta_policy_failures(repo_root)
+            + _validation_infrastructure_report_count_delta_failures(diagnostics)
+        )
+    )
+
+
+def _validation_infrastructure_report_count_mismatch_allowed(
+    repo_root: Path,
+    diagnostics: Sequence[Mapping[str, Any]],
+) -> bool:
+    diagnostic_paths = {str(diagnostic.get("json_path")) for diagnostic in diagnostics}
+    if diagnostic_paths.isdisjoint(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS):
+        return False
+    return not _validation_infrastructure_report_count_policy_failures(
+        repo_root,
+        diagnostics,
+    )
 
 
 def _project_validation_infrastructure_report_counts(
@@ -1620,6 +1682,13 @@ def validate_repository_artifacts(
         )
         if _validation_infrastructure_report_count_mismatch_allowed(root, diagnostics):
             diagnostics = []
+        else:
+            failures.extend(
+                _validation_infrastructure_report_count_policy_failures(
+                    root,
+                    diagnostics,
+                )
+            )
     if actual_report and actual_report != expected_report and diagnostics:
         failures.append("PR152_REPORT_STALE_OR_NONDETERMINISTIC")
         for diagnostic in diagnostics:

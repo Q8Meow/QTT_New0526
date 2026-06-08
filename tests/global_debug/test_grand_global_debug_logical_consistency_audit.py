@@ -59,6 +59,87 @@ def _mutated_pr151_root(tmp_path: Path, mutator) -> Path:
     return root
 
 
+_PR152_VALIDATION_INFRASTRUCTURE_COUNT_PATHS = {
+    "$.completed_pr_artifact_audit.validator_tool_count": (
+        "completed_pr_artifact_audit",
+        "validator_tool_count",
+    ),
+    "$.validator_tool_registry_audit.validator_tool_count": (
+        "validator_tool_registry_audit",
+        "validator_tool_count",
+    ),
+    "$.whole_repo_inventory_audit.audited_text_file_count": (
+        "whole_repo_inventory_audit",
+        "audited_text_file_count",
+    ),
+    "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL": (
+        "whole_repo_inventory_audit",
+        "category_counts",
+        "VALIDATOR_TOOL",
+    ),
+    "$.whole_repo_inventory_audit.tracked_file_count": (
+        "whole_repo_inventory_audit",
+        "tracked_file_count",
+    ),
+}
+
+
+def _set_nested(payload: dict, keys: tuple[str, ...], value: int) -> None:
+    target = payload
+    for key in keys[:-1]:
+        target = target[key]
+    target[keys[-1]] = value
+
+
+def _get_nested(payload: dict, keys: tuple[str, ...]) -> int:
+    target = payload
+    for key in keys:
+        target = target[key]
+    return target
+
+
+def _pr152_validation_infrastructure_count_payloads(delta: int = 3) -> tuple[dict, dict]:
+    tracked = {
+        "completed_pr_artifact_audit": {"validator_tool_count": 139},
+        "validator_tool_registry_audit": {"validator_tool_count": 139},
+        "whole_repo_inventory_audit": {
+            "audited_text_file_count": 6250,
+            "category_counts": {"VALIDATOR_TOOL": 139},
+            "tracked_file_count": 6251,
+        },
+    }
+    rebuilt = deepcopy(tracked)
+    for keys in _PR152_VALIDATION_INFRASTRUCTURE_COUNT_PATHS.values():
+        _set_nested(rebuilt, keys, _get_nested(tracked, keys) + delta)
+    return tracked, rebuilt
+
+
+def _validate_stubbed_pr152_report_delta(
+    monkeypatch,
+    repo_root: Path,
+    tracked: dict,
+    rebuilt: dict,
+) -> list[str]:
+    monkeypatch.setattr(pr152_report, "build_report", lambda repo_root: deepcopy(rebuilt))
+    monkeypatch.setattr(pr152_report, "validate_report_payload", lambda payload: [])
+    monkeypatch.setattr(pr152_report, "_read_json", lambda path: deepcopy(tracked))
+    monkeypatch.setattr(
+        pr152_report,
+        "_validate_changed_paths",
+        lambda repo_root, tracked_report_write_allowed=False: [],
+    )
+    return pr152_report.validate_repository_artifacts(repo_root)
+
+
+def _write_policy_validator_tools(root: Path, *, omit: str | None = None) -> None:
+    for rel_path in pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS:
+        if rel_path == omit:
+            continue
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# validator tool\n", encoding="utf-8")
+
+
 def test_pr152_consumes_required_preflight_and_alias() -> None:
     payload = _report()
     consumed = {
@@ -339,6 +420,253 @@ def test_stale_report_comparator_keeps_repository_validation_fail_closed(
     ]
 
 
+def test_pr152_validation_infrastructure_exact_fastfail_delta_is_allowed(
+    monkeypatch,
+) -> None:
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        tracked,
+        rebuilt,
+    )
+
+    assert failures == []
+    assert pr152_report._validation_infrastructure_delta_policy_failures(REPO_ROOT) == []
+    for rel_path in pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS:
+        assert (REPO_ROOT / rel_path).is_file()
+        assert (
+            pr152_report._category_for_path(
+                rel_path,
+                text_file=pr152_report._is_text_file(REPO_ROOT / rel_path),
+            )
+            == "VALIDATOR_TOOL"
+        )
+
+
+def test_pr152_validation_infrastructure_delta_allowed_in_pull_request_detached_context(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/202/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "202/merge")
+    monkeypatch.setenv(
+        "GITHUB_HEAD_REF",
+        "pr201-pr152-currentization-after-merge",
+    )
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        tracked,
+        rebuilt,
+    )
+
+    assert pr152_report.current_branch_context(REPO_ROOT).branch == (
+        "pr201-pr152-currentization-after-merge"
+    )
+    assert failures == []
+
+
+def test_pr152_validation_infrastructure_delta_allowed_in_main_push_context(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        tracked,
+        rebuilt,
+    )
+
+    assert pr152_report.current_branch_context(REPO_ROOT).branch == "main"
+    assert failures == []
+
+
+def test_pr152_validation_infrastructure_delta_is_policy_based_not_branch_based(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        pr152_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(branch="unrelated-branch", source="unit-test"),
+    )
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    assert (
+        _validate_stubbed_pr152_report_delta(
+            monkeypatch,
+            REPO_ROOT,
+            tracked,
+            rebuilt,
+        )
+        == []
+    )
+
+    wrong_tracked = {"completed_pr_artifact_audit": {"test_file_count": 10}}
+    wrong_rebuilt = {"completed_pr_artifact_audit": {"test_file_count": 13}}
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        wrong_tracked,
+        wrong_rebuilt,
+    )
+    assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+
+
+def test_pr152_validation_infrastructure_delta_wrong_count_fails(
+    monkeypatch,
+) -> None:
+    for delta in (1, 2, 4):
+        tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=delta)
+        failures = _validate_stubbed_pr152_report_delta(
+            monkeypatch,
+            REPO_ROOT,
+            tracked,
+            rebuilt,
+        )
+
+        assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+        assert any(
+            failure.startswith(
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_WRONG_DELTA"
+            )
+            for failure in failures
+        )
+
+
+def test_pr152_validation_infrastructure_delta_wrong_json_path_fails(
+    monkeypatch,
+) -> None:
+    tracked = {"completed_pr_artifact_audit": {"test_file_count": 10}}
+    rebuilt = {"completed_pr_artifact_audit": {"test_file_count": 13}}
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        tracked,
+        rebuilt,
+    )
+
+    assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+    assert any(
+        "$.completed_pr_artifact_audit.test_file_count" in failure
+        for failure in failures
+    )
+
+
+def test_pr152_validation_infrastructure_delta_missing_expected_tool_fails(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    missing_path = "tools/validate_nested_validator_contracts.py"
+    _write_policy_validator_tools(tmp_path, omit=missing_path)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        tmp_path,
+        tracked,
+        rebuilt,
+    )
+
+    assert (
+        "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_TOOL: "
+        f"{missing_path}"
+    ) in failures
+    assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+
+
+def test_pr152_validation_infrastructure_delta_future_tool_fails_with_path(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    future_tool = "tools/validate_future_tool.py"
+    _write_policy_validator_tools(tmp_path)
+    future_path = tmp_path / future_tool
+    future_path.parent.mkdir(parents=True, exist_ok=True)
+    future_path.write_text("# future validator\n", encoding="utf-8")
+    monkeypatch.setattr(
+        pr152_report,
+        "VALIDATION_INFRASTRUCTURE_CHANGED_PATHS",
+        frozenset(
+            {
+                *pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS,
+                future_tool,
+            }
+        ),
+    )
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=4)
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        tmp_path,
+        tracked,
+        rebuilt,
+    )
+
+    assert any(
+        failure.startswith(
+            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_UNREGISTERED_TOOL: "
+            f"{future_tool} "
+        )
+        and "not covered by the current allowed delta policy" in failure
+        and "explicitly register it in the PR152 validation-infrastructure inventory "
+        "delta policy" in failure
+        and "deliberate PR152 currentization strategy" in failure
+        for failure in failures
+    )
+    assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in failures
+
+
+def test_pr152_validation_infrastructure_delta_forbidden_mismatch_paths_fail() -> None:
+    forbidden_paths = [
+        "$.generated_report_consistency_audit.generated_report_count",
+        "$.whole_repo_inventory_audit.category_counts.MASTER_PLAN",
+        "$.whole_repo_inventory_audit.category_counts.ATOMICROWS",
+        "$.whole_repo_inventory_audit.category_counts.SOURCE_EVIDENCE",
+        "$.source_evidence_boundary_audit.authority_boundary_status",
+        "$.no_claim_flags.connector_semantic_value_created",
+        "$.no_claim_flags.private_state_fetch_created",
+        "$.no_claim_flags.runtime_cash_receipt_created",
+        "$.no_claim_flags.order_execution_created",
+        "$.no_claim_flags.live_reachability_created",
+        "$.no_claim_flags.quantum_backend_call_created",
+        "$.no_claim_flags.llm_runtime_created",
+        "$.no_claim_flags.qtt_integrity_authority_created",
+        "$.no_claim_flags.profit_proof_created",
+    ]
+    forbidden_paths.extend(
+        [
+            "$.no_claim_flags." + "sha256_authority_created",
+            "$.no_claim_flags." + "freeze_authority_created",
+            "$.no_claim_flags." + "checksum_authority_created",
+        ]
+    )
+
+    for json_path in forbidden_paths:
+        diagnostic = {
+            "json_path": json_path,
+            "mismatch_kind": "value_mismatch",
+            "tracked_type": "int",
+            "rebuilt_type": "int",
+            "tracked_value": 1,
+            "rebuilt_value": 4,
+        }
+        assert not pr152_report._validation_infrastructure_report_count_mismatch_allowed(
+            REPO_ROOT,
+            [diagnostic],
+        )
+
+
 def test_explicit_tracked_write_guard_allows_only_pr152_report_on_main(monkeypatch) -> None:
     report_path = c.REPORT_PATH.as_posix()
     unrelated_path = "docs/master_plan/generated/PR152_unrelated.report.json"
@@ -371,6 +699,30 @@ def test_explicit_tracked_write_guard_allows_only_pr152_report_on_main(monkeypat
         REPO_ROOT,
         tracked_report_write_allowed=True,
     ) == [expected_unrelated_failure]
+
+
+def test_pr152_fast_preflight_workflow_path_is_exactly_scoped(monkeypatch) -> None:
+    workflow_path = ".github/workflows/qtt_validation.yml"
+    assert workflow_path in c.EXACT_CHANGED_PATH_CANDIDATES
+    monkeypatch.setattr(
+        pr152_report,
+        "current_branch_context",
+        lambda repo_root: BranchContext(
+            branch="pr201-pr152-currentization-after-merge",
+            source="unit-test",
+        ),
+    )
+    monkeypatch.setattr(pr152_report, "_changed_paths", lambda repo_root: [workflow_path])
+    assert pr152_report.validate_repository_artifacts(REPO_ROOT) == []
+
+    monkeypatch.setattr(
+        pr152_report,
+        "_changed_paths",
+        lambda repo_root: [workflow_path, ".github/workflows/unrelated.yml"],
+    )
+    assert pr152_report.validate_repository_artifacts(REPO_ROOT) == [
+        "PR152_CHANGED_PATH_OUT_OF_SCOPE: .github/workflows/unrelated.yml"
+    ]
 
 
 def test_missing_and_malformed_upstream_fail_closed(tmp_path) -> None:

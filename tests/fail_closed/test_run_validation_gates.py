@@ -9144,8 +9144,16 @@ def test_github_workflow_runs_fast_preflight_before_full_validation():
     ).read_text(encoding="utf-8")
     preflight_index = workflow.index("Run fast validation preflight")
     aggregate_index = workflow.index("Run canonical validation gates")
+    pr152_index = workflow.index(
+        "tools/validate_grand_global_debug_logical_consistency_audit.py --repo-root ."
+    )
 
     assert preflight_index < aggregate_index
+    assert preflight_index < pr152_index < aggregate_index
+    assert (
+        "python -B tools/validate_grand_global_debug_logical_consistency_audit.py "
+        "--repo-root ."
+    ) in workflow
     assert "tools/validate_ci_branch_context_matrix.py --repo-root ." in workflow
     assert "tools/validate_repair_pr_changed_file_scope.py --repo-root ." in workflow
     assert "tools/validate_nested_validator_contracts.py --repo-root ." in workflow
