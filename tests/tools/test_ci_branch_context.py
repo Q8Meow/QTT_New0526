@@ -1874,6 +1874,72 @@ def test_pr164_explicit_changed_path_allowance_is_narrow(monkeypatch):
     )
 
 
+def test_pr165_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr165-evidence-backed-scoring-ranking"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=165) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_evidence_backed_scoring_ranking/validators.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_evidence_backed_scoring_ranking/schemas/"
+        "pr165_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr165_evidence_backed_scoring_ranking/test_pr165_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr165_shards/"
+        "PR165_GlobalCandidateRanking.part_0001_of_0004.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr165_evidence_backed_scoring_ranking.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr165_evidence_backed_scoring_ranking.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR164_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr164_review_provenance_qku_canonical_coverage_audit/validators.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/1001/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
     repair_branch = context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
@@ -2302,6 +2368,19 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "src/qtt/stage1_prediction_markets/"
             "pr159r_source_locator_value_capture/validator.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_pr165_evidence_backed_scoring_ranking.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/PR165_FinalSummary.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/pr165_shards/"
+            "PR165_GlobalCandidateRanking.part_0001_of_0004.report.json",
         )
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
