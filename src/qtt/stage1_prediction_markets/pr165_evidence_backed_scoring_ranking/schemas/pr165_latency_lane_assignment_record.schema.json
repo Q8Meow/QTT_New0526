@@ -1,0 +1,30 @@
+{
+  "$comment": "PR165 schemas reference central scoring/status/authority/repair vocabularies.",
+  "$id": "pr165_latency_lane_assignment_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "qku_id": {
+      "type": "string"
+    },
+    "validation_status": {
+      "type": "string"
+    },
+    "vocab_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object",
+  "x_pr165_vocab_refs": [
+    "src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/central_scoring_reason_codes.py",
+    "src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_status_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_authority_policy.py",
+    "src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/repair_routing_vocab.py"
+  ]
+}
