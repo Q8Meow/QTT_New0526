@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 import re
@@ -13,6 +14,7 @@ from .negative_memory_action_policy import (
     AGENT_SELECTION_OVERLAY_ACTIONS,
     FORBIDDEN_OVERLAY_ACTIONS,
     requires_repair,
+    requires_retest,
 )
 from .negative_memory_authority_policy import (
     AUTHORITY_CLASS,
@@ -127,6 +129,20 @@ def _validate_manifest(reports: dict[str, dict[str, Any]], records: dict[str, li
 
 def _validate_counts(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
     summary = records["PR165_B_FinalSummary.report.json"][0]
+    memory_rows = records["PR165_B_CandidateVersionMemoryRegistry.report.json"]
+    class_counts = Counter(row["memory_classification"] for row in memory_rows)
+    action_counts = Counter(row["memory_action_policy"] for row in memory_rows)
+    reason_counts = Counter(reason for row in memory_rows for reason in row.get("reason_codes", []))
+    broad_non_positive = sum(
+        1 for row in memory_rows if is_non_positive_memory(row["memory_classification"])
+    )
+    structural_invalidity = class_counts["STRUCTURAL_INVALIDITY_ARCHIVE_CANDIDATE"]
+    hard_negative = (
+        structural_invalidity
+        + int(summary.get("global_ban_rows", 0))
+        + int(summary.get("permanent_rejection_rows", 0))
+        + int(summary.get("live_ban_rows", 0))
+    )
     expectations = {
         "memory_candidate_rows": ("PR165_B_CandidateVersionMemoryRegistry.report.json", 6502),
         "condition_fingerprint_rows": ("PR165_B_ConditionFingerprintRegistry.report.json", 6502),
@@ -147,7 +163,32 @@ def _validate_counts(records: dict[str, list[dict[str, Any]]], failures: list[st
         actual = len(records[filename])
         _expect(actual == expected, failures, f"{filename} expected {expected} rows got {actual}")
         _expect(summary.get(field) == actual, failures, f"summary {field} mismatch")
-    _expect(summary.get("negative_memory_rows", 0) > 0, failures, "negative memory rows missing")
+    _expect(summary.get("condition_scoped_memory_rows") == 6502, failures, "condition scoped memory row mismatch")
+    _expect(summary.get("negative_memory_rows") == broad_non_positive, failures, "negative memory compatibility count mismatch")
+    _expect(summary.get("broad_non_positive_memory_rows") == broad_non_positive, failures, "broad non-positive count mismatch")
+    _expect(summary.get("condition_memory_caution_rows") == broad_non_positive, failures, "condition caution count mismatch")
+    _expect(
+        summary.get("negative_memory_rows_semantics")
+        == "BACKWARD_COMPATIBILITY_ALIAS_FOR_BROAD_NON_POSITIVE_CONDITION_MEMORY_CAUTION_ROWS",
+        failures,
+        "negative memory compatibility semantics drift",
+    )
+    _expect(summary.get("negative_memory_rows_are_qku_untradable_rows") is False, failures, "negative memory rows marked untradable")
+    _expect(summary.get("hard_negative_memory_rows") == hard_negative == 0, failures, "hard negative memory rows must stay zero")
+    _expect(summary.get("condition_scoped_avoid_rows") == len(records["PR165_B_NegativeCombinationAvoidanceRegistry.report.json"]), failures, "condition scoped avoid count mismatch")
+    _expect(summary.get("cooldown_rows") == len(records["PR165_B_CooldownPolicyRegistry.report.json"]), failures, "cooldown count mismatch")
+    _expect(summary.get("repair_required_rows") == sum(1 for row in memory_rows if requires_repair(row["memory_action_policy"])), failures, "repair required count mismatch")
+    _expect(summary.get("retest_required_rows") == len(records["PR165_B_ReplayPaperRetestQueue.report.json"]), failures, "retest required count mismatch")
+    _expect(summary.get("neutral_insufficient_evidence_rows") == class_counts["NEUTRAL_INSUFFICIENT_EVIDENCE"], failures, "neutral insufficient evidence count mismatch")
+    _expect(summary.get("sparse_regime_watch_rows") == reason_counts["PR165_B_SPARSE_REGIME_EVIDENCE"], failures, "sparse regime watch count mismatch")
+    _expect(summary.get("false_discovery_watch_rows") == class_counts["FALSE_DISCOVERY_RISK_WATCH"], failures, "false discovery watch count mismatch")
+    _expect(summary.get("condition_scoped_cooldown_action_rows") == action_counts["CONDITION_SCOPED_COOLDOWN"], failures, "cooldown action count mismatch")
+    _expect(summary.get("condition_scoped_avoid_action_rows") == action_counts["AVOID_ONLY_WITHIN_MATCHING_CONDITION"], failures, "avoid action count mismatch")
+    _expect(summary.get("action_policy_retest_required_rows") == sum(1 for row in memory_rows if requires_retest(row["memory_action_policy"])), failures, "action-policy retest count mismatch")
+    _expect(summary.get("qku_untradable_rows") == 0, failures, "QKU untradable rows must stay zero")
+    _expect(summary.get("permanent_rejection_rows") == 0, failures, "permanent rejection rows must stay zero")
+    _expect(summary.get("live_ban_rows") == 0, failures, "live ban rows must stay zero")
+    _expect(summary.get("replay_paper_retest_rows") == summary.get("retest_queue_rows"), failures, "replay/paper retest rows must match queue rows")
     _expect(summary.get("positive_memory_rows", 0) > 0, failures, "positive memory rows missing")
     _expect(summary.get("fragile_memory_rows", 0) > 0, failures, "fragile memory rows missing")
     non_positive = summary["negative_memory_rows"]
@@ -161,6 +202,7 @@ def _validate_counts(records: dict[str, list[dict[str, Any]]], failures: list[st
         _expect(summary.get(field) == len(records[filename]) == non_positive, failures, f"{field} must match non-positive memory rows")
     for field in ("metadata_only_rows", "placeholder_only_rows", "future_consumer_only_rows", "unknown_status_rows", "global_ban_rows", "global_ban_rows_without_structural_invalidity"):
         _expect(summary.get(field) == 0, failures, f"{field} must be zero")
+    _expect(summary.get("structural_invalidity_rows") == structural_invalidity == 0, failures, "structural invalidity rows must stay zero")
     _expect(summary.get("orphan_counts_all_0") is True, failures, "orphan counts not all zero")
     _expect(summary.get("authority_counts_all_0") is True, failures, "authority counts not all zero")
 

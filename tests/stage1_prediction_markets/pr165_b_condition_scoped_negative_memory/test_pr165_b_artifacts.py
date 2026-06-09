@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 from src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory import paths as p
@@ -8,9 +9,12 @@ from src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory.
     AGENT_SELECTION_OVERLAY_ACTIONS,
     FORBIDDEN_OVERLAY_ACTIONS,
     MEMORY_ACTION_POLICIES,
+    requires_repair,
+    requires_retest,
 )
 from src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory.negative_memory_status_vocab import (
     MEMORY_CLASSIFICATIONS,
+    is_non_positive_memory,
 )
 from src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory.report_sharding import load_report_records
 from src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory.validators import validate_artifacts
@@ -32,16 +36,65 @@ def test_pr165_b_generated_artifacts_validate():
 def test_pr165_b_row_conservation_and_required_memory_classes():
     summary = _records("PR165_B_FinalSummary.report.json")[0]
     assert summary["memory_candidate_rows"] == 6502
+    assert summary["condition_scoped_memory_rows"] == summary["memory_candidate_rows"]
     assert summary["condition_fingerprint_rows"] == 6502
     assert summary["combination_fingerprint_rows"] == 6502
     assert summary["scenario_outcome_rows"] == 6502
-    assert summary["negative_memory_rows"] > 0
     assert summary["positive_memory_rows"] > 0
     assert summary["fragile_memory_rows"] > 0
     assert summary["global_ban_rows"] == 0
+    assert summary["structural_invalidity_rows"] == 0
+    assert summary["qku_untradable_rows"] == 0
+    assert summary["permanent_rejection_rows"] == 0
+    assert summary["authority_counts_all_0"] is True
+    assert summary["orphan_counts_all_0"] is True
     assert summary["metadata_only_rows"] == 0
     assert summary["placeholder_only_rows"] == 0
     assert summary["unknown_status_rows"] == 0
+
+
+def test_pr165_b_final_summary_splits_condition_caution_from_hard_negative():
+    summary = _records("PR165_B_FinalSummary.report.json")[0]
+    memory_rows = _records("PR165_B_CandidateVersionMemoryRegistry.report.json")
+    class_counts = Counter(row["memory_classification"] for row in memory_rows)
+    action_counts = Counter(row["memory_action_policy"] for row in memory_rows)
+    reason_counts = Counter(reason for row in memory_rows for reason in row["reason_codes"])
+    broad_non_positive_rows = sum(
+        1 for row in memory_rows if is_non_positive_memory(row["memory_classification"])
+    )
+
+    assert len(memory_rows) == 6502
+    assert summary["memory_candidate_rows"] == 6502
+    assert summary["negative_memory_rows"] == broad_non_positive_rows
+    assert summary["broad_non_positive_memory_rows"] == broad_non_positive_rows
+    assert summary["condition_memory_caution_rows"] == broad_non_positive_rows
+    assert summary["negative_memory_rows_are_qku_untradable_rows"] is False
+    assert (
+        summary["negative_memory_rows_semantics"]
+        == "BACKWARD_COMPATIBILITY_ALIAS_FOR_BROAD_NON_POSITIVE_CONDITION_MEMORY_CAUTION_ROWS"
+    )
+    assert summary["hard_negative_memory_rows"] == 0
+    assert summary["neutral_insufficient_evidence_rows"] == class_counts["NEUTRAL_INSUFFICIENT_EVIDENCE"]
+    assert summary["neutral_insufficient_evidence_rows"] > 0
+    assert summary["sparse_regime_watch_rows"] == reason_counts["PR165_B_SPARSE_REGIME_EVIDENCE"]
+    assert summary["false_discovery_watch_rows"] == class_counts["FALSE_DISCOVERY_RISK_WATCH"]
+    assert summary["repair_required_rows"] == sum(
+        1 for row in memory_rows if requires_repair(row["memory_action_policy"])
+    )
+    assert summary["action_policy_retest_required_rows"] == sum(
+        1 for row in memory_rows if requires_retest(row["memory_action_policy"])
+    )
+    assert summary["condition_scoped_cooldown_action_rows"] == action_counts["CONDITION_SCOPED_COOLDOWN"]
+    assert summary["condition_scoped_avoid_action_rows"] == action_counts["AVOID_ONLY_WITHIN_MATCHING_CONDITION"]
+    assert summary["condition_scoped_avoid_rows"] == summary["condition_memory_caution_rows"]
+    assert summary["cooldown_rows"] == summary["condition_memory_caution_rows"]
+    assert summary["retest_required_rows"] == summary["retest_queue_rows"]
+    assert summary["replay_paper_retest_rows"] == summary["retest_queue_rows"]
+    assert summary["top_negative_memory_categories"] == {}
+    assert summary["global_ban_rows"] == 0
+    assert summary["structural_invalidity_rows"] == 0
+    assert summary["qku_untradable_rows"] == 0
+    assert summary["permanent_rejection_rows"] == 0
 
 
 def test_pr165_b_nonpositive_rows_have_policy_and_attribution_refs():

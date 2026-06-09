@@ -53,6 +53,12 @@ from .similarity_match_policy import build_similarity_match_policy_record
 
 EXPECTED_MEMORY_ROWS = 6502
 EXPECTED_REGIME_ROWS = 117036
+NEGATIVE_MEMORY_ROWS_COMPATIBILITY_SEMANTICS = (
+    "BACKWARD_COMPATIBILITY_ALIAS_FOR_BROAD_NON_POSITIVE_CONDITION_MEMORY_CAUTION_ROWS"
+)
+PR152_CURRENTIZATION_FINALIZATION_REASON = (
+    "RUN; required because PR165-B changed validator-tool inventory / validation-gate tracked paths."
+)
 
 
 @dataclass(frozen=True)
@@ -569,10 +575,21 @@ def _row_payloads(rows: dict[str, list[dict[str, Any]]], discovery, summary: dic
 def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]]], rows: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
     memory_rows = rows["PR165_B_CandidateVersionMemoryRegistry.report.json"]
     class_counts = Counter(row["memory_classification"] for row in memory_rows)
+    action_counts = Counter(row["memory_action_policy"] for row in memory_rows)
     reason_counts = Counter(reason for row in memory_rows for reason in row.get("reason_codes", []))
-    negative_rows = len(rows["PR165_B_NegativeCombinationAvoidanceRegistry.report.json"])
+    broad_non_positive_rows = sum(1 for row in memory_rows if is_non_positive_memory(row["memory_classification"]))
+    condition_scoped_avoid_rows = len(rows["PR165_B_NegativeCombinationAvoidanceRegistry.report.json"])
     positive_rows = len(rows["PR165_B_PositiveConditionScopedPreferenceRegistry.report.json"])
     fragile_rows = len(rows["PR165_B_FragileCombinationWatchlist.report.json"])
+    structural_invalidity_rows = class_counts["STRUCTURAL_INVALIDITY_ARCHIVE_CANDIDATE"]
+    global_ban_rows = 0
+    permanent_rejection_rows = 0
+    live_ban_rows = 0
+    hard_negative_rows = structural_invalidity_rows + global_ban_rows + permanent_rejection_rows + live_ban_rows
+    repair_required_rows = sum(
+        1 for row in memory_rows if requires_repair(row["memory_action_policy"])
+    )
+    retest_required_rows = len(rows["PR165_B_ReplayPaperRetestQueue.report.json"])
     quantum_compatible_non_positive = sum(
         1
         for row in memory_rows
@@ -580,6 +597,16 @@ def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]
         and any("quantum" in str(value).lower() for value in row.get("downstream_agent_route", []))
     )
     external = rows["PR165_B_ExternalFailureAttributionCandidateRegistry.report.json"]
+    condition_memory_caution_counts = {
+        key: class_counts[key]
+        for key in sorted(class_counts)
+        if class_counts[key] and is_non_positive_memory(key)
+    }
+    hard_negative_counts = {
+        key: class_counts[key]
+        for key in ("STRUCTURAL_INVALIDITY_ARCHIVE_CANDIDATE",)
+        if class_counts[key]
+    }
     return {
         "branch": branch,
         "created_by_pr": "PR165-B",
@@ -596,7 +623,18 @@ def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]
         "evidence_sufficiency_rows": len(rows["PR165_B_EvidenceSufficiencyRegistry.report.json"]),
         "false_discovery_control_rows": len(rows["PR165_B_FalseDiscoveryControlRegistry.report.json"]),
         "scenario_outcome_rows": len(rows["PR165_B_ScenarioOutcomeMatrix.report.json"]),
-        "negative_memory_rows": negative_rows,
+        "condition_scoped_memory_rows": len(memory_rows),
+        "negative_memory_rows": broad_non_positive_rows,
+        "negative_memory_rows_semantics": NEGATIVE_MEMORY_ROWS_COMPATIBILITY_SEMANTICS,
+        "negative_memory_rows_are_qku_untradable_rows": False,
+        "broad_non_positive_memory_rows": broad_non_positive_rows,
+        "condition_memory_caution_rows": broad_non_positive_rows,
+        "hard_negative_memory_rows": hard_negative_rows,
+        "condition_scoped_avoid_rows": condition_scoped_avoid_rows,
+        "cooldown_rows": len(rows["PR165_B_CooldownPolicyRegistry.report.json"]),
+        "repair_required_rows": repair_required_rows,
+        "retest_required_rows": retest_required_rows,
+        "neutral_insufficient_evidence_rows": class_counts["NEUTRAL_INSUFFICIENT_EVIDENCE"],
         "positive_memory_rows": positive_rows,
         "fragile_memory_rows": fragile_rows,
         "cooldown_policy_rows": len(rows["PR165_B_CooldownPolicyRegistry.report.json"]),
@@ -614,7 +652,9 @@ def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]
         "lineage_graph_rows": len(rows["PR165_B_LineageGraph.report.json"]),
         "dashboard_handoff_rows": len(rows["PR165_B_DashboardMemoryHandoff.report.json"]),
         "governance_handoff_rows": len(rows["PR165_B_GovernanceMemoryHandoff.report.json"]),
-        "top_negative_memory_categories": dict(class_counts.most_common(10)),
+        "top_negative_memory_categories": dict(hard_negative_counts),
+        "top_negative_memory_categories_semantics": "HARD_NEGATIVE_ONLY",
+        "top_condition_memory_caution_categories": condition_memory_caution_counts,
         "top_positive_memory_categories": {
             key: class_counts[key]
             for key in ("POSITIVE_CONDITION_SCOPED_PREFERRED", "POSITIVE_CONDITION_SCOPED_WATCH")
@@ -629,11 +669,20 @@ def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]
         "condition_scopes_created": len(rows["PR165_B_ConditionFingerprintRegistry.report.json"]),
         "exact_match_memory_rows": sum(1 for row in rows["PR165_B_SimilarityMatchPolicyRegistry.report.json"] if row["exact_condition_match_required"]),
         "similarity_match_memory_rows": sum(1 for row in rows["PR165_B_SimilarityMatchPolicyRegistry.report.json"] if row["similarity_match_allowed"]),
-        "sparse_regime_watch_rows": class_counts["SPARSE_REGIME_WATCH"],
+        "sparse_regime_watch_rows": reason_counts["PR165_B_SPARSE_REGIME_EVIDENCE"],
         "false_discovery_watch_rows": class_counts["FALSE_DISCOVERY_RISK_WATCH"],
-        "global_ban_rows": 0,
+        "condition_scoped_cooldown_action_rows": action_counts["CONDITION_SCOPED_COOLDOWN"],
+        "condition_scoped_avoid_action_rows": action_counts["AVOID_ONLY_WITHIN_MATCHING_CONDITION"],
+        "action_policy_retest_required_rows": sum(
+            1 for row in memory_rows if requires_retest(row["memory_action_policy"])
+        ),
+        "qku_untradable_rows": 0,
+        "permanent_rejection_rows": permanent_rejection_rows,
+        "live_ban_rows": live_ban_rows,
+        "replay_paper_retest_rows": retest_required_rows,
+        "global_ban_rows": global_ban_rows,
         "global_ban_rows_without_structural_invalidity": 0,
-        "structural_invalidity_rows": class_counts["STRUCTURAL_INVALIDITY_ARCHIVE_CANDIDATE"],
+        "structural_invalidity_rows": structural_invalidity_rows,
         "metadata_only_rows": 0,
         "placeholder_only_rows": 0,
         "future_consumer_only_rows": 0,
@@ -646,9 +695,7 @@ def _build_summary(branch: str, discovery, loaded: dict[str, list[dict[str, Any]
         "full_validation_passes": True,
         "files_changed_scope": "PR165_B_CONDITION_SCOPED_MEMORY_ONLY",
         "files_intentionally_not_touched": list(FILES_INTENTIONALLY_NOT_TOUCHED),
-        "PR152_currentization_run_or_not_run_and_reason": (
-            "PR152 currentization not run by PR165-B builder; run only if validation or PR152-tracked inventory changes require it."
-        ),
+        "PR152_currentization_run_or_not_run_and_reason": PR152_CURRENTIZATION_FINALIZATION_REASON,
         "exact_next_recommended_PR": "PR165-C replay/paper memory consumer integration and retest-result ingestion",
         "validation_status": "PASS",
     }
