@@ -1316,6 +1316,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr165_b_condition_scoped_negative_memory.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

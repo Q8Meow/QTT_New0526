@@ -1,0 +1,2278 @@
+{
+  "aggregate_counts": {
+    "candidate_packet_count": 0,
+    "combination_fingerprint_count": 0,
+    "condition_fingerprint_count": 0,
+    "qku_count": 0,
+    "row_count": 40,
+    "status_counts": {
+      "validation_status=PASS": 40
+    }
+  },
+  "authority_absence_confirmation": {
+    "connector_binding_authority_absent": true,
+    "live_order_authority_absent": true,
+    "llm_runtime_or_order_authority_absent": true,
+    "paper_result_packet_authority_absent": true,
+    "private_state_authority_absent": true,
+    "profit_authority_absent": true,
+    "qtt_freeze_checksum_authority_absent": true,
+    "quantum_backend_or_advantage_authority_absent": true,
+    "replay_result_packet_authority_absent": true,
+    "runtime_cash_authority_absent": true,
+    "source_acceptance_authority_absent": true
+  },
+  "authority_class": "PR165_B_CONDITION_SCOPED_MEMORY_REPLAY_PAPER_ONLY",
+  "authority_counts": {
+    "connector_binding_count": 0,
+    "final_paper_result_packet_authority_count": 0,
+    "final_replay_result_packet_authority_count": 0,
+    "live_order_authority_count": 0,
+    "live_promotion_ready_claim_count": 0,
+    "llm_api_call_count": 0,
+    "llm_browser_agent_count": 0,
+    "llm_model_loading_count": 0,
+    "llm_order_release_count": 0,
+    "llm_prompt_execution_count": 0,
+    "llm_result_rewrite_count": 0,
+    "llm_runtime_inference_count": 0,
+    "llm_source_acceptance_count": 0,
+    "llm_tool_calling_agent_count": 0,
+    "llm_trade_decision_count": 0,
+    "order_ready_claim_count": 0,
+    "paper_result_packet_count": 0,
+    "private_state_fetch_count": 0,
+    "profit_evidence_count": 0,
+    "protected_atomicrows_bundle_checksum_mutation_count": 0,
+    "qtt_freeze_checksum_global_digest_authority_count": 0,
+    "qtt_generated_sha_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "quantum_simulator_execution_count": 0,
+    "replay_result_packet_count": 0,
+    "runtime_cash_receipt_count": 0,
+    "source_acceptance_count": 0
+  },
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr165_b_condition_scoped_negative_memory.negative_memory_authority_policy",
+  "calls_llm_api": false,
+  "ci_requires_network": false,
+  "connector_binding_count": 0,
+  "created_by_pr": "PR165-B",
+  "creates_connector_binding": false,
+  "creates_final_paper_result_packet_authority": false,
+  "creates_final_replay_result_packet_authority": false,
+  "creates_live_order_authority": false,
+  "creates_live_promotion_ready_claim": false,
+  "creates_order_ready_claim": false,
+  "creates_paper_result_packets": false,
+  "creates_profit_evidence": false,
+  "creates_qtt_freeze_checksum_global_digest_authority": false,
+  "creates_qtt_generated_sha_authority": false,
+  "creates_quantum_advantage_claim": false,
+  "creates_replay_result_packets": false,
+  "creates_runtime_cash_receipt": false,
+  "creates_source_acceptance": false,
+  "downstream_pr_routes": [
+    "PR162D-R3",
+    "PR162E",
+    "PR162F",
+    "PR165-C",
+    "PR166-Q",
+    "PR167",
+    "runtime/cache/dashboard",
+    "governance_agent",
+    "commander_agent"
+  ],
+  "executes_llm_prompt": false,
+  "executes_quantum_backend": false,
+  "executes_quantum_simulator": false,
+  "fetches_private_state": false,
+  "final_paper_result_packet_authority_count": 0,
+  "final_replay_result_packet_authority_count": 0,
+  "live_order_authority_count": 0,
+  "live_promotion_ready_claim_count": 0,
+  "llm_api_call_count": 0,
+  "llm_browser_agent_count": 0,
+  "llm_model_loading_count": 0,
+  "llm_order_release_count": 0,
+  "llm_prompt_execution_count": 0,
+  "llm_result_rewrite_count": 0,
+  "llm_runtime_inference_count": 0,
+  "llm_source_acceptance_count": 0,
+  "llm_tool_calling_agent_count": 0,
+  "llm_trade_decision_count": 0,
+  "loads_llm_model": false,
+  "manifest_report_count": 40,
+  "mutates_protected_atomicrows_bundle_checksum_artifacts": false,
+  "order_ready_claim_count": 0,
+  "paper_result_packet_count": 0,
+  "pr_id": "PR165-B",
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "protected_atomicrows_bundle_checksum_mutation_count": 0,
+  "qtt_freeze_checksum_global_digest_authority_count": 0,
+  "qtt_generated_sha_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "quantum_simulator_execution_count": 0,
+  "record_count": 40,
+  "records": [
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000001",
+      "report_filename": "PR165_B_InputConsumptionAudit.report.json",
+      "row_count": 51,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000002",
+      "report_filename": "PR165_B_OptionalContextMissingReceipt.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000003",
+      "report_filename": "PR165_B_AsOfLeakageAudit.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_asof_leakage_audit.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 947184,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 948308,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 948018,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 948005,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 946826,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 947856,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 480665,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AsOfLeakageAudit.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000004",
+      "report_filename": "PR165_B_EvidenceSufficiencyRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_evidence_sufficiency_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 754481,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 754853,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 754738,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 755169,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 753761,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 756436,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 386819,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_EvidenceSufficiencyRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000005",
+      "report_filename": "PR165_B_FalseDiscoveryControlRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_false_discovery_control_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 772818,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 771982,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 769766,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 770035,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 770210,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 769315,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 390302,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FalseDiscoveryControlRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000006",
+      "report_filename": "PR165_B_ConditionFingerprintRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_condition_fingerprint.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2932514,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2929930,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2929824,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2931127,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2923602,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2929520,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1471993,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ConditionFingerprintRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000007",
+      "report_filename": "PR165_B_CombinationFingerprintRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_combination_fingerprint.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3412434,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3409156,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3410254,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3407987,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3393828,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 3805736,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1985979,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationFingerprintRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000008",
+      "report_filename": "PR165_B_ScenarioOutcomeMatrix.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_scenario_outcome_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1554030,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1551580,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1549317,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1549030,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1546073,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1539429,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 778608,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ScenarioOutcomeMatrix.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000009",
+      "report_filename": "PR165_B_CombinationOutcomeMemoryLedger.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_candidate_version_memory_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4576037,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578197,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4579961,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582861,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582602,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578641,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2302153,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CombinationOutcomeMemoryLedger.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000010",
+      "report_filename": "PR165_B_NegativeCombinationAvoidanceRegistry.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_negative_memory_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4575624,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578226,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4579987,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582905,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582615,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578608,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2279403,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_NegativeCombinationAvoidanceRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000011",
+      "report_filename": "PR165_B_PositiveConditionScopedPreferenceRegistry.report.json",
+      "row_count": 5,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_positive_memory_record.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 22371,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 5,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_PositiveConditionScopedPreferenceRegistry.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_PositiveConditionScopedPreferenceRegistry.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000012",
+      "report_filename": "PR165_B_FragileCombinationWatchlist.report.json",
+      "row_count": 52,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_fragile_memory_record.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 63867,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 52,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_FragileCombinationWatchlist.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_FragileCombinationWatchlist.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000013",
+      "report_filename": "PR165_B_OutcomeAttributionLedger.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_outcome_attribution_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1386204,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1387167,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1388880,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1390645,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1389121,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1390041,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 696788,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_OutcomeAttributionLedger.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000014",
+      "report_filename": "PR165_B_CounterfactualAttributionLedger.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_counterfactual_attribution_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 845252,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 841592,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 841676,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 844819,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 841911,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 824216,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 410820,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CounterfactualAttributionLedger.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000015",
+      "report_filename": "PR165_B_CooldownPolicyRegistry.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_cooldown_policy_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1301778,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1301555,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1300601,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1299219,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1296131,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1301310,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 654176,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CooldownPolicyRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000016",
+      "report_filename": "PR165_B_RetestEligibilityRegistry.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_retest_policy_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1129314,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1130378,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1130680,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1131353,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1129302,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1127516,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 565535,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RetestEligibilityRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000017",
+      "report_filename": "PR165_B_MemoryDecayAndOverridePolicy.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_memory_decay_policy_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 906288,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 906778,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 906029,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 905382,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 903054,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 905330,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 460094,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_MemoryDecayAndOverridePolicy.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000018",
+      "report_filename": "PR165_B_SimilarityMatchPolicyRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_similarity_match_policy_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 832195,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 833319,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 833029,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 833016,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 831837,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 832867,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 422945,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_SimilarityMatchPolicyRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000019",
+      "report_filename": "PR165_B_AllowedWhenConditionRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_allowed_when_policy_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 764747,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 765083,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 764402,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 763748,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 761422,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 763748,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 389019,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AllowedWhenConditionRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000020",
+      "report_filename": "PR165_B_RepairRouteHandoffRegistry.report.json",
+      "row_count": 2512,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_repair_route_record.schema.json",
+      "shard_count": 3,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1516756,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0001_of_0003.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1516827,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0002_of_0003.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 870083,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 512,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0003_of_0003.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_RepairRouteHandoffRegistry.part_0003_of_0003.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000021",
+      "report_filename": "PR165_B_ReplayPaperRetestQueue.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_retest_queue_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1038577,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1038386,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1039023,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1039672,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1038799,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1036005,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 520307,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ReplayPaperRetestQueue.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000022",
+      "report_filename": "PR165_B_CandidateVersionMemoryRegistry.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_candidate_version_memory_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4576037,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578197,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4579961,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582861,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4582602,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 4578641,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2302153,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_CandidateVersionMemoryRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000023",
+      "report_filename": "PR165_B_QuantumNegativeMemoryRegistry.report.json",
+      "row_count": 6497,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_quantum_negative_memory_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1164826,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1164225,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1162668,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1161377,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1157576,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1163496,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 584365,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 497,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_QuantumNegativeMemoryRegistry.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000024",
+      "report_filename": "PR165_B_AgentSelectionOverlayHandoff.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_agent_selection_overlay_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 754229,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 753481,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 751864,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 750345,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 746216,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 749015,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 382443,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentSelectionOverlayHandoff.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000025",
+      "report_filename": "PR165_B_AgentMemoryRouter.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_agent_memory_route_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 955849,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 958860,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 960487,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 962920,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 963903,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 959179,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 484173,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_AgentMemoryRouter.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000026",
+      "report_filename": "PR165_B_LineageGraph.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_lineage_graph_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2801833,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2808032,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2812374,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2818588,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2820640,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 2942378,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 1498665,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_LineageGraph.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000027",
+      "report_filename": "PR165_B_DashboardMemoryHandoff.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_dashboard_handoff_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 620606,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 620340,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 619276,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 618229,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 614952,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 617284,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 316053,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_DashboardMemoryHandoff.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000028",
+      "report_filename": "PR165_B_GovernanceMemoryHandoff.report.json",
+      "row_count": 6502,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_governance_handoff_record.schema.json",
+      "shard_count": 7,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 662610,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 1000,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0001_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 662339,
+          "part_ref": "PR165_B_PART::0002",
+          "row_count": 1000,
+          "shard_index": 2,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0002_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 661177,
+          "part_ref": "PR165_B_PART::0003",
+          "row_count": 1000,
+          "shard_index": 3,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0003_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 660065,
+          "part_ref": "PR165_B_PART::0004",
+          "row_count": 1000,
+          "shard_index": 4,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0004_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 656735,
+          "part_ref": "PR165_B_PART::0005",
+          "row_count": 1000,
+          "shard_index": 5,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0005_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 659252,
+          "part_ref": "PR165_B_PART::0006",
+          "row_count": 1000,
+          "shard_index": 6,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0006_of_0007.report.json"
+        },
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 337134,
+          "part_ref": "PR165_B_PART::0007",
+          "row_count": 502,
+          "shard_index": 7,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0007_of_0007.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0001_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0002_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0003_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0004_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0005_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0006_of_0007.report.json",
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_GovernanceMemoryHandoff.part_0007_of_0007.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000029",
+      "report_filename": "PR165_B_ExternalConditionMemoryScoutingLedger.report.json",
+      "row_count": 20,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 31005,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 20,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalConditionMemoryScoutingLedger.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalConditionMemoryScoutingLedger.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000030",
+      "report_filename": "PR165_B_ExternalFailureAttributionCandidateRegistry.report.json",
+      "row_count": 60,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 69206,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 60,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalFailureAttributionCandidateRegistry.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalFailureAttributionCandidateRegistry.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000031",
+      "report_filename": "PR165_B_ExternalMicrostructureConditionRegistry.report.json",
+      "row_count": 27,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 38971,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 27,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalMicrostructureConditionRegistry.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalMicrostructureConditionRegistry.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000032",
+      "report_filename": "PR165_B_ExternalQuantumFailureAttributionRegistry.report.json",
+      "row_count": 15,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 28187,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 15,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalQuantumFailureAttributionRegistry.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalQuantumFailureAttributionRegistry.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000033",
+      "report_filename": "PR165_B_ExternalScoutingMappabilityDecisionLedger.report.json",
+      "row_count": 20,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_input_consumption_audit.schema.json",
+      "shard_count": 1,
+      "shard_manifest_refs": [
+        {
+          "below_25_mib_limit": true,
+          "estimated_shard_size_bytes": 28850,
+          "part_ref": "PR165_B_PART::0001",
+          "row_count": 20,
+          "shard_index": 1,
+          "shard_path": "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalScoutingMappabilityDecisionLedger.part_0001_of_0001.report.json"
+        }
+      ],
+      "shard_paths": [
+        "docs/master_plan/generated/pr165_b_shards/PR165_B_ExternalScoutingMappabilityDecisionLedger.part_0001_of_0001.report.json"
+      ],
+      "sharded_flag": true,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000034",
+      "report_filename": "PR165_B_NoLiveProfitSourceConnectorPrivateStateAudit.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_authority_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000035",
+      "report_filename": "PR165_B_NoQTTChecksumFreezeAuthorityAudit.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_authority_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000036",
+      "report_filename": "PR165_B_NoQuantumBackendAdvantageClaimAudit.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_authority_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000037",
+      "report_filename": "PR165_B_NoLLMRuntimeHotPathResultRewriteAudit.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_authority_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000038",
+      "report_filename": "PR165_B_OrphanArtifactAudit.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_orphan_audit.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000039",
+      "report_filename": "PR165_B_ReportManifest.report.json",
+      "row_count": 40,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_report_manifest.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    },
+    {
+      "manifest_ref": "PR165_B_MANIFEST::000040",
+      "report_filename": "PR165_B_FinalSummary.report.json",
+      "row_count": 1,
+      "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_final_summary.schema.json",
+      "shard_count": 0,
+      "shard_manifest_refs": [],
+      "shard_paths": [],
+      "sharded_flag": false,
+      "validation_status": "PASS"
+    }
+  ],
+  "replay_result_packet_count": 0,
+  "report_filename": "PR165_B_ReportManifest.report.json",
+  "report_id": "PR165_B_REPORTMANIFEST",
+  "report_name": "PR165_B_ReportManifest",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/schemas/pr165_b_report_manifest.schema.json",
+  "shard_count": 0,
+  "shard_manifest_refs": [],
+  "sharded_flag": false,
+  "source_acceptance_count": 0,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/generated/LocalGateCommandMatrix.json",
+    "docs/master_plan/generated/OwnerDashboardApprovalStaticScreenContract.report.json",
+    "docs/master_plan/generated/PR135CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR135MarketSpecificSectionIndex.report.json",
+    "docs/master_plan/generated/PR135MasterPlanSectionCrosswalk.report.json",
+    "docs/master_plan/generated/PR135RouteTriage.report.json",
+    "docs/master_plan/generated/PR136CommandActionMatrix.report.json",
+    "docs/master_plan/generated/PR136LaunchReadinessDependencyGraph.report.json",
+    "docs/master_plan/generated/PR136MarketSpecificLaunchReadinessIndex.report.json",
+    "docs/master_plan/generated/PR136RouteTriage.report.json",
+    "docs/master_plan/generated/PR137DependencyGateStateMatrix.report.json",
+    "docs/master_plan/generated/PR161B_OwnerDashboardReviewRouteMatrix.report.json",
+    "docs/master_plan/generated/PR161C_QKUAgentConsumptionBridge.report.json",
+    "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+    "docs/master_plan/generated/PR162D_AgentConsumableQKURoutingMatrix.report.json",
+    "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+    "docs/master_plan/generated/PR165_AdverseSelectionPenaltyRegistry.report.json",
+    "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+    "docs/master_plan/generated/PR165_CandidateScoreComponentRegistry.report.json",
+    "docs/master_plan/generated/PR165_CandidateVersionRepairPlan.report.json",
+    "docs/master_plan/generated/PR165_ComputabilityCoverageAudit.report.json",
+    "docs/master_plan/generated/PR165_DashboardScoreHandoff.report.json",
+    "docs/master_plan/generated/PR165_DataQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_DivergencePenaltyRegistry.report.json",
+    "docs/master_plan/generated/PR165_ExpectedValueScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_FinalSummary.report.json",
+    "docs/master_plan/generated/PR165_GlobalCandidateRanking.report.json",
+    "docs/master_plan/generated/PR165_ImplementationShortfallScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_InputConsumptionAudit.report.json",
+    "docs/master_plan/generated/PR165_LatencyAdjustedScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_LatencyLaneAssignmentRegistry.report.json",
+    "docs/master_plan/generated/PR165_LineageGraph.report.json",
+    "docs/master_plan/generated/PR165_LiquidityFillProbabilityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_MakerTakerRouteScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_ModelRiskPenaltyRegistry.report.json",
+    "docs/master_plan/generated/PR165_NoLLMRuntimeHotPathResultRewriteAudit.report.json",
+    "docs/master_plan/generated/PR165_NoLiveProfitSourceConnectorPrivateStateAudit.report.json",
+    "docs/master_plan/generated/PR165_NoQTTChecksumFreezeAuthorityAudit.report.json",
+    "docs/master_plan/generated/PR165_NoQuantumBackendAdvantageClaimAudit.report.json",
+    "docs/master_plan/generated/PR165_OrphanArtifactAudit.report.json",
+    "docs/master_plan/generated/PR165_PR162D_R3PriorityHandoff.report.json",
+    "docs/master_plan/generated/PR165_PR165BNegativeMemoryCandidateHandoff.report.json",
+    "docs/master_plan/generated/PR165_PaperScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_PluginPriorityHandoff.report.json",
+    "docs/master_plan/generated/PR165_PortfolioClusterPreparation.report.json",
+    "docs/master_plan/generated/PR165_PostLaunchRepairRoutingSemantics.report.json",
+    "docs/master_plan/generated/PR165_ProbabilityCalibrationScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_ProvenanceQualityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_QKUAgentConsumerCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR165_QuantumFormulationMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR165_QuantumPriorityScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_RankArbitrationPolicy.report.json",
+    "docs/master_plan/generated/PR165_RegimeSlicedRanking.report.json",
+    "docs/master_plan/generated/PR165_RepairConfidenceScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_RepairRetestRouteRegistry.report.json",
+    "docs/master_plan/generated/PR165_RepairRoutingHandoffRegistry.report.json",
+    "docs/master_plan/generated/PR165_ReplayPaperAlignmentScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_ReplayScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_ReportManifest.report.json",
+    "docs/master_plan/generated/PR165_RiskAdjustedScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_RowConservationAudit.report.json",
+    "docs/master_plan/generated/PR165_ScenarioStressRobustnessScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_ScoreEnvelopeAndRankStabilityRegistry.report.json",
+    "docs/master_plan/generated/PR165_ScoreExplainabilityLedger.report.json",
+    "docs/master_plan/generated/PR165_TCAAdjustedScoreRegistry.report.json",
+    "docs/master_plan/generated/pr165_shards",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/tools/test_ci_branch_context.py",
+    "tools/ci_branch_context.py",
+    "tools/run_validation_gates.py"
+  ],
+  "total_row_count": 40,
+  "upstream_pr_refs": [
+    "PR162R-A",
+    "PR162D-R2A",
+    "PR162R",
+    "PR162R-B",
+    "PR163",
+    "PR163-B",
+    "PR164",
+    "PR163-C",
+    "PR165",
+    "PR203",
+    "PR204"
+  ],
+  "uses_llm_browser_agent": false,
+  "uses_llm_order_release": false,
+  "uses_llm_result_rewrite": false,
+  "uses_llm_runtime_inference": false,
+  "uses_llm_source_acceptance": false,
+  "uses_llm_tool_calling_agent": false,
+  "uses_llm_trade_decision": false,
+  "validation_status": "PASS",
+  "vocab_refs": [
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_reason_codes.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_status_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_action_policy.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/condition_scope_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/retest_cooldown_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/evidence_sufficiency_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/false_discovery_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/memory_decay_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_authority_policy.py"
+  ]
+}

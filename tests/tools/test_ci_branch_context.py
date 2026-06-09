@@ -1940,6 +1940,72 @@ def test_pr165_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr165_b_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr165-b-condition-scoped-negative-memory"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=165) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_b_condition_scoped_negative_memory/validators.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_b_condition_scoped_negative_memory/schemas/"
+        "pr165_b_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr165_b_condition_scoped_negative_memory/test_pr165_b_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_B_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr165_b_shards/"
+        "PR165_B_CandidateVersionMemoryRegistry.part_0001_of_0007.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr165_b_condition_scoped_negative_memory.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr165_b_condition_scoped_negative_memory.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_evidence_backed_scoring_ranking/validators.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/1002/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
     repair_branch = context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
@@ -2381,6 +2447,19 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "docs/master_plan/generated/pr165_shards/"
             "PR165_GlobalCandidateRanking.part_0001_of_0004.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_pr165_b_condition_scoped_negative_memory.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/PR165_B_FinalSummary.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/pr165_b_shards/"
+            "PR165_B_ScenarioOutcomeMatrix.part_0001_of_0007.report.json",
         )
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
