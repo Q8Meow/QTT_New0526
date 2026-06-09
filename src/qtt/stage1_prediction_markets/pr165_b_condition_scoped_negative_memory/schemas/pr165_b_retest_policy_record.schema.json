@@ -1,0 +1,47 @@
+{
+  "$comment": "PR165-B schemas reference central condition-memory vocabularies.",
+  "$id": "pr165_b_retest_policy_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "combination_fingerprint_id": {
+      "type": "string"
+    },
+    "condition_fingerprint_id": {
+      "type": "string"
+    },
+    "memory_action_policy": {
+      "type": "string"
+    },
+    "memory_classification": {
+      "type": "string"
+    },
+    "qku_id": {
+      "type": "string"
+    },
+    "validation_status": {
+      "type": "string"
+    },
+    "vocab_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object",
+  "x_pr165_b_vocab_refs": [
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_reason_codes.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_status_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_action_policy.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/condition_scope_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/retest_cooldown_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/evidence_sufficiency_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/false_discovery_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/memory_decay_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_authority_policy.py"
+  ]
+}
