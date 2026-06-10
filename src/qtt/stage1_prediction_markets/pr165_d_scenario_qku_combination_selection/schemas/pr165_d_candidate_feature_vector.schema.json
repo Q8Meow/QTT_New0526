@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_class": {
+      "type": "string"
+    },
+    "created_by_pr": {
+      "const": "PR165-D"
+    },
+    "pr_id": {
+      "const": "PR165-D"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "report_filename": {
+      "type": "string"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "report_id",
+    "pr_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "validation_status",
+    "record_count"
+  ],
+  "title": "pr165_d_candidate_feature_vector.schema.json",
+  "type": "object"
+}

@@ -155,6 +155,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr165-evidence-backed-scoring-ranking": 165,
     "pr165-b-condition-scoped-negative-memory": 165,
     "pr165-c-replay-paper-memory-consumer-integration": 165,
+    "pr165-d-scenario-qku-combination-selection": 165,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
     159: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
@@ -1038,6 +1039,7 @@ PR164_BRANCH = "pr164-review-provenance-qku-canonical-coverage-audit"
 PR165_BRANCH = "pr165-evidence-backed-scoring-ranking"
 PR165_B_BRANCH = "pr165-b-condition-scoped-negative-memory"
 PR165_C_BRANCH = "pr165-c-replay-paper-memory-consumer-integration"
+PR165_D_BRANCH = "pr165-d-scenario-qku-combination-selection"
 PR163_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR163_",
     "docs/master_plan/generated/pr163_shards/",
@@ -1195,6 +1197,25 @@ PR165_C_ALLOWED_CHANGED_PATHS = frozenset(
         "tools/validate_pr165_c_replay_paper_memory_consumer_integration.py",
         "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/run_validation_gates.py",
+        "tools/ci_branch_context.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+PR165_D_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR165_D_",
+    "docs/master_plan/generated/pr165_d_shards/",
+    "src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/",
+    "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/",
+)
+PR165_D_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr165_d_scenario_qku_combination_selection.py",
+        "tools/validate_pr165_d_scenario_qku_combination_selection.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
         "tools/ci_branch_context.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/tools/test_ci_branch_context.py",
@@ -1671,6 +1692,7 @@ PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
         PR165_BRANCH,
         PR165_B_BRANCH,
         PR165_C_BRANCH,
+        PR165_D_BRANCH,
     }
 )
 PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
@@ -2078,6 +2100,7 @@ def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
         or _is_pr165_scoring_changed_path(normalized)
         or _is_pr165_b_condition_memory_changed_path(normalized)
         or _is_pr165_c_memory_consumer_changed_path(normalized)
+        or _is_pr165_d_scenario_selection_changed_path(normalized)
     )
 
 
@@ -2308,6 +2331,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return _is_pr165_b_condition_memory_changed_path(normalized)
     if branch == PR165_C_BRANCH:
         return _is_pr165_c_memory_consumer_changed_path(normalized)
+    if branch == PR165_D_BRANCH:
+        return _is_pr165_d_scenario_selection_changed_path(normalized)
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
@@ -2443,6 +2468,14 @@ def _is_pr165_c_memory_consumer_changed_path(path: str) -> bool:
     return normalized in PR165_C_ALLOWED_CHANGED_PATHS or any(
         normalized.startswith(prefix)
         for prefix in PR165_C_ALLOWED_CHANGED_PATH_PREFIXES
+    )
+
+
+def _is_pr165_d_scenario_selection_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in PR165_D_ALLOWED_CHANGED_PATHS or any(
+        normalized.startswith(prefix)
+        for prefix in PR165_D_ALLOWED_CHANGED_PATH_PREFIXES
     )
 
 

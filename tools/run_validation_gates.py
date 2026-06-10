@@ -1341,6 +1341,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr165_d_scenario_qku_combination_selection.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

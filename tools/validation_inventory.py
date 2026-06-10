@@ -260,6 +260,7 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
         f"docs/master_plan/generated/{lower}*/**",
         f"src/qtt/stage1_prediction_markets/{lower}*/**",
         f"tests/stage1_prediction_markets/{lower}*/**",
+        f"tools/*{lower}*.py",
     )
 
 
