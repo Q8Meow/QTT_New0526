@@ -3,12 +3,21 @@ name: QTT Validation
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      full_validation:
+        description: Run the full validation suite
+        required: true
+        default: true
+        type: boolean
   push:
     branches:
       - main
 
 permissions:
   contents: read
+
+env:
+  QTT_FORCE_FULL_VALIDATION: ${{ github.event_name == 'workflow_dispatch' && inputs.full_validation && '1' || '0' }}
 
 jobs:
   fast_preflight:
@@ -19,6 +28,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: &checkout_full
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,7 +49,7 @@ jobs:
           python -m pip install pytest
 
       - name: Run fast preflight
-        run: python -B tools/run_validation_gates.py --phase fast-preflight --timing-report .tmp/qtt-validation-timing/fast-preflight.json
+        run: python -B tools/run_validation_gates.py --phase fast-preflight --timing-report .tmp/qtt-validation-timing/fast-preflight.json --router-report .tmp/qtt-validation-router/fast-preflight.json
 
   deterministic_validators:
     name: Deterministic Validators
@@ -50,6 +61,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -64,7 +76,7 @@ jobs:
         run: *install_pytest
 
       - name: Run deterministic validators
-        run: python -B tools/run_validation_gates.py --phase deterministic-validators --timing-report .tmp/qtt-validation-timing/deterministic-validators.json
+        run: python -B tools/run_validation_gates.py --phase deterministic-validators --timing-report .tmp/qtt-validation-timing/deterministic-validators.json --router-report .tmp/qtt-validation-router/deterministic-validators.json
 
   pytest_shard_1:
     name: Pytest Shard 1
@@ -76,6 +88,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -90,7 +103,7 @@ jobs:
         run: *install_pytest
 
       - name: Run pytest shard 1
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-1 --timing-report .tmp/qtt-validation-timing/pytest-shard-1.json
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-1 --timing-report .tmp/qtt-validation-timing/pytest-shard-1.json --router-report .tmp/qtt-validation-router/pytest-shard-1.json
 
   pytest_shard_2:
     name: Pytest Shard 2
@@ -102,6 +115,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -116,7 +130,7 @@ jobs:
         run: *install_pytest
 
       - name: Run pytest shard 2
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-2 --timing-report .tmp/qtt-validation-timing/pytest-shard-2.json
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-2 --timing-report .tmp/qtt-validation-timing/pytest-shard-2.json --router-report .tmp/qtt-validation-router/pytest-shard-2.json
 
   pytest_shard_3:
     name: Pytest Shard 3
@@ -128,6 +142,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -142,7 +157,7 @@ jobs:
         run: *install_pytest
 
       - name: Run pytest shard 3
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-3 --timing-report .tmp/qtt-validation-timing/pytest-shard-3.json
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-3 --timing-report .tmp/qtt-validation-timing/pytest-shard-3.json --router-report .tmp/qtt-validation-router/pytest-shard-3.json
 
   pytest_shard_4:
     name: Pytest Shard 4
@@ -154,6 +169,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -168,7 +184,7 @@ jobs:
         run: *install_pytest
 
       - name: Run pytest shard 4
-        run: python -B tools/run_validation_gates.py --phase pytest-shard-4 --timing-report .tmp/qtt-validation-timing/pytest-shard-4.json
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-4 --timing-report .tmp/qtt-validation-timing/pytest-shard-4.json --router-report .tmp/qtt-validation-router/pytest-shard-4.json
 
   post_validation_checks:
     name: Post Validation Checks
@@ -184,6 +200,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -202,7 +219,7 @@ jobs:
         # test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
         # test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
         # expected 4183 AtomicRows rows
-        run: python -B tools/run_validation_gates.py --phase post-validation --timing-report .tmp/qtt-validation-timing/post-validation.json
+        run: python -B tools/run_validation_gates.py --phase post-validation --timing-report .tmp/qtt-validation-timing/post-validation.json --router-report .tmp/qtt-validation-router/post-validation.json
 
   validation:
     name: Validation Gates
@@ -219,6 +236,18 @@ jobs:
     timeout-minutes: 90
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with: *checkout_full
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Report changed-area validation scope
+        run: python -B tools/changed_area_validation_router.py --repo-root . --report-out .tmp/qtt-validation-router/validation-gates.json
+
       - name: Fail closed unless every phase succeeded
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
@@ -227,6 +256,14 @@ jobs:
           import json
           import os
           import sys
+
+          router_report = ".tmp/qtt-validation-router/validation-gates.json"
+          with open(router_report, encoding="utf-8") as handle:
+              router = json.load(handle)
+          print("required_jobs=" + ",".join(router["required_jobs"]))
+          print("full_validation_required=" + str(router["full_validation_required"]))
+          print("full_validation_reason=" + router["full_validation_reason"])
+          print("skipped_validator_count=" + str(len(router["skipped_validators"])))
 
           needs = json.loads(os.environ["NEEDS_JSON"])
           failures = []

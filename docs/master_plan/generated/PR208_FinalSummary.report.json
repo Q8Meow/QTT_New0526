@@ -1,0 +1,32 @@
+{
+  "cross_platform_path_invariant_supported": true,
+  "force_full_override_supported": true,
+  "github_pr_expected_number": "NEXT_GITHUB_PR_AFTER_207_OR_ACTUAL",
+  "infrastructure_only": true,
+  "local_validation_summary": {
+    "required_commands": [
+      "compileall",
+      "validate_validation_inventory",
+      "focused pytest suites",
+      "fast-preflight phase",
+      "deterministic-validators phase",
+      "full run_validation_gates",
+      "grand audit",
+      "diff checks"
+    ],
+    "status": "recorded in PR body after local validation completes"
+  },
+  "main_full_validation_preserved": true,
+  "next_recommended_pr": "Add empirical reduced-mode timing to PR208 reports after one small post-merge PR, without changing correctness routing.",
+  "nightly_or_manual_full_validation_preserved": true,
+  "pr152_currentization_decision": "Required only when PR152-tracked generated reports, report counts, inventory, or currentization tooling changes.",
+  "pr_id": "PR208_CI_RUNTIME_RATIONALIZATION",
+  "pull_request_reduced_mode_enabled": true,
+  "qtt_roadmap_pr": false,
+  "remaining_risks": [
+    "Reduced-mode timing awaits the first ordinary small PR after PR208."
+  ],
+  "tests_deleted_count": 0,
+  "trading_logic_changed": false,
+  "validators_deleted_count": 0
+}

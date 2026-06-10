@@ -24,15 +24,22 @@ DOWNSTREAM_ROADMAP_BRANCH_VALIDATION_MODE_MARKER = (
 REPAIR_BRANCH_PREFIX = "repair/"
 MAIN_CUMULATIVE_BRANCH_PREFIX = "repair/main-cumulative-"
 CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH = "pr-ci-runtime-parallel-cache-timeout"
+PR208_CI_RUNTIME_RATIONALIZATION_BRANCH = "pr208-ci-runtime-rationalization"
 VALIDATION_INFRASTRUCTURE_BRANCHES = frozenset(
     {
         "pr-ci-fastfail-validation-context-preflight",
         CI_RUNTIME_PARALLEL_CACHE_TIMEOUT_BRANCH,
+        PR208_CI_RUNTIME_RATIONALIZATION_BRANCH,
     }
 )
 VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
     {
         ".github/workflows/qtt_validation.yml",
+        "docs/master_plan/generated/PR208_ChangedAreaRoutingPolicy.report.json",
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+        "docs/master_plan/generated/PR208_CrossPlatformPathInvariant.report.json",
+        "docs/master_plan/generated/PR208_FinalSummary.report.json",
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
         "src/qtt/stage1_prediction_markets/"
         "atomicrows_pr154_value_state/pr161a_materialization_bridge/validator.py",
         "src/qtt/stage1_prediction_markets/"
@@ -75,13 +82,21 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_changed_area_validation_router.py",
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_cross_platform_path_invariant.py",
+        "tests/tools/test_validation_inventory.py",
         "tools/ci_branch_context.py",
+        "tools/changed_area_validation_router.py",
+        "tools/cross_platform_path_invariant.py",
+        "tools/repo_path_refs.py",
         "tools/run_validation_gates.py",
+        "tools/validate_validation_inventory.py",
         "tools/validate_ci_branch_context_matrix.py",
         "tools/validate_nested_validator_contracts.py",
         "tools/validate_repair_pr_changed_file_scope.py",
+        "tools/validation_inventory.py",
     }
 )
 PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH = (
@@ -2079,6 +2094,8 @@ def is_main_cumulative_branch(branch: str) -> bool:
 
 
 def roadmap_pr_number(branch: str) -> int | None:
+    if normalize_branch_context(branch).startswith(PR208_CI_RUNTIME_RATIONALIZATION_BRANCH):
+        return None
     match = re.match(r"^pr(?P<number>[0-9]+)[a-z]*-", branch)
     if match is None:
         return None

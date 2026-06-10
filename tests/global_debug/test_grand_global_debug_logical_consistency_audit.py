@@ -98,7 +98,11 @@ def _get_nested(payload: dict, keys: tuple[str, ...]) -> int:
     return target
 
 
-def _pr152_validation_infrastructure_count_payloads(delta: int = 3) -> tuple[dict, dict]:
+def _pr152_validation_infrastructure_count_payloads(
+    delta: int | None = None,
+) -> tuple[dict, dict]:
+    if delta is None:
+        delta = pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
     tracked = {
         "completed_pr_artifact_audit": {"validator_tool_count": 139},
         "validator_tool_registry_audit": {"validator_tool_count": 139},
@@ -423,7 +427,7 @@ def test_stale_report_comparator_keeps_repository_validation_fail_closed(
 def test_pr152_validation_infrastructure_exact_fastfail_delta_is_allowed(
     monkeypatch,
 ) -> None:
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
 
     failures = _validate_stubbed_pr152_report_delta(
         monkeypatch,
@@ -456,7 +460,7 @@ def test_pr152_validation_infrastructure_delta_allowed_in_pull_request_detached_
         "GITHUB_HEAD_REF",
         "pr201-pr152-currentization-after-merge",
     )
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
 
     failures = _validate_stubbed_pr152_report_delta(
         monkeypatch,
@@ -479,7 +483,7 @@ def test_pr152_validation_infrastructure_delta_allowed_in_main_push_context(
     monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
     monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
 
     failures = _validate_stubbed_pr152_report_delta(
         monkeypatch,
@@ -500,7 +504,7 @@ def test_pr152_validation_infrastructure_delta_is_policy_based_not_branch_based(
         "current_branch_context",
         lambda repo_root: BranchContext(branch="unrelated-branch", source="unit-test"),
     )
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
     assert (
         _validate_stubbed_pr152_report_delta(
             monkeypatch,
@@ -525,7 +529,7 @@ def test_pr152_validation_infrastructure_delta_is_policy_based_not_branch_based(
 def test_pr152_validation_infrastructure_delta_wrong_count_fails(
     monkeypatch,
 ) -> None:
-    for delta in (1, 2, 4):
+    for delta in (1, 2, 3, pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA + 1):
         tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=delta)
         failures = _validate_stubbed_pr152_report_delta(
             monkeypatch,
@@ -569,7 +573,7 @@ def test_pr152_validation_infrastructure_delta_missing_expected_tool_fails(
 ) -> None:
     missing_path = "tools/validate_nested_validator_contracts.py"
     _write_policy_validator_tools(tmp_path, omit=missing_path)
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=3)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
 
     failures = _validate_stubbed_pr152_report_delta(
         monkeypatch,
@@ -604,7 +608,9 @@ def test_pr152_validation_infrastructure_delta_future_tool_fails_with_path(
             }
         ),
     )
-    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(delta=4)
+    tracked, rebuilt = _pr152_validation_infrastructure_count_payloads(
+        delta=pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA + 1
+    )
 
     failures = _validate_stubbed_pr152_report_delta(
         monkeypatch,

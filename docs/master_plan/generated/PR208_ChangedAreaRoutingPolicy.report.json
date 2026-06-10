@@ -1,0 +1,33 @@
+{
+  "branch_context_policy": "required on pull_request, main, and workflow_dispatch",
+  "cross_platform_path_scan_policy": "scan touched generated JSON/report/manifest/shard refs",
+  "force_full_flag_name": "QTT_FORCE_FULL_VALIDATION",
+  "generated_report_without_owner_policy": "fail closed",
+  "main_push_mode": "full validation",
+  "pr152_currentization_policy": "decision required when PR152-tracked reports, counts, or tools change",
+  "pull_request_default_mode": "fast universal preflight plus validators matched by changed files",
+  "required_jobs_for_full_mode": [
+    "deterministic_validators",
+    "fast_preflight",
+    "post_validation_checks",
+    "pytest_shard_1",
+    "pytest_shard_2",
+    "pytest_shard_3",
+    "pytest_shard_4"
+  ],
+  "required_jobs_for_reduced_pr_mode": [
+    "deterministic_validators",
+    "fast_preflight",
+    "post_validation_checks",
+    "pytest_shard_1",
+    "pytest_shard_2",
+    "pytest_shard_3",
+    "pytest_shard_4"
+  ],
+  "routing_policy_version": 1,
+  "schedule_mode": "full validation",
+  "unknown_file_policy": "force full validation unless generated/tool ownership is missing",
+  "validation_infra_changed_policy": "force full validation",
+  "workflow_changed_policy": "force full validation and workflow sanity",
+  "workflow_dispatch_mode": "full validation by default"
+}

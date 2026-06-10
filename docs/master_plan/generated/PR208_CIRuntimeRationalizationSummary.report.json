@@ -1,0 +1,30 @@
+{
+  "changed_area_validator_count": 167,
+  "classified_validator_count": 178,
+  "cross_platform_path_invariant_supported": true,
+  "current_recent_main_runtime_seconds_if_available": 1412,
+  "current_recent_main_runtime_source": "gh run list --branch main --limit 5 reported QTT Validation run 27248003677 as 23m32s at 2026-06-10T01:58:35Z",
+  "current_validator_count": 178,
+  "deterministic_generated_artifact_validator_count": 162,
+  "estimated_runtime_note": "Exact reduced-mode timing is intentionally null until PR208 runs in GitHub CI on a non-infrastructure small pull request.",
+  "estimated_runtime_reduction_percent": null,
+  "estimated_small_pr_runtime_seconds": null,
+  "fail_closed_unknown_change_supported": true,
+  "fast_universal_preflight_count": 11,
+  "force_full_override_supported": true,
+  "full_validation_runtime_expected_on_main": "Full validation remains required on main push, schedule, workflow_dispatch full mode, and QTT_FORCE_FULL_VALIDATION=1.",
+  "next_recommended_pr": "After PR208 lands, observe one small non-infrastructure PR and tune owner globs only if a necessary validator is over- or under-routed.",
+  "nightly_deep_validator_count": 79,
+  "pr152_currentization_decision_supported": true,
+  "release_live_readiness_validator_count": 22,
+  "remaining_risks": [
+    "Reduced-mode runtime is not measured until a future non-infrastructure PR exercises it in CI.",
+    "Unknown non-generated changes intentionally force full validation.",
+    "Generated reports without an owning validator fail closed."
+  ],
+  "tests_deleted_count": 0,
+  "touched_generated_artifact_validator_count": 162,
+  "validators_deleted_count": 0,
+  "validators_moved_out_of_default_pr_path_count": 167,
+  "validators_still_running_on_main_count": 178
+}
