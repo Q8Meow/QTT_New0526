@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from . import paths as p
 from .central_vocab import AUTHORITY_BOUNDARY_REF, NO_ORPHAN_STATUS
 
 OLDER_AGENT_ARTIFACTS = (
@@ -28,7 +29,11 @@ OLDER_AGENT_ARTIFACTS = (
 
 
 def load_older_agent_artifact_refs(repo_root: Path) -> tuple[str, ...]:
-    return tuple(rel for rel in OLDER_AGENT_ARTIFACTS if (repo_root / rel).exists())
+    return tuple(
+        p.normalize_repo_ref(rel)
+        for rel in OLDER_AGENT_ARTIFACTS
+        if p.resolve_repo_relative(repo_root, rel).exists()
+    )
 
 
 def build_older_agent_artifact_consumption_rows(repo_root: Path) -> list[dict[str, object]]:
@@ -37,7 +42,7 @@ def build_older_agent_artifact_consumption_rows(repo_root: Path) -> list[dict[st
         rows.append(
             {
                 "older_agent_artifact_consumption_id": f"PR165_C_OLDER_AGENT_ARTIFACT::{index:04d}",
-                "artifact_path": rel_path,
+                "artifact_path": p.normalize_repo_ref(rel_path),
                 "artifact_present": True,
                 "consumed_by_pr165_c": True,
                 "consumption_role": _role_for_path(rel_path),

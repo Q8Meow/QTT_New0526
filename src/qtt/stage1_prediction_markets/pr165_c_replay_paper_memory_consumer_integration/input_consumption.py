@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from . import paths as p
 from .artifact_discovery import InputDiscovery
 from .central_vocab import AUTHORITY_BOUNDARY_REF, NO_ORPHAN_STATUS
 
@@ -9,15 +10,16 @@ from .central_vocab import AUTHORITY_BOUNDARY_REF, NO_ORPHAN_STATUS
 def build_input_consumption_records(discovery: InputDiscovery) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for index, rel_path in enumerate(discovery.required_inputs, start=1):
+        normalized_path = p.normalize_repo_ref(rel_path)
         present = rel_path not in discovery.missing_required_inputs
         rows.append(
             {
                 "input_consumption_id": f"PR165_C_INPUT::{index:04d}",
-                "input_path": rel_path,
+                "input_path": normalized_path,
                 "input_required": True,
                 "input_present": present,
                 "consumption_status": "CONSUMED" if present else "MISSING_REQUIRED_INPUT",
-                "upstream_source_pr_refs": _source_pr_refs(rel_path),
+                "upstream_source_pr_refs": _source_pr_refs(normalized_path),
                 "downstream_consumer_pr_refs": ["PR165-C"],
                 "owning_agent": "memory_agent",
                 "validator": "tools/validate_pr165_c_replay_paper_memory_consumer_integration.py",
@@ -49,7 +51,7 @@ def build_main_freshness_receipt() -> list[dict[str, object]]:
 
 
 def source_inputs(discovery: InputDiscovery) -> list[str]:
-    return [rel for rel in discovery.required_inputs if rel not in discovery.missing_required_inputs]
+    return [p.normalize_repo_ref(rel) for rel in discovery.required_inputs if rel not in discovery.missing_required_inputs]
 
 
 def _source_pr_refs(rel_path: str) -> list[str]:

@@ -11,8 +11,8 @@ from .deterministic_ids import ordinal_ref
 
 def build_pr_file_connectivity_rows(repo_root: Path, shard_paths: list[str]) -> list[dict[str, object]]:
     files: list[str] = []
-    files.extend((p.PACKAGE_DIR / path.name).as_posix() for path in sorted((repo_root / p.PACKAGE_DIR).glob("*.py")))
-    files.extend((p.SCHEMA_DIR / filename).as_posix() for filename in p.SCHEMA_FILENAMES)
+    files.extend(p.normalize_repo_ref(p.PACKAGE_DIR / path.name) for path in sorted((repo_root / p.PACKAGE_DIR).glob("*.py")))
+    files.extend(p.normalize_repo_ref(p.SCHEMA_DIR / filename) for filename in p.SCHEMA_FILENAMES)
     files.extend(
         [
             "tools/build_pr165_c_replay_paper_memory_consumer_integration.py",
@@ -21,8 +21,8 @@ def build_pr_file_connectivity_rows(repo_root: Path, shard_paths: list[str]) -> 
             "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/test_pr165_c_artifacts.py",
         ]
     )
-    files.extend((p.GENERATED_DIR / filename).as_posix() for filename in p.REPORT_FILENAMES)
-    files.extend(shard_paths)
+    files.extend(p.normalize_repo_ref(p.GENERATED_DIR / filename) for filename in p.REPORT_FILENAMES)
+    files.extend(p.normalize_repo_ref(path) for path in shard_paths)
     unique_files = sorted(dict.fromkeys(files))
     rows = []
     for index, rel_path in enumerate(unique_files, start=1):

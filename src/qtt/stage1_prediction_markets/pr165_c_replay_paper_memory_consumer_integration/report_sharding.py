@@ -56,7 +56,7 @@ def build_sharded_payloads(
     shard_count = len(chunks)
     for index, chunk in enumerate(chunks, start=1):
         shard_name = f"{report_name}.part_{index:04d}_of_{shard_count:04d}.report.json"
-        rel_path = (p.SHARD_DIR / shard_name).as_posix()
+        rel_path = p.normalize_repo_ref(p.SHARD_DIR / shard_name)
         shard_payload = _base_payload(
             filename=shard_name,
             records=chunk,
@@ -107,7 +107,7 @@ def build_sharded_payloads(
             "largest_shard_record_count": max(shard_record_counts) if shard_record_counts else 0,
             "records_omitted_for_sharding_flag": True,
             "full_records_only_in_shards_flag": True,
-            "canonical_records_location": p.SHARD_DIR.as_posix(),
+            "canonical_records_location": p.normalize_repo_ref(p.SHARD_DIR),
             "aggregate_counts": aggregate_counts(records),
             "authority_counts": authority_zero_counts(),
             "authority_absence_confirmation": authority_absence_confirmation(),

@@ -33,6 +33,7 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
     _validate_schemas(repo_root, failures)
     _validate_required_inputs(repo_root, failures)
     _validate_no_scattered_literals(repo_root, failures)
+    _validate_serialized_repo_refs(reports, failures)
     if failures:
         return ValidationResult(False, tuple(failures))
     records = {filename: load_report_records(repo_root, payload) for filename, payload in reports.items()}
@@ -70,8 +71,9 @@ def _validate_schemas(repo_root: Path, failures: list[str]) -> None:
 
 def _validate_required_inputs(repo_root: Path, failures: list[str]) -> None:
     for rel_path in p.REQUIRED_INPUTS:
-        if not p.resolve_repo_relative(repo_root, rel_path).exists():
-            failures.append(f"missing required PR165-C upstream artifact: {rel_path}")
+        normalized = p.normalize_repo_ref(rel_path)
+        if not p.resolve_repo_relative(repo_root, normalized).exists():
+            failures.append(f"missing required PR165-C upstream artifact: {normalized}")
 
 
 def _validate_common_contracts(
@@ -228,6 +230,13 @@ def _validate_pr_file_connectivity(records: dict[str, list[dict[str, Any]]], fai
             _expect(row.get(field) not in (None, "", []), failures, f"PR file connectivity missing {field}")
 
 
+def _validate_serialized_repo_refs(reports: dict[str, dict[str, Any]], failures: list[str]) -> None:
+    for filename, payload in reports.items():
+        for value in _flatten_values(payload):
+            if "\\" in value:
+                failures.append(f"{filename} serialized repo ref contains backslash: {value}")
+
+
 def _validate_authority(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
     for filename, rows in records.items():
         for row in rows:
@@ -254,7 +263,7 @@ def _validate_no_scattered_literals(repo_root: Path, failures: list[str]) -> Non
         text = path.read_text(encoding="utf-8")
         for literal in (*FORBIDDEN_ACTION_LITERALS, *FORBIDDEN_COMPUTABILITY_LITERALS):
             if literal in text:
-                failures.append(f"scattered PR165-C literal outside central vocabulary: {path.relative_to(repo_root).as_posix()}::{literal}")
+                failures.append(f"scattered PR165-C literal outside central vocabulary: {p.to_repo_posix(path, repo_root)}::{literal}")
 
 
 def _flatten_values(value: Any) -> set[str]:

@@ -19,16 +19,18 @@ class InputDiscovery:
 
 
 def discover_inputs(repo_root: Path) -> InputDiscovery:
-    missing = tuple(rel for rel in p.REQUIRED_INPUTS if not p.resolve_repo_relative(repo_root, rel).exists())
+    required_inputs = tuple(p.normalize_repo_ref(rel) for rel in p.REQUIRED_INPUTS)
+    missing = tuple(rel for rel in required_inputs if not p.resolve_repo_relative(repo_root, rel).exists())
     optional_present: dict[str, tuple[str, ...]] = {}
     optional_missing: dict[str, tuple[str, ...]] = {}
-    for group, paths in p.OPTIONAL_INPUT_GROUPS.items():
-        present = tuple(rel for rel in paths if p.resolve_repo_relative(repo_root, rel).exists())
-        absent = tuple(rel for rel in paths if not p.resolve_repo_relative(repo_root, rel).exists())
+    for group, path_refs in p.OPTIONAL_INPUT_GROUPS.items():
+        normalized_refs = tuple(p.normalize_repo_ref(rel) for rel in path_refs)
+        present = tuple(rel for rel in normalized_refs if p.resolve_repo_relative(repo_root, rel).exists())
+        absent = tuple(rel for rel in normalized_refs if not p.resolve_repo_relative(repo_root, rel).exists())
         optional_present[group] = present
         optional_missing[group] = absent
     return InputDiscovery(
-        required_inputs=tuple(p.REQUIRED_INPUTS),
+        required_inputs=required_inputs,
         missing_required_inputs=missing,
         optional_present=optional_present,
         optional_missing=optional_missing,
@@ -65,5 +67,5 @@ def discover_agent_related_reports(repo_root: Path) -> tuple[str, ...]:
     matches = []
     for path in sorted(generated.rglob("*")):
         if path.is_file() and any(pattern in path.name.lower() for pattern in patterns):
-            matches.append(path.relative_to(repo_root).as_posix())
+            matches.append(p.to_repo_posix(path, repo_root))
     return tuple(matches)

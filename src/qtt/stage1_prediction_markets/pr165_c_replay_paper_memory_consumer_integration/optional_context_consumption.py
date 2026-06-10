@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from . import paths as p
 from .artifact_discovery import InputDiscovery
 from .central_vocab import AUTHORITY_BOUNDARY_REF, NO_ORPHAN_STATUS
 
@@ -15,8 +16,8 @@ def build_optional_context_receipts(discovery: InputDiscovery) -> list[dict[str,
             {
                 "optional_context_receipt_id": f"PR165_C_OPTIONAL_CONTEXT::{index:04d}",
                 "context_group": group,
-                "present_paths": list(present),
-                "missing_paths": list(missing),
+                "present_paths": [p.normalize_repo_ref(path) for path in present],
+                "missing_paths": [p.normalize_repo_ref(path) for path in missing],
                 "missing_count": len(missing),
                 "consumption_status": status,
                 "continue_decision": "CONTINUE_WITH_REQUIRED_PR165_AND_PR165_B_INPUTS",
@@ -37,8 +38,8 @@ def build_crosswalk_consumption_audit(discovery: InputDiscovery) -> list[dict[st
             {
                 "crosswalk_consumption_id": f"PR165_C_CROSSWALK_CONSUMPTION::{index:04d}",
                 "context_group": group,
-                "present_paths": list(discovery.optional_present.get(group, ())),
-                "missing_paths": list(discovery.optional_missing.get(group, ())),
+                "present_paths": [p.normalize_repo_ref(path) for path in discovery.optional_present.get(group, ())],
+                "missing_paths": [p.normalize_repo_ref(path) for path in discovery.optional_missing.get(group, ())],
                 "consumption_result": "CONSUMED_WHEN_PRESENT_WITH_RECEIPT",
                 "downstream_report_refs": [
                     "PR165_C_AgentPRConnectivityReconciliation.report.json",

@@ -1,4 +1,7 @@
 from pathlib import Path
+from typing import Any
+
+import pytest
 
 from src.qtt.stage1_prediction_markets.pr165_c_replay_paper_memory_consumer_integration import (
     paths,
@@ -35,7 +38,86 @@ def _records(filename: str) -> list[dict]:
     return load_report_records(REPO_ROOT, _payload(filename))
 
 
+def _string_values(value: Any) -> list[str]:
+    if isinstance(value, dict):
+        values: list[str] = []
+        for nested in value.values():
+            values.extend(_string_values(nested))
+        return values
+    if isinstance(value, list):
+        values = []
+        for nested in value:
+            values.extend(_string_values(nested))
+        return values
+    if isinstance(value, str):
+        return [value]
+    return []
+
+
 def test_pr165_c_validator_accepts_generated_artifacts():
+    result = validate_artifacts(REPO_ROOT)
+    assert result.ok, "\n".join(result.failures[:25])
+
+
+def test_pr165_c_resolve_repo_relative_normalizes_legacy_backslash_refs():
+    legacy_ref = r"docs\master_plan\generated\PR165_C_FinalSummary.report.json"
+    normalized = "docs/master_plan/generated/PR165_C_FinalSummary.report.json"
+
+    assert paths.normalize_repo_ref(legacy_ref) == normalized
+    assert paths.resolve_repo_relative(REPO_ROOT, legacy_ref).relative_to(REPO_ROOT).as_posix() == normalized
+    assert paths.resolve_repo_relative(REPO_ROOT, legacy_ref).exists()
+
+    for bad_ref in (
+        "../docs/master_plan/generated/PR165_C_FinalSummary.report.json",
+        "docs/master_plan/../generated/PR165_C_FinalSummary.report.json",
+        "/docs/master_plan/generated/PR165_C_FinalSummary.report.json",
+        r"C:\repo\docs\master_plan\generated\PR165_C_FinalSummary.report.json",
+    ):
+        with pytest.raises(ValueError):
+            paths.resolve_repo_relative(REPO_ROOT, bad_ref)
+
+
+def test_pr165_c_shard_refs_are_repo_relative_posix():
+    for filename in paths.ROW_LEVEL_REPORTS:
+        payload = _payload(filename)
+        for shard_ref in payload.get("shard_files") or []:
+            assert "\\" not in shard_ref
+            assert paths.normalize_repo_ref(shard_ref) == shard_ref
+            assert paths.resolve_repo_relative(REPO_ROOT, shard_ref).exists()
+        for entry in payload.get("shard_manifest_refs") or []:
+            shard_ref = entry["shard_path"]
+            assert "\\" not in shard_ref
+            assert paths.normalize_repo_ref(shard_ref) == shard_ref
+            assert shard_ref in payload.get("shard_files", [])
+
+
+def test_pr165_c_root_reports_contain_no_backslash_path_refs():
+    offenders = []
+    for filename in paths.REPORT_FILENAMES:
+        for value in _string_values(_payload(filename)):
+            if "\\" in value:
+                offenders.append((filename, value))
+    assert offenders == []
+
+
+def test_pr165_c_load_report_records_loads_posix_shard_refs():
+    payload = _payload("PR165_C_MemoryConsumerRouter.report.json")
+    assert payload["sharded_flag"] is True
+    assert all(paths.normalize_repo_ref(ref) == ref for ref in payload["shard_files"])
+
+    rows = load_report_records(REPO_ROOT, payload)
+
+    assert len(rows) == payload["record_count"] == 6502
+
+
+def test_pr165_c_validate_artifacts_finds_required_upstream_inputs_from_repo_root():
+    missing = [
+        ref
+        for ref in paths.REQUIRED_INPUTS
+        if not paths.resolve_repo_relative(REPO_ROOT, ref).exists()
+    ]
+    assert missing == []
+
     result = validate_artifacts(REPO_ROOT)
     assert result.ok, "\n".join(result.failures[:25])
 

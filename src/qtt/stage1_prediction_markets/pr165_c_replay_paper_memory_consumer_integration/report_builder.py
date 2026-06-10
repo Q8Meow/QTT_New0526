@@ -68,7 +68,7 @@ def write_artifacts(repo_root: Path) -> BuildArtifacts:
             compact=filename in p.ROW_LEVEL_REPORTS,
         )
     for rel_path, shard_payload in shard_payloads.items():
-        write_json(repo_root / rel_path, shard_payload, compact=True)
+        write_json(p.resolve_repo_relative(repo_root, rel_path), shard_payload, compact=True)
     sizes = file_size_summary(repo_root, p.REPORT_FILENAMES)
     summary = dict(payloads["PR165_C_FinalSummary.report.json"]["records"][0])
     summary.update(sizes)
@@ -303,7 +303,7 @@ def build_manifest(payloads: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
                 "report_filename": filename,
                 "row_count": payload.get("record_count", 0),
                 "shard_count": payload.get("shard_count", 0),
-                "shard_paths": list(payload.get("shard_files") or []),
+                "shard_paths": [p.normalize_repo_ref(path) for path in payload.get("shard_files") or []],
                 "schema_ref": payload.get("schema_ref"),
                 "upstream_source_pr_refs": ["PR165", "PR165-B"],
                 "downstream_consumer_pr_refs": list(DOWNSTREAM_PR_ROUTES),
@@ -341,8 +341,13 @@ def _build_summary(
         "created_by_pr": "PR165-C",
         "authority_class": "PR165_C_REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
         "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr165_c_replay_paper_memory_consumer_integration.authority_policy",
-        "input_reports_consumed": [rel for rel in discovery.required_inputs if rel not in discovery.missing_required_inputs],
-        "optional_inputs_missing_with_receipts": discovery.optional_missing,
+        "input_reports_consumed": [
+            p.normalize_repo_ref(rel) for rel in discovery.required_inputs if rel not in discovery.missing_required_inputs
+        ],
+        "optional_inputs_missing_with_receipts": {
+            group: tuple(p.normalize_repo_ref(rel) for rel in missing)
+            for group, missing in discovery.optional_missing.items()
+        },
         "main_freshness_triage_result": "PASS_MAIN_AT_1f50813_ORIGIN_MAIN_MATCHED_AND_LATEST_VALIDATION_SUCCESS",
         "upstream_agent_pr_discovery_result": "PASS_DISCOVERY_ROWS_MATERIALIZED",
         **gh_status,

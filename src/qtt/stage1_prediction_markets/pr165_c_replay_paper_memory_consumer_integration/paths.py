@@ -282,12 +282,39 @@ def ensure_branch(repo_root: Path) -> None:
         raise RuntimeError(f"PR165-C must build on {EXPECTED_BRANCH}, got {branch}")
 
 
-def resolve_repo_relative(repo_root: Path, rel_path: str | Path) -> Path:
-    if isinstance(rel_path, PureWindowsPath):
-        rel_path = rel_path.as_posix()
-    if isinstance(rel_path, PurePosixPath):
-        rel_path = rel_path.as_posix()
-    return repo_root / Path(str(rel_path).replace("/", "\\"))
+def normalize_repo_ref(value: str | Path) -> str:
+    """Return a repo-relative POSIX ref, accepting legacy backslash refs."""
+
+    raw = value.as_posix() if isinstance(value, (PurePosixPath, PureWindowsPath)) else str(value)
+    windows_ref = PureWindowsPath(raw)
+    if windows_ref.drive or windows_ref.root:
+        raise ValueError(f"repo ref must be relative: {raw}")
+    normalized = raw.replace("\\", "/")
+    posix_ref = PurePosixPath(normalized)
+    if posix_ref.is_absolute():
+        raise ValueError(f"repo ref must be relative: {raw}")
+    parts = tuple(part for part in posix_ref.parts if part != ".")
+    if not parts:
+        raise ValueError("repo ref must not be empty")
+    if any(part == ".." for part in parts):
+        raise ValueError(f"repo ref must not contain '..': {raw}")
+    return "/".join(parts)
+
+
+def to_repo_posix(path: Path, repo_root: Path) -> str:
+    candidate = Path(path)
+    if candidate.is_absolute():
+        root = Path(repo_root).resolve()
+        try:
+            candidate = candidate.resolve().relative_to(root)
+        except ValueError as exc:
+            raise ValueError(f"path is outside repo root: {path}") from exc
+    return normalize_repo_ref(candidate)
+
+
+def resolve_repo_relative(repo_root: Path, repo_ref: str | Path) -> Path:
+    normalized = normalize_repo_ref(repo_ref)
+    return Path(repo_root).joinpath(*normalized.split("/"))
 
 
 def schema_path(repo_root: Path, filename: str) -> Path:
