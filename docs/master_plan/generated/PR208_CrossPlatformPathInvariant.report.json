@@ -1,0 +1,17 @@
+{
+  "absolute_serialized_paths_allowed": false,
+  "backslash_serialized_paths_allowed": false,
+  "future_linux_cluster_supported": true,
+  "linux_ci_required": true,
+  "parent_traversal_allowed": false,
+  "pathlib_resolution_required": true,
+  "serialized_repo_paths_must_be_posix": true,
+  "shared_helper_path": "tools/repo_path_refs.py",
+  "test_refs": [
+    "tests/tools/test_cross_platform_path_invariant.py",
+    "tests/tools/test_changed_area_validation_router.py",
+    "tests/tools/test_validation_inventory.py"
+  ],
+  "touched_generated_json_scan_supported": true,
+  "windows_dev_supported": true
+}

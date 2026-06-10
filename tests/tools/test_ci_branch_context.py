@@ -34,6 +34,12 @@ def test_repair_and_main_cumulative_branch_classification():
         )
         is True
     )
+    assert (
+        context.is_main_cumulative_branch(
+            context.PR208_CI_RUNTIME_RATIONALIZATION_BRANCH
+        )
+        is True
+    )
     assert context.is_main_cumulative_branch("feature/unrelated") is False
     assert context.is_downstream_roadmap_branch(
         "feature/non-downstream-validation",
@@ -49,6 +55,13 @@ def test_roadmap_pr_number_parses_pr_branches():
             "pr99-atomicrows-bundle-builder-deterministic-assembly-gate"
         )
         == 99
+    )
+    assert context.roadmap_pr_number(context.PR208_CI_RUNTIME_RATIONALIZATION_BRANCH) is None
+    assert (
+        context.roadmap_pr_number(
+            f"{context.PR208_CI_RUNTIME_RATIONALIZATION_BRANCH}-copy"
+        )
+        is None
     )
 
 

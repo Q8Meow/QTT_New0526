@@ -263,6 +263,7 @@ _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS = frozenset(
         "tools/validate_ci_branch_context_matrix.py",
         "tools/validate_nested_validator_contracts.py",
         "tools/validate_repair_pr_changed_file_scope.py",
+        "tools/validate_validation_inventory.py",
     }
 )
 _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA = len(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS)

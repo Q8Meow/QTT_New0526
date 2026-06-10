@@ -42,6 +42,9 @@ FAST_PREFLIGHT_SCRIPT_NAMES = frozenset(
         "validate_ci_branch_context_matrix.py",
         "validate_repair_pr_changed_file_scope.py",
         "validate_nested_validator_contracts.py",
+        "validate_validation_inventory.py",
+        "changed_area_validation_router.py",
+        "cross_platform_path_invariant.py",
     }
 )
 ISOLATED_SOURCE_EVIDENCE_PYTEST = (
@@ -2862,6 +2865,24 @@ def build_fast_preflight_commands() -> list[list[str]]:
             "--repo-root",
             ".",
         ],
+        [
+            sys.executable,
+            _path("tools", "validate_validation_inventory.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "changed_area_validation_router.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "cross_platform_path_invariant.py"),
+            "--repo-root",
+            ".",
+        ],
     ]
 
 
@@ -3190,6 +3211,85 @@ def _run_commands_accepts_repo_root() -> bool:
     )
 
 
+def _github_event_name() -> str:
+    import os
+
+    return os.getenv("GITHUB_EVENT_NAME", "")
+
+
+def _changed_area_routing_active(
+    *,
+    validation_mode: str,
+    changed_files: Sequence[str],
+) -> bool:
+    if validation_mode == "full":
+        return False
+    if validation_mode == "reduced":
+        return True
+    if changed_files:
+        return True
+    return _github_event_name() == "pull_request"
+
+
+def _router_result_for_current_context(
+    repo_root: pathlib.Path,
+    *,
+    changed_files: Sequence[str],
+    base_ref: str | None,
+    head_ref: str | None,
+    force_full: bool,
+    manual_mode: str,
+):
+    from tools.changed_area_validation_router import (
+        build_router_result,
+        router_input_from_environment,
+    )
+
+    router_input = router_input_from_environment(
+        repo_root,
+        changed_files=changed_files,
+        base_ref=base_ref,
+        head_ref=head_ref,
+        force_full_flag=force_full,
+        manual_mode=manual_mode,
+    )
+    return build_router_result(router_input)
+
+
+def _filter_commands_for_router_result(
+    commands: Sequence[Sequence[str]],
+    *,
+    phase: str,
+    router_result,
+) -> list[list[str]]:
+    from tools.validation_inventory import canonical_command, validator_id_for_command
+
+    required = set(router_result.required_validators)
+    phase_by_command: dict[tuple[str, ...], str] = {}
+    if phase == ALL_PHASE:
+        for phase_record in build_phase_manifest():
+            record_phase = str(phase_record["phase"])
+            for record_command in phase_record["commands"]:
+                phase_by_command[canonical_command(record_command)] = record_phase
+    kept: list[list[str]] = []
+    skipped: list[str] = []
+    for command in commands:
+        command_list = list(command)
+        command_phase = phase_by_command.get(canonical_command(command_list), phase)
+        validator_id = validator_id_for_command(command_list, command_phase)
+        if validator_id in required:
+            kept.append(command_list)
+        else:
+            skipped.append(validator_id)
+    if skipped:
+        print(
+            "QTT_CHANGED_AREA_ROUTER_SKIPPED "
+            f"phase={phase} validators={','.join(sorted(skipped))}",
+            flush=True,
+        )
+    return kept
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -3202,6 +3302,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--timing-report",
         type=pathlib.Path,
         help="Optional untracked JSON timing report path.",
+    )
+    parser.add_argument(
+        "--validation-mode",
+        choices=("auto", "full", "reduced"),
+        default="auto",
+        help=(
+            "auto keeps local/default validation full and uses changed-area "
+            "routing for GitHub pull_request contexts"
+        ),
+    )
+    parser.add_argument("--base-ref")
+    parser.add_argument("--head-ref")
+    parser.add_argument("--changed-file", action="append", default=[])
+    parser.add_argument("--force-full", action="store_true")
+    parser.add_argument("--manual-mode", default="")
+    parser.add_argument(
+        "--router-report",
+        type=pathlib.Path,
+        help="Optional untracked JSON changed-area router report path.",
     )
     args = parser.parse_args(sys.argv[1:] if argv is None else list(argv))
     repo_root = _repo_root()
@@ -3234,6 +3353,50 @@ def main(argv: Sequence[str] | None = None) -> int:
                     pathlib.Path(temp_dir),
                     pathlib.Path(pytest_temp_dir),
                 )
+                router_result = None
+                if _changed_area_routing_active(
+                    validation_mode=args.validation_mode,
+                    changed_files=args.changed_file,
+                ):
+                    router_result = _router_result_for_current_context(
+                        repo_root,
+                        changed_files=args.changed_file,
+                        base_ref=args.base_ref,
+                        head_ref=args.head_ref,
+                        force_full=args.force_full,
+                        manual_mode=args.manual_mode,
+                    )
+                    router_report_path = args.router_report
+                    if router_report_path is not None:
+                        if not router_report_path.is_absolute():
+                            router_report_path = repo_root / router_report_path
+                        router_report_path.parent.mkdir(parents=True, exist_ok=True)
+                        router_report_path.write_text(
+                            json.dumps(
+                                router_result.to_json_dict(),
+                                indent=2,
+                                sort_keys=True,
+                            )
+                            + "\n",
+                            encoding="utf-8",
+                        )
+                    print(
+                        "QTT_CHANGED_AREA_ROUTER_MODE "
+                        f"phase={args.phase} "
+                        f"full_validation_required={router_result.full_validation_required} "
+                        f"reason={router_result.full_validation_reason!r}",
+                        flush=True,
+                    )
+                    if router_result.fail_closed_reasons:
+                        for reason in router_result.fail_closed_reasons:
+                            print(reason, file=sys.stderr, flush=True)
+                        return 2
+                    if not router_result.full_validation_required:
+                        commands = _filter_commands_for_router_result(
+                            commands,
+                            phase=args.phase,
+                            router_result=router_result,
+                        )
                 if _run_commands_accepts_repo_root():
                     return run_commands(
                         commands,
