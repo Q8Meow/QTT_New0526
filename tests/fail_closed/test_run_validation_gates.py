@@ -9355,6 +9355,8 @@ def test_runner_rejects_tracked_generated_timing_report_path(monkeypatch):
 
 
 def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
+    _clear_branch_context_env(monkeypatch)
+
     class Completed:
         def __init__(self, stdout: str = "", stderr: str = "") -> None:
             self.returncode = 0
@@ -9396,6 +9398,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
 
 
 def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
+    _clear_branch_context_env(monkeypatch)
+
     class Completed:
         def __init__(self, stdout: str = "", stderr: str = "") -> None:
             self.returncode = 0
@@ -9440,6 +9444,8 @@ def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):
 
 
 def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
     repo_root = (Path(".tmp") / "test_run_validation_gates_unique_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
@@ -9472,6 +9478,8 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
 
 
 def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
     repo_root = (Path(".tmp") / "test_run_validation_gates_stale_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     tmp_parent = repo_root / ".tmp"
