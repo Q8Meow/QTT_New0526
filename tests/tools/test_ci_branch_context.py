@@ -2085,6 +2085,76 @@ def test_pr165_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr165_d_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr165-d-scenario-qku-combination-selection"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=165) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d_scenario_qku_combination_selection/validators.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d_scenario_qku_combination_selection/schemas/"
+        "pr165_d_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr165_d_scenario_qku_combination_selection/test_pr165_d_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_D_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr165_d_shards/"
+        "PR165_D_RetestBatchSelectionQueue.part_0001_of_0007.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr165_d_scenario_qku_combination_selection.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr165_d_scenario_qku_combination_selection.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validation_inventory.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_C_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_c_replay_paper_memory_consumer_integration/validators.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/1004/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
     repair_branch = context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
@@ -2539,6 +2609,19 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "docs/master_plan/generated/pr165_b_shards/"
             "PR165_B_ScenarioOutcomeMatrix.part_0001_of_0007.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_pr165_d_scenario_qku_combination_selection.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/PR165_D_FinalSummary.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/pr165_d_shards/"
+            "PR165_D_RetestBatchSelectionQueue.part_0001_of_0007.report.json",
         )
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
