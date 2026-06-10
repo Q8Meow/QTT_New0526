@@ -13,6 +13,10 @@ import json
 import time
 from typing import Sequence
 
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
 PYTEST_FRESH_BASETEMP_SCRIPT = "run_pytest_fresh_basetemp.py"
 PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
@@ -512,7 +516,7 @@ def _default_validation_dir() -> pathlib.Path:
 
 
 def _repo_root() -> pathlib.Path:
-    return pathlib.Path(__file__).resolve().parents[1]
+    return REPO_ROOT
 
 
 def _is_final_pytest_command(command: Sequence[str]) -> bool:

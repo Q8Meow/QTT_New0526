@@ -1,5 +1,8 @@
 import json
+import os
 import shutil
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -182,6 +185,12 @@ def _clear_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
+def _env_without_pythonpath() -> dict[str, str]:
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    return env
+
+
 def _owner_gate_git_metadata_responses(branch: str):
     def fake_git_stdout(repo_root, args):
         command = tuple(args)
@@ -213,6 +222,54 @@ def _default_temp_generated_report(filename: str) -> str:
             f"docs/master_plan/generated/{filename}",
         )
     )
+
+
+def test_run_validation_gates_direct_script_imports_router_without_pythonpath():
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(Path("tools") / "run_validation_gates.py"),
+            "--phase",
+            "fast-preflight",
+            "--validation-mode",
+            "reduced",
+            "--changed-file",
+            "docs/master_plan/generated/UnownedGeneratedReport.report.json",
+        ],
+        cwd=REPO_ROOT,
+        env=_env_without_pythonpath(),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    combined_output = completed.stdout + completed.stderr
+    assert completed.returncode == 2
+    assert "GENERATED_REPORT_OWNER_MISSING" in combined_output
+    assert "ModuleNotFoundError" not in combined_output
+    assert "No module named 'tools'" not in combined_output
+
+
+def test_validate_validation_inventory_direct_script_imports_pr208_modules_without_pythonpath():
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            str(Path("tools") / "validate_validation_inventory.py"),
+        ],
+        cwd=REPO_ROOT,
+        env=_env_without_pythonpath(),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    combined_output = completed.stdout + completed.stderr
+    assert completed.returncode == 0, combined_output
+    assert "VALIDATION_INVENTORY_OK" in completed.stdout
+    assert "ModuleNotFoundError" not in combined_output
+    assert "No module named 'tools'" not in combined_output
 
 
 def _expected_commands(
