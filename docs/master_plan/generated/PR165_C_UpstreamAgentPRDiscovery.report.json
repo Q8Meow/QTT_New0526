@@ -1,0 +1,1684 @@
+{
+  "aggregate_counts": {
+    "candidate_packet_count": 0,
+    "combination_fingerprint_count": 0,
+    "condition_fingerprint_count": 0,
+    "core_table_row_count": 0,
+    "qku_count": 0,
+    "row_count": 46,
+    "status_counts": {
+      "no_orphan_status=NO_ORPHAN_ROUTE_COMPLETE": 46,
+      "validation_status=PASS": 46
+    }
+  },
+  "authority_absence_confirmation": {
+    "connector_runtime_binding_absent": true,
+    "live_order_authority_absent": true,
+    "live_promotion_claim_absent": true,
+    "llm_hot_path_or_order_release_absent": true,
+    "order_ready_claim_absent": true,
+    "private_state_fetch_absent": true,
+    "profit_evidence_claim_absent": true,
+    "protected_integrity_authority_absent": true,
+    "quantum_advantage_claim_absent": true,
+    "quantum_backend_execution_absent": true,
+    "runtime_cash_receipt_absent": true
+  },
+  "authority_boundary": {
+    "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+    "authority_class": "PR165_C_REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+    "connector_runtime_binding_allowed": false,
+    "dashboard_governance_commander_handoffs_allowed": true,
+    "live_order_authority_allowed": false,
+    "live_promotion_claim_allowed": false,
+    "llm_hot_path_or_order_release_allowed": false,
+    "materialization_task_creation_allowed": true,
+    "order_ready_claim_allowed": false,
+    "policy_module_ref": "src.qtt.stage1_prediction_markets.pr165_c_replay_paper_memory_consumer_integration.authority_policy",
+    "private_state_fetch_allowed": false,
+    "profit_evidence_claim_allowed": false,
+    "protected_integrity_authority_allowed": false,
+    "quantum_advantage_claim_allowed": false,
+    "quantum_backend_execution_allowed": false,
+    "repair_route_creation_allowed": true,
+    "replay_paper_consumer_actions_allowed": true,
+    "retest_queue_creation_allowed": true,
+    "runtime_cash_receipt_allowed": false
+  },
+  "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+  "authority_class": "PR165_C_REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+  "authority_counts": {
+    "connector_runtime_binding_count": 0,
+    "live_order_authority_count": 0,
+    "live_promotion_claim_count": 0,
+    "llm_hot_path_or_order_release_count": 0,
+    "order_ready_claim_count": 0,
+    "private_state_fetch_count": 0,
+    "profit_evidence_claim_count": 0,
+    "protected_integrity_authority_count": 0,
+    "quantum_advantage_claim_count": 0,
+    "quantum_backend_execution_count": 0,
+    "runtime_cash_receipt_count": 0
+  },
+  "authority_policy_module_ref": "src.qtt.stage1_prediction_markets.pr165_c_replay_paper_memory_consumer_integration.authority_policy",
+  "connector_runtime_binding_count": 0,
+  "created_by_pr": "PR165-C",
+  "downstream_pr_routes": [
+    "PR162D-R3",
+    "PR162E",
+    "PR162E-Q",
+    "PR165-D",
+    "PR166-S",
+    "PR166-Q",
+    "PR171/PR172",
+    "dashboard_agent",
+    "governance_agent",
+    "commander_agent"
+  ],
+  "estimated_root_report_count": 42,
+  "estimated_shard_count": 127,
+  "live_order_authority_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_or_order_release_count": 0,
+  "order_ready_claim_count": 0,
+  "pr_id": "PR165-C",
+  "private_state_fetch_count": 0,
+  "profit_evidence_claim_count": 0,
+  "protected_integrity_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 46,
+  "records": [
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "codex/pr10-replay-paper-review-source-required-fixtures",
+      "discovered_pr_merged_at": "2026-05-08T04:05:26Z",
+      "discovered_pr_number": 10,
+      "discovered_pr_title": "Add replay paper review SOURCE_REQUIRED fixture coverage",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0001",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr110-repair-atomicrows-exact-row-agent-family-eligibility-matrix",
+      "discovered_pr_merged_at": "2026-05-16T01:11:53Z",
+      "discovered_pr_number": 110,
+      "discovered_pr_title": "Repair AtomicRows exact-row agent-family eligibility matrix",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0002",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "codex/pr14-dashboard-research-edge-quantum-risk-fixtures",
+      "discovered_pr_merged_at": "2026-05-08T05:24:56Z",
+      "discovered_pr_number": 14,
+      "discovered_pr_title": "Add dashboard research edge quantum risk SOURCE_REQUIRED fixture coverage",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "dashboard"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0003",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr142-atomicrows-semantic-value-materialization-authorization-handoff-gate",
+      "discovered_pr_merged_at": "2026-05-24T04:51:24Z",
+      "discovered_pr_number": 148,
+      "discovered_pr_title": "Add AtomicRows semantic value materialization authorization handoff readiness gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "handoff"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0004",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr155-agent-consumable-parameter-default-registry",
+      "discovered_pr_merged_at": "2026-05-27T05:56:44Z",
+      "discovered_pr_number": 166,
+      "discovered_pr_title": "Add PR155 agent-consumable parameter default registry",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0005",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr155-agent-consumable-parameter-default-registry",
+      "discovered_pr_merged_at": "2026-05-27T06:45:58Z",
+      "discovered_pr_number": 167,
+      "discovered_pr_title": "Repair PR155 branch-token schema validation",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0006",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr156-agent-default-binding-universal-intake-gate",
+      "discovered_pr_merged_at": "2026-05-27T10:41:59Z",
+      "discovered_pr_number": 168,
+      "discovered_pr_title": "Add PR156 agent default binding universal intake gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0007",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr157-pr154-atomicrows-fillpath-owner-agent-bridge",
+      "discovered_pr_merged_at": "2026-05-27T20:50:05Z",
+      "discovered_pr_number": 169,
+      "discovered_pr_title": "Add PR157 completion fill-path owner-editability no-orphan bridge",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0008",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr161c-qku-residual-candidate-assimilation-fill-campaign",
+      "discovered_pr_merged_at": "2026-05-30T06:56:52Z",
+      "discovered_pr_number": 182,
+      "discovered_pr_title": "Implement PR161C QKU residual assimilation and orchestration graph",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0009",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentLayerCoverage.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleReferenceFanout.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleSlice.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleCoverageGaps.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUAtomicRowsPR154PriorityBridge.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingBreakdown.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingRegistry.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryTopListIndex.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr161d-qku-candidate-quality-scoring-replay-paper-prioritization",
+      "discovered_pr_merged_at": "2026-05-30T23:45:10Z",
+      "discovered_pr_number": 183,
+      "discovered_pr_title": "Implement PR161D QKU candidate quality scoring and replay-paper prior\u00e2\u20ac\u00a6",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentLayerCoverage.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleReferenceFanout.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleSlice.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleCoverageGaps.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUAtomicRowsPR154PriorityBridge.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingBreakdown.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingRegistry.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryTopListIndex.report.json",
+        "docs/master_plan/generated/PR161D_QKUClassicalBaselinePriorityQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUCombinationCandidateRegistry.report.json",
+        "docs/master_plan/generated/PR161D_QKUCombinationGenerationBoundedness.report.json",
+        "docs/master_plan/generated/PR161D_QKUCombinationReplayPaperPriorityQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUCombinationScenarioMap.report.json",
+        "docs/master_plan/generated/PR161D_QKUForbiddenAuthorityScan.report.json",
+        "docs/master_plan/generated/PR161D_QKUFutureProfitabilityPatternFields.report.json",
+        "docs/master_plan/generated/PR161D_QKUGraphConsumptionAudit.report.json",
+        "docs/master_plan/generated/PR161D_QKUHybridArbitrationPriorityQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUMarketActiveBundleSet.report.json"
+      ],
+      "matched_reason": [
+        "qku",
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR161D_QKUAgentGraphRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentLayerCoverage.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleReferenceFanout.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleBundleSlice.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentRoleCoverageGaps.report.json",
+        "docs/master_plan/generated/PR161D_QKUAgentTaskQueue.report.json",
+        "docs/master_plan/generated/PR161D_QKUAtomicRowsPR154PriorityBridge.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingBreakdown.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryRankingRegistry.report.json",
+        "docs/master_plan/generated/PR161D_QKUCategoryTopListIndex.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0010",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr161e-replay-paper-outcome-capture-scenario-learning-bridge",
+      "discovered_pr_merged_at": "2026-05-31T06:49:56Z",
+      "discovered_pr_number": 184,
+      "discovered_pr_title": "Implement PR161E replay-paper outcome capture bridge",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0011",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr161f-replay-paper-executor-input-run-artifact-generation",
+      "discovered_pr_merged_at": "2026-05-31T11:55:29Z",
+      "discovered_pr_number": 185,
+      "discovered_pr_title": "Implement PR161F replay-paper executor input and agent workflow bridge",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent",
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0012",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162-safe-nonlive-replay-paper-executor-data-adapter-quantum-forward-bridge",
+      "discovered_pr_merged_at": "2026-06-01T00:49:31Z",
+      "discovered_pr_number": 186,
+      "discovered_pr_title": "Implement PR162 safe non-live replay-paper data adapter and quantum-f\u00e2\u20ac\u00a6",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0013",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162b-qku-formula-algorithm-solver-market-scope-materialization",
+      "discovered_pr_merged_at": "2026-06-02T04:44:57Z",
+      "discovered_pr_number": 188,
+      "discovered_pr_title": "Implement PR162B QKU formula algorithm solver and market-scope materi\u00e2\u20ac\u00a6",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0014",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162c-multisource-safe-nonlive-dataset-executable-qku-strict-coverage",
+      "discovered_pr_merged_at": "2026-06-02T15:27:08Z",
+      "discovered_pr_number": 189,
+      "discovered_pr_title": "Implement PR162C multisource safe nonlive dataset executable QKU stri\u00e2\u20ac\u00a6",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0015",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162d-aggressive-qku-candidate-materialization-agent-routing",
+      "discovered_pr_merged_at": "2026-06-03T03:20:41Z",
+      "discovered_pr_number": 190,
+      "discovered_pr_title": "PR162D aggressive QKU materialization and quantum readiness",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent",
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0016",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162r-a-replay-paper-executability-classification-audit",
+      "discovered_pr_merged_at": "2026-06-04T05:35:07Z",
+      "discovered_pr_number": 192,
+      "discovered_pr_title": "PR162R-A replay paper executability classification audit",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0017",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162d-r2a-real-computable-formulations-redo",
+      "discovered_pr_merged_at": "2026-06-05T00:55:48Z",
+      "discovered_pr_number": 193,
+      "discovered_pr_title": "Redo PR162D-R2A with executable computable QKU formulations",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0018",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162r-generic-replay-paper-adapter-rerun",
+      "discovered_pr_merged_at": "2026-06-05T06:30:13Z",
+      "discovered_pr_number": 194,
+      "discovered_pr_title": "Implement PR162R generic replay paper adapter rerun",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0019",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr162r-b-replay-paper-data-binding-completion",
+      "discovered_pr_merged_at": "2026-06-05T17:38:12Z",
+      "discovered_pr_number": 195,
+      "discovered_pr_title": "Implement PR162R-B replay paper data binding completion",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0020",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "pr163-generic-paper-adapter-capture-framework",
+      "discovered_pr_merged_at": "2026-06-06T02:49:13Z",
+      "discovered_pr_number": 196,
+      "discovered_pr_title": "Pr163 generic paper adapter capture framework",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_PaperLLMFutureHandoffExclusionReceiptRegistry.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json"
+      ],
+      "matched_reason": [
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0021",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "pr163-b-paired-replay-paper-concurrent-executor",
+      "discovered_pr_merged_at": "2026-06-06T11:30:56Z",
+      "discovered_pr_number": 197,
+      "discovered_pr_title": "Pr163 b paired replay paper concurrent executor",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_PaperLLMFutureHandoffExclusionReceiptRegistry.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json"
+      ],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0022",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR164_AgentOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR164_CandidateSourceToQKUMappingRegistry.report.json",
+        "docs/master_plan/generated/PR164_MasterQKUInventoryReconciliation.report.json",
+        "docs/master_plan/generated/PR164_ModelRiskInventoryForQKU.report.json",
+        "docs/master_plan/generated/PR164_QKUAgentActivationAllowlistAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUCanonicalUmbrellaAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUClassicalQuantumHybridInventory.report.json",
+        "docs/master_plan/generated/PR164_QKUComputabilityMaterializationRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaObjectiveSolverCoverageAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaRegistry.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr164-review-provenance-qku-canonical-coverage-audit",
+      "discovered_pr_merged_at": "2026-06-07T03:15:16Z",
+      "discovered_pr_number": 198,
+      "discovered_pr_title": "PR164 review provenance QKU canonical coverage audit",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR164_AgentOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR164_CandidateSourceToQKUMappingRegistry.report.json",
+        "docs/master_plan/generated/PR164_MasterQKUInventoryReconciliation.report.json",
+        "docs/master_plan/generated/PR164_ModelRiskInventoryForQKU.report.json",
+        "docs/master_plan/generated/PR164_QKUAgentActivationAllowlistAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUCanonicalUmbrellaAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUClassicalQuantumHybridInventory.report.json",
+        "docs/master_plan/generated/PR164_QKUComputabilityMaterializationRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaObjectiveSolverCoverageAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaTestVectorRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUGraphPRLabelEdgeEnrichmentPlan.report.json",
+        "docs/master_plan/generated/PR164_QKUHistorical9360VsCurrent6502Reconciliation.report.json",
+        "docs/master_plan/generated/PR164_QKUMarketScopeCoverageAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUMarketSortedInventory.report.json",
+        "docs/master_plan/generated/PR164_QKUMissingValueFillRouter.report.json",
+        "docs/master_plan/generated/PR164_QKUOnlineSourceEnrichmentPlan.report.json",
+        "docs/master_plan/generated/PR164_QKUResidual4835ToAtomicRows4183PR154342MergeAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUStage1ActivationDormancyAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUUpstreamDownstreamClosureMatrix.report.json"
+      ],
+      "matched_reason": [
+        "qku"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR164_CandidateSourceToQKUMappingRegistry.report.json",
+        "docs/master_plan/generated/PR164_MasterQKUInventoryReconciliation.report.json",
+        "docs/master_plan/generated/PR164_ModelRiskInventoryForQKU.report.json",
+        "docs/master_plan/generated/PR164_QKUAgentActivationAllowlistAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUCanonicalUmbrellaAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUClassicalQuantumHybridInventory.report.json",
+        "docs/master_plan/generated/PR164_QKUComputabilityMaterializationRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaObjectiveSolverCoverageAudit.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaRegistry.report.json",
+        "docs/master_plan/generated/PR164_QKUFormulaTestVectorRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0023",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "pr163-c-pretrade-infrastructure-rejection-remediation",
+      "discovered_pr_merged_at": "2026-06-07T09:14:28Z",
+      "discovered_pr_number": 199,
+      "discovered_pr_title": "PR163-C pretrade infrastructure rejection remediation",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_PaperLLMFutureHandoffExclusionReceiptRegistry.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json"
+      ],
+      "matched_reason": [
+        "PR163",
+        "PR163-C"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0024",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "repair/pr163-c-main-branch-context-after-merge",
+      "discovered_pr_merged_at": "2026-06-07T22:38:36Z",
+      "discovered_pr_number": 200,
+      "discovered_pr_title": "Repair PR163-C main branch context after merge",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_C_AgentRepairOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR163_C_AgentTaskHandoffMatrix.report.json",
+        "docs/master_plan/generated/PR163_C_OperatorDashboardHandoff.report.json",
+        "docs/master_plan/generated/PR163_C_PR165BNegativeMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_PaperLLMFutureHandoffExclusionReceiptRegistry.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json"
+      ],
+      "matched_reason": [
+        "PR163",
+        "PR163-C"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperModeQKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_PaperQKUPrioritizationFeatureHandoffRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0025",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentMemoryRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_AgentDutyDistinctnessMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentFieldOwnershipMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentOverlapConflictAudit.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_CommanderConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_DashboardConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_GovernanceConsumerHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "pr165-evidence-backed-scoring-ranking",
+      "discovered_pr_merged_at": "2026-06-09T03:13:27Z",
+      "discovered_pr_number": 205,
+      "discovered_pr_title": "PR165 evidence-backed scoring and ranking",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentMemoryRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_AgentDutyDistinctnessMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentFieldOwnershipMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentOverlapConflictAudit.report.json",
+        "docs/master_plan/generated/PR165_C_AgentPRConnectivityReconciliation.report.json",
+        "docs/master_plan/generated/PR165_C_AgentTaskQueue.report.json",
+        "docs/master_plan/generated/PR165_C_AgentTaskReceiptRequirementMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_CommanderConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_ComputableQKUFormulaActionRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_DashboardConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_GovernanceConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_C_MemoryConsumerRouter.report.json",
+        "docs/master_plan/generated/PR165_C_OlderAgentArtifactConsumptionAudit.report.json"
+      ],
+      "matched_reason": [
+        "PR165"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR165_C_ComputableQKUFormulaActionRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0026",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentMemoryRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_AgentDutyDistinctnessMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentFieldOwnershipMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentOverlapConflictAudit.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_CommanderConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_DashboardConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_GovernanceConsumerHandoff.report.json"
+      ],
+      "discovered_pr_head_ref_name": "pr165-b-condition-scoped-negative-memory",
+      "discovered_pr_merged_at": "2026-06-09T08:24:38Z",
+      "discovered_pr_number": 206,
+      "discovered_pr_title": "PR165-B condition-scoped negative memory execution",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentMemoryRouter.report.json",
+        "docs/master_plan/generated/PR165_B_AgentSelectionOverlayHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+        "docs/master_plan/generated/PR165_B_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_AgentDutyDistinctnessMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentFieldOwnershipMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_AgentOverlapConflictAudit.report.json",
+        "docs/master_plan/generated/PR165_C_AgentPRConnectivityReconciliation.report.json",
+        "docs/master_plan/generated/PR165_C_AgentTaskQueue.report.json",
+        "docs/master_plan/generated/PR165_C_AgentTaskReceiptRequirementMatrix.report.json",
+        "docs/master_plan/generated/PR165_C_CommanderConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_ComputableQKUFormulaActionRegistry.report.json",
+        "docs/master_plan/generated/PR165_C_DashboardConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_GovernanceConsumerHandoff.report.json",
+        "docs/master_plan/generated/PR165_C_LineageGraph.report.json",
+        "docs/master_plan/generated/PR165_C_MemoryConsumerRouter.report.json",
+        "docs/master_plan/generated/PR165_C_OlderAgentArtifactConsumptionAudit.report.json"
+      ],
+      "matched_reason": [
+        "PR165",
+        "PR165-B"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR165_C_ComputableQKUFormulaActionRegistry.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0027",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "codex/pr23-replay-paper-execution-graph",
+      "discovered_pr_merged_at": "2026-05-08T20:28:26Z",
+      "discovered_pr_number": 23,
+      "discovered_pr_title": "Add replay paper execution graph scaffold",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0028",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "codex/pr25-order-intent-execution-router-scaffolding",
+      "discovered_pr_merged_at": "2026-05-08T22:22:46Z",
+      "discovered_pr_number": 25,
+      "discovered_pr_title": "Add order intent execution router scaffold",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "router"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0029",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr37-qtt-cumulative-test-gate-handoff",
+      "discovered_pr_merged_at": "2026-05-09T04:21:08Z",
+      "discovered_pr_number": 37,
+      "discovered_pr_title": "Add QTT cumulative test gate and PR handoff checker",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "handoff"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0030",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr42-runtime-resolver-replay-paper-handoff",
+      "discovered_pr_merged_at": "2026-05-09T17:29:08Z",
+      "discovered_pr_number": 42,
+      "discovered_pr_title": "Add runtime resolver replay paper handoff",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "handoff",
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0031",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr43-concurrent-replay-paper-contract",
+      "discovered_pr_merged_at": "2026-05-09T18:27:41Z",
+      "discovered_pr_number": 43,
+      "discovered_pr_title": "Add concurrent replay paper contract",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0032",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr60-atomicrows-parameter-agent-binding-registry",
+      "discovered_pr_merged_at": "2026-05-10T19:42:54Z",
+      "discovered_pr_number": 60,
+      "discovered_pr_title": "Add AtomicRows parameter-agent binding registry",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0033",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr61-atomicrows-parameter-agent-binding-consumer-gate",
+      "discovered_pr_merged_at": "2026-05-10T20:29:33Z",
+      "discovered_pr_number": 61,
+      "discovered_pr_title": "Add AtomicRows parameter-agent binding consumer gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0034",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr62-atomicrows-parameter-agent-binding-cumulative-readiness-gate",
+      "discovered_pr_merged_at": "2026-05-10T22:37:54Z",
+      "discovered_pr_number": 62,
+      "discovered_pr_title": "Add AtomicRows parameter-agent binding cumulative readiness gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0035",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr63-atomicrows-parameter-agent-binding-command-matrix",
+      "discovered_pr_merged_at": "2026-05-11T02:13:17Z",
+      "discovered_pr_number": 63,
+      "discovered_pr_title": "Add AtomicRows parameter-agent binding command matrix",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0036",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr64-qtt-agent-role-duty-operating-charter-registry",
+      "discovered_pr_merged_at": "2026-05-11T04:18:32Z",
+      "discovered_pr_number": 64,
+      "discovered_pr_title": "Add QTT agent role operating charter registry",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0037",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr66-qtt-agent-algorithm-binding-registry",
+      "discovered_pr_merged_at": "2026-05-11T07:19:20Z",
+      "discovered_pr_number": 66,
+      "discovered_pr_title": "Add QTT agent algorithm binding registry",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0038",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr67-qtt-agent-algorithm-consumer-gate",
+      "discovered_pr_merged_at": "2026-05-11T15:47:33Z",
+      "discovered_pr_number": 67,
+      "discovered_pr_title": "Add QTT agent algorithm consumer gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0039",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr68-qtt-agent-algorithm-cumulative-readiness-gate",
+      "discovered_pr_merged_at": "2026-05-11T16:36:05Z",
+      "discovered_pr_number": 68,
+      "discovered_pr_title": "Add QTT agent algorithm cumulative readiness gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0040",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr69-qtt-agent-algorithm-command-matrix",
+      "discovered_pr_merged_at": "2026-05-11T17:29:18Z",
+      "discovered_pr_number": 69,
+      "discovered_pr_title": "Add QTT agent algorithm command matrix",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "agent"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0041",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr89-selected-parameter-stack-handoff-packet",
+      "discovered_pr_merged_at": "2026-05-14T01:27:02Z",
+      "discovered_pr_number": 90,
+      "discovered_pr_title": "Add selected parameter-stack handoff packet",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "handoff"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0042",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr90-replay-paper-candidate-stack-competition-gate",
+      "discovered_pr_merged_at": "2026-05-14T02:24:13Z",
+      "discovered_pr_number": 91,
+      "discovered_pr_title": "Add replay-paper candidate stack competition gate",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "replay",
+        "paper"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0043",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr95-owner-dashboard-approval-menu-schema",
+      "discovered_pr_merged_at": "2026-05-14T07:06:12Z",
+      "discovered_pr_number": 96,
+      "discovered_pr_title": "Add owner dashboard approval menu schema",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "dashboard"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0044",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "pr96-owner-dashboard-approval-static-screen-contract",
+      "discovered_pr_merged_at": "2026-05-14T08:50:57Z",
+      "discovered_pr_number": 97,
+      "discovered_pr_title": "Add owner dashboard approval static screen contract",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_UpstreamAgentPRDiscovery.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [],
+      "matched_reason": [
+        "dashboard"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [],
+      "relevance_confidence": "MEDIUM",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY::0045",
+      "validation_status": "PASS"
+    },
+    {
+      "agent_related_artifacts": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json"
+      ],
+      "authority_boundary_ref": "PR165_C_AUTHORITY_BOUNDARY::REPLAY_PAPER_MEMORY_CONSUMER_ONLY",
+      "consumed_by_pr165_c": true,
+      "dashboard_governance_commander_artifacts": [],
+      "discovered_pr_head_ref_name": "",
+      "discovered_pr_merged_at": "",
+      "discovered_pr_number": null,
+      "discovered_pr_title": "PR163-B alias: paired replay paper concurrent executor",
+      "downstream_pr165_c_report_refs": [
+        "PR165_C_AgentDutyDistinctnessMatrix.report.json",
+        "PR165_C_AgentPRConnectivityReconciliation.report.json"
+      ],
+      "matched_files": [
+        "docs/master_plan/generated/PR163_B_PR164ReviewProvenanceHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR165ScoringRankingHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_PR166LLMReviewResearchHandoff.report.json",
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.report.json",
+        "docs/master_plan/generated/PR163_PR163BPairedReplayPaperExecutorHandoff.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR164ReviewProvenanceHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR165ScoringRankingHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR166LLMReviewResearchHandoff.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR166LLMReviewResearchHandoff.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_PR166LLMReviewResearchHandoff.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0003_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_ReplayPaperLLMFutureReviewHandoffRegistry.part_0002_of_0003.report.json"
+      ],
+      "matched_reason": [
+        "KNOWN_SEED_ALIAS_BY_LOCAL_ARTIFACT"
+      ],
+      "no_orphan_status": "NO_ORPHAN_ROUTE_COMPLETE",
+      "not_consumed_reason": "",
+      "qku_route_artifacts": [
+        "docs/master_plan/generated/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0001_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0002_of_0003.report.json",
+        "docs/master_plan/generated/pr163_b_shards/PR163_B_QKUFormulaAlgorithmAgentRoutingMatrix.part_0003_of_0003.report.json"
+      ],
+      "relevance_confidence": "HIGH",
+      "upstream_agent_pr_discovery_id": "PR165_C_AGENT_PR_DISCOVERY_ALIAS::PR163-B",
+      "validation_status": "PASS"
+    }
+  ],
+  "report_filename": "PR165_C_UpstreamAgentPRDiscovery.report.json",
+  "report_id": "PR165_C_UPSTREAMAGENTPRDISCOVERY",
+  "report_name": "PR165_C_UpstreamAgentPRDiscovery",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "pr165_c_upstream_agent_pr_discovery.schema.json",
+  "shard_count": 0,
+  "shard_manifest_refs": [],
+  "sharded_flag": false,
+  "source_inputs": [
+    "docs/master_plan/QTT_MasterPlan_Current.md",
+    "docs/master_plan/generated/PR165_ReportManifest.report.json",
+    "docs/master_plan/generated/PR165_FinalSummary.report.json",
+    "docs/master_plan/generated/PR165_CandidateScoreComponentRegistry.report.json",
+    "docs/master_plan/generated/PR165_GlobalCandidateRanking.report.json",
+    "docs/master_plan/generated/PR165_RegimeSlicedRanking.report.json",
+    "docs/master_plan/generated/PR165_RankArbitrationPolicy.report.json",
+    "docs/master_plan/generated/PR165_ScoreEnvelopeAndRankStabilityRegistry.report.json",
+    "docs/master_plan/generated/PR165_ExpectedValueScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_TCAAdjustedScoreRegistry.report.json",
+    "docs/master_plan/generated/PR165_LatencyLaneAssignmentRegistry.report.json",
+    "docs/master_plan/generated/PR165_QuantumFormulationMaterializationRegistry.report.json",
+    "docs/master_plan/generated/PR165_LineageGraph.report.json",
+    "docs/master_plan/generated/PR165_AgentScoringOrchestrationRouter.report.json",
+    "docs/master_plan/generated/PR165_QKUAgentConsumerCoverageMatrix.report.json",
+    "docs/master_plan/generated/PR165_DashboardScoreHandoff.report.json",
+    "docs/master_plan/generated/PR165_B_ReportManifest.report.json",
+    "docs/master_plan/generated/PR165_B_FinalSummary.report.json",
+    "docs/master_plan/generated/PR165_B_ConditionFingerprintRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_CombinationFingerprintRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_ScenarioOutcomeMatrix.report.json",
+    "docs/master_plan/generated/PR165_B_CombinationOutcomeMemoryLedger.report.json",
+    "docs/master_plan/generated/PR165_B_NegativeCombinationAvoidanceRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_PositiveConditionScopedPreferenceRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_FragileCombinationWatchlist.report.json",
+    "docs/master_plan/generated/PR165_B_OutcomeAttributionLedger.report.json",
+    "docs/master_plan/generated/PR165_B_CooldownPolicyRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_RetestEligibilityRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_ReplayPaperRetestQueue.report.json",
+    "docs/master_plan/generated/PR165_B_RepairRouteHandoffRegistry.report.json",
+    "docs/master_plan/generated/PR165_B_AgentMemoryRouter.report.json",
+    "docs/master_plan/generated/PR165_B_LineageGraph.report.json",
+    "docs/master_plan/generated/PR165_B_DashboardMemoryHandoff.report.json",
+    "docs/master_plan/generated/PR165_B_GovernanceMemoryHandoff.report.json",
+    "docs/master_plan/generated/PR165_B_OrphanArtifactAudit.report.json",
+    "docs/master_plan/generated/pr165_shards",
+    "docs/master_plan/generated/pr165_b_shards",
+    "tools/run_validation_gates.py",
+    "tools/ci_branch_context.py",
+    "tests/fail_closed/test_run_validation_gates.py",
+    "tests/tools/test_ci_branch_context.py"
+  ],
+  "total_row_count": 46,
+  "upstream_pr_refs": [
+    "PR161D",
+    "PR163",
+    "PR163-B",
+    "PR164",
+    "PR163-C",
+    "PR165",
+    "PR165-B"
+  ],
+  "validation_status": "PASS",
+  "vocab_refs": [
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/central_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/agent_duty_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/memory_consumer_action_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/retest_ingestion_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/agent_conflict_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/computability_action_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/materialization_candidate_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/authority_policy.py"
+  ]
+}

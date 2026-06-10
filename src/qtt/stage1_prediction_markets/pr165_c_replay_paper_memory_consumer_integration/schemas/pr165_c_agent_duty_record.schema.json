@@ -1,0 +1,49 @@
+{
+  "$comment": "PR165-C schemas reference centralized replay/paper memory consumer vocabularies.",
+  "$id": "pr165_c_agent_duty_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_boundary_ref": {
+      "type": "string"
+    },
+    "candidate_packet_id": {
+      "type": "string"
+    },
+    "combination_fingerprint_id": {
+      "type": "string"
+    },
+    "condition_fingerprint_id": {
+      "type": "string"
+    },
+    "core_table_row_id": {
+      "type": "string"
+    },
+    "no_orphan_status": {
+      "type": "string"
+    },
+    "qku_id": {
+      "type": "string"
+    },
+    "validation_status": {
+      "type": "string"
+    },
+    "vocab_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object",
+  "x_pr165_c_vocab_refs": [
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/central_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/agent_duty_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/memory_consumer_action_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/retest_ingestion_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/agent_conflict_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/computability_action_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/materialization_candidate_vocab.py",
+    "src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/authority_policy.py"
+  ]
+}
