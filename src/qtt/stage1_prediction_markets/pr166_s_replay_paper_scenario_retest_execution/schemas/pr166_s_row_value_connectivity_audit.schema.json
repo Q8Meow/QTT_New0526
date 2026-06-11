@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "artifact_id": {
+      "type": "string"
+    },
+    "artifact_path": {
+      "type": "string"
+    },
+    "authority_class": {
+      "type": "string"
+    },
+    "created_by_pr": {
+      "const": "PR166-S"
+    },
+    "pr_id": {
+      "const": "PR166-S"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "report_filename": {
+      "type": "string"
+    },
+    "report_id": {
+      "type": "string"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "validation_status": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "artifact_id",
+    "artifact_path",
+    "report_id",
+    "pr_id",
+    "report_filename",
+    "created_by_pr",
+    "authority_class",
+    "validation_status",
+    "record_count",
+    "upstream_pr_refs",
+    "downstream_pr_refs",
+    "authority_boundary_ref",
+    "no_orphan_status"
+  ],
+  "title": "pr166_s_row_value_connectivity_audit.schema.json",
+  "type": "object"
+}

@@ -1040,6 +1040,7 @@ PR165_BRANCH = "pr165-evidence-backed-scoring-ranking"
 PR165_B_BRANCH = "pr165-b-condition-scoped-negative-memory"
 PR165_C_BRANCH = "pr165-c-replay-paper-memory-consumer-integration"
 PR165_D_BRANCH = "pr165-d-scenario-qku-combination-selection"
+PR166_S_BRANCH = "pr166-s-replay-paper-scenario-retest-execution"
 PR163_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR163_",
     "docs/master_plan/generated/pr163_shards/",
@@ -1220,6 +1221,28 @@ PR165_D_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/tools/test_ci_branch_context.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+PR166_S_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR166_S_",
+    "docs/master_plan/generated/pr166_s_shards/",
+    "src/qtt/stage1_prediction_markets/"
+    "pr166_s_replay_paper_scenario_retest_execution/",
+    "tests/stage1_prediction_markets/"
+    "pr166_s_replay_paper_scenario_retest_execution/",
+)
+PR166_S_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr166_s_replay_paper_scenario_retest_execution.py",
+        "tools/validate_pr166_s_replay_paper_scenario_retest_execution.py",
+        "tools/ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
     }
 )
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
@@ -2101,6 +2124,7 @@ def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
         or _is_pr165_b_condition_memory_changed_path(normalized)
         or _is_pr165_c_memory_consumer_changed_path(normalized)
         or _is_pr165_d_scenario_selection_changed_path(normalized)
+        or _is_pr166_s_replay_paper_retest_changed_path(normalized)
     )
 
 
@@ -2333,6 +2357,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return _is_pr165_c_memory_consumer_changed_path(normalized)
     if branch == PR165_D_BRANCH:
         return _is_pr165_d_scenario_selection_changed_path(normalized)
+    if branch == PR166_S_BRANCH:
+        return _is_pr166_s_replay_paper_retest_changed_path(normalized)
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
@@ -2476,6 +2502,14 @@ def _is_pr165_d_scenario_selection_changed_path(path: str) -> bool:
     return normalized in PR165_D_ALLOWED_CHANGED_PATHS or any(
         normalized.startswith(prefix)
         for prefix in PR165_D_ALLOWED_CHANGED_PATH_PREFIXES
+    )
+
+
+def _is_pr166_s_replay_paper_retest_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in PR166_S_ALLOWED_CHANGED_PATHS or any(
+        normalized.startswith(prefix)
+        for prefix in PR166_S_ALLOWED_CHANGED_PATH_PREFIXES
     )
 
 
