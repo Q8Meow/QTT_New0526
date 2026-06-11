@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 from typing import Any
@@ -51,7 +52,14 @@ def current_branch(repo_root: Path) -> str:
         capture_output=True,
         text=True,
     )
-    return result.stdout.strip()
+    branch = result.stdout.strip()
+    if branch:
+        return branch
+    for env_name in ("GITHUB_HEAD_REF", "GITHUB_REF_NAME"):
+        env_branch = os.getenv(env_name, "").strip()
+        if env_branch:
+            return env_branch
+    return branch
 
 
 def ensure_branch(repo_root: Path) -> None:
