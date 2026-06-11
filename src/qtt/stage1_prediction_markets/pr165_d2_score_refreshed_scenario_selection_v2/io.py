@@ -11,6 +11,8 @@ from tools import ci_branch_context
 
 from . import constants as c
 
+_ALLOWED_BRANCH_CONTEXTS = frozenset({c.EXPECTED_BRANCH, c.BASE_BRANCH})
+
 
 def json_text(payload: Any, *, compact: bool = False) -> str:
     separators = (",", ":") if compact else None
@@ -68,8 +70,9 @@ def current_branch(repo_root: Path) -> str:
 
 def ensure_branch(repo_root: Path) -> None:
     branch = current_branch(repo_root)
-    if branch != c.EXPECTED_BRANCH:
-        raise RuntimeError(f"{c.PR_ID} must build on {c.EXPECTED_BRANCH}, got {branch}")
+    if branch not in _ALLOWED_BRANCH_CONTEXTS:
+        allowed = ", ".join(sorted(_ALLOWED_BRANCH_CONTEXTS))
+        raise RuntimeError(f"{c.PR_ID} must build on one of {allowed}, got {branch}")
 
 
 def records_from_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
