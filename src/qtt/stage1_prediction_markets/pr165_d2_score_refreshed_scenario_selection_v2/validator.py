@@ -190,12 +190,34 @@ def _validate_manifest(
     records: dict[str, list[dict[str, Any]]],
     failures: list[str],
 ) -> None:
-    listed = {row["report_name"] + ".report.json" for row in records["PR165_D2_ReportManifest.report.json"]}
-    _expect(listed == set(c.REPORT_FILENAMES), failures, "PR165-D2 manifest does not list exactly required reports")
-    for row in records["PR165_D2_ReportManifest.report.json"]:
+    manifest_rows = records["PR165_D2_ReportManifest.report.json"]
+    root_rows = [row for row in manifest_rows if row.get("manifest_entry_class") == "ROOT_REPORT"]
+    shard_rows = [row for row in manifest_rows if row.get("manifest_entry_class") == "SHARD_REPORT"]
+    _expect(
+        len(root_rows) + len(shard_rows) == len(manifest_rows),
+        failures,
+        "PR165-D2 manifest contains rows without an explicit root/shard entry class",
+    )
+    listed = {row["report_name"] + ".report.json" for row in root_rows}
+    _expect(listed == set(c.REPORT_FILENAMES), failures, "PR165-D2 manifest does not list exactly required root reports")
+    expected_shards: dict[str, tuple[str, int]] = {}
+    for filename, payload in reports.items():
+        for shard_ref in payload.get("shard_manifest_refs") or []:
+            expected_shards[shard_ref["shard_path"]] = (filename, int(shard_ref["row_count"]))
+    listed_shards = {row["report_path"] for row in shard_rows}
+    _expect(listed_shards == set(expected_shards), failures, "PR165-D2 manifest does not list exactly required shard reports")
+    for row in root_rows:
         filename = row["report_name"] + ".report.json"
         _expect(row["row_count"] == reports[filename]["record_count"], failures, f"manifest row count mismatch {filename}")
         _expect(row["schema_path"].endswith(c.REPORT_SCHEMA_REFS[filename]), failures, f"manifest schema mismatch {filename}")
+        _expect(row["report_path"].endswith(filename), failures, f"manifest root path mismatch {filename}")
+    for row in shard_rows:
+        shard_path = row["report_path"]
+        parent_filename, expected_count = expected_shards.get(shard_path, ("", -1))
+        _expect(row["parent_report_name"] + ".report.json" == parent_filename, failures, f"manifest shard parent mismatch {shard_path}")
+        _expect(row["row_count"] == expected_count, failures, f"manifest shard row count mismatch {shard_path}")
+        if parent_filename:
+            _expect(row["schema_path"].endswith(c.REPORT_SCHEMA_REFS[parent_filename]), failures, f"manifest shard schema mismatch {shard_path}")
 
 
 def _validate_summary(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:

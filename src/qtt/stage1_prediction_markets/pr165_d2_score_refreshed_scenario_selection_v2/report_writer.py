@@ -2687,11 +2687,13 @@ def build_sharded_payloads(
 
 def build_manifest_rows(payloads: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     rows = []
-    for index, filename in enumerate(c.REPORT_FILENAMES, start=1):
+    order_index = 0
+    for filename in c.REPORT_FILENAMES:
+        order_index += 1
         payload = payloads[filename]
         row = common_fields(
             artifact_id="PR165_D2_REPORT_MANIFEST",
-            row_id=stable_id("PR165_D2_REPORT_MANIFEST", index),
+            row_id=stable_id("PR165_D2_REPORT_MANIFEST", order_index),
             upstream_artifact_refs=["PR165_D2_REPORT_GENERATION_ORDER"],
             upstream_row_refs=[filename],
             upstream_value_refs=["report_name", "row_count", "schema_path"],
@@ -2713,15 +2715,59 @@ def build_manifest_rows(payloads: dict[str, dict[str, Any]]) -> list[dict[str, A
                 "schema_ref": c.REPORT_SCHEMA_REFS["PR165_D2_ReportManifest.report.json"],
                 "row_count": payload["record_count"],
                 "shard_count": payload.get("shard_count", 0),
+                "manifest_entry_class": "ROOT_REPORT",
+                "parent_report_name": filename.replace(".report.json", ""),
+                "parent_report_path": normalize_repo_ref(c.GENERATED_DIR / filename),
                 "created_by_pr": c.PR_ID,
                 "upstream_refs": payload.get("upstream_pr_refs", []),
                 "downstream_refs": payload.get("downstream_pr_routes", []),
                 "validator_ref": c.VALIDATOR_REF,
                 "authority_boundary_ref": c.AUTHORITY_BOUNDARY_REF,
-                "deterministic_generation_order": index,
+                "deterministic_generation_order": order_index,
             }
         )
         rows.append(row)
+        for shard_ref in payload.get("shard_manifest_refs") or []:
+            order_index += 1
+            shard_path = shard_ref["shard_path"]
+            shard_row = common_fields(
+                artifact_id="PR165_D2_REPORT_MANIFEST",
+                row_id=stable_id("PR165_D2_REPORT_MANIFEST", order_index),
+                upstream_artifact_refs=[filename],
+                upstream_row_refs=[shard_ref["part_ref"]],
+                upstream_value_refs=["shard_path", "row_count", "schema_path"],
+                downstream_pr_refs=[DownstreamRoute.DASHBOARD_GOVERNANCE_COMMANDER_REVIEW.value],
+                downstream_artifact_refs=[filename, shard_path],
+                owning_agent="governance_agent",
+                no_orphan_status=NoOrphanStatus.CONNECTED_TO_DASHBOARD_GOVERNANCE_COMMANDER_REVIEW.value,
+                source_authority_class=SourceAuthorityClass.TERMINAL_AUDIT_NOT_SOURCE_TRUTH.value,
+                computability_status=ComputabilityStatus.TERMINAL_BY_NATURE_WITH_REASON.value,
+                selection_state=SelectionState.TERMINAL_BY_NATURE_WITH_REASON.value,
+                terminal_status_flag=True,
+                terminal_status_reason="REPORT_MANIFEST_SHARD_ROW_TERMINAL_BY_NATURE",
+            )
+            shard_row.update(
+                {
+                    "report_name": Path(shard_path).name.replace(".report.json", ""),
+                    "report_path": shard_path,
+                    "schema_path": normalize_repo_ref(c.SCHEMA_DIR / c.REPORT_SCHEMA_REFS[filename]),
+                    "schema_ref": c.REPORT_SCHEMA_REFS["PR165_D2_ReportManifest.report.json"],
+                    "row_count": shard_ref["row_count"],
+                    "shard_count": payload.get("shard_count", 0),
+                    "manifest_entry_class": "SHARD_REPORT",
+                    "parent_report_name": filename.replace(".report.json", ""),
+                    "parent_report_path": normalize_repo_ref(c.GENERATED_DIR / filename),
+                    "created_by_pr": c.PR_ID,
+                    "upstream_refs": payload.get("upstream_pr_refs", []),
+                    "downstream_refs": payload.get("downstream_pr_routes", []),
+                    "validator_ref": c.VALIDATOR_REF,
+                    "authority_boundary_ref": c.AUTHORITY_BOUNDARY_REF,
+                    "deterministic_generation_order": order_index,
+                    "shard_index": shard_ref["shard_index"],
+                    "part_ref": shard_ref["part_ref"],
+                }
+            )
+            rows.append(shard_row)
     return rows
 
 
