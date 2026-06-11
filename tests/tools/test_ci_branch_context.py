@@ -2315,6 +2315,7 @@ def test_pr166_sm_explicit_changed_path_allowance_is_narrow(monkeypatch):
 
 def test_pr165_d2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr165-d2-score-refreshed-scenario-selection-v2"
+    repair_branch = context.PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH
 
     assert context.is_pr_or_later_branch(branch, minimum_pr=165) is True
     assert context.is_explicit_downstream_repair_changed_path(
@@ -2378,6 +2379,39 @@ def test_pr165_d2_explicit_changed_path_allowance_is_narrow(monkeypatch):
         branch,
         "src/qtt/stage1_prediction_markets/"
         "pr166_sm_score_memory_refresh_from_pr166_s_results/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/tools/test_ci_branch_context.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "docs/master_plan/generated/PR165_D2_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/schemas/"
+        "pr165_d2_report_manifest.schema.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        repair_branch,
+        "tests/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_validator.py",
     )
 
     _clear_github_branch_context_env(monkeypatch)

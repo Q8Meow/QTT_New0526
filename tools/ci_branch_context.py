@@ -1043,6 +1043,9 @@ PR165_D_BRANCH = "pr165-d-scenario-qku-combination-selection"
 PR166_S_BRANCH = "pr166-s-replay-paper-scenario-retest-execution"
 PR166_SM_BRANCH = "pr166-sm-score-memory-refresh-from-pr166-s-results"
 PR165_D2_BRANCH = "pr165-d2-score-refreshed-scenario-selection-v2"
+PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
+    "pr165-d2-main-push-branch-context-repair"
+)
 PR163_ALLOWED_CHANGED_PATH_PREFIXES = (
     "docs/master_plan/generated/PR163_",
     "docs/master_plan/generated/pr163_shards/",
@@ -1294,6 +1297,16 @@ PR165_D2_ALLOWED_CHANGED_PATHS = frozenset(
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
         "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    }
+)
+PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/io.py",
+        "tests/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
+        "tools/ci_branch_context.py",
+        "tests/tools/test_ci_branch_context.py",
     }
 )
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
@@ -2411,6 +2424,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return _is_pr165_c_memory_consumer_changed_path(normalized)
     if branch == PR165_D_BRANCH:
         return _is_pr165_d_scenario_selection_changed_path(normalized)
+    if branch == PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH:
+        return normalized in PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS
     if branch == PR165_D2_BRANCH:
         return _is_pr165_d2_score_refreshed_selection_changed_path(normalized)
     if branch == PR166_S_BRANCH:

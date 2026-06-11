@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+from tools import build_pr165_d2_score_refreshed_scenario_selection_v2 as pr165_d2_builder
 from src.qtt.stage1_prediction_markets.pr165_d2_score_refreshed_scenario_selection_v2 import constants as c
 from src.qtt.stage1_prediction_markets.pr165_d2_score_refreshed_scenario_selection_v2 import io as pr165_d2_io
 
@@ -30,21 +30,24 @@ def _stub_git_branch(monkeypatch, stdout: str) -> None:
     )
 
 
-def test_builder_verify_idempotent():
-    result = subprocess.run(
+def test_builder_verify_idempotent(monkeypatch, capsys):
+    _clear_branch_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", c.BASE_BRANCH)
+    _stub_git_branch(monkeypatch, "")
+    monkeypatch.setattr(
+        sys,
+        "argv",
         [
-            sys.executable,
-            "-B",
-            "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py",
+            c.BUILDER_REF,
+            "--repo-root",
+            str(REPO_ROOT),
             "--verify-idempotent",
         ],
-        cwd=REPO_ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
     )
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert "PR165_D2_SCORE_REFRESHED_SELECTION_IDEMPOTENT" in result.stdout
+
+    assert pr165_d2_builder.main() == 0
+    assert "PR165_D2_SCORE_REFRESHED_SELECTION_IDEMPOTENT" in capsys.readouterr().out
 
 
 def test_branch_guard_accepts_local_expected_branch(monkeypatch):
@@ -52,6 +55,14 @@ def test_branch_guard_accepts_local_expected_branch(monkeypatch):
     _stub_git_branch(monkeypatch, c.EXPECTED_BRANCH)
 
     assert pr165_d2_io.current_branch(REPO_ROOT) == c.EXPECTED_BRANCH
+    pr165_d2_io.ensure_branch(REPO_ROOT)
+
+
+def test_branch_guard_accepts_local_main_post_merge_context(monkeypatch):
+    _clear_branch_env(monkeypatch)
+    _stub_git_branch(monkeypatch, c.BASE_BRANCH)
+
+    assert pr165_d2_io.current_branch(REPO_ROOT) == c.BASE_BRANCH
     pr165_d2_io.ensure_branch(REPO_ROOT)
 
 
@@ -84,11 +95,21 @@ def test_branch_guard_accepts_ci_detached_head_ref(monkeypatch):
     pr165_d2_io.ensure_branch(REPO_ROOT)
 
 
-def test_branch_guard_rejects_wrong_ci_detached_head_ref(monkeypatch):
+def test_branch_guard_accepts_ci_detached_main_ref_name(monkeypatch):
+    _clear_branch_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF_NAME", c.BASE_BRANCH)
+    _stub_git_branch(monkeypatch, "")
+
+    assert pr165_d2_io.current_branch(REPO_ROOT) == c.BASE_BRANCH
+    pr165_d2_io.ensure_branch(REPO_ROOT)
+
+
+def test_branch_guard_rejects_wrong_ci_detached_branch_context(monkeypatch):
     _clear_branch_env(monkeypatch)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("GITHUB_HEAD_REF", "feature/not-pr165-d2")
-    monkeypatch.setenv("GITHUB_REF_NAME", c.EXPECTED_BRANCH)
+    monkeypatch.setenv("GITHUB_REF_NAME", "release/not-pr165-d2")
     _stub_git_branch(monkeypatch, "")
 
     with pytest.raises(RuntimeError, match=c.EXPECTED_BRANCH):
