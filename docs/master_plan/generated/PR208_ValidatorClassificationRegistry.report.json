@@ -1,17 +1,17 @@
 {
   "counts": {
-    "changed_area_validator_count": 167,
-    "classified_validator_count": 178,
-    "current_validator_count": 178,
-    "deterministic_generated_artifact_validator_count": 162,
+    "changed_area_validator_count": 169,
+    "classified_validator_count": 180,
+    "current_validator_count": 180,
+    "deterministic_generated_artifact_validator_count": 164,
     "fast_universal_preflight_count": 11,
-    "nightly_deep_validator_count": 79,
+    "nightly_deep_validator_count": 81,
     "release_live_readiness_validator_count": 22,
     "tests_deleted_count": 0,
-    "touched_generated_artifact_validator_count": 162,
+    "touched_generated_artifact_validator_count": 164,
     "validators_deleted_count": 0,
-    "validators_moved_out_of_default_pr_path_count": 167,
-    "validators_still_running_on_main_count": 178
+    "validators_moved_out_of_default_pr_path_count": 169,
+    "validators_still_running_on_main_count": 180
   },
   "validator_inventory_version": 1,
   "validators": [
@@ -5866,7 +5866,8 @@
         "docs/master_plan/generated/pr136_d*/**",
         "src/qtt/stage1_prediction_markets/pr136_d*/**",
         "src/qtt/stage1_prediction_markets/pr136_d*/schemas/**",
-        "tests/stage1_prediction_markets/pr136_d*/**"
+        "tests/stage1_prediction_markets/pr136_d*/**",
+        "tools/*pr136_d*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -5924,7 +5925,8 @@
         "docs/master_plan/generated/pr136_r*/**",
         "src/qtt/stage1_prediction_markets/pr136_r*/**",
         "src/qtt/stage1_prediction_markets/pr136_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr136_r*/**"
+        "tests/stage1_prediction_markets/pr136_r*/**",
+        "tools/*pr136_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -5981,7 +5983,8 @@
         "docs/master_plan/generated/pr137_g*/**",
         "src/qtt/stage1_prediction_markets/pr137_g*/**",
         "src/qtt/stage1_prediction_markets/pr137_g*/schemas/**",
-        "tests/stage1_prediction_markets/pr137_g*/**"
+        "tests/stage1_prediction_markets/pr137_g*/**",
+        "tools/*pr137_g*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6038,7 +6041,8 @@
         "docs/master_plan/generated/pr137_l*/**",
         "src/qtt/stage1_prediction_markets/pr137_l*/**",
         "src/qtt/stage1_prediction_markets/pr137_l*/schemas/**",
-        "tests/stage1_prediction_markets/pr137_l*/**"
+        "tests/stage1_prediction_markets/pr137_l*/**",
+        "tools/*pr137_l*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6096,7 +6100,8 @@
         "docs/master_plan/generated/pr153r_r*/**",
         "src/qtt/stage1_prediction_markets/pr153r_r*/**",
         "src/qtt/stage1_prediction_markets/pr153r_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr153r_r*/**"
+        "tests/stage1_prediction_markets/pr153r_r*/**",
+        "tools/*pr153r_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6153,7 +6158,8 @@
         "docs/master_plan/generated/pr153s_s*/**",
         "src/qtt/stage1_prediction_markets/pr153s_s*/**",
         "src/qtt/stage1_prediction_markets/pr153s_s*/schemas/**",
-        "tests/stage1_prediction_markets/pr153s_s*/**"
+        "tests/stage1_prediction_markets/pr153s_s*/**",
+        "tools/*pr153s_s*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6215,7 +6221,8 @@
         "src/qtt/stage1_prediction_markets/pr157_p*/schemas/**",
         "tests/atomicrows/**",
         "tests/stage1_prediction_markets/pr157_p*/**",
-        "tools/*atomicrows*.py"
+        "tools/*atomicrows*.py",
+        "tools/*pr157_p*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6278,7 +6285,8 @@
         "docs/master_plan/generated/pr158_o*/**",
         "src/qtt/stage1_prediction_markets/pr158_o*/**",
         "src/qtt/stage1_prediction_markets/pr158_o*/schemas/**",
-        "tests/stage1_prediction_markets/pr158_o*/**"
+        "tests/stage1_prediction_markets/pr158_o*/**",
+        "tools/*pr158_o*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6335,7 +6343,8 @@
         "docs/master_plan/generated/pr159_o*/**",
         "src/qtt/stage1_prediction_markets/pr159_o*/**",
         "src/qtt/stage1_prediction_markets/pr159_o*/schemas/**",
-        "tests/stage1_prediction_markets/pr159_o*/**"
+        "tests/stage1_prediction_markets/pr159_o*/**",
+        "tools/*pr159_o*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6392,7 +6401,8 @@
         "docs/master_plan/generated/pr159r_s*/**",
         "src/qtt/stage1_prediction_markets/pr159r_s*/**",
         "src/qtt/stage1_prediction_markets/pr159r_s*/schemas/**",
-        "tests/stage1_prediction_markets/pr159r_s*/**"
+        "tests/stage1_prediction_markets/pr159r_s*/**",
+        "tools/*pr159r_s*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6449,7 +6459,8 @@
         "docs/master_plan/generated/pr159s_o*/**",
         "src/qtt/stage1_prediction_markets/pr159s_o*/**",
         "src/qtt/stage1_prediction_markets/pr159s_o*/schemas/**",
-        "tests/stage1_prediction_markets/pr159s_o*/**"
+        "tests/stage1_prediction_markets/pr159s_o*/**",
+        "tools/*pr159s_o*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6506,7 +6517,8 @@
         "docs/master_plan/generated/pr160_s*/**",
         "src/qtt/stage1_prediction_markets/pr160_s*/**",
         "src/qtt/stage1_prediction_markets/pr160_s*/schemas/**",
-        "tests/stage1_prediction_markets/pr160_s*/**"
+        "tests/stage1_prediction_markets/pr160_s*/**",
+        "tools/*pr160_s*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6568,7 +6580,8 @@
         "src/qtt/stage1_prediction_markets/pr161a_a*/schemas/**",
         "tests/atomicrows/**",
         "tests/stage1_prediction_markets/pr161a_a*/**",
-        "tools/*atomicrows*.py"
+        "tools/*atomicrows*.py",
+        "tools/*pr161a_a*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6634,6 +6647,7 @@
         "src/qtt/stage1_prediction_markets/pr161b_m*/schemas/**",
         "tests/master_plan/**",
         "tests/stage1_prediction_markets/pr161b_m*/**",
+        "tools/*pr161b_m*.py",
         "tools/master_plan*.py"
       ],
       "linux_required": true,
@@ -6694,7 +6708,8 @@
         "docs/master_plan/generated/pr161c_q*/**",
         "src/qtt/stage1_prediction_markets/pr161c_q*/**",
         "src/qtt/stage1_prediction_markets/pr161c_q*/schemas/**",
-        "tests/stage1_prediction_markets/pr161c_q*/**"
+        "tests/stage1_prediction_markets/pr161c_q*/**",
+        "tools/*pr161c_q*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6751,7 +6766,8 @@
         "docs/master_plan/generated/pr161d_q*/**",
         "src/qtt/stage1_prediction_markets/pr161d_q*/**",
         "src/qtt/stage1_prediction_markets/pr161d_q*/schemas/**",
-        "tests/stage1_prediction_markets/pr161d_q*/**"
+        "tests/stage1_prediction_markets/pr161d_q*/**",
+        "tools/*pr161d_q*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6808,7 +6824,8 @@
         "docs/master_plan/generated/pr161e_r*/**",
         "src/qtt/stage1_prediction_markets/pr161e_r*/**",
         "src/qtt/stage1_prediction_markets/pr161e_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr161e_r*/**"
+        "tests/stage1_prediction_markets/pr161e_r*/**",
+        "tools/*pr161e_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6865,7 +6882,8 @@
         "docs/master_plan/generated/pr161f_r*/**",
         "src/qtt/stage1_prediction_markets/pr161f_r*/**",
         "src/qtt/stage1_prediction_markets/pr161f_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr161f_r*/**"
+        "tests/stage1_prediction_markets/pr161f_r*/**",
+        "tools/*pr161f_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6922,7 +6940,8 @@
         "docs/master_plan/generated/pr162_s*/**",
         "src/qtt/stage1_prediction_markets/pr162_s*/**",
         "src/qtt/stage1_prediction_markets/pr162_s*/schemas/**",
-        "tests/stage1_prediction_markets/pr162_s*/**"
+        "tests/stage1_prediction_markets/pr162_s*/**",
+        "tools/*pr162_s*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -6980,7 +6999,8 @@
         "docs/master_plan/generated/pr162a_s*/**",
         "src/qtt/stage1_prediction_markets/pr162a_s*/**",
         "src/qtt/stage1_prediction_markets/pr162a_s*/schemas/**",
-        "tests/stage1_prediction_markets/pr162a_s*/**"
+        "tests/stage1_prediction_markets/pr162a_s*/**",
+        "tools/*pr162a_s*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7038,7 +7058,8 @@
         "docs/master_plan/generated/pr162b_q*/**",
         "src/qtt/stage1_prediction_markets/pr162b_q*/**",
         "src/qtt/stage1_prediction_markets/pr162b_q*/schemas/**",
-        "tests/stage1_prediction_markets/pr162b_q*/**"
+        "tests/stage1_prediction_markets/pr162b_q*/**",
+        "tools/*pr162b_q*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7095,7 +7116,8 @@
         "docs/master_plan/generated/pr162c_m*/**",
         "src/qtt/stage1_prediction_markets/pr162c_m*/**",
         "src/qtt/stage1_prediction_markets/pr162c_m*/schemas/**",
-        "tests/stage1_prediction_markets/pr162c_m*/**"
+        "tests/stage1_prediction_markets/pr162c_m*/**",
+        "tools/*pr162c_m*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7153,7 +7175,8 @@
         "docs/master_plan/generated/pr162d_a*/**",
         "src/qtt/stage1_prediction_markets/pr162d_a*/**",
         "src/qtt/stage1_prediction_markets/pr162d_a*/schemas/**",
-        "tests/stage1_prediction_markets/pr162d_a*/**"
+        "tests/stage1_prediction_markets/pr162d_a*/**",
+        "tools/*pr162d_a*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7210,7 +7233,8 @@
         "docs/master_plan/generated/pr162d_r*/**",
         "src/qtt/stage1_prediction_markets/pr162d_r*/**",
         "src/qtt/stage1_prediction_markets/pr162d_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr162d_r*/**"
+        "tests/stage1_prediction_markets/pr162d_r*/**",
+        "tools/*pr162d_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7267,7 +7291,8 @@
         "docs/master_plan/generated/pr162r_a*/**",
         "src/qtt/stage1_prediction_markets/pr162r_a*/**",
         "src/qtt/stage1_prediction_markets/pr162r_a*/schemas/**",
-        "tests/stage1_prediction_markets/pr162r_a*/**"
+        "tests/stage1_prediction_markets/pr162r_a*/**",
+        "tools/*pr162r_a*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7324,7 +7349,8 @@
         "docs/master_plan/generated/pr162r_b*/**",
         "src/qtt/stage1_prediction_markets/pr162r_b*/**",
         "src/qtt/stage1_prediction_markets/pr162r_b*/schemas/**",
-        "tests/stage1_prediction_markets/pr162r_b*/**"
+        "tests/stage1_prediction_markets/pr162r_b*/**",
+        "tools/*pr162r_b*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7381,7 +7407,8 @@
         "docs/master_plan/generated/pr162r_g*/**",
         "src/qtt/stage1_prediction_markets/pr162r_g*/**",
         "src/qtt/stage1_prediction_markets/pr162r_g*/schemas/**",
-        "tests/stage1_prediction_markets/pr162r_g*/**"
+        "tests/stage1_prediction_markets/pr162r_g*/**",
+        "tools/*pr162r_g*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7438,7 +7465,8 @@
         "docs/master_plan/generated/pr163_b*/**",
         "src/qtt/stage1_prediction_markets/pr163_b*/**",
         "src/qtt/stage1_prediction_markets/pr163_b*/schemas/**",
-        "tests/stage1_prediction_markets/pr163_b*/**"
+        "tests/stage1_prediction_markets/pr163_b*/**",
+        "tools/*pr163_b*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7495,7 +7523,8 @@
         "docs/master_plan/generated/pr163_c*/**",
         "src/qtt/stage1_prediction_markets/pr163_c*/**",
         "src/qtt/stage1_prediction_markets/pr163_c*/schemas/**",
-        "tests/stage1_prediction_markets/pr163_c*/**"
+        "tests/stage1_prediction_markets/pr163_c*/**",
+        "tools/*pr163_c*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7552,7 +7581,8 @@
         "docs/master_plan/generated/pr163_g*/**",
         "src/qtt/stage1_prediction_markets/pr163_g*/**",
         "src/qtt/stage1_prediction_markets/pr163_g*/schemas/**",
-        "tests/stage1_prediction_markets/pr163_g*/**"
+        "tests/stage1_prediction_markets/pr163_g*/**",
+        "tools/*pr163_g*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7609,7 +7639,8 @@
         "docs/master_plan/generated/pr164_r*/**",
         "src/qtt/stage1_prediction_markets/pr164_r*/**",
         "src/qtt/stage1_prediction_markets/pr164_r*/schemas/**",
-        "tests/stage1_prediction_markets/pr164_r*/**"
+        "tests/stage1_prediction_markets/pr164_r*/**",
+        "tools/*pr164_r*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7666,7 +7697,8 @@
         "docs/master_plan/generated/pr165_b*/**",
         "src/qtt/stage1_prediction_markets/pr165_b*/**",
         "src/qtt/stage1_prediction_markets/pr165_b*/schemas/**",
-        "tests/stage1_prediction_markets/pr165_b*/**"
+        "tests/stage1_prediction_markets/pr165_b*/**",
+        "tools/*pr165_b*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7723,7 +7755,8 @@
         "docs/master_plan/generated/pr165_c*/**",
         "src/qtt/stage1_prediction_markets/pr165_c*/**",
         "src/qtt/stage1_prediction_markets/pr165_c*/schemas/**",
-        "tests/stage1_prediction_markets/pr165_c*/**"
+        "tests/stage1_prediction_markets/pr165_c*/**",
+        "tools/*pr165_c*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7760,6 +7793,64 @@
     {
       "command": [
         "python",
+        "tools/validate_pr165_d_scenario_qku_combination_selection.py",
+        "--repo-root",
+        "."
+      ],
+      "cost_tier": "DEEP",
+      "cross_platform_sensitive": true,
+      "fail_closed_if_touched": true,
+      "fail_closed_if_unknown_change": true,
+      "full_validation_required_when_changed": false,
+      "generated_report_globs": [
+        "docs/master_plan/generated/PR165_D*.json",
+        "docs/master_plan/generated/PR165_D_*.report.json",
+        "docs/master_plan/generated/pr165_d*/**"
+      ],
+      "input_globs": [
+        "docs/master_plan/generated/PR165_D*.json",
+        "docs/master_plan/generated/PR165_D_*.report.json",
+        "docs/master_plan/generated/pr165_d*/**",
+        "src/qtt/stage1_prediction_markets/pr165_d*/**",
+        "src/qtt/stage1_prediction_markets/pr165_d*/schemas/**",
+        "tests/stage1_prediction_markets/pr165_d*/**",
+        "tools/*pr165_d*.py"
+      ],
+      "linux_required": true,
+      "main_behavior": "run",
+      "manual_full_behavior": "run",
+      "nightly_behavior": "run",
+      "output_globs": [
+        "docs/master_plan/generated/PR165_D*.json",
+        "docs/master_plan/generated/PR165_D_*.report.json",
+        "docs/master_plan/generated/pr165_d*/**"
+      ],
+      "owner_domain": "PR165_D",
+      "owner_pr_or_feature": "PR165_D",
+      "phase": "deterministic-validators",
+      "pr152_tracked": false,
+      "pull_request_default_behavior": "run_when_touched",
+      "rationale": "Runs on pull requests only when owned inputs, tools, tests, schemas, or generated artifacts are touched; otherwise it remains covered by main, nightly, and manual full validation.",
+      "release_live_readiness_behavior": "run",
+      "test_globs": [
+        "tests/stage1_prediction_markets/pr165_d*/**"
+      ],
+      "tool_globs": [
+        "tools/validate_pr165_d_scenario_qku_combination_selection.py"
+      ],
+      "validator_class": [
+        "CHANGED_AREA_VALIDATOR",
+        "TOUCHED_GENERATED_ARTIFACT_VALIDATOR",
+        "DETERMINISTIC_GENERATED_ARTIFACT_VALIDATOR",
+        "NIGHTLY_DEEP_VALIDATOR"
+      ],
+      "validator_id": "validate_pr165_d_scenario_qku_combination_selection",
+      "windows_required": true,
+      "workflow_globs": []
+    },
+    {
+      "command": [
+        "python",
         "tools/validate_pr165_evidence_backed_scoring_ranking.py",
         "--repo-root",
         "."
@@ -7780,7 +7871,8 @@
         "docs/master_plan/generated/pr165_e*/**",
         "src/qtt/stage1_prediction_markets/pr165_e*/**",
         "src/qtt/stage1_prediction_markets/pr165_e*/schemas/**",
-        "tests/stage1_prediction_markets/pr165_e*/**"
+        "tests/stage1_prediction_markets/pr165_e*/**",
+        "tools/*pr165_e*.py"
       ],
       "linux_required": true,
       "main_behavior": "run",
@@ -7811,6 +7903,64 @@
         "NIGHTLY_DEEP_VALIDATOR"
       ],
       "validator_id": "validate_pr165_evidence_backed_scoring_ranking",
+      "windows_required": true,
+      "workflow_globs": []
+    },
+    {
+      "command": [
+        "python",
+        "tools/validate_pr166_s_replay_paper_scenario_retest_execution.py",
+        "--repo-root",
+        "."
+      ],
+      "cost_tier": "DEEP",
+      "cross_platform_sensitive": true,
+      "fail_closed_if_touched": true,
+      "fail_closed_if_unknown_change": true,
+      "full_validation_required_when_changed": false,
+      "generated_report_globs": [
+        "docs/master_plan/generated/PR166_S*.json",
+        "docs/master_plan/generated/PR166_S_*.report.json",
+        "docs/master_plan/generated/pr166_s*/**"
+      ],
+      "input_globs": [
+        "docs/master_plan/generated/PR166_S*.json",
+        "docs/master_plan/generated/PR166_S_*.report.json",
+        "docs/master_plan/generated/pr166_s*/**",
+        "src/qtt/stage1_prediction_markets/pr166_s*/**",
+        "src/qtt/stage1_prediction_markets/pr166_s*/schemas/**",
+        "tests/stage1_prediction_markets/pr166_s*/**",
+        "tools/*pr166_s*.py"
+      ],
+      "linux_required": true,
+      "main_behavior": "run",
+      "manual_full_behavior": "run",
+      "nightly_behavior": "run",
+      "output_globs": [
+        "docs/master_plan/generated/PR166_S*.json",
+        "docs/master_plan/generated/PR166_S_*.report.json",
+        "docs/master_plan/generated/pr166_s*/**"
+      ],
+      "owner_domain": "PR166_S",
+      "owner_pr_or_feature": "PR166_S",
+      "phase": "deterministic-validators",
+      "pr152_tracked": false,
+      "pull_request_default_behavior": "run_when_touched",
+      "rationale": "Runs on pull requests only when owned inputs, tools, tests, schemas, or generated artifacts are touched; otherwise it remains covered by main, nightly, and manual full validation.",
+      "release_live_readiness_behavior": "run",
+      "test_globs": [
+        "tests/stage1_prediction_markets/pr166_s*/**"
+      ],
+      "tool_globs": [
+        "tools/validate_pr166_s_replay_paper_scenario_retest_execution.py"
+      ],
+      "validator_class": [
+        "CHANGED_AREA_VALIDATOR",
+        "TOUCHED_GENERATED_ARTIFACT_VALIDATOR",
+        "DETERMINISTIC_GENERATED_ARTIFACT_VALIDATOR",
+        "NIGHTLY_DEEP_VALIDATOR"
+      ],
+      "validator_id": "validate_pr166_s_replay_paper_scenario_retest_execution",
       "windows_required": true,
       "workflow_globs": []
     },

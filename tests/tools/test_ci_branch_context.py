@@ -2155,6 +2155,85 @@ def test_pr165_d_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr166_s_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr166-s-replay-paper-scenario-retest-execution"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=166) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s_replay_paper_scenario_retest_execution/validators.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s_replay_paper_scenario_retest_execution/schemas/"
+        "pr166_s_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_s_replay_paper_scenario_retest_execution/test_pr166_s_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_S_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr166_s_shards/"
+        "PR166_S_OrderIntentRegistry.part_0001_of_0004.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr166_s_replay_paper_scenario_retest_execution.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr166_s_replay_paper_scenario_retest_execution.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/fail_closed/test_run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_D_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d_scenario_qku_combination_selection/validators.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/1005/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr163_c_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr163-c-pretrade-infrastructure-rejection-remediation"
     repair_branch = context.PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH
@@ -2622,6 +2701,24 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "docs/master_plan/generated/pr165_d_shards/"
             "PR165_D_RetestBatchSelectionQueue.part_0001_of_0007.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_pr166_s_replay_paper_scenario_retest_execution.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/PR166_S_FinalSummary.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/pr166_s_shards/"
+            "PR166_S_OrderIntentRegistry.part_0001_of_0004.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "src/qtt/stage1_prediction_markets/"
+            "pr166_s_replay_paper_scenario_retest_execution/validators.py",
         )
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
