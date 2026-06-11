@@ -1368,6 +1368,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_qtt_agent_role_operating_charter_registry.py",
             ),
             "--mode",

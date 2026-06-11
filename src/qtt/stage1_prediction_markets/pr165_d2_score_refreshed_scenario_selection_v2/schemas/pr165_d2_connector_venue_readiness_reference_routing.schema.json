@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_boundary_ref": {
+      "type": "string"
+    },
+    "authority_class": {
+      "type": "string"
+    },
+    "created_by_pr": {
+      "const": "PR165-D2"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "roadmap_pr_id": {
+      "const": "PR165-D2"
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "validation_status": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "roadmap_pr_id",
+    "created_by_pr",
+    "authority_class",
+    "authority_boundary_ref",
+    "schema_ref",
+    "validation_status",
+    "record_count",
+    "records"
+  ],
+  "title": "pr165_d2_connector_venue_readiness_reference_routing",
+  "type": "object"
+}
