@@ -718,6 +718,15 @@ def _expected_commands(
             python_executable,
             str(
                 Path("tools")
+                / "validate_pr166_sf_repair_materialization_before_retest.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
             ),
             "--repo-root",
@@ -2566,6 +2575,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr166_sm_index = command_names.index(
         "validate_pr166_sm_score_memory_refresh_from_pr166_s_results.py"
     )
+    pr166_sf_index = command_names.index(
+        "validate_pr166_sf_repair_materialization_before_retest.py"
+    )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
@@ -2750,6 +2762,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     assert (
         command_names.count(
+            "validate_pr166_sf_repair_materialization_before_retest.py"
+        )
+        == 1
+    )
+    assert (
+        command_names.count(
             "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
         )
         == 1
@@ -2789,6 +2807,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr165_d_index
         < pr166_s_index
         < pr166_sm_index
+        < pr166_sf_index
         < pr165_d2_index
         < next_gate_index
     )
@@ -3063,6 +3082,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         str(
             Path("tools")
             / "validate_pr166_sm_score_memory_refresh_from_pr166_s_results.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr166_sf_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr166_sf_repair_materialization_before_retest.py"
         ),
         "--repo-root",
         ".",
