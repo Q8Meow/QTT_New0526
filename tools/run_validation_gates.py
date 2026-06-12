@@ -1368,6 +1368,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr166_sf_repair_materialization_before_retest.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
             ),
             "--repo-root",

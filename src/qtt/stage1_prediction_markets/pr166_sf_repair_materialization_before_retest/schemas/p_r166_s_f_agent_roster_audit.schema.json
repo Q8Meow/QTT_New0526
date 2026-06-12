@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "created_by_pr": {
+      "const": "PR166-SF"
+    },
+    "records": {
+      "items": {
+        "$ref": "pr166_sf_common.schema.json"
+      },
+      "type": "array"
+    },
+    "roadmap_pr_id": {
+      "const": "PR166-SF"
+    }
+  },
+  "title": "PR166_SF_AgentRosterAudit",
+  "type": "object"
+}

@@ -239,8 +239,13 @@ def _validate_summary(records: dict[str, list[dict[str, Any]]], failures: list[s
     _expect(summary.get("refreshed_score_rows_consumed") == 3985, failures, "refreshed score rows must be 3985")
     _expect(summary.get("refreshed_memory_rows_consumed") == 3985, failures, "refreshed memory rows must be 3985")
     _expect(summary.get("qku_formula_algorithm_computability_rows") == 6502, failures, "computability rows must be 6502")
-    _expect(summary.get("optional_pr166_sf_present") is False, failures, "PR166-SF should be optional absent in current baseline")
-    _expect(summary.get("optional_pr166_sf_missing_handled_by_pr166_sm_repair_handoff") is True, failures, "PR166-SF optional fallback not recorded")
+    optional_pr166_sf_present = summary.get("optional_pr166_sf_present") is True
+    _expect(
+        summary.get("optional_pr166_sf_missing_handled_by_pr166_sm_repair_handoff")
+        is (not optional_pr166_sf_present),
+        failures,
+        "PR166-SF optional present/fallback flags disagree",
+    )
     _expect(summary.get("optional_pr164_present") is True, failures, "optional PR164 presence not recorded")
     for field in (
         "metadata_only_rows",
@@ -297,11 +302,20 @@ def _validate_tca(records: dict[str, list[dict[str, Any]]], failures: list[str])
 
 
 def _validate_repair(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
+    optional_pr166_sf_present = (
+        records["PR165_D2_FinalSummary.report.json"][0].get("optional_pr166_sf_present")
+        is True
+    )
+    expected_queue_status = (
+        "OPTIONAL_PRESENT_CONSUMED"
+        if optional_pr166_sf_present
+        else "OPTIONAL_NOT_PRESENT_CONSUMED_PR166_SM_REPAIR_HANDOFF"
+    )
     for row in records["PR165_D2_RepairAwareSelectionQueue.report.json"]:
         if row["repair_needed_flag"]:
             _expect(row["route_to_pr166_sf_flag"] is True, failures, f"repair route missing {row['candidate_packet_id']}")
             _expect(row["route_to_pr165_d2_retest_flag"] is False, failures, f"repair-needed row routed to retest {row['candidate_packet_id']}")
-            _expect(row["optional_pr166_sf_queue_status"] == "OPTIONAL_NOT_PRESENT_CONSUMED_PR166_SM_REPAIR_HANDOFF", failures, "PR166-SF optional handling mismatch")
+            _expect(row["optional_pr166_sf_queue_status"] == expected_queue_status, failures, "PR166-SF optional handling mismatch")
 
 
 def _validate_quantum(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
@@ -345,10 +359,19 @@ def _validate_agent_handoffs(records: dict[str, list[dict[str, Any]]], failures:
 def _validate_optional_inputs(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
     optional = records["PR165_D2_OptionalInputResolutionLedger.report.json"]
     by_ref = {row["optional_artifact_ref"]: row for row in optional}
+    optional_pr166_sf_present = (
+        records["PR165_D2_FinalSummary.report.json"][0].get("optional_pr166_sf_present")
+        is True
+    )
+    expected_absence_handling = (
+        "OPTIONAL_PRESENT_CONSUMED_AS_STRENGTHENING_INPUT"
+        if optional_pr166_sf_present
+        else "OPTIONAL_NOT_PRESENT_CONSUMED_PR166_SM_REPAIR_HANDOFF"
+    )
     _expect(
-        by_ref["PR166_SF_RepairedCandidateRetestQueue.report.json"]["absence_handling"] == "OPTIONAL_NOT_PRESENT_CONSUMED_PR166_SM_REPAIR_HANDOFF",
+        by_ref["PR166_SF_RepairedCandidateRetestQueue.report.json"]["absence_handling"] == expected_absence_handling,
         failures,
-        "optional PR166-SF repaired queue fallback missing",
+        "optional PR166-SF repaired queue present/fallback receipt missing",
     )
     _expect(any(row["optional_input_pr"] == "PR164" and row["present_flag"] for row in optional), failures, "optional PR164 present row missing")
     for row in records["PR165_D2_RowCountReconciliationLedger.report.json"]:
