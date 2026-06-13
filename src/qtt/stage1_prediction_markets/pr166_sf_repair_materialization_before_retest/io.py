@@ -68,9 +68,11 @@ def current_branch(repo_root: Path) -> str:
 
 def ensure_branch(repo_root: Path) -> None:
     branch = current_branch(repo_root)
-    if branch not in {c.EXPECTED_BRANCH, c.BASE_BRANCH}:
+    downstream_validation_branches = {"pr166-s2-replay-paper-retest-loop-v2"}
+    if branch not in {c.EXPECTED_BRANCH, c.BASE_BRANCH, *downstream_validation_branches}:
         raise RuntimeError(
-            f"{c.PR_ID} must build on {c.EXPECTED_BRANCH} or main post-merge, got {branch}"
+            f"{c.PR_ID} must build on {c.EXPECTED_BRANCH}, main post-merge, "
+            f"or exact downstream validation branches {sorted(downstream_validation_branches)}, got {branch}"
         )
 
 

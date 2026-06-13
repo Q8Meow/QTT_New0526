@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "required": [
+    "artifact_id",
+    "row_id",
+    "created_by_pr",
+    "roadmap_pr_id",
+    "candidate_packet_id",
+    "qku_id",
+    "formula_id",
+    "algorithm_id",
+    "upstream_pr_refs",
+    "upstream_artifact_refs",
+    "downstream_pr_refs",
+    "downstream_artifact_refs",
+    "owning_agent",
+    "reviewer_or_challenger_agent",
+    "validator_ref",
+    "manifest_ref",
+    "schema_ref",
+    "authority_boundary_ref",
+    "no_orphan_status",
+    "connector_binding_allowed_in_this_pr",
+    "private_state_fetch_allowed_in_this_pr",
+    "runtime_cash_receipt_allowed_in_this_pr",
+    "source_truth_acceptance_allowed_in_this_pr"
+  ],
+  "title": "PR166-S2 common row schema",
+  "type": "object"
+}
