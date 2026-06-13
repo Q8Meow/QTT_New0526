@@ -1386,6 +1386,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_pr166_sm2_score_memory_refresh_v2.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
             ),
             "--repo-root",

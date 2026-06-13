@@ -11,7 +11,13 @@ from tools import ci_branch_context
 
 from . import constants as c
 
-_ALLOWED_BRANCH_CONTEXTS = frozenset({c.EXPECTED_BRANCH, c.BASE_BRANCH})
+_ALLOWED_BRANCH_CONTEXTS = frozenset(
+    {
+        c.EXPECTED_BRANCH,
+        c.BASE_BRANCH,
+        "pr166-sm2-score-memory-refresh-v2",
+    }
+)
 
 
 def json_text(payload: Any, *, compact: bool = False) -> str:

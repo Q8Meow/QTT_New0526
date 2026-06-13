@@ -736,6 +736,15 @@ def _expected_commands(
             python_executable,
             str(
                 Path("tools")
+                / "validate_pr166_sm2_score_memory_refresh_v2.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
             ),
             "--repo-root",
@@ -2590,6 +2599,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr166_s2_index = command_names.index(
         "validate_pr166_s2_replay_paper_retest_loop_v2.py"
     )
+    pr166_sm2_index = command_names.index(
+        "validate_pr166_sm2_score_memory_refresh_v2.py"
+    )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
@@ -3123,6 +3135,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr166_sm2_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr166_sm2_score_memory_refresh_v2.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
     assert commands[pr165_d2_index] == [
         python_executable,
         str(
@@ -3158,6 +3179,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr166_s_index]
     assert "--write-report" not in commands[pr166_sm_index]
     assert "--write-report" not in commands[pr166_s2_index]
+    assert "--write-report" not in commands[pr166_sm2_index]
     assert "--write-report" not in commands[pr165_d2_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
