@@ -1,0 +1,63 @@
+{
+  "$id": "pr166_sf_r2_common.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "connector_binding_allowed_in_this_pr": {
+      "const": false
+    },
+    "conversion_status": {
+      "type": "string"
+    },
+    "created_by_pr": {
+      "const": "PR166-SF-R2"
+    },
+    "live_order_authority_allowed_in_this_pr": {
+      "const": false
+    },
+    "no_orphan_status": {
+      "enum": [
+        "DASHBOARD_GOVERNANCE_COMMANDER_ROUTE_CONNECTED",
+        "MATERIALIZATION_ROUTE_CONNECTED",
+        "NO_FILL_ROUTE_CONNECTED",
+        "QUANTUM_ROUTE_CONNECTED",
+        "REPAIRED_POSITIVE_ROUTE_CONNECTED",
+        "REPAIR_ROUTE_CONNECTED",
+        "RETEST_ROUTE_CONNECTED",
+        "SCORE_MEMORY_ROUTE_CONNECTED",
+        "SELECTION_ROUTE_CONNECTED",
+        "SIMULATOR_ROUTE_CONNECTED",
+        "STILL_NEGATIVE_ROUTE_CONNECTED",
+        "TERMINAL_ROUTE_CONNECTED"
+      ]
+    },
+    "profit_evidence_allowed_in_this_pr": {
+      "const": false
+    },
+    "quantum_backend_execution_allowed_in_this_pr": {
+      "const": false
+    },
+    "roadmap_pr_id": {
+      "const": "PR166-SF-R2"
+    }
+  },
+  "required": [
+    "artifact_id",
+    "row_id",
+    "created_by_pr",
+    "roadmap_pr_id",
+    "candidate_packet_id",
+    "upstream_pr_refs",
+    "downstream_pr_refs",
+    "owning_agent",
+    "reviewer_or_challenger_agent",
+    "validator_ref",
+    "manifest_ref",
+    "schema_ref",
+    "authority_boundary_ref",
+    "no_orphan_status",
+    "deterministic_sort_key"
+  ],
+  "title": "PR166-SF-R2 common row schema",
+  "type": "object"
+}

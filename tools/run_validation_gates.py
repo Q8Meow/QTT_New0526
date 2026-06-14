@@ -162,6 +162,15 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
+                "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
+            ),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5c "
+                "isolates PR166-SF-R2 repair retest timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
                 "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
                 "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
                 "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
@@ -172,7 +181,7 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
             ),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5c "
+                "Stage 1 prediction-market tests, subprocess group 5d "
                 "split from the longest shard-2 runtime group"
             ),
         ),
@@ -1980,6 +1989,15 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr166_sm2_score_memory_refresh_v2.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr166_sf_r2_targeted_conversion_repair_retest.py",
             ),
             "--repo-root",
             ".",

@@ -2606,6 +2606,109 @@ def test_pr166_sm2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr166_sf_r2_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = "pr166-sf-r2-targeted-conversion-repair-retest"
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=166) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/schemas/"
+        "pr166_sf_r2_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/"
+        "test_pr166_sf_r2_validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_SF_R2_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr166_sf_r2_shards/"
+        "PR166_SF_R2_NetEdgeLedger.part_0001_of_0004.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr166_sf_r2_targeted_conversion_repair_retest.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr166_sf_r2_targeted_conversion_repair_retest.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_repair_materialization_before_retest/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/changed_area_validation_router.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validation_inventory.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/ci_branch_context.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/fail_closed/test_run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_SM2_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/validator.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/1010/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr165_d2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr165-d2-score-refreshed-scenario-selection-v2"
     repair_branch = context.PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH

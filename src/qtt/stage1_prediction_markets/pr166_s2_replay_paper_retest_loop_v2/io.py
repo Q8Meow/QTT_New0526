@@ -16,6 +16,7 @@ _ALLOWED_BRANCH_CONTEXTS = frozenset(
         c.EXPECTED_BRANCH,
         c.BASE_BRANCH,
         "pr166-sm2-score-memory-refresh-v2",
+        "pr166-sf-r2-targeted-conversion-repair-retest",
     }
 )
 
