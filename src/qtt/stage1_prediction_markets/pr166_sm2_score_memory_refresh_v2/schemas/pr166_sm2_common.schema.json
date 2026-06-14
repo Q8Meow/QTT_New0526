@@ -1,0 +1,60 @@
+{
+  "$id": "pr166_sm2_common.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "connector_binding_allowed_in_this_pr": {
+      "const": false
+    },
+    "created_by_pr": {
+      "const": "PR166-SM2"
+    },
+    "no_orphan_status": {
+      "enum": [
+        "CONNECTED_TO_PR165_D3_SELECTION",
+        "CONNECTED_TO_PR166_SF_R2_REPAIR",
+        "CONNECTED_TO_PR166_Q_ROUTE",
+        "CONNECTED_TO_PR167_SIM_ROUTE",
+        "CONNECTED_TO_PR162D_R3_ROUTE",
+        "CONNECTED_TO_AGENT_TASK_ROUTE",
+        "CONNECTED_TO_DASHBOARD_GOVERNANCE_COMMANDER_REVIEW",
+        "CONNECTED_TO_CONNECTOR_READINESS_REFERENCE_ROUTE",
+        "CONNECTED_UPSTREAM_TERMINAL_BY_NATURE"
+      ]
+    },
+    "owning_agent": {
+      "type": "string"
+    },
+    "private_state_fetch_allowed_in_this_pr": {
+      "const": false
+    },
+    "roadmap_pr_id": {
+      "const": "PR166-SM2"
+    },
+    "runtime_cash_receipt_allowed_in_this_pr": {
+      "const": false
+    },
+    "source_truth_acceptance_allowed_in_this_pr": {
+      "const": false
+    }
+  },
+  "required": [
+    "artifact_id",
+    "row_id",
+    "created_by_pr",
+    "roadmap_pr_id",
+    "candidate_packet_id",
+    "upstream_pr_refs",
+    "downstream_pr_refs",
+    "owning_agent",
+    "reviewer_or_challenger_agent",
+    "validator_ref",
+    "manifest_ref",
+    "schema_ref",
+    "authority_boundary_ref",
+    "no_orphan_status",
+    "deterministic_sort_key"
+  ],
+  "title": "PR166-SM2 common row schema",
+  "type": "object"
+}

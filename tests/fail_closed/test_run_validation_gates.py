@@ -6,6 +6,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from tools import ci_branch_context
 from tools import (
     validate_atomicrows_research_provenance_evidence_tier_classification as research_provenance_gate,
@@ -728,6 +730,15 @@ def _expected_commands(
             str(
                 Path("tools")
                 / "validate_pr166_s2_replay_paper_retest_loop_v2.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr166_sm2_score_memory_refresh_v2.py"
             ),
             "--repo-root",
             ".",
@@ -2361,6 +2372,65 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     )
 
 
+def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
+    commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"]
+
+    assert [command.paths for command in commands] == [
+        (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
+        (
+            "tests/agent_algorithm",
+            "tests/agents",
+            "tests/algorithms",
+            "tests/connectors",
+        ),
+        (
+            "tests/core",
+            "tests/dashboard",
+            "tests/edge",
+            "tests/external_repo",
+            "tests/governance",
+            "tests/launch",
+            "tests/master_plan",
+        ),
+        ("tests/global_debug",),
+        (
+            "tests/neural_signal",
+            "tests/quantum",
+            "tests/replay_paper",
+            "tests/replay_paper_review",
+            "tests/research",
+            "tests/roadmap",
+        ),
+        (
+            "tests/runtime_cash",
+            "tests/runtime_orchestration",
+            "tests/runtime_resolver",
+            "tests/scoring",
+            "tests/selection",
+            "tests/venue_neutral_prediction_adapter",
+        ),
+        ("tests/source_evidence",),
+    ]
+    assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
+    assert all(command.reason for command in commands)
+    assert ("tests",) not in [command.paths for command in commands]
+
+    expanded_paths = [
+        path
+        for command in commands
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(expanded_paths) == len(set(expanded_paths))
+    assert set(expanded_paths) == set(
+        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-4"]
+    )
+    assert (
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
+        in runner._pytest_files_for_command(commands[3], REPO_ROOT)
+    )
+
+
 def test_runner_commands_use_sys_executable(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -2589,6 +2659,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     pr166_s2_index = command_names.index(
         "validate_pr166_s2_replay_paper_retest_loop_v2.py"
+    )
+    pr166_sm2_index = command_names.index(
+        "validate_pr166_sm2_score_memory_refresh_v2.py"
     )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -3123,6 +3196,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr166_sm2_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr166_sm2_score_memory_refresh_v2.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
     assert commands[pr165_d2_index] == [
         python_executable,
         str(
@@ -3158,6 +3240,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr166_s_index]
     assert "--write-report" not in commands[pr166_sm_index]
     assert "--write-report" not in commands[pr166_s2_index]
+    assert "--write-report" not in commands[pr166_sm2_index]
     assert "--write-report" not in commands[pr165_d2_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
@@ -9583,6 +9666,381 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
     ]
     assert seen == expected
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+
+
+def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+    monkeypatch.delenv(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, raising=False)
+    monkeypatch.delenv(runner.PR152_BUILD_REPORT_CACHE_ENV, raising=False)
+
+    repo_root = (Path(".tmp") / "test_run_validation_gates_scan_cache").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    repo_root.mkdir(parents=True)
+    cache_paths: list[Path] = []
+    pr152_cache_paths: list[Path] = []
+
+    def fake_run_commands(
+        commands: list[list[str]],
+        repo_root: Path | None = None,
+        **kwargs,
+    ) -> int:
+        cache_text = os.environ.get(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV)
+        assert cache_text is not None
+        cache_path = Path(cache_text)
+        assert cache_path.name == "NoRuntimeArtifactScanCache.json"
+        assert cache_path.parent.name.startswith("qtt_validation_gates_")
+        cache_paths.append(cache_path)
+        pr152_cache_text = os.environ.get(runner.PR152_BUILD_REPORT_CACHE_ENV)
+        assert pr152_cache_text is not None
+        pr152_cache_path = Path(pr152_cache_text)
+        assert pr152_cache_path.name == "PR152BuildReportCache.json"
+        assert pr152_cache_path.parent.name.startswith("qtt_validation_gates_")
+        pr152_cache_paths.append(pr152_cache_path)
+        return 0
+
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner, "run_commands", fake_run_commands)
+
+    try:
+        assert runner.main(["--phase", "fast-preflight"]) == 0
+        assert cache_paths
+    finally:
+        shutil.rmtree(repo_root, ignore_errors=True)
+
+    assert os.environ.get(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV) is None
+    assert os.environ.get(runner.PR152_BUILD_REPORT_CACHE_ENV) is None
+    assert pr152_cache_paths
+
+
+def test_runner_preserves_explicit_no_runtime_scan_cache_env(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    repo_root = (Path(".tmp") / "test_run_validation_gates_explicit_scan_cache").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    repo_root.mkdir(parents=True)
+    explicit_cache = repo_root / ".tmp" / "explicit_scan_cache.json"
+    monkeypatch.setenv(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, str(explicit_cache))
+    seen: list[str] = []
+
+    def fake_run_commands(
+        commands: list[list[str]],
+        repo_root: Path | None = None,
+        **kwargs,
+    ) -> int:
+        seen.append(os.environ[runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV])
+        return 0
+
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner, "run_commands", fake_run_commands)
+
+    try:
+        assert runner.main(["--phase", "fast-preflight"]) == 0
+        assert seen == [str(explicit_cache)]
+        assert os.environ[runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV] == str(
+            explicit_cache
+        )
+    finally:
+        shutil.rmtree(repo_root, ignore_errors=True)
+
+
+def test_runner_preserves_explicit_pr152_build_report_cache_env(monkeypatch):
+    _clear_branch_context_env(monkeypatch)
+
+    repo_root = (Path(".tmp") / "test_run_validation_gates_explicit_pr152_cache").resolve()
+    shutil.rmtree(repo_root, ignore_errors=True)
+    repo_root.mkdir(parents=True)
+    explicit_cache = repo_root / ".tmp" / "explicit_pr152_build_cache.json"
+    monkeypatch.setenv(runner.PR152_BUILD_REPORT_CACHE_ENV, str(explicit_cache))
+    seen: list[str] = []
+
+    def fake_run_commands(
+        commands: list[list[str]],
+        repo_root: Path | None = None,
+        **kwargs,
+    ) -> int:
+        seen.append(os.environ[runner.PR152_BUILD_REPORT_CACHE_ENV])
+        return 0
+
+    monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
+    monkeypatch.setattr(runner, "run_commands", fake_run_commands)
+
+    try:
+        assert runner.main(["--phase", "fast-preflight"]) == 0
+        assert seen == [str(explicit_cache)]
+        assert os.environ[runner.PR152_BUILD_REPORT_CACHE_ENV] == str(explicit_cache)
+    finally:
+        shutil.rmtree(repo_root, ignore_errors=True)
+
+
+def _no_runtime_strict_options():
+    from tools.validate_no_runtime_artifacts import ScanOptions
+
+    return ScanOptions(
+        forbid_source_retrieval=True,
+        forbid_source_acceptance=True,
+        forbid_connector_binding=True,
+        forbid_private_state_fetch=True,
+        forbid_order_execution=True,
+        forbid_neural_training=True,
+        forbid_neural_inference=True,
+        forbid_external_repo_clone=True,
+        forbid_package_install_scripts=True,
+    )
+
+
+def _runtime_scan_cache_repo(tmp_path: Path) -> Path:
+    repo_root = tmp_path / "repo"
+    (repo_root / "src").mkdir(parents=True)
+    (repo_root / "src" / "ok.py").write_text("# ok\n", encoding="utf-8")
+    return repo_root
+
+
+def test_runner_no_runtime_scan_cache_reuses_matching_result(tmp_path, monkeypatch):
+    from tools import validate_no_runtime_artifacts as scanner
+
+    repo_root = _runtime_scan_cache_repo(tmp_path)
+    monkeypatch.setenv(
+        runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV,
+        str(repo_root / ".tmp" / "no_runtime_scan_cache.json"),
+    )
+    calls = 0
+
+    def fake_scan(root: Path, options) -> list[str]:
+        nonlocal calls
+        calls += 1
+        assert root == repo_root.resolve()
+        return ["synthetic violation"]
+
+    monkeypatch.setattr(scanner, "scan_repository", fake_scan)
+
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == ["synthetic violation"]
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == ["synthetic violation"]
+    assert calls == 1
+
+
+def test_runner_no_runtime_scan_cache_reruns_when_stale(tmp_path, monkeypatch):
+    from tools import validate_no_runtime_artifacts as scanner
+
+    repo_root = _runtime_scan_cache_repo(tmp_path)
+    monkeypatch.setenv(
+        runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV,
+        str(repo_root / ".tmp" / "no_runtime_scan_cache.json"),
+    )
+    calls: list[str] = []
+
+    def fake_scan(root: Path, options) -> list[str]:
+        calls.append("scan")
+        return []
+
+    monkeypatch.setattr(scanner, "scan_repository", fake_scan)
+
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == []
+    (repo_root / "src" / "new.py").write_text("# new\n", encoding="utf-8")
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == []
+    assert calls == ["scan", "scan"]
+
+
+def test_runner_no_runtime_scan_cache_reruns_when_corrupt(tmp_path, monkeypatch):
+    from tools import validate_no_runtime_artifacts as scanner
+
+    repo_root = _runtime_scan_cache_repo(tmp_path)
+    cache_path = repo_root / ".tmp" / "no_runtime_scan_cache.json"
+    cache_path.parent.mkdir()
+    cache_path.write_text("{not-json", encoding="utf-8")
+    monkeypatch.setenv(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, str(cache_path))
+
+    calls = 0
+
+    def fake_scan(root: Path, options) -> list[str]:
+        nonlocal calls
+        calls += 1
+        return []
+
+    monkeypatch.setattr(scanner, "scan_repository", fake_scan)
+
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == []
+    assert calls == 1
+
+
+def test_runner_no_runtime_scan_cache_rejects_scanned_tree_path(
+    tmp_path,
+    monkeypatch,
+):
+    repo_root = _runtime_scan_cache_repo(tmp_path)
+    monkeypatch.setenv(
+        runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV,
+        str(repo_root / "no_runtime_scan_cache.json"),
+    )
+
+    with pytest.raises(RuntimeError, match="must point outside the scanned tree"):
+        runner.scan_no_runtime_artifacts_with_run_cache(
+            repo_root,
+            _no_runtime_strict_options(),
+        )
+
+
+def test_runner_records_successful_no_runtime_command_cache(
+    tmp_path,
+    monkeypatch,
+):
+    from tools import validate_no_runtime_artifacts as scanner
+
+    repo_root = _runtime_scan_cache_repo(tmp_path)
+    cache_path = repo_root / ".tmp" / "no_runtime_scan_cache.json"
+    monkeypatch.setenv(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, str(cache_path))
+
+    class Completed:
+        returncode = 0
+
+    monkeypatch.setattr(runner.subprocess, "run", lambda command: Completed())
+
+    command = [
+        sys.executable,
+        str(Path("tools") / "validate_no_runtime_artifacts.py"),
+        "--repo-root",
+        str(repo_root),
+        "--forbid-source-retrieval",
+        "--forbid-source-acceptance",
+        "--forbid-connector-binding",
+        "--forbid-private-state-fetch",
+        "--forbid-order-execution",
+        "--forbid-neural-training",
+        "--forbid-neural-inference",
+        "--forbid-external-repo-clone",
+        "--forbid-package-install-scripts",
+    ]
+
+    assert runner.run_commands([command]) == 0
+    assert cache_path.is_file()
+
+    def fail_if_uncached(root: Path, options) -> list[str]:
+        raise AssertionError("successful scanner command should seed the cache")
+
+    monkeypatch.setattr(scanner, "scan_repository", fail_if_uncached)
+    assert runner.scan_no_runtime_artifacts_with_run_cache(
+        repo_root,
+        _no_runtime_strict_options(),
+    ) == []
+
+
+def test_runner_pr152_build_report_cache_reuses_matching_result(
+    tmp_path,
+    monkeypatch,
+):
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    monkeypatch.setenv(
+        runner.PR152_BUILD_REPORT_CACHE_ENV,
+        str(repo_root / ".tmp" / "pr152_build_cache.json"),
+    )
+    monkeypatch.setattr(
+        runner,
+        "_pr152_build_report_fingerprint",
+        lambda root: {"repo_root": str(root), "state": "stable"},
+    )
+    calls = 0
+
+    def fake_builder(root: Path) -> dict[str, object]:
+        nonlocal calls
+        calls += 1
+        return {"calls": calls, "root": str(root)}
+
+    first = runner.build_pr152_report_with_run_cache(repo_root, fake_builder)
+    first["calls"] = 99
+    second = runner.build_pr152_report_with_run_cache(repo_root, fake_builder)
+
+    assert second == {"calls": 1, "root": str(repo_root.resolve())}
+    assert calls == 1
+
+
+def test_runner_pr152_build_report_cache_reruns_when_stale(
+    tmp_path,
+    monkeypatch,
+):
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    monkeypatch.setenv(
+        runner.PR152_BUILD_REPORT_CACHE_ENV,
+        str(repo_root / ".tmp" / "pr152_build_cache.json"),
+    )
+    state = {"value": "initial"}
+    monkeypatch.setattr(
+        runner,
+        "_pr152_build_report_fingerprint",
+        lambda root: {"repo_root": str(root), "state": state["value"]},
+    )
+    calls: list[str] = []
+
+    def fake_builder(root: Path) -> dict[str, object]:
+        calls.append(state["value"])
+        return {"state": state["value"]}
+
+    assert runner.build_pr152_report_with_run_cache(repo_root, fake_builder) == {
+        "state": "initial"
+    }
+    state["value"] = "changed"
+    assert runner.build_pr152_report_with_run_cache(repo_root, fake_builder) == {
+        "state": "changed"
+    }
+    assert calls == ["initial", "changed"]
+
+
+def test_runner_pr152_build_report_cache_reruns_when_corrupt(
+    tmp_path,
+    monkeypatch,
+):
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    cache_path = repo_root / ".tmp" / "pr152_build_cache.json"
+    cache_path.parent.mkdir()
+    cache_path.write_text("{not-json", encoding="utf-8")
+    monkeypatch.setenv(runner.PR152_BUILD_REPORT_CACHE_ENV, str(cache_path))
+    monkeypatch.setattr(
+        runner,
+        "_pr152_build_report_fingerprint",
+        lambda root: {"repo_root": str(root), "state": "stable"},
+    )
+    calls = 0
+
+    def fake_builder(root: Path) -> dict[str, object]:
+        nonlocal calls
+        calls += 1
+        return {"rebuilt": True}
+
+    assert runner.build_pr152_report_with_run_cache(repo_root, fake_builder) == {
+        "rebuilt": True
+    }
+    assert calls == 1
+
+
+def test_runner_pr152_build_report_cache_rejects_repo_root_path(
+    tmp_path,
+    monkeypatch,
+):
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    monkeypatch.setenv(
+        runner.PR152_BUILD_REPORT_CACHE_ENV,
+        str(repo_root / "pr152_build_cache.json"),
+    )
+
+    with pytest.raises(RuntimeError, match="must point outside the repo"):
+        runner.build_pr152_report_with_run_cache(repo_root, lambda root: {})
 
 
 def test_runner_creates_tmp_parent_before_running_commands(monkeypatch, capsys):

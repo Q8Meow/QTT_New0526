@@ -18,6 +18,17 @@ from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_au
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_UNCACHED_PR152_BUILD_REPORT = pr152_report.build_report
+
+
+def _cached_pr152_build_report(repo_root: Path | str) -> dict:
+    return runner.build_pr152_report_with_run_cache(
+        repo_root,
+        _UNCACHED_PR152_BUILD_REPORT,
+    )
+
+
+pr152_report.build_report = _cached_pr152_build_report
 
 
 def _report() -> dict:
@@ -247,8 +258,8 @@ def test_pr152_source_atomicrows_quantum_and_runtime_boundaries() -> None:
 
 
 def test_report_is_deterministic_and_has_no_local_paths() -> None:
-    first = pr152_report.build_report(REPO_ROOT)
-    second = pr152_report.build_report(REPO_ROOT)
+    first = _UNCACHED_PR152_BUILD_REPORT(REPO_ROOT)
+    second = _UNCACHED_PR152_BUILD_REPORT(REPO_ROOT)
     assert first == second
     assert pr152_report.json_dump(first) == pr152_report.json_dump(second)
     serialized = pr152_report.json_dump(first)
