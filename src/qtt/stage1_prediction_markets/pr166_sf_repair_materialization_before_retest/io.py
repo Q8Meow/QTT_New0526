@@ -72,6 +72,7 @@ def ensure_branch(repo_root: Path) -> None:
         "pr166-s2-replay-paper-retest-loop-v2",
         "pr166-sm2-score-memory-refresh-v2",
         "pr166-sf-r2-targeted-conversion-repair-retest",
+        "pr166-sm3-score-memory-refresh-v3",
     }
     if branch not in {c.EXPECTED_BRANCH, c.BASE_BRANCH, *downstream_validation_branches}:
         raise RuntimeError(

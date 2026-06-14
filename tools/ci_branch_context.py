@@ -157,6 +157,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr165-c-replay-paper-memory-consumer-integration": 165,
     "pr165-d-scenario-qku-combination-selection": 165,
     "pr166-sf-r2-targeted-conversion-repair-retest": 166,
+    "pr166-sm3-score-memory-refresh-v3": 166,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
     159: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
@@ -1047,6 +1048,7 @@ PR166_SF_BRANCH = "pr166-sf-repair-materialization-before-retest"
 PR166_S2_BRANCH = "pr166-s2-replay-paper-retest-loop-v2"
 PR166_SM2_BRANCH = "pr166-sm2-score-memory-refresh-v2"
 PR166_SF_R2_BRANCH = "pr166-sf-r2-targeted-conversion-repair-retest"
+PR166_SM3_BRANCH = "pr166-sm3-score-memory-refresh-v3"
 PR165_D2_BRANCH = "pr165-d2-score-refreshed-scenario-selection-v2"
 PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
     "pr165-d2-main-push-branch-context-repair"
@@ -1387,6 +1389,41 @@ PR166_SF_R2_ALLOWED_CHANGED_PATHS = frozenset(
         "pr166_sf_repair_materialization_before_retest/io.py",
         "src/qtt/stage1_prediction_markets/"
         "pr166_sm2_score_memory_refresh_v2/io.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    }
+)
+PR166_SM3_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR166_SM3_",
+    "docs/master_plan/generated/pr166_sm3_shards/",
+    "src/qtt/stage1_prediction_markets/"
+    "pr166_sm3_score_memory_refresh_v3/",
+    "tests/stage1_prediction_markets/"
+    "pr166_sm3_score_memory_refresh_v3/",
+)
+PR166_SM3_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr166_sm3_score_memory_refresh_v3.py",
+        "tools/validate_pr166_sm3_score_memory_refresh_v3.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_repair_materialization_before_retest/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/io.py",
         "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/ci_branch_context.py",
         "tools/run_validation_gates.py",
@@ -1913,6 +1950,8 @@ PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
         PR165_D2_BRANCH,
         PR166_S2_BRANCH,
         PR166_SM2_BRANCH,
+        PR166_SF_R2_BRANCH,
+        PR166_SM3_BRANCH,
     }
 )
 PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
@@ -2328,6 +2367,7 @@ def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
         or _is_pr166_s2_replay_paper_retest_changed_path(normalized)
         or _is_pr166_sm2_score_memory_refresh_changed_path(normalized)
         or _is_pr166_sf_r2_targeted_conversion_repair_changed_path(normalized)
+        or _is_pr166_sm3_score_memory_refresh_changed_path(normalized)
     )
 
 
@@ -2576,6 +2616,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return _is_pr166_sm2_score_memory_refresh_changed_path(normalized)
     if branch == PR166_SF_R2_BRANCH:
         return _is_pr166_sf_r2_targeted_conversion_repair_changed_path(normalized)
+    if branch == PR166_SM3_BRANCH:
+        return _is_pr166_sm3_score_memory_refresh_changed_path(normalized)
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
@@ -2775,6 +2817,14 @@ def _is_pr166_sf_r2_targeted_conversion_repair_changed_path(path: str) -> bool:
     return normalized in PR166_SF_R2_ALLOWED_CHANGED_PATHS or any(
         normalized.startswith(prefix)
         for prefix in PR166_SF_R2_ALLOWED_CHANGED_PATH_PREFIXES
+    )
+
+
+def _is_pr166_sm3_score_memory_refresh_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in PR166_SM3_ALLOWED_CHANGED_PATHS or any(
+        normalized.startswith(prefix)
+        for prefix in PR166_SM3_ALLOWED_CHANGED_PATH_PREFIXES
     )
 
 
