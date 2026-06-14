@@ -747,6 +747,15 @@ def _expected_commands(
             python_executable,
             str(
                 Path("tools")
+                / "validate_pr166_sf_r2_targeted_conversion_repair_retest.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
             ),
             "--repo-root",
@@ -2420,6 +2429,9 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ),
         ("tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",),
         (
+            "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
+        ),
+        (
             "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
             "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
             "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
@@ -2737,6 +2749,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     pr166_sm2_index = command_names.index(
         "validate_pr166_sm2_score_memory_refresh_v2.py"
+    )
+    pr166_sf_r2_index = command_names.index(
+        "validate_pr166_sf_r2_targeted_conversion_repair_retest.py"
     )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -3280,6 +3295,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         "--repo-root",
         ".",
     ]
+    assert commands[pr166_sf_r2_index] == [
+        python_executable,
+        str(
+            Path("tools")
+            / "validate_pr166_sf_r2_targeted_conversion_repair_retest.py"
+        ),
+        "--repo-root",
+        ".",
+    ]
     assert commands[pr165_d2_index] == [
         python_executable,
         str(
@@ -3316,6 +3340,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--write-report" not in commands[pr166_sm_index]
     assert "--write-report" not in commands[pr166_s2_index]
     assert "--write-report" not in commands[pr166_sm2_index]
+    assert "--write-report" not in commands[pr166_sf_r2_index]
     assert "--write-report" not in commands[pr165_d2_index]
     assert "--branch" not in commands[pr161a_index]
     assert "--branch" not in commands[pr161b_index]
@@ -3342,6 +3367,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--branch" not in commands[pr166_s_index]
     assert "--branch" not in commands[pr166_sm_index]
     assert "--branch" not in commands[pr166_s2_index]
+    assert "--branch" not in commands[pr166_sf_r2_index]
     assert "--branch" not in commands[pr165_d2_index]
     assert "--allow-main" not in commands[pr161a_index]
     assert "--allow-main" not in commands[pr161b_index]
@@ -3368,6 +3394,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--allow-main" not in commands[pr166_s_index]
     assert "--allow-main" not in commands[pr166_sm_index]
     assert "--allow-main" not in commands[pr166_s2_index]
+    assert "--allow-main" not in commands[pr166_sf_r2_index]
     assert "--allow-main" not in commands[pr165_d2_index]
     assert "--output" not in commands[pr158_index]
     assert "--output" not in commands[pr159_index]
@@ -3399,6 +3426,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert "--output" not in commands[pr166_s_index]
     assert "--output" not in commands[pr166_sm_index]
     assert "--output" not in commands[pr166_s2_index]
+    assert "--output" not in commands[pr166_sf_r2_index]
     assert "--output" not in commands[pr165_d2_index]
 
 
