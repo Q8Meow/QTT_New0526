@@ -2556,6 +2556,10 @@ def test_pr166_sm2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
+        "tests/fail_closed/test_fail_closed_guards.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
         "src/qtt/stage1_prediction_markets/"
         "pr166_s2_replay_paper_retest_loop_v2/io.py",
     )
@@ -2567,6 +2571,10 @@ def test_pr166_sm2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.is_explicit_downstream_repair_changed_path(
         branch,
         "tests/fail_closed/test_run_validation_gates.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
     )
     assert context.is_explicit_downstream_repair_changed_path(
         branch,

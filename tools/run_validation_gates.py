@@ -2,14 +2,17 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import hashlib
 import pathlib
 import subprocess
 import sys
 import tempfile
 import inspect
 import json
+import os
 import time
 from typing import Sequence
 
@@ -23,6 +26,12 @@ PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
 TIMING_SCHEMA_VERSION = 1
 SLOWEST_ENTRY_LIMIT = 20
 PYTEST_DURATIONS_ARG = "--durations=50"
+NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV = "QTT_NO_RUNTIME_ARTIFACT_SCAN_CACHE"
+NO_RUNTIME_ARTIFACT_SCAN_CACHE_KIND = "qtt_no_runtime_artifact_scan"
+NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION = 1
+PR152_BUILD_REPORT_CACHE_ENV = "QTT_PR152_BUILD_REPORT_CACHE"
+PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
+PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
 PYTEST_SHARD_PHASES = (
@@ -55,6 +64,7 @@ ISOLATED_SOURCE_EVIDENCE_PYTEST = (
     "tests/source_evidence/"
     "test_controlled_official_source_capture_candidate_packets.py"
 )
+_PR152_BUILD_REPORT_MEMORY_CACHE: dict[tuple[str, str], dict[str, object]] = {}
 
 
 @dataclass(frozen=True)
@@ -82,8 +92,70 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
     ),
     "pytest-shard-2": (
         PytestShardCommand(
-            paths=("tests/stage1_prediction_markets",),
-            reason="Stage 1 prediction-market tests",
+            paths=(
+                "tests/stage1_prediction_markets/agent_consumable_parameter_default_registry",
+                "tests/stage1_prediction_markets/agent_default_binding_universal_intake_gate",
+                "tests/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing",
+                "tests/stage1_prediction_markets/atomicrows_bundle_reconciliation",
+                "tests/stage1_prediction_markets/atomicrows_pr154_value_state",
+                "tests/stage1_prediction_markets/latency_hot_path_snapshot_boundary",
+            ),
+            reason="Stage 1 prediction-market tests, subprocess group 1",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
+                "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
+                "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
+                "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
+                "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
+                "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
+                "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
+            ),
+            reason="Stage 1 prediction-market tests, subprocess group 2",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure",
+                "tests/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion",
+                "tests/stage1_prediction_markets/pr162d_r2a_real_formulations",
+                "tests/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit",
+                "tests/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion",
+                "tests/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun",
+                "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor",
+                "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
+            ),
+            reason="Stage 1 prediction-market tests, subprocess group 3",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework",
+                "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit",
+                "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
+                "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration",
+                "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection",
+                "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2",
+                "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
+                "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
+                "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
+            ),
+            reason="Stage 1 prediction-market tests, subprocess group 4",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
+                "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
+                "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",
+                "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
+                "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
+                "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
+                "tests/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation",
+                "tests/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning",
+                "tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate",
+                "tests/stage1_prediction_markets/source_intelligence",
+                "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
+            ),
+            reason="Stage 1 prediction-market tests, subprocess group 5",
         ),
     ),
     "pytest-shard-3": (
@@ -98,15 +170,56 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="Preserves the existing isolated source-evidence pytest invocation",
         ),
         PytestShardCommand(
-            paths=("tests",),
-            ignores=(
-                "tests/tools",
-                "tests/fail_closed",
-                "tests/stage1_prediction_markets",
-                "tests/atomicrows",
-                ISOLATED_SOURCE_EVIDENCE_PYTEST,
+            paths=(
+                "tests/agent_algorithm",
+                "tests/agents",
+                "tests/algorithms",
+                "tests/connectors",
             ),
-            reason="Remaining tests after the explicit stable shard groups",
+            reason="Shard 4 residual tests, subprocess group 1",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/core",
+                "tests/dashboard",
+                "tests/edge",
+                "tests/external_repo",
+                "tests/governance",
+                "tests/launch",
+                "tests/master_plan",
+            ),
+            reason="Shard 4 residual tests, subprocess group 2",
+        ),
+        PytestShardCommand(
+            paths=("tests/global_debug",),
+            reason="Shard 4 PR152 global-debug residual tests, subprocess group 3",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/neural_signal",
+                "tests/quantum",
+                "tests/replay_paper",
+                "tests/replay_paper_review",
+                "tests/research",
+                "tests/roadmap",
+            ),
+            reason="Shard 4 residual tests, subprocess group 4",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/runtime_cash",
+                "tests/runtime_orchestration",
+                "tests/runtime_resolver",
+                "tests/scoring",
+                "tests/selection",
+                "tests/venue_neutral_prediction_adapter",
+            ),
+            reason="Shard 4 residual tests, subprocess group 5",
+        ),
+        PytestShardCommand(
+            paths=("tests/source_evidence",),
+            ignores=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
+            reason="Shard 4 source-evidence residual tests, subprocess group 6",
         ),
     ),
 }
@@ -792,6 +905,467 @@ def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str,
         text=True,
     )
     return completed.returncode, completed.stdout, completed.stderr
+
+
+def _json_cache_bytes(payload: object) -> bytes:
+    return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _path_is_relative_to(path: pathlib.Path, parent: pathlib.Path) -> bool:
+    try:
+        path.relative_to(parent)
+    except ValueError:
+        return False
+    return True
+
+
+def _no_runtime_scanner_module():
+    from tools import validate_no_runtime_artifacts
+
+    return validate_no_runtime_artifacts
+
+
+def _no_runtime_scan_cache_path(root: pathlib.Path) -> pathlib.Path | None:
+    cache_text = os.environ.get(NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV)
+    if not cache_text:
+        return None
+    cache_path = pathlib.Path(cache_text)
+    if not cache_path.is_absolute():
+        cache_path = root / cache_path
+    return cache_path.resolve()
+
+
+def _validate_no_runtime_scan_cache_path(
+    root: pathlib.Path,
+    cache_path: pathlib.Path,
+) -> None:
+    if not _path_is_relative_to(cache_path, root):
+        return
+    scanner = _no_runtime_scanner_module()
+    rel = cache_path.relative_to(root)
+    if rel.parts and rel.parts[0] in scanner.SKIP_DIR_PARTS:
+        return
+    raise RuntimeError(
+        f"{NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV} must point outside the scanned tree "
+        f"or under a skipped directory such as .tmp: {rel.as_posix()}"
+    )
+
+
+def _no_runtime_options_cache_payload(options) -> dict[str, bool]:
+    fields = getattr(options, "__dataclass_fields__")
+    return {field: bool(getattr(options, field)) for field in sorted(fields)}
+
+
+def _no_runtime_scanner_source_digest() -> str:
+    scanner = _no_runtime_scanner_module()
+    return hashlib.sha256(pathlib.Path(scanner.__file__).read_bytes()).hexdigest()
+
+
+def _git_tracked_blob_by_path(root: pathlib.Path) -> dict[str, str]:
+    git_marker = root / ".git"
+    if not git_marker.exists():
+        return {}
+    returncode, stdout, _stderr = _git_stdout(root, ["ls-files", "-s", "-z"])
+    if returncode != 0:
+        return {}
+
+    tracked: dict[str, str] = {}
+    for record in stdout.split("\0"):
+        if not record:
+            continue
+        try:
+            metadata, path_text = record.split("\t", 1)
+        except ValueError:
+            continue
+        metadata_parts = metadata.split()
+        if len(metadata_parts) >= 2:
+            tracked[path_text] = metadata_parts[1]
+    return tracked
+
+
+def _no_runtime_scan_fingerprint(
+    root: pathlib.Path,
+    options,
+) -> dict[str, object]:
+    scanner = _no_runtime_scanner_module()
+    paths = scanner._iter_paths(root)
+    tracked_blobs = _git_tracked_blob_by_path(root)
+    path_hasher = hashlib.sha256()
+    for path in paths:
+        rel = scanner._rel_path(path, root).as_posix()
+        try:
+            stat = path.stat()
+            kind = "file" if path.is_file() else "dir"
+            entry = {
+                "kind": kind,
+                "mtime_ns": stat.st_mtime_ns,
+                "path": rel,
+                "size": stat.st_size if kind == "file" else None,
+                "tracked_blob": tracked_blobs.get(rel, ""),
+            }
+        except OSError as exc:
+            entry = {
+                "error": exc.__class__.__name__,
+                "path": rel,
+                "tracked_blob": tracked_blobs.get(rel, ""),
+            }
+        path_hasher.update(_json_cache_bytes(entry))
+        path_hasher.update(b"\n")
+
+    return {
+        "cache_kind": NO_RUNTIME_ARTIFACT_SCAN_CACHE_KIND,
+        "options": _no_runtime_options_cache_payload(options),
+        "path_count": len(paths),
+        "paths_digest": path_hasher.hexdigest(),
+        "repo_root": str(root),
+        "schema_version": NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION,
+        "source_digest": _no_runtime_scanner_source_digest(),
+    }
+
+
+def _load_no_runtime_scan_cache(
+    cache_path: pathlib.Path,
+    fingerprint: dict[str, object],
+) -> list[str] | None:
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema_version") != NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION:
+        return None
+    if payload.get("cache_kind") != NO_RUNTIME_ARTIFACT_SCAN_CACHE_KIND:
+        return None
+    if payload.get("fingerprint") != fingerprint:
+        return None
+    violations = payload.get("violations")
+    if not isinstance(violations, list) or not all(
+        isinstance(item, str) for item in violations
+    ):
+        return None
+    return list(violations)
+
+
+def _write_no_runtime_scan_cache(
+    cache_path: pathlib.Path,
+    fingerprint: dict[str, object],
+    violations: Sequence[str],
+) -> None:
+    payload = {
+        "cache_kind": NO_RUNTIME_ARTIFACT_SCAN_CACHE_KIND,
+        "created_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "fingerprint": fingerprint,
+        "schema_version": NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION,
+        "violations": list(violations),
+    }
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = cache_path.with_name(f"{cache_path.name}.{os.getpid()}.tmp")
+        temp_path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        os.replace(temp_path, cache_path)
+    except OSError:
+        return
+
+
+def scan_no_runtime_artifacts_with_run_cache(
+    root: pathlib.Path,
+    options,
+) -> list[str]:
+    scanner = _no_runtime_scanner_module()
+    resolved_root = root.resolve()
+    cache_path = _no_runtime_scan_cache_path(resolved_root)
+    if cache_path is None:
+        return scanner.scan_repository(resolved_root, options)
+
+    _validate_no_runtime_scan_cache_path(resolved_root, cache_path)
+    fingerprint = _no_runtime_scan_fingerprint(resolved_root, options)
+    cached_violations = _load_no_runtime_scan_cache(cache_path, fingerprint)
+    if cached_violations is not None:
+        return cached_violations
+
+    violations = scanner.scan_repository(resolved_root, options)
+    _write_no_runtime_scan_cache(cache_path, fingerprint, violations)
+    return violations
+
+
+def _is_no_runtime_scan_command(command: Sequence[str]) -> bool:
+    return any(
+        pathlib.PurePath(str(part)).name == "validate_no_runtime_artifacts.py"
+        for part in command
+    )
+
+
+def _no_runtime_options_from_command(command: Sequence[str]):
+    scanner = _no_runtime_scanner_module()
+    flags = {str(part) for part in command}
+    return scanner.ScanOptions(
+        forbid_source_retrieval="--forbid-source-retrieval" in flags,
+        forbid_source_acceptance="--forbid-source-acceptance" in flags,
+        forbid_connector_binding="--forbid-connector-binding" in flags,
+        forbid_private_state_fetch="--forbid-private-state-fetch" in flags,
+        forbid_order_execution="--forbid-order-execution" in flags,
+        forbid_neural_training="--forbid-neural-training" in flags,
+        forbid_neural_inference="--forbid-neural-inference" in flags,
+        forbid_external_repo_clone="--forbid-external-repo-clone" in flags,
+        forbid_package_install_scripts="--forbid-package-install-scripts" in flags,
+    )
+
+
+def _no_runtime_root_from_command(
+    command: Sequence[str],
+    fallback_root: pathlib.Path | None,
+) -> pathlib.Path:
+    root = pathlib.Path(".")
+    command_parts = [str(part) for part in command]
+    if "--repo-root" in command_parts:
+        index = command_parts.index("--repo-root")
+        if index + 1 < len(command_parts):
+            root = pathlib.Path(command_parts[index + 1])
+    if not root.is_absolute():
+        root = (fallback_root or pathlib.Path.cwd()) / root
+    return root.resolve()
+
+
+def _record_no_runtime_scan_success(
+    command: Sequence[str],
+    repo_root: pathlib.Path | None,
+) -> None:
+    if not os.environ.get(NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV):
+        return
+    if not _is_no_runtime_scan_command(command):
+        return
+    root = _no_runtime_root_from_command(command, repo_root)
+    cache_path = _no_runtime_scan_cache_path(root)
+    if cache_path is None:
+        return
+    _validate_no_runtime_scan_cache_path(root, cache_path)
+    options = _no_runtime_options_from_command(command)
+    fingerprint = _no_runtime_scan_fingerprint(root, options)
+    _write_no_runtime_scan_cache(cache_path, fingerprint, [])
+
+
+def _validate_run_local_cache_path(
+    root: pathlib.Path,
+    cache_path: pathlib.Path,
+    env_name: str,
+) -> None:
+    if not _path_is_relative_to(cache_path, root):
+        return
+    rel = cache_path.relative_to(root)
+    if rel.parts and rel.parts[0] == ".tmp":
+        return
+    raise RuntimeError(
+        f"{env_name} must point outside the repo or under .tmp: {rel.as_posix()}"
+    )
+
+
+def _pr152_build_report_cache_path(root: pathlib.Path) -> pathlib.Path | None:
+    cache_text = os.environ.get(PR152_BUILD_REPORT_CACHE_ENV)
+    if not cache_text:
+        return None
+    cache_path = pathlib.Path(cache_text)
+    if not cache_path.is_absolute():
+        cache_path = root / cache_path
+    return cache_path.resolve()
+
+
+def _pr152_report_source_digest() -> str:
+    from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (  # noqa: E501
+        constants,
+        report,
+    )
+
+    hasher = hashlib.sha256()
+    for path in (
+        pathlib.Path(report.__file__),
+        pathlib.Path(constants.__file__),
+        pathlib.Path(__file__),
+    ):
+        hasher.update(path.name.encode("utf-8"))
+        hasher.update(b"\0")
+        hasher.update(path.read_bytes())
+        hasher.update(b"\0")
+    return hasher.hexdigest()
+
+
+def _git_stdout_or_empty(
+    repo_root: pathlib.Path,
+    args: Sequence[str],
+) -> tuple[int, str]:
+    returncode, stdout, _stderr = _git_stdout(repo_root, args)
+    return returncode, stdout if returncode == 0 else ""
+
+
+def _status_paths_from_porcelain(status_stdout: str) -> tuple[tuple[str, str], ...]:
+    records = [record for record in status_stdout.split("\0") if record]
+    parsed: list[tuple[str, str]] = []
+    index = 0
+    while index < len(records):
+        record = records[index]
+        code = record[:2]
+        path = record[3:] if len(record) > 3 and record[2] == " " else record[2:].strip()
+        if path:
+            parsed.append((code, path.replace("\\", "/")))
+        index += 2 if code[:1] in {"R", "C"} or code[1:] in {"R", "C"} else 1
+    return tuple(sorted(parsed, key=lambda item: (item[1].casefold(), item[1], item[0])))
+
+
+def _dirty_path_fingerprints(
+    root: pathlib.Path,
+    status_stdout: str,
+) -> tuple[dict[str, object], ...]:
+    fingerprints: list[dict[str, object]] = []
+    for code, rel_path in _status_paths_from_porcelain(status_stdout):
+        path = root / rel_path
+        entry: dict[str, object] = {"code": code, "path": rel_path}
+        try:
+            stat = path.stat()
+        except OSError as exc:
+            entry["error"] = exc.__class__.__name__
+            fingerprints.append(entry)
+            continue
+        entry["mtime_ns"] = stat.st_mtime_ns
+        entry["size"] = stat.st_size
+        if path.is_file() and not code.startswith("??"):
+            try:
+                entry["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            except OSError as exc:
+                entry["error"] = exc.__class__.__name__
+        fingerprints.append(entry)
+    return tuple(fingerprints)
+
+
+def _path_traversal_cache_fingerprint(root: pathlib.Path) -> dict[str, object]:
+    hasher = hashlib.sha256()
+    count = 0
+    if root.exists():
+        for path in sorted(
+            root.rglob("*"),
+            key=lambda item: str(item.relative_to(root)).replace("\\", "/").casefold(),
+        ):
+            rel_path = str(path.relative_to(root)).replace("\\", "/")
+            if rel_path == ".tmp" or rel_path.startswith(".tmp/"):
+                continue
+            try:
+                stat = path.stat()
+            except OSError as exc:
+                entry = {"error": exc.__class__.__name__, "path": rel_path}
+            else:
+                entry = {
+                    "is_file": path.is_file(),
+                    "mtime_ns": stat.st_mtime_ns,
+                    "path": rel_path,
+                    "size": stat.st_size,
+                }
+            hasher.update(_json_cache_bytes(entry))
+            hasher.update(b"\n")
+            count += 1
+    return {"path_count": count, "paths_digest": hasher.hexdigest()}
+
+
+def _pr152_build_report_fingerprint(root: pathlib.Path) -> dict[str, object]:
+    ls_returncode, ls_stdout = _git_stdout_or_empty(root, ["ls-files", "-s", "-z"])
+    status_returncode, status_stdout = _git_stdout_or_empty(
+        root,
+        ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
+    )
+    branch_returncode, branch_stdout = _git_stdout_or_empty(
+        root,
+        ["branch", "--show-current"],
+    )
+    if ls_returncode != 0:
+        fallback = _path_traversal_cache_fingerprint(root)
+    else:
+        fallback = {"path_count": None, "paths_digest": ""}
+    return {
+        "branch": branch_stdout.strip() if branch_returncode == 0 else "",
+        "cache_kind": PR152_BUILD_REPORT_CACHE_KIND,
+        "dirty_paths": list(_dirty_path_fingerprints(root, status_stdout)),
+        "fallback": fallback,
+        "git_ls_files_s_z": ls_stdout,
+        "git_status_porcelain_z": status_stdout,
+        "repo_root": str(root),
+        "schema_version": PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION,
+        "source_digest": _pr152_report_source_digest(),
+    }
+
+
+def _load_pr152_build_report_cache(
+    cache_path: pathlib.Path,
+    fingerprint: dict[str, object],
+) -> dict[str, object] | None:
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema_version") != PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION:
+        return None
+    if payload.get("cache_kind") != PR152_BUILD_REPORT_CACHE_KIND:
+        return None
+    if payload.get("fingerprint") != fingerprint:
+        return None
+    report = payload.get("report")
+    if not isinstance(report, dict):
+        return None
+    return deepcopy(report)
+
+
+def _write_pr152_build_report_cache(
+    cache_path: pathlib.Path,
+    fingerprint: dict[str, object],
+    report: dict[str, object],
+) -> None:
+    payload = {
+        "cache_kind": PR152_BUILD_REPORT_CACHE_KIND,
+        "created_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "fingerprint": fingerprint,
+        "report": report,
+        "schema_version": PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION,
+    }
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = cache_path.with_name(f"{cache_path.name}.{os.getpid()}.tmp")
+        temp_path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        os.replace(temp_path, cache_path)
+    except OSError:
+        return
+
+
+def build_pr152_report_with_run_cache(
+    repo_root: pathlib.Path | str,
+    builder,
+) -> dict[str, object]:
+    root = pathlib.Path(repo_root).resolve()
+    cache_path = _pr152_build_report_cache_path(root)
+    if cache_path is None:
+        return builder(root)
+    _validate_run_local_cache_path(root, cache_path, PR152_BUILD_REPORT_CACHE_ENV)
+    fingerprint = _pr152_build_report_fingerprint(root)
+    fingerprint_key = hashlib.sha256(_json_cache_bytes(fingerprint)).hexdigest()
+    memory_key = (str(cache_path), fingerprint_key)
+
+    if memory_key in _PR152_BUILD_REPORT_MEMORY_CACHE:
+        return deepcopy(_PR152_BUILD_REPORT_MEMORY_CACHE[memory_key])
+    cached_report = _load_pr152_build_report_cache(cache_path, fingerprint)
+    if cached_report is not None:
+        _PR152_BUILD_REPORT_MEMORY_CACHE[memory_key] = deepcopy(cached_report)
+        return deepcopy(cached_report)
+
+    report = builder(root)
+    if not isinstance(report, dict):
+        raise RuntimeError("PR152 build_report cache builder returned a non-dict payload")
+    _write_pr152_build_report_cache(cache_path, fingerprint, report)
+    _PR152_BUILD_REPORT_MEMORY_CACHE[memory_key] = deepcopy(report)
+    return deepcopy(report)
 
 
 def _tracked_modified_paths(repo_root: pathlib.Path) -> set[str]:
@@ -3246,6 +3820,11 @@ def run_commands(
                 except RuntimeError as exc:
                     print(str(exc), file=sys.stderr, flush=True)
             return finish(completed.returncode)
+        try:
+            _record_no_runtime_scan_success(command_list, cleanup_repo_root)
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr, flush=True)
+            return finish(1)
         if cleanup_repo_root is not None and _is_final_pytest_command(command_list):
             try:
                 restore_gate_side_effects()
@@ -3409,8 +3988,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     global _RUN_COMMANDS_CLEANUP_REPO_ROOT
     previous_cleanup_repo_root = _RUN_COMMANDS_CLEANUP_REPO_ROOT
     _RUN_COMMANDS_CLEANUP_REPO_ROOT = repo_root
+    previous_scan_cache_env = os.environ.get(NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV)
+    installed_scan_cache_env = False
+    previous_pr152_cache_env = os.environ.get(PR152_BUILD_REPORT_CACHE_ENV)
+    installed_pr152_cache_env = False
     try:
         with tempfile.TemporaryDirectory(prefix="qtt_validation_gates_") as temp_dir:
+            if previous_scan_cache_env is None:
+                os.environ[NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV] = str(
+                    pathlib.Path(temp_dir) / "NoRuntimeArtifactScanCache.json"
+                )
+                installed_scan_cache_env = True
+            if previous_pr152_cache_env is None:
+                os.environ[PR152_BUILD_REPORT_CACHE_ENV] = str(
+                    pathlib.Path(temp_dir) / "PR152BuildReportCache.json"
+                )
+                installed_pr152_cache_env = True
             with tempfile.TemporaryDirectory(
                 prefix="run_validation_gates_pytest_",
                 dir=tmp_parent,
@@ -3473,6 +4066,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                     )
                 return run_commands(commands)
     finally:
+        if installed_scan_cache_env:
+            os.environ.pop(NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, None)
+        if installed_pr152_cache_env:
+            os.environ.pop(PR152_BUILD_REPORT_CACHE_ENV, None)
         _RUN_COMMANDS_CLEANUP_REPO_ROOT = previous_cleanup_repo_root
 
 

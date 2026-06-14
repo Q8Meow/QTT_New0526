@@ -6,6 +6,7 @@ from tools.master_plan_traceability_check import (
     MIN_MASTER_PLAN_LINES,
     SOURCE_EVIDENCE_PACKET_MARKERS,
 )
+from tools.run_validation_gates import scan_no_runtime_artifacts_with_run_cache
 from tools.validate_no_runtime_artifacts import ScanOptions, scan_repository
 
 
@@ -32,7 +33,7 @@ def test_source_packet_markers_present():
 
 
 def test_static_no_runtime_artifact_scanner_accepts_current_repo_surface():
-    violations = scan_repository(
+    violations = scan_no_runtime_artifacts_with_run_cache(
         Path('.'),
         ScanOptions(
             forbid_source_retrieval=True,

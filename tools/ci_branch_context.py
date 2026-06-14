@@ -1355,7 +1355,9 @@ PR166_SM2_ALLOWED_CHANGED_PATHS = frozenset(
         "pr166_s2_replay_paper_retest_loop_v2/io.py",
         "src/qtt/stage1_prediction_markets/"
         "pr166_sf_repair_materialization_before_retest/io.py",
+        "tests/fail_closed/test_fail_closed_guards.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
