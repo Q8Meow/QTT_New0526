@@ -145,7 +145,23 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             paths=(
                 "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
                 "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
+            ),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5a "
+                "split from the longest shard-2 runtime group"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
                 "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",
+            ),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b "
+                "isolates PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
                 "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
                 "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
                 "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
@@ -155,7 +171,10 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/source_intelligence",
                 "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
             ),
-            reason="Stage 1 prediction-market tests, subprocess group 5",
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5c "
+                "split from the longest shard-2 runtime group"
+            ),
         ),
     ),
     "pytest-shard-3": (

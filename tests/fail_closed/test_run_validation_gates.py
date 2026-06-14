@@ -2372,6 +2372,81 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     )
 
 
+def test_runner_splits_pytest_shard_2_longest_group_deterministically():
+    commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
+
+    assert [command.paths for command in commands] == [
+        (
+            "tests/stage1_prediction_markets/agent_consumable_parameter_default_registry",
+            "tests/stage1_prediction_markets/agent_default_binding_universal_intake_gate",
+            "tests/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing",
+            "tests/stage1_prediction_markets/atomicrows_bundle_reconciliation",
+            "tests/stage1_prediction_markets/atomicrows_pr154_value_state",
+            "tests/stage1_prediction_markets/latency_hot_path_snapshot_boundary",
+        ),
+        (
+            "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
+            "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
+            "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
+            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
+            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
+            "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
+            "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
+        ),
+        (
+            "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure",
+            "tests/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion",
+            "tests/stage1_prediction_markets/pr162d_r2a_real_formulations",
+            "tests/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit",
+            "tests/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion",
+            "tests/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun",
+            "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor",
+            "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
+        ),
+        (
+            "tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework",
+            "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit",
+            "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
+            "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration",
+            "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection",
+            "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2",
+            "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
+            "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
+            "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
+        ),
+        (
+            "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
+            "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
+        ),
+        ("tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",),
+        (
+            "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
+            "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
+            "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
+            "tests/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation",
+            "tests/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning",
+            "tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate",
+            "tests/stage1_prediction_markets/source_intelligence",
+            "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
+        ),
+    ]
+    assert all(command.reason for command in commands)
+    assert ("tests/stage1_prediction_markets",) not in [
+        command.paths for command in commands
+    ]
+
+    expanded_paths = [
+        path
+        for command in commands
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(expanded_paths) == len(set(expanded_paths))
+    assert set(expanded_paths) == set(
+        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"]
+    )
+
+
 def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"]
 
