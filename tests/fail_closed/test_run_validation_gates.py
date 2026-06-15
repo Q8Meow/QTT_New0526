@@ -2416,6 +2416,34 @@ def _pr166_sf_r2_group_paths() -> list[tuple[str, ...]]:
     ]
 
 
+def _pr166_sf_r2_idempotence_path() -> str:
+    return (
+        f"{runner.PR166_SF_R2_TEST_ROOT}/"
+        f"{runner.PR166_SF_R2_IDEMPOTENCE_TEST_FILE}"
+    )
+
+
+def _pr166_sf_r2_shard_2_group_paths() -> list[tuple[str, ...]]:
+    idempotence_group = (_pr166_sf_r2_idempotence_path(),)
+    return [
+        group_paths
+        for group_paths in _pr166_sf_r2_group_paths()
+        if group_paths != idempotence_group
+    ]
+
+
+def _pr166_sf_r2_split_command_placements():
+    return [
+        (phase, command.paths)
+        for phase in runner.PYTEST_SHARD_PHASES
+        for command in runner.PYTEST_SHARD_COMMANDS[phase]
+        if any(
+            path.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
+            for path in command.paths
+        )
+    ]
+
+
 def test_runner_splits_pytest_shard_2_longest_group_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
 
@@ -2442,7 +2470,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
             "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
         ),
-        *_pr166_sf_r2_group_paths(),
+        *_pr166_sf_r2_shard_2_group_paths(),
         *_pr166_sm2_group_paths(),
         (
             "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
@@ -2512,27 +2540,65 @@ def test_runner_pr166_sf_r2_split_groups_cover_each_test_file_once():
         for group in _pr166_sf_r2_group_paths()
         for path in group
     ]
+    expanded_by_phase = {
+        phase: [
+            path
+            for command in runner.PYTEST_SHARD_COMMANDS[phase]
+            if any(
+                command_path.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
+                for command_path in command.paths
+            )
+            for path in runner._pytest_files_for_command(command, REPO_ROOT)
+        ]
+        for phase in runner.PYTEST_SHARD_PHASES
+    }
     expanded = [
         path
-        for command in runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
-        if any(
-            path.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
-            for path in command.paths
-        )
-        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+        for phase_paths in expanded_by_phase.values()
+        for path in phase_paths
+    ]
+    idempotence_path = _pr166_sf_r2_idempotence_path()
+    manifest_hits = [
+        (phase, path)
+        for phase, phase_paths in runner.pytest_shard_manifest(REPO_ROOT).items()
+        for path in phase_paths
+        if path == idempotence_path
     ]
 
-    assert len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS) == 6
+    assert len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS) == 8
     assert all(
         0 < len(group) <= 14 for group in runner.PR166_SF_R2_PYTEST_FILE_GROUPS
     )
     assert grouped == sorted(grouped)
     assert len(grouped) == len(set(grouped))
     assert set(grouped) == expected
-    assert expanded == grouped
-    assert set(expanded).issubset(
-        set(runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"])
+    assert len(expanded) == len(set(expanded))
+    assert sorted(expanded) == grouped
+    assert expanded.count(idempotence_path) == 1
+    assert idempotence_path not in expanded_by_phase["pytest-shard-2"]
+    assert expanded_by_phase["pytest-shard-4"] == [idempotence_path]
+    assert manifest_hits == [("pytest-shard-4", idempotence_path)]
+
+
+def test_runner_pr166_sf_r2_idempotence_is_own_early_shard4_subgroup():
+    idempotence_path = _pr166_sf_r2_idempotence_path()
+    placements = [
+        (phase, paths)
+        for phase, paths in _pr166_sf_r2_split_command_placements()
+        if idempotence_path in paths
+    ]
+    manifest_hits = [
+        (phase, path)
+        for phase, phase_paths in runner.pytest_shard_manifest(REPO_ROOT).items()
+        for path in phase_paths
+        if path == idempotence_path
+    ]
+
+    assert placements == [("pytest-shard-4", (idempotence_path,))]
+    assert runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"][0].paths == (
+        idempotence_path,
     )
+    assert manifest_hits == [("pytest-shard-4", idempotence_path)]
 
 
 @pytest.mark.parametrize(
@@ -2587,16 +2653,23 @@ def test_runner_fails_closed_if_any_pr166_sf_r2_subgroup_fails(
         def __init__(self, returncode: int) -> None:
             self.returncode = returncode
 
+    expected_paths = _pr166_sf_r2_group_paths()[pr166_sf_r2_subgroup_index]
+    placements = [
+        (phase, paths)
+        for phase, paths in _pr166_sf_r2_split_command_placements()
+        if paths == expected_paths
+    ]
+    assert len(placements) == 1
+    phase, failing_paths = placements[0]
     commands = runner.build_pytest_shard_commands(
-        "pytest-shard-2",
+        phase,
         Path(".tmp") / "pytest-basetemp",
     )
-    pr166_commands = [
+    failing_command = next(
         command
         for command in commands
-        if any(part.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/") for part in command)
-    ]
-    failing_command = pr166_commands[pr166_sf_r2_subgroup_index]
+        if tuple(command[2 : 2 + len(failing_paths)]) == failing_paths
+    )
     failing_index = commands.index(failing_command)
     seen: list[list[str]] = []
 
@@ -2606,7 +2679,7 @@ def test_runner_fails_closed_if_any_pr166_sf_r2_subgroup_fails(
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
 
-    exit_code = runner.run_commands(commands, phase="pytest-shard-2")
+    exit_code = runner.run_commands(commands, phase=phase)
 
     assert exit_code == 83
     assert seen == commands[: failing_index + 1]
@@ -2682,6 +2755,7 @@ def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"]
 
     assert [command.paths for command in commands] == [
+        (_pr166_sf_r2_idempotence_path(),),
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
             "tests/agent_algorithm",
@@ -2733,7 +2807,7 @@ def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[3], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[4], REPO_ROOT)
     )
 
 

@@ -138,17 +138,16 @@ def test_pr166_sf_r2_split_pytest_groups_preserve_directory_routing():
         f"{runner.PR166_SF_R2_TEST_ROOT}/test_pr166_sf_r2_validator.py"
     )
     expected_ids = {
-        inventory.validator_id_for_command(command, "pytest-shard-2")
+        inventory.validator_id_for_command(command, phase)
+        for phase in ("pytest-shard-2", "pytest-shard-4")
         for command in runner.build_pytest_shard_commands(
-            "pytest-shard-2",
+            phase,
             Path(".tmp") / "pytest",
         )
-        if any(
-            part.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
-            for part in command
-        )
+        if any(part.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/") for part in command)
     }
 
     assert len(expected_ids) == len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
+    assert "pytest_shard_4" in result.required_jobs
     assert result.fail_closed_reasons == ()

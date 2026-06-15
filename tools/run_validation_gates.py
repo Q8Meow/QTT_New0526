@@ -178,6 +178,7 @@ PR166_SM2_PYTEST_FILE_GROUPS = (
         "test_pr166_sm2_validator.py",
     ),
 )
+PR166_SF_R2_IDEMPOTENCE_TEST_FILE = "test_pr166_sf_r2_idempotence.py"
 PR166_SF_R2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sf_r2_agent_duty.py",
@@ -216,7 +217,11 @@ PR166_SF_R2_PYTEST_FILE_GROUPS = (
         "test_pr166_sf_r2_formula_qku_repair.py",
         "test_pr166_sf_r2_handoff_intake.py",
         "test_pr166_sf_r2_holdout_replay.py",
-        "test_pr166_sf_r2_idempotence.py",
+    ),
+    (
+        PR166_SF_R2_IDEMPOTENCE_TEST_FILE,
+    ),
+    (
         "test_pr166_sf_r2_impl_shortfall.py",
         "test_pr166_sf_r2_input_consumption.py",
         "test_pr166_sf_r2_launch_candidate_filter.py",
@@ -341,23 +346,30 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             ),
         ),
         PytestShardCommand(
-            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[3]),
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[4]),
             reason=(
                 "Stage 1 prediction-market tests, subprocess group 5b4 "
                 "split PR166-SF-R2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
-            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[4]),
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[5]),
             reason=(
                 "Stage 1 prediction-market tests, subprocess group 5b5 "
                 "split PR166-SF-R2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
-            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[5]),
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[6]),
             reason=(
                 "Stage 1 prediction-market tests, subprocess group 5b6 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[7]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b7 "
                 "split PR166-SF-R2 timing without changing coverage"
             ),
         ),
@@ -477,6 +489,13 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
     ),
     "pytest-shard-4": (
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[3]),
+            reason=(
+                "PR166-SF-R2 idempotence isolated as an early shard-4 subgroup "
+                "for timeout-inconclusive runtime containment without changing coverage"
+            ),
+        ),
         PytestShardCommand(
             paths=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
             reason="Preserves the existing isolated source-evidence pytest invocation",
