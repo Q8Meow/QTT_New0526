@@ -180,6 +180,15 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
+                "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3",
+            ),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5e "
+                "isolates PR165-D3 quantum-aware scenario selection timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
                 "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
                 "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
                 "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
@@ -190,7 +199,7 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
             ),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5e "
+                "Stage 1 prediction-market tests, subprocess group 5f "
                 "split from the longest shard-2 runtime group"
             ),
         ),
@@ -2025,6 +2034,15 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr165_d3_quantum_aware_scenario_selection_v3.py",
             ),
             "--repo-root",
             ".",

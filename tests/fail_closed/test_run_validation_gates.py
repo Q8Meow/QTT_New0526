@@ -769,6 +769,15 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(
+                Path("tools")
+                / "validate_pr165_d3_quantum_aware_scenario_selection_v3.py"
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(Path("tools") / "validate_qtt_agent_role_operating_charter_registry.py"),
             "--mode",
             "dev",
@@ -2439,6 +2448,10 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
         ),
         ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
         (
+            "tests/stage1_prediction_markets/"
+            "pr165_d3_quantum_aware_scenario_selection_v3",
+        ),
+        (
             "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
             "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
             "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
@@ -2766,6 +2779,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
+    pr165_d3_index = command_names.index(
+        "validate_pr165_d3_quantum_aware_scenario_selection_v3.py"
+    )
     next_gate_index = command_names.index(
         "validate_qtt_agent_role_operating_charter_registry.py"
     )
@@ -2977,6 +2993,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         == 1
     )
     assert (
+        command_names.count(
+            "validate_pr165_d3_quantum_aware_scenario_selection_v3.py"
+        )
+        == 1
+    )
+    assert (
         pr154_index
         < pr155_index
         < pr156_index
@@ -3017,6 +3039,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr166_sf_r2_index
         < pr166_sm3_index
         < pr165_d2_index
+        < pr165_d3_index
         < next_gate_index
     )
     assert commands[pr155_index] == [

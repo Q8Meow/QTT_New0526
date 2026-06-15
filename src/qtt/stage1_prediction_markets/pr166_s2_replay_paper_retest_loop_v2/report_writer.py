@@ -166,6 +166,8 @@ def load_sources(repo_root: Path) -> SourceData:
         payloads[path.name] = payload
         records[path.name] = records_from_report_payload(repo_root, payload)
     for path in sorted((repo_root / c.GENERATED_DIR).glob("PR165_*.report.json")):
+        if path.name.startswith("PR165_D3_"):
+            continue
         if path.name in payloads:
             continue
         payload = read_json(path)

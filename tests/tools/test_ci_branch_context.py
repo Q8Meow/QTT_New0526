@@ -3530,3 +3530,53 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
         branch_context.branch,
         "PR160",
     )
+
+
+def test_pr165_d3_quantum_selection_branch_context_allowance_is_narrow():
+    branch = context.PR165_D3_BRANCH
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_D3_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr165_d3_shards/"
+        "PR165_D3_SelectedCombos.shard_0001.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/report_writer.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3/io.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_SM3_FinalSummary.report.json",
+    )

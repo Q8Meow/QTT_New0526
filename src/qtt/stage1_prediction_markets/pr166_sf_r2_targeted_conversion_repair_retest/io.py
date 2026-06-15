@@ -47,10 +47,14 @@ def records_from_report_payload(repo_root: Path, payload: dict[str, Any]) -> lis
 
 def ensure_branch(repo_root: Path) -> None:
     branch = _current_branch(repo_root)
-    if branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH, "pr166-sm3-score-memory-refresh-v3"}:
+    downstream_validation_branches = {
+        "pr166-sm3-score-memory-refresh-v3",
+        "pr165-d3-quantum-aware-scenario-selection-v3",
+    }
+    if branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH, *downstream_validation_branches}:
         return
     ci_branch = _ci_branch_context(repo_root)
-    if ci_branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH, "pr166-sm3-score-memory-refresh-v3", ""}:
+    if ci_branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH, *downstream_validation_branches, ""}:
         return
     raise RuntimeError(
         f"{c.PR_ID} builder must run on {c.EXPECTED_BRANCH} or {c.BASE_BRANCH}; "

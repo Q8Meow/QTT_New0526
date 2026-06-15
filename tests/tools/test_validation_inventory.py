@@ -47,6 +47,16 @@ def test_inventory_has_pr208_validation_infrastructure_entries():
         assert entry.cross_platform_sensitive is True
 
 
+def test_inventory_has_pr165_d3_quantum_selection_entry():
+    entry = inventory.inventory_by_id()[
+        "validate_pr165_d3_quantum_aware_scenario_selection_v3"
+    ]
+    assert "docs/master_plan/generated/PR165_D3_*.report.json" in entry.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr165_d3*/schemas/**" in entry.schema_globs
+    assert "tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py" in entry.tool_globs
+    assert "tests/stage1_prediction_markets/pr165_d3*/**" in entry.required_when_files_match
+
+
 def test_inventory_path_globs_are_posix():
     for entry in inventory.validation_inventory():
         for field_name in (
