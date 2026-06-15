@@ -131,3 +131,24 @@ def test_pr166_sm2_split_pytest_groups_preserve_directory_routing():
     assert len(expected_ids) == len(runner.PR166_SM2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
     assert result.fail_closed_reasons == ()
+
+
+def test_pr166_sf_r2_split_pytest_groups_preserve_directory_routing():
+    result = _pull_request_result(
+        f"{runner.PR166_SF_R2_TEST_ROOT}/test_pr166_sf_r2_validator.py"
+    )
+    expected_ids = {
+        inventory.validator_id_for_command(command, "pytest-shard-2")
+        for command in runner.build_pytest_shard_commands(
+            "pytest-shard-2",
+            Path(".tmp") / "pytest",
+        )
+        if any(
+            part.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
+            for part in command
+        )
+    }
+
+    assert len(expected_ids) == len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS)
+    assert expected_ids.issubset(set(result.required_validators))
+    assert result.fail_closed_reasons == ()

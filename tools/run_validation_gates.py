@@ -86,6 +86,9 @@ class TimingEntry:
 PR166_SM2_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2"
 )
+PR166_SF_R2_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest"
+)
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sm2_ablation.py",
@@ -175,10 +178,103 @@ PR166_SM2_PYTEST_FILE_GROUPS = (
         "test_pr166_sm2_validator.py",
     ),
 )
+PR166_SF_R2_PYTEST_FILE_GROUPS = (
+    (
+        "test_pr166_sf_r2_agent_duty.py",
+        "test_pr166_sf_r2_agent_kpi.py",
+        "test_pr166_sf_r2_agent_task_queue.py",
+        "test_pr166_sf_r2_all_negative_intake.py",
+        "test_pr166_sf_r2_alt_exec_repair.py",
+        "test_pr166_sf_r2_authority_boundaries.py",
+        "test_pr166_sf_r2_before_after.py",
+        "test_pr166_sf_r2_break_even_gap.py",
+        "test_pr166_sf_r2_build_outputs.py",
+        "test_pr166_sf_r2_calib_uplift_proof.py",
+        "test_pr166_sf_r2_calibration.py",
+        "test_pr166_sf_r2_calibration_repair.py",
+        "test_pr166_sf_r2_capacity_crowding.py",
+    ),
+    (
+        "test_pr166_sf_r2_champion_challenger.py",
+        "test_pr166_sf_r2_compact_names.py",
+        "test_pr166_sf_r2_computable_payload.py",
+        "test_pr166_sf_r2_connectivity.py",
+        "test_pr166_sf_r2_connector_routing.py",
+        "test_pr166_sf_r2_conversion_attribution.py",
+        "test_pr166_sf_r2_conversion_frontier.py",
+        "test_pr166_sf_r2_conversion_proof.py",
+        "test_pr166_sf_r2_cost_floor.py",
+        "test_pr166_sf_r2_cost_repair.py",
+        "test_pr166_sf_r2_downstream_handoffs.py",
+        "test_pr166_sf_r2_episode_plan.py",
+    ),
+    (
+        "test_pr166_sf_r2_external_signals.py",
+        "test_pr166_sf_r2_fill_probability_model.py",
+        "test_pr166_sf_r2_fill_repair.py",
+        "test_pr166_sf_r2_fills_no_fills.py",
+        "test_pr166_sf_r2_formula_qku_repair.py",
+        "test_pr166_sf_r2_handoff_intake.py",
+        "test_pr166_sf_r2_holdout_replay.py",
+        "test_pr166_sf_r2_idempotence.py",
+        "test_pr166_sf_r2_impl_shortfall.py",
+        "test_pr166_sf_r2_input_consumption.py",
+        "test_pr166_sf_r2_launch_candidate_filter.py",
+        "test_pr166_sf_r2_lcb_confidence.py",
+    ),
+    (
+        "test_pr166_sf_r2_marginal_utility.py",
+        "test_pr166_sf_r2_microstructure.py",
+        "test_pr166_sf_r2_net_edge.py",
+        "test_pr166_sf_r2_no_bad_status_tokens.py",
+        "test_pr166_sf_r2_no_orphans.py",
+        "test_pr166_sf_r2_no_profit_evidence.py",
+        "test_pr166_sf_r2_order_intents.py",
+        "test_pr166_sf_r2_overfit_fdr.py",
+        "test_pr166_sf_r2_parameter_bound_audit.py",
+        "test_pr166_sf_r2_parameter_repair.py",
+        "test_pr166_sf_r2_positive_capacity.py",
+        "test_pr166_sf_r2_positive_conversion.py",
+    ),
+    (
+        "test_pr166_sf_r2_pr152_pr208_routing_contract.py",
+        "test_pr166_sf_r2_quantum_handoff.py",
+        "test_pr166_sf_r2_quantum_objective_map.py",
+        "test_pr166_sf_r2_quantum_repair.py",
+        "test_pr166_sf_r2_rank_stability.py",
+        "test_pr166_sf_r2_regime_memory.py",
+        "test_pr166_sf_r2_repair_ablation.py",
+        "test_pr166_sf_r2_repair_failure.py",
+        "test_pr166_sf_r2_repair_feasibility.py",
+        "test_pr166_sf_r2_repair_frontier.py",
+        "test_pr166_sf_r2_repair_portfolio.py",
+        "test_pr166_sf_r2_repair_priority.py",
+    ),
+    (
+        "test_pr166_sf_r2_repair_sensitivity.py",
+        "test_pr166_sf_r2_repair_universe.py",
+        "test_pr166_sf_r2_repaired_packet_registry.py",
+        "test_pr166_sf_r2_retest_policy.py",
+        "test_pr166_sf_r2_retest_universe.py",
+        "test_pr166_sf_r2_route_crosswalk_cmd.py",
+        "test_pr166_sf_r2_row_count_reconciliation.py",
+        "test_pr166_sf_r2_runtime_safety_handoff.py",
+        "test_pr166_sf_r2_shard_input_audit.py",
+        "test_pr166_sf_r2_status_enum_drift.py",
+        "test_pr166_sf_r2_still_negative.py",
+        "test_pr166_sf_r2_tca_cost_roots.py",
+        "test_pr166_sf_r2_terminal_rows.py",
+        "test_pr166_sf_r2_validator.py",
+    ),
+)
 
 
 def _pr166_sm2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:
     return tuple(f"{PR166_SM2_TEST_ROOT}/{file_name}" for file_name in file_names)
+
+
+def _pr166_sf_r2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:
+    return tuple(f"{PR166_SF_R2_TEST_ROOT}/{file_name}" for file_name in file_names)
 
 
 PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
@@ -202,18 +298,6 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
-                "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
-                "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
-                "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
-                "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
-                "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
-                "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
-                "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
-            ),
-            reason="Stage 1 prediction-market tests, subprocess group 2",
-        ),
-        PytestShardCommand(
-            paths=(
                 "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure",
                 "tests/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion",
                 "tests/stage1_prediction_markets/pr162d_r2a_real_formulations",
@@ -227,20 +311,6 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
-                "tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework",
-                "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit",
-                "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
-                "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration",
-                "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection",
-                "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2",
-                "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
-                "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
-                "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
-            ),
-            reason="Stage 1 prediction-market tests, subprocess group 4",
-        ),
-        PytestShardCommand(
-            paths=(
                 "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
                 "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
             ),
@@ -250,72 +320,87 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             ),
         ),
         PytestShardCommand(
-            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[0]),
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[0]),
             reason=(
                 "Stage 1 prediction-market tests, subprocess group 5b1 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[1]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b2 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[2]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b3 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[3]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b4 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[4]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b5 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[5]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b6 "
+                "split PR166-SF-R2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[0]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5c1 "
                 "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
             paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[1]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b2 "
+                "Stage 1 prediction-market tests, subprocess group 5c2 "
                 "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
             paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[2]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b3 "
+                "Stage 1 prediction-market tests, subprocess group 5c3 "
                 "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
             paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[3]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b4 "
+                "Stage 1 prediction-market tests, subprocess group 5c4 "
                 "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
             paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[4]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b5 "
+                "Stage 1 prediction-market tests, subprocess group 5c5 "
                 "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(
             paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[5]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b6 "
+                "Stage 1 prediction-market tests, subprocess group 5c6 "
                 "split PR166-SM2 timing without changing coverage"
-            ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5c "
-                "isolates PR166-SF-R2 repair retest timing without changing coverage"
-            ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5d "
-                "isolates PR166-SM3 score memory refresh timing without changing coverage"
-            ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5e "
-                "isolates PR165-D3 quantum-aware scenario selection timing without changing coverage"
             ),
         ),
         PytestShardCommand(
@@ -330,7 +415,7 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
             ),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5f "
+                "Stage 1 prediction-market tests, subprocess group 5d "
                 "split from the longest shard-2 runtime group"
             ),
         ),
@@ -339,6 +424,56 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         PytestShardCommand(
             paths=("tests/atomicrows",),
             reason="AtomicRows tests",
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
+                "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
+                "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
+                "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
+                "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
+                "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
+                "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
+            ),
+            reason=(
+                "Stage 1 prediction-market legacy source-resolution block "
+                "moved out of shard 2 to rebalance cumulative runtime"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework",
+                "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit",
+                "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
+                "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration",
+                "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection",
+                "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2",
+                "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
+                "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
+                "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
+            ),
+            reason=(
+                "Stage 1 prediction-market legacy retest block moved out of "
+                "shard 2 to rebalance cumulative runtime"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",
+            ),
+            reason=(
+                "Stage 1 prediction-market PR166-SM3 group moved out of "
+                "shard 2 to rebalance cumulative runtime"
+            ),
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3",
+            ),
+            reason=(
+                "Stage 1 prediction-market PR165-D3 group moved out of "
+                "shard 2 to rebalance cumulative runtime without changing logic"
+            ),
         ),
     ),
     "pytest-shard-4": (

@@ -385,13 +385,15 @@ def _test_globs(stem: str, command: Sequence[str], phase: str) -> tuple[str, ...
                 continue
             if part.startswith("tests/"):
                 globs.append(part if part.endswith(".py") else f"{part}/**")
-        pr166_sm2_prefix = f"{runner.PR166_SM2_TEST_ROOT}/"
-        globs = [
-            f"{runner.PR166_SM2_TEST_ROOT}/**"
-            if glob.startswith(pr166_sm2_prefix)
-            else glob
-            for glob in globs
-        ]
+        for split_test_root in (
+            runner.PR166_SM2_TEST_ROOT,
+            runner.PR166_SF_R2_TEST_ROOT,
+        ):
+            split_prefix = f"{split_test_root}/"
+            globs = [
+                f"{split_test_root}/**" if glob.startswith(split_prefix) else glob
+                for glob in globs
+            ]
         return _dedupe_sorted(globs)
     token = _pr_token(stem)
     globs = []

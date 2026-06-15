@@ -2388,7 +2388,7 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     assert (
         "tests/stage1_prediction_markets/pr159r_source_locator_value_capture/"
         "test_pr159r_branch_context_relaxation.py"
-        in shard_manifest["pytest-shard-2"]
+        in shard_manifest["pytest-shard-3"]
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
@@ -2406,6 +2406,16 @@ def _pr166_sm2_group_paths() -> list[tuple[str, ...]]:
     ]
 
 
+def _pr166_sf_r2_group_paths() -> list[tuple[str, ...]]:
+    return [
+        tuple(
+            f"{runner.PR166_SF_R2_TEST_ROOT}/{file_name}"
+            for file_name in group
+        )
+        for group in runner.PR166_SF_R2_PYTEST_FILE_GROUPS
+    ]
+
+
 def test_runner_splits_pytest_shard_2_longest_group_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
 
@@ -2419,15 +2429,6 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/latency_hot_path_snapshot_boundary",
         ),
         (
-            "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
-            "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
-            "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
-            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
-            "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
-            "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
-            "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
-        ),
-        (
             "tests/stage1_prediction_markets/pr160_split_reclassification_route_closure",
             "tests/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion",
             "tests/stage1_prediction_markets/pr162d_r2a_real_formulations",
@@ -2438,29 +2439,11 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
         ),
         (
-            "tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework",
-            "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit",
-            "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
-            "tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration",
-            "tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection",
-            "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2",
-            "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
-            "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
-            "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
-        ),
-        (
             "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
             "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
         ),
+        *_pr166_sf_r2_group_paths(),
         *_pr166_sm2_group_paths(),
-        (
-            "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
-        ),
-        ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
-        (
-            "tests/stage1_prediction_markets/"
-            "pr165_d3_quantum_aware_scenario_selection_v3",
-        ),
         (
             "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
             "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
@@ -2518,6 +2501,40 @@ def test_runner_pr166_sm2_split_groups_cover_each_test_file_once():
     )
 
 
+def test_runner_pr166_sf_r2_split_groups_cover_each_test_file_once():
+    expected = {
+        path
+        for path in runner.discover_pytest_files(REPO_ROOT)
+        if path.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
+    }
+    grouped = [
+        path
+        for group in _pr166_sf_r2_group_paths()
+        for path in group
+    ]
+    expanded = [
+        path
+        for command in runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
+        if any(
+            path.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/")
+            for path in command.paths
+        )
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS) == 6
+    assert all(
+        0 < len(group) <= 14 for group in runner.PR166_SF_R2_PYTEST_FILE_GROUPS
+    )
+    assert grouped == sorted(grouped)
+    assert len(grouped) == len(set(grouped))
+    assert set(grouped) == expected
+    assert expanded == grouped
+    assert set(expanded).issubset(
+        set(runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"])
+    )
+
+
 @pytest.mark.parametrize(
     "pr166_sm2_subgroup_index",
     range(len(runner.PR166_SM2_PYTEST_FILE_GROUPS)),
@@ -2555,6 +2572,110 @@ def test_runner_fails_closed_if_any_pr166_sm2_subgroup_fails(
     assert exit_code == 73
     assert seen == commands[: failing_index + 1]
     assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "pr166_sf_r2_subgroup_index",
+    range(len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS)),
+)
+def test_runner_fails_closed_if_any_pr166_sf_r2_subgroup_fails(
+    pr166_sf_r2_subgroup_index,
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = runner.build_pytest_shard_commands(
+        "pytest-shard-2",
+        Path(".tmp") / "pytest-basetemp",
+    )
+    pr166_commands = [
+        command
+        for command in commands
+        if any(part.startswith(f"{runner.PR166_SF_R2_TEST_ROOT}/") for part in command)
+    ]
+    failing_command = pr166_commands[pr166_sf_r2_subgroup_index]
+    failing_index = commands.index(failing_command)
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(83 if command == failing_command else 0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands, phase="pytest-shard-2")
+
+    assert exit_code == 83
+    assert seen == commands[: failing_index + 1]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
+
+
+def test_runner_rebalances_pytest_shard_3_with_stage1_legacy_group():
+    commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-3"]
+
+    assert [command.paths for command in commands] == [
+        ("tests/atomicrows",),
+        (
+            "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
+            "tests/stage1_prediction_markets/"
+            "multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
+            "tests/stage1_prediction_markets/"
+            "nonlive_replay_paper_data_adapter_quantum_forward_bridge",
+            "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
+            "tests/stage1_prediction_markets/"
+            "pr158_owner_response_selection_readiness_bridge",
+            "tests/stage1_prediction_markets/"
+            "pr159_official_source_completion_bridge",
+            "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
+        ),
+        (
+            "tests/stage1_prediction_markets/"
+            "pr163_generic_paper_adapter_capture_framework",
+            "tests/stage1_prediction_markets/"
+            "pr164_review_provenance_qku_canonical_coverage_audit",
+            "tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory",
+            "tests/stage1_prediction_markets/"
+            "pr165_c_replay_paper_memory_consumer_integration",
+            "tests/stage1_prediction_markets/"
+            "pr165_d_scenario_qku_combination_selection",
+            "tests/stage1_prediction_markets/"
+            "pr165_d2_score_refreshed_scenario_selection_v2",
+            "tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking",
+            "tests/stage1_prediction_markets/"
+            "pr166_s_replay_paper_scenario_retest_execution",
+            "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
+        ),
+        ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
+        (
+            "tests/stage1_prediction_markets/"
+            "pr165_d3_quantum_aware_scenario_selection_v3",
+        ),
+    ]
+    assert all(command.reason for command in commands)
+
+    expanded_paths = [
+        path
+        for command in commands
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(expanded_paths) == len(set(expanded_paths))
+    assert set(expanded_paths) == set(
+        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-3"]
+    )
+    assert (
+        "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/"
+        "test_pr166_s2_exec_readiness.py"
+        in runner._pytest_files_for_command(commands[2], REPO_ROOT)
+    )
+    assert (
+        "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/"
+        "test_pr165_d3_validator.py"
+        in runner._pytest_files_for_command(commands[4], REPO_ROOT)
+    )
 
 
 def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
