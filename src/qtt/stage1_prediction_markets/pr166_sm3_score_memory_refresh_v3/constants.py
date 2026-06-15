@@ -1,0 +1,431 @@
+"""Constants for PR166-SM3 score / memory refresh v3."""
+
+from __future__ import annotations
+
+from pathlib import Path
+import re
+
+PR_ID = "PR166-SM3"
+BASE_BRANCH = "main"
+EXPECTED_BRANCH = "pr166-sm3-score-memory-refresh-v3"
+CREATED_AT_UTC = "2026-06-14T00:00:00Z"
+AUTHORITY_CLASS = "PR166_SM3_REPLAY_PAPER_SCORE_MEMORY_REFRESH_V3_ONLY"
+AUTHORITY_BOUNDARY_REF = (
+    "PR166_SM3_AUTHORITY_BOUNDARY::SCORE_MEMORY_REFRESH_V3_REPLAY_PAPER_ONLY_"
+    "NO_LIVE_SOURCE_TRUTH_CONNECTOR_BINDING_PROFIT_QUANTUM_BACKEND_QTT_SHA_OR_ATOMICROWS_HASH"
+)
+VALIDATION_STATUS = "PASS"
+VALIDATOR_REF = "tools/validate_pr166_sm3_score_memory_refresh_v3.py"
+BUILDER_REF = "tools/build_pr166_sm3_score_memory_refresh_v3.py"
+MANIFEST_REF = "PR166_SM3_ReportManifest.report.json"
+NOT_APPLICABLE_ID = "NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE"
+NOT_TERMINAL_REASON = "ROW_CONTINUES_TO_DECLARED_DOWNSTREAM_ROUTE"
+LINEAGE_NOT_PRESENT = "PRIOR_LINEAGE_ARTIFACT_NOT_PRESENT_WITH_EXACT_PATH"
+DEFAULT_SHARD_ROW_TARGET = 1000
+REVIEW_ROUTE = "DASHBOARD_GOVERNANCE_COMMANDER_REVIEW"
+
+GENERATED_DIR = Path("docs/master_plan/generated")
+SHARD_DIR = GENERATED_DIR / "pr166_sm3_shards"
+PACKAGE_DIR = Path("src/qtt/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3")
+SCHEMA_DIR = PACKAGE_DIR / "schemas"
+TEST_DIR = Path("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3")
+PACKAGE_IMPORT = "src.qtt.stage1_prediction_markets.pr166_sm3_score_memory_refresh_v3"
+
+UPSTREAM_PR_REFS: tuple[str, ...] = (
+    "PR166-SF-R2",
+    "PR166-SM2",
+    "PR166-S2",
+    "PR166-SF",
+    "PR165-D2",
+    "PR166-S",
+    "PR166-SM",
+    "PR165-D",
+    "PR165-C",
+    "PR165-B",
+    "PR165",
+    "PR164",
+)
+
+DOWNSTREAM_PR_REFS: tuple[str, ...] = (
+    "PR165-D3",
+    "PR166-SD",
+    "PR162D-R3",
+    "PR162E",
+    "PR162F",
+    "PR162E-Q",
+    "PR166-Q",
+    "PR166-QB",
+    "PR166-QC",
+    "PR166-SM4",
+    "PR167",
+    "PR167-B",
+    "PR168",
+    "PR169",
+    "PR170",
+    "PR171",
+    "PR172",
+    "PR173",
+    "PR174",
+    "PR175",
+    "PR176",
+    "PR177",
+    "PR178",
+    "PR179",
+    "PR179-EXEC",
+    "PR180",
+    "PR181",
+    "PR-POSTTRADE-FULL",
+    REVIEW_ROUTE,
+    "TERMINAL_BY_NATURE_WITH_REASON",
+)
+
+FUTURE_CONNECTOR_PR_REFS: tuple[str, ...] = (
+    "PR174",
+    "PR175",
+    "PR176",
+    "PR177",
+    "PR178",
+    "PR179",
+    "PR179-EXEC",
+    "PR180",
+    "PR181",
+)
+
+REPORT_FILENAMES: tuple[str, ...] = (
+    "PR166_SM3_InputAudit.report.json",
+    "PR166_SM3_ShardInputAudit.report.json",
+    "PR166_SM3_OptionalInputs.report.json",
+    "PR166_SM3_RowCountLedger.report.json",
+    "PR166_SM3_ScorePolicy.report.json",
+    "PR166_SM3_MemoryPolicy.report.json",
+    "PR166_SM3_ResultIntake.report.json",
+    "PR166_SM3_PosEvidence.report.json",
+    "PR166_SM3_StillNegMemory.report.json",
+    "PR166_SM3_NoFillMemory.report.json",
+    "PR166_SM3_ConvProofMemory.report.json",
+    "PR166_SM3_HoldoutMemory.report.json",
+    "PR166_SM3_ScoreRegistry.report.json",
+    "PR166_SM3_MemoryLedger.report.json",
+    "PR166_SM3_RankDelta.report.json",
+    "PR166_SM3_RankAggregation.report.json",
+    "PR166_SM3_RankStability.report.json",
+    "PR166_SM3_TCAScore.report.json",
+    "PR166_SM3_ExecAdjustedRank.report.json",
+    "PR166_SM3_EdgeLCB.report.json",
+    "PR166_SM3_ConfidenceLedger.report.json",
+    "PR166_SM3_CalibrationMemory.report.json",
+    "PR166_SM3_MicrostructureMemory.report.json",
+    "PR166_SM3_CapacityCrowding.report.json",
+    "PR166_SM3_OverfitFDR.report.json",
+    "PR166_SM3_DiversityLedger.report.json",
+    "PR166_SM3_ChampionRegistry.report.json",
+    "PR166_SM3_ChallengerRegistry.report.json",
+    "PR166_SM3_FragilePositive.report.json",
+    "PR166_SM3_SuppressionLedger.report.json",
+    "PR166_SM3_StillNegRecovery.report.json",
+    "PR166_SM3_PosExpansionQueue.report.json",
+    "PR166_SM3_RegimeMemory.report.json",
+    "PR166_SM3_MarginalUtility.report.json",
+    "PR166_SM3_QKUComboScore.report.json",
+    "PR166_SM3_FormulaAlgoScore.report.json",
+    "PR166_SM3_ParamStackScore.report.json",
+    "PR166_SM3_BestComboRegistry.report.json",
+    "PR166_SM3_QuantumMemory.report.json",
+    "PR166_SM3_QuantumPriority.report.json",
+    "PR166_SM3_QuantumObjectiveReady.report.json",
+    "PR166_SM3_PR165D3Handoff.report.json",
+    "PR166_SM3_PR166QHandoff.report.json",
+    "PR166_SM3_PR166QBHandoff.report.json",
+    "PR166_SM3_PR166QCHandoff.report.json",
+    "PR166_SM3_PR166SM4Handoff.report.json",
+    "PR166_SM3_PR166SDHandoff.report.json",
+    "PR166_SM3_PR162DR3Handoff.report.json",
+    "PR166_SM3_PR162EHandoff.report.json",
+    "PR166_SM3_PR162FHandoff.report.json",
+    "PR166_SM3_PR162EQHandoff.report.json",
+    "PR166_SM3_PR167Handoff.report.json",
+    "PR166_SM3_PR167BHandoff.report.json",
+    "PR166_SM3_PR168Handoff.report.json",
+    "PR166_SM3_PR169Handoff.report.json",
+    "PR166_SM3_PR170Handoff.report.json",
+    "PR166_SM3_PR171Handoff.report.json",
+    "PR166_SM3_PR172Handoff.report.json",
+    "PR166_SM3_PR173Handoff.report.json",
+    "PR166_SM3_PR174181Handoff.report.json",
+    "PR166_SM3_RuntimeSafetyHandoff.report.json",
+    "PR166_SM3_LaunchReviewFilter.report.json",
+    "PR166_SM3_SummaryHandoff.report.json",
+    "PR166_SM3_EvidenceQuality.report.json",
+    "PR166_SM3_PosDurability.report.json",
+    "PR166_SM3_AlphaAttrib.report.json",
+    "PR166_SM3_ICDecay.report.json",
+    "PR166_SM3_DeflatedMetric.report.json",
+    "PR166_SM3_ModelRisk.report.json",
+    "PR166_SM3_QKUHypergraph.report.json",
+    "PR166_SM3_ComboOptimizer.report.json",
+    "PR166_SM3_QuantumQKUPortfolio.report.json",
+    "PR166_SM3_QuantumFallback.report.json",
+    "PR166_SM3_LatencyBudget.report.json",
+    "PR166_SM3_HotPathCache.report.json",
+    "PR166_SM3_SelectionFrontier.report.json",
+    "PR166_SM3_AgentConsumerMap.report.json",
+    "PR166_SM3_RowDAG.report.json",
+    "PR166_SM3_OwnerReviewQueue.report.json",
+    "PR166_SM3_LivePrepNeeds.report.json",
+    "PR166_SM3_ReplayPaperLaneMap.report.json",
+    "PR166_SM3_QuantumComboReady.report.json",
+    "PR166_SM3_ScoreExplain.report.json",
+    "PR166_SM3_LineageAudit.report.json",
+    "PR166_SM3_ScoreDeltaLineage.report.json",
+    "PR166_SM3_MemoryDeltaLineage.report.json",
+    "PR166_SM3_LineageConflict.report.json",
+    "PR166_SM3_ExternalSignals.report.json",
+    "PR166_SM3_SearchReceipt.report.json",
+    "PR166_SM3_AgentDutyLedger.report.json",
+    "PR166_SM3_AgentTaskQueue.report.json",
+    "PR166_SM3_AgentKPIAudit.report.json",
+    "PR166_SM3_DashboardHandoff.report.json",
+    "PR166_SM3_GovernanceHandoff.report.json",
+    "PR166_SM3_CommanderHandoff.report.json",
+    "PR166_SM3_MarketIndex.report.json",
+    "PR166_SM3_PlanCrosswalk.report.json",
+    "PR166_SM3_CmdActionMatrix.report.json",
+    "PR166_SM3_RouteTriageMatrix.report.json",
+    "PR166_SM3_ConnectorRouting.report.json",
+    "PR166_SM3_ProvenanceLedger.report.json",
+    "PR166_SM3_FileConnAudit.report.json",
+    "PR166_SM3_ValueConnAudit.report.json",
+    "PR166_SM3_AuthorityAudit.report.json",
+    "PR166_SM3_NoProfitAudit.report.json",
+    "PR166_SM3_OrphanAudit.report.json",
+    "PR166_SM3_StatusDriftAudit.report.json",
+    "PR166_SM3_ReportManifest.report.json",
+    "PR166_SM3_FinalSummary.report.json",
+)
+
+SUMMARY_REPORTS = frozenset(
+    {
+        "PR166_SM3_InputAudit.report.json",
+        "PR166_SM3_ShardInputAudit.report.json",
+        "PR166_SM3_OptionalInputs.report.json",
+        "PR166_SM3_RowCountLedger.report.json",
+        "PR166_SM3_ScorePolicy.report.json",
+        "PR166_SM3_MemoryPolicy.report.json",
+        "PR166_SM3_ChampionRegistry.report.json",
+        "PR166_SM3_ExternalSignals.report.json",
+        "PR166_SM3_SearchReceipt.report.json",
+        "PR166_SM3_AgentDutyLedger.report.json",
+        "PR166_SM3_AgentTaskQueue.report.json",
+        "PR166_SM3_AgentKPIAudit.report.json",
+        "PR166_SM3_DashboardHandoff.report.json",
+        "PR166_SM3_GovernanceHandoff.report.json",
+        "PR166_SM3_CommanderHandoff.report.json",
+        "PR166_SM3_MarketIndex.report.json",
+        "PR166_SM3_PlanCrosswalk.report.json",
+        "PR166_SM3_CmdActionMatrix.report.json",
+        "PR166_SM3_RouteTriageMatrix.report.json",
+        "PR166_SM3_ConnectorRouting.report.json",
+        "PR166_SM3_ProvenanceLedger.report.json",
+        "PR166_SM3_FileConnAudit.report.json",
+        "PR166_SM3_ValueConnAudit.report.json",
+        "PR166_SM3_AuthorityAudit.report.json",
+        "PR166_SM3_NoProfitAudit.report.json",
+        "PR166_SM3_OrphanAudit.report.json",
+        "PR166_SM3_StatusDriftAudit.report.json",
+        "PR166_SM3_ReportManifest.report.json",
+        "PR166_SM3_FinalSummary.report.json",
+    }
+)
+ROW_LEVEL_REPORTS = frozenset(name for name in REPORT_FILENAMES if name not in SUMMARY_REPORTS)
+
+STRICT_INPUT_REPORTS: tuple[str, ...] = (
+    "PR166_SF_R2_FinalSummary.report.json",
+    "PR166_SF_R2_ReportManifest.report.json",
+    "PR166_SF_R2_InputAudit.report.json",
+    "PR166_SF_R2_RowCountLedger.report.json",
+    "PR166_SF_R2_RepairUniverse.report.json",
+    "PR166_SF_R2_RepairedPacketRegistry.report.json",
+    "PR166_SF_R2_RetestUniverse.report.json",
+    "PR166_SF_R2_EpisodePlan.report.json",
+    "PR166_SF_R2_OrderIntentLedger.report.json",
+    "PR166_SF_R2_FillLedger.report.json",
+    "PR166_SF_R2_NoFillLedger.report.json",
+    "PR166_SF_R2_TCALedger.report.json",
+    "PR166_SF_R2_ImplShortfall.report.json",
+    "PR166_SF_R2_NetEdgeLedger.report.json",
+    "PR166_SF_R2_EdgeLCBRegistry.report.json",
+    "PR166_SF_R2_ConfidenceRegistry.report.json",
+    "PR166_SF_R2_CalibrationLedger.report.json",
+    "PR166_SF_R2_Microstructure.report.json",
+    "PR166_SF_R2_CapacityCrowding.report.json",
+    "PR166_SF_R2_OverfitFDR.report.json",
+    "PR166_SF_R2_RankStability.report.json",
+    "PR166_SF_R2_BeforeAfter.report.json",
+    "PR166_SF_R2_ConversionAttribution.report.json",
+    "PR166_SF_R2_PosConversion.report.json",
+    "PR166_SF_R2_StillNegative.report.json",
+    "PR166_SF_R2_TerminalRows.report.json",
+    "PR166_SF_R2_RepairFailure.report.json",
+    "PR166_SF_R2_RetestBoostResult.report.json",
+    "PR166_SF_R2_ChampionRegistry.report.json",
+    "PR166_SF_R2_ChallengerRegistry.report.json",
+    "PR166_SF_R2_RegimeMemory.report.json",
+    "PR166_SF_R2_MarginalUtility.report.json",
+    "PR166_SF_R2_DiversityLedger.report.json",
+    "PR166_SF_R2_QuantumPriority.report.json",
+    "PR166_SF_R2_QuantumStructure.report.json",
+    "PR166_SF_R2_PR166QHandoff.report.json",
+    "PR166_SF_R2_PR166SM3Handoff.report.json",
+    "PR166_SF_R2_PR165D3Handoff.report.json",
+    "PR166_SF_R2_PR167Handoff.report.json",
+    "PR166_SF_R2_R3GapHandoff.report.json",
+    "PR166_SF_R2_AgentDutyLedger.report.json",
+    "PR166_SF_R2_AgentTaskQueue.report.json",
+    "PR166_SF_R2_AgentKPIAudit.report.json",
+    "PR166_SF_R2_DashboardHandoff.report.json",
+    "PR166_SF_R2_GovernanceHandoff.report.json",
+    "PR166_SF_R2_CommanderHandoff.report.json",
+    "PR166_SF_R2_ConnectorRouting.report.json",
+    "PR166_SF_R2_AuthorityAudit.report.json",
+    "PR166_SF_R2_NoProfitAudit.report.json",
+    "PR166_SF_R2_OrphanAudit.report.json",
+    "PR166_SF_R2_RepairFrontier.report.json",
+    "PR166_SF_R2_ConvProof.report.json",
+    "PR166_SF_R2_HoldoutReplay.report.json",
+    "PR166_SF_R2_LaunchCandidateFilter.report.json",
+    "PR166_SF_R2_RuntimeSafetyHandoff.report.json",
+    "PR166_SM2_FinalSummary.report.json",
+    "PR166_SM2_ReportManifest.report.json",
+    "PR166_SM2_ScoreRegistry.report.json",
+    "PR166_SM2_MemoryLedger.report.json",
+    "PR166_SM2_PosEdgeRegistry.report.json",
+    "PR166_SM2_NegEdgeRegistry.report.json",
+    "PR166_SM2_AllNegConvPlan.report.json",
+    "PR166_SM2_RepairPriority.report.json",
+    "PR166_SM2_BreakEvenGap.report.json",
+    "PR166_SM2_QuantumPriority.report.json",
+    "PR166_SM2_QuantumStructure.report.json",
+    "PR166_SM2_RankAggregation.report.json",
+    "PR166_SM2_RankStabilityLedger.report.json",
+    "PR166_SM2_AgentDutyLedger.report.json",
+    "PR166_SM2_AgentTaskQueue.report.json",
+    "PR166_SM2_AgentKPIAudit.report.json",
+    "PR166_S2_FinalSummary.report.json",
+    "PR166_S2_NetEdgeResultLedger.report.json",
+    "PR166_S2_TCAResultLedger.report.json",
+    "PR166_S2_QuantumHandoff.report.json",
+    "PR166_S2_AgentDutyLedger.report.json",
+    "PR166_SF_FinalSummary.report.json",
+    "PR166_SF_QKUTradabilityLedger.report.json",
+    "PR166_SF_AgentDutyLedger.report.json",
+    "PR165_D2_AgentRosterDiscoveryAudit.report.json",
+    "PR165_D2_AgentDutySourceCrosswalk.report.json",
+    "PR165_D2_CommandActionMatrix.report.json",
+    "PR165_D2_RouteTriageMatrix.report.json",
+    "PR165_D2_QuantumCandidatePriorityV2.report.json",
+)
+
+LINEAGE_INPUT_REPORTS: tuple[str, ...] = (
+    "PR166_S_FinalSummary.report.json",
+    "PR166_S_ReportManifest.report.json",
+    "PR166_S_ResultAttributionLedger.report.json",
+    "PR166_S_ResultConfidenceRegistry.report.json",
+    "PR166_S_ExecutionCostLedger.report.json",
+    "PR166_S_QuantumAdvisoryPassthrough.report.json",
+    "PR166_SM_FinalSummary.report.json",
+    "PR166_SM_ReportManifest.report.json",
+    "PR166_SM_RefreshedScoreRegistry.report.json",
+    "PR166_SM_RefreshedMemoryLedger.report.json",
+    "PR166_SM_NetEdgeRankDeltaRegistry.report.json",
+    "PR166_SM_QuantumPriorityAfterReplayPaperRegistry.report.json",
+)
+
+REQUIRED_INPUT_REPORTS: tuple[str, ...] = tuple(dict.fromkeys((*STRICT_INPUT_REPORTS, *LINEAGE_INPUT_REPORTS)))
+
+OPTIONAL_INPUT_PATTERNS: tuple[str, ...] = (
+    "PR164_*.report.json",
+    "PR165_*.report.json",
+    "PR165_B_*.report.json",
+    "PR165_C_*.report.json",
+    "PR165_D_*.report.json",
+)
+
+EXPECTED_COUNTS = {
+    "PR166_SF_R2_PR166SM3Handoff.report.json": 3213,
+    "PR166_SF_R2_RepairedPacketRegistry.report.json": 3213,
+    "PR166_SF_R2_RetestUniverse.report.json": 3213,
+    "PR166_SF_R2_PosConversion.report.json": 148,
+    "PR166_SF_R2_StillNegative.report.json": 2882,
+    "PR166_SF_R2_NoFillLedger.report.json": 183,
+    "PR166_SF_R2_ConvProof.report.json": 3213,
+    "PR166_SF_R2_HoldoutReplay.report.json": 3213,
+    "PR166_SF_R2_PR166QHandoff.report.json": 559,
+    "PR165_D2_AgentRosterDiscoveryAudit.report.json": 8,
+    "PR165_D2_AgentDutySourceCrosswalk.report.json": 8,
+}
+
+EXTERNAL_REFERENCE_ROWS: tuple[dict[str, str], ...] = (
+    {
+        "source_family": "QUANTCONNECT_LEAN_REALITY_MODELING",
+        "source_url": "https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/key-concepts",
+        "source_authority": "OFFICIAL_CANDIDATE_PROVISIONAL",
+        "mapped_component": "fills_slippage_fees_brokerage_capacity_reality_modeling",
+    },
+    {
+        "source_family": "KALSHI_BINARY_ORDERBOOK",
+        "source_url": "https://docs.kalshi.com/getting_started/orderbook_responses",
+        "source_authority": "OFFICIAL_CANDIDATE_PROVISIONAL",
+        "mapped_component": "yes_no_bid_symmetry_binary_orderbook_semantics",
+    },
+    {
+        "source_family": "QISKIT_OPTIMIZATION_QUBO_CONVERTER",
+        "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html",
+        "source_authority": "OFFICIAL_CANDIDATE_PROVISIONAL",
+        "mapped_component": "quadratic_program_to_qubo_without_backend_execution",
+    },
+    {
+        "source_family": "D_WAVE_OCEAN_MODEL_FAMILIES",
+        "source_url": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html",
+        "source_authority": "OFFICIAL_CANDIDATE_PROVISIONAL",
+        "mapped_component": "bqm_cqm_dqm_qubo_ising_model_family_routing",
+    },
+    {
+        "source_family": "APACHE_AIRFLOW_DAG_DEPENDENCIES",
+        "source_url": "https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html",
+        "source_authority": "OFFICIAL_CANDIDATE_PROVISIONAL",
+        "mapped_component": "upstream_downstream_row_dag_orchestration",
+    },
+    {
+        "source_family": "SCIKIT_LEARN_PROBABILITY_CALIBRATION",
+        "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+        "source_authority": "TECHNICAL_REFERENCE_CANDIDATE_PROVISIONAL",
+        "mapped_component": "calibration_brier_log_loss_replay_paper_memory",
+    },
+    {
+        "source_family": "BAILEY_LOPEZ_DE_PRADO_DEFLATED_SHARPE",
+        "source_url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551",
+        "source_authority": "RESEARCH_CANDIDATE_PROVISIONAL",
+        "mapped_component": "multiple_testing_false_discovery_deflated_metric",
+    },
+    {
+        "source_family": "IMPLEMENTATION_SHORTFALL_TCA",
+        "source_url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2807317",
+        "source_authority": "RESEARCH_CANDIDATE_PROVISIONAL",
+        "mapped_component": "implementation_shortfall_tca_decomposition",
+    },
+)
+
+
+def _schema_name(report_filename: str) -> str:
+    stem = report_filename.removesuffix(".report.json").replace("PR166_SM3_", "pr166_sm3_")
+    stem = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", stem)
+    stem = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", stem)
+    stem = stem.replace("__", "_").lower()
+    return f"{stem}.schema.json"
+
+
+REPORT_SCHEMA_REFS = {name: _schema_name(name) for name in REPORT_FILENAMES}
+SCHEMA_FILENAMES: tuple[str, ...] = (
+    "pr166_sm3_common.schema.json",
+    *(REPORT_SCHEMA_REFS[name] for name in REPORT_FILENAMES),
+)
