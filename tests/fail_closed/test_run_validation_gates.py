@@ -2396,6 +2396,16 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     )
 
 
+def _pr166_sm2_group_paths() -> list[tuple[str, ...]]:
+    return [
+        tuple(
+            f"{runner.PR166_SM2_TEST_ROOT}/{file_name}"
+            for file_name in group
+        )
+        for group in runner.PR166_SM2_PYTEST_FILE_GROUPS
+    ]
+
+
 def test_runner_splits_pytest_shard_2_longest_group_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
 
@@ -2442,7 +2452,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
             "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
         ),
-        ("tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",),
+        *_pr166_sm2_group_paths(),
         (
             "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
         ),
@@ -2477,6 +2487,74 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
     assert set(expanded_paths) == set(
         runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"]
     )
+
+
+def test_runner_pr166_sm2_split_groups_cover_each_test_file_once():
+    expected = {
+        path
+        for path in runner.discover_pytest_files(REPO_ROOT)
+        if path.startswith(f"{runner.PR166_SM2_TEST_ROOT}/")
+    }
+    grouped = [
+        path
+        for group in _pr166_sm2_group_paths()
+        for path in group
+    ]
+    expanded = [
+        path
+        for command in runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
+        if any(path.startswith(f"{runner.PR166_SM2_TEST_ROOT}/") for path in command.paths)
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(runner.PR166_SM2_PYTEST_FILE_GROUPS) == 6
+    assert all(0 < len(group) <= 14 for group in runner.PR166_SM2_PYTEST_FILE_GROUPS)
+    assert grouped == sorted(grouped)
+    assert len(grouped) == len(set(grouped))
+    assert set(grouped) == expected
+    assert expanded == grouped
+    assert set(expanded).issubset(
+        set(runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"])
+    )
+
+
+@pytest.mark.parametrize(
+    "pr166_sm2_subgroup_index",
+    range(len(runner.PR166_SM2_PYTEST_FILE_GROUPS)),
+)
+def test_runner_fails_closed_if_any_pr166_sm2_subgroup_fails(
+    pr166_sm2_subgroup_index,
+    monkeypatch,
+    capsys,
+):
+    class Completed:
+        def __init__(self, returncode: int) -> None:
+            self.returncode = returncode
+
+    commands = runner.build_pytest_shard_commands(
+        "pytest-shard-2",
+        Path(".tmp") / "pytest-basetemp",
+    )
+    pr166_commands = [
+        command
+        for command in commands
+        if any(part.startswith(f"{runner.PR166_SM2_TEST_ROOT}/") for part in command)
+    ]
+    failing_command = pr166_commands[pr166_sm2_subgroup_index]
+    failing_index = commands.index(failing_command)
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str]) -> Completed:
+        seen.append(command)
+        return Completed(73 if command == failing_command else 0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    exit_code = runner.run_commands(commands, phase="pytest-shard-2")
+
+    assert exit_code == 73
+    assert seen == commands[: failing_index + 1]
+    assert runner.SUCCESS_MARKER not in capsys.readouterr().out
 
 
 def test_runner_splits_pytest_shard_4_residual_tests_deterministically():

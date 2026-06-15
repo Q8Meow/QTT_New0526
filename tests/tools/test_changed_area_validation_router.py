@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from tools import run_validation_gates as runner
+from tools import validation_inventory as inventory
 from tools.changed_area_validation_router import RouterInput, build_router_result
 
 
@@ -111,3 +113,21 @@ def test_pr152_decision_triggers_for_generated_report_count_changes():
 
     assert result.pr152_currentization_required is True
     assert "PR152-tracked" in result.pr152_currentization_reason
+
+
+def test_pr166_sm2_split_pytest_groups_preserve_directory_routing():
+    result = _pull_request_result(
+        f"{runner.PR166_SM2_TEST_ROOT}/test_pr166_sm2_validator.py"
+    )
+    expected_ids = {
+        inventory.validator_id_for_command(command, "pytest-shard-2")
+        for command in runner.build_pytest_shard_commands(
+            "pytest-shard-2",
+            Path(".tmp") / "pytest",
+        )
+        if any(part.startswith(f"{runner.PR166_SM2_TEST_ROOT}/") for part in command)
+    }
+
+    assert len(expected_ids) == len(runner.PR166_SM2_PYTEST_FILE_GROUPS)
+    assert expected_ids.issubset(set(result.required_validators))
+    assert result.fail_closed_reasons == ()

@@ -79,9 +79,13 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+        "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+        "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tests/tools/test_changed_area_validation_router.py",
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
@@ -92,6 +96,8 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tools/cross_platform_path_invariant.py",
         "tools/repo_path_refs.py",
         "tools/run_validation_gates.py",
+        "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        "tools/validate_no_runtime_artifacts.py",
         "tools/validate_validation_inventory.py",
         "tools/validate_ci_branch_context_matrix.py",
         "tools/validate_nested_validator_contracts.py",
@@ -1482,6 +1488,8 @@ PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
         "tools/currentize_pr152_after_generated_artifacts.py",
         "tools/ci_branch_context.py",
         "tools/run_validation_gates.py",
+        "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        "tools/validate_no_runtime_artifacts.py",
         "tools/validation_inventory.py",
         "tools/changed_area_validation_router.py",
         "src/qtt/stage1_prediction_markets/"
@@ -1497,6 +1505,10 @@ PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/"
         "pr166_sm3_score_memory_refresh_v3/io.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+        "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+        "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",

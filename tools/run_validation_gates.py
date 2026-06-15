@@ -83,6 +83,104 @@ class TimingEntry:
     returncode: int
 
 
+PR166_SM2_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2"
+)
+PR166_SM2_PYTEST_FILE_GROUPS = (
+    (
+        "test_pr166_sm2_ablation.py",
+        "test_pr166_sm2_agent_duty.py",
+        "test_pr166_sm2_agent_kpi.py",
+        "test_pr166_sm2_agent_task_queue.py",
+        "test_pr166_sm2_all_neg_conversion.py",
+        "test_pr166_sm2_alt_exec_memory.py",
+        "test_pr166_sm2_authority_boundaries.py",
+        "test_pr166_sm2_break_even_gap.py",
+        "test_pr166_sm2_build_outputs.py",
+        "test_pr166_sm2_calib_boost.py",
+        "test_pr166_sm2_calibration.py",
+        "test_pr166_sm2_candidate_family.py",
+        "test_pr166_sm2_capacity_crowding.py",
+    ),
+    (
+        "test_pr166_sm2_champion_challenger.py",
+        "test_pr166_sm2_compact_names.py",
+        "test_pr166_sm2_condition_winners_losers.py",
+        "test_pr166_sm2_connector_ref_routing.py",
+        "test_pr166_sm2_conversion_agent_queue.py",
+        "test_pr166_sm2_conversion_math.py",
+        "test_pr166_sm2_convertible_queue.py",
+        "test_pr166_sm2_cost_cut.py",
+        "test_pr166_sm2_counterfactual.py",
+        "test_pr166_sm2_diversity.py",
+        "test_pr166_sm2_edge_decay.py",
+        "test_pr166_sm2_edge_uplift.py",
+    ),
+    (
+        "test_pr166_sm2_evidence_depth.py",
+        "test_pr166_sm2_expansion_policy.py",
+        "test_pr166_sm2_external_dedupe.py",
+        "test_pr166_sm2_external_signal_registry.py",
+        "test_pr166_sm2_fill_boost.py",
+        "test_pr166_sm2_fragile_watchlist.py",
+        "test_pr166_sm2_handoff_intake.py",
+        "test_pr166_sm2_idempotence.py",
+        "test_pr166_sm2_input_consumption.py",
+        "test_pr166_sm2_lat_liq_impact.py",
+        "test_pr166_sm2_latent_edge.py",
+        "test_pr166_sm2_lcb_confidence.py",
+    ),
+    (
+        "test_pr166_sm2_marginal_utility.py",
+        "test_pr166_sm2_memory_dag.py",
+        "test_pr166_sm2_memory_ledger.py",
+        "test_pr166_sm2_microstructure.py",
+        "test_pr166_sm2_no_bad_status_tokens.py",
+        "test_pr166_sm2_no_fill_memory.py",
+        "test_pr166_sm2_no_orphans.py",
+        "test_pr166_sm2_no_profit_evidence.py",
+        "test_pr166_sm2_orthogonal_edge.py",
+        "test_pr166_sm2_overfit_fdr.py",
+        "test_pr166_sm2_param_uplift.py",
+        "test_pr166_sm2_pos_seed_driver.py",
+    ),
+    (
+        "test_pr166_sm2_positive_expansion.py",
+        "test_pr166_sm2_positive_negative_edge.py",
+        "test_pr166_sm2_pr152_pr208_routing_contract.py",
+        "test_pr166_sm2_pref_avoid_memory.py",
+        "test_pr166_sm2_provenance_supersession_drift.py",
+        "test_pr166_sm2_quantum_priority.py",
+        "test_pr166_sm2_rank_aggregation.py",
+        "test_pr166_sm2_rank_delta.py",
+        "test_pr166_sm2_rank_stability.py",
+        "test_pr166_sm2_regime_memory.py",
+        "test_pr166_sm2_repair_priority.py",
+        "test_pr166_sm2_result_intake.py",
+    ),
+    (
+        "test_pr166_sm2_retest_boost_queue.py",
+        "test_pr166_sm2_route_crosswalk_cmd.py",
+        "test_pr166_sm2_row_count_reconciliation.py",
+        "test_pr166_sm2_score_explain.py",
+        "test_pr166_sm2_score_registry.py",
+        "test_pr166_sm2_selection_pressure.py",
+        "test_pr166_sm2_selection_ready_queue.py",
+        "test_pr166_sm2_settlement_adverse.py",
+        "test_pr166_sm2_shard_input_audit.py",
+        "test_pr166_sm2_shrinkage.py",
+        "test_pr166_sm2_status_enum_drift.py",
+        "test_pr166_sm2_tca_cost_roots.py",
+        "test_pr166_sm2_tt_risk.py",
+        "test_pr166_sm2_validator.py",
+    ),
+)
+
+
+def _pr166_sm2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:
+    return tuple(f"{PR166_SM2_TEST_ROOT}/{file_name}" for file_name in file_names)
+
+
 PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
     "pytest-shard-1": (
         PytestShardCommand(
@@ -152,12 +250,45 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             ),
         ),
         PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",
-            ),
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[0]),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b "
-                "isolates PR166-SM2 timing without changing coverage"
+                "Stage 1 prediction-market tests, subprocess group 5b1 "
+                "split PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[1]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b2 "
+                "split PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[2]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b3 "
+                "split PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[3]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b4 "
+                "split PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[4]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b5 "
+                "split PR166-SM2 timing without changing coverage"
+            ),
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[5]),
+            reason=(
+                "Stage 1 prediction-market tests, subprocess group 5b6 "
+                "split PR166-SM2 timing without changing coverage"
             ),
         ),
         PytestShardCommand(

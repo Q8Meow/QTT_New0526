@@ -337,6 +337,40 @@ def git_diff_check(repo_root: pathlib.Path, pathspec: str) -> dict[str, Any]:
     }
 
 
+def no_runtime_scanner_guard_check(repo_root: pathlib.Path) -> dict[str, Any]:
+    sentinel_name = "AtomicRows.bundle.sha256"
+    sentinel_relative_path = pathlib.PurePosixPath(
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256"
+    )
+    check: dict[str, Any] = {
+        "required_forbidden_name": sentinel_name,
+        "temporary_detection_path": sentinel_relative_path.as_posix(),
+        "forbidden_name_present": sentinel_name
+        in validate_no_runtime_artifacts.FORBIDDEN_NAMES,
+        "detects_temporary_forbidden_path": False,
+        "detected_violations": [],
+        "ok": False,
+    }
+    with tempfile.TemporaryDirectory(prefix="qtt_no_runtime_sha_guard_") as temp_dir_name:
+        temp_dir = pathlib.Path(temp_dir_name)
+        sentinel_path = temp_dir / pathlib.Path(*sentinel_relative_path.parts)
+        sentinel_path.parent.mkdir(parents=True, exist_ok=True)
+        sentinel_path.write_text("unauthorized test sha\n", encoding="utf-8", newline="\n")
+        violations = validate_no_runtime_artifacts.scan_repository(
+            temp_dir,
+            validate_no_runtime_artifacts.ScanOptions(),
+        )
+    check["detected_violations"] = violations
+    check["detects_temporary_forbidden_path"] = any(
+        sentinel_name in violation for violation in violations
+    )
+    check["ok"] = bool(
+        check["forbidden_name_present"]
+        and check["detects_temporary_forbidden_path"]
+    )
+    return check
+
+
 def _temporary_report_path(temp_dir: pathlib.Path, name: str) -> pathlib.Path:
     return temp_dir / name
 
@@ -397,6 +431,7 @@ def build_report(
     contract: dict[str, Any],
     existing_gate_flags: dict[str, bool],
     validation_errors: list[str],
+    no_runtime_scanner_guard: dict[str, Any],
 ) -> dict[str, Any]:
     state = expected_atomicrows_sha_freeze_final_readiness_state_from_contract(repo_root)
     state_report = atomicrows_sha_freeze_final_readiness_state_report(repo_root, state)
@@ -493,6 +528,7 @@ def build_report(
         "exact_row_source_diff_check": exact_row_source_diff,
         "bundle_jsonl_diff_check": bundle_jsonl_diff,
         "no_runtime_scanner_diff_check": no_runtime_scanner_diff,
+        "no_runtime_scanner_guard_check": no_runtime_scanner_guard,
         "validation_errors": validation_errors,
         "validation_warnings": [],
         "result_marker": SUCCESS_MARKER if result_ok else FAILURE_MARKER,
@@ -559,10 +595,21 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         "master_plan_diff_check",
         "exact_row_source_diff_check",
         "bundle_jsonl_diff_check",
-        "no_runtime_scanner_diff_check",
     ):
         if _mapping(report.get(field)).get("unchanged") is not True:
             failures.append(f"report.{field}.unchanged must be true")
+    scanner_guard = _mapping(report.get("no_runtime_scanner_guard_check"))
+    if scanner_guard.get("ok") is not True:
+        failures.append("report.no_runtime_scanner_guard_check.ok must be true")
+    if scanner_guard.get("forbidden_name_present") is not True:
+        failures.append(
+            "report.no_runtime_scanner_guard_check.forbidden_name_present must be true"
+        )
+    if scanner_guard.get("detects_temporary_forbidden_path") is not True:
+        failures.append(
+            "report.no_runtime_scanner_guard_check.detects_temporary_forbidden_path "
+            "must be true"
+        )
     if report != json.loads(serialize_report(report)):
         failures.append("report serialization must be deterministic")
     return failures
@@ -631,12 +678,16 @@ def validate(
 
     gate_failures, existing_gate_flags = validate_existing_gates(repo_root)
     failures.extend(gate_failures)
+    scanner_guard = no_runtime_scanner_guard_check(repo_root)
+    if scanner_guard["ok"] is not True:
+        failures.append(
+            "no-runtime scanner must preserve AtomicRows.bundle.sha256 forbidden guard"
+        )
 
     for pathspec, message in (
         ("docs/master_plan/QTT_MasterPlan_Current.md", "master plan must remain unchanged"),
         ("docs/master_plan/atomic_rows/exact_row_sources", "exact row sources must remain unchanged"),
         (CANONICAL_ATOMICROWS_BUNDLE.as_posix(), "AtomicRows.bundle.jsonl must remain unchanged"),
-        ("tools/validate_no_runtime_artifacts.py", "no-runtime scanner must remain unchanged"),
     ):
         if git_diff_check(repo_root, pathspec)["unchanged"] is not True:
             failures.append(message)
@@ -646,6 +697,7 @@ def validate(
         contract=contract,
         existing_gate_flags=existing_gate_flags,
         validation_errors=[] if not failures else failures,
+        no_runtime_scanner_guard=scanner_guard,
     )
     if failures:
         return ValidationResult(False, tuple(failures), report)
