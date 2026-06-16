@@ -86,27 +86,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout light pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: &checkout_light_pytest
-          fetch-depth: 0
-          sparse-checkout-cone-mode: false
-          # LIGHT_PYTEST_CHECKOUT keeps ordinary pytest shards off PR166-SM2 report fixtures.
-          sparse-checkout: |
-            .github
-            AGENTS.md
-            data
-            docs/master_plan/**
-            !docs/master_plan/generated/PR166_SM2_*.report.json
-            !docs/master_plan/generated/pr166_sm2_shards/**
-            pyproject.toml
-            pytest.ini
-            requirements.txt
-            requirements-dev.txt
-            schemas
-            src
-            tests
-            tools
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -131,9 +113,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout light pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_light_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -158,9 +140,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout light pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_light_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -185,27 +167,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout PR166-SM2 report fixture pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: &checkout_pr166_sm2_report_fixture_pytest
-          fetch-depth: 0
-          sparse-checkout-cone-mode: false
-          # PR166_SM2_REPORT_FIXTURE_CHECKOUT is required by Shards 4/5/7.
-          sparse-checkout: |
-            .github
-            AGENTS.md
-            data
-            docs/master_plan/**
-            docs/master_plan/generated/PR166_SM2_*.report.json
-            docs/master_plan/generated/pr166_sm2_shards/**
-            pyproject.toml
-            pytest.ini
-            requirements.txt
-            requirements-dev.txt
-            schemas
-            src
-            tests
-            tools
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -230,9 +194,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout PR166-SM2 report fixture pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_pr166_sm2_report_fixture_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -257,9 +221,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout light pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_light_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -284,9 +248,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout PR166-SM2 report fixture pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_pr166_sm2_report_fixture_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -311,9 +275,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout light pytest surface
+      - name: Check out repository
         uses: actions/checkout@v4
-        with: *checkout_light_pytest
+        with: *checkout_full
 
       - name: Set up Python
         uses: actions/setup-python@v5
