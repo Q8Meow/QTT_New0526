@@ -1516,6 +1516,9 @@ PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/stage1_prediction_markets/"
         "pr166_sf_r2_targeted_conversion_repair_retest/"
         "test_pr166_sf_r2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/"
+        "test_pr166_sm3_idempotence.py",
         "docs/master_plan/generated/"
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",

@@ -3643,6 +3643,12 @@ def test_pr165_d3_quantum_selection_branch_context_allowance_is_narrow():
         "pr166_sf_r2_targeted_conversion_repair_retest/"
         "test_pr166_sf_r2_idempotence.py",
     )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/"
+        "test_pr166_sm3_idempotence.py",
+    )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/generated/PR166_SM3_FinalSummary.report.json",

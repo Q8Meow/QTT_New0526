@@ -2426,6 +2426,12 @@ def test_runner_pytest_runtime_budget_plan_is_complete_and_fail_closed():
         runner.RUNTIME_BUDGET_POLICY["pytest_idempotence_hard_review_seconds"]
         == 180
     )
+    assert runner.BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS == frozenset(
+        {
+            _pr166_sf_r2_idempotence_path(),
+            _pr166_sm3_idempotence_path(),
+        }
+    )
 
 
 def _pr166_sm2_group_paths() -> list[tuple[str, ...]]:
@@ -2452,6 +2458,13 @@ def _pr166_sf_r2_idempotence_path() -> str:
     return (
         f"{runner.PR166_SF_R2_TEST_ROOT}/"
         f"{runner.PR166_SF_R2_IDEMPOTENCE_TEST_FILE}"
+    )
+
+
+def _pr166_sm3_idempotence_path() -> str:
+    return (
+        f"{runner.PR166_SM3_TEST_ROOT}/"
+        f"{runner.PR166_SM3_IDEMPOTENCE_TEST_FILE}"
     )
 
 
@@ -2624,6 +2637,28 @@ def test_runner_pr166_sf_r2_idempotence_is_own_early_shard4_subgroup():
     )
     assert idempotence_command.bounded_idempotence is True
     assert manifest_hits == [("pytest-shard-4", idempotence_path)]
+
+
+def test_runner_pr166_sm3_idempotence_is_bounded_shard7_subgroup():
+    idempotence_path = _pr166_sm3_idempotence_path()
+    placements = [
+        (phase, command.paths)
+        for phase in runner.PYTEST_SHARD_PHASES
+        for command in runner.PYTEST_SHARD_COMMANDS[phase]
+        if idempotence_path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+    manifest_hits = [
+        (phase, path)
+        for phase, phase_paths in runner.pytest_shard_manifest(REPO_ROOT).items()
+        for path in phase_paths
+        if path == idempotence_path
+    ]
+
+    assert placements == [("pytest-shard-7", (idempotence_path,))]
+    idempotence_command = runner.PYTEST_SHARD_COMMANDS["pytest-shard-7"][1]
+    assert idempotence_command.paths == (idempotence_path,)
+    assert idempotence_command.bounded_idempotence is True
+    assert manifest_hits == [("pytest-shard-7", idempotence_path)]
 
 
 @pytest.mark.parametrize(
@@ -2802,18 +2837,30 @@ def test_runner_splits_pytest_shard_4_bounded_idempotence_deterministically():
 
 def test_runner_splits_pytest_shard_7_current_pr_group_first():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-7"]
+    idempotence_path = _pr166_sm3_idempotence_path()
 
     assert [command.paths for command in commands] == [
         (
             "tests/stage1_prediction_markets/"
             "pr165_d3_quantum_aware_scenario_selection_v3",
         ),
-        ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
+        (idempotence_path,),
+        (runner.PR166_SM3_TEST_ROOT,),
     ]
+    assert commands[1].bounded_idempotence is True
+    assert commands[2].ignores == (idempotence_path,)
     assert (
         "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/"
         "test_pr165_d3_validator.py"
         in runner._pytest_files_for_command(commands[0], REPO_ROOT)
+    )
+    assert idempotence_path in runner._pytest_files_for_command(
+        commands[1],
+        REPO_ROOT,
+    )
+    assert idempotence_path not in runner._pytest_files_for_command(
+        commands[2],
+        REPO_ROOT,
     )
     assert all(command.reason for command in commands)
 

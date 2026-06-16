@@ -125,6 +125,9 @@ PR166_SM2_TEST_ROOT = (
 PR166_SF_R2_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest"
 )
+PR166_SM3_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3"
+)
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sm2_ablation.py",
@@ -215,6 +218,13 @@ PR166_SM2_PYTEST_FILE_GROUPS = (
     ),
 )
 PR166_SF_R2_IDEMPOTENCE_TEST_FILE = "test_pr166_sf_r2_idempotence.py"
+PR166_SM3_IDEMPOTENCE_TEST_FILE = "test_pr166_sm3_idempotence.py"
+BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
+    {
+        f"{PR166_SF_R2_TEST_ROOT}/{PR166_SF_R2_IDEMPOTENCE_TEST_FILE}",
+        f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+    }
+)
 PR166_SF_R2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sf_r2_agent_duty.py",
@@ -554,12 +564,25 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
         ),
         PytestShardCommand(
             paths=(
-                "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",
+                f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
             ),
-            reason="PR166-SM3 downstream score-memory group isolated from Shard 2",
-            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
-            historical_runtime_seconds=184.0,
+            reason=(
+                "Bounded PR166-SM3 idempotence proof kept explicit so default "
+                "PR CI does not run the exhaustive byte-for-byte rebuild mode"
+            ),
+            runtime_budget_seconds=PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+            historical_runtime_seconds=100.0,
             known_historical_heavy=True,
+            bounded_idempotence=True,
+        ),
+        PytestShardCommand(
+            paths=(PR166_SM3_TEST_ROOT,),
+            ignores=(
+                f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason="PR166-SM3 downstream score-memory non-idempotence group",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=55.0,
         ),
     ),
     "pytest-shard-8": (
@@ -1195,10 +1218,12 @@ def pytest_runtime_budget_failures(
     if duplicates:
         failures.append("PYTEST_SHARD_DUPLICATE_TESTS: " + ", ".join(duplicates))
 
-    idempotence_path = (
-        f"{PR166_SF_R2_TEST_ROOT}/{PR166_SF_R2_IDEMPOTENCE_TEST_FILE}"
-    )
-    idempotence_placements: list[tuple[str, int, PytestShardCommand]] = []
+    idempotence_placements: dict[
+        str, list[tuple[str, int, PytestShardCommand]]
+    ] = {
+        path: []
+        for path in sorted(BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS)
+    }
     for phase in PYTEST_SHARD_PHASES:
         commands = PYTEST_SHARD_COMMANDS.get(phase, ())
         if not commands:
@@ -1207,6 +1232,7 @@ def pytest_runtime_budget_failures(
         estimated_total = 0.0
         heavy_indices: list[int] = []
         for index, command in enumerate(commands, start=1):
+            expanded_command_paths = _pytest_files_for_command(command, root)
             if command.runtime_budget_seconds is None:
                 failures.append(f"PYTEST_GROUP_MISSING_RUNTIME_BUDGET: {phase}:{index}")
             elif command.runtime_budget_seconds <= 0:
@@ -1231,16 +1257,18 @@ def pytest_runtime_budget_failures(
                 > PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
             ):
                 failures.append(f"PYTEST_UNBOUNDED_IDEMPOTENCE_OVER_HARD_REVIEW: {phase}:{index}")
-            if idempotence_path in command.paths:
-                idempotence_placements.append((phase, index, command))
+            for idempotence_path in BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS:
+                if idempotence_path not in expanded_command_paths:
+                    continue
+                idempotence_placements[idempotence_path].append((phase, index, command))
                 if not command.bounded_idempotence:
-                    failures.append("PYTEST_IDEMPOTENCE_GROUP_NOT_BOUNDED")
+                    failures.append(f"PYTEST_IDEMPOTENCE_GROUP_NOT_BOUNDED: {idempotence_path}")
                 if (
                     command.runtime_budget_seconds is None
                     or command.runtime_budget_seconds
                     > PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
                 ):
-                    failures.append("PYTEST_IDEMPOTENCE_GROUP_BUDGET_TOO_HIGH")
+                    failures.append(f"PYTEST_IDEMPOTENCE_GROUP_BUDGET_TOO_HIGH: {idempotence_path}")
         shard_budget = PYTEST_SHARD_RUNTIME_BUDGETS.get(phase, {})
         target = float(shard_budget.get("target_seconds", 0))
         if estimated_total > target:
@@ -1252,8 +1280,11 @@ def pytest_runtime_budget_failures(
         if len(heavy_indices) > 2:
             failures.append(f"PYTEST_HEAVY_GROUPS_CONCENTRATED: {phase}")
 
-    if len(idempotence_placements) != 1:
-        failures.append("PYTEST_IDEMPOTENCE_GROUP_PLACEMENT_COUNT")
+    for idempotence_path, placements in idempotence_placements.items():
+        if len(placements) != 1:
+            failures.append(
+                f"PYTEST_IDEMPOTENCE_GROUP_PLACEMENT_COUNT: {idempotence_path}"
+            )
     return tuple(failures)
 
 
@@ -4284,7 +4315,7 @@ def _runtime_budget_warning_payloads(
         if len(path_args) == 1 and path_args[0].endswith(".py"):
             hard_threshold = PYTEST_FILE_HARD_REVIEW_SECONDS
             warning_threshold = PYTEST_FILE_WARNING_SECONDS
-            if path_args[0].endswith(f"/{PR166_SF_R2_IDEMPOTENCE_TEST_FILE}"):
+            if path_args[0] in BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS:
                 hard_threshold = PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
                 warning_threshold = PYTEST_IDEMPOTENCE_WARNING_SECONDS
             if entry.elapsed_seconds > hard_threshold:
