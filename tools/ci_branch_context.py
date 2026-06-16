@@ -1544,6 +1544,8 @@ PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS = frozenset(
 PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_CHANGED_PATHS = frozenset(
     {
         "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tests/stage1_prediction_markets/"
         "pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
         "tests/stage1_prediction_markets/"

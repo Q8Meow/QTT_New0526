@@ -3357,6 +3357,8 @@ def test_pr166_sm2_bounded_idempotence_ci_repair_scope_is_exact():
     )
     allowed_paths = (
         "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "tests/stage1_prediction_markets/"
         "pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
         "tests/stage1_prediction_markets/"
