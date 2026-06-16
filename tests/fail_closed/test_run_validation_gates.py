@@ -10732,6 +10732,94 @@ def _workflow_job_block(workflow: str, job_id: str) -> str:
     return workflow[start:next_job]
 
 
+PYTEST_LIGHT_CHECKOUT_JOB_IDS = frozenset(
+    {
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_6",
+        "pytest_shard_8",
+    }
+)
+PYTEST_PR166_SM2_REPORT_FIXTURE_CHECKOUT_JOB_IDS = frozenset(
+    {
+        "pytest_shard_4",
+        "pytest_shard_5",
+        "pytest_shard_7",
+    }
+)
+FULL_CHECKOUT_REQUIRED_JOB_IDS = frozenset(
+    {
+        "fast_preflight",
+        "deterministic_validators",
+        "post_validation_checks",
+        "validation",
+    }
+)
+
+
+def _workflow_job_ids(workflow: str) -> tuple[str, ...]:
+    jobs_section = workflow.split("\njobs:\n", 1)[1]
+    return tuple(
+        line.strip()[:-1]
+        for line in jobs_section.splitlines()
+        if line.startswith("  ") and line.endswith(":") and not line.startswith("    ")
+    )
+
+
+def _workflow_checkout_step_block(job_block: str) -> str:
+    checkout_markers = (
+        "      - name: Checkout light pytest surface\n",
+        "      - name: Checkout PR166-SM2 report fixture pytest surface\n",
+        "      - name: Check out repository\n",
+    )
+    starts = [
+        job_block.index(marker)
+        for marker in checkout_markers
+        if marker in job_block
+    ]
+    assert starts, job_block
+    start = min(starts)
+    next_step = job_block.find("\n      - name:", start + 1)
+    if next_step == -1:
+        return job_block[start:]
+    return job_block[start:next_step]
+
+
+def _sparse_checkout_entries(job_block: str) -> tuple[str, ...]:
+    step_block = _workflow_checkout_step_block(job_block)
+    marker = "          sparse-checkout: |\n"
+    assert marker in step_block
+    entries: list[str] = []
+    for line in step_block.split(marker, 1)[1].splitlines():
+        if not line.startswith("            "):
+            break
+        entry = line.strip()
+        if entry:
+            entries.append(entry)
+    return tuple(entries)
+
+
+def _pytest_phase_requires_pr166_sm2_report_fixture(phase: str) -> bool:
+    fixture_test_paths = frozenset(
+        {
+            f"{runner.PR166_SF_R2_TEST_ROOT}/"
+            f"{runner.PR166_SF_R2_IDEMPOTENCE_TEST_FILE}",
+            f"{runner.PR166_SM3_TEST_ROOT}/"
+            f"{runner.PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+        }
+    )
+    for command in runner.PYTEST_SHARD_COMMANDS[phase]:
+        for path in command.paths:
+            if path == runner.PR166_SM2_TEST_ROOT:
+                return True
+            if path.startswith(f"{runner.PR166_SM2_TEST_ROOT}/"):
+                return True
+            if path in fixture_test_paths:
+                return True
+    return False
+
+
 def test_github_workflow_preserves_required_validation_check_identity():
     workflow = _workflow_text()
     validation_block = _workflow_job_block(workflow, "validation")
@@ -10807,6 +10895,94 @@ def test_github_workflow_post_validation_waits_for_validators_and_pytest_shards(
         *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
     ):
         assert f"      - {job_id}\n" in post_block
+
+
+def test_github_workflow_pytest_shards_use_explicit_checkout_profiles():
+    workflow = _workflow_text()
+    pytest_job_ids = tuple(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES)
+
+    assert pytest_job_ids == (
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_4",
+        "pytest_shard_5",
+        "pytest_shard_6",
+        "pytest_shard_7",
+        "pytest_shard_8",
+    )
+    assert (
+        PYTEST_LIGHT_CHECKOUT_JOB_IDS
+        | PYTEST_PR166_SM2_REPORT_FIXTURE_CHECKOUT_JOB_IDS
+    ) == set(pytest_job_ids)
+
+    for job_id in pytest_job_ids:
+        block = _workflow_job_block(workflow, job_id)
+        assert "        uses: actions/checkout@v4\n" in block
+        assert "        with: *checkout_full\n" not in block
+        assert "        with: &checkout_full\n" not in block
+        if job_id in PYTEST_LIGHT_CHECKOUT_JOB_IDS:
+            assert "      - name: Checkout light pytest surface\n" in block
+            assert (
+                "        with: &checkout_light_pytest\n" in block
+                or "        with: *checkout_light_pytest\n" in block
+            )
+        else:
+            assert (
+                "      - name: Checkout PR166-SM2 report fixture pytest surface\n"
+                in block
+            )
+            assert (
+                "        with: &checkout_pr166_sm2_report_fixture_pytest\n" in block
+                or "        with: *checkout_pr166_sm2_report_fixture_pytest\n" in block
+            )
+
+
+def test_github_workflow_pytest_checkout_profiles_bound_pr166_sm2_fixtures():
+    workflow = _workflow_text()
+    light_block = _workflow_job_block(workflow, "pytest_shard_1")
+    fixture_block = _workflow_job_block(workflow, "pytest_shard_4")
+    light_entries = _sparse_checkout_entries(light_block)
+    fixture_entries = _sparse_checkout_entries(fixture_block)
+    light_positive_entries = tuple(
+        entry for entry in light_entries if not entry.startswith("!")
+    )
+
+    assert "          sparse-checkout-cone-mode: false\n" in light_block
+    assert "          sparse-checkout-cone-mode: false\n" in fixture_block
+    assert "LIGHT_PYTEST_CHECKOUT" in light_block
+    assert "PR166_SM2_REPORT_FIXTURE_CHECKOUT" in fixture_block
+    assert "!docs/master_plan/generated/PR166_SM2_*.report.json" in light_entries
+    assert "!docs/master_plan/generated/pr166_sm2_shards/**" in light_entries
+    assert "docs/master_plan/generated/PR166_SM2_*.report.json" not in light_positive_entries
+    assert "docs/master_plan/generated/pr166_sm2_shards/**" not in light_positive_entries
+    assert "docs/master_plan/generated/PR166_SM2_*.report.json" in fixture_entries
+    assert "docs/master_plan/generated/pr166_sm2_shards/**" in fixture_entries
+    assert all(not entry.startswith("!") for entry in fixture_entries)
+
+
+def test_github_workflow_pytest_profile_map_matches_fixture_requirements():
+    expected_fixture_jobs = {
+        phase.replace("-", "_")
+        for phase in runner.PYTEST_SHARD_PHASES
+        if _pytest_phase_requires_pr166_sm2_report_fixture(phase)
+    }
+
+    assert expected_fixture_jobs == PYTEST_PR166_SM2_REPORT_FIXTURE_CHECKOUT_JOB_IDS
+    assert PYTEST_LIGHT_CHECKOUT_JOB_IDS.isdisjoint(expected_fixture_jobs)
+
+
+def test_github_workflow_full_checkout_is_limited_to_required_non_pytest_jobs():
+    workflow = _workflow_text()
+    full_checkout_jobs = {
+        job_id
+        for job_id in _workflow_job_ids(workflow)
+        if "        with: *checkout_full\n" in _workflow_job_block(workflow, job_id)
+        or "        with: &checkout_full\n" in _workflow_job_block(workflow, job_id)
+    }
+
+    assert full_checkout_jobs == FULL_CHECKOUT_REQUIRED_JOB_IDS
+    assert not any(job_id.startswith("pytest_shard_") for job_id in full_checkout_jobs)
 
 
 def test_nested_validator_contract_scan_blocks_hidden_full_rerun():
