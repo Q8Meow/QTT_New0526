@@ -862,7 +862,7 @@
     "pr_identity_roster_consumed": true,
     "roadmap_controller_consumed": true,
     "schema_file_count": 192,
-    "test_file_count": 1708,
+    "test_file_count": 1709,
     "validator_tool_count": 156,
     "visible_recent_pr_reports": [
       "docs/master_plan/generated/PR149_AtomicRowsSemanticValueMaterializationImplementationBridge.report.json",
@@ -1183,7 +1183,7 @@
     "fixture_file_count": 258,
     "schema_file_count": 192,
     "status": "PASS",
-    "test_file_count": 1708
+    "test_file_count": 1709
   },
   "source_evidence_boundary_audit": {
     "audit_domain": "SOURCE_EVIDENCE_BOUNDARY",
@@ -1329,7 +1329,7 @@
       "tests",
       "tools"
     ],
-    "audited_text_file_count": 11872,
+    "audited_text_file_count": 11874,
     "category_counts": {
       "ATOMICROWS": 61,
       "CONFIG": 4,
@@ -1339,9 +1339,9 @@
       "OTHER": 3,
       "ROADMAP": 42,
       "SCHEMA": 1805,
-      "SOURCE": 1888,
+      "SOURCE": 1889,
       "SOURCE_EVIDENCE": 59,
-      "TEST": 1966,
+      "TEST": 1967,
       "TOOL": 86,
       "VALIDATOR_TOOL": 156,
       "WORKFLOW": 1
@@ -1355,6 +1355,6 @@
       ".pytest_cache"
     ],
     "sk\u0069pped_local_runtime_path_count": 0,
-    "tracked_file_count": 11873
+    "tracked_file_count": 11875
   }
 }

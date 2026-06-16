@@ -60,6 +60,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "grand_global_debug_logical_consistency_audit/report.py",
         "src/qtt/stage1_prediction_markets/"
         "grand_global_debug_logical_consistency_audit/constants.py",
+        "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
         "src/qtt/stage1_prediction_markets/"
         "master_plan_residual_candidate_coverage/validator.py",
         "src/qtt/stage1_prediction_markets/"
@@ -90,6 +91,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_cross_platform_path_invariant.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
         "tests/tools/test_validation_inventory.py",
         "tools/ci_branch_context.py",
         "tools/changed_area_validation_router.py",
@@ -116,6 +118,9 @@ PR159S_BRANCH_CONTEXT_REPAIR_BRANCH = (
 PR160_MAIN_ANCESTRY_REPAIR_BRANCH = "repair/pr160-main-ancestry-after-pr176"
 PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
     "repair/pr160-main-push-branch-context-relaxation"
+)
+PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH = (
+    "repair/main-pr166-sm2-bounded-idempotence-ci"
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
@@ -164,6 +169,7 @@ EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "pr165-d-scenario-qku-combination-selection": 165,
     "pr166-sf-r2-targeted-conversion-repair-retest": 166,
     "pr166-sm3-score-memory-refresh-v3": 166,
+    PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH: 166,
 }
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CONTEXT_ALLOWANCES = {
     159: frozenset({PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH}),
@@ -1535,6 +1541,28 @@ PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS = frozenset(
         "tests/tools/test_ci_branch_context.py",
     }
 )
+PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_CHANGED_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "tests/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/"
+        "test_pr165_d2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/test_pr166_s2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_repair_materialization_before_retest/test_pr166_sf_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_idempotence.py",
+        "tools/ci_branch_context.py",
+        "tools/validate_repair_pr_changed_file_scope.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+    }
+)
 PR159_ALLOWED_CHANGED_PATHS = frozenset(
     {
         "tools/validate_pr159_official_source_completion_bridge.py",
@@ -1600,6 +1628,9 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
     }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH: (
+        PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_CHANGED_PATHS
+    ),
     PR163_C_MAIN_BRANCH_CONTEXT_REPAIR_BRANCH: frozenset(
         {
             "tools/ci_branch_context.py",
@@ -2012,6 +2043,7 @@ PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
         PR166_SF_R2_BRANCH,
         PR166_SM3_BRANCH,
         PR165_D3_BRANCH,
+        PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH,
     }
 )
 PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(

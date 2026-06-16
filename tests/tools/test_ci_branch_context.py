@@ -3338,6 +3338,58 @@ def test_changed_path_helper_requires_exact_repair_scope():
     )
 
 
+def test_pr166_sm2_bounded_idempotence_ci_repair_scope_is_exact():
+    branch = context.PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH
+    assert context.is_downstream_or_main_validation_branch(
+        branch,
+        after_pr=138,
+        allow_repair=False,
+    )
+    assert not context.is_downstream_or_main_validation_branch(
+        branch,
+        after_pr=166,
+        allow_repair=False,
+    )
+    assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR160")
+    assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+        branch,
+        "PR160",
+    )
+    allowed_paths = (
+        "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "tests/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr165_d2_score_refreshed_scenario_selection_v2/"
+        "test_pr165_d2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/test_pr166_s2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_repair_materialization_before_retest/test_pr166_sf_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_idempotence.py",
+        "tools/ci_branch_context.py",
+        "tools/validate_repair_pr_changed_file_scope.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+    )
+
+    for path in allowed_paths:
+        assert context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+
+    denied_paths = (
+        "docs/master_plan/generated/PR166_SM2_FinalSummary.report.json",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/report_writer.py",
+        "src/qtt/stage1_prediction_markets/quantum_backend/backend_runtime.py",
+    )
+    for path in denied_paths:
+        assert not context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+
+
 def test_validation_infrastructure_changed_path_scope_is_exact():
     for branch in context.VALIDATION_INFRASTRUCTURE_BRANCHES:
         assert context.is_validation_infrastructure_branch(branch)
@@ -3355,11 +3407,19 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,
+            "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
             "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,
             "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tests/tools/test_validate_repair_pr_changed_file_scope.py",
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,

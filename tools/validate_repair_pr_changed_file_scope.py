@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 import sys
@@ -16,6 +17,20 @@ from tools import ci_branch_context as context  # noqa: E402
 
 SUCCESS_MARKER = "REPAIR_PR_CHANGED_FILE_SCOPE_OK"
 
+TRANSIENT_RUNTIME_ARTIFACT_PATH_PREFIXES = (
+    ".tmp/qtt-validation-router/",
+    ".tmp/qtt-validation-timing/",
+    ".pytest_cache/",
+    ".mypy_cache/",
+    ".ruff_cache/",
+    "htmlcov/",
+)
+TRANSIENT_RUNTIME_ARTIFACT_EXACT_PATHS = frozenset(
+    {
+        ".coverage",
+        "coverage.xml",
+    }
+)
 FORBIDDEN_REPAIR_SCOPE_PATHS = (
     "docs/master_plan/generated/PR163_C_FinalSummary.report.json",
     "docs/master_plan/QTT_MasterPlan_Current.md",
@@ -33,6 +48,17 @@ FORBIDDEN_REPAIR_SCOPE_PATHS = (
 )
 
 
+@dataclass(frozen=True)
+class _ChangedPath:
+    path: str
+    source: str
+    status: str = ""
+
+    @property
+    def is_untracked_worktree_path(self) -> bool:
+        return self.source == "worktree" and self.status == "??"
+
+
 def _git(
     repo_root: Path,
     args: Sequence[str],
@@ -44,7 +70,47 @@ def _git(
         capture_output=True,
         text=True,
     )
-    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+    return completed.returncode, completed.stdout.rstrip(), completed.stderr.rstrip()
+
+
+def _normalize_repo_path(path: str) -> str | None:
+    normalized = path.strip().replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized if normalized else None
+
+
+def _porcelain_status(line: str) -> str:
+    return line[:2] if len(line) >= 2 else line
+
+
+def _normalize_status_path(line: str) -> str | None:
+    if len(line) < 3:
+        return None
+    if len(line) >= 3 and line[2] == " ":
+        path = line[3:].strip()
+    elif len(line) >= 2 and line[1] == " ":
+        path = line[2:].strip()
+    else:
+        path = line[3:].strip()
+    if " -> " in path:
+        path = path.rsplit(" -> ", 1)[1]
+    return _normalize_repo_path(path)
+
+
+def _is_transient_runtime_artifact_path(path: str) -> bool:
+    normalized = _normalize_repo_path(path)
+    if not normalized:
+        return False
+    return (
+        normalized in TRANSIENT_RUNTIME_ARTIFACT_EXACT_PATHS
+        or any(
+            normalized.startswith(prefix)
+            for prefix in TRANSIENT_RUNTIME_ARTIFACT_PATH_PREFIXES
+        )
+        or normalized.startswith("__pycache__/")
+        or "/__pycache__/" in normalized
+    )
 
 
 def _explicit_repair_branches_with_scope() -> frozenset[str]:
@@ -63,23 +129,72 @@ def _explicit_repair_branches_with_scope() -> frozenset[str]:
     return frozenset(branches)
 
 
-def _changed_files_from_git(repo_root: Path) -> tuple[str, ...]:
+def _changed_worktree_entries_from_git(repo_root: Path) -> tuple[_ChangedPath, ...]:
+    rc, stdout, _stderr = _git(
+        repo_root,
+        ("status", "--porcelain", "--untracked-files=all"),
+    )
+    if rc != 0 or not stdout.strip():
+        return ()
+    entries = {
+        _ChangedPath(
+            path=path,
+            source="worktree",
+            status=_porcelain_status(line),
+        )
+        for line in stdout.splitlines()
+        for path in (_normalize_status_path(line),)
+        if path
+    }
+    return tuple(sorted(entries, key=lambda entry: (entry.path, entry.status)))
+
+
+def _changed_worktree_files_from_git(repo_root: Path) -> tuple[str, ...]:
+    return tuple(entry.path for entry in _changed_worktree_entries_from_git(repo_root))
+
+
+def _changed_file_entries_from_git(repo_root: Path) -> tuple[_ChangedPath, ...]:
+    worktree_entries = _changed_worktree_entries_from_git(repo_root)
+    if worktree_entries:
+        return worktree_entries
+
     diff_commands = (
         ("diff", "--name-only", "HEAD^1", "HEAD"),
         ("diff", "--name-only", "origin/main...HEAD"),
         ("diff", "--name-only", "main...HEAD"),
-        ("diff", "--name-only", "--cached"),
-        ("diff", "--name-only"),
     )
     for args in diff_commands:
         rc, stdout, _stderr = _git(repo_root, args)
         if rc == 0 and stdout.strip():
             return tuple(
-                line.strip().replace("\\", "/")
+                _ChangedPath(path=path, source="diff", status="committed")
                 for line in stdout.splitlines()
-                if line.strip()
+                for path in (_normalize_repo_path(line),)
+                if path
             )
     return ()
+
+
+def _changed_files_from_git(repo_root: Path) -> tuple[str, ...]:
+    return tuple(entry.path for entry in _changed_file_entries_from_git(repo_root))
+
+
+def _changed_files_for_repair_scope_from_git(
+    repo_root: Path,
+    failures: list[str],
+) -> tuple[str, ...]:
+    scope_paths: list[str] = []
+    for entry in _changed_file_entries_from_git(repo_root):
+        if not _is_transient_runtime_artifact_path(entry.path):
+            scope_paths.append(entry.path)
+            continue
+        if entry.is_untracked_worktree_path:
+            continue
+        failures.append(
+            "git hygiene failure: transient runtime artifact is tracked or staged: "
+            f"{entry.path}"
+        )
+    return tuple(scope_paths)
 
 
 def _expect(condition: bool, failures: list[str], message: str) -> None:
@@ -160,7 +275,7 @@ def _check_current_repair_branch_scope(repo_root: Path, failures: list[str]) -> 
     if normalized not in known_repairs:
         return
 
-    changed_files = _changed_files_from_git(repo_root)
+    changed_files = _changed_files_for_repair_scope_from_git(repo_root, failures)
     for path in changed_files:
         if context.changed_path_allowed_for_explicit_repair_branch(normalized, path):
             continue
