@@ -44,7 +44,21 @@ def _git(
         capture_output=True,
         text=True,
     )
-    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
+    return completed.returncode, completed.stdout.rstrip(), completed.stderr.rstrip()
+
+
+def _normalize_status_path(line: str) -> str | None:
+    if len(line) < 3:
+        return None
+    if len(line) >= 3 and line[2] == " ":
+        path = line[3:].strip()
+    elif len(line) >= 2 and line[1] == " ":
+        path = line[2:].strip()
+    else:
+        path = line[3:].strip()
+    if " -> " in path:
+        path = path.rsplit(" -> ", 1)[1]
+    return path.replace("\\", "/") if path else None
 
 
 def _explicit_repair_branches_with_scope() -> frozenset[str]:
@@ -63,13 +77,31 @@ def _explicit_repair_branches_with_scope() -> frozenset[str]:
     return frozenset(branches)
 
 
+def _changed_worktree_files_from_git(repo_root: Path) -> tuple[str, ...]:
+    rc, stdout, _stderr = _git(
+        repo_root,
+        ("status", "--porcelain", "--untracked-files=all"),
+    )
+    if rc != 0 or not stdout.strip():
+        return ()
+    paths = {
+        path
+        for line in stdout.splitlines()
+        for path in (_normalize_status_path(line),)
+        if path
+    }
+    return tuple(sorted(paths))
+
+
 def _changed_files_from_git(repo_root: Path) -> tuple[str, ...]:
+    worktree_files = _changed_worktree_files_from_git(repo_root)
+    if worktree_files:
+        return worktree_files
+
     diff_commands = (
         ("diff", "--name-only", "HEAD^1", "HEAD"),
         ("diff", "--name-only", "origin/main...HEAD"),
         ("diff", "--name-only", "main...HEAD"),
-        ("diff", "--name-only", "--cached"),
-        ("diff", "--name-only"),
     )
     for args in diff_commands:
         rc, stdout, _stderr = _git(repo_root, args)
