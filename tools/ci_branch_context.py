@@ -1492,6 +1492,7 @@ PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
         "tools/validate_no_runtime_artifacts.py",
         "tools/validation_inventory.py",
         "tools/changed_area_validation_router.py",
+        ".github/workflows/qtt_validation.yml",
         "src/qtt/stage1_prediction_markets/"
         "pr166_s2_replay_paper_retest_loop_v2/io.py",
         "src/qtt/stage1_prediction_markets/"
@@ -1512,6 +1513,9 @@ PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/"
+        "test_pr166_sf_r2_idempotence.py",
         "docs/master_plan/generated/"
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",

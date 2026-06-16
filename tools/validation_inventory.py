@@ -69,10 +69,7 @@ GENERATED_REPORT_GLOBS = (
 PHASE_JOB_IDS = {
     runner.FAST_PREFLIGHT_PHASE: "fast_preflight",
     runner.DETERMINISTIC_VALIDATORS_PHASE: "deterministic_validators",
-    "pytest-shard-1": "pytest_shard_1",
-    "pytest-shard-2": "pytest_shard_2",
-    "pytest-shard-3": "pytest_shard_3",
-    "pytest-shard-4": "pytest_shard_4",
+    **{phase: phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES},
     runner.POST_VALIDATION_PHASE: "post_validation_checks",
 }
 

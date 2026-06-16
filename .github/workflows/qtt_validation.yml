@@ -186,6 +186,114 @@ jobs:
       - name: Run pytest shard 4
         run: python -B tools/run_validation_gates.py --phase pytest-shard-4 --timing-report .tmp/qtt-validation-timing/pytest-shard-4.json --router-report .tmp/qtt-validation-router/pytest-shard-4.json
 
+  pytest_shard_5:
+    name: Pytest Shard 5
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with: *checkout_full
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 5
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-5 --timing-report .tmp/qtt-validation-timing/pytest-shard-5.json --router-report .tmp/qtt-validation-router/pytest-shard-5.json
+
+  pytest_shard_6:
+    name: Pytest Shard 6
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with: *checkout_full
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 6
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-6 --timing-report .tmp/qtt-validation-timing/pytest-shard-6.json --router-report .tmp/qtt-validation-router/pytest-shard-6.json
+
+  pytest_shard_7:
+    name: Pytest Shard 7
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with: *checkout_full
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 7
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-7 --timing-report .tmp/qtt-validation-timing/pytest-shard-7.json --router-report .tmp/qtt-validation-router/pytest-shard-7.json
+
+  pytest_shard_8:
+    name: Pytest Shard 8
+    runs-on: ubuntu-latest
+    needs:
+      - fast_preflight
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with: *checkout_full
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Restore pip download cache
+        uses: actions/cache@v4
+        with: *pip_cache
+
+      - name: Install test dependency
+        run: *install_pytest
+
+      - name: Run pytest shard 8
+        run: python -B tools/run_validation_gates.py --phase pytest-shard-8 --timing-report .tmp/qtt-validation-timing/pytest-shard-8.json --router-report .tmp/qtt-validation-router/pytest-shard-8.json
+
   post_validation_checks:
     name: Post Validation Checks
     runs-on: ubuntu-latest
@@ -195,6 +303,10 @@ jobs:
       - pytest_shard_2
       - pytest_shard_3
       - pytest_shard_4
+      - pytest_shard_5
+      - pytest_shard_6
+      - pytest_shard_7
+      - pytest_shard_8
     timeout-minutes: 90
 
     steps:
@@ -231,6 +343,10 @@ jobs:
       - pytest_shard_2
       - pytest_shard_3
       - pytest_shard_4
+      - pytest_shard_5
+      - pytest_shard_6
+      - pytest_shard_7
+      - pytest_shard_8
       - post_validation_checks
     if: ${{ always() }}
     timeout-minutes: 90

@@ -2382,7 +2382,7 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     assert set(shard_manifest) == set(runner.PYTEST_SHARD_PHASES)
     assert (
         runner.ISOLATED_SOURCE_EVIDENCE_PYTEST
-        in shard_manifest["pytest-shard-4"]
+        in shard_manifest["pytest-shard-8"]
     )
     assert "tests/tools/test_ci_branch_context.py" in shard_manifest["pytest-shard-1"]
     assert (
@@ -2392,7 +2392,39 @@ def test_runner_pytest_shards_cover_each_test_file_once():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in shard_manifest["pytest-shard-4"]
+        in shard_manifest["pytest-shard-8"]
+    )
+    assert (
+        "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/"
+        "test_pr165_d3_validator.py"
+        in shard_manifest["pytest-shard-7"]
+    )
+
+
+def test_runner_pytest_runtime_budget_plan_is_complete_and_fail_closed():
+    failures = runner.pytest_runtime_budget_failures(REPO_ROOT)
+    plan = runner.pytest_runtime_budget_plan()
+
+    assert failures == ()
+    assert set(plan["pytest_shards"]) == set(runner.PYTEST_SHARD_PHASES)
+    assert set(plan["shard_budgets"]) == set(runner.PYTEST_SHARD_PHASES)
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_shard_target_seconds"] == 20 * 60
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_shard_warning_seconds"] == 25 * 60
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_shard_hard_review_seconds"] == 30 * 60
+    assert (
+        runner.RUNTIME_BUDGET_POLICY["pytest_subprocess_group_target_seconds"]
+        == 8 * 60
+    )
+    assert (
+        runner.RUNTIME_BUDGET_POLICY["pytest_subprocess_group_warning_seconds"]
+        == 10 * 60
+    )
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_file_warning_seconds"] == 120
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_file_hard_review_seconds"] == 300
+    assert runner.RUNTIME_BUDGET_POLICY["pytest_idempotence_warning_seconds"] == 120
+    assert (
+        runner.RUNTIME_BUDGET_POLICY["pytest_idempotence_hard_review_seconds"]
+        == 180
     )
 
 
@@ -2423,7 +2455,7 @@ def _pr166_sf_r2_idempotence_path() -> str:
     )
 
 
-def _pr166_sf_r2_shard_2_group_paths() -> list[tuple[str, ...]]:
+def _pr166_sf_r2_non_idempotence_group_paths() -> list[tuple[str, ...]]:
     idempotence_group = (_pr166_sf_r2_idempotence_path(),)
     return [
         group_paths
@@ -2466,22 +2498,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor",
             "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
         ),
-        (
-            "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
-            "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
-        ),
-        *_pr166_sf_r2_shard_2_group_paths(),
-        *_pr166_sm2_group_paths(),
-        (
-            "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
-            "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
-            "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
-            "tests/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation",
-            "tests/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning",
-            "tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate",
-            "tests/stage1_prediction_markets/source_intelligence",
-            "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
-        ),
+        ("tests/atomicrows",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [
@@ -2513,7 +2530,7 @@ def test_runner_pr166_sm2_split_groups_cover_each_test_file_once():
     ]
     expanded = [
         path
-        for command in runner.PYTEST_SHARD_COMMANDS["pytest-shard-2"]
+        for command in runner.PYTEST_SHARD_COMMANDS["pytest-shard-5"]
         if any(path.startswith(f"{runner.PR166_SM2_TEST_ROOT}/") for path in command.paths)
         for path in runner._pytest_files_for_command(command, REPO_ROOT)
     ]
@@ -2525,7 +2542,7 @@ def test_runner_pr166_sm2_split_groups_cover_each_test_file_once():
     assert set(grouped) == expected
     assert expanded == grouped
     assert set(expanded).issubset(
-        set(runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-2"])
+        set(runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-5"])
     )
 
 
@@ -2576,7 +2593,13 @@ def test_runner_pr166_sf_r2_split_groups_cover_each_test_file_once():
     assert sorted(expanded) == grouped
     assert expanded.count(idempotence_path) == 1
     assert idempotence_path not in expanded_by_phase["pytest-shard-2"]
+    assert not expanded_by_phase["pytest-shard-2"]
     assert expanded_by_phase["pytest-shard-4"] == [idempotence_path]
+    assert sorted(expanded_by_phase["pytest-shard-6"]) == sorted(
+        path
+        for group in _pr166_sf_r2_non_idempotence_group_paths()
+        for path in group
+    )
     assert manifest_hits == [("pytest-shard-4", idempotence_path)]
 
 
@@ -2595,9 +2618,11 @@ def test_runner_pr166_sf_r2_idempotence_is_own_early_shard4_subgroup():
     ]
 
     assert placements == [("pytest-shard-4", (idempotence_path,))]
-    assert runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"][0].paths == (
+    idempotence_command = runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"][1]
+    assert idempotence_command.paths == (
         idempotence_path,
     )
+    assert idempotence_command.bounded_idempotence is True
     assert manifest_hits == [("pytest-shard-4", idempotence_path)]
 
 
@@ -2615,7 +2640,7 @@ def test_runner_fails_closed_if_any_pr166_sm2_subgroup_fails(
             self.returncode = returncode
 
     commands = runner.build_pytest_shard_commands(
-        "pytest-shard-2",
+        "pytest-shard-5",
         Path(".tmp") / "pytest-basetemp",
     )
     pr166_commands = [
@@ -2633,7 +2658,7 @@ def test_runner_fails_closed_if_any_pr166_sm2_subgroup_fails(
 
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
 
-    exit_code = runner.run_commands(commands, phase="pytest-shard-2")
+    exit_code = runner.run_commands(commands, phase="pytest-shard-5")
 
     assert exit_code == 73
     assert seen == commands[: failing_index + 1]
@@ -2690,7 +2715,6 @@ def test_runner_rebalances_pytest_shard_3_with_stage1_legacy_group():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-3"]
 
     assert [command.paths for command in commands] == [
-        ("tests/atomicrows",),
         (
             "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
             "tests/stage1_prediction_markets/"
@@ -2721,10 +2745,15 @@ def test_runner_rebalances_pytest_shard_3_with_stage1_legacy_group():
             "pr166_s_replay_paper_scenario_retest_execution",
             "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
         ),
-        ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
         (
-            "tests/stage1_prediction_markets/"
-            "pr165_d3_quantum_aware_scenario_selection_v3",
+            "tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization",
+            "tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization",
+            "tests/stage1_prediction_markets/qku_residual_candidate_assimilation",
+            "tests/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation",
+            "tests/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning",
+            "tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate",
+            "tests/stage1_prediction_markets/source_intelligence",
+            "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
         ),
     ]
     assert all(command.reason for command in commands)
@@ -2742,20 +2771,57 @@ def test_runner_rebalances_pytest_shard_3_with_stage1_legacy_group():
     assert (
         "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/"
         "test_pr166_s2_exec_readiness.py"
-        in runner._pytest_files_for_command(commands[2], REPO_ROOT)
-    )
-    assert (
-        "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/"
-        "test_pr165_d3_validator.py"
-        in runner._pytest_files_for_command(commands[4], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[1], REPO_ROOT)
     )
 
 
-def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
+def test_runner_splits_pytest_shard_4_bounded_idempotence_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-4"]
 
     assert [command.paths for command in commands] == [
+        (
+            "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
+            "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
+        ),
         (_pr166_sf_r2_idempotence_path(),),
+    ]
+    assert commands[1].bounded_idempotence is True
+    assert all(command.reason for command in commands)
+
+    expanded_paths = [
+        path
+        for command in commands
+        for path in runner._pytest_files_for_command(command, REPO_ROOT)
+    ]
+
+    assert len(expanded_paths) == len(set(expanded_paths))
+    assert set(expanded_paths) == set(
+        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-4"]
+    )
+
+
+def test_runner_splits_pytest_shard_7_current_pr_group_first():
+    commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-7"]
+
+    assert [command.paths for command in commands] == [
+        (
+            "tests/stage1_prediction_markets/"
+            "pr165_d3_quantum_aware_scenario_selection_v3",
+        ),
+        ("tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",),
+    ]
+    assert (
+        "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/"
+        "test_pr165_d3_validator.py"
+        in runner._pytest_files_for_command(commands[0], REPO_ROOT)
+    )
+    assert all(command.reason for command in commands)
+
+
+def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
+    commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-8"]
+
+    assert [command.paths for command in commands] == [
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
             "tests/agent_algorithm",
@@ -2803,11 +2869,11 @@ def test_runner_splits_pytest_shard_4_residual_tests_deterministically():
 
     assert len(expanded_paths) == len(set(expanded_paths))
     assert set(expanded_paths) == set(
-        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-4"]
+        runner.pytest_shard_manifest(REPO_ROOT)["pytest-shard-8"]
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[4], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[3], REPO_ROOT)
     )
 
 
@@ -10028,6 +10094,8 @@ def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     assert payload["schema_version"] == runner.TIMING_SCHEMA_VERSION
     assert payload["phase"] == "with-report"
+    assert payload["runtime_budget_policy"] == runner.RUNTIME_BUDGET_POLICY
+    assert payload["runtime_budget_warnings"] == []
     assert payload["command_entries"][0]["command"] == ["python", "ok.py"]
     assert payload["slowest_entries"]
     assert payload["total_elapsed_seconds"] >= 0
@@ -10633,10 +10701,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     phase_jobs = (
         "fast_preflight",
         "deterministic_validators",
-        "pytest_shard_1",
-        "pytest_shard_2",
-        "pytest_shard_3",
-        "pytest_shard_4",
+        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
         "post_validation_checks",
     )
 
@@ -10677,10 +10742,7 @@ def test_github_workflow_aggregate_depends_on_every_required_phase_job():
     for job_id in (
         "fast_preflight",
         "deterministic_validators",
-        "pytest_shard_1",
-        "pytest_shard_2",
-        "pytest_shard_3",
-        "pytest_shard_4",
+        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
         "post_validation_checks",
     ):
         assert f"      - {job_id}\n" in validation_block
@@ -10695,10 +10757,7 @@ def test_github_workflow_post_validation_waits_for_validators_and_pytest_shards(
 
     for job_id in (
         "deterministic_validators",
-        "pytest_shard_1",
-        "pytest_shard_2",
-        "pytest_shard_3",
-        "pytest_shard_4",
+        *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
     ):
         assert f"      - {job_id}\n" in post_block
 

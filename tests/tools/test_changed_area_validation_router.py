@@ -2,7 +2,11 @@ from pathlib import Path
 
 from tools import run_validation_gates as runner
 from tools import validation_inventory as inventory
-from tools.changed_area_validation_router import RouterInput, build_router_result
+from tools.changed_area_validation_router import (
+    RouterInput,
+    build_router_result,
+    build_routing_policy_report,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -120,9 +124,9 @@ def test_pr166_sm2_split_pytest_groups_preserve_directory_routing():
         f"{runner.PR166_SM2_TEST_ROOT}/test_pr166_sm2_validator.py"
     )
     expected_ids = {
-        inventory.validator_id_for_command(command, "pytest-shard-2")
+        inventory.validator_id_for_command(command, "pytest-shard-5")
         for command in runner.build_pytest_shard_commands(
-            "pytest-shard-2",
+            "pytest-shard-5",
             Path(".tmp") / "pytest",
         )
         if any(part.startswith(f"{runner.PR166_SM2_TEST_ROOT}/") for part in command)
@@ -130,6 +134,7 @@ def test_pr166_sm2_split_pytest_groups_preserve_directory_routing():
 
     assert len(expected_ids) == len(runner.PR166_SM2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
+    assert "pytest_shard_5" in result.required_jobs
     assert result.fail_closed_reasons == ()
 
 
@@ -139,7 +144,7 @@ def test_pr166_sf_r2_split_pytest_groups_preserve_directory_routing():
     )
     expected_ids = {
         inventory.validator_id_for_command(command, phase)
-        for phase in ("pytest-shard-2", "pytest-shard-4")
+        for phase in ("pytest-shard-4", "pytest-shard-6")
         for command in runner.build_pytest_shard_commands(
             phase,
             Path(".tmp") / "pytest",
@@ -150,4 +155,20 @@ def test_pr166_sf_r2_split_pytest_groups_preserve_directory_routing():
     assert len(expected_ids) == len(runner.PR166_SF_R2_PYTEST_FILE_GROUPS)
     assert expected_ids.issubset(set(result.required_validators))
     assert "pytest_shard_4" in result.required_jobs
+    assert "pytest_shard_6" in result.required_jobs
     assert result.fail_closed_reasons == ()
+
+
+def test_router_policy_report_knows_all_eight_pytest_shard_jobs():
+    report = build_routing_policy_report()
+    expected_jobs = sorted(
+        {
+            "fast_preflight",
+            "deterministic_validators",
+            *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
+            "post_validation_checks",
+        }
+    )
+
+    assert report["required_jobs_for_reduced_pr_mode"] == expected_jobs
+    assert report["required_jobs_for_full_mode"] == expected_jobs
