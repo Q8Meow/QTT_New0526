@@ -26,6 +26,15 @@ PHASE_SUCCESS_MARKER_PREFIX = "QTT_VALIDATION_PHASE_OK"
 TIMING_SCHEMA_VERSION = 1
 SLOWEST_ENTRY_LIMIT = 20
 PYTEST_DURATIONS_ARG = "--durations=50"
+PYTEST_SHARD_TARGET_SECONDS = 20 * 60
+PYTEST_SHARD_WARNING_SECONDS = 25 * 60
+PYTEST_SHARD_HARD_REVIEW_SECONDS = 30 * 60
+PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS = 8 * 60
+PYTEST_SUBPROCESS_GROUP_WARNING_SECONDS = 10 * 60
+PYTEST_FILE_WARNING_SECONDS = 120
+PYTEST_FILE_HARD_REVIEW_SECONDS = 300
+PYTEST_IDEMPOTENCE_WARNING_SECONDS = 120
+PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS = 180
 NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV = "QTT_NO_RUNTIME_ARTIFACT_SCAN_CACHE"
 NO_RUNTIME_ARTIFACT_SCAN_CACHE_KIND = "qtt_no_runtime_artifact_scan"
 NO_RUNTIME_ARTIFACT_SCAN_CACHE_SCHEMA_VERSION = 1
@@ -39,6 +48,10 @@ PYTEST_SHARD_PHASES = (
     "pytest-shard-2",
     "pytest-shard-3",
     "pytest-shard-4",
+    "pytest-shard-5",
+    "pytest-shard-6",
+    "pytest-shard-7",
+    "pytest-shard-8",
 )
 POST_VALIDATION_PHASE = "post-validation"
 ALL_PHASE = "all"
@@ -49,6 +62,25 @@ ORDERED_PHASES = (
     POST_VALIDATION_PHASE,
 )
 VALIDATION_PHASES = (*ORDERED_PHASES, ALL_PHASE)
+PYTEST_SHARD_RUNTIME_BUDGETS = {
+    phase: {
+        "target_seconds": PYTEST_SHARD_TARGET_SECONDS,
+        "warning_seconds": PYTEST_SHARD_WARNING_SECONDS,
+        "hard_review_seconds": PYTEST_SHARD_HARD_REVIEW_SECONDS,
+    }
+    for phase in PYTEST_SHARD_PHASES
+}
+RUNTIME_BUDGET_POLICY = {
+    "pytest_shard_target_seconds": PYTEST_SHARD_TARGET_SECONDS,
+    "pytest_shard_warning_seconds": PYTEST_SHARD_WARNING_SECONDS,
+    "pytest_shard_hard_review_seconds": PYTEST_SHARD_HARD_REVIEW_SECONDS,
+    "pytest_subprocess_group_target_seconds": PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+    "pytest_subprocess_group_warning_seconds": PYTEST_SUBPROCESS_GROUP_WARNING_SECONDS,
+    "pytest_file_warning_seconds": PYTEST_FILE_WARNING_SECONDS,
+    "pytest_file_hard_review_seconds": PYTEST_FILE_HARD_REVIEW_SECONDS,
+    "pytest_idempotence_warning_seconds": PYTEST_IDEMPOTENCE_WARNING_SECONDS,
+    "pytest_idempotence_hard_review_seconds": PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+}
 FAST_PREFLIGHT_SCRIPT_NAMES = frozenset(
     {
         "validate_grand_global_debug_logical_consistency_audit.py",
@@ -72,6 +104,10 @@ class PytestShardCommand:
     paths: tuple[str, ...]
     ignores: tuple[str, ...] = ()
     reason: str = ""
+    runtime_budget_seconds: int | None = None
+    historical_runtime_seconds: float | None = None
+    known_historical_heavy: bool = False
+    bounded_idempotence: bool = False
 
 
 @dataclass(frozen=True)
@@ -83,11 +119,222 @@ class TimingEntry:
     returncode: int
 
 
+PR166_SM2_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2"
+)
+PR166_SF_R2_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest"
+)
+PR166_SM3_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3"
+)
+PR166_SM2_PYTEST_FILE_GROUPS = (
+    (
+        "test_pr166_sm2_ablation.py",
+        "test_pr166_sm2_agent_duty.py",
+        "test_pr166_sm2_agent_kpi.py",
+        "test_pr166_sm2_agent_task_queue.py",
+        "test_pr166_sm2_all_neg_conversion.py",
+        "test_pr166_sm2_alt_exec_memory.py",
+        "test_pr166_sm2_authority_boundaries.py",
+        "test_pr166_sm2_break_even_gap.py",
+        "test_pr166_sm2_build_outputs.py",
+        "test_pr166_sm2_calib_boost.py",
+        "test_pr166_sm2_calibration.py",
+        "test_pr166_sm2_candidate_family.py",
+        "test_pr166_sm2_capacity_crowding.py",
+    ),
+    (
+        "test_pr166_sm2_champion_challenger.py",
+        "test_pr166_sm2_compact_names.py",
+        "test_pr166_sm2_condition_winners_losers.py",
+        "test_pr166_sm2_connector_ref_routing.py",
+        "test_pr166_sm2_conversion_agent_queue.py",
+        "test_pr166_sm2_conversion_math.py",
+        "test_pr166_sm2_convertible_queue.py",
+        "test_pr166_sm2_cost_cut.py",
+        "test_pr166_sm2_counterfactual.py",
+        "test_pr166_sm2_diversity.py",
+        "test_pr166_sm2_edge_decay.py",
+        "test_pr166_sm2_edge_uplift.py",
+    ),
+    (
+        "test_pr166_sm2_evidence_depth.py",
+        "test_pr166_sm2_expansion_policy.py",
+        "test_pr166_sm2_external_dedupe.py",
+        "test_pr166_sm2_external_signal_registry.py",
+        "test_pr166_sm2_fill_boost.py",
+        "test_pr166_sm2_fragile_watchlist.py",
+        "test_pr166_sm2_handoff_intake.py",
+        "test_pr166_sm2_idempotence.py",
+        "test_pr166_sm2_input_consumption.py",
+        "test_pr166_sm2_lat_liq_impact.py",
+        "test_pr166_sm2_latent_edge.py",
+        "test_pr166_sm2_lcb_confidence.py",
+    ),
+    (
+        "test_pr166_sm2_marginal_utility.py",
+        "test_pr166_sm2_memory_dag.py",
+        "test_pr166_sm2_memory_ledger.py",
+        "test_pr166_sm2_microstructure.py",
+        "test_pr166_sm2_no_bad_status_tokens.py",
+        "test_pr166_sm2_no_fill_memory.py",
+        "test_pr166_sm2_no_orphans.py",
+        "test_pr166_sm2_no_profit_evidence.py",
+        "test_pr166_sm2_orthogonal_edge.py",
+        "test_pr166_sm2_overfit_fdr.py",
+        "test_pr166_sm2_param_uplift.py",
+        "test_pr166_sm2_pos_seed_driver.py",
+    ),
+    (
+        "test_pr166_sm2_positive_expansion.py",
+        "test_pr166_sm2_positive_negative_edge.py",
+        "test_pr166_sm2_pr152_pr208_routing_contract.py",
+        "test_pr166_sm2_pref_avoid_memory.py",
+        "test_pr166_sm2_provenance_supersession_drift.py",
+        "test_pr166_sm2_quantum_priority.py",
+        "test_pr166_sm2_rank_aggregation.py",
+        "test_pr166_sm2_rank_delta.py",
+        "test_pr166_sm2_rank_stability.py",
+        "test_pr166_sm2_regime_memory.py",
+        "test_pr166_sm2_repair_priority.py",
+        "test_pr166_sm2_result_intake.py",
+    ),
+    (
+        "test_pr166_sm2_retest_boost_queue.py",
+        "test_pr166_sm2_route_crosswalk_cmd.py",
+        "test_pr166_sm2_row_count_reconciliation.py",
+        "test_pr166_sm2_score_explain.py",
+        "test_pr166_sm2_score_registry.py",
+        "test_pr166_sm2_selection_pressure.py",
+        "test_pr166_sm2_selection_ready_queue.py",
+        "test_pr166_sm2_settlement_adverse.py",
+        "test_pr166_sm2_shard_input_audit.py",
+        "test_pr166_sm2_shrinkage.py",
+        "test_pr166_sm2_status_enum_drift.py",
+        "test_pr166_sm2_tca_cost_roots.py",
+        "test_pr166_sm2_tt_risk.py",
+        "test_pr166_sm2_validator.py",
+    ),
+)
+PR166_SF_R2_IDEMPOTENCE_TEST_FILE = "test_pr166_sf_r2_idempotence.py"
+PR166_SM3_IDEMPOTENCE_TEST_FILE = "test_pr166_sm3_idempotence.py"
+BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
+    {
+        f"{PR166_SF_R2_TEST_ROOT}/{PR166_SF_R2_IDEMPOTENCE_TEST_FILE}",
+        f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+    }
+)
+PR166_SF_R2_PYTEST_FILE_GROUPS = (
+    (
+        "test_pr166_sf_r2_agent_duty.py",
+        "test_pr166_sf_r2_agent_kpi.py",
+        "test_pr166_sf_r2_agent_task_queue.py",
+        "test_pr166_sf_r2_all_negative_intake.py",
+        "test_pr166_sf_r2_alt_exec_repair.py",
+        "test_pr166_sf_r2_authority_boundaries.py",
+        "test_pr166_sf_r2_before_after.py",
+        "test_pr166_sf_r2_break_even_gap.py",
+        "test_pr166_sf_r2_build_outputs.py",
+        "test_pr166_sf_r2_calib_uplift_proof.py",
+        "test_pr166_sf_r2_calibration.py",
+        "test_pr166_sf_r2_calibration_repair.py",
+        "test_pr166_sf_r2_capacity_crowding.py",
+    ),
+    (
+        "test_pr166_sf_r2_champion_challenger.py",
+        "test_pr166_sf_r2_compact_names.py",
+        "test_pr166_sf_r2_computable_payload.py",
+        "test_pr166_sf_r2_connectivity.py",
+        "test_pr166_sf_r2_connector_routing.py",
+        "test_pr166_sf_r2_conversion_attribution.py",
+        "test_pr166_sf_r2_conversion_frontier.py",
+        "test_pr166_sf_r2_conversion_proof.py",
+        "test_pr166_sf_r2_cost_floor.py",
+        "test_pr166_sf_r2_cost_repair.py",
+        "test_pr166_sf_r2_downstream_handoffs.py",
+        "test_pr166_sf_r2_episode_plan.py",
+    ),
+    (
+        "test_pr166_sf_r2_external_signals.py",
+        "test_pr166_sf_r2_fill_probability_model.py",
+        "test_pr166_sf_r2_fill_repair.py",
+        "test_pr166_sf_r2_fills_no_fills.py",
+        "test_pr166_sf_r2_formula_qku_repair.py",
+        "test_pr166_sf_r2_handoff_intake.py",
+        "test_pr166_sf_r2_holdout_replay.py",
+    ),
+    (
+        PR166_SF_R2_IDEMPOTENCE_TEST_FILE,
+    ),
+    (
+        "test_pr166_sf_r2_impl_shortfall.py",
+        "test_pr166_sf_r2_input_consumption.py",
+        "test_pr166_sf_r2_launch_candidate_filter.py",
+        "test_pr166_sf_r2_lcb_confidence.py",
+    ),
+    (
+        "test_pr166_sf_r2_marginal_utility.py",
+        "test_pr166_sf_r2_microstructure.py",
+        "test_pr166_sf_r2_net_edge.py",
+        "test_pr166_sf_r2_no_bad_status_tokens.py",
+        "test_pr166_sf_r2_no_orphans.py",
+        "test_pr166_sf_r2_no_profit_evidence.py",
+        "test_pr166_sf_r2_order_intents.py",
+        "test_pr166_sf_r2_overfit_fdr.py",
+        "test_pr166_sf_r2_parameter_bound_audit.py",
+        "test_pr166_sf_r2_parameter_repair.py",
+        "test_pr166_sf_r2_positive_capacity.py",
+        "test_pr166_sf_r2_positive_conversion.py",
+    ),
+    (
+        "test_pr166_sf_r2_pr152_pr208_routing_contract.py",
+        "test_pr166_sf_r2_quantum_handoff.py",
+        "test_pr166_sf_r2_quantum_objective_map.py",
+        "test_pr166_sf_r2_quantum_repair.py",
+        "test_pr166_sf_r2_rank_stability.py",
+        "test_pr166_sf_r2_regime_memory.py",
+        "test_pr166_sf_r2_repair_ablation.py",
+        "test_pr166_sf_r2_repair_failure.py",
+        "test_pr166_sf_r2_repair_feasibility.py",
+        "test_pr166_sf_r2_repair_frontier.py",
+        "test_pr166_sf_r2_repair_portfolio.py",
+        "test_pr166_sf_r2_repair_priority.py",
+    ),
+    (
+        "test_pr166_sf_r2_repair_sensitivity.py",
+        "test_pr166_sf_r2_repair_universe.py",
+        "test_pr166_sf_r2_repaired_packet_registry.py",
+        "test_pr166_sf_r2_retest_policy.py",
+        "test_pr166_sf_r2_retest_universe.py",
+        "test_pr166_sf_r2_route_crosswalk_cmd.py",
+        "test_pr166_sf_r2_row_count_reconciliation.py",
+        "test_pr166_sf_r2_runtime_safety_handoff.py",
+        "test_pr166_sf_r2_shard_input_audit.py",
+        "test_pr166_sf_r2_status_enum_drift.py",
+        "test_pr166_sf_r2_still_negative.py",
+        "test_pr166_sf_r2_tca_cost_roots.py",
+        "test_pr166_sf_r2_terminal_rows.py",
+        "test_pr166_sf_r2_validator.py",
+    ),
+)
+
+
+def _pr166_sm2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:
+    return tuple(f"{PR166_SM2_TEST_ROOT}/{file_name}" for file_name in file_names)
+
+
+def _pr166_sf_r2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:
+    return tuple(f"{PR166_SF_R2_TEST_ROOT}/{file_name}" for file_name in file_names)
+
+
 PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
     "pytest-shard-1": (
         PytestShardCommand(
             paths=("tests/tools", "tests/fail_closed"),
             reason="CI tooling and fail-closed runner policy tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=29.0,
         ),
     ),
     "pytest-shard-2": (
@@ -100,19 +347,9 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/atomicrows_pr154_value_state",
                 "tests/stage1_prediction_markets/latency_hot_path_snapshot_boundary",
             ),
-            reason="Stage 1 prediction-market tests, subprocess group 1",
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
-                "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
-                "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
-                "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
-                "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
-                "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
-                "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
-            ),
-            reason="Stage 1 prediction-market tests, subprocess group 2",
+            reason="Stage 1 prediction-market foundational lightweight tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=16.0,
         ),
         PytestShardCommand(
             paths=(
@@ -125,7 +362,37 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor",
                 "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
             ),
-            reason="Stage 1 prediction-market tests, subprocess group 3",
+            reason="Stage 1 PR160/PR162/PR163 medium replay-paper infrastructure tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=24.0,
+        ),
+        PytestShardCommand(
+            paths=(
+                "tests/atomicrows",
+            ),
+            reason="AtomicRows tests moved out of residual shards for stable runtime budget",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=70.0,
+        ),
+    ),
+    "pytest-shard-3": (
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/master_plan_residual_candidate_coverage",
+                "tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage",
+                "tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge",
+                "tests/stage1_prediction_markets/pr157_completion_materialization_bridge",
+                "tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge",
+                "tests/stage1_prediction_markets/pr159_official_source_completion_bridge",
+                "tests/stage1_prediction_markets/pr159r_source_locator_value_capture",
+            ),
+            reason=(
+                "Stage 1 prediction-market legacy source-resolution block "
+                "isolated from PR166 heavy groups"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=160.0,
+            known_historical_heavy=True,
         ),
         PytestShardCommand(
             paths=(
@@ -139,44 +406,13 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution",
                 "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2",
             ),
-            reason="Stage 1 prediction-market tests, subprocess group 4",
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
-                "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
-            ),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5a "
-                "split from the longest shard-2 runtime group"
+                "Stage 1 PR164/PR165/PR166-S replay retest block isolated from "
+                "PR166-SM2 and PR166-SF-R2 idempotence-heavy groups"
             ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5b "
-                "isolates PR166-SM2 timing without changing coverage"
-            ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5c "
-                "isolates PR166-SF-R2 repair retest timing without changing coverage"
-            ),
-        ),
-        PytestShardCommand(
-            paths=(
-                "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3",
-            ),
-            reason=(
-                "Stage 1 prediction-market tests, subprocess group 5d "
-                "isolates PR166-SM3 score memory refresh timing without changing coverage"
-            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=258.0,
+            known_historical_heavy=True,
         ),
         PytestShardCommand(
             paths=(
@@ -190,21 +426,171 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py",
             ),
             reason=(
-                "Stage 1 prediction-market tests, subprocess group 5e "
-                "split from the longest shard-2 runtime group"
+                "Stage 1 residual QKU/source-intelligence group split out of "
+                "the former shard-2 aggregation"
             ),
-        ),
-    ),
-    "pytest-shard-3": (
-        PytestShardCommand(
-            paths=("tests/atomicrows",),
-            reason="AtomicRows tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=53.0,
         ),
     ),
     "pytest-shard-4": (
         PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest",
+                "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results",
+            ),
+            reason=(
+                "PR166-SF and PR166-SM heavy historical tests isolated under "
+                "the canonical runtime budget"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=137.0,
+            known_historical_heavy=True,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[3]),
+            reason=(
+                "Bounded PR166-SF-R2 idempotence proof kept as its own early "
+                "subgroup so timeout-inconclusive failures classify cleanly"
+            ),
+            runtime_budget_seconds=PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+            historical_runtime_seconds=115.0,
+            known_historical_heavy=True,
+            bounded_idempotence=True,
+        ),
+    ),
+    "pytest-shard-5": (
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[0]),
+            reason="PR166-SM2 split subgroup 1 preserving full test coverage",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=17.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[1]),
+            reason="PR166-SM2 split subgroup 2 preserving full test coverage",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=4.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[2]),
+            reason=(
+                "PR166-SM2 idempotence-heavy subgroup isolated from other "
+                "historical heavy families"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=124.0,
+            known_historical_heavy=True,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[3]),
+            reason="PR166-SM2 split subgroup 4 preserving full test coverage",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=3.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[4]),
+            reason="PR166-SM2 split subgroup 5 preserving full test coverage",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=4.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sm2_pytest_paths(PR166_SM2_PYTEST_FILE_GROUPS[5]),
+            reason="PR166-SM2 split subgroup 6 preserving full test coverage",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=28.0,
+        ),
+    ),
+    "pytest-shard-6": (
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[0]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 1",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=8.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[1]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 2",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=2.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[2]),
+            reason=(
+                "PR166-SF-R2 heavy non-idempotence subgroup isolated from "
+                "bounded idempotence and PR166-SM2"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=115.0,
+            known_historical_heavy=True,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[4]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 4",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=1.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[5]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 5",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=2.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[6]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 6",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=2.0,
+        ),
+        PytestShardCommand(
+            paths=_pr166_sf_r2_pytest_paths(PR166_SF_R2_PYTEST_FILE_GROUPS[7]),
+            reason="PR166-SF-R2 non-idempotence split subgroup 7",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=28.0,
+        ),
+    ),
+    "pytest-shard-7": (
+        PytestShardCommand(
+            paths=(
+                "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3",
+            ),
+            reason=(
+                "Current PR165-D3 test group kept first so current PR failures "
+                "are not buried behind historical families"
+            ),
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=154.0,
+            known_historical_heavy=True,
+        ),
+        PytestShardCommand(
+            paths=(
+                f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason=(
+                "Bounded PR166-SM3 idempotence proof kept explicit so default "
+                "PR CI does not run the exhaustive byte-for-byte rebuild mode"
+            ),
+            runtime_budget_seconds=PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+            historical_runtime_seconds=100.0,
+            known_historical_heavy=True,
+            bounded_idempotence=True,
+        ),
+        PytestShardCommand(
+            paths=(PR166_SM3_TEST_ROOT,),
+            ignores=(
+                f"{PR166_SM3_TEST_ROOT}/{PR166_SM3_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason="PR166-SM3 downstream score-memory non-idempotence group",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=55.0,
+        ),
+    ),
+    "pytest-shard-8": (
+        PytestShardCommand(
             paths=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
             reason="Preserves the existing isolated source-evidence pytest invocation",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=52.0,
         ),
         PytestShardCommand(
             paths=(
@@ -214,6 +600,8 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/connectors",
             ),
             reason="Shard 4 residual tests, subprocess group 1",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=8.0,
         ),
         PytestShardCommand(
             paths=(
@@ -226,10 +614,15 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/master_plan",
             ),
             reason="Shard 4 residual tests, subprocess group 2",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=37.0,
         ),
         PytestShardCommand(
             paths=("tests/global_debug",),
             reason="Shard 4 PR152 global-debug residual tests, subprocess group 3",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=215.0,
+            known_historical_heavy=True,
         ),
         PytestShardCommand(
             paths=(
@@ -241,6 +634,8 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/roadmap",
             ),
             reason="Shard 4 residual tests, subprocess group 4",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=10.0,
         ),
         PytestShardCommand(
             paths=(
@@ -252,11 +647,15 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
                 "tests/venue_neutral_prediction_adapter",
             ),
             reason="Shard 4 residual tests, subprocess group 5",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=10.0,
         ),
         PytestShardCommand(
             paths=("tests/source_evidence",),
             ignores=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
             reason="Shard 4 source-evidence residual tests, subprocess group 6",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=10.0,
         ),
     ),
 }
@@ -771,6 +1170,122 @@ def pytest_shard_membership(
         duplicate_text = ", ".join(sorted(duplicates))
         raise ValueError(f"pytest shard duplicate test files: {duplicate_text}")
     return membership
+
+
+def pytest_runtime_budget_plan() -> dict[str, object]:
+    return {
+        "policy": dict(RUNTIME_BUDGET_POLICY),
+        "shard_budgets": deepcopy(PYTEST_SHARD_RUNTIME_BUDGETS),
+        "pytest_shards": {
+            phase: [
+                {
+                    "paths": list(command.paths),
+                    "ignores": list(command.ignores),
+                    "reason": command.reason,
+                    "runtime_budget_seconds": command.runtime_budget_seconds,
+                    "historical_runtime_seconds": command.historical_runtime_seconds,
+                    "known_historical_heavy": command.known_historical_heavy,
+                    "bounded_idempotence": command.bounded_idempotence,
+                }
+                for command in PYTEST_SHARD_COMMANDS[phase]
+            ]
+            for phase in PYTEST_SHARD_PHASES
+        },
+    }
+
+
+def pytest_runtime_budget_failures(
+    repo_root: pathlib.Path | str | None = None,
+) -> tuple[str, ...]:
+    root = _repo_root() if repo_root is None else pathlib.Path(repo_root)
+    failures: list[str] = []
+    if set(PYTEST_SHARD_COMMANDS) != set(PYTEST_SHARD_PHASES):
+        failures.append("PYTEST_SHARD_COMMAND_PHASE_MISMATCH")
+    if set(PYTEST_SHARD_RUNTIME_BUDGETS) != set(PYTEST_SHARD_PHASES):
+        failures.append("PYTEST_SHARD_BUDGET_PHASE_MISMATCH")
+
+    all_tests = set(discover_pytest_files(root))
+    manifest = pytest_shard_manifest(root)
+    flattened = [
+        path
+        for phase_paths in manifest.values()
+        for path in phase_paths
+    ]
+    missing = sorted(all_tests - set(flattened))
+    duplicates = sorted({path for path in flattened if flattened.count(path) > 1})
+    if missing:
+        failures.append("PYTEST_SHARD_UNASSIGNED_TESTS: " + ", ".join(missing))
+    if duplicates:
+        failures.append("PYTEST_SHARD_DUPLICATE_TESTS: " + ", ".join(duplicates))
+
+    idempotence_placements: dict[
+        str, list[tuple[str, int, PytestShardCommand]]
+    ] = {
+        path: []
+        for path in sorted(BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS)
+    }
+    for phase in PYTEST_SHARD_PHASES:
+        commands = PYTEST_SHARD_COMMANDS.get(phase, ())
+        if not commands:
+            failures.append(f"PYTEST_SHARD_EMPTY: {phase}")
+            continue
+        estimated_total = 0.0
+        heavy_indices: list[int] = []
+        for index, command in enumerate(commands, start=1):
+            expanded_command_paths = _pytest_files_for_command(command, root)
+            if command.runtime_budget_seconds is None:
+                failures.append(f"PYTEST_GROUP_MISSING_RUNTIME_BUDGET: {phase}:{index}")
+            elif command.runtime_budget_seconds <= 0:
+                failures.append(f"PYTEST_GROUP_BAD_RUNTIME_BUDGET: {phase}:{index}")
+            if not command.reason:
+                failures.append(f"PYTEST_GROUP_MISSING_REASON: {phase}:{index}")
+            if command.historical_runtime_seconds is None:
+                failures.append(f"PYTEST_GROUP_MISSING_HISTORICAL_RUNTIME: {phase}:{index}")
+            else:
+                estimated_total += command.historical_runtime_seconds
+            if command.known_historical_heavy:
+                heavy_indices.append(index)
+            contains_idempotence = any(
+                path.endswith("_idempotence.py") or path.endswith("idempotence.py")
+                for path in command.paths
+            )
+            if (
+                contains_idempotence
+                and not command.bounded_idempotence
+                and command.historical_runtime_seconds is not None
+                and command.historical_runtime_seconds
+                > PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
+            ):
+                failures.append(f"PYTEST_UNBOUNDED_IDEMPOTENCE_OVER_HARD_REVIEW: {phase}:{index}")
+            for idempotence_path in BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS:
+                if idempotence_path not in expanded_command_paths:
+                    continue
+                idempotence_placements[idempotence_path].append((phase, index, command))
+                if not command.bounded_idempotence:
+                    failures.append(f"PYTEST_IDEMPOTENCE_GROUP_NOT_BOUNDED: {idempotence_path}")
+                if (
+                    command.runtime_budget_seconds is None
+                    or command.runtime_budget_seconds
+                    > PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
+                ):
+                    failures.append(f"PYTEST_IDEMPOTENCE_GROUP_BUDGET_TOO_HIGH: {idempotence_path}")
+        shard_budget = PYTEST_SHARD_RUNTIME_BUDGETS.get(phase, {})
+        target = float(shard_budget.get("target_seconds", 0))
+        if estimated_total > target:
+            failures.append(
+                f"PYTEST_SHARD_ESTIMATE_OVER_TARGET: {phase} {estimated_total:.1f}"
+            )
+            if any(index > 2 for index in heavy_indices):
+                failures.append(f"PYTEST_HEAVY_GROUP_LATE_IN_OVERLOADED_SHARD: {phase}")
+        if len(heavy_indices) > 2:
+            failures.append(f"PYTEST_HEAVY_GROUPS_CONCENTRATED: {phase}")
+
+    for idempotence_path, placements in idempotence_placements.items():
+        if len(placements) != 1:
+            failures.append(
+                f"PYTEST_IDEMPOTENCE_GROUP_PLACEMENT_COUNT: {idempotence_path}"
+            )
+    return tuple(failures)
 
 
 def _is_pr142_handoff_readiness_validator_command(command: Sequence[str]) -> bool:
@@ -2025,6 +2540,15 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr165_d3_quantum_aware_scenario_selection_v3.py",
             ),
             "--repo-root",
             ".",
@@ -3697,6 +4221,130 @@ def _timing_entry_payload(entry: TimingEntry) -> dict[str, object]:
     }
 
 
+def _pytest_path_args(command: Sequence[str]) -> tuple[str, ...]:
+    path_args: list[str] = []
+    skip_next = False
+    for part in command[2:]:
+        if skip_next:
+            skip_next = False
+            continue
+        if part in {"--ignore", "--basetemp"}:
+            skip_next = True
+            continue
+        if part.startswith("-"):
+            continue
+        path_args.append(part)
+    return tuple(path_args)
+
+
+def _runtime_budget_warning_payloads(
+    entries: Sequence[TimingEntry],
+    *,
+    phase: str,
+    total_elapsed_seconds: float,
+) -> list[dict[str, object]]:
+    warnings: list[dict[str, object]] = []
+    if phase in PYTEST_SHARD_PHASES:
+        if total_elapsed_seconds > PYTEST_SHARD_HARD_REVIEW_SECONDS:
+            warnings.append(
+                {
+                    "level": "hard_review",
+                    "kind": "pytest_shard_total",
+                    "phase": phase,
+                    "elapsed_seconds": total_elapsed_seconds,
+                    "threshold_seconds": PYTEST_SHARD_HARD_REVIEW_SECONDS,
+                }
+            )
+        elif total_elapsed_seconds > PYTEST_SHARD_WARNING_SECONDS:
+            warnings.append(
+                {
+                    "level": "warning",
+                    "kind": "pytest_shard_total",
+                    "phase": phase,
+                    "elapsed_seconds": total_elapsed_seconds,
+                    "threshold_seconds": PYTEST_SHARD_WARNING_SECONDS,
+                }
+            )
+
+    for entry in entries:
+        if not _command_uses_pytest_helper(entry.command):
+            continue
+        path_args = _pytest_path_args(entry.command)
+        idempotence_paths = [
+            path
+            for path in path_args
+            if path.endswith("_idempotence.py") or path.endswith("idempotence.py")
+        ]
+        if entry.elapsed_seconds > PYTEST_SUBPROCESS_GROUP_WARNING_SECONDS:
+            warnings.append(
+                {
+                    "level": "warning",
+                    "kind": "pytest_subprocess_group",
+                    "phase": entry.phase,
+                    "command_index": entry.command_index,
+                    "elapsed_seconds": entry.elapsed_seconds,
+                    "threshold_seconds": PYTEST_SUBPROCESS_GROUP_WARNING_SECONDS,
+                    "paths": list(path_args),
+                }
+            )
+        if idempotence_paths:
+            if entry.elapsed_seconds > PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS:
+                warnings.append(
+                    {
+                        "level": "hard_review",
+                        "kind": "pytest_idempotence_group",
+                        "phase": entry.phase,
+                        "command_index": entry.command_index,
+                        "elapsed_seconds": entry.elapsed_seconds,
+                        "threshold_seconds": PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+                        "paths": idempotence_paths,
+                    }
+                )
+            elif entry.elapsed_seconds > PYTEST_IDEMPOTENCE_WARNING_SECONDS:
+                warnings.append(
+                    {
+                        "level": "warning",
+                        "kind": "pytest_idempotence_group",
+                        "phase": entry.phase,
+                        "command_index": entry.command_index,
+                        "elapsed_seconds": entry.elapsed_seconds,
+                        "threshold_seconds": PYTEST_IDEMPOTENCE_WARNING_SECONDS,
+                        "paths": idempotence_paths,
+                    }
+                )
+        if len(path_args) == 1 and path_args[0].endswith(".py"):
+            hard_threshold = PYTEST_FILE_HARD_REVIEW_SECONDS
+            warning_threshold = PYTEST_FILE_WARNING_SECONDS
+            if path_args[0] in BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS:
+                hard_threshold = PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS
+                warning_threshold = PYTEST_IDEMPOTENCE_WARNING_SECONDS
+            if entry.elapsed_seconds > hard_threshold:
+                warnings.append(
+                    {
+                        "level": "hard_review",
+                        "kind": "pytest_file",
+                        "phase": entry.phase,
+                        "command_index": entry.command_index,
+                        "elapsed_seconds": entry.elapsed_seconds,
+                        "threshold_seconds": hard_threshold,
+                        "path": path_args[0],
+                    }
+                )
+            elif entry.elapsed_seconds > warning_threshold:
+                warnings.append(
+                    {
+                        "level": "warning",
+                        "kind": "pytest_file",
+                        "phase": entry.phase,
+                        "command_index": entry.command_index,
+                        "elapsed_seconds": entry.elapsed_seconds,
+                        "threshold_seconds": warning_threshold,
+                        "path": path_args[0],
+                    }
+                )
+    return warnings
+
+
 def _slowest_timing_entries(entries: Sequence[TimingEntry]) -> list[TimingEntry]:
     return sorted(entries, key=lambda entry: entry.elapsed_seconds, reverse=True)[
         :SLOWEST_ENTRY_LIMIT
@@ -3726,6 +4374,23 @@ def _print_timing_summary(
             f"elapsed_seconds={entry.elapsed_seconds:.3f} "
             f"returncode={entry.returncode} "
             f"command={subprocess.list2cmdline(entry.command)}",
+            flush=True,
+        )
+    for warning in _runtime_budget_warning_payloads(
+        entries,
+        phase=phase,
+        total_elapsed_seconds=total_elapsed_seconds,
+    ):
+        detail = " ".join(
+            f"{key}={value}"
+            for key, value in warning.items()
+            if key != "paths"
+        )
+        paths = ",".join(str(path) for path in warning.get("paths", ()))
+        if paths:
+            detail = f"{detail} paths={paths}"
+        print(
+            f"QTT_VALIDATION_RUNTIME_BUDGET_{str(warning['level']).upper()} {detail}",
             flush=True,
         )
 
@@ -3764,6 +4429,12 @@ def _write_timing_report(
         "schema_version": TIMING_SCHEMA_VERSION,
         "generated_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "phase": phase,
+        "runtime_budget_policy": dict(RUNTIME_BUDGET_POLICY),
+        "runtime_budget_warnings": _runtime_budget_warning_payloads(
+            entries,
+            phase=phase,
+            total_elapsed_seconds=total_elapsed_seconds,
+        ),
         "command_entries": [_timing_entry_payload(entry) for entry in entries],
         "total_elapsed_seconds": total_elapsed_seconds,
         "slowest_entries": [

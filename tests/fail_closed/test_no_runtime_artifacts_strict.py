@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from tools import validate_no_runtime_artifacts as scanner
 from tools.validate_no_runtime_artifacts import ScanOptions, scan_repository
 
 
@@ -859,3 +860,110 @@ def test_scanner_rejects_expanded_package_install_variants(
     violations = scan_repository(tmp_path, _strict_options())
 
     assert any(expected_fragment in violation for violation in violations)
+
+
+def test_scanner_prunes_only_runtime_cache_directories_from_path_scope(tmp_path):
+    skipped_dirs = [
+        ".git",
+        ".hypothesis",
+        ".mypy_cache",
+        ".nox",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".tmp",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "env",
+        "node_modules",
+        "venv",
+    ]
+    for dirname in skipped_dirs:
+        ignored = tmp_path / dirname
+        ignored.mkdir()
+        (ignored / "secrets.json").write_text("{}", encoding="utf-8")
+        (ignored / "bad.py").write_text(
+            "import requests\nrequests.get('https://example.invalid/source')\n",
+            encoding="utf-8",
+        )
+
+    violations = scan_repository(tmp_path, _strict_options())
+    iterated = {path.relative_to(tmp_path).as_posix() for path in scanner._iter_paths(tmp_path)}
+
+    assert violations == []
+    assert not any(path.split("/", 1)[0] in skipped_dirs for path in iterated)
+
+
+def test_scanner_keeps_required_source_test_tool_schema_and_top_level_report_coverage(
+    tmp_path,
+):
+    files = {
+        "src/bad_source.py": "import requests\nrequests.get('https://example.invalid/source')\n",
+        "tests/test_bad_runtime.py": "def test_bad():\n    submit_order()\n",
+        "tools/bad_install.sh": "pip install package\n",
+        "schemas/bad_install.json": '{"command": "python -m pip install package"}\n',
+        "docs/master_plan/generated/RequiredReport.report.json": (
+            '{"command": "python -m pip install package"}\n'
+        ),
+    }
+    for path_text, text in files.items():
+        path = tmp_path / path_text
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+
+    assert any("HTTP retrieval client" in violation for violation in violations)
+    assert any("order execution call" in violation for violation in violations)
+    assert any("tools/bad_install.sh" in violation for violation in violations)
+    assert any("schemas/bad_install.json" in violation for violation in violations)
+    assert any(
+        "docs/master_plan/generated/RequiredReport.report.json" in violation
+        for violation in violations
+    )
+
+
+def test_scanner_does_not_reread_generated_shard_payload_content_but_keeps_path_scan(
+    tmp_path,
+):
+    shard_path = (
+        tmp_path
+        / "docs"
+        / "master_plan"
+        / "generated"
+        / "pr999_shards"
+        / "Required.part_0001.report.json"
+    )
+    shard_path.parent.mkdir(parents=True)
+    shard_path.write_text('{"command": "python -m pip install package"}\n', encoding="utf-8")
+    forbidden_name = shard_path.parent / "secrets.json"
+    forbidden_name.write_text("{}", encoding="utf-8")
+
+    violations = scan_repository(tmp_path, _strict_options())
+    iterated = {path.relative_to(tmp_path).as_posix() for path in scanner._iter_paths(tmp_path)}
+
+    assert shard_path.relative_to(tmp_path).as_posix() in iterated
+    assert forbidden_name.relative_to(tmp_path).as_posix() in iterated
+    assert not scanner._should_scan_package_install_text(shard_path, tmp_path)
+    assert not any("pip install command" in violation for violation in violations)
+    assert any("secrets.json" in violation for violation in violations)
+
+
+def test_scanner_progress_receipts_are_available_for_long_running_gate(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "ok.py").write_text("VALUE = 1\n", encoding="utf-8")
+    receipts: list[str] = []
+
+    violations = scan_repository(
+        tmp_path,
+        _strict_options(),
+        progress=receipts.append,
+        progress_interval_seconds=0,
+    )
+
+    assert violations == []
+    assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_START") for receipt in receipts)
+    assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_SCOPE") for receipt in receipts)
+    assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_PROGRESS") for receipt in receipts)
+    assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_DONE") for receipt in receipts)

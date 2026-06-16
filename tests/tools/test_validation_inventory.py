@@ -47,6 +47,41 @@ def test_inventory_has_pr208_validation_infrastructure_entries():
         assert entry.cross_platform_sensitive is True
 
 
+def test_inventory_has_pr165_d3_quantum_selection_entry():
+    entry = inventory.inventory_by_id()[
+        "validate_pr165_d3_quantum_aware_scenario_selection_v3"
+    ]
+    assert "docs/master_plan/generated/PR165_D3_*.report.json" in entry.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr165_d3*/schemas/**" in entry.schema_globs
+    assert "tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py" in entry.tool_globs
+    assert "tests/stage1_prediction_markets/pr165_d3*/**" in entry.required_when_files_match
+
+
+def test_inventory_knows_every_pytest_shard_phase_job():
+    for phase in runner.PYTEST_SHARD_PHASES:
+        assert inventory.phase_job_id(phase) == phase.replace("-", "_")
+
+    phase_jobs = {
+        inventory.phase_job_id(phase)
+        for phase in (
+            runner.FAST_PREFLIGHT_PHASE,
+            runner.DETERMINISTIC_VALIDATORS_PHASE,
+            *runner.PYTEST_SHARD_PHASES,
+            runner.POST_VALIDATION_PHASE,
+        )
+    }
+    assert {
+        "pytest_shard_1",
+        "pytest_shard_2",
+        "pytest_shard_3",
+        "pytest_shard_4",
+        "pytest_shard_5",
+        "pytest_shard_6",
+        "pytest_shard_7",
+        "pytest_shard_8",
+    }.issubset(phase_jobs)
+
+
 def test_inventory_path_globs_are_posix():
     for entry in inventory.validation_inventory():
         for field_name in (

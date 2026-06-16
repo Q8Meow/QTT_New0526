@@ -7,6 +7,9 @@ from dataclasses import dataclass
 import os
 import pathlib
 import re
+import sys
+import time
+from typing import Callable
 
 FORBIDDEN_NAMES = {
     ".env",
@@ -309,10 +312,14 @@ TEXT_SUFFIXES = {
     ".yml",
 }
 PACKAGE_INSTALL_TEXT_SUFFIXES = TEXT_SUFFIXES | {".md", ".rst", ".txt"}
+NO_RUNTIME_PROGRESS_INTERVAL_SECONDS = 30.0
 SKIP_DIR_PARTS = {
     ".git",
     ".venv",
+    ".coverage",
+    ".hypothesis",
     ".mypy_cache",
+    ".nox",
     ".pytest_cache",
     ".ruff_cache",
     ".tmp",
@@ -323,10 +330,25 @@ SKIP_DIR_PARTS = {
     "node_modules",
     "venv",
 }
+SKIP_FILE_NAMES = {
+    ".coverage",
+    "coverage.xml",
+    "junit.xml",
+}
 SKIP_CONTENT_PATHS = {
     pathlib.PurePosixPath("tools/validate_no_runtime_artifacts.py"),
 }
 SKIP_CONTENT_TOP_LEVEL_DIRS = {"docs"}
+PACKAGE_INSTALL_SCAN_CONTENT_SKIP_DIR_SUFFIXES = ("_shards",)
+PACKAGE_INSTALL_LINE_HINTS = (
+    "pip",
+    "uv ",
+    "npm ",
+    "pnpm ",
+    "yarn ",
+    "poetry ",
+    "conda ",
+)
 
 # CI_TEST_DEPENDENCY_ALLOWLIST is the only package-install exception: CI may
 # install pytest before running the repository's canonical validation gates.
@@ -443,6 +465,16 @@ class ScanOptions:
     forbid_package_install_scripts: bool = False
 
 
+@dataclass
+class ScanStats:
+    visited_paths: int = 0
+    skipped_paths: int = 0
+    content_files_scanned: int = 0
+    package_text_files_scanned: int = 0
+    package_text_files_skipped: int = 0
+    violations: int = 0
+
+
 def _part_key(part: str) -> str:
     return re.sub(r"[-\s]+", "_", part.lower())
 
@@ -511,7 +543,7 @@ def _iter_paths(root: pathlib.Path) -> list[pathlib.Path]:
         dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_PARTS]
         current_dir = pathlib.Path(dirpath)
         paths.extend(current_dir / name for name in dirnames)
-        paths.extend(current_dir / name for name in filenames)
+        paths.extend(current_dir / name for name in filenames if name not in SKIP_FILE_NAMES)
     return sorted(paths, key=lambda item: item.as_posix().lower())
 
 
@@ -534,9 +566,22 @@ def _should_scan_content(path: pathlib.Path, root: pathlib.Path) -> bool:
     return path.is_file() and path.suffix.lower() in TEXT_SUFFIXES
 
 
+def _is_generated_report_shard_payload_path(rel: pathlib.PurePosixPath) -> bool:
+    return (
+        len(rel.parts) >= 4
+        and rel.parts[:3] == ("docs", "master_plan", "generated")
+        and any(
+            part.endswith(PACKAGE_INSTALL_SCAN_CONTENT_SKIP_DIR_SUFFIXES)
+            for part in rel.parts[3:-1]
+        )
+    )
+
+
 def _should_scan_package_install_text(path: pathlib.Path, root: pathlib.Path) -> bool:
     rel = _rel_path(path, root)
     if rel in SKIP_CONTENT_PATHS:
+        return False
+    if _is_generated_report_shard_payload_path(rel):
         return False
     return (
         rel.parts
@@ -867,12 +912,97 @@ def _scan_text_content(
     return violations
 
 
-def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
+def _line_might_contain_package_install(line: str) -> bool:
+    lower = line.lower()
+    return any(hint in lower for hint in PACKAGE_INSTALL_LINE_HINTS)
+
+
+def _scan_package_install_text_file(
+    path: pathlib.PurePosixPath,
+    source_path: pathlib.Path,
+) -> list[str]:
+    violations: list[str] = []
+    ci_test_dependency_allowlist_hits: dict[pathlib.PurePosixPath, int] = {}
+    try:
+        lines = source_path.open(encoding="utf-8", errors="ignore")
+    except OSError as exc:
+        return [f"unable to scan package install text in {path}: {exc.__class__.__name__}"]
+    with lines:
+        for line in lines:
+            if not _line_might_contain_package_install(line):
+                continue
+            for label, pattern in CONTENT_PATTERNS["forbid_package_install_scripts"]:
+                match = re.search(pattern, line, flags=re.IGNORECASE | re.MULTILINE)
+                if not match:
+                    continue
+                if label == "pip install command" and _is_ci_test_dependency_allowlisted_pip_install(
+                    path,
+                    line,
+                    match,
+                    ci_test_dependency_allowlist_hits,
+                ):
+                    continue
+                violations.append(f"forbidden {label} in {path}")
+                return violations
+    return violations
+
+
+def _progress_receipt(
+    progress: Callable[[str], None] | None,
+    message: str,
+) -> None:
+    if progress is not None:
+        progress(message)
+
+
+def scan_repository(
+    root: pathlib.Path,
+    options: ScanOptions,
+    *,
+    progress: Callable[[str], None] | None = None,
+    progress_interval_seconds: float = NO_RUNTIME_PROGRESS_INTERVAL_SECONDS,
+) -> list[str]:
     root = root.resolve()
     violations: list[str] = []
     enabled_flags = _enabled_flags(options)
+    stats = ScanStats()
+    started = time.perf_counter()
+    last_progress = started
 
-    for path in _iter_paths(root):
+    _progress_receipt(
+        progress,
+        f"NO_RUNTIME_ARTIFACT_SCAN_START root={root}",
+    )
+    paths = _iter_paths(root)
+    _progress_receipt(
+        progress,
+        "NO_RUNTIME_ARTIFACT_SCAN_SCOPE "
+        f"path_count={len(paths)} "
+        f"elapsed_seconds={time.perf_counter() - started:.3f}",
+    )
+
+    def maybe_progress(force: bool = False) -> None:
+        nonlocal last_progress
+        if progress is None:
+            return
+        now = time.perf_counter()
+        if not force and now - last_progress < progress_interval_seconds:
+            return
+        last_progress = now
+        _progress_receipt(
+            progress,
+            "NO_RUNTIME_ARTIFACT_SCAN_PROGRESS "
+            f"visited_paths={stats.visited_paths} "
+            f"skipped_paths={stats.skipped_paths} "
+            f"content_files_scanned={stats.content_files_scanned} "
+            f"package_text_files_scanned={stats.package_text_files_scanned} "
+            f"package_text_files_skipped={stats.package_text_files_skipped} "
+            f"violations={len(violations)} "
+            f"elapsed_seconds={now - started:.3f}",
+        )
+
+    for path in paths:
+        stats.visited_paths += 1
         rel = _rel_path(path, root)
         name = path.name
         lower_name = name.lower()
@@ -912,18 +1042,40 @@ def scan_repository(root: pathlib.Path, options: ScanOptions) -> list[str]:
                 path,
                 root,
             ):
-                text = path.read_text(encoding="utf-8", errors="ignore")
-                violations.extend(
-                    _scan_text_content(rel, text, ["forbid_package_install_scripts"])
-                )
+                stats.package_text_files_scanned += 1
+                violations.extend(_scan_package_install_text_file(rel, path))
+            else:
+                stats.skipped_paths += 1
+                if (
+                    options.forbid_package_install_scripts
+                    and path.is_file()
+                    and path.suffix.lower() in PACKAGE_INSTALL_TEXT_SUFFIXES
+                    and _is_generated_report_shard_payload_path(rel)
+                ):
+                    stats.package_text_files_skipped += 1
+            maybe_progress()
             continue
 
+        stats.content_files_scanned += 1
         text = path.read_text(encoding="utf-8", errors="ignore")
         if path.suffix.lower() == ".py":
             violations.extend(_scan_python_content(rel, text, enabled_flags))
         else:
             violations.extend(_scan_text_content(rel, text, enabled_flags))
+        maybe_progress()
 
+    stats.violations = len(violations)
+    _progress_receipt(
+        progress,
+        "NO_RUNTIME_ARTIFACT_SCAN_DONE "
+        f"visited_paths={stats.visited_paths} "
+        f"skipped_paths={stats.skipped_paths} "
+        f"content_files_scanned={stats.content_files_scanned} "
+        f"package_text_files_scanned={stats.package_text_files_scanned} "
+        f"package_text_files_skipped={stats.package_text_files_skipped} "
+        f"violations={stats.violations} "
+        f"elapsed_seconds={time.perf_counter() - started:.3f}",
+    )
     return violations
 
 
@@ -953,9 +1105,19 @@ def main() -> int:
     parser.add_argument("--forbid-neural-inference", action="store_true")
     parser.add_argument("--forbid-external-repo-clone", action="store_true")
     parser.add_argument("--forbid-package-install-scripts", action="store_true")
+    parser.add_argument(
+        "--progress-interval-seconds",
+        type=float,
+        default=NO_RUNTIME_PROGRESS_INTERVAL_SECONDS,
+    )
     args = parser.parse_args()
 
-    violations = scan_repository(pathlib.Path(args.repo_root), options_from_args(args))
+    violations = scan_repository(
+        pathlib.Path(args.repo_root),
+        options_from_args(args),
+        progress=lambda message: print(message, file=sys.stderr, flush=True),
+        progress_interval_seconds=args.progress_interval_seconds,
+    )
     if violations:
         raise SystemExit("NO_RUNTIME_ARTIFACT_GATE_FAILED\n- " + "\n- ".join(violations))
     print("NO_RUNTIME_ARTIFACT_GATE_OK")

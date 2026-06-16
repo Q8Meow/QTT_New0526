@@ -69,10 +69,7 @@ GENERATED_REPORT_GLOBS = (
 PHASE_JOB_IDS = {
     runner.FAST_PREFLIGHT_PHASE: "fast_preflight",
     runner.DETERMINISTIC_VALIDATORS_PHASE: "deterministic_validators",
-    "pytest-shard-1": "pytest_shard_1",
-    "pytest-shard-2": "pytest_shard_2",
-    "pytest-shard-3": "pytest_shard_3",
-    "pytest-shard-4": "pytest_shard_4",
+    **{phase: phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES},
     runner.POST_VALIDATION_PHASE: "post_validation_checks",
 }
 
@@ -187,6 +184,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr165_d3" in stem:
+        return "pr165_d3"
     match = re.search(r"(pr\d+[a-z]?(?:_[a-z])?)", stem)
     if match is None:
         return None
@@ -383,6 +382,15 @@ def _test_globs(stem: str, command: Sequence[str], phase: str) -> tuple[str, ...
                 continue
             if part.startswith("tests/"):
                 globs.append(part if part.endswith(".py") else f"{part}/**")
+        for split_test_root in (
+            runner.PR166_SM2_TEST_ROOT,
+            runner.PR166_SF_R2_TEST_ROOT,
+        ):
+            split_prefix = f"{split_test_root}/"
+            globs = [
+                f"{split_test_root}/**" if glob.startswith(split_prefix) else glob
+                for glob in globs
+            ]
         return _dedupe_sorted(globs)
     token = _pr_token(stem)
     globs = []

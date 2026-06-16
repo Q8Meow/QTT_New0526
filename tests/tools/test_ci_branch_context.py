@@ -3351,6 +3351,30 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,
+            "tools/validate_no_runtime_artifacts.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
             "src/qtt/stage1_prediction_markets/"
             "pr159r_source_locator_value_capture/validator.py",
         )
@@ -3370,6 +3394,15 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
         assert context.is_validation_infrastructure_changed_path(
             branch,
             "tools/validate_pr165_b_condition_scoped_negative_memory.py",
+        )
+        assert not context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/"
+            "AtomicRowsShaFreezeFinalReadinessStateContract.report.json",
+        )
+        assert not context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_atomicrows_sha_freeze_authority_runtime.py",
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,
@@ -3529,4 +3562,102 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
     assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
         branch_context.branch,
         "PR160",
+    )
+
+
+def test_pr165_d3_quantum_selection_branch_context_allowance_is_narrow():
+    branch = context.PR165_D3_BRANCH
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR165_D3_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr165_d3_shards/"
+        "PR165_D3_SelectedCombos.shard_0001.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_no_runtime_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        ".github/workflows/qtt_validation.yml",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/report_writer.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3/io.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/"
+        "test_pr166_sf_r2_idempotence.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/"
+        "test_pr166_sm3_idempotence.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_SM3_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/AtomicRowsShaFreezeFinalReadinessStateContract.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_no_runtime_trade_execution.py",
     )

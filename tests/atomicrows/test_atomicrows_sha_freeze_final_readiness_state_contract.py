@@ -276,8 +276,12 @@ def test_atomicrows_bundle_sha256_remains_forbidden_in_no_runtime_scanner():
     assert "AtomicRows.bundle.sha256" in validate_no_runtime_artifacts.FORBIDDEN_NAMES
 
 
-def test_no_runtime_scanner_has_no_pr114a_diff():
-    assert _git_stdout("diff", "--", "tools/validate_no_runtime_artifacts.py") == ""
+def test_no_runtime_scanner_preserves_atomicrows_sha_forbidden_guard():
+    guard = validator.no_runtime_scanner_guard_check(REPO_ROOT)
+
+    assert guard["ok"] is True
+    assert guard["forbidden_name_present"] is True
+    assert guard["detects_temporary_forbidden_path"] is True
 
 
 def test_master_plan_current_is_unchanged():
@@ -311,6 +315,7 @@ def test_no_runtime_live_source_connector_order_cash_backend_profit_quantum_auth
     report = _report()
     materialization_report = _materialization_report()
 
+    assert report["no_runtime_scanner_guard_check"]["ok"] is True
     for field in (
         "runtime_live_authority_created",
         "source_connector_authority_created",

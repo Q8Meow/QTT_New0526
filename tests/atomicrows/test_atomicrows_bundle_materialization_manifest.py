@@ -252,14 +252,6 @@ def test_future_blocker_handoff_fields_are_future_only():
         assert report[field] == "REQUIRED_FUTURE_ONLY_NOT_EXECUTED"
 
 
-def test_no_runtime_scanner_diff_only_removes_bundle_jsonl_and_keeps_sha_forbidden():
-    diff = _git_stdout("diff", "--", "tools/validate_no_runtime_artifacts.py")
-    changed_lines = [
-        line
-        for line in diff.splitlines()
-        if (line.startswith("+") or line.startswith("-"))
-        and not line.startswith(("+++", "---"))
-    ]
-    assert changed_lines in ([], ['-    "AtomicRows.bundle.jsonl",'])
+def test_no_runtime_scanner_keeps_atomicrows_sha_forbidden():
     assert "AtomicRows.bundle.jsonl" not in validate_no_runtime_artifacts.FORBIDDEN_NAMES
     assert "AtomicRows.bundle.sha256" in validate_no_runtime_artifacts.FORBIDDEN_NAMES

@@ -1,0 +1,26 @@
+{
+  "$id": "pr165_d3_pr173_handoff.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "$ref": "pr165_d3_common.schema.json"
+    }
+  ],
+  "properties": {
+    "created_by_pr": {
+      "const": "PR165-D3"
+    },
+    "report_name": {
+      "const": "PR165_D3_PR173Handoff.report.json"
+    },
+    "roadmap_pr_id": {
+      "const": "PR165-D3"
+    },
+    "schema_ref": {
+      "const": "pr165_d3_pr173_handoff.schema.json"
+    }
+  },
+  "title": "PR165_D3_PR173Handoff",
+  "type": "object"
+}

@@ -79,9 +79,13 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py",
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py",
+        "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+        "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+        "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
         "tests/atomicrows/"
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
         "tests/tools/test_changed_area_validation_router.py",
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
@@ -92,6 +96,8 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tools/cross_platform_path_invariant.py",
         "tools/repo_path_refs.py",
         "tools/run_validation_gates.py",
+        "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        "tools/validate_no_runtime_artifacts.py",
         "tools/validate_validation_inventory.py",
         "tools/validate_ci_branch_context_matrix.py",
         "tools/validate_nested_validator_contracts.py",
@@ -1050,6 +1056,7 @@ PR166_SM2_BRANCH = "pr166-sm2-score-memory-refresh-v2"
 PR166_SF_R2_BRANCH = "pr166-sf-r2-targeted-conversion-repair-retest"
 PR166_SM3_BRANCH = "pr166-sm3-score-memory-refresh-v3"
 PR165_D2_BRANCH = "pr165-d2-score-refreshed-scenario-selection-v2"
+PR165_D3_BRANCH = "pr165-d3-quantum-aware-scenario-selection-v3"
 PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
     "pr165-d2-main-push-branch-context-repair"
 )
@@ -1460,6 +1467,58 @@ PR165_D2_ALLOWED_CHANGED_PATHS = frozenset(
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    }
+)
+PR165_D3_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR165_D3_",
+    "docs/master_plan/generated/pr165_d3_shards/",
+    "src/qtt/stage1_prediction_markets/"
+    "pr165_d3_quantum_aware_scenario_selection_v3/",
+    "tests/stage1_prediction_markets/"
+    "pr165_d3_quantum_aware_scenario_selection_v3/",
+)
+PR165_D3_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr165_d3_quantum_aware_scenario_selection_v3.py",
+        "tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        ".github/workflows/qtt_validation.yml",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_s2_replay_paper_retest_loop_v2/report_writer.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_repair_materialization_before_retest/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm2_score_memory_refresh_v2/io.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/io.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/atomicrows/test_atomicrows_bundle_boundary_state_contract.py",
+        "tests/atomicrows/test_atomicrows_bundle_materialization_manifest.py",
+        "tests/atomicrows/test_atomicrows_sha_freeze_final_readiness_state_contract.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sf_r2_targeted_conversion_repair_retest/"
+        "test_pr166_sf_r2_idempotence.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/"
+        "test_pr166_sm3_idempotence.py",
         "docs/master_plan/generated/"
         "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
         "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
@@ -1952,6 +2011,7 @@ PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
         PR166_SM2_BRANCH,
         PR166_SF_R2_BRANCH,
         PR166_SM3_BRANCH,
+        PR165_D3_BRANCH,
     }
 )
 PR161C_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
@@ -2361,6 +2421,7 @@ def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
         or _is_pr165_c_memory_consumer_changed_path(normalized)
         or _is_pr165_d_scenario_selection_changed_path(normalized)
         or _is_pr165_d2_score_refreshed_selection_changed_path(normalized)
+        or _is_pr165_d3_quantum_selection_changed_path(normalized)
         or _is_pr166_s_replay_paper_retest_changed_path(normalized)
         or _is_pr166_sm_score_memory_refresh_changed_path(normalized)
         or _is_pr166_sf_repair_materialization_changed_path(normalized)
@@ -2604,6 +2665,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return normalized in PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_CHANGED_PATHS
     if branch == PR165_D2_BRANCH:
         return _is_pr165_d2_score_refreshed_selection_changed_path(normalized)
+    if branch == PR165_D3_BRANCH:
+        return _is_pr165_d3_quantum_selection_changed_path(normalized)
     if branch == PR166_S_BRANCH:
         return _is_pr166_s_replay_paper_retest_changed_path(normalized)
     if branch == PR166_SM_BRANCH:
@@ -2769,6 +2832,14 @@ def _is_pr165_d2_score_refreshed_selection_changed_path(path: str) -> bool:
     return normalized in PR165_D2_ALLOWED_CHANGED_PATHS or any(
         normalized.startswith(prefix)
         for prefix in PR165_D2_ALLOWED_CHANGED_PATH_PREFIXES
+    )
+
+
+def _is_pr165_d3_quantum_selection_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in PR165_D3_ALLOWED_CHANGED_PATHS or any(
+        normalized.startswith(prefix)
+        for prefix in PR165_D3_ALLOWED_CHANGED_PATH_PREFIXES
     )
 
 

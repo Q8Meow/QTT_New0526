@@ -1,0 +1,42 @@
+{
+  "$id": "pr165_d3_common.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "created_by_pr": {
+      "const": "PR165-D3"
+    },
+    "forbidden_authority_counts": {
+      "type": "object"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_name": {
+      "type": "string"
+    },
+    "roadmap_pr_id": {
+      "const": "PR165-D3"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "roadmap_pr_id",
+    "created_by_pr",
+    "report_name",
+    "record_count",
+    "schema_ref",
+    "validator_ref"
+  ],
+  "title": "PR165-D3 common report schema",
+  "type": "object"
+}

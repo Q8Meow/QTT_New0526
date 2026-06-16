@@ -26,6 +26,7 @@ from tools.validation_inventory import (
     phase_job_ids_for_validators,
     validation_inventory,
 )
+from tools import run_validation_gates as runner
 
 ROUTING_POLICY_VERSION = 1
 FORCE_FULL_FLAG_NAME = "QTT_FORCE_FULL_VALIDATION"
@@ -391,6 +392,14 @@ def build_router_result(router_input: RouterInput) -> RouterResult:
 
 
 def build_routing_policy_report() -> dict[str, object]:
+    full_validation_jobs = sorted(
+        {
+            "fast_preflight",
+            "deterministic_validators",
+            *(phase.replace("-", "_") for phase in runner.PYTEST_SHARD_PHASES),
+            "post_validation_checks",
+        }
+    )
     return {
         "routing_policy_version": ROUTING_POLICY_VERSION,
         "pull_request_default_mode": (
@@ -411,28 +420,8 @@ def build_routing_policy_report() -> dict[str, object]:
             "scan touched generated JSON/report/manifest/shard refs"
         ),
         "branch_context_policy": "required on pull_request, main, and workflow_dispatch",
-        "required_jobs_for_reduced_pr_mode": sorted(
-            {
-                "fast_preflight",
-                "deterministic_validators",
-                "pytest_shard_1",
-                "pytest_shard_2",
-                "pytest_shard_3",
-                "pytest_shard_4",
-                "post_validation_checks",
-            }
-        ),
-        "required_jobs_for_full_mode": sorted(
-            {
-                "fast_preflight",
-                "deterministic_validators",
-                "pytest_shard_1",
-                "pytest_shard_2",
-                "pytest_shard_3",
-                "pytest_shard_4",
-                "post_validation_checks",
-            }
-        ),
+        "required_jobs_for_reduced_pr_mode": full_validation_jobs,
+        "required_jobs_for_full_mode": full_validation_jobs,
     }
 
 
