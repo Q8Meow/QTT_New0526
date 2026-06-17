@@ -2083,6 +2083,15 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "validate_idempotence_runtime_containment.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
             ),
             "--repo-root",

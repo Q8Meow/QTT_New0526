@@ -250,13 +250,52 @@ def _format_report_mismatch_diagnostic(diagnostic: Mapping[str, Any]) -> str:
 
 _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS = frozenset(
     {
+        "$.completed_pr_artifact_audit.test_file_count",
         "$.completed_pr_artifact_audit.validator_tool_count",
+        "$.schema_fixture_test_consistency_audit.test_file_count",
         "$.validator_tool_registry_audit.validator_tool_count",
         "$.whole_repo_inventory_audit.audited_text_file_count",
+        "$.whole_repo_inventory_audit.category_counts.TEST",
         "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL",
         "$.whole_repo_inventory_audit.tracked_file_count",
     }
 )
+_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_FIELD_PATHS = {
+    "$.completed_pr_artifact_audit.test_file_count": (
+        "completed_pr_artifact_audit",
+        "test_file_count",
+    ),
+    "$.completed_pr_artifact_audit.validator_tool_count": (
+        "completed_pr_artifact_audit",
+        "validator_tool_count",
+    ),
+    "$.schema_fixture_test_consistency_audit.test_file_count": (
+        "schema_fixture_test_consistency_audit",
+        "test_file_count",
+    ),
+    "$.validator_tool_registry_audit.validator_tool_count": (
+        "validator_tool_registry_audit",
+        "validator_tool_count",
+    ),
+    "$.whole_repo_inventory_audit.audited_text_file_count": (
+        "whole_repo_inventory_audit",
+        "audited_text_file_count",
+    ),
+    "$.whole_repo_inventory_audit.category_counts.TEST": (
+        "whole_repo_inventory_audit",
+        "category_counts",
+        "TEST",
+    ),
+    "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL": (
+        "whole_repo_inventory_audit",
+        "category_counts",
+        "VALIDATOR_TOOL",
+    ),
+    "$.whole_repo_inventory_audit.tracked_file_count": (
+        "whole_repo_inventory_audit",
+        "tracked_file_count",
+    ),
+}
 
 _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS = frozenset(
     {
@@ -269,6 +308,46 @@ _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS = frozenset(
     }
 )
 _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA = len(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS)
+_PR_CI_FASTFAIL_REPORT_COUNT_EXPECTED_DELTAS = {
+    "$.completed_pr_artifact_audit.validator_tool_count": (
+        _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
+    ),
+    "$.validator_tool_registry_audit.validator_tool_count": (
+        _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
+    ),
+    "$.whole_repo_inventory_audit.audited_text_file_count": (
+        _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
+    ),
+    "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL": (
+        _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
+    ),
+    "$.whole_repo_inventory_audit.tracked_file_count": (
+        _PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA
+    ),
+}
+_IDEMPOTENCE_RUNTIME_CONTAINMENT_DELTA_PATHS = frozenset(
+    {
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "tools/validate_idempotence_runtime_containment.py",
+    }
+)
+_IDEMPOTENCE_RUNTIME_CONTAINMENT_REPORT_COUNT_EXPECTED_DELTAS = {
+    "$.completed_pr_artifact_audit.test_file_count": 1,
+    "$.completed_pr_artifact_audit.validator_tool_count": 1,
+    "$.schema_fixture_test_consistency_audit.test_file_count": 1,
+    "$.validator_tool_registry_audit.validator_tool_count": 1,
+    "$.whole_repo_inventory_audit.audited_text_file_count": 3,
+    "$.whole_repo_inventory_audit.category_counts.TEST": 2,
+    "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL": 1,
+    "$.whole_repo_inventory_audit.tracked_file_count": 3,
+}
+_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS = frozenset(
+    {
+        *_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS,
+        "tools/validate_idempotence_runtime_containment.py",
+    }
+)
 
 
 def _registered_validation_infrastructure_validator_tool_paths() -> frozenset[str]:
@@ -282,8 +361,14 @@ def _registered_validation_infrastructure_validator_tool_paths() -> frozenset[st
 def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[str]:
     failures: list[str] = []
     registered_tool_paths = _registered_validation_infrastructure_validator_tool_paths()
-    unregistered_tool_paths = registered_tool_paths - _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS
-    missing_policy_paths = _PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS - registered_tool_paths
+    unregistered_tool_paths = (
+        registered_tool_paths
+        - _VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS
+    )
+    missing_policy_paths = (
+        _VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS
+        - registered_tool_paths
+    )
 
     for rel_path in sorted(unregistered_tool_paths, key=_stable_path_key):
         failures.append(
@@ -299,7 +384,10 @@ def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[st
             "delta policy"
         )
 
-    for rel_path in sorted(_PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS, key=_stable_path_key):
+    for rel_path in sorted(
+        _VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS,
+        key=_stable_path_key,
+    ):
         path = repo_root / rel_path
         if not path.is_file():
             failures.append(
@@ -316,18 +404,38 @@ def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[st
     return failures
 
 
-def _validation_infrastructure_report_count_delta_failures(
+def _nested_value(payload: Mapping[str, Any], keys: Sequence[str]) -> Any:
+    target: Any = payload
+    for key in keys:
+        if not isinstance(target, Mapping) or key not in target:
+            raise KeyError(key)
+        target = target[key]
+    return target
+
+
+def _set_nested_value(payload: dict[str, Any], keys: Sequence[str], value: Any) -> None:
+    target: dict[str, Any] = payload
+    for key in keys[:-1]:
+        child = target.setdefault(key, {})
+        if not isinstance(child, dict):
+            raise KeyError(key)
+        target = child
+    target[keys[-1]] = value
+
+
+def _validation_infrastructure_report_count_delta_policy_failures(
     diagnostics: Sequence[Mapping[str, Any]],
+    expected_deltas: Mapping[str, int],
 ) -> list[str]:
-    if len(diagnostics) != len(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS):
+    if len(diagnostics) != len(expected_deltas):
         return [
             "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISMATCH_COUNT: "
-            f"expected {len(_VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS)} "
-            f"mismatch paths, found {len(diagnostics)}"
+            f"expected {len(expected_deltas)} mismatch paths, found {len(diagnostics)}"
         ]
     diagnostic_paths = {str(diagnostic.get("json_path")) for diagnostic in diagnostics}
-    unexpected_paths = diagnostic_paths - _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS
-    missing_paths = _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_MISMATCH_PATHS - diagnostic_paths
+    expected_paths = set(expected_deltas)
+    unexpected_paths = diagnostic_paths - expected_paths
+    missing_paths = expected_paths - diagnostic_paths
     failures = [
         "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_UNEXPECTED_JSON_PATH: "
         f"{path}"
@@ -341,7 +449,6 @@ def _validation_infrastructure_report_count_delta_failures(
     if failures:
         return failures
 
-    deltas: set[int] = set()
     for diagnostic in diagnostics:
         if (
             diagnostic.get("mismatch_kind") != "value_mismatch"
@@ -359,14 +466,33 @@ def _validation_infrastructure_report_count_delta_failures(
                 "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_NON_INTEGER_VALUE: "
                 f"{diagnostic.get('json_path')}"
             ]
-        deltas.add(rebuilt - tracked)
-    if deltas != {_PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA}:
-        found = ", ".join(f"{delta:+d}" for delta in sorted(deltas))
-        return [
-            "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_WRONG_DELTA: "
-            f"expected +{_PR_CI_FASTFAIL_VALIDATOR_TOOL_DELTA}, found {found}"
-        ]
+        path = str(diagnostic.get("json_path"))
+        expected_delta = expected_deltas[path]
+        found_delta = rebuilt - tracked
+        if found_delta != expected_delta:
+            return [
+                "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_WRONG_DELTA: "
+                f"{path} expected +{expected_delta}, found {found_delta:+d}"
+            ]
     return []
+
+
+def _validation_infrastructure_report_count_delta_failures(
+    diagnostics: Sequence[Mapping[str, Any]],
+) -> list[str]:
+    policy_failures = [
+        _validation_infrastructure_report_count_delta_policy_failures(
+            diagnostics,
+            _PR_CI_FASTFAIL_REPORT_COUNT_EXPECTED_DELTAS,
+        ),
+        _validation_infrastructure_report_count_delta_policy_failures(
+            diagnostics,
+            _IDEMPOTENCE_RUNTIME_CONTAINMENT_REPORT_COUNT_EXPECTED_DELTAS,
+        ),
+    ]
+    if any(not failures for failures in policy_failures):
+        return []
+    return sorted({failure for failures in policy_failures for failure in failures})
 
 
 def _validation_infrastructure_report_count_policy_failures(
@@ -418,23 +544,8 @@ def _project_validation_infrastructure_report_counts(
 
     projected = deepcopy(report)
     try:
-        projected["completed_pr_artifact_audit"]["validator_tool_count"] = tracked_report[
-            "completed_pr_artifact_audit"
-        ]["validator_tool_count"]
-        projected["validator_tool_registry_audit"]["validator_tool_count"] = tracked_report[
-            "validator_tool_registry_audit"
-        ]["validator_tool_count"]
-        projected["whole_repo_inventory_audit"]["audited_text_file_count"] = tracked_report[
-            "whole_repo_inventory_audit"
-        ]["audited_text_file_count"]
-        projected["whole_repo_inventory_audit"]["tracked_file_count"] = tracked_report[
-            "whole_repo_inventory_audit"
-        ]["tracked_file_count"]
-        projected["whole_repo_inventory_audit"]["category_counts"][
-            "VALIDATOR_TOOL"
-        ] = tracked_report["whole_repo_inventory_audit"]["category_counts"][
-            "VALIDATOR_TOOL"
-        ]
+        for keys in _VALIDATION_INFRASTRUCTURE_REPORT_COUNT_FIELD_PATHS.values():
+            _set_nested_value(projected, keys, _nested_value(tracked_report, keys))
     except (KeyError, TypeError):
         return report
     return projected

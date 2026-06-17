@@ -1,12 +1,15 @@
-import os
-import subprocess
-import sys
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
+from src.qtt.stage1_prediction_markets.bounded_idempotence import (
+    assert_bounded_idempotence_equal,
+    bounded_snapshot,
+)
 from src.qtt.stage1_prediction_markets.pr163_c_pretrade_infrastructure_rejection_remediation import paths as p
+from src.qtt.stage1_prediction_markets.pr163_c_pretrade_infrastructure_rejection_remediation.report_builder import build_payloads_with_shards
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -65,6 +68,37 @@ def _set_github_main_push_env(monkeypatch) -> None:
         monkeypatch.setenv(name, value)
 
 
+REQUIRED_EXACT_REPORTS = (
+    "PR163_C_FinalSummary.report.json",
+    "PR163_C_ReportManifest.report.json",
+    "PR163_C_NoLiveProfitSourceConnectorPrivateStateAudit.report.json",
+    "PR163_C_NoQTTChecksumFreezeAuthorityAudit.report.json",
+    "PR163_C_NoQuantumBackendAdvantageClaimAudit.report.json",
+    "PR163_C_NoLLMRuntimeHotPathResultRewriteAudit.report.json",
+    "PR163_C_OrphanArtifactAudit.report.json",
+)
+# The builder's --verify-idempotent CLI remains the manual exhaustive
+# byte-for-byte rebuild path. PR/main CI uses this bounded deterministic
+# contract over required root reports, manifest coverage, and sampled shards.
+
+
+def _receipt(message: str) -> None:
+    print(f"PR163_C_BOUNDED_IDEMPOTENCE {message}", flush=True)
+
+
+def _bounded_snapshot(
+    payloads: dict[str, dict[str, Any]],
+    shard_payloads: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    return bounded_snapshot(
+        payloads,
+        shard_payloads,
+        constants=p,
+        required_exact_reports=REQUIRED_EXACT_REPORTS,
+        manifest_report_filename="PR163_C_ReportManifest.report.json",
+    )
+
+
 def _branch_error(branch: str) -> str:
     return (
         f"PR163-C build must run on {EXPECTED_BRANCH} or {MAIN_BRANCH}; "
@@ -73,20 +107,16 @@ def _branch_error(branch: str) -> str:
 
 
 def test_pr163_c_repeat_run_determinism():
-    env = os.environ.copy()
-    env.update(_github_main_push_env())
-    result = subprocess.run(
-        [
-            sys.executable,
-            "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py",
-            "--verify-idempotent",
-        ],
-        check=True,
-        capture_output=True,
-        env=env,
-        text=True,
-    )
-    assert "PR163_C_PRETRADE_INFRA_REPAIR_IDEMPOTENT" in result.stdout
+    _receipt("stage=rebuild_once")
+    first_payloads, first_shards = build_payloads_with_shards(REPO_ROOT)
+    first = _bounded_snapshot(first_payloads, first_shards)
+
+    _receipt("stage=rebuild_twice")
+    second_payloads, second_shards = build_payloads_with_shards(REPO_ROOT)
+    second = _bounded_snapshot(second_payloads, second_shards)
+
+    assert_bounded_idempotence_equal(first, second)
+    _receipt("stage=complete")
 
 
 def test_pr163_c_local_named_branch_passes_branch_context_check(monkeypatch):

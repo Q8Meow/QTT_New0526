@@ -87,10 +87,21 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "test_atomicrows_semantic_value_materialization_owner_authorization_gate.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/"
+        "test_pr163_c_repeat_run_determinism.py",
+        "tests/stage1_prediction_markets/"
+        "pr164_review_provenance_qku_canonical_coverage_audit/"
+        "test_pr164_repeat_run_determinism.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm_score_memory_refresh_from_pr166_s_results/"
+        "test_pr166_sm_idempotence.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_cross_platform_path_invariant.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
         "tests/tools/test_validate_repair_pr_changed_file_scope.py",
         "tests/tools/test_validation_inventory.py",
         "tools/ci_branch_context.py",
@@ -102,6 +113,7 @@ VALIDATION_INFRASTRUCTURE_CHANGED_PATHS = frozenset(
         "tools/validate_no_runtime_artifacts.py",
         "tools/validate_validation_inventory.py",
         "tools/validate_ci_branch_context_matrix.py",
+        "tools/validate_idempotence_runtime_containment.py",
         "tools/validate_nested_validator_contracts.py",
         "tools/validate_repair_pr_changed_file_scope.py",
         "tools/validation_inventory.py",
@@ -121,6 +133,33 @@ PR160_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
 )
 PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH = (
     "repair/main-pr166-sm2-bounded-idempotence-ci"
+)
+IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH = (
+    "hardening/all-idempotence-runtime-containment-audit"
+)
+IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_CHANGED_PATHS = frozenset(
+    {
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py",
+        "tests/stage1_prediction_markets/"
+        "pr163_c_pretrade_infrastructure_rejection_remediation/"
+        "test_pr163_c_repeat_run_determinism.py",
+        "tests/stage1_prediction_markets/"
+        "pr164_review_provenance_qku_canonical_coverage_audit/"
+        "test_pr164_repeat_run_determinism.py",
+        "tests/stage1_prediction_markets/"
+        "pr166_sm_score_memory_refresh_from_pr166_s_results/"
+        "test_pr166_sm_idempotence.py",
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "src/qtt/stage1_prediction_markets/"
+        "grand_global_debug_logical_consistency_audit/report.py",
+        "tools/ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "tools/validation_inventory.py",
+    }
 )
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS = {
     "repair-pr153r-redo-report-determinism": 153,
@@ -2373,7 +2412,10 @@ def is_branch_allowed_for_upstream_pr_gate(
     if not normalized:
         return False
     policy = upstream_branch_gate_policy(upstream_gate)
-    if is_validation_infrastructure_branch(normalized):
+    if (
+        is_idempotence_runtime_containment_hardening_branch(normalized)
+        or is_validation_infrastructure_branch(normalized)
+    ):
         return True
     if normalized == "main":
         return include_main and ancestry_present
@@ -2403,7 +2445,8 @@ def is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
         return False
     policy = upstream_branch_gate_policy(upstream_gate)
     return (
-        is_validation_infrastructure_branch(normalized)
+        is_idempotence_runtime_containment_hardening_branch(normalized)
+        or is_validation_infrastructure_branch(normalized)
         or normalized in policy.allowed_branches
         or normalized in policy.local_repair_branches_requiring_ancestry
         or normalized in policy.detached_head_ref_branches
@@ -2461,6 +2504,25 @@ def is_validation_infrastructure_changed_path(branch: str, path: str) -> bool:
         or _is_pr166_sm2_score_memory_refresh_changed_path(normalized)
         or _is_pr166_sf_r2_targeted_conversion_repair_changed_path(normalized)
         or _is_pr166_sm3_score_memory_refresh_changed_path(normalized)
+    )
+
+
+def is_idempotence_runtime_containment_hardening_changed_path(
+    branch: str,
+    path: str,
+) -> bool:
+    normalized_path = path.replace("\\", "/")
+    return (
+        normalize_branch_context(branch)
+        == IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH
+        and normalized_path in IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_CHANGED_PATHS
+    )
+
+
+def is_idempotence_runtime_containment_hardening_branch(branch: str) -> bool:
+    return (
+        normalize_branch_context(branch)
+        == IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH
     )
 
 
@@ -2655,6 +2717,8 @@ def is_explicit_downstream_repair_branch_context_allowed(
 
 def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
+    if is_idempotence_runtime_containment_hardening_changed_path(branch, normalized):
+        return True
     if (
         is_pr_or_later_branch(
             branch,
@@ -2956,10 +3020,14 @@ def is_downstream_or_main_validation_branch(
     *,
     allow_repair: bool = True,
 ) -> bool:
-    return is_main_cumulative_branch(branch) or is_downstream_roadmap_branch(
-        branch,
-        after_pr,
-        allow_repair=allow_repair,
+    return (
+        is_idempotence_runtime_containment_hardening_branch(branch)
+        or is_main_cumulative_branch(branch)
+        or is_downstream_roadmap_branch(
+            branch,
+            after_pr,
+            allow_repair=allow_repair,
+        )
     )
 
 
@@ -2970,6 +3038,8 @@ def is_pr_or_later_branch(
     allow_main: bool = True,
     allow_repair: bool = True,
 ) -> bool:
+    if is_idempotence_runtime_containment_hardening_branch(branch):
+        return True
     if allow_main and is_main_cumulative_branch(branch):
         return True
     explicit_repair_pr = _explicit_downstream_repair_branch_pr_number(branch)

@@ -1,0 +1,473 @@
+{
+  "authority_class": "CI_RUNTIME_CONTAINMENT_STATIC_GUARD_FIXTURE_NOT_TRADING_AUTHORITY",
+  "checkout_fixture_requirements": [
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr166_sm2_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-5"
+      ]
+    },
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr166_sf_r2_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-4",
+        "pytest-shard-6"
+      ]
+    },
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr166_sm3_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-7"
+      ]
+    },
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr165_d3_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-7"
+      ]
+    }
+  ],
+  "default_ci_idempotence_policy": {
+    "bounded_default_ci_classes": [
+      "BOUNDED_PR_CI_IDEMPOTENCE",
+      "LIGHTWEIGHT_SAFE_DEFAULT_CI"
+    ],
+    "exhaustive_default_ci_class": "DEFAULT_CI_FORBIDDEN_EXHAUSTIVE_IDEMPOTENCE",
+    "manual_exhaustive_class": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+    "policy": "DEFAULT_CI_FORBIDDEN_EXHAUSTIVE_IDEMPOTENCE"
+  },
+  "forbidden_touch_patterns": [
+    {
+      "code": "FORBIDDEN_MASTER_PLAN_CHANGE",
+      "pattern": "docs/master_plan/QTT_MasterPlan_Current.md"
+    },
+    {
+      "code": "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE",
+      "pattern": "docs/master_plan/generated/**"
+    },
+    {
+      "code": "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE",
+      "pattern": "docs/master_plan/source_evidence/generated/**"
+    },
+    {
+      "code": "FORBIDDEN_PR166_Q_BUSINESS_CHANGE",
+      "pattern": "src/qtt/stage1_prediction_markets/pr166_q*/**"
+    },
+    {
+      "code": "FORBIDDEN_PR166_Q_BUSINESS_CHANGE",
+      "pattern": "tests/stage1_prediction_markets/pr166_q*/**"
+    },
+    {
+      "code": "FORBIDDEN_PR165_D3_BUSINESS_CHANGE",
+      "pattern": "src/qtt/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/**"
+    },
+    {
+      "code": "FORBIDDEN_PR165_D3_BUSINESS_CHANGE",
+      "pattern": "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/**"
+    },
+    {
+      "code": "SPARSE_CHECKOUT_EXPERIMENT_BLOCKED",
+      "pattern": ".github/sparse-checkout/**"
+    }
+  ],
+  "idempotence_tests": [
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py",
+      "path": "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/test_pr163_c_repeat_run_determinism.py",
+      "pytest_shard": "pytest-shard-2",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr164_review_provenance_qku_canonical_coverage_audit.py",
+      "path": "tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/test_pr164_repeat_run_determinism.py",
+      "pytest_shard": "pytest-shard-3",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_s2_replay_paper_retest_loop_v2.py",
+      "path": "tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2/test_pr166_s2_idempotence.py",
+      "pytest_shard": "pytest-shard-3",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_sf_repair_materialization_before_retest.py",
+      "path": "tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest/test_pr166_sf_idempotence.py",
+      "pytest_shard": "pytest-shard-4",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_sm_score_memory_refresh_from_pr166_s_results.py",
+      "path": "tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results/test_pr166_sm_idempotence.py",
+      "pytest_shard": "pytest-shard-4",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_sf_r2_targeted_conversion_repair_retest.py",
+      "path": "tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_idempotence.py",
+      "pytest_shard": "pytest-shard-4",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_sm2_score_memory_refresh_v2.py",
+      "path": "tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_idempotence.py",
+      "pytest_shard": "pytest-shard-5",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr165_d3_quantum_aware_scenario_selection_v3.py",
+      "path": "tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
+      "pytest_shard": "pytest-shard-7",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_sm3_score_memory_refresh_v3.py",
+      "path": "tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3/test_pr166_sm3_idempotence.py",
+      "pytest_shard": "pytest-shard-7",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py",
+      "path": "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
+      "pytest_shard": "pytest-shard-3",
+      "runtime_budget_seconds": 180
+    }
+  ],
+  "known_heavy_families": [
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-SF-R2",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_sf_r2_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-4",
+        "pytest-shard-6"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-SM3",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_sm3_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-7"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-SM2",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_sm2_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-5"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR165-D3",
+      "generated_shard_glob": "docs/master_plan/generated/pr165_d3_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-7"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-S2",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_s2_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-3"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR165-D2",
+      "generated_shard_glob": "docs/master_plan/generated/pr165_d2_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-3"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-SF",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_sf_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-4"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-SM",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_sm_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-4"
+      ]
+    }
+  ],
+  "manual_nightly_exhaustive_paths": [
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr163_c_pretrade_infrastructure_rejection_remediation.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr164_review_provenance_qku_canonical_coverage_audit.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr165_b_condition_scoped_negative_memory.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr165_c_replay_paper_memory_consumer_integration.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr165_d_scenario_qku_combination_selection.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr165_evidence_backed_scoring_ranking.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_s_replay_paper_scenario_retest_execution.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_s2_replay_paper_retest_loop_v2.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_sf_repair_materialization_before_retest.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_sf_r2_targeted_conversion_repair_retest.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_sm_score_memory_refresh_from_pr166_s_results.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_sm2_score_memory_refresh_v2.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_sm3_score_memory_refresh_v3.py"
+    }
+  ],
+  "pytest_shards": [
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-1",
+      "workflow_job_id": "pytest_shard_1",
+      "workflow_name": "Pytest Shard 1"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-2",
+      "workflow_job_id": "pytest_shard_2",
+      "workflow_name": "Pytest Shard 2"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-3",
+      "workflow_job_id": "pytest_shard_3",
+      "workflow_name": "Pytest Shard 3"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-4",
+      "workflow_job_id": "pytest_shard_4",
+      "workflow_name": "Pytest Shard 4"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-5",
+      "workflow_job_id": "pytest_shard_5",
+      "workflow_name": "Pytest Shard 5"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-6",
+      "workflow_job_id": "pytest_shard_6",
+      "workflow_name": "Pytest Shard 6"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-7",
+      "workflow_job_id": "pytest_shard_7",
+      "workflow_name": "Pytest Shard 7"
+    },
+    {
+      "aggregation_required": true,
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "phase": "pytest-shard-8",
+      "workflow_job_id": "pytest_shard_8",
+      "workflow_name": "Pytest Shard 8"
+    }
+  ],
+  "runtime_artifact_policy": [
+    {
+      "classification": "RUNTIME_ARTIFACT_FAILS_IF_TRACKED_OR_STAGED",
+      "path_pattern": ".tmp/qtt-validation-router/*.json"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_FAILS_IF_TRACKED_OR_STAGED",
+      "path_pattern": ".tmp/qtt-validation-timing/*.json"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_FAILS_IF_TRACKED_OR_STAGED",
+      "path_pattern": ".tmp/run_validation_gates_pytest_*"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": ".pytest_cache/**"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": "__pycache__/**"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": "*/__pycache__/**"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": ".mypy_cache/**"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": ".ruff_cache/**"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": ".coverage"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": "coverage.xml"
+    },
+    {
+      "classification": "RUNTIME_ARTIFACT_IGNORED_IF_UNTRACKED",
+      "path_pattern": "htmlcov/**"
+    }
+  ],
+  "runtime_budget_policy": {
+    "default_ci_unbounded_verify_idempotent": "DEFAULT_CI_FORBIDDEN_EXHAUSTIVE_IDEMPOTENCE",
+    "pytest_file_hard_review_seconds": 300,
+    "pytest_idempotence_hard_review_seconds": 180,
+    "pytest_shard_hard_review_seconds": 1800,
+    "pytest_shard_target_seconds": 1200,
+    "pytest_shard_warning_seconds": 1500
+  },
+  "schema_version": 1,
+  "workflow_jobs": [
+    {
+      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
+      "job_id": "fast_preflight",
+      "name": "Fast Preflight"
+    },
+    {
+      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
+      "job_id": "deterministic_validators",
+      "name": "Deterministic Validators"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_1",
+      "name": "Pytest Shard 1"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_2",
+      "name": "Pytest Shard 2"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_3",
+      "name": "Pytest Shard 3"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_4",
+      "name": "Pytest Shard 4"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_5",
+      "name": "Pytest Shard 5"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_6",
+      "name": "Pytest Shard 6"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_7",
+      "name": "Pytest Shard 7"
+    },
+    {
+      "classification": "PYTEST_SHARD_DEFAULT_CI",
+      "job_id": "pytest_shard_8",
+      "name": "Pytest Shard 8"
+    },
+    {
+      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
+      "job_id": "post_validation_checks",
+      "name": "Post Validation Checks"
+    },
+    {
+      "classification": "LIGHTWEIGHT_SAFE_DEFAULT_CI",
+      "job_id": "validation",
+      "name": "Validation Gates"
+    }
+  ]
+}
