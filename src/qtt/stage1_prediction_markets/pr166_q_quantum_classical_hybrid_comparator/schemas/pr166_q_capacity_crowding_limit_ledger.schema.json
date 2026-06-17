@@ -1,0 +1,47 @@
+{
+  "$id": "pr166_q_capacity_crowding_limit_ledger.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_boundary_ref": {
+      "const": "PR166_Q_AUTHORITY_BOUNDARY::REPLAY_PAPER_ONLY_NO_LIVE_SOURCE_TRUTH_CONNECTOR_BINDING_PROFIT_QUANTUM_BACKEND_QTT_SHA_OR_ATOMICROWS_HASH"
+    },
+    "authority_class": {
+      "const": "PR166_Q_REPLAY_PAPER_QUANTUM_CLASSICAL_HYBRID_COMPARATOR_ONLY"
+    },
+    "created_by_pr": {
+      "const": "PR166-Q"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "$ref": "pr166_q_common.schema.json"
+      },
+      "type": "array"
+    },
+    "report_filename": {
+      "const": "PR166_Q_CapacityCrowdingLimitLedger.report.json"
+    },
+    "roadmap_pr_id": {
+      "const": "PR166-Q"
+    },
+    "schema_ref": {
+      "const": "pr166_q_capacity_crowding_limit_ledger.schema.json"
+    }
+  },
+  "required": [
+    "report_filename",
+    "roadmap_pr_id",
+    "created_by_pr",
+    "authority_class",
+    "authority_boundary_ref",
+    "schema_ref",
+    "record_count",
+    "records"
+  ],
+  "title": "PR166_Q_CapacityCrowdingLimitLedger.report.json",
+  "type": "object"
+}

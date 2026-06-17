@@ -2817,6 +2817,72 @@ def test_pr166_sm3_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr166_q_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = context.PR166_Q_BRANCH
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=166) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_q_quantum_classical_hybrid_comparator/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_q_quantum_classical_hybrid_comparator/schemas/"
+        "pr166_q_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_Q_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr166_q_shards/"
+        "PR166_Q_QuantumClassicalHybridRaceLedger.part_0001_of_0001.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr166_q_quantum_classical_hybrid_comparator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr166_q_quantum_classical_hybrid_comparator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_idempotence_runtime_containment.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR166_SM3_FinalSummary.report.json",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_sm3_score_memory_refresh_v3/validator.py",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/166/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr165_d2_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = "pr165-d2-score-refreshed-scenario-selection-v2"
     repair_branch = context.PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH
@@ -3600,6 +3666,24 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             branch,
             "src/qtt/stage1_prediction_markets/"
             "pr166_s2_replay_paper_retest_loop_v2/validator.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "tools/validate_pr166_q_quantum_classical_hybrid_comparator.py",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/PR166_Q_FinalSummary.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "docs/master_plan/generated/pr166_q_shards/"
+            "PR166_Q_QuantumClassicalHybridRaceLedger.part_0001_of_0001.report.json",
+        )
+        assert context.is_validation_infrastructure_changed_path(
+            branch,
+            "src/qtt/stage1_prediction_markets/"
+            "pr166_q_quantum_classical_hybrid_comparator/validator.py",
         )
         assert context.is_validation_infrastructure_changed_path(
             branch,

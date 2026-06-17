@@ -29,6 +29,14 @@
     {
       "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
       "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr166_q_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-8"
+      ]
+    },
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
       "path_glob": "docs/master_plan/generated/pr165_d3_shards/*.json",
       "required_by_pytest_shards": [
         "pytest-shard-7"
@@ -164,6 +172,15 @@
       "bounded_contract": true,
       "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr166_q_quantum_classical_hybrid_comparator.py",
+      "path": "tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_idempotence.py",
+      "pytest_shard": "pytest-shard-8",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "manual_exhaustive_path": "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py",
       "path": "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
       "pytest_shard": "pytest-shard-3",
@@ -186,6 +203,14 @@
       "generated_shard_glob": "docs/master_plan/generated/pr166_sm3_shards/*.json",
       "pytest_shards": [
         "pytest-shard-7"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR166-Q",
+      "generated_shard_glob": "docs/master_plan/generated/pr166_q_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-8"
       ]
     },
     {
@@ -293,6 +318,10 @@
     {
       "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
       "path": "tools/build_pr166_sm3_score_memory_refresh_v3.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr166_q_quantum_classical_hybrid_comparator.py"
     }
   ],
   "pytest_shards": [

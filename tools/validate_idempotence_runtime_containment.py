@@ -627,10 +627,18 @@ def _validate_changed_files(
     changed_paths: Sequence[str],
     *,
     workflow_text: str,
+    current_branch: str = "",
+    auto_discovered_changed_paths: bool = False,
 ) -> list[Failure]:
     failures: list[Failure] = []
     forbidden = tuple(_active_inventory_entries(inventory.get("forbidden_touch_patterns", ())))
     for path in sorted(dict.fromkeys(normalize_path(path) for path in changed_paths)):
+        if _allowed_explicit_roadmap_feature_touch(
+            current_branch,
+            path,
+            auto_discovered_changed_paths=auto_discovered_changed_paths,
+        ):
+            continue
         for entry in forbidden:
             pattern = str(entry.get("pattern", ""))
             if _matches(path, pattern):
@@ -640,6 +648,26 @@ def _validate_changed_files(
             _failure("SPARSE_CHECKOUT_EXPERIMENT_BLOCKED", path=".github/workflows/qtt_validation.yml")
         )
     return failures
+
+
+def _allowed_explicit_roadmap_feature_touch(
+    branch: str,
+    path: str,
+    *,
+    auto_discovered_changed_paths: bool,
+) -> bool:
+    if not auto_discovered_changed_paths:
+        return False
+    try:
+        from tools.ci_branch_context import (
+            PR166_Q_BRANCH,
+            is_explicit_downstream_repair_changed_path,
+        )
+    except Exception:
+        return False
+    if branch != PR166_Q_BRANCH:
+        return False
+    return is_explicit_downstream_repair_changed_path(branch, path)
 
 
 def _validate_checkout(inventory: Mapping[str, Any]) -> list[Failure]:
@@ -678,6 +706,8 @@ def validate(
     root = repo_root.resolve()
     payload = dict(inventory) if inventory is not None else load_inventory(root / (inventory_path or INVENTORY_PATH))
     workflow = _workflow_text(root) if workflow_text is None else workflow_text
+    auto_discovered_changed_paths = changed_paths is None
+    branch = _current_branch(root)
     discovered = (
         discover_idempotence_tests(root)
         if discovered_idempotence is None
@@ -704,6 +734,8 @@ def validate(
             payload,
             _changed_paths(root) if changed_paths is None else changed_paths,
             workflow_text=workflow,
+            current_branch=branch,
+            auto_discovered_changed_paths=auto_discovered_changed_paths,
         )
     )
     failures.extend(_validate_checkout(payload))
