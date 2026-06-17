@@ -309,6 +309,38 @@ def test_pr166_q_branch_scoped_exception_does_not_allow_master_plan():
     assert "FORBIDDEN_MASTER_PLAN_CHANGE" in _codes(failures)
 
 
+def test_pr166_qb_branch_scoped_auto_discovered_changes_are_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/PR166_QB_FinalSummary.report.json",
+            "docs/master_plan/generated/pr166_qb_shards/"
+            "PR166_QB_RaceArb.part_0001_of_0001.report.json",
+            "src/qtt/stage1_prediction_markets/"
+            "pr166_qb_bounded_quantum_benchmark/report_writer.py",
+            "tests/stage1_prediction_markets/"
+            "pr166_qb_bounded_quantum_benchmark/test_pr166_qb_artifacts.py",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr166-qb-bounded-nonlive-quantum-optimizer-benchmark",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert failures == []
+
+
+def test_pr166_qb_branch_scoped_exception_does_not_allow_other_reports():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        ("docs/master_plan/generated/PR166_Q_FinalSummary.report.json",),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr166-qb-bounded-nonlive-quantum-optimizer-benchmark",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
 def test_pr165_d3_business_file_change_is_rejected_for_hardening_pr():
     failures = _validate(
         _inventory(),
