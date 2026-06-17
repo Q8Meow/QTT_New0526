@@ -197,6 +197,14 @@ def _changed_paths(repo_root: Path) -> tuple[str, ...]:
 
 
 def _current_branch(repo_root: Path) -> str:
+    try:
+        from tools.ci_branch_context import current_branch_context
+
+        branch = current_branch_context(repo_root).branch
+        if branch:
+            return branch
+    except Exception:
+        pass
     rc, stdout, _stderr = _git(repo_root, ("branch", "--show-current"))
     if rc == 0:
         return stdout.strip()

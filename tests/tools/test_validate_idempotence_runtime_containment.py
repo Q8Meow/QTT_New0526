@@ -262,6 +262,41 @@ def test_pr166_q_branch_scoped_auto_discovered_changes_are_allowed():
     assert failures == []
 
 
+def test_pr166_q_github_pr_merge_ref_auto_discovered_changes_are_allowed(
+    monkeypatch,
+):
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/222/merge")
+    monkeypatch.setenv("GITHUB_REF_NAME", "222/merge")
+    monkeypatch.setenv(
+        "GITHUB_HEAD_REF",
+        "pr166-q-quantum-classical-hybrid-comparator",
+    )
+    monkeypatch.setattr(
+        validator,
+        "_changed_paths",
+        lambda _repo_root: (
+            "docs/master_plan/generated/PR166_Q_FinalSummary.report.json",
+            "src/qtt/stage1_prediction_markets/"
+            "pr166_q_quantum_classical_hybrid_comparator/validator.py",
+            "tests/stage1_prediction_markets/"
+            "pr166_q_quantum_classical_hybrid_comparator/"
+            "test_pr166_q_validator.py",
+        ),
+    )
+    monkeypatch.setattr(validator, "_tracked_paths", lambda _repo_root: ())
+    monkeypatch.setattr(validator, "_staged_paths", lambda _repo_root: ())
+
+    failures = validator.validate(
+        REPO_ROOT,
+        inventory=_inventory(),
+        workflow_text=WORKFLOW_TEXT,
+    )
+
+    assert "FORBIDDEN_PR166_Q_BUSINESS_CHANGE" not in _codes(failures)
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" not in _codes(failures)
+
+
 def test_pr166_q_branch_scoped_exception_does_not_allow_master_plan():
     failures = validator._validate_changed_files(
         _inventory(),
