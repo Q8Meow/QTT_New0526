@@ -57,6 +57,23 @@ def test_inventory_has_pr165_d3_quantum_selection_entry():
     assert "tests/stage1_prediction_markets/pr165_d3*/**" in entry.required_when_files_match
 
 
+def test_inventory_keeps_pr166_qb_and_qc_scopes_distinct():
+    by_id = inventory.inventory_by_id()
+
+    qb = by_id["validate_pr166_qb_bounded_quantum_benchmark"]
+    assert "docs/master_plan/generated/PR166_QB_*.report.json" in qb.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr166_qb*/schemas/**" in qb.schema_globs
+
+    qc = by_id["validate_pr166_qc_quantum_selected_replay_paper_retest"]
+    assert "docs/master_plan/generated/PR166_QC_*.report.json" in qc.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr166_qc*/schemas/**" in qc.schema_globs
+    assert (
+        "tests/stage1_prediction_markets/"
+        "pr166_qc*/**"
+        in qc.required_when_files_match
+    )
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.PYTEST_SHARD_PHASES:
         assert inventory.phase_job_id(phase) == phase.replace("-", "_")

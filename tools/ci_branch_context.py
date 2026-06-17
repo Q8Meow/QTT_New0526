@@ -1102,6 +1102,7 @@ PR166_SF_R2_BRANCH = "pr166-sf-r2-targeted-conversion-repair-retest"
 PR166_SM3_BRANCH = "pr166-sm3-score-memory-refresh-v3"
 PR166_Q_BRANCH = "pr166-q-quantum-classical-hybrid-comparator"
 PR166_QB_BRANCH = "pr166-qb-bounded-nonlive-quantum-optimizer-benchmark"
+PR166_QC_BRANCH = "pr166-qc-quantum-selected-replay-paper-retest"
 PR165_D2_BRANCH = "pr165-d2-score-refreshed-scenario-selection-v2"
 PR165_D3_BRANCH = "pr165-d3-quantum-aware-scenario-selection-v3"
 PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
@@ -1538,6 +1539,40 @@ PR166_QB_ALLOWED_CHANGED_PATHS = frozenset(
         "tools/run_validation_gates.py",
         "tools/validation_inventory.py",
         "tools/validate_idempotence_runtime_containment.py",
+        "tests/fail_closed/test_run_validation_gates.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_validate_idempotence_runtime_containment.py",
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+        "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+        "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+    }
+)
+PR166_QC_ALLOWED_CHANGED_PATH_PREFIXES = (
+    "docs/master_plan/generated/PR166_QC_",
+    "docs/master_plan/generated/pr166_qc_shards/",
+    "src/qtt/stage1_prediction_markets/"
+    "pr166_qc_quantum_selected_replay_paper_retest/",
+    "tests/stage1_prediction_markets/"
+    "pr166_qc_quantum_selected_replay_paper_retest/",
+)
+PR166_QC_ALLOWED_CHANGED_PATHS = frozenset(
+    {
+        "tools/build_pr166_qc_quantum_selected_replay_paper_retest.py",
+        "tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "tools/ci_branch_context.py",
+        "tools/run_validation_gates.py",
+        "tools/validation_inventory.py",
+        "tools/validate_idempotence_runtime_containment.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
         "tests/fail_closed/test_run_validation_gates.py",
         "tests/tools/test_ci_branch_context.py",
         "tests/tools/test_validation_inventory.py",
@@ -2141,6 +2176,7 @@ PR162_THROUGH_PR164_BRANCH_CONTEXT_BRANCHES = frozenset(
         PR166_SM3_BRANCH,
         PR166_Q_BRANCH,
         PR166_QB_BRANCH,
+        PR166_QC_BRANCH,
         PR165_D3_BRANCH,
         PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH,
     }
@@ -2843,6 +2879,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         return _is_pr166_q_quantum_classical_hybrid_changed_path(normalized)
     if branch == PR166_QB_BRANCH:
         return _is_pr166_qb_bounded_quantum_benchmark_changed_path(normalized)
+    if branch == PR166_QC_BRANCH:
+        return _is_pr166_qc_quantum_selected_replay_paper_changed_path(normalized)
     if branch == PR162R_B_BRANCH:
         return normalized in PR162R_B_ALLOWED_CHANGED_PATHS or any(
             normalized.startswith(prefix)
@@ -3074,6 +3112,14 @@ def _is_pr166_qb_bounded_quantum_benchmark_changed_path(path: str) -> bool:
     return normalized in PR166_QB_ALLOWED_CHANGED_PATHS or any(
         normalized.startswith(prefix)
         for prefix in PR166_QB_ALLOWED_CHANGED_PATH_PREFIXES
+    )
+
+
+def _is_pr166_qc_quantum_selected_replay_paper_changed_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in PR166_QC_ALLOWED_CHANGED_PATHS or any(
+        normalized.startswith(prefix)
+        for prefix in PR166_QC_ALLOWED_CHANGED_PATH_PREFIXES
     )
 
 

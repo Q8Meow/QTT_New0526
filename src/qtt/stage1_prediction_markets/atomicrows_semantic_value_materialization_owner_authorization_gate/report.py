@@ -13,9 +13,11 @@ from tools.build_master_plan_section_coverage_report import (
     load_yaml_subset,
 )
 from tools.ci_branch_context import (
+    PR166_QC_BRANCH,
     current_branch_context,
     is_downstream_roadmap_branch,
     is_explicit_downstream_repair_changed_path,
+    is_validation_infrastructure_branch,
     is_validation_infrastructure_changed_path,
 )
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
@@ -1982,6 +1984,16 @@ def _is_pr152_audit_changed_path_for_branch(path: str, branch: str) -> bool:
     )
 
 
+def _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return is_validation_infrastructure_branch(
+        branch
+    ) and is_explicit_downstream_repair_changed_path(PR166_QC_BRANCH, normalized)
+
+
 def _is_pr142_handoff_changed_path(path: str, repo_root: Path) -> bool:
     branch_context = current_branch_context(repo_root)
     return _is_pr142_handoff_changed_path_for_branch(
@@ -2028,6 +2040,10 @@ def _is_allowed_pr141_changed_path(path: str, repo_root: Path) -> bool:
         or is_explicit_downstream_repair_changed_path(
             branch_context.branch,
             normalized,
+        )
+        or _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
+            normalized,
+            branch_context.branch,
         )
         or is_validation_infrastructure_changed_path(
             branch_context.branch,

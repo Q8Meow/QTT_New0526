@@ -190,7 +190,7 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 def _pr_token(stem: str) -> str | None:
     if "pr165_d3" in stem:
         return "pr165_d3"
-    match = re.search(r"(pr\d+[a-z]?(?:_[a-z])?)", stem)
+    match = re.search(r"(pr\d+[a-z]?(?:_[a-z]+)?)", stem)
     if match is None:
         return None
     return match.group(1)
