@@ -775,6 +775,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr166_qb_bounded_quantum_benchmark.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -2446,6 +2452,7 @@ def test_runner_pytest_runtime_budget_plan_is_complete_and_fail_closed():
             _pr166_sf_r2_idempotence_path(),
             _pr166_sm3_idempotence_path(),
             _pr166_q_idempotence_path(),
+            _pr166_qb_idempotence_path(),
         }
     )
 
@@ -2488,6 +2495,13 @@ def _pr166_q_idempotence_path() -> str:
     return (
         f"{runner.PR166_Q_TEST_ROOT}/"
         f"{runner.PR166_Q_IDEMPOTENCE_TEST_FILE}"
+    )
+
+
+def _pr166_qb_idempotence_path() -> str:
+    return (
+        f"{runner.PR166_QB_TEST_ROOT}/"
+        f"{runner.PR166_QB_IDEMPOTENCE_TEST_FILE}"
     )
 
 
@@ -2891,10 +2905,13 @@ def test_runner_splits_pytest_shard_7_current_pr_group_first():
 def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     commands = runner.PYTEST_SHARD_COMMANDS["pytest-shard-8"]
     idempotence_path = _pr166_q_idempotence_path()
+    qb_idempotence_path = _pr166_qb_idempotence_path()
 
     assert [command.paths for command in commands] == [
         (idempotence_path,),
         (runner.PR166_Q_TEST_ROOT,),
+        (qb_idempotence_path,),
+        (runner.PR166_QB_TEST_ROOT,),
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
             "tests/agent_algorithm",
@@ -2932,6 +2949,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     ]
     assert commands[0].bounded_idempotence is True
     assert commands[1].ignores == (idempotence_path,)
+    assert commands[2].bounded_idempotence is True
+    assert commands[3].ignores == (qb_idempotence_path,)
     assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
@@ -2948,7 +2967,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[5], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[7], REPO_ROOT)
     )
 
 
@@ -3193,6 +3212,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr166_q_index = command_names.index(
         "validate_pr166_q_quantum_classical_hybrid_comparator.py"
     )
+    pr166_qb_index = command_names.index(
+        "validate_pr166_qb_bounded_quantum_benchmark.py"
+    )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
@@ -3407,6 +3429,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         command_names.count("validate_pr166_q_quantum_classical_hybrid_comparator.py")
         == 1
     )
+    assert command_names.count("validate_pr166_qb_bounded_quantum_benchmark.py") == 1
     assert (
         command_names.count(
             "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -3460,6 +3483,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr166_sf_r2_index
         < pr166_sm3_index
         < pr166_q_index
+        < pr166_qb_index
         < pr165_d2_index
         < pr165_d3_index
         < next_gate_index
@@ -3787,6 +3811,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
             Path("tools")
             / "validate_pr166_q_quantum_classical_hybrid_comparator.py"
         ),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr166_qb_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr166_qb_bounded_quantum_benchmark.py"),
         "--repo-root",
         ".",
     ]

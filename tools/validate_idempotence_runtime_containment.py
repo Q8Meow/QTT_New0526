@@ -669,11 +669,12 @@ def _allowed_explicit_roadmap_feature_touch(
     try:
         from tools.ci_branch_context import (
             PR166_Q_BRANCH,
+            PR166_QB_BRANCH,
             is_explicit_downstream_repair_changed_path,
         )
     except Exception:
         return False
-    if branch != PR166_Q_BRANCH:
+    if branch not in {PR166_Q_BRANCH, PR166_QB_BRANCH}:
         return False
     return is_explicit_downstream_repair_changed_path(branch, path)
 
