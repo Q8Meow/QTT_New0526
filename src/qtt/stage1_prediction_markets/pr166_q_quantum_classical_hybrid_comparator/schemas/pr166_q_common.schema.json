@@ -1,0 +1,40 @@
+{
+  "$id": "pr166_q_common.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "computability_disposition": {
+      "enum": [
+        "COMPUTABLE_NOW",
+        "COMPUTABLE_WITH_CANDIDATE_ASSUMPTIONS",
+        "COMPUTABLE_AFTER_NARROW_FILL_ACTION",
+        "QUANTUM_REFORMULATION_TRIAGE_REQUIRED",
+        "EXCLUDED_UNSAFE_OR_IMPOSSIBLE_WITH_EXACT_REASON"
+      ]
+    },
+    "created_by_pr": {
+      "const": "PR166-Q"
+    },
+    "row_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "row_id",
+    "created_by_pr",
+    "source_pr",
+    "qku_id",
+    "formula_id",
+    "algorithm_id",
+    "computability_disposition",
+    "quantum_backend_execution_flag",
+    "quantum_advantage_claim_flag",
+    "live_order_authority_flag",
+    "profit_evidence_flag",
+    "source_truth_acceptance_flag",
+    "connector_semantic_binding_flag",
+    "private_state_fetch_flag",
+    "runtime_cash_receipt_flag"
+  ],
+  "title": "PR166-Q common generated report row",
+  "type": "object"
+}
