@@ -3338,6 +3338,49 @@ def test_changed_path_helper_requires_exact_repair_scope():
     )
 
 
+def test_idempotence_runtime_containment_hardening_scope_is_exact():
+    branch = context.IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_BRANCH
+    assert context.is_idempotence_runtime_containment_hardening_branch(branch)
+    assert context.is_downstream_or_main_validation_branch(
+        branch,
+        after_pr=138,
+        allow_repair=False,
+    )
+    assert context.is_pr_or_later_branch(branch, minimum_pr=99)
+    assert not context.is_validation_infrastructure_branch(branch)
+    assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR160")
+    assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+        branch,
+        "PR160",
+    )
+
+    for path in context.IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_CHANGED_PATHS:
+        assert context.is_idempotence_runtime_containment_hardening_changed_path(
+            branch,
+            path,
+        )
+        assert context.is_explicit_downstream_repair_changed_path(branch, path)
+
+    denied_paths = (
+        ".github/workflows/unrelated.yml",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/generated/PR166_Q_FinalSummary.report.json",
+        "src/qtt/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/report.py",
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_q_quantum_comparator_business_logic/validator.py",
+        "tests/stage1_prediction_markets/"
+        "pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_idempotence.py",
+    )
+    for path in denied_paths:
+        assert not context.is_validation_infrastructure_changed_path(branch, path)
+        assert not context.is_idempotence_runtime_containment_hardening_changed_path(
+            branch,
+            path,
+        )
+        assert not context.is_explicit_downstream_repair_changed_path(branch, path)
+
+
 def test_pr166_sm2_bounded_idempotence_ci_repair_scope_is_exact():
     branch = context.PR166_SM2_BOUNDED_IDEMPOTENCE_CI_REPAIR_BRANCH
     assert context.is_downstream_or_main_validation_branch(
@@ -3576,6 +3619,8 @@ def test_validation_infrastructure_changed_path_scope_is_exact():
             "src/qtt/stage1_prediction_markets/"
             "pr165_d2_score_refreshed_scenario_selection_v2/validator.py",
         )
+        for path in context.IDEMPOTENCE_RUNTIME_CONTAINMENT_HARDENING_CHANGED_PATHS:
+            assert context.is_validation_infrastructure_changed_path(branch, path)
     assert not context.is_validation_infrastructure_changed_path(
         "repair/pr163-c-main-branch-context-after-merge",
         "tools/validate_ci_branch_context_matrix.py",

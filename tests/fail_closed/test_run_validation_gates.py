@@ -361,6 +361,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_idempotence_runtime_containment.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py"

@@ -43,10 +43,14 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tools/ci_branch_context.py",
     "tools/validation_inventory.py",
     "tools/validate_validation_inventory.py",
+    "tools/validate_idempotence_runtime_containment.py",
     "tools/changed_area_validation_router.py",
     "tools/cross_platform_path_invariant.py",
     "tools/repo_path_refs.py",
+    "src/qtt/stage1_prediction_markets/grand_global_debug_logical_consistency_audit/report.py",
     "tests/tools/test_validation_inventory.py",
+    "tests/tools/test_validate_idempotence_runtime_containment.py",
+    "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
     "tests/tools/test_changed_area_validation_router.py",
     "tests/tools/test_cross_platform_path_invariant.py",
     "tests/tools/test_ci_branch_context.py",
@@ -208,6 +212,8 @@ def _owner_pr_or_feature(stem: str) -> str:
         return "ci_branch_context"
     if "validation_inventory" in stem:
         return "PR208"
+    if "idempotence_runtime_containment" in stem:
+        return "CI runtime containment"
     if "changed_area_validation_router" in stem:
         return "PR208"
     if "cross_platform_path_invariant" in stem:
@@ -217,7 +223,11 @@ def _owner_pr_or_feature(stem: str) -> str:
 
 def _owner_domain(stem: str, command: Sequence[str]) -> str:
     haystack = " ".join(command).lower()
-    if "validation_inventory" in stem or "changed_area" in stem:
+    if (
+        "validation_inventory" in stem
+        or "changed_area" in stem
+        or "idempotence_runtime_containment" in stem
+    ):
         return "CI validation infrastructure"
     if "cross_platform_path" in stem or "repo_path_refs" in haystack:
         return "cross-platform path invariant"
@@ -317,6 +327,15 @@ def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
                 "docs/master_plan/generated/PR208_FinalSummary.report.json",
             )
         )
+    if "idempotence_runtime_containment" in stem:
+        globs.extend(
+            (
+                *VALIDATION_INFRASTRUCTURE_GLOBS,
+                "tools/validate_idempotence_runtime_containment.py",
+                "tests/tools/test_validate_idempotence_runtime_containment.py",
+                "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+            )
+        )
     if "changed_area_validation_router" in stem:
         globs.extend(
             (
@@ -405,6 +424,7 @@ def _workflow_globs(stem: str) -> tuple[str, ...]:
     if stem in {
         "validate_ci_branch_context_matrix",
         "validate_validation_inventory",
+        "validate_idempotence_runtime_containment",
         "changed_area_validation_router",
     }:
         return (".github/workflows/**",)
@@ -491,6 +511,7 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
         for glob in required_globs
     ) or validator_id in {
         "validate_validation_inventory",
+        "validate_idempotence_runtime_containment",
         "changed_area_validation_router",
         "cross_platform_path_invariant",
     }
@@ -501,6 +522,7 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
             "cross_platform_path_invariant",
             "changed_area_validation_router",
             "validate_validation_inventory",
+            "validate_idempotence_runtime_containment",
         }
     )
     pr152_tracked = any(_matches_any(glob.rstrip("/**"), PR152_TRACKED_GLOBS) for glob in required_globs)

@@ -71,27 +71,12 @@ def _mutated_pr151_root(tmp_path: Path, mutator) -> Path:
 
 
 _PR152_VALIDATION_INFRASTRUCTURE_COUNT_PATHS = {
-    "$.completed_pr_artifact_audit.validator_tool_count": (
-        "completed_pr_artifact_audit",
-        "validator_tool_count",
-    ),
-    "$.validator_tool_registry_audit.validator_tool_count": (
-        "validator_tool_registry_audit",
-        "validator_tool_count",
-    ),
-    "$.whole_repo_inventory_audit.audited_text_file_count": (
-        "whole_repo_inventory_audit",
-        "audited_text_file_count",
-    ),
-    "$.whole_repo_inventory_audit.category_counts.VALIDATOR_TOOL": (
-        "whole_repo_inventory_audit",
-        "category_counts",
-        "VALIDATOR_TOOL",
-    ),
-    "$.whole_repo_inventory_audit.tracked_file_count": (
-        "whole_repo_inventory_audit",
-        "tracked_file_count",
-    ),
+    path: pr152_report._VALIDATION_INFRASTRUCTURE_REPORT_COUNT_FIELD_PATHS[path]
+    for path in pr152_report._PR_CI_FASTFAIL_REPORT_COUNT_EXPECTED_DELTAS
+}
+_PR152_IDEMPOTENCE_RUNTIME_CONTAINMENT_COUNT_PATHS = {
+    path: pr152_report._VALIDATION_INFRASTRUCTURE_REPORT_COUNT_FIELD_PATHS[path]
+    for path in pr152_report._IDEMPOTENCE_RUNTIME_CONTAINMENT_REPORT_COUNT_EXPECTED_DELTAS
 }
 
 
@@ -129,6 +114,29 @@ def _pr152_validation_infrastructure_count_payloads(
     return tracked, rebuilt
 
 
+def _pr152_idempotence_runtime_containment_count_payloads() -> tuple[dict, dict]:
+    tracked = {
+        "completed_pr_artifact_audit": {
+            "test_file_count": 1709,
+            "validator_tool_count": 156,
+        },
+        "schema_fixture_test_consistency_audit": {"test_file_count": 1709},
+        "validator_tool_registry_audit": {"validator_tool_count": 156},
+        "whole_repo_inventory_audit": {
+            "audited_text_file_count": 11874,
+            "category_counts": {"TEST": 1967, "VALIDATOR_TOOL": 156},
+            "tracked_file_count": 6251,
+        },
+    }
+    rebuilt = deepcopy(tracked)
+    for path, delta in (
+        pr152_report._IDEMPOTENCE_RUNTIME_CONTAINMENT_REPORT_COUNT_EXPECTED_DELTAS.items()
+    ):
+        keys = _PR152_IDEMPOTENCE_RUNTIME_CONTAINMENT_COUNT_PATHS[path]
+        _set_nested(rebuilt, keys, _get_nested(tracked, keys) + delta)
+    return tracked, rebuilt
+
+
 def _validate_stubbed_pr152_report_delta(
     monkeypatch,
     repo_root: Path,
@@ -147,7 +155,7 @@ def _validate_stubbed_pr152_report_delta(
 
 
 def _write_policy_validator_tools(root: Path, *, omit: str | None = None) -> None:
-    for rel_path in pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS:
+    for rel_path in pr152_report._VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS:
         if rel_path == omit:
             continue
         path = root / rel_path
@@ -460,6 +468,23 @@ def test_pr152_validation_infrastructure_exact_fastfail_delta_is_allowed(
         )
 
 
+def test_pr152_idempotence_runtime_containment_delta_is_allowed(
+    monkeypatch,
+) -> None:
+    tracked, rebuilt = _pr152_idempotence_runtime_containment_count_payloads()
+
+    failures = _validate_stubbed_pr152_report_delta(
+        monkeypatch,
+        REPO_ROOT,
+        tracked,
+        rebuilt,
+    )
+
+    assert failures == []
+    for rel_path in pr152_report._IDEMPOTENCE_RUNTIME_CONTAINMENT_DELTA_PATHS:
+        assert (REPO_ROOT / rel_path).is_file()
+
+
 def test_pr152_validation_infrastructure_delta_allowed_in_pull_request_detached_context(
     monkeypatch,
 ) -> None:
@@ -614,7 +639,7 @@ def test_pr152_validation_infrastructure_delta_future_tool_fails_with_path(
         "VALIDATION_INFRASTRUCTURE_CHANGED_PATHS",
         frozenset(
             {
-                *pr152_report._PR_CI_FASTFAIL_VALIDATOR_TOOL_PATHS,
+                *pr152_report._VALIDATION_INFRASTRUCTURE_DELTA_POLICY_VALIDATOR_TOOL_PATHS,
                 future_tool,
             }
         ),
