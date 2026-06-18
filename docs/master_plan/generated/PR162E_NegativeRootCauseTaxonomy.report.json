@@ -1,0 +1,505 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 32,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "formula input repair",
+      "root_cause_code": "MISSING_FORMULA_INPUT",
+      "row_id": "PR162E_ROOT_CAUSE::00001",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "parameter-range repair",
+      "root_cause_code": "MISSING_PARAMETER_VALUE",
+      "row_id": "PR162E_ROOT_CAUSE::00002",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "feature-binding repair",
+      "root_cause_code": "MISSING_FEATURE_BINDING",
+      "row_id": "PR162E_ROOT_CAUSE::00003",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "fee/slippage/latency repair",
+      "root_cause_code": "MISSING_COST_MODEL",
+      "row_id": "PR162E_ROOT_CAUSE::00004",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "fee/slippage/latency repair",
+      "root_cause_code": "MISSING_FEE_MODEL",
+      "row_id": "PR162E_ROOT_CAUSE::00005",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "fee/slippage/latency repair",
+      "root_cause_code": "MISSING_SLIPPAGE_MODEL",
+      "row_id": "PR162E_ROOT_CAUSE::00006",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 98,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "fee/slippage/latency repair",
+      "root_cause_code": "MISSING_LATENCY_MODEL",
+      "row_id": "PR162E_ROOT_CAUSE::00007",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "queue/fill repair",
+      "root_cause_code": "MISSING_FILL_MODEL",
+      "row_id": "PR162E_ROOT_CAUSE::00008",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "queue/fill repair",
+      "root_cause_code": "QUEUE_SURVIVAL_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00009",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "queue/fill repair",
+      "root_cause_code": "PARTIAL_FILL_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00010",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "queue/fill repair",
+      "root_cause_code": "NO_FILL_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00011",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 29,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "stale-book repair",
+      "root_cause_code": "STALE_BOOK_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00012",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "agent diagnostic review",
+      "root_cause_code": "MARKET_STATE_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00013",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "agent diagnostic review",
+      "root_cause_code": "EVENT_LIFECYCLE_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00014",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "agent diagnostic review",
+      "root_cause_code": "PRICE_SIDE_NORMALIZATION_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00015",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "orderbook state repair",
+      "root_cause_code": "ORDERBOOK_DEPTH_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00016",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "capacity/crowding repair",
+      "root_cause_code": "CAPACITY_CROWDING_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00017",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "adverse-selection penalty repair",
+      "root_cause_code": "ADVERSE_SELECTION_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00018",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "implementation-shortfall adjustment",
+      "root_cause_code": "IMPLEMENTATION_SHORTFALL_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00019",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "implementation-shortfall adjustment",
+      "root_cause_code": "MODEL_EXECUTION_GAP_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00020",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "overfit/FDR penalty adjustment",
+      "root_cause_code": "OVERFIT_FDR_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00021",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "calibration shrinkage",
+      "root_cause_code": "CALIBRATION_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00022",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "regime fingerprint repair",
+      "root_cause_code": "REGIME_MISMATCH_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00023",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "portfolio marginal utility repair",
+      "root_cause_code": "PORTFOLIO_CONFLICT_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00024",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 79,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "portfolio marginal utility repair",
+      "root_cause_code": "NEGATIVE_MARGINAL_UTILITY",
+      "row_id": "PR162E_ROOT_CAUSE::00025",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 183,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "QUBO/BQM/Ising/CQM/DQM/QuadProgram encoding repair",
+      "root_cause_code": "QUANTUM_ENCODING_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00026",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "penalty scaling repair",
+      "root_cause_code": "PENALTY_SCALING_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00027",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "constraint mapping repair",
+      "root_cause_code": "CONSTRAINT_MAPPING_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00028",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "interpret-back repair",
+      "root_cause_code": "INTERPRET_BACK_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00029",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "feasibility repair",
+      "root_cause_code": "FEASIBILITY_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00030",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "classical fallback repair",
+      "root_cause_code": "CLASSICAL_FALLBACK_FAILURE",
+      "row_id": "PR162E_ROOT_CAUSE::00031",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_count": 0,
+      "downstream_report_refs": [
+        "PR162E_NegativeCandidateRepairPlan.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "repair_action": "agent diagnostic review",
+      "root_cause_code": "UNKNOWN_REQUIRES_AGENT_REVIEW",
+      "row_id": "PR162E_ROOT_CAUSE::00032",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_NegativeRootCauseTaxonomy.report.json",
+  "report_name": "PR162E_NegativeRootCauseTaxonomy.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_negative_repair.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

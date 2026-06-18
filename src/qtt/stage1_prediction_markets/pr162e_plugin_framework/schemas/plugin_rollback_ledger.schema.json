@@ -1,0 +1,89 @@
+{
+  "$id": "plugin_rollback_ledger.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "authority_envelope_ref": {
+      "type": "string"
+    },
+    "connector_semantic_binding_flag": {
+      "const": false
+    },
+    "downstream_report_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "live_order_authority_flag": {
+      "const": false
+    },
+    "plugin_family": {
+      "type": "string"
+    },
+    "plugin_id": {
+      "type": "string"
+    },
+    "plugin_materialization_status": {
+      "enum": [
+        "COMPUTABLE_PLUGIN_READY",
+        "COMPUTABLE_REPAIR_READY",
+        "POST_REPAIR_RETEST_READY",
+        "TERMINAL_NO_TRADE_NONLIVE"
+      ]
+    },
+    "private_state_fetch_flag": {
+      "const": false
+    },
+    "profit_evidence_flag": {
+      "const": false
+    },
+    "quantum_advantage_claim_flag": {
+      "const": false
+    },
+    "quantum_backend_execution_flag": {
+      "const": false
+    },
+    "row_id": {
+      "type": "string"
+    },
+    "runtime_lane": {
+      "enum": [
+        "STRUCTURAL_ONLY",
+        "RESEARCH_CANDIDATE",
+        "REPLAY_PATH_ONLY",
+        "PAPER_PATH_ONLY",
+        "OPEN_TRADE_SIM_ONLY",
+        "PRECOMPUTE_PATH",
+        "BATCH_RETEST_PATH",
+        "BATCH_REPAIR_PATH",
+        "MANUAL_NIGHTLY_PATH",
+        "OWNER_REVIEW_ONLY",
+        "CONNECTOR_READINESS_ROUTE_ONLY",
+        "MARKET_PORTABILITY_ROUTE_ONLY",
+        "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY"
+      ]
+    },
+    "source_truth_accepted": {
+      "const": false
+    },
+    "terminal_reason": {
+      "type": "string"
+    },
+    "upstream_report_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "row_id",
+    "authority_envelope_ref",
+    "owning_agent",
+    "upstream_report_refs",
+    "downstream_report_refs"
+  ],
+  "title": "PR162E plugin_rollback_ledger.schema.json",
+  "type": "object"
+}

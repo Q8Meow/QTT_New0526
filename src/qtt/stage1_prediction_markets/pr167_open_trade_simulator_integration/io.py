@@ -47,10 +47,17 @@ def records_from_report_payload(repo_root: Path, payload: dict[str, Any]) -> lis
 
 def ensure_branch(repo_root: Path) -> None:
     branch = _current_branch(repo_root)
-    if branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH}:
+    allowed_branches = {c.EXPECTED_BRANCH, c.BASE_BRANCH}
+    try:
+        from tools.ci_branch_context import PR162E_BRANCH
+
+        allowed_branches.add(PR162E_BRANCH)
+    except Exception:
+        pass
+    if branch in allowed_branches:
         return
     ci_branch = _ci_branch_context(repo_root)
-    if ci_branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH, ""}:
+    if ci_branch in {*allowed_branches, ""}:
         return
     raise RuntimeError(
         f"{c.PR_ID} builder must run on {c.EXPECTED_BRANCH} or {c.BASE_BRANCH}; "

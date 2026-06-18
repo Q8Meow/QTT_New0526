@@ -1,0 +1,1916 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 82,
+  "records": [
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_PluginNeeds.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_PluginNeeds.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00001",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_OwnerAgentIntakeNeeds.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_OwnerAgentIntakeNeeds.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00002",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_OwnerAgentIntakeNeeds.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimRetestRepair.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_SimRetestRepair.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00003",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimNoTradeNonLive.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": false,
+      "missing_status": "UPSTREAM_NOT_FOUND_WITH_REPAIR_ROUTE",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR167_SimNoTradeNonLive.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00004",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimNoTradeNonLive.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimPaperOnlyRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_SimPaperOnlyRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00005",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimPaperOnlyRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimWatchRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": false,
+      "missing_status": "UPSTREAM_NOT_FOUND_WITH_REPAIR_ROUTE",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR167_SimWatchRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00006",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimWatchRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimChampChallenger.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_SimChampChallenger.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00007",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimChampChallenger.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimQualityGradeRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": false,
+      "missing_status": "UPSTREAM_NOT_FOUND_WITH_REPAIR_ROUTE",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR167_SimQualityGradeRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00008",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimQualityGradeRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_SimFailureRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_SimFailureRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00009",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_SimFailureRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_ReportConsumerCrosswalk.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 131,
+      "resolved_path": "docs/master_plan/generated/PR167_ReportConsumerCrosswalk.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00010",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_ReportConsumerCrosswalk.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_ArtifactMap.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 243,
+      "resolved_path": "docs/master_plan/generated/PR167_ArtifactMap.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00011",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_ArtifactMap.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_AgentWorkOrders.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_AgentWorkOrders.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00012",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_AgentWorkOrders.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_AgentDAG.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_AgentDAG.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00013",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_AgentDAG.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_NoOrphanProof.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_NoOrphanProof.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00014",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_NoOrphanProof.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_ConnectorRouteReady.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_ConnectorRouteReady.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00015",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_ConnectorRouteReady.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_MarketPortability.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_MarketPortability.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00016",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_MarketPortability.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR167_OwnerDashboardReview.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR167",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR167_OwnerDashboardReview.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00017",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR167_OwnerDashboardReview.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_To_PR162E.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_To_PR162E.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00018",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_To_PR162E.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_QUBORecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_QUBORecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00019",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_QUBORecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_BQMRecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_BQMRecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00020",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_BQMRecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_IsingRecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_IsingRecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00021",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_IsingRecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_CQMRecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_CQMRecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00022",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_CQMRecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_DQMRecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_DQMRecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00023",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_DQMRecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_QuadProgramRecipe.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_QuadProgramRecipe.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00024",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_QuadProgramRecipe.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_MapProof.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_MapProof.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00025",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_MapProof.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_TestVectors.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_TestVectors.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00026",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_TestVectors.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_SolutionInterpretBack.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_SolutionInterpretBack.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00027",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_SolutionInterpretBack.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_FeasibilityChecks.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_FeasibilityChecks.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00028",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_FeasibilityChecks.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_ObjectiveMap.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_ObjectiveMap.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00029",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_ObjectiveMap.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_VariableEncoding.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_VariableEncoding.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00030",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_VariableEncoding.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_ConstraintMap.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_ConstraintMap.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00031",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_ConstraintMap.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_PenaltyMap.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_PenaltyMap.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00032",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_PenaltyMap.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_CoeffScaling.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_CoeffScaling.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00033",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_CoeffScaling.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_UnitNorm.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_UnitNorm.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00034",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_UnitNorm.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_EdgeAttribution.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_EdgeAttribution.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00035",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_EdgeAttribution.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR162E_Q_StillNegativeMapRepair.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR162E_Q_StillNegativeMapRepair.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00036",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR162E_Q_StillNegativeMapRepair.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_ReplayEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_ReplayEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00037",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_ReplayEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_PaperEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_PaperEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00038",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_PaperEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_TCAEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_TCAEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00039",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_TCAEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_FillNoFillEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_FillNoFillEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00040",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_FillNoFillEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_LatencyEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_LatencyEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00041",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_LatencyEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_QueueRiskEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_QueueRiskEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00042",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_QueueRiskEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_CapacityCrowdingEvidence.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_CapacityCrowdingEvidence.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00043",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_CapacityCrowdingEvidence.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_StillNegativeAfterCosts.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_StillNegativeAfterCosts.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00044",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_StillNegativeAfterCosts.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_ReplayPaperRepairLab.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_ReplayPaperRepairLab.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00045",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_ReplayPaperRepairLab.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_OwnerDashboardReview.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_OwnerDashboardReview.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00046",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_OwnerDashboardReview.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QC_ConnectorRouteReadiness.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QC",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QC_ConnectorRouteReadiness.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00047",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QC_ConnectorRouteReadiness.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_QUBOReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_QUBOReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00048",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_QUBOReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_BQMReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_BQMReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00049",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_BQMReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_IsingReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_IsingReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00050",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_IsingReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_CQMReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_CQMReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00051",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_CQMReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_DQMReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_DQMReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00052",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_DQMReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_QB_QuadProgramReceipt.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-QB",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_QB_QuadProgramReceipt.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00053",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_QB_QuadProgramReceipt.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_QuantumStructuralReadiness.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_QuantumStructuralReadiness.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00054",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_QuantumStructuralReadiness.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_QUBOReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_QUBOReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00055",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_QUBOReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_BQMReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_BQMReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00056",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_BQMReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_IsingReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_IsingReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00057",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_IsingReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_CQMReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_CQMReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00058",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_CQMReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_DQMReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_DQMReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00059",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_DQMReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR166_Q_QuadraticProgramReadinessRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR166-Q",
+      "record_count": 559,
+      "resolved_path": "docs/master_plan/generated/PR166_Q_QuadraticProgramReadinessRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00060",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR166_Q_QuadraticProgramReadinessRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 8,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00061",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 8,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00062",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_RouteTriage.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": false,
+      "missing_status": "UPSTREAM_NOT_FOUND_WITH_REPAIR_ROUTE",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_RouteTriage.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00063",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_RouteTriage.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_MasterPlanSectionCrosswalk.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 43,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_MasterPlanSectionCrosswalk.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00064",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_MasterPlanSectionCrosswalk.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_MarketSpecificSelectionIndex.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 325,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_MarketSpecificSelectionIndex.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00065",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_MarketSpecificSelectionIndex.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR165_D2_CommandActionMatrix.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR165-D2",
+      "record_count": 9,
+      "resolved_path": "docs/master_plan/generated/PR165_D2_CommandActionMatrix.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00066",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR165_D2_CommandActionMatrix.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR152_CurrentizationReport.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": false,
+      "missing_status": "UPSTREAM_NOT_FOUND_WITH_REPAIR_ROUTE",
+      "owning_agent": "Commander",
+      "producer_pr": "PR152",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR152_CurrentizationReport.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00067",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR152_CurrentizationReport.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR208_ChangedAreaRoutingPolicy.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR208",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR208_ChangedAreaRoutingPolicy.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00068",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR208_ChangedAreaRoutingPolicy.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR208",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR208_ValidatorClassificationRegistry.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00069",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR208_ValidatorClassificationRegistry.report.json"
+      ]
+    },
+    {
+      "artifact_path": "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumed_purpose": "PR162E_PLUGIN_FRAMEWORK_INPUT",
+      "downstream_report": "PR162E_UpstreamReportUse.report.json",
+      "downstream_report_refs": [
+        "PR162E_InputConsumption.report.json"
+      ],
+      "exists_flag": true,
+      "missing_status": "FOUND",
+      "owning_agent": "Commander",
+      "producer_pr": "PR208",
+      "record_count": 0,
+      "resolved_path": "docs/master_plan/generated/PR208_CIRuntimeRationalizationSummary.report.json",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_REPO::00070",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "upstream_report_refs": [
+        "PR208_CIRuntimeRationalizationSummary.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "variable_domains",
+        "constraint_class",
+        "objective_class"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "QUAD_PROGRAM_ADAPTER_PLUGIN",
+        "CONSTRAINT_REPAIR_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.QuadraticProgram.html",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00071",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "DOCUMENTATION",
+      "source_truth_accepted": false,
+      "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.QuadraticProgram.html",
+      "topic": "QuadProgram structural variables and constraints",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.QuadraticProgram.html"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "penalty_model",
+        "converter_sequence"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "QUBO_ADAPTER_PLUGIN",
+        "PENALTY_SCALING_REPAIR_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00072",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "DOCUMENTATION",
+      "source_truth_accepted": false,
+      "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html",
+      "topic": "QUBO converter and penalty scaling",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "bqm_recipe_ref",
+        "ising_recipe_ref",
+        "cqm_recipe_ref",
+        "dqm_recipe_ref"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "BQM_ADAPTER_PLUGIN",
+        "ISING_ADAPTER_PLUGIN",
+        "CQM_ADAPTER_PLUGIN",
+        "DQM_ADAPTER_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00073",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "DOCUMENTATION",
+      "source_truth_accepted": false,
+      "source_url": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html",
+      "topic": "BQM/QUBO/Ising/CQM/DQM structural model families",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "symbolic_qubo_terms",
+        "candidate_fill_values"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "QUBO_ADAPTER_PLUGIN",
+        "CANDIDATE_FILL_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://pyqubo.readthedocs.io/en/latest/",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00074",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "OPEN_SOURCE_CODE",
+      "source_truth_accepted": false,
+      "source_url": "https://pyqubo.readthedocs.io/en/latest/",
+      "topic": "Symbolic QUBO construction and placeholders",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://pyqubo.readthedocs.io/en/latest/"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "implementation_shortfall",
+        "market_impact"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "IMPL_SHORTFALL_PLUGIN",
+        "EXECUTION_COST_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://www.smallake.kr/wp-content/uploads/2016/03/optliq.pdf",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00075",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "CLASSICAL_FINANCE_REFERENCE",
+      "source_truth_accepted": false,
+      "source_url": "https://www.smallake.kr/wp-content/uploads/2016/03/optliq.pdf",
+      "topic": "Implementation shortfall and market impact",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://www.smallake.kr/wp-content/uploads/2016/03/optliq.pdf"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "deflated_score_ref",
+        "multiple_testing_count"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "OVERFIT_FDR_CONTROL_PLUGIN",
+        "HOLDOUT_CONFIDENCE_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00076",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "RESEARCH_PAPER",
+      "source_truth_accepted": false,
+      "source_url": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf",
+      "topic": "Backtest overfitting and multiple testing",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "correlation_cluster_ref",
+        "risk_budget"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "PORTFOLIO_UTILITY_PLUGIN",
+        "DIVERSIFICATION_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2708678",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00077",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "PORTFOLIO_OPTIMIZATION_REFERENCE",
+      "source_truth_accepted": false,
+      "source_url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2708678",
+      "topic": "HRP cluster-aware diversification",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2708678"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "queue_risk_dependency",
+        "adverse_selection_penalty"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "QUEUE_RISK_PLUGIN",
+        "ADVERSE_SELECTION_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://arxiv.org/pdf/1610.00261",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00078",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "MARKET_MICROSTRUCTURE_REFERENCE",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/pdf/1610.00261",
+      "topic": "Order-book imbalance and adverse selection",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://arxiv.org/pdf/1610.00261"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "orderbook_state",
+        "event_lifecycle_stage"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "ORDERBOOK_STATE_PLUGIN",
+        "FILL_MODEL_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://arxiv.org/abs/2604.24366",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00079",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "MARKET_MICROSTRUCTURE_REFERENCE",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/abs/2604.24366",
+      "topic": "Prediction-market order books and fill/no-fill routing",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://arxiv.org/abs/2604.24366"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "lower_confidence_bound_score",
+        "calibration_error_ref"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "LOWER_CONFIDENCE_BOUND_PLUGIN",
+        "CALIBRATION_ERROR_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://arxiv.org/html/2107.07511v6",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00080",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "CALIBRATION_REFERENCE",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/html/2107.07511v6",
+      "topic": "Distribution-free uncertainty sets",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://arxiv.org/html/2107.07511v6"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "regret_estimate",
+        "exploration_budget"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "BANDIT_ARBITRATION_PLUGIN",
+        "CHAMP_CHALLENGER_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://research.google.com/pubs/archive/37042.pdf",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00081",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "RESEARCH_PAPER",
+      "source_truth_accepted": false,
+      "source_url": "https://research.google.com/pubs/archive/37042.pdf",
+      "topic": "Bandit regret and champion challenger routing",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://research.google.com/pubs/archive/37042.pdf"
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_filled": [
+        "calibration_error_ref",
+        "probability_calibration"
+      ],
+      "consumed_purpose": "CANDIDATE_SOURCE_INTAKE_NO_SOURCE_TRUTH_ACCEPTANCE",
+      "downstream_report": "PR162E_ExternalCandidateIntake.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateIntake.report.json"
+      ],
+      "missing_status": "FOUND",
+      "owning_agent": "External Scout Agent",
+      "plugin_families_affected": [
+        "PROBABILITY_CALIBRATION_PLUGIN",
+        "CALIBRATION_ERROR_PLUGIN"
+      ],
+      "producer_pr": "ONLINE_CANDIDATE_PROVISIONAL",
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "resolved_path": "https://scikit-learn.org/stable/modules/calibration.html",
+      "responsible_agent": "Commander",
+      "row_id": "PR162E_PR162E_UPSTREAMREPORTUSE_ONLINE::00082",
+      "search_terms": "PR167 PR162E_Q PR166_QC PR165_D2 PR152 PR208",
+      "source_class": "DOCUMENTATION",
+      "source_truth_accepted": false,
+      "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+      "topic": "Calibration curves and calibrated probabilities",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ],
+      "url": "https://scikit-learn.org/stable/modules/calibration.html"
+    }
+  ],
+  "report_filename": "PR162E_UpstreamReportUse.report.json",
+  "report_name": "PR162E_UpstreamReportUse.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_contract.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

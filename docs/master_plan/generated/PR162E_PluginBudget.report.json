@@ -1,0 +1,1387 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 95,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FORMULA_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00001",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "ALGORITHM_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00002",
+      "runtime_budget_ms": 51,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PARAMETER_STACK_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00003",
+      "runtime_budget_ms": 52,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FEATURE_TRANSFORM_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00004",
+      "runtime_budget_ms": 53,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "SIGNAL_SCORING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00005",
+      "runtime_budget_ms": 54,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "EDGE_ATTRIBUTION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00006",
+      "runtime_budget_ms": 55,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PROBABILITY_CALIBRATION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00007",
+      "runtime_budget_ms": 56,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "EXPECTED_VALUE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00008",
+      "runtime_budget_ms": 57,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "THRESHOLD_POLICY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00009",
+      "runtime_budget_ms": 58,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "DECISION_RULE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00010",
+      "runtime_budget_ms": 59,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FORMULA_EQUIVALENCE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00011",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FORMULA_VERSION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00012",
+      "runtime_budget_ms": 61,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FORMULA_ROLLBACK_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00013",
+      "runtime_budget_ms": 62,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FEATURE_IMPUTATION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00014",
+      "runtime_budget_ms": 63,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CANDIDATE_FILL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00015",
+      "runtime_budget_ms": 64,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00016",
+      "runtime_budget_ms": 65,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00017",
+      "runtime_budget_ms": 66,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "IMPL_SHORTFALL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00018",
+      "runtime_budget_ms": 67,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00019",
+      "runtime_budget_ms": 68,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00020",
+      "runtime_budget_ms": 69,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00021",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "QUEUE_RISK_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00022",
+      "runtime_budget_ms": 71,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "QUEUE_SURVIVAL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00023",
+      "runtime_budget_ms": 72,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "LATENCY_DECAY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00024",
+      "runtime_budget_ms": 73,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "SLIPPAGE_IMPACT_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00025",
+      "runtime_budget_ms": 74,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "ADVERSE_SELECTION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00026",
+      "runtime_budget_ms": 75,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CANCEL_REPLACE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00027",
+      "runtime_budget_ms": 76,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CAPACITY_CROWDING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00028",
+      "runtime_budget_ms": 77,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "SETTLEMENT_FINALITY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00029",
+      "runtime_budget_ms": 78,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "MODEL_EXECUTION_GAP_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00030",
+      "runtime_budget_ms": 79,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "AGGRESSION_LADDER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00031",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "ORDERBOOK_STATE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00032",
+      "runtime_budget_ms": 81,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "STALE_BOOK_DIAGNOSTIC_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00033",
+      "runtime_budget_ms": 82,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "STALE_BOOK_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00034",
+      "runtime_budget_ms": 83,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "COST_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00035",
+      "runtime_budget_ms": 84,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "FILL_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00036",
+      "runtime_budget_ms": 85,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "LATENCY_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00037",
+      "runtime_budget_ms": 86,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Portfolio/Risk Agent",
+      "plugin_family": "PORTFOLIO_UTILITY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00038",
+      "runtime_budget_ms": 87,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Portfolio/Risk Agent",
+      "plugin_family": "MARGINAL_UTILITY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00039",
+      "runtime_budget_ms": 88,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "DIVERSIFICATION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00040",
+      "runtime_budget_ms": 89,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CORRELATION_CLUSTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00041",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "COMMON_DRIVER_EXPOSURE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00042",
+      "runtime_budget_ms": 91,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Portfolio/Risk Agent",
+      "plugin_family": "RISK_BUDGET_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00043",
+      "runtime_budget_ms": 92,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "REGIME_MEMORY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00044",
+      "runtime_budget_ms": 93,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00045",
+      "runtime_budget_ms": 94,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "NEGATIVE_COMBO_MEMORY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00046",
+      "runtime_budget_ms": 95,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "NEGATIVE_CANDIDATE_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00047",
+      "runtime_budget_ms": 96,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "ALPHA_RECOVERY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00048",
+      "runtime_budget_ms": 97,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CHAMP_CHALLENGER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00049",
+      "runtime_budget_ms": 98,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "OVERFIT_FDR_CONTROL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00050",
+      "runtime_budget_ms": 99,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "HOLDOUT_CONFIDENCE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00051",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "LOWER_CONFIDENCE_BOUND_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00052",
+      "runtime_budget_ms": 101,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CALIBRATION_ERROR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00053",
+      "runtime_budget_ms": 102,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "RETEST_PRIORITY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00054",
+      "runtime_budget_ms": 103,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "REPAIR_PRIORITY_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00055",
+      "runtime_budget_ms": 104,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "NO_TRADE_REASON_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00056",
+      "runtime_budget_ms": 105,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "BANDIT_ARBITRATION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00057",
+      "runtime_budget_ms": 106,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "ENSEMBLE_STACKING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00058",
+      "runtime_budget_ms": 107,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "EXPECTED_REPAIR_VALUE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00059",
+      "runtime_budget_ms": 108,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "REPAIR_ROI_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00060",
+      "runtime_budget_ms": 109,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUANTUM_RECIPE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00061",
+      "runtime_budget_ms": 110,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUBO_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00062",
+      "runtime_budget_ms": 111,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "BQM_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00063",
+      "runtime_budget_ms": 112,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "ISING_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00064",
+      "runtime_budget_ms": 113,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "CQM_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00065",
+      "runtime_budget_ms": 114,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "DQM_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00066",
+      "runtime_budget_ms": 115,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUAD_PROGRAM_ADAPTER_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00067",
+      "runtime_budget_ms": 116,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "HYBRID_ROUTE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00068",
+      "runtime_budget_ms": 117,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUANTUM_PRECOMPUTE_SLATE_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00069",
+      "runtime_budget_ms": 118,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CLASSICAL_FALLBACK_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00070",
+      "runtime_budget_ms": 119,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "INTERPRET_BACK_VALIDATOR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00071",
+      "runtime_budget_ms": 120,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PROOF_VECTOR_VALIDATOR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00072",
+      "runtime_budget_ms": 121,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FEASIBILITY_VALIDATOR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00073",
+      "runtime_budget_ms": 122,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "COEFFICIENT_SCALING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00074",
+      "runtime_budget_ms": 123,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "UNIT_NORMALIZATION_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00075",
+      "runtime_budget_ms": 124,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PRECISION_BINNING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00076",
+      "runtime_budget_ms": 125,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "PENALTY_TUNING_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00077",
+      "runtime_budget_ms": 126,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "QUBIT_COST_ESTIMATOR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00078",
+      "runtime_budget_ms": 127,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "EMBEDDING_READINESS_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00079",
+      "runtime_budget_ms": 128,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUANTUM_SHOT_BUDGET_STRUCTURAL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00080",
+      "runtime_budget_ms": 129,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "ANNEAL_SCHEDULE_STRUCTURAL_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00081",
+      "runtime_budget_ms": 130,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Quantum Recipe Validation Agent",
+      "plugin_family": "QUANTUM_ENCODING_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00082",
+      "runtime_budget_ms": 131,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "PENALTY_SCALING_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00083",
+      "runtime_budget_ms": 132,
+      "runtime_lane": "OPEN_TRADE_SIM_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "CONSTRAINT_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00084",
+      "runtime_budget_ms": 133,
+      "runtime_lane": "PRECOMPUTE_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "HYBRID_FALLBACK_REPAIR_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00085",
+      "runtime_budget_ms": 134,
+      "runtime_lane": "BATCH_RETEST_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "REPLAY_PAPER_RETEST_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00086",
+      "runtime_budget_ms": 135,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "OPEN_TRADE_SIM_PLUGIN",
+      "row_id": "PR162E_PLUGIN_BUDGET::00087",
+      "runtime_budget_ms": 136,
+      "runtime_lane": "MANUAL_NIGHTLY_PATH",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "OWNER_DASHBOARD_REVIEW_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00088",
+      "runtime_budget_ms": 137,
+      "runtime_lane": "OWNER_REVIEW_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "CONNECTOR_READINESS_ROUTE_WITHOUT_BINDING",
+      "row_id": "PR162E_PLUGIN_BUDGET::00089",
+      "runtime_budget_ms": 138,
+      "runtime_lane": "CONNECTOR_READINESS_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "MARKET_PORTABILITY_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00090",
+      "runtime_budget_ms": 139,
+      "runtime_lane": "MARKET_PORTABILITY_ROUTE_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "AGENT_WORK_ORDER_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00091",
+      "runtime_budget_ms": 140,
+      "runtime_lane": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Negative Candidate Repair Agent",
+      "plugin_family": "AGENT_REPAIR_WORK_ORDER_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00092",
+      "runtime_budget_ms": 141,
+      "runtime_lane": "STRUCTURAL_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "GOVERNANCE_REVIEW_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00093",
+      "runtime_budget_ms": 142,
+      "runtime_lane": "RESEARCH_CANDIDATE",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "COMMANDER_DAG_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00094",
+      "runtime_budget_ms": 143,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_PluginRuntimeBudget.report.json"
+      ],
+      "owning_agent": "Formula Materialization Agent",
+      "plugin_family": "FUTURE_LIVE_ELIGIBILITY_STRUCTURAL_ROUTE",
+      "row_id": "PR162E_PLUGIN_BUDGET::00095",
+      "runtime_budget_ms": 144,
+      "runtime_lane": "PAPER_PATH_ONLY",
+      "upstream_report_refs": [
+        "PR162E_PluginFamilyRegistry.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_PluginBudget.report.json",
+  "report_name": "PR162E_PluginBudget.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_contract.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

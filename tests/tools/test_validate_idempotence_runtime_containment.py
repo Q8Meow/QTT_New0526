@@ -406,6 +406,40 @@ def test_pr162e_q_branch_scoped_exception_does_not_allow_other_reports():
     assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
 
 
+def test_pr162e_plugin_framework_branch_scoped_auto_discovered_changes_are_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/PR162E_FinalSummary.report.json",
+            "docs/master_plan/generated/PR162E_PluginRegistry.report.json",
+            "docs/master_plan/generated/"
+            "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+            "src/qtt/stage1_prediction_markets/"
+            "pr162e_plugin_framework/report_writer.py",
+            "src/qtt/plugins/contracts.py",
+            "tests/pr162e/test_pr162e_plugin_abi.py",
+            "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr162e-plugin-framework",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert failures == []
+
+
+def test_pr162e_plugin_framework_branch_scoped_exception_does_not_allow_other_reports():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        ("docs/master_plan/generated/PR167_FinalSummary.report.json",),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr162e-plugin-framework",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
 def test_pr167_branch_scoped_auto_discovered_changes_are_allowed():
     failures = validator._validate_changed_files(
         _inventory(),

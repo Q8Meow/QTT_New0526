@@ -802,6 +802,24 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr162e_plugin_framework.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr162e_negative_repair_factory.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr162e_no_orphan_lineage.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -2477,6 +2495,7 @@ def test_runner_pytest_runtime_budget_plan_is_complete_and_fail_closed():
             _pr166_qc_idempotence_path(),
             _pr162e_q_idempotence_path(),
             _pr167_idempotence_path(),
+            _pr162e_idempotence_path(),
         }
     )
 
@@ -2547,6 +2566,13 @@ def _pr167_idempotence_path() -> str:
     return (
         f"{runner.PR167_TEST_ROOT}/"
         f"{runner.PR167_IDEMPOTENCE_TEST_FILE}"
+    )
+
+
+def _pr162e_idempotence_path() -> str:
+    return (
+        f"{runner.PR162E_TEST_ROOT}/"
+        f"{runner.PR162E_IDEMPOTENCE_TEST_FILE}"
     )
 
 
@@ -2954,6 +2980,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     qc_idempotence_path = _pr166_qc_idempotence_path()
     pr162e_q_idempotence_path = _pr162e_q_idempotence_path()
     pr167_idempotence_path = _pr167_idempotence_path()
+    pr162e_idempotence_path = _pr162e_idempotence_path()
 
     assert [command.paths for command in commands] == [
         (idempotence_path,),
@@ -2966,6 +2993,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         (runner.PR162E_Q_TEST_ROOT,),
         (pr167_idempotence_path,),
         (runner.PR167_TEST_ROOT,),
+        (pr162e_idempotence_path,),
+        (runner.PR162E_TEST_ROOT,),
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
             "tests/agent_algorithm",
@@ -3011,6 +3040,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[7].ignores == (pr162e_q_idempotence_path,)
     assert commands[8].bounded_idempotence is True
     assert commands[9].ignores == (pr167_idempotence_path,)
+    assert commands[10].bounded_idempotence is True
+    assert commands[11].ignores == (pr162e_idempotence_path,)
     assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
@@ -3027,7 +3058,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[13], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[15], REPO_ROOT)
     )
 
 
@@ -3284,6 +3315,15 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr167_index = command_names.index(
         "validate_pr167_open_trade_simulator_integration.py"
     )
+    pr162e_plugin_index = command_names.index(
+        "validate_pr162e_plugin_framework.py"
+    )
+    pr162e_negative_repair_index = command_names.index(
+        "validate_pr162e_negative_repair_factory.py"
+    )
+    pr162e_no_orphan_index = command_names.index(
+        "validate_pr162e_no_orphan_lineage.py"
+    )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
@@ -3507,6 +3547,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     )
     assert command_names.count("validate_pr162e_q_quantum_automapper.py") == 1
     assert command_names.count("validate_pr167_open_trade_simulator_integration.py") == 1
+    assert command_names.count("validate_pr162e_plugin_framework.py") == 1
+    assert command_names.count("validate_pr162e_negative_repair_factory.py") == 1
+    assert command_names.count("validate_pr162e_no_orphan_lineage.py") == 1
     assert (
         command_names.count(
             "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -3564,6 +3607,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr166_qc_index
         < pr162e_q_index
         < pr167_index
+        < pr162e_plugin_index
+        < pr162e_negative_repair_index
+        < pr162e_no_orphan_index
         < pr165_d2_index
         < pr165_d3_index
         < next_gate_index
@@ -3918,6 +3964,24 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert commands[pr167_index] == [
         python_executable,
         str(Path("tools") / "validate_pr167_open_trade_simulator_integration.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr162e_plugin_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr162e_plugin_framework.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr162e_negative_repair_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr162e_negative_repair_factory.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr162e_no_orphan_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr162e_no_orphan_lineage.py"),
         "--repo-root",
         ".",
     ]

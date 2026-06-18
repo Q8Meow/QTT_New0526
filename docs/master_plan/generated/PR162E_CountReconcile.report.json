@@ -1,0 +1,368 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 18,
+  "records": [
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR162E_Q_To_PR162E.report.json",
+      "producer_pr": "PR162E-Q",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00001",
+      "upstream_report_refs": [
+        "PR162E_Q_To_PR162E.report.json"
+      ]
+    },
+    {
+      "actual_count": 8,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 8,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",
+      "producer_pr": "PR165-D2",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00002",
+      "upstream_report_refs": [
+        "PR165_D2_AgentDutySourceCrosswalk.report.json"
+      ]
+    },
+    {
+      "actual_count": 8,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 8,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",
+      "producer_pr": "PR165-D2",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00003",
+      "upstream_report_refs": [
+        "PR165_D2_AgentRosterDiscoveryAudit.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_AgentDAG.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00004",
+      "upstream_report_refs": [
+        "PR167_AgentDAG.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_AgentWorkOrders.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00005",
+      "upstream_report_refs": [
+        "PR167_AgentWorkOrders.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_ConnectorRouteReady.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00006",
+      "upstream_report_refs": [
+        "PR167_ConnectorRouteReady.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_MarketPortability.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00007",
+      "upstream_report_refs": [
+        "PR167_MarketPortability.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_NoOrphanProof.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00008",
+      "upstream_report_refs": [
+        "PR167_NoOrphanProof.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_OwnerAgentIntakeNeeds.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00009",
+      "upstream_report_refs": [
+        "PR167_OwnerAgentIntakeNeeds.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_OwnerDashboardReview.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00010",
+      "upstream_report_refs": [
+        "PR167_OwnerDashboardReview.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_PluginNeeds.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00011",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json"
+      ]
+    },
+    {
+      "actual_count": 0,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_SimNoTradeNonLive.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "DIFF_USE_ACTUAL_REPO_TRUTH",
+      "row_id": "PR162E_COUNT_RECONCILE::00012",
+      "upstream_report_refs": [
+        "PR167_SimNoTradeNonLive.report.json"
+      ]
+    },
+    {
+      "actual_count": 559,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "downstream_effect": "USE_ACTUAL_ROWS_NO_FABRICATION",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 559,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_SimRetestRepair.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00013",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "actual_count": 438,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "count_semantics": "PR167 owner/agent intake rows",
+      "downstream_effect": "FILTERED_ROUTE_COUNT_FROM_ACTUAL_FLAGS",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 438,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_OwnerAgentIntakeNeeds.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00014",
+      "upstream_report_refs": [
+        "PR167_OwnerAgentIntakeNeeds.report.json"
+      ]
+    },
+    {
+      "actual_count": 385,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "count_semantics": "PR167 repair rows",
+      "downstream_effect": "FILTERED_ROUTE_COUNT_FROM_ACTUAL_FLAGS",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 385,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_SimRetestRepair.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00015",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "actual_count": 190,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "count_semantics": "PR167 retest rows",
+      "downstream_effect": "FILTERED_ROUTE_COUNT_FROM_ACTUAL_FLAGS",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 190,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_SimRetestRepair.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00016",
+      "upstream_report_refs": [
+        "PR167_SimRetestRepair.report.json"
+      ]
+    },
+    {
+      "actual_count": 385,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "count_semantics": "PR167 no-trade non-live rows",
+      "downstream_effect": "FILTERED_ROUTE_COUNT_FROM_ACTUAL_FLAGS",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 385,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_PluginNeeds.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00017",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json"
+      ]
+    },
+    {
+      "actual_count": 438,
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "count_semantics": "PR167 owner dashboard review rows",
+      "downstream_effect": "FILTERED_ROUTE_COUNT_FROM_ACTUAL_FLAGS",
+      "downstream_report_refs": [
+        "PR162E_FinalSummary.report.json"
+      ],
+      "expected_count": 438,
+      "owning_agent": "Commander",
+      "producer_path": "docs/master_plan/generated/PR167_OwnerDashboardReview.report.json",
+      "producer_pr": "PR167",
+      "reconcile_status": "MATCH",
+      "row_id": "PR162E_COUNT_RECONCILE::00018",
+      "upstream_report_refs": [
+        "PR167_OwnerDashboardReview.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_CountReconcile.report.json",
+  "report_name": "PR162E_CountReconcile.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_contract.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

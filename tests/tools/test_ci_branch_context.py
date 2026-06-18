@@ -3091,6 +3091,67 @@ def test_pr162e_q_explicit_changed_path_allowance_is_narrow(monkeypatch):
     assert context.current_branch_context(REPO_ROOT).branch == branch
 
 
+def test_pr162e_plugin_framework_changed_path_allowance_is_narrow(monkeypatch):
+    branch = context.PR162E_BRANCH
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=162) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/schemas/plugin_contract.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/plugins/contracts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/pr162e/test_pr162e_plugin_abi.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162E_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr162e_plugin_framework.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr162e_plugin_framework.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/report.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/io.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/connectors/live_connector.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR167_FinalSummary.report.json",
+    )
+
+    _clear_github_branch_context_env(monkeypatch)
+    monkeypatch.setenv("GITHUB_REF", "refs/pull/227/merge")
+    monkeypatch.setenv("GITHUB_HEAD_REF", branch)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert context.current_branch_context(REPO_ROOT).branch == branch
+
+
 def test_pr167_explicit_changed_path_allowance_is_narrow(monkeypatch):
     branch = context.PR167_BRANCH
 

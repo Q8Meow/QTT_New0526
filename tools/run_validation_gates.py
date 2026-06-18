@@ -141,6 +141,7 @@ PR166_QC_TEST_ROOT = (
 PR162E_Q_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr162e_q_quantum_automapper"
 )
+PR162E_TEST_ROOT = "tests/pr162e"
 PR167_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr167_open_trade_simulator_integration"
 )
@@ -239,6 +240,7 @@ PR166_Q_IDEMPOTENCE_TEST_FILE = "test_pr166_q_idempotence.py"
 PR166_QB_IDEMPOTENCE_TEST_FILE = "test_pr166_qb_idempotence.py"
 PR166_QC_IDEMPOTENCE_TEST_FILE = "test_pr166_qc_idempotence.py"
 PR162E_Q_IDEMPOTENCE_TEST_FILE = "test_pr162e_q_idempotence.py"
+PR162E_IDEMPOTENCE_TEST_FILE = "test_pr162e_idempotence_bounded.py"
 PR167_IDEMPOTENCE_TEST_FILE = "test_pr167_idempotence.py"
 BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
     {
@@ -248,6 +250,7 @@ BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
         f"{PR166_QB_TEST_ROOT}/{PR166_QB_IDEMPOTENCE_TEST_FILE}",
         f"{PR166_QC_TEST_ROOT}/{PR166_QC_IDEMPOTENCE_TEST_FILE}",
         f"{PR162E_Q_TEST_ROOT}/{PR162E_Q_IDEMPOTENCE_TEST_FILE}",
+        f"{PR162E_TEST_ROOT}/{PR162E_IDEMPOTENCE_TEST_FILE}",
         f"{PR167_TEST_ROOT}/{PR167_IDEMPOTENCE_TEST_FILE}",
     }
 )
@@ -716,6 +719,27 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="PR167 open-trade simulator integration non-idempotence group",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=20.0,
+        ),
+        PytestShardCommand(
+            paths=(
+                f"{PR162E_TEST_ROOT}/{PR162E_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason=(
+                "Bounded PR162E plugin framework idempotence proof kept explicit "
+                "so default PR CI does not run an exhaustive rebuild mode"
+            ),
+            runtime_budget_seconds=PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+            historical_runtime_seconds=4.0,
+            bounded_idempotence=True,
+        ),
+        PytestShardCommand(
+            paths=(PR162E_TEST_ROOT,),
+            ignores=(
+                f"{PR162E_TEST_ROOT}/{PR162E_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason="PR162E plugin framework focused tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=4.0,
         ),
         PytestShardCommand(
             paths=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
@@ -2716,6 +2740,33 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr167_open_trade_simulator_integration.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr162e_plugin_framework.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr162e_negative_repair_factory.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr162e_no_orphan_lineage.py",
             ),
             "--repo-root",
             ".",
