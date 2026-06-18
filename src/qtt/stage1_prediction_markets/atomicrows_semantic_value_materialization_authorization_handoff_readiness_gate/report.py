@@ -9,6 +9,7 @@ from typing import Any, Mapping, Sequence
 
 from tools.ci_branch_context import (
     BranchContext,
+    PR162E_Q_BRANCH,
     PR166_QC_BRANCH,
     current_branch_context,
     is_downstream_roadmap_branch,
@@ -904,6 +905,16 @@ def _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
     ) and is_explicit_downstream_repair_changed_path(PR166_QC_BRANCH, normalized)
 
 
+def _is_pr162e_q_quantum_automapper_changed_path_for_validation_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return is_validation_infrastructure_branch(
+        branch
+    ) and is_explicit_downstream_repair_changed_path(PR162E_Q_BRANCH, normalized)
+
+
 def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
     normalized = path.replace("\\", "/")
     return (
@@ -934,6 +945,9 @@ def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
         branch,
         normalized,
     ) or _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
+        normalized,
+        branch,
+    ) or _is_pr162e_q_quantum_automapper_changed_path_for_validation_branch(
         normalized,
         branch,
     ) or is_validation_infrastructure_changed_path(

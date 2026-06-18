@@ -1,0 +1,44 @@
+{
+  "$id": "pr162e_q_map_budget.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "created_by_pr": {
+      "const": "PR162E-Q"
+    },
+    "record_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "records": {
+      "type": "array"
+    },
+    "report_name": {
+      "type": "string"
+    },
+    "roadmap_pr_id": {
+      "const": "PR162E-Q"
+    },
+    "schema_ref": {
+      "const": "pr162e_q_map_budget.schema.json"
+    },
+    "shard_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "sharded_flag": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "report_name",
+    "roadmap_pr_id",
+    "created_by_pr",
+    "schema_ref",
+    "record_count",
+    "records"
+  ],
+  "type": "object"
+}

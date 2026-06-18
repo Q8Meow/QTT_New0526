@@ -13,6 +13,7 @@ from tools.build_master_plan_section_coverage_report import (
     load_yaml_subset,
 )
 from tools.ci_branch_context import (
+    PR162E_Q_BRANCH,
     PR166_QC_BRANCH,
     current_branch_context,
     is_downstream_roadmap_branch,
@@ -1689,6 +1690,16 @@ def _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
     ) and is_explicit_downstream_repair_changed_path(PR166_QC_BRANCH, normalized)
 
 
+def _is_pr162e_q_quantum_automapper_changed_path_for_validation_branch(
+    path: str,
+    branch: str,
+) -> bool:
+    normalized = path.replace("\\", "/")
+    return is_validation_infrastructure_branch(
+        branch
+    ) and is_explicit_downstream_repair_changed_path(PR162E_Q_BRANCH, normalized)
+
+
 def _is_pr141_downstream_changed_path(path: str, repo_root: Path) -> bool:
     branch_context = current_branch_context(repo_root)
     return _is_pr141_downstream_changed_path_for_branch(
@@ -1749,6 +1760,10 @@ def _is_allowed_pr140_changed_path(path: str, repo_root: Path) -> bool:
             branch_context.branch,
         )
         or _is_pr166_qc_replay_paper_changed_path_for_validation_branch(
+            normalized,
+            branch_context.branch,
+        )
+        or _is_pr162e_q_quantum_automapper_changed_path_for_validation_branch(
             normalized,
             branch_context.branch,
         )
