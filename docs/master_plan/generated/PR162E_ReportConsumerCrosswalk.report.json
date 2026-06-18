@@ -1,0 +1,1302 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 83,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ReadReceipt.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00001",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_InputConsumption.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00002",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_UpstreamReportUse.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00003",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_CountReconcile.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00004",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginNeedsConsumption.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00005",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginBudget.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00006",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AuthorityEnvelope.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00007",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginFamilyRegistry.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00008",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginRegistry.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00009",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_FormulaPluginInterface.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00010",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AlgorithmPluginInterface.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00011",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_QuantumRecipePluginInterface.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00012",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_QUBOAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00013",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_BQMAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00014",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_IsingAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00015",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_CQMAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00016",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_DQMAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00017",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_QuadProgramAdapter.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00018",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_HybridRoutePlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00019",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ClassicalFallbackPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00020",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExecutionTCAPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00021",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_FillModelPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00022",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_QueueRiskPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00023",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_LatencyPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00024",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ImplShortfallPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00025",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PortfolioUtilityPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00026",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_RegimeMemoryPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00027",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_OverfitFDRPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00028",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_CapacityCrowdingPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00029",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_MarginalUtilityPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00030",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_LCBScorePlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00031",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ConditionMemoryPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00032",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_BanditArbitrationPlugin.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00033",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginVersionLedger.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00034",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginRollbackLedger.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00035",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginEquivalenceDedupe.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00036",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ReplayPaperPluginRoute.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00037",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_OpenTradeSimPluginRoute.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00038",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginCompatibilityMatrix.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00039",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginDependencyDAG.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00040",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginRuntimeBudget.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00041",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginFailClosed.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00042",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginTestVectors.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00043",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginValidator.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00044",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginChampChallenger.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00045",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PluginRepairQueue.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00046",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_NegativeReplayPaperCandidateInventory.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00047",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_NegativeRootCauseTaxonomy.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00048",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_NegativeCandidateRepairPlan.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00049",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AlphaRecoveryLab.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00050",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExpectedRepairValue.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00051",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_RepairROI.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00052",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_PostRepairRetestQueue.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00053",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_TerminalNoTradeNonLive.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00054",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_RepairedCandidateToPluginMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00055",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AgentRepairWorkOrders.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00056",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_NegativeMemorySeed.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00057",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExternalCandidateIntake.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00058",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExternalCandidateDedup.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00059",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00060",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExternalCandidateRepairFill.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00061",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_CrosswalkUse.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00062",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AgentDutyBinding.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00063",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_PR162F.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00064",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_PR166_QC_Retest.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00065",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_PR167_Retest.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00066",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_OwnerDashboard.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00067",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_FutureConnectors.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00068",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_MarketPortability.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00069",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_To_FutureLivePluginAuthority.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00070",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ReportConsumerCrosswalk.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00071",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ArtifactMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00072",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AgentWorkOrders.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00073",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AgentDAG.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00074",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_UniversalArtifactLineageMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00075",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ValueLineageMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00076",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_FileConsumerMap.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00077",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_QKUFormulaAlgorithmLineage.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00078",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_ExternalCandidateLineage.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00079",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_TerminalArtifactExceptionLedger.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00080",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_NoOrphanProof.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00081",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_AuthorityBoundaryAudit.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00082",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "consumer_agent": "Governance",
+      "consumer_report": "PR162E_NoOrphanProof.report.json",
+      "downstream_report_refs": [
+        "PR162E_NoOrphanProof.report.json"
+      ],
+      "owning_agent": "Commander",
+      "producer_pr": "PR162E",
+      "report_filename": "PR162E_FinalSummary.report.json",
+      "row_id": "PR162E_REPORT_CONSUMER::00083",
+      "upstream_report_refs": [
+        "PR162E_PluginRegistry.report.json"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_ReportConsumerCrosswalk.report.json",
+  "report_name": "PR162E_ReportConsumerCrosswalk.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_contract.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

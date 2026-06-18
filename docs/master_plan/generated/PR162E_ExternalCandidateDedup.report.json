@@ -1,0 +1,638 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 12,
+  "records": [
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00001"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "variable_domains",
+        "constraint_class",
+        "objective_class"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "QISKIT_QUAD_PROGRAM",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00001"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "constraint mapping repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "QUAD_PROGRAM_ADAPTER_PLUGIN",
+        "CONSTRAINT_REPAIR_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00001"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00001"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00001",
+      "scout_query": "Qiskit Optimization QuadraticProgram documentation",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "DOCUMENTATION",
+      "source_id": "PR162E_EXTERNAL::QISKIT_QUAD_PROGRAM",
+      "source_summary": "QuadProgram structural variables and constraints",
+      "source_title": "Qiskit Optimization QuadraticProgram",
+      "source_truth_accepted": false,
+      "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.QuadraticProgram.html",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00002"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "penalty_model",
+        "converter_sequence"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "QISKIT_QUBO_CONVERTER",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00002"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "penalty scaling repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "QUBO_ADAPTER_PLUGIN",
+        "PENALTY_SCALING_REPAIR_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00002"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00002"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00002",
+      "scout_query": "Qiskit Optimization QuadraticProgramToQubo documentation",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "DOCUMENTATION",
+      "source_id": "PR162E_EXTERNAL::QISKIT_QUBO_CONVERTER",
+      "source_summary": "QUBO converter and penalty scaling",
+      "source_title": "Qiskit QuadraticProgramToQubo",
+      "source_truth_accepted": false,
+      "source_url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.converters.QuadraticProgramToQubo.html",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00003"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "bqm_recipe_ref",
+        "ising_recipe_ref",
+        "cqm_recipe_ref",
+        "dqm_recipe_ref"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "DWAVE_OCEAN_MODELS",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00003"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "hybrid fallback repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "BQM_ADAPTER_PLUGIN",
+        "ISING_ADAPTER_PLUGIN",
+        "CQM_ADAPTER_PLUGIN",
+        "DQM_ADAPTER_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00003"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00003"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00003",
+      "scout_query": "D-Wave Ocean BQM QUBO Ising CQM DQM documentation",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "DOCUMENTATION",
+      "source_id": "PR162E_EXTERNAL::DWAVE_OCEAN_MODELS",
+      "source_summary": "BQM/QUBO/Ising/CQM/DQM structural model families",
+      "source_title": "D-Wave Ocean model classes",
+      "source_truth_accepted": false,
+      "source_url": "https://docs.dwavequantum.com/en/latest/ocean/api_ref_dimod/models.html",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00004"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "symbolic_qubo_terms",
+        "candidate_fill_values"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "PYQUBO_SYMBOLIC",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00004"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "formula input repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "QUBO_ADAPTER_PLUGIN",
+        "CANDIDATE_FILL_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00004"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00004"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00004",
+      "scout_query": "PyQUBO symbolic QUBO construction",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "OPEN_SOURCE_CODE",
+      "source_id": "PR162E_EXTERNAL::PYQUBO_SYMBOLIC",
+      "source_summary": "Symbolic QUBO construction and placeholders",
+      "source_title": "PyQUBO documentation",
+      "source_truth_accepted": false,
+      "source_url": "https://pyqubo.readthedocs.io/en/latest/",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00005"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "implementation_shortfall",
+        "market_impact"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "ALMGREN_CHRISS",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00005"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "implementation-shortfall adjustment"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "IMPL_SHORTFALL_PLUGIN",
+        "EXECUTION_COST_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00005"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00005"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00005",
+      "scout_query": "Almgren Chriss optimal execution implementation shortfall",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "CLASSICAL_FINANCE_REFERENCE",
+      "source_id": "PR162E_EXTERNAL::ALMGREN_CHRISS",
+      "source_summary": "Implementation shortfall and market impact",
+      "source_title": "Optimal Execution of Portfolio Transactions",
+      "source_truth_accepted": false,
+      "source_url": "https://www.smallake.kr/wp-content/uploads/2016/03/optliq.pdf",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00006"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "deflated_score_ref",
+        "multiple_testing_count"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "DEFLATED_SHARPE",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00006"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "overfit/FDR penalty adjustment"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "OVERFIT_FDR_CONTROL_PLUGIN",
+        "HOLDOUT_CONFIDENCE_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00006"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00006"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00006",
+      "scout_query": "Deflated Sharpe ratio backtest overfitting",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "RESEARCH_PAPER",
+      "source_id": "PR162E_EXTERNAL::DEFLATED_SHARPE",
+      "source_summary": "Backtest overfitting and multiple testing",
+      "source_title": "The Deflated Sharpe Ratio",
+      "source_truth_accepted": false,
+      "source_url": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00007"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "correlation_cluster_ref",
+        "risk_budget"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "HRP",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00007"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "portfolio marginal utility repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "PORTFOLIO_UTILITY_PLUGIN",
+        "DIVERSIFICATION_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00007"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00007"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00007",
+      "scout_query": "Hierarchical Risk Parity robust portfolio construction",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "PORTFOLIO_OPTIMIZATION_REFERENCE",
+      "source_id": "PR162E_EXTERNAL::HRP",
+      "source_summary": "HRP cluster-aware diversification",
+      "source_title": "Building Diversified Portfolios that Outperform Out-of-Sample",
+      "source_truth_accepted": false,
+      "source_url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2708678",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00008"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "queue_risk_dependency",
+        "adverse_selection_penalty"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "ORDERBOOK_ADVERSE_SELECTION",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00008"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "queue/fill repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "QUEUE_RISK_PLUGIN",
+        "ADVERSE_SELECTION_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00008"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00008"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00008",
+      "scout_query": "market microstructure adverse selection queue risk",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "MARKET_MICROSTRUCTURE_REFERENCE",
+      "source_id": "PR162E_EXTERNAL::ORDERBOOK_ADVERSE_SELECTION",
+      "source_summary": "Order-book imbalance and adverse selection",
+      "source_title": "The Micro-Price",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/pdf/1610.00261",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00009"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "orderbook_state",
+        "event_lifecycle_stage"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "POLYMARKET_MICROSTRUCTURE",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00009"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "event lifecycle repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "ORDERBOOK_STATE_PLUGIN",
+        "FILL_MODEL_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00009"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00009"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00009",
+      "scout_query": "prediction market orderbook microstructure fill no fill event resolution",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "MARKET_MICROSTRUCTURE_REFERENCE",
+      "source_id": "PR162E_EXTERNAL::POLYMARKET_MICROSTRUCTURE",
+      "source_summary": "Prediction-market order books and fill/no-fill routing",
+      "source_title": "Polymarket market microstructure",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/abs/2604.24366",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00010"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "lower_confidence_bound_score",
+        "calibration_error_ref"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "CONFORMAL_PREDICTION",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00010"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "lower-confidence-bound adjustment"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "LOWER_CONFIDENCE_BOUND_PLUGIN",
+        "CALIBRATION_ERROR_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00010"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00010"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00010",
+      "scout_query": "conformal prediction uncertainty aware ranking lower confidence bound",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "CALIBRATION_REFERENCE",
+      "source_id": "PR162E_EXTERNAL::CONFORMAL_PREDICTION",
+      "source_summary": "Distribution-free uncertainty sets",
+      "source_title": "A Gentle Introduction to Conformal Prediction",
+      "source_truth_accepted": false,
+      "source_url": "https://arxiv.org/html/2107.07511v6",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00011"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "regret_estimate",
+        "exploration_budget"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "CONTEXTUAL_BANDITS",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00011"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "retest priority repair"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "BANDIT_ARBITRATION_PLUGIN",
+        "CHAMP_CHALLENGER_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00011"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00011"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00011",
+      "scout_query": "bandit champion challenger regret aware allocation",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "RESEARCH_PAPER",
+      "source_id": "PR162E_EXTERNAL::CONTEXTUAL_BANDITS",
+      "source_summary": "Bandit regret and champion challenger routing",
+      "source_title": "An Empirical Evaluation of Thompson Sampling",
+      "source_truth_accepted": false,
+      "source_url": "https://research.google.com/pubs/archive/37042.pdf",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    },
+    {
+      "algorithm_refs": [
+        "PR162E_EXTERNAL_ALGORITHM::00012"
+      ],
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "candidate_fields_extracted": [
+        "calibration_error_ref",
+        "probability_calibration"
+      ],
+      "confidence": "CANDIDATE_PROVISIONAL",
+      "downstream_report_ref": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "downstream_report_refs": [
+        "PR162E_ExternalCandidateToPluginMap.report.json"
+      ],
+      "duplicate_or_equivalence_key": "SKLEARN_CALIBRATION",
+      "formula_refs": [
+        "PR162E_EXTERNAL_FORMULA::00012"
+      ],
+      "negative_candidate_repair_fields_extracted": [
+        "calibration shrinkage"
+      ],
+      "owner_agent_route": "External Scout Agent",
+      "owning_agent": "External Scout Agent",
+      "plugin_family_mapping": [
+        "PROBABILITY_CALIBRATION_PLUGIN",
+        "CALIBRATION_ERROR_PLUGIN"
+      ],
+      "qku_refs": [
+        "PR162E_EXTERNAL_QKU::00012"
+      ],
+      "quantum_recipe_refs": [
+        "PR162E_EXTERNAL_QUANTUM::00012"
+      ],
+      "replay_paper_route": "PR162E_ExternalCandidateToPluginMap.report.json",
+      "row_id": "PR162E_EXTERNAL_CANDIDATE::00012",
+      "scout_query": "probability calibration Bayesian shrinkage robust calibration",
+      "source_accessed_at_utc": "2026-06-18T00:00:00Z",
+      "source_class": "DOCUMENTATION",
+      "source_id": "PR162E_EXTERNAL::SKLEARN_CALIBRATION",
+      "source_summary": "Calibration curves and calibrated probabilities",
+      "source_title": "Probability calibration",
+      "source_truth_accepted": false,
+      "source_url": "https://scikit-learn.org/stable/modules/calibration.html",
+      "unsafe_reason_if_rejected": "",
+      "upstream_report_refs": [
+        "ONLINE_SCOUT_MODE"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_ExternalCandidateDedup.report.json",
+  "report_name": "PR162E_ExternalCandidateDedup.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "plugin_source_candidate.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

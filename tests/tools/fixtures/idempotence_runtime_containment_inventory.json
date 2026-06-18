@@ -249,6 +249,15 @@
       "bounded_contract": true,
       "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr162e_plugin_framework.py",
+      "path": "tests/pr162e/test_pr162e_idempotence_bounded.py",
+      "pytest_shard": "pytest-shard-8",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "manual_exhaustive_path": "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py",
       "path": "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
       "pytest_shard": "pytest-shard-3",

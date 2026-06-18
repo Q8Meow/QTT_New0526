@@ -1,0 +1,687 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 18,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00019",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00019",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00001",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00019",
+        "PR162E_Q_TO_PR162E::00019"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00020",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00020",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00002",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00020",
+        "PR162E_Q_TO_PR162E::00020"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00021",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00021",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00003",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00021",
+        "PR162E_Q_TO_PR162E::00021"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00114",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00114",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00004",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00114",
+        "PR162E_Q_TO_PR162E::00114"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00115",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00115",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00005",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00115",
+        "PR162E_Q_TO_PR162E::00115"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00116",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00116",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00006",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00116",
+        "PR162E_Q_TO_PR162E::00116"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00209",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00209",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00007",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00209",
+        "PR162E_Q_TO_PR162E::00209"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00210",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00210",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00008",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00210",
+        "PR162E_Q_TO_PR162E::00210"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00211",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00211",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00009",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00211",
+        "PR162E_Q_TO_PR162E::00211"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00304",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00304",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00010",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00304",
+        "PR162E_Q_TO_PR162E::00304"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00305",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00305",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00011",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00305",
+        "PR162E_Q_TO_PR162E::00305"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00306",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00306",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00012",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00306",
+        "PR162E_Q_TO_PR162E::00306"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00399",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00399",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00013",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00399",
+        "PR162E_Q_TO_PR162E::00399"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00400",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00400",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00014",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00400",
+        "PR162E_Q_TO_PR162E::00400"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00401",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00401",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00015",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00401",
+        "PR162E_Q_TO_PR162E::00401"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00494",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "FILL_MODEL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00494",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00016",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00494",
+        "PR162E_Q_TO_PR162E::00494"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00495",
+      "owning_agent": "Fill/Queue/Latency Agent",
+      "plugin_family": "NO_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00495",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00017",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00495",
+        "PR162E_Q_TO_PR162E::00495"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00496",
+      "owning_agent": "Open Trade Simulator Agent",
+      "plugin_family": "PARTIAL_FILL_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00496",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_FILLMODELPLUGIN::00018",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00496",
+        "PR162E_Q_TO_PR162E::00496"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_FillModelPlugin.report.json",
+  "report_name": "PR162E_FillModelPlugin.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "execution_tca_plugin.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

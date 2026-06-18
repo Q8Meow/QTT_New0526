@@ -188,6 +188,12 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if (
+        "pr162e_plugin_framework" in stem
+        or "pr162e_negative_repair_factory" in stem
+        or "pr162e_no_orphan_lineage" in stem
+    ):
+        return "pr162e"
     if "pr167_open_trade_simulator" in stem:
         return "pr167"
     if "pr165_d3" in stem:
@@ -265,14 +271,22 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
         return ()
     tag = _pr_tag_from_token(token)
     lower = token.lower()
-    return (
+    globs = [
         f"docs/master_plan/generated/{tag}*.json",
         f"docs/master_plan/generated/{tag}_*.report.json",
         f"docs/master_plan/generated/{lower}*/**",
         f"src/qtt/stage1_prediction_markets/{lower}*/**",
         f"tests/stage1_prediction_markets/{lower}*/**",
         f"tools/*{lower}*.py",
-    )
+    ]
+    if token == "pr162e":
+        globs.extend(
+            [
+                "src/qtt/plugins/**",
+                "tests/pr162e/**",
+            ]
+        )
+    return tuple(globs)
 
 
 def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
@@ -417,6 +431,8 @@ def _test_globs(stem: str, command: Sequence[str], phase: str) -> tuple[str, ...
     globs = []
     if token is not None:
         globs.append(f"tests/stage1_prediction_markets/{token.lower()}*/**")
+        if token == "pr162e":
+            globs.append("tests/pr162e/**")
     if "atomicrows" in " ".join(command).lower():
         globs.append("tests/atomicrows/**")
     return tuple(globs)

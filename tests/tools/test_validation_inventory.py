@@ -86,6 +86,20 @@ def test_inventory_has_pr162e_q_quantum_automapper_entry():
     )
 
 
+def test_inventory_has_pr162e_plugin_framework_entries():
+    entries = inventory.inventory_by_id()
+    entry = entries["validate_pr162e_plugin_framework"]
+
+    assert "docs/master_plan/generated/PR162E_*.report.json" in entry.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr162e*/schemas/**" in entry.schema_globs
+    assert "src/qtt/plugins/**" in entry.required_when_files_match
+    assert "tests/pr162e/**" in entry.required_when_files_match
+    assert "tools/validate_pr162e_plugin_framework.py" in entry.tool_globs
+
+    assert entries["validate_pr162e_negative_repair_factory"].owner_pr_or_feature == "PR162E"
+    assert entries["validate_pr162e_no_orphan_lineage"].owner_pr_or_feature == "PR162E"
+
+
 def test_inventory_has_pr167_open_trade_simulator_entry():
     entry = inventory.inventory_by_id()["validate_pr167_open_trade_simulator_integration"]
 

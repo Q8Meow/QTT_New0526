@@ -1,0 +1,477 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 12,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00016",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00016",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00001",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00016",
+        "PR162E_Q_TO_PR162E::00016"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00017",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00017",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00002",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00017",
+        "PR162E_Q_TO_PR162E::00017"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00111",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00111",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00003",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00111",
+        "PR162E_Q_TO_PR162E::00111"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00112",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00112",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00004",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00112",
+        "PR162E_Q_TO_PR162E::00112"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00206",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00206",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00005",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00206",
+        "PR162E_Q_TO_PR162E::00206"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00207",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00207",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00006",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00207",
+        "PR162E_Q_TO_PR162E::00207"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00301",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00301",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00007",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00301",
+        "PR162E_Q_TO_PR162E::00301"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00302",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00302",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00008",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00302",
+        "PR162E_Q_TO_PR162E::00302"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00396",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00396",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00009",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00396",
+        "PR162E_Q_TO_PR162E::00396"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00397",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00397",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00010",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00397",
+        "PR162E_Q_TO_PR162E::00397"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00491",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "EXECUTION_COST_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00491",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00011",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00491",
+        "PR162E_Q_TO_PR162E::00491"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00492",
+      "owning_agent": "Execution/TCA Agent",
+      "plugin_family": "TCA_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00492",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_EXECUTIONTCAPLUGIN::00012",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00492",
+        "PR162E_Q_TO_PR162E::00492"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_ExecutionTCAPlugin.report.json",
+  "report_name": "PR162E_ExecutionTCAPlugin.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "execution_tca_plugin.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}

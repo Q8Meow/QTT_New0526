@@ -1,0 +1,267 @@
+{
+  "atomicrows_bundle_sha_hash_checksum_authority_count": 0,
+  "authority_boundary": {
+    "authority_envelope_id": "PR162E_AUTHORITY::NO_LIVE_NO_SOURCE_TRUTH_NO_CONNECTOR_NO_CASH_NO_BACKEND",
+    "authority_scope": "PR162E_NONLIVE_PLUGIN_FRAMEWORK_ONLY",
+    "candidate_values_route": "CANDIDATE_PROVISIONAL_REPLAY_PAPER_RETEST_REPAIR_OR_OWNER_REVIEW_ONLY",
+    "no_atomicrows_bundle_sha_hash_checksum_authority": true,
+    "no_connector_semantic_binding": true,
+    "no_live_order_authority": true,
+    "no_live_promotion_claim": true,
+    "no_llm_hot_path": true,
+    "no_llm_order_release": true,
+    "no_llm_result_rewrite": true,
+    "no_llm_source_acceptance": true,
+    "no_private_state_fetch": true,
+    "no_profit_evidence": true,
+    "no_qtt_sha_freeze_checksum_global_digest_authority": true,
+    "no_quantum_advantage_claim": true,
+    "no_quantum_backend_execution": true,
+    "no_runtime_cash_receipt": true,
+    "no_source_truth_acceptance": true
+  },
+  "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+  "builder_ref": "tools/build_pr162e_plugin_framework.py",
+  "connector_semantic_binding_count": 0,
+  "created_at_utc": "2026-06-18T00:00:00Z",
+  "created_by_pr": "PR162E",
+  "future_consumer_note_only_count": 0,
+  "live_order_authority_count": 0,
+  "live_order_execution_count": 0,
+  "live_promotion_claim_count": 0,
+  "llm_hot_path_artifact_count": 0,
+  "llm_order_release_artifact_count": 0,
+  "llm_result_rewrite_artifact_count": 0,
+  "llm_source_acceptance_artifact_count": 0,
+  "metadata_only_count": 0,
+  "orphan_count": 0,
+  "placeholder_count": 0,
+  "private_state_fetch_count": 0,
+  "profit_evidence_count": 0,
+  "qtt_sha_freeze_checksum_global_digest_authority_count": 0,
+  "quantum_advantage_claim_count": 0,
+  "quantum_backend_execution_count": 0,
+  "record_count": 6,
+  "records": [
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00045",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00045",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00001",
+      "runtime_budget_ms": 70,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00045",
+        "PR162E_Q_TO_PR162E::00045"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00140",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00140",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00002",
+      "runtime_budget_ms": 60,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00140",
+        "PR162E_Q_TO_PR162E::00140"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00235",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00235",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00003",
+      "runtime_budget_ms": 50,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00235",
+        "PR162E_Q_TO_PR162E::00235"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_PostRepairRetestQueue.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00330",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00330",
+      "plugin_materialization_status": "POST_REPAIR_RETEST_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00004",
+      "runtime_budget_ms": 100,
+      "runtime_lane": "BATCH_REPAIR_PATH",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00330",
+        "PR162E_Q_TO_PR162E::00330"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00425",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00425",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00005",
+      "runtime_budget_ms": 90,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00425",
+        "PR162E_Q_TO_PR162E::00425"
+      ]
+    },
+    {
+      "authority_envelope_ref": "PR162E_AuthorityEnvelope.report.json::PR162E_AUTHORITY",
+      "commander_visibility": true,
+      "dashboard_visibility": true,
+      "downstream_pr": "PR162F_OR_PR166_QC_R2_OR_FUTURE_STRUCTURAL_AUTHORITY",
+      "downstream_report_refs": [
+        "PR162E_ReportConsumerCrosswalk.report.json",
+        "PR162E_NoOrphanProof.report.json",
+        "PR162E_ReplayPaperPluginRoute.report.json"
+      ],
+      "governance_visibility": true,
+      "no_orphan_proof_ref": "PR162E_NO_ORPHAN::00520",
+      "owning_agent": "Regime Memory Agent",
+      "plugin_family": "CONDITION_FINGERPRINT_PLUGIN",
+      "plugin_id": "PR162E_PLUGIN::00520",
+      "plugin_materialization_status": "COMPUTABLE_PLUGIN_READY",
+      "row_id": "PR162E_CONDITIONMEMORYPLUGIN::00006",
+      "runtime_budget_ms": 80,
+      "runtime_lane": "REPLAY_PATH_ONLY",
+      "supporting_agents": [
+        "Commander",
+        "Governance",
+        "Dashboard/Owner Review Agent"
+      ],
+      "terminal_reason": "",
+      "upstream_report_refs": [
+        "PR167_PluginNeeds.report.json",
+        "PR167_SimRetestRepair.report.json",
+        "PR162E_Q_To_PR162E.report.json"
+      ],
+      "upstream_row_refs": [
+        "PR167_PLUGINNEEDS::00520",
+        "PR162E_Q_TO_PR162E::00520"
+      ]
+    }
+  ],
+  "report_filename": "PR162E_ConditionMemoryPlugin.report.json",
+  "report_name": "PR162E_ConditionMemoryPlugin.report.json",
+  "roadmap_pr_id": "PR162E",
+  "runtime_cash_receipt_count": 0,
+  "schema_ref": "condition_memory_plugin.schema.json",
+  "sharded_flag": false,
+  "solver_label_only_count": 0,
+  "source_truth_acceptance_count": 0,
+  "validation_status": "PASS",
+  "validator_ref": "tools/validate_pr162e_plugin_framework.py"
+}
