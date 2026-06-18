@@ -141,6 +141,9 @@ PR166_QC_TEST_ROOT = (
 PR162E_Q_TEST_ROOT = (
     "tests/stage1_prediction_markets/pr162e_q_quantum_automapper"
 )
+PR167_TEST_ROOT = (
+    "tests/stage1_prediction_markets/pr167_open_trade_simulator_integration"
+)
 PR166_SM2_PYTEST_FILE_GROUPS = (
     (
         "test_pr166_sm2_ablation.py",
@@ -236,6 +239,7 @@ PR166_Q_IDEMPOTENCE_TEST_FILE = "test_pr166_q_idempotence.py"
 PR166_QB_IDEMPOTENCE_TEST_FILE = "test_pr166_qb_idempotence.py"
 PR166_QC_IDEMPOTENCE_TEST_FILE = "test_pr166_qc_idempotence.py"
 PR162E_Q_IDEMPOTENCE_TEST_FILE = "test_pr162e_q_idempotence.py"
+PR167_IDEMPOTENCE_TEST_FILE = "test_pr167_idempotence.py"
 BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
     {
         f"{PR166_SF_R2_TEST_ROOT}/{PR166_SF_R2_IDEMPOTENCE_TEST_FILE}",
@@ -244,6 +248,7 @@ BOUNDED_DEFAULT_IDEMPOTENCE_TEST_PATHS = frozenset(
         f"{PR166_QB_TEST_ROOT}/{PR166_QB_IDEMPOTENCE_TEST_FILE}",
         f"{PR166_QC_TEST_ROOT}/{PR166_QC_IDEMPOTENCE_TEST_FILE}",
         f"{PR162E_Q_TEST_ROOT}/{PR162E_Q_IDEMPOTENCE_TEST_FILE}",
+        f"{PR167_TEST_ROOT}/{PR167_IDEMPOTENCE_TEST_FILE}",
     }
 )
 PR166_SF_R2_PYTEST_FILE_GROUPS = (
@@ -690,6 +695,27 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="PR162E-Q quantum automapper non-idempotence group",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=5.0,
+        ),
+        PytestShardCommand(
+            paths=(
+                f"{PR167_TEST_ROOT}/{PR167_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason=(
+                "Bounded PR167 open-trade simulator idempotence proof kept explicit "
+                "so default PR CI does not run an exhaustive rebuild mode"
+            ),
+            runtime_budget_seconds=PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS,
+            historical_runtime_seconds=18.0,
+            bounded_idempotence=True,
+        ),
+        PytestShardCommand(
+            paths=(PR167_TEST_ROOT,),
+            ignores=(
+                f"{PR167_TEST_ROOT}/{PR167_IDEMPOTENCE_TEST_FILE}",
+            ),
+            reason="PR167 open-trade simulator integration non-idempotence group",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=20.0,
         ),
         PytestShardCommand(
             paths=(ISOLATED_SOURCE_EVIDENCE_PYTEST,),
@@ -2681,6 +2707,15 @@ def build_validation_commands(
             _path(
                 "tools",
                 "validate_pr162e_q_quantum_automapper.py",
+            ),
+            "--repo-root",
+            ".",
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr167_open_trade_simulator_integration.py",
             ),
             "--repo-root",
             ".",

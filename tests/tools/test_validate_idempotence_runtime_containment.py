@@ -406,6 +406,38 @@ def test_pr162e_q_branch_scoped_exception_does_not_allow_other_reports():
     assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
 
 
+def test_pr167_branch_scoped_auto_discovered_changes_are_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/PR167_FinalSummary.report.json",
+            "docs/master_plan/generated/pr167_shards/"
+            "PR167_SimEligibility.part_0001_of_0001.report.json",
+            "src/qtt/stage1_prediction_markets/"
+            "pr167_open_trade_simulator_integration/report_writer.py",
+            "tests/stage1_prediction_markets/"
+            "pr167_open_trade_simulator_integration/test_pr167_artifacts.py",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr167-open-trade-simulator-integration",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert failures == []
+
+
+def test_pr167_branch_scoped_exception_does_not_allow_other_reports():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        ("docs/master_plan/generated/PR166_QC_FinalSummary.report.json",),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr167-open-trade-simulator-integration",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
 def test_pr165_d3_business_file_change_is_rejected_for_hardening_pr():
     failures = _validate(
         _inventory(),

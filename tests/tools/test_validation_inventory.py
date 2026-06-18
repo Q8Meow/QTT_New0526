@@ -86,6 +86,18 @@ def test_inventory_has_pr162e_q_quantum_automapper_entry():
     )
 
 
+def test_inventory_has_pr167_open_trade_simulator_entry():
+    entry = inventory.inventory_by_id()["validate_pr167_open_trade_simulator_integration"]
+
+    assert "docs/master_plan/generated/PR167_*.report.json" in entry.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr167*/schemas/**" in entry.schema_globs
+    assert "tools/validate_pr167_open_trade_simulator_integration.py" in entry.tool_globs
+    assert (
+        "tests/stage1_prediction_markets/pr167*/**"
+        in entry.required_when_files_match
+    )
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.PYTEST_SHARD_PHASES:
         assert inventory.phase_job_id(phase) == phase.replace("-", "_")

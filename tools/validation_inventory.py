@@ -188,6 +188,8 @@ def validator_id_for_command(command: Sequence[str], phase: str) -> str:
 
 
 def _pr_token(stem: str) -> str | None:
+    if "pr167_open_trade_simulator" in stem:
+        return "pr167"
     if "pr165_d3" in stem:
         return "pr165_d3"
     match = re.search(r"(pr\d+[a-z]?(?:_[a-z]+)?)", stem)
