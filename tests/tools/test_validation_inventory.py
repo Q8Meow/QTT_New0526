@@ -74,6 +74,18 @@ def test_inventory_keeps_pr166_qb_and_qc_scopes_distinct():
     )
 
 
+def test_inventory_has_pr162e_q_quantum_automapper_entry():
+    entry = inventory.inventory_by_id()["validate_pr162e_q_quantum_automapper"]
+
+    assert "docs/master_plan/generated/PR162E_Q_*.report.json" in entry.output_globs
+    assert "src/qtt/stage1_prediction_markets/pr162e_q*/schemas/**" in entry.schema_globs
+    assert "tools/validate_pr162e_q_quantum_automapper.py" in entry.tool_globs
+    assert (
+        "tests/stage1_prediction_markets/pr162e_q*/**"
+        in entry.required_when_files_match
+    )
+
+
 def test_inventory_knows_every_pytest_shard_phase_job():
     for phase in runner.PYTEST_SHARD_PHASES:
         assert inventory.phase_job_id(phase) == phase.replace("-", "_")

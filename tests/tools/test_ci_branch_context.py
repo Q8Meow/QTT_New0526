@@ -3008,6 +3008,77 @@ def test_pr166_qc_explicit_changed_path_allowance_is_narrow(monkeypatch):
         branch,
         "docs/master_plan/QTT_MasterPlan_Current.md",
     )
+
+
+def test_pr162e_q_explicit_changed_path_allowance_is_narrow(monkeypatch):
+    branch = context.PR162E_Q_BRANCH
+
+    assert context.is_pr_or_later_branch(branch, minimum_pr=162) is True
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr162e_q_quantum_automapper/validator.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr162e_q_quantum_automapper/schemas/"
+        "pr162e_q_report_manifest.schema.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/stage1_prediction_markets/"
+        "pr162e_q_quantum_automapper/test_pr162e_q_artifacts.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/PR162E_Q_FinalSummary.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/generated/pr162e_q_shards/"
+        "PR162E_Q_MapEligibility.part_0001_of_0001.report.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/build_pr162e_q_quantum_automapper.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_pr162e_q_quantum_automapper.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tools/validate_idempotence_runtime_containment.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_field_coverage_enrichment_plan/report.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate/report.py",
+    )
+    assert context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "atomicrows_semantic_value_materialization_owner_authorization_gate/report.py",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+    )
+    assert not context.is_explicit_downstream_repair_changed_path(
+        branch,
+        "src/qtt/stage1_prediction_markets/"
+        "pr166_qc_quantum_selected_replay_paper_retest/validator.py",
+    )
     assert not context.is_explicit_downstream_repair_changed_path(
         branch,
         "docs/master_plan/generated/PR166_QB_FinalSummary.report.json",

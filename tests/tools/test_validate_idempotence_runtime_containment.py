@@ -84,6 +84,7 @@ def test_current_inventory_passes_and_classifies_runtime_containment():
         "PR165-D2",
         "PR166-SF",
         "PR166-SM",
+        "PR162E-Q",
     }
     assert all(
         entry["classification"].startswith("RUNTIME_ARTIFACT_")
@@ -367,6 +368,38 @@ def test_pr166_qc_branch_scoped_exception_does_not_allow_other_reports():
         ("docs/master_plan/generated/PR166_QB_FinalSummary.report.json",),
         workflow_text=WORKFLOW_TEXT,
         current_branch="pr166-qc-quantum-selected-replay-paper-retest",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert "FORBIDDEN_GENERATED_REPORT_PAYLOAD_CHANGE" in _codes(failures)
+
+
+def test_pr162e_q_branch_scoped_auto_discovered_changes_are_allowed():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        (
+            "docs/master_plan/generated/PR162E_Q_FinalSummary.report.json",
+            "docs/master_plan/generated/pr162e_q_shards/"
+            "PR162E_Q_MapEligibility.part_0001_of_0001.report.json",
+            "src/qtt/stage1_prediction_markets/"
+            "pr162e_q_quantum_automapper/report_writer.py",
+            "tests/stage1_prediction_markets/"
+            "pr162e_q_quantum_automapper/test_pr162e_q_artifacts.py",
+        ),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr162e-q-quantum-automapper",
+        auto_discovered_changed_paths=True,
+    )
+
+    assert failures == []
+
+
+def test_pr162e_q_branch_scoped_exception_does_not_allow_other_reports():
+    failures = validator._validate_changed_files(
+        _inventory(),
+        ("docs/master_plan/generated/PR166_QC_FinalSummary.report.json",),
+        workflow_text=WORKFLOW_TEXT,
+        current_branch="pr162e-q-quantum-automapper",
         auto_discovered_changed_paths=True,
     )
 
