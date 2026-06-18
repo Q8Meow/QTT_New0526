@@ -796,6 +796,12 @@ def _expected_commands(
         ],
         [
             python_executable,
+            str(Path("tools") / "validate_pr167_open_trade_simulator_integration.py"),
+            "--repo-root",
+            ".",
+        ],
+        [
+            python_executable,
             str(
                 Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -2470,6 +2476,7 @@ def test_runner_pytest_runtime_budget_plan_is_complete_and_fail_closed():
             _pr166_qb_idempotence_path(),
             _pr166_qc_idempotence_path(),
             _pr162e_q_idempotence_path(),
+            _pr167_idempotence_path(),
         }
     )
 
@@ -2533,6 +2540,13 @@ def _pr162e_q_idempotence_path() -> str:
     return (
         f"{runner.PR162E_Q_TEST_ROOT}/"
         f"{runner.PR162E_Q_IDEMPOTENCE_TEST_FILE}"
+    )
+
+
+def _pr167_idempotence_path() -> str:
+    return (
+        f"{runner.PR167_TEST_ROOT}/"
+        f"{runner.PR167_IDEMPOTENCE_TEST_FILE}"
     )
 
 
@@ -2939,6 +2953,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     qb_idempotence_path = _pr166_qb_idempotence_path()
     qc_idempotence_path = _pr166_qc_idempotence_path()
     pr162e_q_idempotence_path = _pr162e_q_idempotence_path()
+    pr167_idempotence_path = _pr167_idempotence_path()
 
     assert [command.paths for command in commands] == [
         (idempotence_path,),
@@ -2949,6 +2964,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
         (runner.PR166_QC_TEST_ROOT,),
         (pr162e_q_idempotence_path,),
         (runner.PR162E_Q_TEST_ROOT,),
+        (pr167_idempotence_path,),
+        (runner.PR167_TEST_ROOT,),
         (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,),
         (
             "tests/agent_algorithm",
@@ -2992,6 +3009,8 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     assert commands[5].ignores == (qc_idempotence_path,)
     assert commands[6].bounded_idempotence is True
     assert commands[7].ignores == (pr162e_q_idempotence_path,)
+    assert commands[8].bounded_idempotence is True
+    assert commands[9].ignores == (pr167_idempotence_path,)
     assert commands[-1].ignores == (runner.ISOLATED_SOURCE_EVIDENCE_PYTEST,)
     assert all(command.reason for command in commands)
     assert ("tests",) not in [command.paths for command in commands]
@@ -3008,7 +3027,7 @@ def test_runner_splits_pytest_shard_8_residual_tests_deterministically():
     )
     assert (
         "tests/global_debug/test_grand_global_debug_logical_consistency_audit.py"
-        in runner._pytest_files_for_command(commands[11], REPO_ROOT)
+        in runner._pytest_files_for_command(commands[13], REPO_ROOT)
     )
 
 
@@ -3262,6 +3281,9 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     pr162e_q_index = command_names.index(
         "validate_pr162e_q_quantum_automapper.py"
     )
+    pr167_index = command_names.index(
+        "validate_pr167_open_trade_simulator_integration.py"
+    )
     pr165_d2_index = command_names.index(
         "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
     )
@@ -3484,6 +3506,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         == 1
     )
     assert command_names.count("validate_pr162e_q_quantum_automapper.py") == 1
+    assert command_names.count("validate_pr167_open_trade_simulator_integration.py") == 1
     assert (
         command_names.count(
             "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
@@ -3540,6 +3563,7 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
         < pr166_qb_index
         < pr166_qc_index
         < pr162e_q_index
+        < pr167_index
         < pr165_d2_index
         < pr165_d3_index
         < next_gate_index
@@ -3888,6 +3912,12 @@ def test_runner_includes_pr157_bridge_after_pr156_without_tracked_write(monkeypa
     assert commands[pr162e_q_index] == [
         python_executable,
         str(Path("tools") / "validate_pr162e_q_quantum_automapper.py"),
+        "--repo-root",
+        ".",
+    ]
+    assert commands[pr167_index] == [
+        python_executable,
+        str(Path("tools") / "validate_pr167_open_trade_simulator_integration.py"),
         "--repo-root",
         ".",
     ]

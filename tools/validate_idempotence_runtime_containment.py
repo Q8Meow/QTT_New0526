@@ -673,10 +673,11 @@ def _allowed_explicit_roadmap_feature_touch(
             PR166_QB_BRANCH,
             PR166_QC_BRANCH,
             is_explicit_downstream_repair_changed_path,
+            PR167_BRANCH,
         )
     except Exception:
         return False
-    if branch not in {PR166_Q_BRANCH, PR166_QB_BRANCH, PR166_QC_BRANCH, PR162E_Q_BRANCH}:
+    if branch not in {PR166_Q_BRANCH, PR166_QB_BRANCH, PR166_QC_BRANCH, PR162E_Q_BRANCH, PR167_BRANCH}:
         return False
     return is_explicit_downstream_repair_changed_path(branch, path)
 

@@ -61,6 +61,14 @@
     {
       "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
       "main_checkout_green": true,
+      "path_glob": "docs/master_plan/generated/pr167_shards/*.json",
+      "required_by_pytest_shards": [
+        "pytest-shard-8"
+      ]
+    },
+    {
+      "classification": "CHECKOUT_FIXTURE_CLASSIFIED_ONLY",
+      "main_checkout_green": true,
       "path_glob": "docs/master_plan/generated/pr165_d3_shards/*.json",
       "required_by_pytest_shards": [
         "pytest-shard-7"
@@ -232,6 +240,15 @@
       "bounded_contract": true,
       "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "manual_exhaustive_path": "tools/build_pr167_open_trade_simulator_integration.py",
+      "path": "tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_idempotence.py",
+      "pytest_shard": "pytest-shard-8",
+      "runtime_budget_seconds": 180
+    },
+    {
+      "bounded_contract": true,
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "default_ci_classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "manual_exhaustive_path": "tools/build_pr165_d2_score_refreshed_scenario_selection_v2.py",
       "path": "tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2/test_pr165_d2_idempotence.py",
       "pytest_shard": "pytest-shard-3",
@@ -284,6 +301,14 @@
       "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
       "family": "PR162E-Q",
       "generated_shard_glob": "docs/master_plan/generated/pr162e_q_shards/*.json",
+      "pytest_shards": [
+        "pytest-shard-8"
+      ]
+    },
+    {
+      "classification": "BOUNDED_PR_CI_IDEMPOTENCE",
+      "family": "PR167",
+      "generated_shard_glob": "docs/master_plan/generated/pr167_shards/*.json",
       "pytest_shards": [
         "pytest-shard-8"
       ]
@@ -409,6 +434,10 @@
     {
       "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
       "path": "tools/build_pr162e_q_quantum_automapper.py"
+    },
+    {
+      "classification": "MANUAL_NIGHTLY_EXHAUSTIVE_IDEMPOTENCE",
+      "path": "tools/build_pr167_open_trade_simulator_integration.py"
     }
   ],
   "pytest_shards": [
