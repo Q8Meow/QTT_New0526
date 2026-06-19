@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Truth Overlay Row",
+  "type": "object",
+  "required": ["historical_artifact_path", "row_pointer", "canonical_row_key", "old_label", "new_truth_status", "formula_status", "owning_agent", "downstream_route", "no_orphan_ref"],
+  "properties": {
+    "historical_artifact_path": {"type": "string", "minLength": 1},
+    "row_pointer": {"type": "string", "minLength": 1},
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "old_label": {"type": "string"},
+    "new_truth_status": {"type": "string", "minLength": 1},
+    "formula_status": {"type": "string", "minLength": 1},
+    "owning_agent": {"type": "string", "minLength": 1},
+    "downstream_route": {"type": "string", "minLength": 1},
+    "no_orphan_ref": {"type": "string", "minLength": 1}
+  }
+}

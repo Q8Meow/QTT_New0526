@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Authority Boundary",
+  "type": "object",
+  "required": ["creates_live_authority", "creates_order_authority", "creates_profit_evidence", "creates_source_truth_authority", "creates_connector_semantics", "quantum_backend_execution_count", "quantum_advantage_claim_count"],
+  "properties": {
+    "creates_live_authority": {"const": false},
+    "creates_order_authority": {"const": false},
+    "creates_profit_evidence": {"const": false},
+    "creates_source_truth_authority": {"const": false},
+    "creates_connector_semantics": {"const": false},
+    "quantum_backend_execution_count": {"const": 0},
+    "quantum_advantage_claim_count": {"const": 0}
+  }
+}

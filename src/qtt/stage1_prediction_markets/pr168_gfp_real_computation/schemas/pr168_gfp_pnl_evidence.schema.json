@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP PnL Evidence Row",
+  "type": "object",
+  "required": ["evidence_id", "canonical_row_key", "formula_id", "numeric_inputs", "numeric_outputs", "execution_adjusted_edge", "net_expected_pnl_candidate", "positive_negative_decision"],
+  "properties": {
+    "evidence_id": {"type": "string", "minLength": 1},
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "formula_id": {"type": "string", "minLength": 1},
+    "numeric_inputs": {"type": "object", "minProperties": 1},
+    "numeric_outputs": {"type": "object", "minProperties": 1},
+    "execution_adjusted_edge": {"type": "number"},
+    "net_expected_pnl_candidate": {"type": "number"},
+    "positive_negative_decision": {"type": "string", "minLength": 1}
+  }
+}

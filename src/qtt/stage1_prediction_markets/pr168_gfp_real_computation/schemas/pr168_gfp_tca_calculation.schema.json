@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP TCA Calculation",
+  "type": "object",
+  "required": ["explicit_fees", "spread_cost", "slippage", "market_impact", "adverse_selection_penalty", "implementation_shortfall", "total_tca_cost"],
+  "properties": {
+    "explicit_fees": {"type": "number"},
+    "spread_cost": {"type": "number"},
+    "slippage": {"type": "number"},
+    "market_impact": {"type": "number"},
+    "adverse_selection_penalty": {"type": "number"},
+    "implementation_shortfall": {"type": "number"},
+    "total_tca_cost": {"type": "number"}
+  }
+}

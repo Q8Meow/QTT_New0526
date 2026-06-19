@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Formula Variable Map",
+  "type": "object",
+  "required": ["formula_id", "variable_map"],
+  "properties": {
+    "formula_id": {"type": "string", "minLength": 1},
+    "variable_map": {"type": "object", "minProperties": 1}
+  }
+}

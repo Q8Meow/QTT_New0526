@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Count Reconcile Row",
+  "type": "object",
+  "required": ["expected_count", "actual_repo_count", "source_path_or_search_query", "row_family", "semantic_count_type", "formula_assignment_required", "reconciliation_status"],
+  "properties": {
+    "expected_count": {"type": "integer", "minimum": 0},
+    "actual_repo_count": {"type": "integer", "minimum": 0},
+    "source_path_or_search_query": {"type": "string", "minLength": 1},
+    "row_family": {"type": "string", "minLength": 1},
+    "semantic_count_type": {"type": "string", "minLength": 1},
+    "formula_assignment_required": {"type": "boolean"},
+    "reconciliation_status": {"type": "string", "minLength": 1}
+  }
+}

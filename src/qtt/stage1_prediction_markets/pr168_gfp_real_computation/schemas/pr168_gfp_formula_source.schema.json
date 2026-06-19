@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Formula Source Row",
+  "type": "object",
+  "required": ["formula_family", "formula_source_ref", "formula_source_class", "source_truth_accepted"],
+  "properties": {
+    "formula_family": {"type": "string", "minLength": 1},
+    "formula_source_ref": {"type": "string", "minLength": 1},
+    "formula_source_class": {"type": "string", "minLength": 1},
+    "source_truth_accepted": {"const": false}
+  }
+}

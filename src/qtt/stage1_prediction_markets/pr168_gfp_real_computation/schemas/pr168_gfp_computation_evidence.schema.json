@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Computation Evidence Row",
+  "type": "object",
+  "required": ["canonical_row_key", "formula_id", "formula_status", "real_computation_evidence_status"],
+  "properties": {
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "formula_id": {"type": "string", "minLength": 1},
+    "formula_status": {"type": "string", "minLength": 1},
+    "real_computation_evidence_status": {"type": "string", "minLength": 1},
+    "input_values_present": {"type": "boolean"},
+    "output_values_present": {"type": "boolean"},
+    "execution_adjusted_edge_present": {"type": "boolean"},
+    "net_expected_pnl_candidate_present": {"type": "boolean"},
+    "positive_negative_decision_present": {"type": "boolean"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"real_computation_evidence_status": {"enum": ["COMPUTED_POSITIVE_EDGE", "COMPUTED_NEGATIVE_EDGE", "COMPUTED_NEUTRAL_OR_ZERO_EDGE"]}}},
+      "then": {"properties": {"input_values_present": {"const": true}, "output_values_present": {"const": true}, "execution_adjusted_edge_present": {"const": true}, "net_expected_pnl_candidate_present": {"const": true}, "positive_negative_decision_present": {"const": true}}}
+    }
+  ]
+}

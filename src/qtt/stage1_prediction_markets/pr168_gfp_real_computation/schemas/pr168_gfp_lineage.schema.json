@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Lineage Row",
+  "type": "object",
+  "required": ["artifact_id", "canonical_row_key", "artifact_type", "producer_pr", "consumer_report", "downstream_pr", "no_orphan_status"],
+  "properties": {
+    "artifact_id": {"type": "string", "minLength": 1},
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "artifact_type": {"type": "string", "minLength": 1},
+    "producer_pr": {"type": "string", "minLength": 1},
+    "consumer_report": {"type": "string", "minLength": 1},
+    "downstream_pr": {"type": "string", "minLength": 1},
+    "no_orphan_status": {"const": "NO_ORPHAN"}
+  }
+}

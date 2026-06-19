@@ -88,6 +88,7 @@ FAST_PREFLIGHT_SCRIPT_NAMES = frozenset(
         "validate_repair_pr_changed_file_scope.py",
         "validate_nested_validator_contracts.py",
         "validate_validation_inventory.py",
+        "validate_validation_scope_registry.py",
         "changed_area_validation_router.py",
         "cross_platform_path_invariant.py",
     }
@@ -402,6 +403,12 @@ PYTEST_SHARD_COMMANDS: dict[str, tuple[PytestShardCommand, ...]] = {
             reason="AtomicRows tests moved out of residual shards for stable runtime budget",
             runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
             historical_runtime_seconds=70.0,
+        ),
+        PytestShardCommand(
+            paths=("tests/pr168_gfp",),
+            reason="PR168-GFP executable formula and truth-overlay focused tests",
+            runtime_budget_seconds=PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS,
+            historical_runtime_seconds=2.0,
         ),
     ),
     "pytest-shard-3": (
@@ -2775,6 +2782,139 @@ def build_validation_commands(
             sys.executable,
             _path(
                 "tools",
+                "build_pr168_gfp_global_formula_discovery_real_computation.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_baseline_count_reconcile.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_no_fake_positive_negative_labels.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_formula_assignment_coverage.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_real_formula_computation.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_formula_registry_integrity.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_atomicrows_computation_coverage.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_qku_computation_coverage.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_candidate_packet_v1_coverage.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_quantum_objective_coefficients.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_metadata_placeholder_demotions.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_truth_overlay_required.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_report_compactness.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_formula_source_arbitration.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_master_plan_formula_catalog_diff.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_minimum_tradability_formula_set.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_forbidden_bundle_terminology.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_no_orphan_lineage.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
+                "validate_pr168_gfp_authority_boundaries.py",
+            ),
+        ],
+        [
+            sys.executable,
+            _path(
+                "tools",
                 "validate_pr165_d2_score_refreshed_scenario_selection_v2.py",
             ),
             "--repo-root",
@@ -4326,6 +4466,10 @@ def build_fast_preflight_commands() -> list[list[str]]:
             _path("tools", "validate_validation_inventory.py"),
             "--repo-root",
             ".",
+        ],
+        [
+            sys.executable,
+            _path("tools", "validate_validation_scope_registry.py"),
         ],
         [
             sys.executable,

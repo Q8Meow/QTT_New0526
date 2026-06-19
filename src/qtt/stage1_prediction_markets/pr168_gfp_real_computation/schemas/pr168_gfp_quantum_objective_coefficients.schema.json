@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Quantum Objective Coefficients",
+  "type": "object",
+  "required": ["quantum_model_family", "variable_map", "linear_coefficients", "quadratic_coefficients", "backend_execution_allowed", "quantum_advantage_claim"],
+  "properties": {
+    "quantum_model_family": {"type": "string", "minLength": 1},
+    "variable_map": {"type": "object", "minProperties": 1},
+    "linear_coefficients": {"type": "object"},
+    "quadratic_coefficients": {"type": "object"},
+    "constraint_penalties": {"type": "object"},
+    "backend_execution_allowed": {"const": false},
+    "quantum_advantage_claim": {"const": false}
+  }
+}

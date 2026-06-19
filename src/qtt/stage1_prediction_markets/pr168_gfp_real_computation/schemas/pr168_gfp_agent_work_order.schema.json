@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Agent Work Order",
+  "type": "object",
+  "required": ["agent_work_order_id", "canonical_row_key", "owning_agent", "work_order_status", "downstream_outputs_promised"],
+  "properties": {
+    "agent_work_order_id": {"type": "string", "minLength": 1},
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "owning_agent": {"type": "string", "minLength": 1},
+    "work_order_status": {"type": "string", "minLength": 1},
+    "downstream_outputs_promised": {"type": "array"}
+  }
+}

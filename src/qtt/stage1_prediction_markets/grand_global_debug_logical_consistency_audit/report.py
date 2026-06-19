@@ -17,6 +17,7 @@ from tools.ci_branch_context import (
     is_pr_or_later_branch,
     is_validation_infrastructure_changed_path,
 )
+from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed
 
 from . import constants as c
 
@@ -1729,6 +1730,8 @@ def _is_allowed_pr152_changed_path_for_branch(
     if is_explicit_downstream_repair_changed_path(branch, normalized):
         return True
     if is_validation_infrastructure_changed_path(branch, normalized):
+        return True
+    if is_pr_scoped_changed_path_allowed(branch, normalized):
         return True
     return normalized in c.EXACT_CHANGED_PATH_CANDIDATES and _branch_allows_pr152_changed_paths(
         branch
