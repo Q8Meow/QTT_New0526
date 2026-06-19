@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Required Formula Set Row",
+  "type": "object",
+  "required": ["required_formula_set_id", "formula_ids", "formula_expression_refs", "required_formula_set_is_computed_evidence"],
+  "properties": {
+    "required_formula_set_id": {"type": "string", "minLength": 1},
+    "formula_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "formula_expression_refs": {"type": "array", "minItems": 1},
+    "required_formula_set_is_computed_evidence": {"const": false}
+  }
+}

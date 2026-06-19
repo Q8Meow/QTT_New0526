@@ -822,6 +822,109 @@ def _expected_commands(
             python_executable,
             str(
                 Path("tools")
+                / "build_pr168_gfp_global_formula_discovery_real_computation.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_baseline_count_reconcile.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_no_fake_positive_negative_labels.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_formula_assignment_coverage.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_real_formula_computation.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_formula_registry_integrity.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_atomicrows_computation_coverage.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_qku_computation_coverage.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_candidate_packet_v1_coverage.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_quantum_objective_coefficients.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_metadata_placeholder_demotions.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_truth_overlay_required.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_report_compactness.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_formula_source_arbitration.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_master_plan_formula_catalog_diff.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_minimum_tradability_formula_set.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
+                / "validate_pr168_gfp_forbidden_bundle_terminology.py"
+            ),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_no_orphan_lineage.py"),
+        ],
+        [
+            python_executable,
+            str(Path("tools") / "validate_pr168_gfp_authority_boundaries.py"),
+        ],
+        [
+            python_executable,
+            str(
+                Path("tools")
                 / "validate_pr165_d2_score_refreshed_scenario_selection_v2.py"
             ),
             "--repo-root",
@@ -2620,6 +2723,7 @@ def test_runner_splits_pytest_shard_2_longest_group_deterministically():
             "tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation",
         ),
         ("tests/atomicrows",),
+        ("tests/pr168_gfp",),
     ]
     assert all(command.reason for command in commands)
     assert ("tests/stage1_prediction_markets",) not in [

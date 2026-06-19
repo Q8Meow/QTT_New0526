@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Replay Paper Recompute Route",
+  "type": "object",
+  "required": ["canonical_row_key", "formula_id", "downstream_route", "replay_paper_recompute_route", "owning_agent"],
+  "properties": {
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "formula_id": {"type": "string", "minLength": 1},
+    "downstream_route": {"type": "string", "minLength": 1},
+    "replay_paper_recompute_route": {"type": "string", "minLength": 1},
+    "owning_agent": {"type": "string", "minLength": 1}
+  }
+}

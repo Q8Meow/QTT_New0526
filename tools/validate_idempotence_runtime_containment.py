@@ -15,6 +15,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed  # noqa: E402
+
 SUCCESS_MARKER = "QTT_IDEMPOTENCE_RUNTIME_CONTAINMENT_OK"
 FAIL_PREFIX = "QTT_IDEMPOTENCE_RUNTIME_CONTAINMENT_FAIL"
 INVENTORY_PATH = Path(
@@ -666,6 +668,8 @@ def _allowed_explicit_roadmap_feature_touch(
 ) -> bool:
     if not auto_discovered_changed_paths:
         return False
+    if is_pr_scoped_changed_path_allowed(branch, path):
+        return True
     try:
         from tools.ci_branch_context import (
             PR162E_BRANCH,

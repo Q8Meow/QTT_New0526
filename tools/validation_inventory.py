@@ -41,6 +41,8 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     ".github/workflows/**",
     "tools/run_validation_gates.py",
     "tools/ci_branch_context.py",
+    "tools/validation_scope_registry.py",
+    "tools/validate_validation_scope_registry.py",
     "tools/validation_inventory.py",
     "tools/validate_validation_inventory.py",
     "tools/validate_idempotence_runtime_containment.py",
@@ -48,12 +50,15 @@ VALIDATION_INFRASTRUCTURE_GLOBS = (
     "tools/cross_platform_path_invariant.py",
     "tools/repo_path_refs.py",
     "src/qtt/stage1_prediction_markets/grand_global_debug_logical_consistency_audit/report.py",
+    "src/qtt/stage1_prediction_markets/"
+    "qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py",
     "tests/tools/test_validation_inventory.py",
     "tests/tools/test_validate_idempotence_runtime_containment.py",
     "tests/tools/fixtures/idempotence_runtime_containment_inventory.json",
     "tests/tools/test_changed_area_validation_router.py",
     "tests/tools/test_cross_platform_path_invariant.py",
     "tests/tools/test_ci_branch_context.py",
+    "tests/tools/test_validation_scope_registry.py",
     "tests/fail_closed/test_run_validation_gates.py",
     "docs/master_plan/generated/PR208_*.report.json",
 )
@@ -276,6 +281,7 @@ def _pr_globs(stem: str) -> tuple[str, ...]:
         f"docs/master_plan/generated/{tag}_*.report.json",
         f"docs/master_plan/generated/{lower}*/**",
         f"src/qtt/stage1_prediction_markets/{lower}*/**",
+        f"tests/{lower}/**",
         f"tests/stage1_prediction_markets/{lower}*/**",
         f"tools/*{lower}*.py",
     ]
@@ -323,6 +329,14 @@ def _domain_globs(stem: str, command: Sequence[str]) -> tuple[str, ...]:
         )
     if "ci_branch_context" in haystack:
         globs.extend(("tools/ci_branch_context.py", "tests/tools/test_ci_branch_context.py"))
+    if "validation_scope_registry" in haystack:
+        globs.extend(
+            (
+                "tools/validation_scope_registry.py",
+                "tools/validate_validation_scope_registry.py",
+                "tests/tools/test_validation_scope_registry.py",
+            )
+        )
     if "grand_global_debug_logical_consistency_audit" in stem:
         globs.extend(
             (
@@ -430,6 +444,7 @@ def _test_globs(stem: str, command: Sequence[str], phase: str) -> tuple[str, ...
     token = _pr_token(stem)
     globs = []
     if token is not None:
+        globs.append(f"tests/{token.lower()}/**")
         globs.append(f"tests/stage1_prediction_markets/{token.lower()}*/**")
         if token == "pr162e":
             globs.append("tests/pr162e/**")
@@ -442,6 +457,7 @@ def _workflow_globs(stem: str) -> tuple[str, ...]:
     if stem in {
         "validate_ci_branch_context_matrix",
         "validate_validation_inventory",
+        "validate_validation_scope_registry",
         "validate_idempotence_runtime_containment",
         "changed_area_validation_router",
     }:
@@ -529,6 +545,7 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
         for glob in required_globs
     ) or validator_id in {
         "validate_validation_inventory",
+        "validate_validation_scope_registry",
         "validate_idempotence_runtime_containment",
         "changed_area_validation_router",
         "cross_platform_path_invariant",
@@ -540,6 +557,7 @@ def _entry_for_command(command: Sequence[str], phase: str) -> ValidatorInventory
             "cross_platform_path_invariant",
             "changed_area_validation_router",
             "validate_validation_inventory",
+            "validate_validation_scope_registry",
             "validate_idempotence_runtime_containment",
         }
     )

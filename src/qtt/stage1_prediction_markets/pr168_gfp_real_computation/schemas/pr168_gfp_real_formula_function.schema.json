@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Real Formula Function Row",
+  "type": "object",
+  "required": ["formula_id", "formula_family", "formula_expression", "formula_source_ref", "formula_source_class", "computation_function_path", "computation_function_name", "variable_map", "input_schema", "output_schema"],
+  "properties": {
+    "formula_id": {"type": "string", "minLength": 1},
+    "formula_family": {"type": "string", "minLength": 1},
+    "formula_expression": {"type": "string", "minLength": 3},
+    "formula_source_ref": {"type": "string", "minLength": 1},
+    "formula_source_class": {"type": "string", "minLength": 1},
+    "computation_function_path": {"type": "string", "minLength": 1},
+    "computation_function_name": {"type": "string", "minLength": 1},
+    "variable_map": {"type": "object", "minProperties": 1},
+    "input_schema": {"type": "object", "minProperties": 1},
+    "output_schema": {"type": "object", "minProperties": 1},
+    "source_truth_accepted": {"const": false}
+  }
+}

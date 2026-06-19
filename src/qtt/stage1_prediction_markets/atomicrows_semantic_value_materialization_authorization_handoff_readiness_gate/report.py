@@ -20,6 +20,7 @@ from tools.ci_branch_context import (
     is_validation_infrastructure_branch,
     is_validation_infrastructure_changed_path,
 )
+from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed
 from tools.validate_master_plan_section_coverage import validate_json_schema_subset
 
 from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import (
@@ -981,7 +982,7 @@ def _is_allowed_pr142_changed_path_for_branch(path: str, branch: str) -> bool:
     ) or is_validation_infrastructure_changed_path(
         branch,
         normalized,
-    )
+    ) or is_pr_scoped_changed_path_allowed(branch, normalized)
 
 
 def _is_allowed_pr142_changed_path(path: str, repo_root: Path) -> bool:

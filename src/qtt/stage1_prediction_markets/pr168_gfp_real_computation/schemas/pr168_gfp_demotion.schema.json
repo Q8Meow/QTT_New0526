@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Demotion Row",
+  "type": "object",
+  "required": ["canonical_row_key", "old_label", "new_truth_status", "reason_code", "owning_agent", "downstream_route"],
+  "properties": {
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "old_label": {"type": "string", "minLength": 1},
+    "new_truth_status": {"type": "string", "pattern": "^(UNVERIFIED_|REAL_FORMULA_ASSIGNED_|ACTIONABLE_|TERMINAL_|STRUCTURAL_|METADATA_|PLACEHOLDER_|COMPUTATION_)"},
+    "reason_code": {"type": "string", "minLength": 1},
+    "owning_agent": {"type": "string", "minLength": 1},
+    "downstream_route": {"type": "string", "minLength": 1}
+  }
+}

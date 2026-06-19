@@ -1106,6 +1106,7 @@ PR166_QC_BRANCH = "pr166-qc-quantum-selected-replay-paper-retest"
 PR162E_Q_BRANCH = "pr162e-q-quantum-automapper"
 PR162E_BRANCH = "pr162e-plugin-framework"
 PR167_BRANCH = "pr167-open-trade-simulator-integration"
+PR168_GFP_BRANCH = "pr168-gfp-global-formula-discovery-real-computation"
 PR165_D2_BRANCH = "pr165-d2-score-refreshed-scenario-selection-v2"
 PR165_D3_BRANCH = "pr165-d3-quantum-aware-scenario-selection-v3"
 PR165_D2_MAIN_PUSH_BRANCH_CONTEXT_REPAIR_BRANCH = (
@@ -2918,6 +2919,8 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
     normalized = path.replace("\\", "/")
     if is_idempotence_runtime_containment_hardening_changed_path(branch, normalized):
         return True
+    if is_pr168_gfp_changed_path(normalized, branch):
+        return True
     if (
         is_pr_or_later_branch(
             branch,
@@ -3100,6 +3103,12 @@ def is_explicit_downstream_repair_changed_path(branch: str, path: str) -> bool:
         branch,
         frozenset(),
     )
+
+
+def is_pr168_gfp_changed_path(path: str, branch: str) -> bool:
+    from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed
+
+    return is_pr_scoped_changed_path_allowed(branch, path)
 
 
 def _is_pr165_scoring_changed_path(path: str) -> bool:

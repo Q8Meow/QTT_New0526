@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Global Label Inventory Row",
+  "type": "object",
+  "required": ["artifact_path", "row_pointer", "canonical_row_key", "old_label", "new_truth_status"],
+  "properties": {
+    "artifact_path": {"type": "string", "minLength": 1},
+    "row_pointer": {"type": "string", "minLength": 1},
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "old_label": {"type": "string", "minLength": 1},
+    "new_truth_status": {"type": "string", "minLength": 1}
+  }
+}

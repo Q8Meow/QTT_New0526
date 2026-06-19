@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR168-GFP Canonical Row Key",
+  "type": "object",
+  "required": ["canonical_row_key", "row_family", "source_report_path", "source_row_pointer", "dedupe_equivalence_key", "no_orphan_ref"],
+  "properties": {
+    "canonical_row_key": {"type": "string", "minLength": 1},
+    "row_family": {"type": "string", "minLength": 1},
+    "source_report_path": {"type": "string", "minLength": 1},
+    "source_row_pointer": {"type": "string", "minLength": 1},
+    "dedupe_equivalence_key": {"type": "string", "minLength": 1},
+    "no_orphan_ref": {"type": "string", "minLength": 1}
+  }
+}
